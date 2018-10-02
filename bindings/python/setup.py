@@ -16,10 +16,10 @@ extension_module = setuptools.Extension(
   	'rl_client._rl_client',
   	sources = glob.glob('*.cc'),
   	library_dirs = [],
-  	include_dirs = ['../../include/'],
+  	include_dirs = ['../../../rlclientlib/include'],
   	libraries = ['pthread', 'dl'],
   	extra_compile_args = ['-std=c++11'],
-  	extra_objects = ['../../rlclientlib/librlclient.a', external_deps_dir + 'libcpprest.a', '../../../vowpalwabbit/libvw.a', '../../../vowpalwabbit/liballreduce.a', \
+  	extra_objects = ['../../rlclientlib/librlclientlib.a', external_deps_dir + 'libcpprest.a', '../../../../vowpalwabbit/libvw.a', '../../../../vowpalwabbit/liballreduce.a', \
         external_deps_dir + 'libboost_system.a', external_deps_dir + 'libboost_program_options.a', \
         external_deps_dir + 'libssl.a', external_deps_dir + 'libcrypto.a', external_deps_dir + 'libz.a']
 )

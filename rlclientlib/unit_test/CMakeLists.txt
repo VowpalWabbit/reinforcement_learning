@@ -4,7 +4,7 @@ if(MSVC)
   set(msvc_stdafx "http_server/stdafx.cc")
 endif()
 
-add_executable(testlib
+add_executable(rltest
   ${msvc_stdafx}
   async_batcher_test.cc
   data_buffer_test.cc
@@ -31,16 +31,19 @@ add_executable(testlib
   watchdog_test.cc
 )
 
-set_target_properties(testlib PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO
-)
+# Devirtualization is an optimization that changes the vtable if the compiler decides a function
+# doesn't need to be virtual. This is incompatible with the mocking framework used in testing as it
+# makes the vtable structure unpredictable
+if(MSVC)
+  # MSVC doesn't optimize aggresively enough for this bug to be an issue right now.
+else()
+  target_compile_options(rltest PRIVATE -fno-devirtualize)
+endif()
 
 # Add the include directories from rlclientlib target for testing
-target_include_directories(testlib PRIVATE $<TARGET_PROPERTY:rlclientlib,INCLUDE_DIRECTORIES>)
+target_include_directories(rltest PRIVATE $<TARGET_PROPERTY:rlclientlib,INCLUDE_DIRECTORIES>)
 
-target_link_libraries(testlib PRIVATE
-    rlclientlib fakeit Boost::unit_test_framework)
+target_link_libraries(rltest PRIVATE
+  rlclientlib fakeit Boost::unit_test_framework)
 
-add_test(testlib testlib)
+add_test(rltest rltest)

@@ -65,6 +65,263 @@ CMAKE_SOURCE_DIR = /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning
 CMAKE_BINARY_DIR = /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build
 
 #=============================================================================
+# Directory level rules for directory bindings
+
+# Convenience name for "all" pass in the directory.
+bindings/all: bindings/python/all
+
+.PHONY : bindings/all
+
+# Convenience name for "clean" pass in the directory.
+bindings/clean: bindings/python/clean
+
+.PHONY : bindings/clean
+
+# Convenience name for "preinstall" pass in the directory.
+bindings/preinstall: bindings/python/preinstall
+
+.PHONY : bindings/preinstall
+
+#=============================================================================
+# Directory level rules for directory bindings/python
+
+# Convenience name for "all" pass in the directory.
+bindings/python/all: bindings/python/CMakeFiles/_rl_client.dir/all
+
+.PHONY : bindings/python/all
+
+# Convenience name for "clean" pass in the directory.
+bindings/python/clean: bindings/python/CMakeFiles/_rl_client.dir/clean
+bindings/python/clean: bindings/python/CMakeFiles/rl_client_swig_compilation.dir/clean
+
+.PHONY : bindings/python/clean
+
+# Convenience name for "preinstall" pass in the directory.
+bindings/python/preinstall:
+
+.PHONY : bindings/python/preinstall
+
+#=============================================================================
+# Target rules for target bindings/python/CMakeFiles/_rl_client.dir
+
+# All Build rule for target.
+bindings/python/CMakeFiles/_rl_client.dir/all: bindings/python/CMakeFiles/rl_client_swig_compilation.dir/all
+bindings/python/CMakeFiles/_rl_client.dir/all: rlclientlib/CMakeFiles/rlclientlib.dir/all
+	$(MAKE) -f bindings/python/CMakeFiles/_rl_client.dir/build.make bindings/python/CMakeFiles/_rl_client.dir/depend
+	$(MAKE) -f bindings/python/CMakeFiles/_rl_client.dir/build.make bindings/python/CMakeFiles/_rl_client.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles --progress-num=1,2,3 "Built target _rl_client"
+.PHONY : bindings/python/CMakeFiles/_rl_client.dir/all
+
+# Include target in all.
+all: bindings/python/CMakeFiles/_rl_client.dir/all
+
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+bindings/python/CMakeFiles/_rl_client.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 28
+	$(MAKE) -f CMakeFiles/Makefile2 bindings/python/CMakeFiles/_rl_client.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 0
+.PHONY : bindings/python/CMakeFiles/_rl_client.dir/rule
+
+# Convenience name for target.
+_rl_client: bindings/python/CMakeFiles/_rl_client.dir/rule
+
+.PHONY : _rl_client
+
+# clean rule for target.
+bindings/python/CMakeFiles/_rl_client.dir/clean:
+	$(MAKE) -f bindings/python/CMakeFiles/_rl_client.dir/build.make bindings/python/CMakeFiles/_rl_client.dir/clean
+.PHONY : bindings/python/CMakeFiles/_rl_client.dir/clean
+
+# clean rule for target.
+clean: bindings/python/CMakeFiles/_rl_client.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
+# Target rules for target bindings/python/CMakeFiles/rl_client_swig_compilation.dir
+
+# All Build rule for target.
+bindings/python/CMakeFiles/rl_client_swig_compilation.dir/all:
+	$(MAKE) -f bindings/python/CMakeFiles/rl_client_swig_compilation.dir/build.make bindings/python/CMakeFiles/rl_client_swig_compilation.dir/depend
+	$(MAKE) -f bindings/python/CMakeFiles/rl_client_swig_compilation.dir/build.make bindings/python/CMakeFiles/rl_client_swig_compilation.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles --progress-num=8 "Built target rl_client_swig_compilation"
+.PHONY : bindings/python/CMakeFiles/rl_client_swig_compilation.dir/all
+
+# Build rule for subdir invocation for target.
+bindings/python/CMakeFiles/rl_client_swig_compilation.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 1
+	$(MAKE) -f CMakeFiles/Makefile2 bindings/python/CMakeFiles/rl_client_swig_compilation.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 0
+.PHONY : bindings/python/CMakeFiles/rl_client_swig_compilation.dir/rule
+
+# Convenience name for target.
+rl_client_swig_compilation: bindings/python/CMakeFiles/rl_client_swig_compilation.dir/rule
+
+.PHONY : rl_client_swig_compilation
+
+# clean rule for target.
+bindings/python/CMakeFiles/rl_client_swig_compilation.dir/clean:
+	$(MAKE) -f bindings/python/CMakeFiles/rl_client_swig_compilation.dir/build.make bindings/python/CMakeFiles/rl_client_swig_compilation.dir/clean
+.PHONY : bindings/python/CMakeFiles/rl_client_swig_compilation.dir/clean
+
+# clean rule for target.
+clean: bindings/python/CMakeFiles/rl_client_swig_compilation.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
+# Directory level rules for directory doc
+
+# Convenience name for "all" pass in the directory.
+doc/all:
+
+.PHONY : doc/all
+
+# Convenience name for "clean" pass in the directory.
+doc/clean: doc/CMakeFiles/doc.dir/clean
+doc/clean: doc/CMakeFiles/copy_docs_file_build_dir.dir/clean
+doc/clean: doc/CMakeFiles/doxygen_python.dir/clean
+doc/clean: doc/CMakeFiles/doxygen_cpp.dir/clean
+
+.PHONY : doc/clean
+
+# Convenience name for "preinstall" pass in the directory.
+doc/preinstall:
+
+.PHONY : doc/preinstall
+
+#=============================================================================
+# Target rules for target doc/CMakeFiles/doc.dir
+
+# All Build rule for target.
+doc/CMakeFiles/doc.dir/all: doc/CMakeFiles/doxygen_python.dir/all
+doc/CMakeFiles/doc.dir/all: doc/CMakeFiles/doxygen_cpp.dir/all
+	$(MAKE) -f doc/CMakeFiles/doc.dir/build.make doc/CMakeFiles/doc.dir/depend
+	$(MAKE) -f doc/CMakeFiles/doc.dir/build.make doc/CMakeFiles/doc.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles --progress-num= "Built target doc"
+.PHONY : doc/CMakeFiles/doc.dir/all
+
+# Build rule for subdir invocation for target.
+doc/CMakeFiles/doc.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 0
+	$(MAKE) -f CMakeFiles/Makefile2 doc/CMakeFiles/doc.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 0
+.PHONY : doc/CMakeFiles/doc.dir/rule
+
+# Convenience name for target.
+doc: doc/CMakeFiles/doc.dir/rule
+
+.PHONY : doc
+
+# clean rule for target.
+doc/CMakeFiles/doc.dir/clean:
+	$(MAKE) -f doc/CMakeFiles/doc.dir/build.make doc/CMakeFiles/doc.dir/clean
+.PHONY : doc/CMakeFiles/doc.dir/clean
+
+# clean rule for target.
+clean: doc/CMakeFiles/doc.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
+# Target rules for target doc/CMakeFiles/copy_docs_file_build_dir.dir
+
+# All Build rule for target.
+doc/CMakeFiles/copy_docs_file_build_dir.dir/all:
+	$(MAKE) -f doc/CMakeFiles/copy_docs_file_build_dir.dir/build.make doc/CMakeFiles/copy_docs_file_build_dir.dir/depend
+	$(MAKE) -f doc/CMakeFiles/copy_docs_file_build_dir.dir/build.make doc/CMakeFiles/copy_docs_file_build_dir.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles --progress-num= "Built target copy_docs_file_build_dir"
+.PHONY : doc/CMakeFiles/copy_docs_file_build_dir.dir/all
+
+# Build rule for subdir invocation for target.
+doc/CMakeFiles/copy_docs_file_build_dir.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 0
+	$(MAKE) -f CMakeFiles/Makefile2 doc/CMakeFiles/copy_docs_file_build_dir.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 0
+.PHONY : doc/CMakeFiles/copy_docs_file_build_dir.dir/rule
+
+# Convenience name for target.
+copy_docs_file_build_dir: doc/CMakeFiles/copy_docs_file_build_dir.dir/rule
+
+.PHONY : copy_docs_file_build_dir
+
+# clean rule for target.
+doc/CMakeFiles/copy_docs_file_build_dir.dir/clean:
+	$(MAKE) -f doc/CMakeFiles/copy_docs_file_build_dir.dir/build.make doc/CMakeFiles/copy_docs_file_build_dir.dir/clean
+.PHONY : doc/CMakeFiles/copy_docs_file_build_dir.dir/clean
+
+# clean rule for target.
+clean: doc/CMakeFiles/copy_docs_file_build_dir.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
+# Target rules for target doc/CMakeFiles/doxygen_python.dir
+
+# All Build rule for target.
+doc/CMakeFiles/doxygen_python.dir/all: doc/CMakeFiles/copy_docs_file_build_dir.dir/all
+	$(MAKE) -f doc/CMakeFiles/doxygen_python.dir/build.make doc/CMakeFiles/doxygen_python.dir/depend
+	$(MAKE) -f doc/CMakeFiles/doxygen_python.dir/build.make doc/CMakeFiles/doxygen_python.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles --progress-num= "Built target doxygen_python"
+.PHONY : doc/CMakeFiles/doxygen_python.dir/all
+
+# Build rule for subdir invocation for target.
+doc/CMakeFiles/doxygen_python.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 0
+	$(MAKE) -f CMakeFiles/Makefile2 doc/CMakeFiles/doxygen_python.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 0
+.PHONY : doc/CMakeFiles/doxygen_python.dir/rule
+
+# Convenience name for target.
+doxygen_python: doc/CMakeFiles/doxygen_python.dir/rule
+
+.PHONY : doxygen_python
+
+# clean rule for target.
+doc/CMakeFiles/doxygen_python.dir/clean:
+	$(MAKE) -f doc/CMakeFiles/doxygen_python.dir/build.make doc/CMakeFiles/doxygen_python.dir/clean
+.PHONY : doc/CMakeFiles/doxygen_python.dir/clean
+
+# clean rule for target.
+clean: doc/CMakeFiles/doxygen_python.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
+# Target rules for target doc/CMakeFiles/doxygen_cpp.dir
+
+# All Build rule for target.
+doc/CMakeFiles/doxygen_cpp.dir/all: doc/CMakeFiles/copy_docs_file_build_dir.dir/all
+	$(MAKE) -f doc/CMakeFiles/doxygen_cpp.dir/build.make doc/CMakeFiles/doxygen_cpp.dir/depend
+	$(MAKE) -f doc/CMakeFiles/doxygen_cpp.dir/build.make doc/CMakeFiles/doxygen_cpp.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles --progress-num= "Built target doxygen_cpp"
+.PHONY : doc/CMakeFiles/doxygen_cpp.dir/all
+
+# Build rule for subdir invocation for target.
+doc/CMakeFiles/doxygen_cpp.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 0
+	$(MAKE) -f CMakeFiles/Makefile2 doc/CMakeFiles/doxygen_cpp.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 0
+.PHONY : doc/CMakeFiles/doxygen_cpp.dir/rule
+
+# Convenience name for target.
+doxygen_cpp: doc/CMakeFiles/doxygen_cpp.dir/rule
+
+.PHONY : doxygen_cpp
+
+# clean rule for target.
+doc/CMakeFiles/doxygen_cpp.dir/clean:
+	$(MAKE) -f doc/CMakeFiles/doxygen_cpp.dir/build.make doc/CMakeFiles/doxygen_cpp.dir/clean
+.PHONY : doc/CMakeFiles/doxygen_cpp.dir/clean
+
+# clean rule for target.
+clean: doc/CMakeFiles/doxygen_cpp.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
 # Directory level rules for directory ext_libs
 
 # Convenience name for "all" pass in the directory.
@@ -127,7 +384,7 @@ rlclientlib/preinstall: rlclientlib/unit_test/preinstall
 rlclientlib/CMakeFiles/rlclientlib.dir/all:
 	$(MAKE) -f rlclientlib/CMakeFiles/rlclientlib.dir/build.make rlclientlib/CMakeFiles/rlclientlib.dir/depend
 	$(MAKE) -f rlclientlib/CMakeFiles/rlclientlib.dir/build.make rlclientlib/CMakeFiles/rlclientlib.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24 "Built target rlclientlib"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles --progress-num=18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41 "Built target rlclientlib"
 .PHONY : rlclientlib/CMakeFiles/rlclientlib.dir/all
 
 # Include target in all.
@@ -161,12 +418,12 @@ clean: rlclientlib/CMakeFiles/rlclientlib.dir/clean
 # Directory level rules for directory rlclientlib/unit_test
 
 # Convenience name for "all" pass in the directory.
-rlclientlib/unit_test/all: rlclientlib/unit_test/CMakeFiles/testlib.dir/all
+rlclientlib/unit_test/all: rlclientlib/unit_test/CMakeFiles/rltest.dir/all
 
 .PHONY : rlclientlib/unit_test/all
 
 # Convenience name for "clean" pass in the directory.
-rlclientlib/unit_test/clean: rlclientlib/unit_test/CMakeFiles/testlib.dir/clean
+rlclientlib/unit_test/clean: rlclientlib/unit_test/CMakeFiles/rltest.dir/clean
 
 .PHONY : rlclientlib/unit_test/clean
 
@@ -176,39 +433,266 @@ rlclientlib/unit_test/preinstall:
 .PHONY : rlclientlib/unit_test/preinstall
 
 #=============================================================================
-# Target rules for target rlclientlib/unit_test/CMakeFiles/testlib.dir
+# Target rules for target rlclientlib/unit_test/CMakeFiles/rltest.dir
 
 # All Build rule for target.
-rlclientlib/unit_test/CMakeFiles/testlib.dir/all: rlclientlib/CMakeFiles/rlclientlib.dir/all
-	$(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/depend
-	$(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles --progress-num=25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47 "Built target testlib"
-.PHONY : rlclientlib/unit_test/CMakeFiles/testlib.dir/all
+rlclientlib/unit_test/CMakeFiles/rltest.dir/all: rlclientlib/CMakeFiles/rlclientlib.dir/all
+	$(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/depend
+	$(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles --progress-num=42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64 "Built target rltest"
+.PHONY : rlclientlib/unit_test/CMakeFiles/rltest.dir/all
 
 # Include target in all.
-all: rlclientlib/unit_test/CMakeFiles/testlib.dir/all
+all: rlclientlib/unit_test/CMakeFiles/rltest.dir/all
 
 .PHONY : all
 
 # Build rule for subdir invocation for target.
-rlclientlib/unit_test/CMakeFiles/testlib.dir/rule: cmake_check_build_system
+rlclientlib/unit_test/CMakeFiles/rltest.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 47
-	$(MAKE) -f CMakeFiles/Makefile2 rlclientlib/unit_test/CMakeFiles/testlib.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 rlclientlib/unit_test/CMakeFiles/rltest.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 0
-.PHONY : rlclientlib/unit_test/CMakeFiles/testlib.dir/rule
+.PHONY : rlclientlib/unit_test/CMakeFiles/rltest.dir/rule
 
 # Convenience name for target.
-testlib: rlclientlib/unit_test/CMakeFiles/testlib.dir/rule
+rltest: rlclientlib/unit_test/CMakeFiles/rltest.dir/rule
 
-.PHONY : testlib
-
-# clean rule for target.
-rlclientlib/unit_test/CMakeFiles/testlib.dir/clean:
-	$(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/clean
-.PHONY : rlclientlib/unit_test/CMakeFiles/testlib.dir/clean
+.PHONY : rltest
 
 # clean rule for target.
-clean: rlclientlib/unit_test/CMakeFiles/testlib.dir/clean
+rlclientlib/unit_test/CMakeFiles/rltest.dir/clean:
+	$(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/clean
+.PHONY : rlclientlib/unit_test/CMakeFiles/rltest.dir/clean
+
+# clean rule for target.
+clean: rlclientlib/unit_test/CMakeFiles/rltest.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
+# Directory level rules for directory examples
+
+# Convenience name for "all" pass in the directory.
+examples/all: examples/basic_usage_cpp/all
+examples/all: examples/override_interface/all
+examples/all: examples/rl_sim_cpp/all
+examples/all: examples/test_cpp/all
+
+.PHONY : examples/all
+
+# Convenience name for "clean" pass in the directory.
+examples/clean: examples/basic_usage_cpp/clean
+examples/clean: examples/override_interface/clean
+examples/clean: examples/rl_sim_cpp/clean
+examples/clean: examples/test_cpp/clean
+
+.PHONY : examples/clean
+
+# Convenience name for "preinstall" pass in the directory.
+examples/preinstall: examples/basic_usage_cpp/preinstall
+examples/preinstall: examples/override_interface/preinstall
+examples/preinstall: examples/rl_sim_cpp/preinstall
+examples/preinstall: examples/test_cpp/preinstall
+
+.PHONY : examples/preinstall
+
+#=============================================================================
+# Directory level rules for directory examples/basic_usage_cpp
+
+# Convenience name for "all" pass in the directory.
+examples/basic_usage_cpp/all: examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/all
+
+.PHONY : examples/basic_usage_cpp/all
+
+# Convenience name for "clean" pass in the directory.
+examples/basic_usage_cpp/clean: examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/clean
+
+.PHONY : examples/basic_usage_cpp/clean
+
+# Convenience name for "preinstall" pass in the directory.
+examples/basic_usage_cpp/preinstall:
+
+.PHONY : examples/basic_usage_cpp/preinstall
+
+#=============================================================================
+# Target rules for target examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir
+
+# All Build rule for target.
+examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/all: rlclientlib/CMakeFiles/rlclientlib.dir/all
+	$(MAKE) -f examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/build.make examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/depend
+	$(MAKE) -f examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/build.make examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles --progress-num=4,5 "Built target basic_usage_cpp.out"
+.PHONY : examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/all
+
+# Build rule for subdir invocation for target.
+examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 26
+	$(MAKE) -f CMakeFiles/Makefile2 examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 0
+.PHONY : examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/rule
+
+# Convenience name for target.
+basic_usage_cpp.out: examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/rule
+
+.PHONY : basic_usage_cpp.out
+
+# clean rule for target.
+examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/clean:
+	$(MAKE) -f examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/build.make examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/clean
+.PHONY : examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/clean
+
+# clean rule for target.
+clean: examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
+# Directory level rules for directory examples/override_interface
+
+# Convenience name for "all" pass in the directory.
+examples/override_interface/all: examples/override_interface/CMakeFiles/override_interface.out.dir/all
+
+.PHONY : examples/override_interface/all
+
+# Convenience name for "clean" pass in the directory.
+examples/override_interface/clean: examples/override_interface/CMakeFiles/override_interface.out.dir/clean
+
+.PHONY : examples/override_interface/clean
+
+# Convenience name for "preinstall" pass in the directory.
+examples/override_interface/preinstall:
+
+.PHONY : examples/override_interface/preinstall
+
+#=============================================================================
+# Target rules for target examples/override_interface/CMakeFiles/override_interface.out.dir
+
+# All Build rule for target.
+examples/override_interface/CMakeFiles/override_interface.out.dir/all: rlclientlib/CMakeFiles/rlclientlib.dir/all
+	$(MAKE) -f examples/override_interface/CMakeFiles/override_interface.out.dir/build.make examples/override_interface/CMakeFiles/override_interface.out.dir/depend
+	$(MAKE) -f examples/override_interface/CMakeFiles/override_interface.out.dir/build.make examples/override_interface/CMakeFiles/override_interface.out.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles --progress-num=6,7 "Built target override_interface.out"
+.PHONY : examples/override_interface/CMakeFiles/override_interface.out.dir/all
+
+# Build rule for subdir invocation for target.
+examples/override_interface/CMakeFiles/override_interface.out.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 26
+	$(MAKE) -f CMakeFiles/Makefile2 examples/override_interface/CMakeFiles/override_interface.out.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 0
+.PHONY : examples/override_interface/CMakeFiles/override_interface.out.dir/rule
+
+# Convenience name for target.
+override_interface.out: examples/override_interface/CMakeFiles/override_interface.out.dir/rule
+
+.PHONY : override_interface.out
+
+# clean rule for target.
+examples/override_interface/CMakeFiles/override_interface.out.dir/clean:
+	$(MAKE) -f examples/override_interface/CMakeFiles/override_interface.out.dir/build.make examples/override_interface/CMakeFiles/override_interface.out.dir/clean
+.PHONY : examples/override_interface/CMakeFiles/override_interface.out.dir/clean
+
+# clean rule for target.
+clean: examples/override_interface/CMakeFiles/override_interface.out.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
+# Directory level rules for directory examples/rl_sim_cpp
+
+# Convenience name for "all" pass in the directory.
+examples/rl_sim_cpp/all: examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/all
+
+.PHONY : examples/rl_sim_cpp/all
+
+# Convenience name for "clean" pass in the directory.
+examples/rl_sim_cpp/clean: examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/clean
+
+.PHONY : examples/rl_sim_cpp/clean
+
+# Convenience name for "preinstall" pass in the directory.
+examples/rl_sim_cpp/preinstall:
+
+.PHONY : examples/rl_sim_cpp/preinstall
+
+#=============================================================================
+# Target rules for target examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir
+
+# All Build rule for target.
+examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/all: rlclientlib/CMakeFiles/rlclientlib.dir/all
+	$(MAKE) -f examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/build.make examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/depend
+	$(MAKE) -f examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/build.make examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles --progress-num=9,10,11,12,13 "Built target rl_sim_cpp.out"
+.PHONY : examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/all
+
+# Build rule for subdir invocation for target.
+examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 29
+	$(MAKE) -f CMakeFiles/Makefile2 examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 0
+.PHONY : examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/rule
+
+# Convenience name for target.
+rl_sim_cpp.out: examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/rule
+
+.PHONY : rl_sim_cpp.out
+
+# clean rule for target.
+examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/clean:
+	$(MAKE) -f examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/build.make examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/clean
+.PHONY : examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/clean
+
+# clean rule for target.
+clean: examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
+# Directory level rules for directory examples/test_cpp
+
+# Convenience name for "all" pass in the directory.
+examples/test_cpp/all: examples/test_cpp/CMakeFiles/rl_test.out.dir/all
+
+.PHONY : examples/test_cpp/all
+
+# Convenience name for "clean" pass in the directory.
+examples/test_cpp/clean: examples/test_cpp/CMakeFiles/rl_test.out.dir/clean
+
+.PHONY : examples/test_cpp/clean
+
+# Convenience name for "preinstall" pass in the directory.
+examples/test_cpp/preinstall:
+
+.PHONY : examples/test_cpp/preinstall
+
+#=============================================================================
+# Target rules for target examples/test_cpp/CMakeFiles/rl_test.out.dir
+
+# All Build rule for target.
+examples/test_cpp/CMakeFiles/rl_test.out.dir/all: rlclientlib/CMakeFiles/rlclientlib.dir/all
+	$(MAKE) -f examples/test_cpp/CMakeFiles/rl_test.out.dir/build.make examples/test_cpp/CMakeFiles/rl_test.out.dir/depend
+	$(MAKE) -f examples/test_cpp/CMakeFiles/rl_test.out.dir/build.make examples/test_cpp/CMakeFiles/rl_test.out.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles --progress-num=14,15,16,17 "Built target rl_test.out"
+.PHONY : examples/test_cpp/CMakeFiles/rl_test.out.dir/all
+
+# Build rule for subdir invocation for target.
+examples/test_cpp/CMakeFiles/rl_test.out.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 28
+	$(MAKE) -f CMakeFiles/Makefile2 examples/test_cpp/CMakeFiles/rl_test.out.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles 0
+.PHONY : examples/test_cpp/CMakeFiles/rl_test.out.dir/rule
+
+# Convenience name for target.
+rl_test.out: examples/test_cpp/CMakeFiles/rl_test.out.dir/rule
+
+.PHONY : rl_test.out
+
+# clean rule for target.
+examples/test_cpp/CMakeFiles/rl_test.out.dir/clean:
+	$(MAKE) -f examples/test_cpp/CMakeFiles/rl_test.out.dir/build.make examples/test_cpp/CMakeFiles/rl_test.out.dir/clean
+.PHONY : examples/test_cpp/CMakeFiles/rl_test.out.dir/clean
+
+# clean rule for target.
+clean: examples/test_cpp/CMakeFiles/rl_test.out.dir/clean
 
 .PHONY : clean
 

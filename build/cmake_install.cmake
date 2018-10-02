@@ -39,6 +39,8 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
+  include("/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/bindings/cmake_install.cmake")
+  include("/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/doc/cmake_install.cmake")
   include("/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/ext_libs/cmake_install.cmake")
   include("/mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/rlclientlib/cmake_install.cmake")
 

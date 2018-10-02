@@ -36,6 +36,7 @@ set(CMAKE_TARGET_DEFINITIONS_CXX
   "CPPREST_FORCE_HTTP_LISTENER_ASIO"
   "NDEBUG"
   "_FILE_OFFSET_BITS=64"
+  "__extern_always_inline=inline"
   )
 
 # The include file search paths:

@@ -78,6 +78,17 @@ edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
 
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
+	/usr/local/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+
+.PHONY : test/fast
+
 # The main all target
 all: cmake_check_build_system
 	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/rlclientlib/unit_test/CMakeFiles/progress.marks
@@ -111,19 +122,19 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-rlclientlib/unit_test/CMakeFiles/testlib.dir/rule:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f CMakeFiles/Makefile2 rlclientlib/unit_test/CMakeFiles/testlib.dir/rule
-.PHONY : rlclientlib/unit_test/CMakeFiles/testlib.dir/rule
+rlclientlib/unit_test/CMakeFiles/rltest.dir/rule:
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f CMakeFiles/Makefile2 rlclientlib/unit_test/CMakeFiles/rltest.dir/rule
+.PHONY : rlclientlib/unit_test/CMakeFiles/rltest.dir/rule
 
 # Convenience name for target.
-testlib: rlclientlib/unit_test/CMakeFiles/testlib.dir/rule
+rltest: rlclientlib/unit_test/CMakeFiles/rltest.dir/rule
 
-.PHONY : testlib
+.PHONY : rltest
 
 # fast build rule for target.
-testlib/fast:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/build
-.PHONY : testlib/fast
+rltest/fast:
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/build
+.PHONY : rltest/fast
 
 async_batcher_test.o: async_batcher_test.cc.o
 
@@ -131,7 +142,7 @@ async_batcher_test.o: async_batcher_test.cc.o
 
 # target to build an object file
 async_batcher_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/async_batcher_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/async_batcher_test.cc.o
 .PHONY : async_batcher_test.cc.o
 
 async_batcher_test.i: async_batcher_test.cc.i
@@ -140,7 +151,7 @@ async_batcher_test.i: async_batcher_test.cc.i
 
 # target to preprocess a source file
 async_batcher_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/async_batcher_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/async_batcher_test.cc.i
 .PHONY : async_batcher_test.cc.i
 
 async_batcher_test.s: async_batcher_test.cc.s
@@ -149,7 +160,7 @@ async_batcher_test.s: async_batcher_test.cc.s
 
 # target to generate assembly for a file
 async_batcher_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/async_batcher_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/async_batcher_test.cc.s
 .PHONY : async_batcher_test.cc.s
 
 data_buffer_test.o: data_buffer_test.cc.o
@@ -158,7 +169,7 @@ data_buffer_test.o: data_buffer_test.cc.o
 
 # target to build an object file
 data_buffer_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/data_buffer_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/data_buffer_test.cc.o
 .PHONY : data_buffer_test.cc.o
 
 data_buffer_test.i: data_buffer_test.cc.i
@@ -167,7 +178,7 @@ data_buffer_test.i: data_buffer_test.cc.i
 
 # target to preprocess a source file
 data_buffer_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/data_buffer_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/data_buffer_test.cc.i
 .PHONY : data_buffer_test.cc.i
 
 data_buffer_test.s: data_buffer_test.cc.s
@@ -176,7 +187,7 @@ data_buffer_test.s: data_buffer_test.cc.s
 
 # target to generate assembly for a file
 data_buffer_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/data_buffer_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/data_buffer_test.cc.s
 .PHONY : data_buffer_test.cc.s
 
 data_callback_test.o: data_callback_test.cc.o
@@ -185,7 +196,7 @@ data_callback_test.o: data_callback_test.cc.o
 
 # target to build an object file
 data_callback_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/data_callback_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/data_callback_test.cc.o
 .PHONY : data_callback_test.cc.o
 
 data_callback_test.i: data_callback_test.cc.i
@@ -194,7 +205,7 @@ data_callback_test.i: data_callback_test.cc.i
 
 # target to preprocess a source file
 data_callback_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/data_callback_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/data_callback_test.cc.i
 .PHONY : data_callback_test.cc.i
 
 data_callback_test.s: data_callback_test.cc.s
@@ -203,7 +214,7 @@ data_callback_test.s: data_callback_test.cc.s
 
 # target to generate assembly for a file
 data_callback_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/data_callback_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/data_callback_test.cc.s
 .PHONY : data_callback_test.cc.s
 
 err_callback_test.o: err_callback_test.cc.o
@@ -212,7 +223,7 @@ err_callback_test.o: err_callback_test.cc.o
 
 # target to build an object file
 err_callback_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/err_callback_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/err_callback_test.cc.o
 .PHONY : err_callback_test.cc.o
 
 err_callback_test.i: err_callback_test.cc.i
@@ -221,7 +232,7 @@ err_callback_test.i: err_callback_test.cc.i
 
 # target to preprocess a source file
 err_callback_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/err_callback_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/err_callback_test.cc.i
 .PHONY : err_callback_test.cc.i
 
 err_callback_test.s: err_callback_test.cc.s
@@ -230,7 +241,7 @@ err_callback_test.s: err_callback_test.cc.s
 
 # target to generate assembly for a file
 err_callback_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/err_callback_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/err_callback_test.cc.s
 .PHONY : err_callback_test.cc.s
 
 event_queue_test.o: event_queue_test.cc.o
@@ -239,7 +250,7 @@ event_queue_test.o: event_queue_test.cc.o
 
 # target to build an object file
 event_queue_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/event_queue_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/event_queue_test.cc.o
 .PHONY : event_queue_test.cc.o
 
 event_queue_test.i: event_queue_test.cc.i
@@ -248,7 +259,7 @@ event_queue_test.i: event_queue_test.cc.i
 
 # target to preprocess a source file
 event_queue_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/event_queue_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/event_queue_test.cc.i
 .PHONY : event_queue_test.cc.i
 
 event_queue_test.s: event_queue_test.cc.s
@@ -257,7 +268,7 @@ event_queue_test.s: event_queue_test.cc.s
 
 # target to generate assembly for a file
 event_queue_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/event_queue_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/event_queue_test.cc.s
 .PHONY : event_queue_test.cc.s
 
 event_test.o: event_test.cc.o
@@ -266,7 +277,7 @@ event_test.o: event_test.cc.o
 
 # target to build an object file
 event_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/event_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/event_test.cc.o
 .PHONY : event_test.cc.o
 
 event_test.i: event_test.cc.i
@@ -275,7 +286,7 @@ event_test.i: event_test.cc.i
 
 # target to preprocess a source file
 event_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/event_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/event_test.cc.i
 .PHONY : event_test.cc.i
 
 event_test.s: event_test.cc.s
@@ -284,7 +295,7 @@ event_test.s: event_test.cc.s
 
 # target to generate assembly for a file
 event_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/event_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/event_test.cc.s
 .PHONY : event_test.cc.s
 
 eventhub_client_test.o: eventhub_client_test.cc.o
@@ -293,7 +304,7 @@ eventhub_client_test.o: eventhub_client_test.cc.o
 
 # target to build an object file
 eventhub_client_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/eventhub_client_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/eventhub_client_test.cc.o
 .PHONY : eventhub_client_test.cc.o
 
 eventhub_client_test.i: eventhub_client_test.cc.i
@@ -302,7 +313,7 @@ eventhub_client_test.i: eventhub_client_test.cc.i
 
 # target to preprocess a source file
 eventhub_client_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/eventhub_client_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/eventhub_client_test.cc.i
 .PHONY : eventhub_client_test.cc.i
 
 eventhub_client_test.s: eventhub_client_test.cc.s
@@ -311,7 +322,7 @@ eventhub_client_test.s: eventhub_client_test.cc.s
 
 # target to generate assembly for a file
 eventhub_client_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/eventhub_client_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/eventhub_client_test.cc.s
 .PHONY : eventhub_client_test.cc.s
 
 explore_test.o: explore_test.cc.o
@@ -320,7 +331,7 @@ explore_test.o: explore_test.cc.o
 
 # target to build an object file
 explore_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/explore_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/explore_test.cc.o
 .PHONY : explore_test.cc.o
 
 explore_test.i: explore_test.cc.i
@@ -329,7 +340,7 @@ explore_test.i: explore_test.cc.i
 
 # target to preprocess a source file
 explore_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/explore_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/explore_test.cc.i
 .PHONY : explore_test.cc.i
 
 explore_test.s: explore_test.cc.s
@@ -338,7 +349,7 @@ explore_test.s: explore_test.cc.s
 
 # target to generate assembly for a file
 explore_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/explore_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/explore_test.cc.s
 .PHONY : explore_test.cc.s
 
 factory_test.o: factory_test.cc.o
@@ -347,7 +358,7 @@ factory_test.o: factory_test.cc.o
 
 # target to build an object file
 factory_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/factory_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/factory_test.cc.o
 .PHONY : factory_test.cc.o
 
 factory_test.i: factory_test.cc.i
@@ -356,7 +367,7 @@ factory_test.i: factory_test.cc.i
 
 # target to preprocess a source file
 factory_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/factory_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/factory_test.cc.i
 .PHONY : factory_test.cc.i
 
 factory_test.s: factory_test.cc.s
@@ -365,7 +376,7 @@ factory_test.s: factory_test.cc.s
 
 # target to generate assembly for a file
 factory_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/factory_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/factory_test.cc.s
 .PHONY : factory_test.cc.s
 
 http_server/http_server.o: http_server/http_server.cc.o
@@ -374,7 +385,7 @@ http_server/http_server.o: http_server/http_server.cc.o
 
 # target to build an object file
 http_server/http_server.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/http_server/http_server.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/http_server/http_server.cc.o
 .PHONY : http_server/http_server.cc.o
 
 http_server/http_server.i: http_server/http_server.cc.i
@@ -383,7 +394,7 @@ http_server/http_server.i: http_server/http_server.cc.i
 
 # target to preprocess a source file
 http_server/http_server.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/http_server/http_server.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/http_server/http_server.cc.i
 .PHONY : http_server/http_server.cc.i
 
 http_server/http_server.s: http_server/http_server.cc.s
@@ -392,7 +403,7 @@ http_server/http_server.s: http_server/http_server.cc.s
 
 # target to generate assembly for a file
 http_server/http_server.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/http_server/http_server.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/http_server/http_server.cc.s
 .PHONY : http_server/http_server.cc.s
 
 json_context_parse_test.o: json_context_parse_test.cc.o
@@ -401,7 +412,7 @@ json_context_parse_test.o: json_context_parse_test.cc.o
 
 # target to build an object file
 json_context_parse_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/json_context_parse_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/json_context_parse_test.cc.o
 .PHONY : json_context_parse_test.cc.o
 
 json_context_parse_test.i: json_context_parse_test.cc.i
@@ -410,7 +421,7 @@ json_context_parse_test.i: json_context_parse_test.cc.i
 
 # target to preprocess a source file
 json_context_parse_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/json_context_parse_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/json_context_parse_test.cc.i
 .PHONY : json_context_parse_test.cc.i
 
 json_context_parse_test.s: json_context_parse_test.cc.s
@@ -419,7 +430,7 @@ json_context_parse_test.s: json_context_parse_test.cc.s
 
 # target to generate assembly for a file
 json_context_parse_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/json_context_parse_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/json_context_parse_test.cc.s
 .PHONY : json_context_parse_test.cc.s
 
 live_model_test.o: live_model_test.cc.o
@@ -428,7 +439,7 @@ live_model_test.o: live_model_test.cc.o
 
 # target to build an object file
 live_model_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/live_model_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/live_model_test.cc.o
 .PHONY : live_model_test.cc.o
 
 live_model_test.i: live_model_test.cc.i
@@ -437,7 +448,7 @@ live_model_test.i: live_model_test.cc.i
 
 # target to preprocess a source file
 live_model_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/live_model_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/live_model_test.cc.i
 .PHONY : live_model_test.cc.i
 
 live_model_test.s: live_model_test.cc.s
@@ -446,7 +457,7 @@ live_model_test.s: live_model_test.cc.s
 
 # target to generate assembly for a file
 live_model_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/live_model_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/live_model_test.cc.s
 .PHONY : live_model_test.cc.s
 
 main.o: main.cc.o
@@ -455,7 +466,7 @@ main.o: main.cc.o
 
 # target to build an object file
 main.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/main.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/main.cc.o
 .PHONY : main.cc.o
 
 main.i: main.cc.i
@@ -464,7 +475,7 @@ main.i: main.cc.i
 
 # target to preprocess a source file
 main.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/main.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/main.cc.i
 .PHONY : main.cc.i
 
 main.s: main.cc.s
@@ -473,7 +484,7 @@ main.s: main.cc.s
 
 # target to generate assembly for a file
 main.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/main.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/main.cc.s
 .PHONY : main.cc.s
 
 mock_util.o: mock_util.cc.o
@@ -482,7 +493,7 @@ mock_util.o: mock_util.cc.o
 
 # target to build an object file
 mock_util.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/mock_util.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/mock_util.cc.o
 .PHONY : mock_util.cc.o
 
 mock_util.i: mock_util.cc.i
@@ -491,7 +502,7 @@ mock_util.i: mock_util.cc.i
 
 # target to preprocess a source file
 mock_util.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/mock_util.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/mock_util.cc.i
 .PHONY : mock_util.cc.i
 
 mock_util.s: mock_util.cc.s
@@ -500,7 +511,7 @@ mock_util.s: mock_util.cc.s
 
 # target to generate assembly for a file
 mock_util.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/mock_util.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/mock_util.cc.s
 .PHONY : mock_util.cc.s
 
 model_mgmt_test.o: model_mgmt_test.cc.o
@@ -509,7 +520,7 @@ model_mgmt_test.o: model_mgmt_test.cc.o
 
 # target to build an object file
 model_mgmt_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/model_mgmt_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/model_mgmt_test.cc.o
 .PHONY : model_mgmt_test.cc.o
 
 model_mgmt_test.i: model_mgmt_test.cc.i
@@ -518,7 +529,7 @@ model_mgmt_test.i: model_mgmt_test.cc.i
 
 # target to preprocess a source file
 model_mgmt_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/model_mgmt_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/model_mgmt_test.cc.i
 .PHONY : model_mgmt_test.cc.i
 
 model_mgmt_test.s: model_mgmt_test.cc.s
@@ -527,7 +538,7 @@ model_mgmt_test.s: model_mgmt_test.cc.s
 
 # target to generate assembly for a file
 model_mgmt_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/model_mgmt_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/model_mgmt_test.cc.s
 .PHONY : model_mgmt_test.cc.s
 
 object_pool_test.o: object_pool_test.cc.o
@@ -536,7 +547,7 @@ object_pool_test.o: object_pool_test.cc.o
 
 # target to build an object file
 object_pool_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/object_pool_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/object_pool_test.cc.o
 .PHONY : object_pool_test.cc.o
 
 object_pool_test.i: object_pool_test.cc.i
@@ -545,7 +556,7 @@ object_pool_test.i: object_pool_test.cc.i
 
 # target to preprocess a source file
 object_pool_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/object_pool_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/object_pool_test.cc.i
 .PHONY : object_pool_test.cc.i
 
 object_pool_test.s: object_pool_test.cc.s
@@ -554,7 +565,7 @@ object_pool_test.s: object_pool_test.cc.s
 
 # target to generate assembly for a file
 object_pool_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/object_pool_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/object_pool_test.cc.s
 .PHONY : object_pool_test.cc.s
 
 ranking_response_test.o: ranking_response_test.cc.o
@@ -563,7 +574,7 @@ ranking_response_test.o: ranking_response_test.cc.o
 
 # target to build an object file
 ranking_response_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/ranking_response_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/ranking_response_test.cc.o
 .PHONY : ranking_response_test.cc.o
 
 ranking_response_test.i: ranking_response_test.cc.i
@@ -572,7 +583,7 @@ ranking_response_test.i: ranking_response_test.cc.i
 
 # target to preprocess a source file
 ranking_response_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/ranking_response_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/ranking_response_test.cc.i
 .PHONY : ranking_response_test.cc.i
 
 ranking_response_test.s: ranking_response_test.cc.s
@@ -581,7 +592,7 @@ ranking_response_test.s: ranking_response_test.cc.s
 
 # target to generate assembly for a file
 ranking_response_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/ranking_response_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/ranking_response_test.cc.s
 .PHONY : ranking_response_test.cc.s
 
 safe_vw_test.o: safe_vw_test.cc.o
@@ -590,7 +601,7 @@ safe_vw_test.o: safe_vw_test.cc.o
 
 # target to build an object file
 safe_vw_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/safe_vw_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/safe_vw_test.cc.o
 .PHONY : safe_vw_test.cc.o
 
 safe_vw_test.i: safe_vw_test.cc.i
@@ -599,7 +610,7 @@ safe_vw_test.i: safe_vw_test.cc.i
 
 # target to preprocess a source file
 safe_vw_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/safe_vw_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/safe_vw_test.cc.i
 .PHONY : safe_vw_test.cc.i
 
 safe_vw_test.s: safe_vw_test.cc.s
@@ -608,7 +619,7 @@ safe_vw_test.s: safe_vw_test.cc.s
 
 # target to generate assembly for a file
 safe_vw_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/safe_vw_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/safe_vw_test.cc.s
 .PHONY : safe_vw_test.cc.s
 
 sleeper_test.o: sleeper_test.cc.o
@@ -617,7 +628,7 @@ sleeper_test.o: sleeper_test.cc.o
 
 # target to build an object file
 sleeper_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/sleeper_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/sleeper_test.cc.o
 .PHONY : sleeper_test.cc.o
 
 sleeper_test.i: sleeper_test.cc.i
@@ -626,7 +637,7 @@ sleeper_test.i: sleeper_test.cc.i
 
 # target to preprocess a source file
 sleeper_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/sleeper_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/sleeper_test.cc.i
 .PHONY : sleeper_test.cc.i
 
 sleeper_test.s: sleeper_test.cc.s
@@ -635,7 +646,7 @@ sleeper_test.s: sleeper_test.cc.s
 
 # target to generate assembly for a file
 sleeper_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/sleeper_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/sleeper_test.cc.s
 .PHONY : sleeper_test.cc.s
 
 status_builder_test.o: status_builder_test.cc.o
@@ -644,7 +655,7 @@ status_builder_test.o: status_builder_test.cc.o
 
 # target to build an object file
 status_builder_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/status_builder_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/status_builder_test.cc.o
 .PHONY : status_builder_test.cc.o
 
 status_builder_test.i: status_builder_test.cc.i
@@ -653,7 +664,7 @@ status_builder_test.i: status_builder_test.cc.i
 
 # target to preprocess a source file
 status_builder_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/status_builder_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/status_builder_test.cc.i
 .PHONY : status_builder_test.cc.i
 
 status_builder_test.s: status_builder_test.cc.s
@@ -662,7 +673,7 @@ status_builder_test.s: status_builder_test.cc.s
 
 # target to generate assembly for a file
 status_builder_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/status_builder_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/status_builder_test.cc.s
 .PHONY : status_builder_test.cc.s
 
 str_util_test.o: str_util_test.cc.o
@@ -671,7 +682,7 @@ str_util_test.o: str_util_test.cc.o
 
 # target to build an object file
 str_util_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/str_util_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/str_util_test.cc.o
 .PHONY : str_util_test.cc.o
 
 str_util_test.i: str_util_test.cc.i
@@ -680,7 +691,7 @@ str_util_test.i: str_util_test.cc.i
 
 # target to preprocess a source file
 str_util_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/str_util_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/str_util_test.cc.i
 .PHONY : str_util_test.cc.i
 
 str_util_test.s: str_util_test.cc.s
@@ -689,7 +700,7 @@ str_util_test.s: str_util_test.cc.s
 
 # target to generate assembly for a file
 str_util_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/str_util_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/str_util_test.cc.s
 .PHONY : str_util_test.cc.s
 
 watchdog_test.o: watchdog_test.cc.o
@@ -698,7 +709,7 @@ watchdog_test.o: watchdog_test.cc.o
 
 # target to build an object file
 watchdog_test.cc.o:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/watchdog_test.cc.o
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/watchdog_test.cc.o
 .PHONY : watchdog_test.cc.o
 
 watchdog_test.i: watchdog_test.cc.i
@@ -707,7 +718,7 @@ watchdog_test.i: watchdog_test.cc.i
 
 # target to preprocess a source file
 watchdog_test.cc.i:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/watchdog_test.cc.i
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/watchdog_test.cc.i
 .PHONY : watchdog_test.cc.i
 
 watchdog_test.s: watchdog_test.cc.s
@@ -716,7 +727,7 @@ watchdog_test.s: watchdog_test.cc.s
 
 # target to generate assembly for a file
 watchdog_test.cc.s:
-	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/watchdog_test.cc.s
+	cd /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build && $(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/watchdog_test.cc.s
 .PHONY : watchdog_test.cc.s
 
 # Help Target
@@ -726,8 +737,9 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... testlib"
 	@echo "... edit_cache"
+	@echo "... rltest"
+	@echo "... test"
 	@echo "... async_batcher_test.o"
 	@echo "... async_batcher_test.i"
 	@echo "... async_batcher_test.s"

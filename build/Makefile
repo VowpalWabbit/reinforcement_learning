@@ -78,6 +78,17 @@ edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
 
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
+	/usr/local/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+
+.PHONY : test/fast
+
 # The main all target
 all: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles /mnt/c/w/repos/vowpal_wabbit_jagerrit/reinforcement_learning/build/CMakeFiles/progress.marks
@@ -111,6 +122,84 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named _rl_client
+
+# Build rule for target.
+_rl_client: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 _rl_client
+.PHONY : _rl_client
+
+# fast build rule for target.
+_rl_client/fast:
+	$(MAKE) -f bindings/python/CMakeFiles/_rl_client.dir/build.make bindings/python/CMakeFiles/_rl_client.dir/build
+.PHONY : _rl_client/fast
+
+#=============================================================================
+# Target rules for targets named rl_client_swig_compilation
+
+# Build rule for target.
+rl_client_swig_compilation: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 rl_client_swig_compilation
+.PHONY : rl_client_swig_compilation
+
+# fast build rule for target.
+rl_client_swig_compilation/fast:
+	$(MAKE) -f bindings/python/CMakeFiles/rl_client_swig_compilation.dir/build.make bindings/python/CMakeFiles/rl_client_swig_compilation.dir/build
+.PHONY : rl_client_swig_compilation/fast
+
+#=============================================================================
+# Target rules for targets named doc
+
+# Build rule for target.
+doc: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 doc
+.PHONY : doc
+
+# fast build rule for target.
+doc/fast:
+	$(MAKE) -f doc/CMakeFiles/doc.dir/build.make doc/CMakeFiles/doc.dir/build
+.PHONY : doc/fast
+
+#=============================================================================
+# Target rules for targets named copy_docs_file_build_dir
+
+# Build rule for target.
+copy_docs_file_build_dir: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 copy_docs_file_build_dir
+.PHONY : copy_docs_file_build_dir
+
+# fast build rule for target.
+copy_docs_file_build_dir/fast:
+	$(MAKE) -f doc/CMakeFiles/copy_docs_file_build_dir.dir/build.make doc/CMakeFiles/copy_docs_file_build_dir.dir/build
+.PHONY : copy_docs_file_build_dir/fast
+
+#=============================================================================
+# Target rules for targets named doxygen_python
+
+# Build rule for target.
+doxygen_python: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 doxygen_python
+.PHONY : doxygen_python
+
+# fast build rule for target.
+doxygen_python/fast:
+	$(MAKE) -f doc/CMakeFiles/doxygen_python.dir/build.make doc/CMakeFiles/doxygen_python.dir/build
+.PHONY : doxygen_python/fast
+
+#=============================================================================
+# Target rules for targets named doxygen_cpp
+
+# Build rule for target.
+doxygen_cpp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 doxygen_cpp
+.PHONY : doxygen_cpp
+
+# fast build rule for target.
+doxygen_cpp/fast:
+	$(MAKE) -f doc/CMakeFiles/doxygen_cpp.dir/build.make doc/CMakeFiles/doxygen_cpp.dir/build
+.PHONY : doxygen_cpp/fast
+
+#=============================================================================
 # Target rules for targets named rlclientlib
 
 # Build rule for target.
@@ -124,17 +213,69 @@ rlclientlib/fast:
 .PHONY : rlclientlib/fast
 
 #=============================================================================
-# Target rules for targets named testlib
+# Target rules for targets named rltest
 
 # Build rule for target.
-testlib: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 testlib
-.PHONY : testlib
+rltest: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 rltest
+.PHONY : rltest
 
 # fast build rule for target.
-testlib/fast:
-	$(MAKE) -f rlclientlib/unit_test/CMakeFiles/testlib.dir/build.make rlclientlib/unit_test/CMakeFiles/testlib.dir/build
-.PHONY : testlib/fast
+rltest/fast:
+	$(MAKE) -f rlclientlib/unit_test/CMakeFiles/rltest.dir/build.make rlclientlib/unit_test/CMakeFiles/rltest.dir/build
+.PHONY : rltest/fast
+
+#=============================================================================
+# Target rules for targets named basic_usage_cpp.out
+
+# Build rule for target.
+basic_usage_cpp.out: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 basic_usage_cpp.out
+.PHONY : basic_usage_cpp.out
+
+# fast build rule for target.
+basic_usage_cpp.out/fast:
+	$(MAKE) -f examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/build.make examples/basic_usage_cpp/CMakeFiles/basic_usage_cpp.out.dir/build
+.PHONY : basic_usage_cpp.out/fast
+
+#=============================================================================
+# Target rules for targets named override_interface.out
+
+# Build rule for target.
+override_interface.out: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 override_interface.out
+.PHONY : override_interface.out
+
+# fast build rule for target.
+override_interface.out/fast:
+	$(MAKE) -f examples/override_interface/CMakeFiles/override_interface.out.dir/build.make examples/override_interface/CMakeFiles/override_interface.out.dir/build
+.PHONY : override_interface.out/fast
+
+#=============================================================================
+# Target rules for targets named rl_sim_cpp.out
+
+# Build rule for target.
+rl_sim_cpp.out: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 rl_sim_cpp.out
+.PHONY : rl_sim_cpp.out
+
+# fast build rule for target.
+rl_sim_cpp.out/fast:
+	$(MAKE) -f examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/build.make examples/rl_sim_cpp/CMakeFiles/rl_sim_cpp.out.dir/build
+.PHONY : rl_sim_cpp.out/fast
+
+#=============================================================================
+# Target rules for targets named rl_test.out
+
+# Build rule for target.
+rl_test.out: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 rl_test.out
+.PHONY : rl_test.out
+
+# fast build rule for target.
+rl_test.out/fast:
+	$(MAKE) -f examples/test_cpp/CMakeFiles/rl_test.out.dir/build.make examples/test_cpp/CMakeFiles/rl_test.out.dir/build
+.PHONY : rl_test.out/fast
 
 # Help Target
 help:
@@ -144,8 +285,19 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
+	@echo "... test"
+	@echo "... _rl_client"
+	@echo "... rl_client_swig_compilation"
+	@echo "... doc"
+	@echo "... copy_docs_file_build_dir"
+	@echo "... doxygen_python"
+	@echo "... doxygen_cpp"
 	@echo "... rlclientlib"
-	@echo "... testlib"
+	@echo "... rltest"
+	@echo "... basic_usage_cpp.out"
+	@echo "... override_interface.out"
+	@echo "... rl_sim_cpp.out"
+	@echo "... rl_test.out"
 .PHONY : help
 
 

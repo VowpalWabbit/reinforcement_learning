@@ -1,3 +1,5 @@
+add_subdirectory(unit_test)
+
 add_library(rlclientlib
   src/api_status.cc
   src/error_callback_fn.cc
@@ -24,46 +26,21 @@ add_library(rlclientlib
   src/vw_model/vw_model.cc
 )
 
-add_subdirectory(unit_test)
+# TODO Ideally most of these options should come as public dependencies on a VW cmake project
 
-target_include_directories(rlclientlib
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-  PRIVATE
-    src
-    ${vw_inc_dirs}
-    ${rapidjson_inc_dirs})
+target_compile_features(rlclientlib PUBLIC cxx_std_11)
+target_compile_definitions(rlclientlib PUBLIC _FILE_OFFSET_BITS=64 NDEBUG __extern_always_inline=inline)
+set_target_properties(rlclientlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-set_target_properties(rlclientlib PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO
-)
+if(MSVC)
+  target_compile_options(rlclientlib PRIVATE /W4)
+  target_compile_options(rlclientlib PUBLIC /MP -D__SSE2__)
+else()
+  target_compile_options(rlclientlib PRIVATE -Wall -Wextra -Wpedantic)
+  target_compile_options(rlclientlib PUBLIC -fomit-frame-pointer -fno-strict-aliasing -msse2 -mfpmath=sse)
+endif()
 
-# target_compile_features(rlclientlib PRIVATE cxx_std_11)
-target_link_libraries(rlclientlib PRIVATE cpprestsdk::cpprest Boost::system vw)
+target_include_directories(rlclientlib PUBLIC include PRIVATE src)
+target_link_libraries(rlclientlib PRIVATE vw allreduce cpprestsdk::cpprest Boost::system Boost::program_options dl z rapidjson)
 
-# # 'make install' to the correct locations (provided by GNUInstallDirs).
-# install(TARGETS rlclientlib EXPORT MyLibraryConfig
-#     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # This is for Windows
-# install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-# # This makes the project importable from the install directory
-# # Put config file in per-project dir (name MUST match), can also
-# # just go into 'cmake'.
-# install(EXPORT MyLibraryConfig DESTINATION share/MyLibrary/cmake)
-
-# # This makes the project importable from the build directory
-# export(TARGETS rlclientlib FILE MyLibraryConfig.cmake)
-
-# Every library has unit tests, of course
-# add_executable(testlib
-#     test/testlib.cpp)
-
-# target_link_libraries(testlib
-#     rlclientlib)
-
-# add_test(testlib testlib)
+# TODO complete module installation
