@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <memory>
-#include "../../vowpalwabbit/vw.h"
+#include "vw.h"
 
 namespace reinforcement_learning {
 
