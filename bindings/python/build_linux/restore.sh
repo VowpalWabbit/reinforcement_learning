@@ -30,6 +30,7 @@ if [ ! -f $BUILD_DIR/libcpprest.a ]; then
 
 	git clone https://github.com/Microsoft/cpprestsdk.git $CPPREST_FOLDER
 	cd $CPPREST_FOLDER/Release
+	git checkout e8dda215426172cd348e4d6d455141f40768bf47
 	mkdir build
 	cd build
 	cmake .. -DBUILD_SHARED_LIBS=0 -DCMAKE_CXX_FLAGS=-fPIC

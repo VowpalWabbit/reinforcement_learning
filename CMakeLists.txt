@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.2)
 project(reinforcement_learning)
 
 # Must use GNUInstallDirs to install libraries into correct
@@ -9,11 +9,13 @@ project(reinforcement_learning)
 find_package(cpprestsdk REQUIRED)
 find_package(Boost COMPONENTS unit_test_framework system program_options REQUIRED)
 
-add_library(rapidjson INTERFACE)
-target_include_directories(rapidjson INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../rapidjson/include)
+set (CMAKE_CXX_STANDARD 11)
 
-set(vw_lib_dir ${CMAKE_CURRENT_SOURCE_DIR}/../vowpalwabbit)
-set(vw_inc_dirs ${CMAKE_CURRENT_SOURCE_DIR}/../explore ${CMAKE_CURRENT_SOURCE_DIR}/../vowpalwabbit)
+add_library(rapidjson INTERFACE)
+target_include_directories(rapidjson INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ext_libs/vowpal_wabbit/rapidjson/include)
+
+set(vw_lib_dir ${CMAKE_CURRENT_SOURCE_DIR}/ext_libs/vowpal_wabbit/vowpalwabbit)
+set(vw_inc_dirs ${CMAKE_CURRENT_SOURCE_DIR}/ext_libs/vowpal_wabbit/explore ${CMAKE_CURRENT_SOURCE_DIR}/ext_libs/vowpal_wabbit/vowpalwabbit)
 
 if(NOT EXISTS "${vw_lib_dir}/libvw.a")
   message(FATAL_ERROR "${vw_lib_dir}/libvw.a not found. Build vw first.")

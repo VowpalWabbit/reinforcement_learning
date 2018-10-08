@@ -18,3 +18,5 @@
 *.nupkg
 # Ignore the packages folder
 **/packages
+
+build
