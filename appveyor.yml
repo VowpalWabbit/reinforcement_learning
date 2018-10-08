@@ -22,7 +22,8 @@ build_script:
 - nuget install -o ext_libs\vowpal_wabbit\packages ext_libs\vowpal_wabbit\python\windows35\packages.config
 - nuget install -o ext_libs\vowpal_wabbit\packages ext_libs\vowpal_wabbit\vowpalwabbit\packages.config
 - nuget install -o ext_libs\vowpal_wabbit\packages ext_libs\vowpal_wabbit\vowpalwabbit\packages.config
-- nuget install rl.sln
+- nuget install -o packages rlclientlib\packages.config
+- nuget install -o packages unit_tests\packages.config
 - '"C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe" "rl.sln" /m /verbosity:normal /p:Configuration=Release;Platform=x64'
 test_script:
 - ps: >-
