@@ -6,11 +6,11 @@ platform: x64
 shallow_clone: true
 clone_folder: C:\reinforcement_learning
 cache: c:\tools\vcpkg\installed\
-# need to install nuget packages before Visual Studio starts to make ANTLR targets available.
 install:
-  - cd %APPVEYOR_BUILD_FOLDER%
+  - cd c:\reinforcement_learning
   - git submodule update --init --recursive
 build_script:
+# need to install nuget packages before Visual Studio starts to make ANTLR targets available.
 # Temporary workaround: https://github.com/Microsoft/vcpkg/issues/4189#issuecomment-417462822
 - rd /s /q C:\OpenSSL-v11-Win32
 - rd /s /q C:\OpenSSL-v11-Win64
