@@ -3,7 +3,7 @@ os: Windows Server 2012 R2
 configuration:
 - Release
 platform: x64
-shallow_clone: true
+shallow_clone: 10
 clone_folder: c:\reinforcement_learning\
 cache: c:\tools\vcpkg\installed\
 # need to install nuget packages before Visual Studio starts to make ANTLR targets available.
