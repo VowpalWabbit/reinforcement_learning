@@ -1,0 +1,4 @@
+[submodule "ext_libs/vowpal_wabbit"]
+	path = ext_libs/vowpal_wabbit
+	url = https://github.com/VowpalWabbit/vowpal_wabbit.git
+	branch = master
