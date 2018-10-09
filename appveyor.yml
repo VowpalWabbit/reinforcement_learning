@@ -1,10 +1,14 @@
 version: 1.0.{build}
-os: Windows Server 2012 R2
+image: Visual Studio 2017
 configuration:
 - Release
 platform: x64
 clone_folder: c:\reinforcement_learning\
 cache: c:\tools\vcpkg\installed\
+environment:
+  # VcpkgRoot will be used when we transition to a build script
+  VcpkgRoot: c:\tools\vcpkg
+  VcpkgIntegration: c:\tools\vcpkg\scripts\buildsystems\msbuild\vcpkg.targets
 # need to install nuget packages before Visual Studio starts to make ANTLR targets available.
 build_script:
 # Temporary workaround: https://github.com/Microsoft/vcpkg/issues/4189#issuecomment-417462822
