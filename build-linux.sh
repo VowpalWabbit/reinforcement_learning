@@ -4,7 +4,7 @@ set -e
 
 # Build vw dependency
 cd ext_libs/vowpal_wabbit/vowpalwabbit
-make vw
+make all
 cd ../../..
 
 # Build reinforcement_learning
