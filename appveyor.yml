@@ -18,11 +18,4 @@ build_script:
   - cd c:\reinforcement_learning
   - .\build-windows.cmd
 test_script:
-- ps: >-
-    if($env:PLATFORM -eq "x64")
-    {
-       cd c:\reinforcement_learning
-       .\x64\Release\unit_test.exe
-    }
-on_failure:
-- ps: Get-ChildItem C:\Users\appveyor\AppData\Local\CrashDumps\\*.dmp | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+- cmd: .\x64\Release\unit_test.exe
