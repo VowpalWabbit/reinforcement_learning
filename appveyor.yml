@@ -5,7 +5,7 @@ platform: x64
 clone_folder: c:\reinforcement_learning\
 cache:
   - c:\tools\vcpkg\installed\ -> build-windows.cmd
-  - c:\reinforcement_learning\packages -> **\packages.config, build-windows.cmd
+  - packages -> **\packages.config, build-windows.cmd
 environment:
   VcpkgInstallRoot: c:\tools\vcpkg\
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
