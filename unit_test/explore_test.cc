@@ -5,7 +5,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include "../../explore/explore.h"
+#include "explore.h"
 
 const int NUM_ACTIONS = 10;
 namespace e = exploration;
