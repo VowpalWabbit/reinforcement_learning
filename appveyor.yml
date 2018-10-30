@@ -22,4 +22,4 @@ build_script:
   - cd c:\reinforcement_learning
   - .\build-windows.cmd
 test_script:
-- cmd: c:\reinforcement_learning\x64\Release\unit_test.exe
+  - "c:\reinforcement_learning\x64\Release\unit_test.exe"
