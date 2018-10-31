@@ -1,6 +1,8 @@
 #include "safe_vw.h"
-#include "../../vowpalwabbit/example.h"
-#include "../../vowpalwabbit/parse_example_json.h"
+
+// VW headers
+#include "example.h"
+#include "parse_example_json.h"
 
 namespace reinforcement_learning {
 

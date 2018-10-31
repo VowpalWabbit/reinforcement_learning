@@ -1,0 +1,21 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+configuration: Release
+platform: x64
+clone_folder: c:\reinforcement_learning\
+cache:
+  - c:\tools\vcpkg\installed\ -> build-windows.cmd
+  - packages -> **\packages.config, build-windows.cmd
+environment:
+  VcpkgInstallRoot: c:\tools\vcpkg\
+  APPVEYOR_SAVE_CACHE_ON_ERROR: true
+install:
+  - git submodule update --init --recursive
+build_script:
+  # Temporary workaround: https://github.com/Microsoft/vcpkg/issues/4189#issuecomment-417462822
+  - rd /s /q C:\OpenSSL-v11-Win32
+  - rd /s /q C:\OpenSSL-v11-Win64
+  - cd c:\reinforcement_learning
+  - .\build-windows.cmd
+test_script:
+  - c:\reinforcement_learning\x64\Debug\unit_test.exe
