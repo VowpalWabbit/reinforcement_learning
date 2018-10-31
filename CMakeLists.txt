@@ -1,9 +1,5 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.5)
 project(reinforcement_learning)
-
-# Must use GNUInstallDirs to install libraries into correct
-# locations on all platforms.
-# include(GNUInstallDirs)
 
 # TODO Compile cpprest into its own lib so that it doesn't have to be consumed
 find_package(cpprestsdk REQUIRED)
@@ -43,5 +39,6 @@ add_subdirectory(bindings EXCLUDE_FROM_ALL)
 add_subdirectory(doc EXCLUDE_FROM_ALL)
 add_subdirectory(ext_libs)
 add_subdirectory(rlclientlib)
+add_subdirectory(unit_test)
 
 add_subdirectory(examples EXCLUDE_FROM_ALL)
