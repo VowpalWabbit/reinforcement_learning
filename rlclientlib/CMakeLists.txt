@@ -30,6 +30,10 @@ set_target_properties(rlclientlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(rlclientlib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(rlclientlib PRIVATE vw cpprestsdk::cpprest Boost::system)
 
+if(TURN_OFF_DEVIRTUALIZE)
+  target_compile_options(rlclientlib PUBLIC -fno-devirtualize)
+endif()
+
 install(TARGETS rlclientlib
   INCLUDES DESTINATION rlclientlib
   ARCHIVE DESTINATION lib

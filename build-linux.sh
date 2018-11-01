@@ -5,7 +5,7 @@ set -e
 # Build reinforcement_learning
 mkdir -p build
 cd build
-cmake ..
+cmake .. -DTURN_OFF_DEVIRTUALIZE=On
 NUM_PROCESSORS=$(cat nprocs.txt)
 make -j${NUM_PROCESSORS}
 

@@ -7,6 +7,14 @@ find_package(Boost COMPONENTS unit_test_framework system REQUIRED)
 
 set(CMAKE_CXX_STANDARD 11)
 
+set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
+set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: Debug, Release" FORCE)
+
+# Devirtualization is an optimization that changes the vtable if the compiler decides a function
+# doesn't need to be virtual. This is incompatible with the mocking framework used in testing as it
+# makes the vtable structure unpredictable
+option(TURN_OFF_DEVIRTUALIZE "Turn off devirtualize which is required for mocking framework" OFF)
+
 include(ProcessorCount)
 ProcessorCount(NumProcessors)
 message("Number of processors: ${NumProcessors}")
