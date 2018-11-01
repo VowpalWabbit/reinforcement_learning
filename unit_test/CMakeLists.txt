@@ -44,6 +44,6 @@ endif()
 target_include_directories(rltest PRIVATE $<TARGET_PROPERTY:rlclientlib,INCLUDE_DIRECTORIES>)
 
 target_link_libraries(rltest PRIVATE
-  rlclientlib fakeit Boost::unit_test_framework)
+  rlclientlib fakeit Boost::unit_test_framework Boost::system)
 
 add_test(rltest rltest)

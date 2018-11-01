@@ -1,44 +1,23 @@
 cmake_minimum_required(VERSION 3.5)
 project(reinforcement_learning)
 
-# TODO Compile cpprest into its own lib so that it doesn't have to be consumed
+# TODO Compile cpprest into its own separate lib so that it doesn't have to be consumed
 find_package(cpprestsdk REQUIRED)
-find_package(Boost COMPONENTS unit_test_framework system program_options REQUIRED)
+find_package(Boost COMPONENTS unit_test_framework system REQUIRED)
 
-set (CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 11)
 
-add_library(rapidjson INTERFACE)
-target_include_directories(rapidjson INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/ext_libs/vowpal_wabbit/rapidjson/include)
-
-set(vw_lib_dir ${CMAKE_CURRENT_SOURCE_DIR}/ext_libs/vowpal_wabbit/vowpalwabbit)
-set(vw_inc_dirs ${CMAKE_CURRENT_SOURCE_DIR}/ext_libs/vowpal_wabbit/explore ${CMAKE_CURRENT_SOURCE_DIR}/ext_libs/vowpal_wabbit/vowpalwabbit)
-
-if(NOT EXISTS "${vw_lib_dir}/libvw.a")
-  message(FATAL_ERROR "${vw_lib_dir}/libvw.a not found. Build vw first.")
-endif()
-
-if(NOT EXISTS "${vw_lib_dir}/liballreduce.a")
-  message(FATAL_ERROR "${vw_lib_dir}/liballreduce.a not found. Build vw first.")
-endif()
-
-add_library(vw STATIC IMPORTED)
-set_target_properties(vw PROPERTIES
-  IMPORTED_LOCATION "${vw_lib_dir}/libvw.a"
-  INTERFACE_INCLUDE_DIRECTORIES "${vw_inc_dirs}"
-)
-
-add_library(allreduce STATIC IMPORTED)
-set_target_properties(allreduce PROPERTIES
-  IMPORTED_LOCATION "${vw_lib_dir}/liballreduce.a"
-  INTERFACE_INCLUDE_DIRECTORIES "${vw_inc_dirs}"
-)
-
-enable_testing()
+include(ProcessorCount)
+ProcessorCount(NumProcessors)
+message("Number of processors: ${NumProcessors}")
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/nprocs.txt ${NumProcessors})
 
 add_subdirectory(bindings EXCLUDE_FROM_ALL)
 add_subdirectory(doc EXCLUDE_FROM_ALL)
 add_subdirectory(ext_libs)
 add_subdirectory(rlclientlib)
-add_subdirectory(unit_test)
+add_subdirectory(examples)
 
-add_subdirectory(examples EXCLUDE_FROM_ALL)
+# enable_testing should be run after ext_libs so that the vw unit tests arent turned on.
+enable_testing()
+add_subdirectory(unit_test)

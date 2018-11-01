@@ -2,14 +2,12 @@
 
 set -e
 
-# Build vw dependency
-cd ext_libs/vowpal_wabbit/vowpalwabbit
-make all
-cd ../../..
-
 # Build reinforcement_learning
 mkdir -p build
 cd build
 cmake ..
-make -j
+NUM_PROCESSORS=$(cat nprocs.txt)
+make -j${NUM_PROCESSORS}
+
+export CTEST_OUTPUT_ON_FAILURE=1
 make test

@@ -26,11 +26,12 @@ add_library(rlclientlib
   vw_model/vw_model.cc
 )
 
-# TODO Ideally most of these options should come as public dependencies on a VW cmake project
-
 set_target_properties(rlclientlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
-
 target_include_directories(rlclientlib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(rlclientlib PRIVATE vw allreduce cpprestsdk::cpprest Boost::system Boost::program_options dl z rapidjson)
+target_link_libraries(rlclientlib PRIVATE vw cpprestsdk::cpprest Boost::system)
 
-# TODO complete module installation
+install(TARGETS rlclientlib
+  INCLUDES DESTINATION rlclientlib
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+)

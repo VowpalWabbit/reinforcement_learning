@@ -26,4 +26,4 @@ add_custom_target(doxygen_python
 add_dependencies(doxygen_cpp copy_docs_file_build_dir)
 add_dependencies(doxygen_python copy_docs_file_build_dir)
 
-add_custom_target(doc DEPENDS doxygen_cpp doxygen_python)
+add_custom_target(rl_doc DEPENDS doxygen_cpp doxygen_python)
