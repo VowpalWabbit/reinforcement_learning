@@ -1,6 +1,6 @@
 #include "safe_vw.h"
 
-// VowpalWabbit
+// VW headers
 #include "example.h"
 #include "parse_example_json.h"
 
