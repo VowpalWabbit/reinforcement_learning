@@ -1,27 +1,30 @@
-find_package(SWIG REQUIRED)
+find_package(SWIG)
+
+if(${SWIG_FOUND})
 include(${SWIG_USE_FILE})
 
-find_package(PythonLibs 3.6 REQUIRED)
+  find_package(PythonLibs 3.6 REQUIRED)
 
-include_directories(${PYTHON_INCLUDE_PATH})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+  include_directories(${PYTHON_INCLUDE_PATH})
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-set(CMAKE_SWIG_FLAGS "-c++")
+  set(CMAKE_SWIG_FLAGS "-c++")
 
-set_source_files_properties(rl_client.i PROPERTIES CPLUSPLUS ON)
+  set_source_files_properties(rl_client.i PROPERTIES CPLUSPLUS ON)
 
-swig_add_module(rl_client python rl_client.i py_api.cc)
-swig_link_libraries(rl_client rlclientlib ${PYTHON_LIBRARIES})
+  swig_add_module(rl_client python rl_client.i py_api.cc)
+  swig_link_libraries(rl_client rlclientlib ${PYTHON_LIBRARIES})
 
-find_package(PythonInterp 3.6 REQUIRED)
-if(NOT PYTHONINTERP_FOUND)
-  message(FATAL_ERROR "Python 3.6 not found")
+  find_package(PythonInterp 3.6 REQUIRED)
+  if(NOT PYTHONINTERP_FOUND)
+    message(FATAL_ERROR "Python 3.6 not found")
+  endif()
+
+  add_custom_command(TARGET ${SWIG_MODULE_rl_client_REAL_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/rl_client ${CMAKE_CURRENT_BINARY_DIR}/rl_client
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/setup.py ${CMAKE_CURRENT_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/README.md ${CMAKE_CURRENT_BINARY_DIR}
+    COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_wheel
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  )
 endif()
-
-add_custom_command(TARGET ${SWIG_MODULE_rl_client_REAL_NAME} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/rl_client ${CMAKE_CURRENT_BINARY_DIR}/rl_client
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/setup.py ${CMAKE_CURRENT_BINARY_DIR}
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/README.md ${CMAKE_CURRENT_BINARY_DIR}
-  COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_wheel
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-)
