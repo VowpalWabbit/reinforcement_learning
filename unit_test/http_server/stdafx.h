@@ -22,6 +22,7 @@
 #include <fstream>
 #include <random>
 
+#define OPENSSL_API_COMPAT 0x0908
 #include "cpprest/json.h"
 #include "cpprest/http_listener.h"
 #include "cpprest/uri.h"
