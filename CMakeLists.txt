@@ -3,6 +3,7 @@ project(reinforcement_learning)
 
 # TODO Compile cpprest into its own separate lib so that it doesn't have to be consumed
 find_package(cpprestsdk REQUIRED)
+find_package(OpenSSL REQUIRED)
 find_package(Boost COMPONENTS unit_test_framework system REQUIRED)
 
 set(CMAKE_CXX_STANDARD 11)
