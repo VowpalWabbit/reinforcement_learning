@@ -1,4 +1,3 @@
-#define OPENSSL_API_COMPAT 0x0908
 #include <map>
 #include <regex>
 #include "config_utility.h"

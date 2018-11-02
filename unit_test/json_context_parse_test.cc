@@ -3,7 +3,6 @@
 #   define BOOST_TEST_MODULE Main
 #endif
 
-#define OPENSSL_API_COMPAT 0x0908
 #include <boost/test/unit_test.hpp>
 #include <cpprest/json.h>
 #include "err_constants.h"

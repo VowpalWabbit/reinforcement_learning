@@ -1,4 +1,3 @@
-#define OPENSSL_API_COMPAT 0x0908
 #include "restapi_data_transport.h"
 #include <cpprest/http_client.h>
 #include <cpprest/asyncrt_utils.h>

@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.5)
 project(reinforcement_learning)
 
+set(CMAKE_CXX_STANDARD 11)
+
 # TODO Compile cpprest into its own separate lib so that it doesn't have to be consumed
 find_package(cpprestsdk REQUIRED)
 find_package(OpenSSL REQUIRED)
-find_package(Boost COMPONENTS unit_test_framework system REQUIRED)
+find_package(Boost COMPONENTS unit_test_framework system program_options REQUIRED)
 
-set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: Debug, Release" FORCE)

@@ -1,4 +1,3 @@
-#define OPENSSL_API_COMPAT 0x0908
 #include <cpprest/json.h>
 #include <object_factory.h>
 #include <cpprest/asyncrt_utils.h>
