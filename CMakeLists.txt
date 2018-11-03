@@ -8,7 +8,6 @@ find_package(cpprestsdk REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Boost COMPONENTS unit_test_framework system program_options REQUIRED)
 
-
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: Debug, Release" FORCE)
 
