@@ -32,15 +32,30 @@ Windows dependencies are managed through Vcpkg and Nuget.
 
 ```
 vcpkg install cpprestsdk:x64-windows
+vcpkg install zlib:x64-windows
+vcpkg install boost-system:x64-windows
+vcpkg install boost-program-options:x64-windows
+vcpkg install boost-test:x64-windows
 ```
 
-## Building
+## Build
 
-You should be able to build the *vowpal wabbit* on most systems with:
 ```
-make all
+mkdir build
+cd build
+cmake ..
+make
 
 # Test
-make clean
+mkdir build
+cd build
+cmake .. -DTURN_OFF_DEVIRTUALIZE=On
 make rl_clientlib_test
+make test
 ```
+
+## Make targets
+- `rl_doc` - Python and C++ docs
+- `_rl_client` - Python bindings
+- `rlclient` - rlclient library
+- `rltest` - unit tests

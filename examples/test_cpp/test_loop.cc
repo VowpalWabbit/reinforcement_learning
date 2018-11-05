@@ -12,7 +12,7 @@ namespace err = r::error_code;
 namespace po = boost::program_options;
 namespace chrono = std::chrono;
 
-test_loop::test_loop(const boost::program_options::variables_map& vm) 
+test_loop::test_loop(const boost::program_options::variables_map& vm)
   : threads(vm["threads"].as<size_t>())
   , examples(vm["examples"].as<size_t>())
   , experiment_name(generate_experiment_name(vm["experiment_name"].as<std::string>(), threads, examples, vm["features"].as<size_t>(), vm["actions"].as<size_t>()))
@@ -22,7 +22,7 @@ test_loop::test_loop(const boost::program_options::variables_map& vm)
   , sleep_interval(vm["sleep"].as<size_t>())
 {
   for (size_t i = 0; i < threads; ++i) {
-    loggers.push_back(std::ofstream(experiment_name + "." + std::to_string(i), std::ofstream::out));
+    loggers.push_back(std::make_shared<std::ofstream>(experiment_name + "." + std::to_string(i), std::ofstream::out));
   }
 }
 
@@ -66,10 +66,10 @@ int test_loop::load_file(const std::string& file_name, std::string& config_str) 
   return err::success;
 }
 
-std::string test_loop::generate_experiment_name(const std::string& experiment_name_base, size_t threads, 
+std::string test_loop::generate_experiment_name(const std::string& experiment_name_base, size_t threads,
 	size_t examples, size_t features, size_t actions)
 {
-  return experiment_name_base + "-t" + std::to_string(threads) + "-n" + std::to_string(examples) 
+  return experiment_name_base + "-t" + std::to_string(threads) + "-n" + std::to_string(examples)
 	  + "-f" + std::to_string(features) + "-a" + std::to_string(actions);
 }
 
@@ -83,7 +83,7 @@ void test_loop::run() {
   }
 }
 
-void test_loop::validity_loop(size_t thread_id) 
+void test_loop::validity_loop(size_t thread_id)
 {
   r::ranking_response response;
   r::api_status status;
@@ -95,7 +95,7 @@ void test_loop::validity_loop(size_t thread_id)
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
-    
+
     if (test_inputs.is_rewarded(thread_id, i)) {
       if (test_inputs.report_outcome(rl.get(), thread_id, i, &status) != err::success) {
         std::cout << status.get_error_msg() << std::endl;
@@ -103,8 +103,8 @@ void test_loop::validity_loop(size_t thread_id)
       }
     }
 
-    test_inputs.log(thread_id, i, response, loggers[thread_id]);
-    
+    test_inputs.log(thread_id, i, response, (*loggers[thread_id]));
+
     if (sleep_interval > 0) {
       std::this_thread::sleep_for(std::chrono::milliseconds(sleep_interval));
     }
@@ -148,8 +148,8 @@ void test_loop::perf_loop(size_t thread_id)
 
   const auto choose_rank_perf = (chrono::duration_cast<chrono::microseconds>(choose_rank_end - choose_rank_start).count()) / examples;
   const auto report_outcome_perf = (chrono::duration_cast<chrono::microseconds>(report_outcome_end - report_outcome_start).count()) / examples;
-  
-  loggers[thread_id] << thread_id << ": Choose_rank: " << choose_rank_perf << std::endl;
-  loggers[thread_id] << thread_id << ": Report outcome: " << report_outcome_perf << std::endl;
+
+  (*loggers[thread_id]) << thread_id << ": Choose_rank: " << choose_rank_perf << std::endl;
+  (*loggers[thread_id]) << thread_id << ": Report outcome: " << report_outcome_perf << std::endl;
 }
 
