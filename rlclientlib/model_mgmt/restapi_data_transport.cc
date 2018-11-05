@@ -47,7 +47,7 @@ namespace reinforcement_learning { namespace model_management {
       .then([&](http_response response) {
       if ( response.status_code() != 200 )
         RETURN_ERROR_ARG(_trace, status, http_bad_status_code, _url);
-      
+
       const auto iter = response.headers().find(U("Last-Modified"));
       if ( iter == response.headers().end() )
         RETURN_ERROR_ARG(_trace, status, last_modified_not_found, _url);

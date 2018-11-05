@@ -13,8 +13,12 @@
 # VS files
 *.vcxproj.user
 *.csproj.user
+*.VC.db
+.vs
 
 # Ignore NuGet Packages
 *.nupkg
 # Ignore the packages folder
 **/packages
+
+build
