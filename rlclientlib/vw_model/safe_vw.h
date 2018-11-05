@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 #include "../../vowpalwabbit/vw.h"
-#include "model_mgmt.h"
+#include "vw.h"
 
 namespace reinforcement_learning {
 

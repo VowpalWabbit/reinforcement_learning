@@ -6,7 +6,7 @@ PIP_FOLDER = ./rl_client/
 # Python 3.6 is specifically provided, tricky if we want to link against different versions.
 INCLUDE = -I ../../include -I ./ $(shell python3.6-config --includes)
 RLCLIENT_LIB = -L ../../rlclientlib -lrlclient
-VW_LIB = -L ../../../vowpalwabbit -lvw -lallreduce
+VW_LIB = -L../ext_libs/vowpal_wabbit/vowpalwabbit -lvw -lallreduce
 BOOST_LIBS = -lboost_system
 CPPREST_LIBS = -lcpprest -lssl -lcrypto -pthread -ldl
 ALL_LIBS = $(RLCLIENT_LIB) $(VW_LIB) $(BOOST_LIBS) $(CPPREST_LIBS) $(LIBS)
