@@ -1,30 +1,20 @@
-if(NOT DEFINED RL_PY_VERSION)
-  set(RL_PY_VERSION 2.7)
-endif()
-
-message("Building Python module for Python version ${RL_PY_VERSION}")
-find_package(PythonLibs ${RL_PY_VERSION})
-find_package(SWIG)
-
-if(SWIG_FOUND AND PythonLibs_FOUND)
-include(${SWIG_USE_FILE})
-  if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND NOT WIN32)
-    SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -Wl,--export-dynamic")
+if(DEFINED BUILD_PYTHON)
+  if(NOT DEFINED RL_PY_VERSION)
+    message(SEND_ERROR "RL_PY_VERSION must be defined.")
   endif()
 
-  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-  set(CMAKE_STATIC_LIBRARY_PREFIX "")
-  set(CMAKE_SWIG_FLAGS "-c++")
+  find_package(SWIG REQUIRED)
+  find_package(PythonInterp ${RL_PY_VERSION} REQUIRED)
 
-  include_directories(${PYTHON_INCLUDE_PATH})
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
-  set_source_files_properties(rl_client.i PROPERTIES CPLUSPLUS ON)
-  swig_add_module(rl_client python rl_client.i py_api.cc)
-  swig_link_libraries(rl_client rlclientlib ${PYTHON_LIBRARIES})
-
-  add_custom_command(TARGET ${SWIG_MODULE_rl_client_REAL_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/rl_client.py ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  set(pip_folder ${CMAKE_CURRENT_SOURCE_DIR}/rl_client/)
+  add_custom_target(_rl_client ALL)
+  add_custom_command(TARGET _rl_client
+    COMMAND ${SWIG_EXECUTABLE} -c++ -python -o rl_client_wrap.cc rl_client.i
+    COMMAND ${CMAKE_COMMAND} -E copy rl_client.py ${pip_folder}
+    COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_wheel
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/rl_client.i ${CMAKE_CURRENT_SOURCE_DIR}/py_api.h ${CMAKE_CURRENT_SOURCE_DIR}/py_api.cc
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
+
+  add_dependencies(_rl_client rlclientlib vw allreduce)
 endif()
