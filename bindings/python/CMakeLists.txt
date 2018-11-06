@@ -1,4 +1,4 @@
-if(DEFINED BUILD_PYTHON)
+if(BUILD_PYTHON)
   if(NOT DEFINED RL_PY_VERSION)
     message(SEND_ERROR "RL_PY_VERSION must be defined.")
   endif()
