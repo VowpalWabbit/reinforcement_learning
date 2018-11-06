@@ -1,5 +1,6 @@
 add_library(rlclientlib
   api_status.cc
+  azure_factories.cc
   console_tracer.cc
   error_callback_fn.cc
   factory_resolver.cc
@@ -13,7 +14,6 @@ add_library(rlclientlib
   model_mgmt/model_mgmt.cc
   model_mgmt/restapi_data_transport.cc
   ranking_event.cc
-  ranking_response_impl.cc
   ranking_response.cc
   trace_logger.cc
   utility/config_utility.cc
