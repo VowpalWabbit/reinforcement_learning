@@ -2,6 +2,7 @@
 #include "test_data_provider.h"
 #include "live_model.h"
 
+#include <memory>
 #include <boost/program_options.hpp>
 
 class test_loop {
@@ -15,7 +16,7 @@ private:
   int load_config_from_json(const std::string& file_name,
     reinforcement_learning::utility::configuration& config,
     reinforcement_learning::api_status* status) const;
-  std::string generate_experiment_name(const std::string& experiment_name_base, 
+  std::string generate_experiment_name(const std::string& experiment_name_base,
 	size_t threads, size_t examples, size_t features, size_t actions);
 
   void validity_loop(size_t thread_id);
@@ -30,6 +31,6 @@ private:
   test_data_provider test_inputs;
   const bool is_perf;
 
-  std::vector<std::ofstream> loggers;
+  std::vector<std::shared_ptr<std::ofstream>> loggers;
   std::unique_ptr<reinforcement_learning::live_model> rl;
 };

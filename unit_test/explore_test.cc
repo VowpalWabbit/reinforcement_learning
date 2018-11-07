@@ -5,8 +5,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include "../../explore/explore.h"
 #include "ranking_response.h"
+#include "explore.h"
 
 const int NUM_ACTIONS = 10;
 namespace e = exploration;
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(swap_fail_test) {
 
   // Check that swap failed
   BOOST_CHECK_EQUAL(err_code, E_EXPLORATION_BAD_RANGE);
-  
+
   // Check that nothing changed
   auto expected_scores = scores;
   auto idx = 0;

@@ -1,3 +1,4 @@
+#define OPENSSL_API_COMPAT 0x0908
 #include <openssl/hmac.h>
 #include <sstream>
 #include "eventhub_client.h"
@@ -208,7 +209,7 @@ namespace reinforcement_learning {
     std::vector<unsigned char> digest(EVP_MAX_MD_SIZE);
     unsigned int digest_len;
     // https://www.openssl.org/docs/man1.0.2/crypto/hmac.html
-    if (!HMAC(EVP_sha256(), shared_access_key_name.c_str(), (int)shared_access_key.length(),
+    if (!HMAC(EVP_sha256(), shared_access_key.c_str(), (int)shared_access_key.length(),
               (const unsigned char*)data.c_str(), (int)data.length(), &digest[0], &digest_len)) {
       api_status::try_update(status, error_code::eventhub_generate_SAS_hash,
                             "Failed to generate SAS hash");

@@ -28,7 +28,7 @@ namespace reinforcement_learning {
       error_callback_fn* perror_cb = nullptr);
 
     int init(api_status* status);
-  
+
   protected:
     int append(TEvent&& data, api_status* status);
     int append(TEvent& item, api_status* status);

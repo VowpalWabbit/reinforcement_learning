@@ -1,0 +1,24 @@
+*.o
+*.a
+*.out
+
+.DS_Store
+
+# build folders
+**/x64
+**/obj
+**/Debug
+**/Release
+
+# VS files
+*.vcxproj.user
+*.csproj.user
+*.VC.db
+.vs
+
+# Ignore NuGet Packages
+*.nupkg
+# Ignore the packages folder
+**/packages
+
+build
