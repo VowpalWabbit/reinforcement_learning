@@ -4,6 +4,7 @@
 #endif
 
 #include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 
 #include "configuration.h"
 #include "config_utility.h"
@@ -23,13 +24,13 @@ const auto config_json = R"({
 BOOST_AUTO_TEST_CASE(configuration_set_value) {
   util::configuration config;
   config.set("CustomKey", "CustomValue");
-  BOOST_CHECK_EQUAL(config.get("CustomKey", nullptr), "CustomValue");
+  BOOST_CHECK_EQUAL(config.get("CustomKey", "DefaultValue"), "CustomValue");
 }
 
 BOOST_AUTO_TEST_CASE(configuration_get_string_value) {
   util::configuration config;
   BOOST_CHECK_EQUAL(util::config::create_from_json(config_json, config), err::success);
-  BOOST_CHECK_EQUAL(config.get("StringKey", nullptr), "StringValue");
+  BOOST_CHECK_EQUAL(config.get("StringKey", "DefaultValue"), "StringValue");
 }
 
 BOOST_AUTO_TEST_CASE(configuration_get_default_value) {
@@ -47,7 +48,7 @@ BOOST_AUTO_TEST_CASE(configuration_get_int_value) {
 BOOST_AUTO_TEST_CASE(configuration_get_float_value) {
   util::configuration config;
   BOOST_CHECK_EQUAL(util::config::create_from_json(config_json, config), err::success);
-  BOOST_TEST(config.get_float("FloatKey", 0.0) == 3.67, boost::test_tools::tolerance(0.0001));
+  BOOST_CHECK_CLOSE(config.get_float("FloatKey", 0.0), 3.67, 0.0001);
 }
 
 BOOST_AUTO_TEST_CASE(configuration_get_bool_value) {
@@ -62,8 +63,8 @@ BOOST_AUTO_TEST_CASE(configuration_parse_get_translated_name) {
   })";
   util::configuration config;
   BOOST_CHECK_EQUAL(util::config::create_from_json(json, config), err::success);
-  BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::APP_ID, nullptr), "application_id_value");
-  BOOST_CHECK_EQUAL(config.get("ApplicationID", nullptr), nullptr);
+  BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::APP_ID, "DefaultValue"), "application_id_value");
+  BOOST_CHECK_EQUAL(config.get("ApplicationID", "DefaultValue"), "DefaultValue");
 }
 
 BOOST_AUTO_TEST_CASE(configuration_parse_get_untranslated_name) {
@@ -88,10 +89,10 @@ BOOST_AUTO_TEST_CASE(configuration_parse_eventhub_connection_string) {
 
   util::configuration config;
   BOOST_CHECK_EQUAL(util::config::create_from_json(json, config), err::success);
-  BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::INTERACTION_EH_HOST, nullptr), "<ingest>.servicebus.windows.net");
-  BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::INTERACTION_EH_NAME, nullptr), "interaction");
-  BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::INTERACTION_EH_KEY_NAME, nullptr), "RootManageSharedAccessKey");
-  BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::INTERACTION_EH_KEY, nullptr), "<SAKey>");
+  BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::INTERACTION_EH_HOST, "DefaultValue"), "<ingest>.servicebus.windows.net");
+  BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::INTERACTION_EH_NAME, "DefaultValue"), "interaction");
+  BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::INTERACTION_EH_KEY_NAME, "DefaultValue"), "RootManageSharedAccessKey");
+  BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::INTERACTION_EH_KEY, "DefaultValue"), "<SAKey>");
 }
 
 BOOST_AUTO_TEST_CASE(configuration_parse_malformed_eventhub_connection_string_expect_error) {
