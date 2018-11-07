@@ -7,6 +7,7 @@ endif()
 add_executable(rltest
   ${msvc_stdafx}
   async_batcher_test.cc
+  configuration_test.cc
   data_buffer_test.cc
   data_callback_test.cc
   err_callback_test.cc

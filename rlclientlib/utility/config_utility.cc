@@ -93,18 +93,7 @@ namespace reinforcement_learning { namespace utility { namespace config {
   }
 
   int create_from_json(const std::string& config_json, configuration& cc, i_trace* trace, api_status* status) {
-    const char* json_names[] = {
-      "ApplicationID",
-      "ModelBlobUri",
-      "InitialExplorationEpsilon",
-      "ModelRefreshIntervalMs",
-      "SendHighMaterMark",
-      "QueueMaxSize",
-      "BatchTimeoutMs",
-      "QueueMode"
-    };
-
-    const std::map<std::string, std::string> from_to = {
+    static const std::map<std::string, std::string> legacy_translation_mapping = {
       { "ApplicationID"             , name::APP_ID },
       { "ModelBlobUri"              , name::MODEL_BLOB_URI },
       { "SendHighMaterMark"         , name::INTERACTION_SEND_HIGH_WATER_MARK },
@@ -116,28 +105,25 @@ namespace reinforcement_learning { namespace utility { namespace config {
     };
 
     auto obj = json::value::parse(to_string_t(config_json));
+    auto jsonObj = obj.as_object();
 
-    //look for specific field names in the json
-    for (std::string name : json_names) {
-      const auto wname = to_string_t(name); //cpp/json works with wstring
-      if (obj.has_field(wname)) {
-        const auto jvalue = obj.at(wname);
-        const auto value = to_utf8string( jvalue.is_string() ? jvalue.as_string() : jvalue.serialize());
-        name = translate(from_to, name);
-        cc.set(name.c_str(), value.c_str());
+    for (auto const& prop_pair : jsonObj) {
+      auto prop_name = to_utf8string(prop_pair.first);
+      auto const& prop_value = prop_pair.second;
+      auto const string_value = to_utf8string(prop_value.is_string() ? prop_value.as_string() : prop_value.serialize());
+      prop_name = translate(legacy_translation_mapping, prop_name);
+
+      // Check if the current field is an EventHub connect string that needs to be parsed.
+      if (prop_name == "EventHubInteractionConnectionString") {
+        RETURN_IF_FAIL(set_eventhub_config(string_value, "interaction", cc, trace, status));
       }
-    }
-
-    auto wname = to_string_t("EventHubInteractionConnectionString");
-    if ( obj.has_field(to_string_t(wname)) ) {
-      const auto value = to_utf8string(obj.at(wname).as_string());
-      RETURN_IF_FAIL(set_eventhub_config(value, "interaction", cc, trace, status));
-    }
-
-    wname = to_string_t("EventHubObservationConnectionString");
-    if ( obj.has_field(to_string_t(wname)) ) {
-      const auto value = to_utf8string(obj.at(wname).as_string());
-      RETURN_IF_FAIL(set_eventhub_config(value, "observation", cc, trace, status));
+      else if (prop_name == "EventHubObservationConnectionString") {
+        RETURN_IF_FAIL(set_eventhub_config(string_value, "observation", cc, trace, status));
+      }
+      else {
+        // Otherwise, just set the value in the config collection.
+        cc.set(prop_name.c_str(), string_value.c_str());
+      }
     }
 
     return error_code::success;
