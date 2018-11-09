@@ -36,6 +36,7 @@ vcpkg install zlib:x64-windows
 vcpkg install boost-system:x64-windows
 vcpkg install boost-program-options:x64-windows
 vcpkg install boost-test:x64-windows
+vcpkg install boost-uuid:x64-windows
 ```
 
 ## Build
@@ -52,6 +53,14 @@ cd build
 cmake .. -DTURN_OFF_DEVIRTUALIZE=On
 make rl_clientlib_test
 make test
+```
+
+### Experimental - CMake on Windows
+```
+mkdir build
+cd build
+cmake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
+.\reinforcement_learning.sln
 ```
 
 ## Make targets
