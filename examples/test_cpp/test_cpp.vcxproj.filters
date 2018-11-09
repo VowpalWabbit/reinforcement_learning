@@ -24,12 +24,18 @@
     <ClCompile Include="test_data_provider.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="experiment_controller.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test_loop.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="test_data_provider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="experiment_controller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -105,6 +105,10 @@ namespace reinforcement_learning { namespace utility { namespace config {
       { "QueueMode"                 , name::QUEUE_MODE } // expect either DROP or BLOCK, default is DROP
     };
 
+    const std::set<std::string> deprecated = {
+     "QueueMaxSize"
+    };
+
     web::json::value obj;
     try {
       obj = json::value::parse(to_string_t(config_json));
