@@ -15,10 +15,10 @@ namespace chrono = std::chrono;
 
 test_loop::test_loop(const boost::program_options::variables_map& vm)
   : threads(vm["threads"].as<size_t>())
-  , examples(vm["examples"].as<size_t>())
-  , experiment_name(generate_experiment_name(vm["experiment_name"].as<std::string>(), threads, examples, vm["features"].as<size_t>(), vm["actions"].as<size_t>()))
+  , controller(experiment_controller_factory::create(vm))
+  , experiment_name(generate_experiment_name(vm["experiment_name"].as<std::string>(), threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>()))
   , json_config(vm["json_config"].as<std::string>())
-  , test_inputs(experiment_name, threads, examples, vm["features"].as<size_t>(), vm["actions"].as<size_t>(), vm.count("float_outcome") > 0)
+  , test_inputs(experiment_name, threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>(), vm.count("float_outcome") > 0)
   , is_perf(vm.count("perf") > 0)
   , sleep_interval(vm["sleep"].as<size_t>())
 {
@@ -67,11 +67,9 @@ int test_loop::load_file(const std::string& file_name, std::string& config_str) 
   return err::success;
 }
 
-std::string test_loop::generate_experiment_name(const std::string& experiment_name_base, size_t threads,
-	size_t examples, size_t features, size_t actions)
+std::string test_loop::generate_experiment_name(const std::string& experiment_name_base, size_t threads, size_t features, size_t actions)
 {
-  return experiment_name_base + "-t" + std::to_string(threads) + "-n" + std::to_string(examples)
-	  + "-f" + std::to_string(features) + "-a" + std::to_string(actions);
+  return experiment_name_base + "-t" + std::to_string(threads) + "-f" + std::to_string(features) + "-a" + std::to_string(actions);
 }
 
 void test_loop::run() {
@@ -88,28 +86,28 @@ void test_loop::validity_loop(size_t thread_id)
 {
   r::ranking_response response;
   r::api_status status;
-  auto const step = examples / 100;
-  for (size_t i = 0; i < examples; ++i) {
-    if (step > 0 && i % step == 0 && thread_id == 0) std::cout << "\r" << (i / step) << "%";
-
-    if (rl->choose_rank(test_inputs.get_event_id(thread_id, i), test_inputs.get_context(thread_id, i), response, &status) != err::success) {
+  for (controller->restart(); controller->is_running(); controller->iterate()) {
+    if (thread_id == 0) controller->progress_bar();
+    const auto event_id = test_inputs.create_event_id(thread_id, controller->get_iteration());
+    if (rl->choose_rank(event_id.c_str(), test_inputs.get_context(thread_id, controller->get_iteration()), response, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
 
-    if (test_inputs.is_rewarded(thread_id, i)) {
-      if (test_inputs.report_outcome(rl.get(), thread_id, i, &status) != err::success) {
+    if (test_inputs.is_rewarded(thread_id, controller->get_iteration())) {
+      if (test_inputs.report_outcome(rl.get(), thread_id, controller->get_iteration(), &status) != err::success) {
         std::cout << status.get_error_msg() << std::endl;
         continue;
       }
     }
 
-    test_inputs.log(thread_id, i, response, (*loggers[thread_id]));
+    test_inputs.log(thread_id, controller->get_iteration(), response, (*loggers[thread_id]));
 
     if (sleep_interval > 0) {
       std::this_thread::sleep_for(std::chrono::milliseconds(sleep_interval));
     }
   }
+  if (thread_id == 0) controller->progress_bar();
   std::cout << std::endl;
 }
 
@@ -121,7 +119,8 @@ void test_loop::perf_loop(size_t thread_id)
   size_t choose_rank_size = 0;
   {
     r::utility::data_buffer buffer;
-    const std::string warmup_id = "_warmup_" + std::string(test_inputs.get_event_id(0, 0));
+    const auto event_id = test_inputs.create_event_id(0, 0);
+    const std::string warmup_id = "_warmup_" + std::string(event_id.c_str());
     if (rl->choose_rank(warmup_id.c_str(), test_inputs.get_context(0, 0), response, &status) != err::success) {
       std::cout << "Warmup is failed. " << status.get_error_msg() << std::endl;
       return;
@@ -133,21 +132,22 @@ void test_loop::perf_loop(size_t thread_id)
 
   std::cout << "Perf test is started..." << std::endl;
   std::cout << "Choose_rank..." << std::endl;
-  auto const step = examples / 100;
   const auto choose_rank_start = chrono::high_resolution_clock::now();
-  for (size_t i = 0; i < examples; ++i) {
-    if (step > 0 && i % step == 0 && thread_id == 0) std::cout << "\r" << (i / step) << "%";
+  for (controller->restart(); controller->is_running(); controller->iterate()) {
+    if (thread_id == 0) controller->progress_bar();
+    const auto event_id = test_inputs.create_event_id(thread_id, controller->get_iteration());
 
-    if (rl->choose_rank(test_inputs.get_event_id(thread_id, i), test_inputs.get_context(thread_id, i), response, &status) != err::success) {
+    if (rl->choose_rank(event_id.c_str(), test_inputs.get_context(thread_id, controller->get_iteration()), response, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
   }
+  if (thread_id == 0) controller->progress_bar();
   std::cout << std::endl;
 
   const auto choose_rank_end = chrono::high_resolution_clock::now();
 
-  const auto choose_rank_perf = (chrono::duration_cast<chrono::microseconds>(choose_rank_end - choose_rank_start).count()) / examples;
+  const auto choose_rank_perf = (chrono::duration_cast<chrono::microseconds>(choose_rank_end - choose_rank_start).count()) / controller->get_iteration();
   (*loggers[thread_id]) << thread_id << ": Choose_rank: " << choose_rank_perf << " microseconds" << std::endl;
 }
 
