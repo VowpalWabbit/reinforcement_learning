@@ -3,9 +3,11 @@
 #include <boost/program_options.hpp>
 
 #include <mutex>
+#include <thread>
 
 class experiment_controller {
 public:
+  virtual ~experiment_controller() {}
   void restart();
   void iterate();
 
@@ -39,6 +41,7 @@ private:
 class duration_experiment_controller : public experiment_controller {
 public:
   duration_experiment_controller(size_t duration);
+  virtual ~duration_experiment_controller() override;
 
   virtual void on_restart() override;
 

@@ -50,6 +50,11 @@ duration_experiment_controller::duration_experiment_controller(size_t duration)
   : _duration(duration)
 { }
 
+duration_experiment_controller::~duration_experiment_controller()
+{
+  if (_timer_thread) _timer_thread->join();
+}
+
 void duration_experiment_controller::timer() {
   std::this_thread::sleep_for(std::chrono::milliseconds(_duration));
   stop();
@@ -57,6 +62,7 @@ void duration_experiment_controller::timer() {
 
 void duration_experiment_controller::on_restart()
 {
+  if (_timer_thread) _timer_thread->join();
   _timer_thread.reset(new std::thread(&duration_experiment_controller::timer, this));
 }
 
