@@ -17,8 +17,8 @@ public:
   bool is_running() const;
 
 protected:
-  virtual void on_restart() {}
-  virtual void on_iterate() {}
+  virtual void on_restart() = 0;
+  virtual void on_iterate() = 0;
 
   void stop();
 
@@ -31,6 +31,7 @@ class iterations_experiment_controller : public experiment_controller {
 public:
   iterations_experiment_controller(size_t num_iterations);
 
+  virtual void on_restart() override {}
   virtual void on_iterate() override;
 
 private:
@@ -43,6 +44,7 @@ public:
   virtual ~duration_experiment_controller() override;
 
   virtual void on_restart() override;
+  virtual void on_iterate() override {}
 
 private:
   void timer();
