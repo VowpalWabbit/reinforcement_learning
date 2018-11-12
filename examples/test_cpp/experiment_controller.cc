@@ -9,8 +9,7 @@ void throw_if_conflicting(const boost::program_options::variables_map& vm, const
       first + "' and '" + second + "'.");
   }
 }
-void experiment_controller::restart()
-{
+void experiment_controller::restart() {
   _iteration = 0;
   _is_running = true;
   on_restart();
@@ -38,20 +37,18 @@ void experiment_controller::progress_bar() {
 }
 
 iterations_experiment_controller::iterations_experiment_controller(size_t num_iterations)
-  : _num_iterations(num_iterations)
-{ }
+  : _num_iterations(num_iterations) {
+}
 
-void iterations_experiment_controller::on_iterate()
-{
+void iterations_experiment_controller::on_iterate() {
   _is_running = _iteration < _num_iterations;
 }
 
 duration_experiment_controller::duration_experiment_controller(size_t duration)
-  : _duration(duration)
-{ }
+  : _duration(duration) {
+}
 
-duration_experiment_controller::~duration_experiment_controller()
-{
+duration_experiment_controller::~duration_experiment_controller() {
   if (_timer_thread) _timer_thread->join();
 }
 
@@ -60,8 +57,7 @@ void duration_experiment_controller::timer() {
   stop();
 }
 
-void duration_experiment_controller::on_restart()
-{
+void duration_experiment_controller::on_restart() {
   if (_timer_thread) _timer_thread->join();
   _timer_thread.reset(new std::thread(&duration_experiment_controller::timer, this));
 }
