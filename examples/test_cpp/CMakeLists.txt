@@ -8,4 +8,4 @@ add_executable(rl_test.out
 # TODO remove internal header dependency of this example
 target_include_directories(rl_test.out PRIVATE $<TARGET_PROPERTY:rlclientlib,INCLUDE_DIRECTORIES>)
 
-target_link_libraries(rl_test.out PRIVATE rlclientlib)
+target_link_libraries(rl_test.out PRIVATE Boost::program_options rlclientlib)
