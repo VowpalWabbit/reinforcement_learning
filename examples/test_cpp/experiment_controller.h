@@ -14,7 +14,6 @@ public:
   void progress_bar();
   size_t get_iteration() const;
 
-public:
   bool is_running() const;
 
 protected:
