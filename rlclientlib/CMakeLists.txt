@@ -76,7 +76,7 @@ source_group("Private headers" FILES ${PROJECT_PRIVATE_HEADERS})
 add_library(rlclientlib ${PROJECT_SOURCES} ${PROJECT_PUBLIC_HEADERS} ${PROJECT_PRIVATE_HEADERS})
 set_target_properties(rlclientlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(rlclientlib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(rlclientlib PUBLIC Boost::system Boost::program_options vw OpenSSL::SSL OpenSSL::Crypto cpprestsdk::cpprest)
+target_link_libraries(rlclientlib PUBLIC Boost::system vw OpenSSL::SSL OpenSSL::Crypto cpprestsdk::cpprest)
 
 # Consuming Boost uuid requires BCrypt, normally this is automatically linked but vcpkg turns this feature off.
 if(WIN32)
