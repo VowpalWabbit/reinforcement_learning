@@ -22,6 +22,7 @@ po::variables_map process_cmd_line(const int argc, char** argv) {
     ("perf,p", "if it is perf test (otherwise - validity)")
     ("float_outcome,f", "if outcome is float (otherwise - json)")
     ("sleep,s", po::value<size_t>()->default_value(0), "Milliseconds to sleep between loop iterations")
+    ("duration,d", po::value<size_t>(), "Duration of experiment (in ms). Alternative to n")
     ;
 
   po::variables_map vm;
