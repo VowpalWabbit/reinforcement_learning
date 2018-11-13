@@ -9,12 +9,6 @@ cache:
 environment:
   VcpkgInstallRoot: c:\tools\vcpkg\
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
-
-init:
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
 install:
   - git submodule update --init --recursive
 build_script:
