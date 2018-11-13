@@ -43,7 +43,7 @@ const auto JSON_CFG = R"(
 const auto JSON_CONTEXT = R"({"_multi":[{},{}]})";
 
 BOOST_AUTO_TEST_CASE(live_model_ranking_request) {
-  auto mock_sender = get_mock_sender();
+  auto mock_sender = get_mock_sender(r::error_code::success);
   auto mock_data_transport = get_mock_data_transport();
   auto mock_model = get_mock_model();
 
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request) {
 }
 
 BOOST_AUTO_TEST_CASE(live_model_outcome) {
-  auto mock_sender = get_mock_sender();
+  auto mock_sender = get_mock_sender(r::error_code::success);
   auto mock_data_transport = get_mock_data_transport();
   auto mock_model = get_mock_model();
 
@@ -163,8 +163,13 @@ void algo_error_func(const r::api_status&, algo_server* ph) {
 BOOST_AUTO_TEST_CASE(typesafe_err_callback) {
   //start a http server that will receive events sent from the eventhub_client
   bool post_error = true;
-  http_helper http_server;
-  BOOST_CHECK(http_server.on_initialize(U("http://localhost:8080"), post_error));
+  auto mock_sender = get_mock_sender(r::error_code::http_bad_status_code);
+  auto mock_data_transport = get_mock_data_transport();
+  auto mock_model = get_mock_model();
+
+  auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
+  auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
+  auto model_factory = get_mock_model_factory(mock_model.get());
 
   //create a simple ds configuration
   u::configuration config;
@@ -184,7 +189,7 @@ BOOST_AUTO_TEST_CASE(typesafe_err_callback) {
   // Create live_model in own scope so that destructor can be forced, flushing buffers and queues.
   {
     //create a ds live_model, and initialize with configuration
-    r::live_model ds(config, algo_error_func, &the_server);
+    r::live_model ds(config, algo_error_func, &the_server, &r::trace_logger_factory, data_transport_factory.get(), model_factory.get(), sender_factory.get());
 
     ds.init(nullptr);
 
