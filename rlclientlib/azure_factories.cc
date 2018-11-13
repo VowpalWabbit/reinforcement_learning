@@ -2,6 +2,7 @@
 #include "constants.h"
 #include "model_mgmt/restapi_data_transport.h"
 #include "logger/event_logger.h"
+#include "utility/http_helper.h"
 
 namespace reinforcement_learning {
   namespace m = model_management;
@@ -26,7 +27,8 @@ namespace reinforcement_learning {
       api_status::try_update(status, error_code::http_uri_not_provided, error_code::http_uri_not_provided_s);
       return error_code::http_uri_not_provided;
     }
-    auto pret = new m::restapi_data_tranport(uri, trace_logger);
+    auto client = new utility::http_client(uri);
+    auto pret = new m::restapi_data_tranport(client, trace_logger);
     const auto scode = pret->check(status);
     if (scode != error_code::success) {
       delete pret;

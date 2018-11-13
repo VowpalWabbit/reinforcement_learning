@@ -21,6 +21,7 @@ set(PROJECT_SOURCES
   utility/configuration.cc
   utility/context_helper.cc
   utility/data_buffer.cc
+  utility/http_helper.cc
   utility/str_util.cc
   utility/watchdog.cc
   vw_model/safe_vw.cc
