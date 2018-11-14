@@ -46,7 +46,7 @@ int vector_trace_create(r::i_trace** retval, const u::configuration&, r::i_trace
 }
 
 BOOST_AUTO_TEST_CASE(test_trace_logging) {
-  auto mock_logger = get_mock_sender();
+  auto mock_logger = get_mock_sender(r::error_code::success);
   auto mock_data_transport = get_mock_data_transport();
   auto mock_model = get_mock_model();
 

@@ -13,12 +13,12 @@ namespace u = r::utility;
 
 using namespace fakeit;
 
-std::unique_ptr<fakeit::Mock<r::i_sender>> get_mock_sender() {
+std::unique_ptr<fakeit::Mock<r::i_sender>> get_mock_sender(int send_return_code) {
   auto mock = std::unique_ptr<fakeit::Mock<r::i_sender>>(
     new fakeit::Mock<r::i_sender>());
 
   When(Method((*mock), init)).AlwaysReturn(r::error_code::success);
-  When(Method((*mock), send)).AlwaysReturn(r::error_code::success);
+  When(Method((*mock), send)).AlwaysReturn(send_return_code);
   Fake(Dtor((*mock)));
 
   return mock;
