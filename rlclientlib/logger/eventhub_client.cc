@@ -14,21 +14,9 @@ using namespace web; // Common features like URIs.
 using namespace web::http; // Common HTTP functionality
 namespace u = reinforcement_learning::utility;
 
-// Private helper
-string_t build_url(const std::string& host, const std::string& name, const bool local_test) {
-  const std::string proto = local_test ? "http://" : "https://";
-  std::string url;
-  if (local_test) { url.append(proto).append(host); }
-  else {
-    url.append(proto).append(host).append("/").append(name)
-        .append("/messages?timeout=60&api-version=2014-01");
-  }
-  return conversions::to_string_t(url);
-}
-
 namespace reinforcement_learning {
   eventhub_client::http_request_task::http_request_task(
-    web::http::client::http_client* client,
+    u::i_http_client* client,
     const std::string& host,
     const std::string& auth,
     std::string&& post_data,
@@ -138,7 +126,7 @@ namespace reinforcement_learning {
         RETURN_IF_FAIL(pop_task(status));
       }
 
-      std::unique_ptr<http_request_task> request_task(new http_request_task(&_client, _eventhub_host, auth_str, std::move(post_data), _max_retries, _error_callback, _trace));
+      std::unique_ptr<http_request_task> request_task(new http_request_task(_client.get(), _eventhub_host, auth_str, std::move(post_data), _max_retries, _error_callback, _trace));
       _tasks.push(std::move(request_task));
     }
     catch (const std::exception& e) {
@@ -147,11 +135,11 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  eventhub_client::eventhub_client(const std::string& host, const std::string& key_name,
+  eventhub_client::eventhub_client(u::i_http_client* client, const std::string& host, const std::string& key_name,
                                    const std::string& key, const std::string& name,
                                    size_t max_tasks_count, size_t max_retries,  i_trace* trace,
-                                   error_callback_fn* error_callback, const bool local_test)
-    : _client(build_url(host, name, local_test), u::get_http_config()),
+                                   error_callback_fn* error_callback)
+    : _client(client)/*build_url(host, name, local_test), u::get_http_config())*/,
       _eventhub_host(host), _shared_access_key_name(key_name),
       _shared_access_key(key), _eventhub_name(name),
       _authorization_valid_until(0), _max_tasks_count(max_tasks_count),

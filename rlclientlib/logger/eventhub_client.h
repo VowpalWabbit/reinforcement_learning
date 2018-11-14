@@ -5,7 +5,7 @@
 #include "sender.h"
 #include "error_callback_fn.h"
 
-#include <cpprest/http_client.h>
+#include "utility/http_helper.h"
 #include <pplx/pplxtasks.h>
 
 #include <queue>
@@ -21,9 +21,9 @@ namespace reinforcement_learning {
   public:
     virtual int init(api_status* status) override;
 
-    eventhub_client(const std::string& host, const std::string& key_name,
+    eventhub_client(utility::i_http_client* client, const std::string& host, const std::string& key_name,
                     const std::string& key, const std::string& name,
-                    size_t tasks_count, size_t MAX_RETRIES, i_trace* trace, error_callback_fn* _error_cb, bool local_test = false);
+                    size_t tasks_count, size_t MAX_RETRIES, i_trace* trace, error_callback_fn* _error_cb);
     ~eventhub_client();
   protected:
     virtual int v_send(std::string&& data, api_status* status) override;
@@ -33,7 +33,7 @@ namespace reinforcement_learning {
     public:
       http_request_task() = default;
       http_request_task(
-        web::http::client::http_client* client,
+        utility::i_http_client* client,
         const std::string& host,
         const std::string& auth,
         std::string&& post_data,
@@ -55,7 +55,7 @@ namespace reinforcement_learning {
     private:
       pplx::task<web::http::status_code> send_request(size_t try_count);
 
-      web::http::client::http_client* _client;
+      utility::i_http_client* _client;
       std::string _host;
       std::string _auth;
       std::string _post_data;
@@ -91,7 +91,7 @@ namespace reinforcement_learning {
     eventhub_client& operator=(eventhub_client&&) = delete;
 
   private:
-    web::http::client::http_client _client;
+    std::unique_ptr<utility::i_http_client> _client;
 
     const std::string _eventhub_host; //e.g. "ingest-x2bw4dlnkv63q.servicebus.windows.net"
     const std::string _shared_access_key_name; //e.g. "RootManageSharedAccessKey"

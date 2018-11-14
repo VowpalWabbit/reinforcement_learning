@@ -9,7 +9,7 @@
 #include <boost/test/unit_test.hpp>
 #include "err_constants.h"
 
-using namespace web;
+/*using namespace web;
 using namespace http;
 using namespace utility;
 using namespace http::experimental::listener;
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(retry_http_send_success)
   // Use scope to force destructor and therefore flushing of buffers.
   {
     //create a client
-    eventhub_client eh("localhost:8080", "", "", "", 1, 8 /* retries */, nullptr, &error_callback, true);
+    eventhub_client eh("localhost:8080", "", "", "", 1, 8 /* retries *//*, nullptr, &error_callback, true);
 
     api_status ret;
     BOOST_CHECK_EQUAL(eh.send("message 1", &ret), error_code::success);
@@ -154,4 +154,4 @@ BOOST_AUTO_TEST_CASE(http_in_order_after_retry)
   BOOST_CHECK_EQUAL(received_messages[3], "message 4");
   BOOST_CHECK_EQUAL(received_messages[4], "message 5");
   BOOST_CHECK_EQUAL(counter._err_count, 0);
-}
+}*/
