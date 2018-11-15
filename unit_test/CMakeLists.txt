@@ -11,10 +11,10 @@ add_executable(rltest
   eventhub_client_test.cc
   explore_test.cc
   factory_test.cc
-  mock_http_server.cc
   json_context_parse_test.cc
   live_model_test.cc
   main.cc
+  mock_http_client.cc
   mock_util.cc
   model_mgmt_test.cc
   object_pool_test.cc
