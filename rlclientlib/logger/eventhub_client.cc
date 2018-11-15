@@ -139,7 +139,7 @@ namespace reinforcement_learning {
                                    const std::string& key, const std::string& name,
                                    size_t max_tasks_count, size_t max_retries,  i_trace* trace,
                                    error_callback_fn* error_callback)
-    : _client(client)/*build_url(host, name, local_test), u::get_http_config())*/,
+    : _client(client),
       _eventhub_host(host), _shared_access_key_name(key_name),
       _shared_access_key(key), _eventhub_name(name),
       _authorization_valid_until(0), _max_tasks_count(max_tasks_count),
