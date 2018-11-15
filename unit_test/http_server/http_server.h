@@ -1,12 +1,12 @@
 #pragma once
-#include "utility/http_helper.h"
+#include "http_client.h"
 
 #include <functional>
 
 using namespace web;
 using namespace http;
 
-class mock_http_client : public reinforcement_learning::utility::i_http_client {
+class mock_http_client : public reinforcement_learning::i_http_client {
 public:
   using response_fn = void(const http_request&, http_response&);
 
@@ -14,8 +14,8 @@ public:
 
   virtual const std::string& get_url() const override;
 
-  virtual task_t request(method_t method) override;
-  virtual task_t request(request_t request) override;
+  virtual response_t request(method_t method) override;
+  virtual response_t request(request_t request) override;
 
   void set_responder(http::method, std::function<response_fn> custom_responder);
 private:

@@ -3,16 +3,10 @@
 #   define BOOST_TEST_MODULE Main
 #endif
 
-#include "http_server/stdafx.h"
 #include "logger/eventhub_client.h"
 #include "http_server/http_server.h"
 #include <boost/test/unit_test.hpp>
 #include "err_constants.h"
-
-/*using namespace web;
-using namespace http;
-using namespace utility;
-using namespace http::experimental::listener;
 
 using namespace reinforcement_learning;
 
@@ -31,12 +25,10 @@ void error_counter_func(const api_status&, void* counter) {
 
 BOOST_AUTO_TEST_CASE(send_something)
 {
-  //start a http server that will receive events sent from the eventhub_client
-  http_helper http_server;
-  BOOST_CHECK(http_server.on_initialize(U("http://localhost:8080")));
+  mock_http_client* http_client = new mock_http_client("localhost:8080");
 
   //create a client
-  eventhub_client eh("localhost:8080", "", "", "", 1, 1, nullptr, nullptr, true);
+  eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, 1, nullptr, nullptr);
 
   api_status ret;
   //send events
@@ -46,19 +38,18 @@ BOOST_AUTO_TEST_CASE(send_something)
 
 BOOST_AUTO_TEST_CASE(retry_http_send_success)
 {
-  http_helper http_server;
-  BOOST_CHECK(http_server.on_initialize(U("http://localhost:8080")));
+  mock_http_client* http_client = new mock_http_client("localhost:8080");
 
   int tries = 0;
   int succeed_after_n_tries = 3;
-  http_server.set_custom_responder(methods::POST, [&tries, succeed_after_n_tries](const http_request& message) {
+  http_client->set_responder(methods::POST, [&tries, succeed_after_n_tries](const http_request& message, http_response& resp) {
     tries++;
 
     if (tries > succeed_after_n_tries) {
-      message.reply(status_codes::Created);
+      resp.set_status_code(status_codes::Created);
     }
     else {
-      message.reply(status_codes::InternalError);
+      resp.set_status_code(status_codes::InternalError);
     }
   });
 
@@ -68,7 +59,7 @@ BOOST_AUTO_TEST_CASE(retry_http_send_success)
   // Use scope to force destructor and therefore flushing of buffers.
   {
     //create a client
-    eventhub_client eh("localhost:8080", "", "", "", 1, 8 /* retries *//*, nullptr, &error_callback, true);
+    eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, 8 /* retries */, nullptr, &error_callback);
 
     api_status ret;
     BOOST_CHECK_EQUAL(eh.send("message 1", &ret), error_code::success);
@@ -81,15 +72,14 @@ BOOST_AUTO_TEST_CASE(retry_http_send_success)
 
 BOOST_AUTO_TEST_CASE(retry_http_send_fail)
 {
-  http_helper http_server;
-  BOOST_CHECK(http_server.on_initialize(U("http://localhost:8080")));
+  mock_http_client* http_client = new mock_http_client("localhost:8080");
 
   const int MAX_RETRIES = 10;
 
   int tries = 0;
-  http_server.set_custom_responder(methods::POST, [&tries](const http_request& message) {
+  http_client->set_responder(methods::POST, [&tries](const http_request& message, http_response& resp) {
     tries++;
-    message.reply(status_codes::InternalError);
+    resp.set_status_code(status_codes::InternalError);
   });
 
   error_counter counter;
@@ -98,7 +88,7 @@ BOOST_AUTO_TEST_CASE(retry_http_send_fail)
   // Use scope to force destructor and therefore flushing of buffers.
   {
     //create a client
-    eventhub_client eh("localhost:8080", "", "", "", 1, MAX_RETRIES, nullptr, &error_callback, true);
+    eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, MAX_RETRIES, nullptr, &error_callback);
 
     api_status ret;
     BOOST_CHECK_EQUAL(eh.send("message 1", &ret), error_code::success);
@@ -111,24 +101,23 @@ BOOST_AUTO_TEST_CASE(retry_http_send_fail)
 
 BOOST_AUTO_TEST_CASE(http_in_order_after_retry)
 {
-  http_helper http_server;
-  BOOST_CHECK(http_server.on_initialize(U("http://localhost:8080")));
+  mock_http_client* http_client = new mock_http_client("localhost:8080");
 
   const int MAX_RETRIES = 10;
   int tries = 0;
   std::vector<std::string> received_messages;
-  http_server.set_custom_responder(methods::POST, [&tries, &received_messages](const http_request& message) {
+  http_client->set_responder(methods::POST, [&tries, &received_messages](const http_request& message, http_response& resp) {
     tries++;
 
     // Succeed every 4th attempt.
     if (tries >= 4) {
       // extract_string can only be called once on an http_request but we only do it once. Using const cast to avoid having to read out the stream.
       received_messages.push_back(const_cast<http_request&>(message).extract_utf8string().get());
-      message.reply(status_codes::Created);
+      resp.set_status_code(status_codes::Created);
       tries = 0;
     }
     else {
-      message.reply(status_codes::InternalError);
+      resp.set_status_code(status_codes::InternalError);
     }
   });
 
@@ -138,7 +127,7 @@ BOOST_AUTO_TEST_CASE(http_in_order_after_retry)
   // Use scope to force destructor and therefore flushing of buffers.
   {
     //create a client
-    eventhub_client eh("localhost:8080", "", "", "", 1, MAX_RETRIES, nullptr, &error_callback, true);
+    eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, MAX_RETRIES, nullptr, &error_callback);
 
     api_status ret;
     BOOST_CHECK_EQUAL(eh.send("message 1", &ret), error_code::success);
@@ -154,4 +143,4 @@ BOOST_AUTO_TEST_CASE(http_in_order_after_retry)
   BOOST_CHECK_EQUAL(received_messages[3], "message 4");
   BOOST_CHECK_EQUAL(received_messages[4], "message 5");
   BOOST_CHECK_EQUAL(counter._err_count, 0);
-}*/
+}

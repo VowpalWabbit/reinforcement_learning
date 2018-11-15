@@ -5,6 +5,7 @@ set(PROJECT_SOURCES
   console_tracer.cc
   error_callback_fn.cc
   factory_resolver.cc
+  http_client.cc
   live_model_impl.cc
   live_model.cc
   logger/async_batcher.cc
@@ -50,6 +51,7 @@ set(PROJECT_PRIVATE_HEADERS
   azure_factories.h
   console_tracer.h
   error_callback_fn.h
+  http_client.h
   live_model_impl.h
   logger/async_batcher.h
   logger/event_logger.h

@@ -3,7 +3,7 @@
 #include <sstream>
 #include "eventhub_client.h"
 #include "err_constants.h"
-#include "utility/http_helper.h"
+#include "http_client.h"
 #include "trace_logger.h"
 #include "error_callback_fn.h"
 #include "str_util.h"
@@ -16,7 +16,7 @@ namespace u = reinforcement_learning::utility;
 
 namespace reinforcement_learning {
   eventhub_client::http_request_task::http_request_task(
-    u::i_http_client* client,
+    i_http_client* client,
     const std::string& host,
     const std::string& auth,
     std::string&& post_data,
@@ -135,7 +135,7 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  eventhub_client::eventhub_client(u::i_http_client* client, const std::string& host, const std::string& key_name,
+  eventhub_client::eventhub_client(i_http_client* client, const std::string& host, const std::string& key_name,
                                    const std::string& key, const std::string& name,
                                    size_t max_tasks_count, size_t max_retries,  i_trace* trace,
                                    error_callback_fn* error_callback)

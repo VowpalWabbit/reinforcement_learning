@@ -22,17 +22,17 @@ const std::string& mock_http_client::get_url() const {
   return _url;
 }
 
-mock_http_client::task_t mock_http_client::request(mock_http_client::request_t request) {
+mock_http_client::response_t mock_http_client::request(mock_http_client::request_t request) {
   http_response resp;
   _responders[request.method()](request, resp);
-  return task_t([resp]() { return resp; });
+  return response_t([resp]() { return resp; });
 }
 
-mock_http_client::task_t mock_http_client::request(mock_http_client::method_t method) {
+mock_http_client::response_t mock_http_client::request(mock_http_client::method_t method) {
   http_response resp;
   http_request request;
   _responders[method](request, resp);
-  return task_t([resp]() { return resp; });
+  return response_t([resp]() { return resp; });
 }
 
 void mock_http_client::set_responder(http::method method, std::function<response_fn> responder) {
