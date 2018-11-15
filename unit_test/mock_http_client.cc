@@ -28,13 +28,9 @@ mock_http_client::response_t mock_http_client::request(mock_http_client::request
 }
 
 mock_http_client::response_t mock_http_client::request(mock_http_client::method_t method) {
-  auto responder = _responders[method];
-  return response_t([responder]() { 
-    http_request request;
-    http_response resp;
-    responder(request, resp);
-    return resp;
-  });
+  mock_http_client::request_t req;
+  req.set_method(method);
+  return request(req);
 }
 
 void mock_http_client::set_responder(http::method method, std::function<response_fn> responder) {
