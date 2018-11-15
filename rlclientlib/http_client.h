@@ -4,7 +4,7 @@
 namespace reinforcement_learning {
   class i_http_client {
   public:
-    typedef typename web::http::http_request request_t;
+    typedef web::http::http_request request_t;
     typedef pplx::task<web::http::http_response> response_t;
     typedef web::http::method method_t;
 
