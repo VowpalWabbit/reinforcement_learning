@@ -19,16 +19,22 @@ const std::string& mock_http_client::get_url() const {
 }
 
 mock_http_client::response_t mock_http_client::request(mock_http_client::request_t request) {
-  http_response resp;
-  _responders[request.method()](request, resp);
-  return response_t([resp]() { return resp; });
+  auto responder = _responders[request.method()];
+  return response_t([responder, request]() {
+    http_response resp;
+    responder(request, resp);
+    return resp;
+  });
 }
 
 mock_http_client::response_t mock_http_client::request(mock_http_client::method_t method) {
-  http_response resp;
-  http_request request;
-  _responders[method](request, resp);
-  return response_t([resp]() { return resp; });
+  auto responder = _responders[method];
+  return response_t([responder]() { 
+    http_request request;
+    http_response resp;
+    responder(request, resp);
+    return resp;
+  });
 }
 
 void mock_http_client::set_responder(http::method method, std::function<response_fn> responder) {
