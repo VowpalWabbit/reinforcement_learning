@@ -1,11 +1,7 @@
-#include "stdafx.h"
-#include "http_server.h"
+#include "mock_http_client.h"
 
 using namespace std;
-using namespace web;
 using namespace utility;
-using namespace http;
-using namespace web::http::experimental::listener;
 
 mock_http_client::mock_http_client(const std::string& url)
   : _url(url)

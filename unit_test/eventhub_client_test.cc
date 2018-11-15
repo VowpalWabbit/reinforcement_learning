@@ -4,7 +4,7 @@
 #endif
 
 #include "logger/eventhub_client.h"
-#include "http_server/http_server.h"
+#include "mock_http_client.h"
 #include <boost/test/unit_test.hpp>
 #include "err_constants.h"
 

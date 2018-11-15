@@ -9,6 +9,8 @@ namespace reinforcement_learning {
     typedef web::http::method method_t;
 
   public:
+    virtual ~i_http_client() = default;
+
     virtual response_t request(method_t) = 0;
     virtual response_t request(request_t) = 0;
 
@@ -26,6 +28,7 @@ namespace reinforcement_learning {
 
     virtual response_t request(method_t method) override;
     virtual response_t request(request_t method) override;
+
     virtual const std::string& get_url() const override;
 
   private:

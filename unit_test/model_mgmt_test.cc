@@ -16,7 +16,7 @@
 #include "model_mgmt/model_downloader.h"
 #include "model_mgmt/data_callback_fn.h"
 #include "model_mgmt/restapi_data_transport.h"
-#include "http_server/http_server.h"
+#include "mock_http_client.h"
 #include "config_utility.h"
 #include "configuration.h"
 #include "utility/watchdog.h"
