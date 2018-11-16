@@ -32,7 +32,7 @@ namespace reinforcement_learning {
     virtual const std::string& get_url() const override;
 
   private:
-    std::string _url;
+    const std::string _url;
     web::http::client::http_client _impl;
   };
 }
