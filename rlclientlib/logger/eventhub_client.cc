@@ -1,12 +1,14 @@
 #define OPENSSL_API_COMPAT 0x0908
-#include <openssl/hmac.h>
-#include <sstream>
 #include "eventhub_client.h"
 #include "err_constants.h"
-#include "http_client.h"
 #include "trace_logger.h"
 #include "error_callback_fn.h"
 #include "str_util.h"
+
+#include "utility/http_client.h"
+
+#include <openssl/hmac.h>
+#include <sstream>
 
 using namespace std::chrono;
 using namespace utility; // Common utilities like string conversions

@@ -1,8 +1,9 @@
 #pragma once
 #include "model_mgmt.h"
+#include "utility/http_client.h"
+
 #include <chrono>
 #include <string>
-#include "http_client.h"
 
 namespace reinforcement_learning {
   class i_trace;

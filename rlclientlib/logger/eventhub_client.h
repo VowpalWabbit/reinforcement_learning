@@ -5,7 +5,8 @@
 #include "sender.h"
 #include "error_callback_fn.h"
 
-#include "http_client.h"
+#include "utility/http_client.h"
+
 #include <pplx/pplxtasks.h>
 
 #include <queue>
