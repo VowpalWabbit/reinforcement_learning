@@ -1,20 +1,15 @@
 #define OPENSSL_API_COMPAT 0x0908
-#include "http_authorization.h"
-#include "err_constants.h"
-#include "trace_logger.h"
 #include "error_callback_fn.h"
-#include "str_util.h"
-
-#include "utility/http_client.h"
+#include "err_constants.h"
+#include "http_authorization.h"
+#include "http_client.h"
+#include "trace_logger.h"
 
 #include <openssl/hmac.h>
 #include <sstream>
 
 using namespace std::chrono;
 using namespace utility; // Common utilities like string conversions
-using namespace web; // Common features like URIs.
-using namespace web::http; // Common HTTP functionality
-namespace u = reinforcement_learning::utility;
 
 namespace reinforcement_learning {
   http_authorization::http_authorization(

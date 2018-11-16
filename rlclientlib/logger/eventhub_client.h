@@ -10,8 +10,6 @@
 
 #include <pplx/pplxtasks.h>
 
-#include <queue>
-#include <chrono>
 #include <memory>
 
 namespace reinforcement_learning {
@@ -85,7 +83,6 @@ namespace reinforcement_learning {
     const std::string _eventhub_host; //e.g. "ingest-x2bw4dlnkv63q.servicebus.windows.net"
 
     std::mutex _mutex;
-    std::mutex _mutex_http_tasks;
     moving_queue<std::unique_ptr<http_request_task>> _tasks;
     const size_t _max_tasks_count;
     const size_t _max_retries;

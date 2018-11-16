@@ -2,13 +2,11 @@
 #include "eventhub_client.h"
 #include "err_constants.h"
 #include "trace_logger.h"
-#include "error_callback_fn.h"
 #include "str_util.h"
 
 #include "utility/http_authorization.h"
 #include "utility/http_client.h"
 
-#include <openssl/hmac.h>
 #include <sstream>
 
 using namespace std::chrono;
@@ -64,7 +62,7 @@ namespace reinforcement_learning {
           return send_request(try_count + 1).get();
         }
         else {
-          auto msg = utility::concat("(expected 201): Found ", code, ", failed after ", try_count, " retries.");
+          auto msg = u::concat("(expected 201): Found ", code, ", failed after ", try_count, " retries.");
           api_status::try_update(&status, error_code::http_bad_status_code, msg.c_str());
           ERROR_CALLBACK(_error_callback, status);
 
@@ -96,7 +94,7 @@ namespace reinforcement_learning {
 
   int eventhub_client::pop_task(api_status* status) {
     // This function must be under a lock as there is a delay between popping from the queue and joining the task, but it should essentially be atomic.
-    std::lock_guard<std::mutex> lock(_mutex_http_tasks);
+    std::lock_guard<std::mutex> lock(_mutex);
 
     std::unique_ptr<http_request_task> oldest;
     _tasks.pop(&oldest);
@@ -138,7 +136,7 @@ namespace reinforcement_learning {
                                    error_callback_fn* error_callback)
     : _client(client)
     , _authorization(host, key_name, key, name, trace)
-    ,  _eventhub_host(host)
+    , _eventhub_host(host)
     , _max_tasks_count(max_tasks_count)
     , _max_retries(max_retries)
     , _trace(trace)

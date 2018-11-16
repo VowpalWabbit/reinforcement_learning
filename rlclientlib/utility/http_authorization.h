@@ -1,17 +1,10 @@
 #pragma once
 
 #include "api_status.h"
-#include "moving_queue.h"
-#include "sender.h"
-#include "error_callback_fn.h"
 
-#include "utility/http_client.h"
-
-#include <pplx/pplxtasks.h>
-
-#include <queue>
 #include <chrono>
-#include <memory>
+#include <mutex>
+#include <string>
 
 namespace reinforcement_learning {
   class i_trace;
