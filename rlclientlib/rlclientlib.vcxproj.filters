@@ -29,6 +29,7 @@
     <ClCompile Include="async_batcher.cc" />
     <ClCompile Include="utility\http_helper.cc" />
     <ClCompile Include="utility\http_client.cc" />
+    <ClCompile Include="utility\http_authorization.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -67,6 +68,7 @@
     <ClInclude Include="console_tracer.h" />
     <ClInclude Include="azure_factories.h" />
     <ClInclude Include="utility\http_client.h" />
+    <ClInclude Include="utility\http_authorization.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

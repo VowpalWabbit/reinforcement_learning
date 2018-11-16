@@ -5,6 +5,7 @@
 #include "error_callback_fn.h"
 #include "str_util.h"
 
+#include "utility/http_authorization.h"
 #include "utility/http_client.h"
 
 #include <openssl/hmac.h>
@@ -89,7 +90,7 @@ namespace reinforcement_learning {
   }
 
   int eventhub_client::init(api_status* status) {
-    RETURN_IF_FAIL(check_authorization_validity_generate_if_needed(status));
+    RETURN_IF_FAIL(_authorization.init(status));
     return error_code::success;
   }
 
@@ -113,14 +114,8 @@ namespace reinforcement_learning {
   }
 
   int eventhub_client::v_send(std::string&& post_data, api_status* status) {
-    RETURN_IF_FAIL(check_authorization_validity_generate_if_needed(status));
-
     std::string auth_str;
-    {
-      // protected access for _authorization
-      std::lock_guard<std::mutex> lock(_mutex);
-      auth_str = _authorization;
-    }
+    RETURN_IF_FAIL(_authorization.get(auth_str, status));
 
     try {
       // Before creating the task, ensure that it is allowed to be created.
@@ -141,85 +136,18 @@ namespace reinforcement_learning {
                                    const std::string& key, const std::string& name,
                                    size_t max_tasks_count, size_t max_retries,  i_trace* trace,
                                    error_callback_fn* error_callback)
-    : _client(client),
-      _eventhub_host(host), _shared_access_key_name(key_name),
-      _shared_access_key(key), _eventhub_name(name),
-      _authorization_valid_until(0), _max_tasks_count(max_tasks_count),
-      _max_retries(max_retries),
-      _trace(trace),
-      _error_callback(error_callback)
-  { }
+    : _client(client)
+    , _authorization(host, key_name, key, name, trace)
+    ,  _eventhub_host(host)
+    , _max_tasks_count(max_tasks_count)
+    , _max_retries(max_retries)
+    , _trace(trace)
+    , _error_callback(error_callback) {
+  }
 
   eventhub_client::~eventhub_client() {
     while (_tasks.size() != 0) {
       pop_task(nullptr);
     }
-  }
-
-  int eventhub_client::check_authorization_validity_generate_if_needed(api_status* status) {
-    const auto now = duration_cast<std::chrono::seconds>(system_clock::now().time_since_epoch());
-    std::lock_guard<std::mutex> lock(_mutex);
-    // re-create authorization token if needed
-    if (now.count() > _authorization_valid_until - 60 * 15) {
-      RETURN_IF_FAIL(generate_authorization_string(
-        now, _shared_access_key, _shared_access_key_name, _eventhub_host, _eventhub_name,
-        _authorization, _authorization_valid_until, status, _trace));
-    }
-    return error_code::success;
-  }
-
-  int eventhub_client::generate_authorization_string(
-    std::chrono::seconds now,
-    const std::string& shared_access_key,
-    const std::string& shared_access_key_name,
-    const std::string& eventhub_host,
-    const std::string& eventhub_name,
-    std::string& authorization_string /* out */,
-    long long& valid_until /* out */,
-    api_status* status,
-    i_trace* trace) {
-
-    // Update saved valid_until value.
-    valid_until = now.count() + 60 * 60 * 24 * 7; // 1 week
-
-    // construct "sr"
-    std::ostringstream resource_stream;
-    resource_stream << "https://" << eventhub_host << "/" << eventhub_name;
-
-    // encode(resource_stream)
-    const auto encoded_uri = conversions::to_utf8string(
-      web::uri::encode_data_string(conversions::to_string_t(resource_stream.str())));
-
-    // construct data to be signed
-    std::ostringstream data_stream;
-    data_stream << encoded_uri << "\n" << valid_until;
-    std::string data = data_stream.str();
-
-    // compute HMAC of data
-    std::vector<unsigned char> digest(EVP_MAX_MD_SIZE);
-    unsigned int digest_len;
-    // https://www.openssl.org/docs/man1.0.2/crypto/hmac.html
-    if (!HMAC(EVP_sha256(), shared_access_key.c_str(), (int)shared_access_key.length(),
-              (const unsigned char*)data.c_str(), (int)data.length(), &digest[0], &digest_len)) {
-      api_status::try_update(status, error_code::eventhub_generate_SAS_hash,
-                            "Failed to generate SAS hash");
-      TRACE_ERROR(trace, "Failed to generate SAS hash");
-      return error_code::eventhub_generate_SAS_hash;
-    }
-    digest.resize(digest_len);
-
-    // encode digest (base64 + url encoding)
-    const auto encoded_digest = web::uri::encode_data_string(conversions::to_base64(digest));
-
-    // construct SAS
-    std::ostringstream authorization_stream;
-    authorization_stream
-      << "SharedAccessSignature sr=" << encoded_uri
-      << "&sig=" << conversions::to_utf8string(encoded_digest)
-      << "&se=" << valid_until
-      << "&skn=" << shared_access_key_name;
-    authorization_string = authorization_stream.str();
-
-    return error_code::success;
   }
 }

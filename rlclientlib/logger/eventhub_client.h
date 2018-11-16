@@ -5,6 +5,7 @@
 #include "sender.h"
 #include "error_callback_fn.h"
 
+#include "utility/http_authorization.h"
 #include "utility/http_client.h"
 
 #include <pplx/pplxtasks.h>
@@ -70,19 +71,6 @@ namespace reinforcement_learning {
     };
 
   private:
-    int check_authorization_validity_generate_if_needed(api_status* status);
-
-    static int generate_authorization_string(
-      std::chrono::seconds now,
-      const std::string& shared_access_key,
-      const std::string& shared_access_key_name,
-      const std::string& eventhub_host,
-      const std::string& eventhub_name,
-      std::string& authorization_string /* out */,
-      long long& valid_until /* out */,
-      api_status* status,
-      i_trace* trace);
-
     int pop_task(api_status* status);
 
     // cannot be copied or assigned
@@ -93,15 +81,9 @@ namespace reinforcement_learning {
 
   private:
     std::unique_ptr<i_http_client> _client;
-
+    http_authorization _authorization;
     const std::string _eventhub_host; //e.g. "ingest-x2bw4dlnkv63q.servicebus.windows.net"
-    const std::string _shared_access_key_name; //e.g. "RootManageSharedAccessKey"
-    const std::string _shared_access_key;
-    //e.g. Check https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-authentication-and-security-model-overview
-    const std::string _eventhub_name; //e.g. "interaction"
 
-    std::string _authorization;
-    long long _authorization_valid_until; //in seconds
     std::mutex _mutex;
     std::mutex _mutex_http_tasks;
     moving_queue<std::unique_ptr<http_request_task>> _tasks;
