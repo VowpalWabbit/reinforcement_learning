@@ -5,7 +5,6 @@ set(PROJECT_SOURCES
   console_tracer.cc
   error_callback_fn.cc
   factory_resolver.cc
-  http_client.cc
   live_model_impl.cc
   live_model.cc
   logger/async_batcher.cc
@@ -22,6 +21,7 @@ set(PROJECT_SOURCES
   utility/configuration.cc
   utility/context_helper.cc
   utility/data_buffer.cc
+  utility/http_client.cc
   utility/http_helper.cc
   utility/str_util.cc
   utility/watchdog.cc
@@ -51,7 +51,6 @@ set(PROJECT_PRIVATE_HEADERS
   azure_factories.h
   console_tracer.h
   error_callback_fn.h
-  http_client.h
   live_model_impl.h
   logger/async_batcher.h
   logger/event_logger.h
@@ -63,6 +62,7 @@ set(PROJECT_PRIVATE_HEADERS
   ranking_event.h
   utility/context_helper.h
   utility/data_buffer.h
+  utility/http_client.h
   utility/http_helper.h
   utility/interruptable_sleeper.h
   utility/object_pool.h
