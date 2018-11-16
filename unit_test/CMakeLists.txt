@@ -1,11 +1,6 @@
 
 # If compiling on windows add the stdafx file
-if(MSVC)
-  set(msvc_stdafx "http_server/stdafx.cc")
-endif()
-
 add_executable(rltest
-  ${msvc_stdafx}
   async_batcher_test.cc
   configuration_test.cc
   data_buffer_test.cc
@@ -16,10 +11,10 @@ add_executable(rltest
   eventhub_client_test.cc
   explore_test.cc
   factory_test.cc
-  http_server/http_server.cc
   json_context_parse_test.cc
   live_model_test.cc
   main.cc
+  mock_http_client.cc
   mock_util.cc
   model_mgmt_test.cc
   object_pool_test.cc

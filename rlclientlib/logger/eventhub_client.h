@@ -5,11 +5,11 @@
 #include "sender.h"
 #include "error_callback_fn.h"
 
-#include <cpprest/http_client.h>
+#include "utility/http_authorization.h"
+#include "utility/http_client.h"
+
 #include <pplx/pplxtasks.h>
 
-#include <queue>
-#include <chrono>
 #include <memory>
 
 namespace reinforcement_learning {
@@ -20,10 +20,11 @@ namespace reinforcement_learning {
   class eventhub_client : public i_sender {
   public:
     virtual int init(api_status* status) override;
-
-    eventhub_client(const std::string& host, const std::string& key_name,
+    
+    // Takes the ownership of the i_http_client and delete it at the end of lifetime
+    eventhub_client(i_http_client* client, const std::string& host, const std::string& key_name,
                     const std::string& key, const std::string& name,
-                    size_t tasks_count, size_t MAX_RETRIES, i_trace* trace, error_callback_fn* _error_cb, bool local_test = false);
+                    size_t tasks_count, size_t MAX_RETRIES, i_trace* trace, error_callback_fn* _error_cb);
     ~eventhub_client();
   protected:
     virtual int v_send(std::string&& data, api_status* status) override;
@@ -33,7 +34,7 @@ namespace reinforcement_learning {
     public:
       http_request_task() = default;
       http_request_task(
-        web::http::client::http_client* client,
+        i_http_client* client,
         const std::string& host,
         const std::string& auth,
         std::string&& post_data,
@@ -55,7 +56,7 @@ namespace reinforcement_learning {
     private:
       pplx::task<web::http::status_code> send_request(size_t try_count);
 
-      web::http::client::http_client* _client;
+      i_http_client* _client;
       std::string _host;
       std::string _auth;
       std::string _post_data;
@@ -69,19 +70,6 @@ namespace reinforcement_learning {
     };
 
   private:
-    int check_authorization_validity_generate_if_needed(api_status* status);
-
-    static int generate_authorization_string(
-      std::chrono::seconds now,
-      const std::string& shared_access_key,
-      const std::string& shared_access_key_name,
-      const std::string& eventhub_host,
-      const std::string& eventhub_name,
-      std::string& authorization_string /* out */,
-      long long& valid_until /* out */,
-      api_status* status,
-      i_trace* trace);
-
     int pop_task(api_status* status);
 
     // cannot be copied or assigned
@@ -91,18 +79,11 @@ namespace reinforcement_learning {
     eventhub_client& operator=(eventhub_client&&) = delete;
 
   private:
-    web::http::client::http_client _client;
-
+    std::unique_ptr<i_http_client> _client;
+    http_authorization _authorization;
     const std::string _eventhub_host; //e.g. "ingest-x2bw4dlnkv63q.servicebus.windows.net"
-    const std::string _shared_access_key_name; //e.g. "RootManageSharedAccessKey"
-    const std::string _shared_access_key;
-    //e.g. Check https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-authentication-and-security-model-overview
-    const std::string _eventhub_name; //e.g. "interaction"
 
-    std::string _authorization;
-    long long _authorization_valid_until; //in seconds
     std::mutex _mutex;
-    std::mutex _mutex_http_tasks;
     moving_queue<std::unique_ptr<http_request_task>> _tasks;
     const size_t _max_tasks_count;
     const size_t _max_retries;
