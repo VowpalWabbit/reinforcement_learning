@@ -20,7 +20,8 @@ namespace reinforcement_learning {
   class eventhub_client : public i_sender {
   public:
     virtual int init(api_status* status) override;
-
+    
+    // Takes the ownership of the i_http_client and delete it at the end of lifetime
     eventhub_client(i_http_client* client, const std::string& host, const std::string& key_name,
                     const std::string& key, const std::string& name,
                     size_t tasks_count, size_t MAX_RETRIES, i_trace* trace, error_callback_fn* _error_cb);
