@@ -15,7 +15,8 @@
 #include "utility/periodic_background_proc.h"
 #include "model_mgmt/model_downloader.h"
 #include "model_mgmt/data_callback_fn.h"
-#include "http_server/http_server.h"
+#include "model_mgmt/restapi_data_transport.h"
+#include "mock_http_client.h"
 #include "config_utility.h"
 #include "configuration.h"
 #include "utility/watchdog.h"
@@ -73,9 +74,6 @@ void dummy_data_fn(const m::model_data& data, int* ctxt) {
 
 #ifdef _WIN32 //_WIN32 (http_server http protocol issues in linux)
 BOOST_AUTO_TEST_CASE(background_mock_azure_get) {
-  //start a http server that will receive events sent from the eventhub_client
-  http_helper http_server;
-  http_server.on_initialize(U("http://localhost:8080"));
   //create a simple ds configuration
   u::configuration cc;
   auto scode = cfg::create_from_json(JSON_CFG,cc);
@@ -83,10 +81,8 @@ BOOST_AUTO_TEST_CASE(background_mock_azure_get) {
   cc.set(r::name::EH_TEST, "true"); // local test event hub
   cc.set("ModelExportFrequency", "00:01:00");
 
-  m::i_data_transport* temp_transport = nullptr;
-  scode = r::data_transport_factory.create(&temp_transport, r::value::AZURE_STORAGE_BLOB, cc);
-  BOOST_CHECK_EQUAL(scode, r::error_code::success);
-  std::unique_ptr<m::i_data_transport> transport(temp_transport);
+  auto http_client = new mock_http_client("http://test.com");
+  std::unique_ptr<m::i_data_transport> transport(new m::restapi_data_tranport(http_client, nullptr));
 
   r::api_status status;
 
@@ -116,19 +112,17 @@ BOOST_AUTO_TEST_CASE(background_mock_azure_get) {
 
 BOOST_AUTO_TEST_CASE(mock_azure_storage_model_data)
 {
-  //start a http server that will receive events sent from the eventhub_client
-  http_helper http_server;
-  BOOST_CHECK(http_server.on_initialize(U("http://localhost:8080")));
   //create a simple ds configuration
   u::configuration cc;
   auto scode = cfg::create_from_json(JSON_CFG,cc);
   BOOST_CHECK_EQUAL(scode, r::error_code::success);
   cc.set(r::name::EH_TEST, "true"); // local test event hub
 
-  m::i_data_transport* data_transport;
+  auto http_client = new mock_http_client("http://test.com");
+  std::unique_ptr<m::i_data_transport> data_transport(new m::restapi_data_tranport(http_client, nullptr));
+
   r::api_status status;
-  scode = r::data_transport_factory.create(&data_transport, r::value::AZURE_STORAGE_BLOB, cc, &status);
-  BOOST_CHECK_EQUAL(scode, r::error_code::success);
+
   m::model_data md;
   BOOST_CHECK_EQUAL(md.refresh_count(), 0);
   scode = data_transport->get_data(md, &status);
@@ -136,8 +130,6 @@ BOOST_AUTO_TEST_CASE(mock_azure_storage_model_data)
   BOOST_CHECK_EQUAL(md.refresh_count(), 1);
   scode = data_transport->get_data(md, &status);
   BOOST_CHECK_EQUAL(md.refresh_count(), 2);
-
-  delete data_transport;
 }
 #endif //_WIN32 (http_server http protocol issues in linux)
 

@@ -17,8 +17,6 @@
 #include "str_util.h"
 
 #include "mock_util.h"
-#include "http_server/stdafx.h"
-#include "http_server/http_server.h"
 
 #include <fakeit/fakeit.hpp>
 
