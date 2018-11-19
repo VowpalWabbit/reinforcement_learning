@@ -2,9 +2,10 @@
 
 All RL Inference API functions return error codes.
 
-Following is the list of all error codes:
-\snippet include/err_constants.h Error Codes
+Following is the list of all error defintions:
+\snippet include/errors_data.h Error Definitions
 
-Here are the corresponding error descriptions:
-\snippet include/err_constants.h Error Description
+Where each error defintion is surfaced in C++ by the follwing:
+\snippet include/err_constants.h Error Generator
+
 */
