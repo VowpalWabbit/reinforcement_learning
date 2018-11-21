@@ -225,3 +225,4 @@ return sb << reinforcement_learning::error_code::code ## _s                     
     return retval__LINE__;        \
   }                               \
 } while (0)                       \
+
