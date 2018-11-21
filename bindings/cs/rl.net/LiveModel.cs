@@ -30,7 +30,6 @@ namespace Rl.Net {
         [DllImport("rl.net.native.dll")]
         private static extern int LiveModelReportActionTaken(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, IntPtr apiStatus);
 
-
         [DllImport("rl.net.native.dll")]
         private static extern int LiveModelReportOutcomeF(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, float outcome, IntPtr apiStatus);
 
