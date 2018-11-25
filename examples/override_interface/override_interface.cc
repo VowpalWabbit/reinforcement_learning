@@ -32,9 +32,10 @@ public:
   }
 
 protected:
-  virtual int v_send(std::string&& data, r::api_status* status) override {
+  virtual int v_send(reinforcement_learning::utility::data_buffer&& data, r::api_status* status) override {
     std::lock_guard<std::mutex> lock(_mutex);
-    _stream << data << std::endl;
+    _stream.write(reinterpret_cast<const char*>(data.preamble()), data.filled_buffer_size());
+    _stream << std::endl;
     return err::success;
   }
 
