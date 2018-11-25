@@ -41,6 +41,9 @@ namespace reinforcement_learning { namespace error_code {
   const int eh_connstr_parse_error      = 27;
   const int unhandled_background_error_occurred = 28;
   const int thread_unresponsive_timeout = 29;
+  const int incorrect_buffer_preamble_size  = 30;
+  const int serialize_unknown_outcome_type  = 31;
+  const int preamble_error                  = 32;
   //! [Error Codes]
 }}
 
@@ -73,5 +76,8 @@ namespace reinforcement_learning { namespace error_code {
   char const * const eh_connstr_parse_error_s = "Unable to parse event hub connection string.";
   char const * const unhandled_background_error_occurred_s = "A background thread encountered an error but there was no error handler registered. Register an error handler to see the error code and message.";
   char const * const thread_unresponsive_timeout_s = "A background thread exceeded the watchdog timer.";
+  char const * const incorrect_buffer_preamble_size_s = "Buffer preamble is pre-allocated and does not match the size requested.";
+  char const * const serialize_unknown_outcome_type_s = "Unable to serialize unknown outcome type.";
+  char const * const preamble_error_s           = "Unable to read or write the preamble.";
   //! [Error Description]
 }}

@@ -11,6 +11,7 @@
 #include <pplx/pplxtasks.h>
 
 #include <memory>
+#include "data_buffer.h"
 
 namespace reinforcement_learning {
   class i_trace;
@@ -27,17 +28,18 @@ namespace reinforcement_learning {
                     size_t tasks_count, size_t MAX_RETRIES, i_trace* trace, error_callback_fn* _error_cb);
     ~eventhub_client();
   protected:
-    virtual int v_send(std::string&& data, api_status* status) override;
+    int v_send(buffer& data, api_status* status) override;
 
   private:
     class http_request_task {
     public:
+      using buffer = std::shared_ptr< utility::data_buffer>;
       http_request_task() = default;
       http_request_task(
         i_http_client* client,
         const std::string& host,
         const std::string& auth,
-        std::string&& post_data,
+        buffer& data,
         size_t max_retries = 1, // If MAX_RETRIES is set to 1, only the initial request will be attempted.
         error_callback_fn* error_callback = nullptr,
         i_trace* trace = nullptr);
@@ -49,8 +51,6 @@ namespace reinforcement_learning {
       http_request_task(const http_request_task&) = delete;
       http_request_task& operator=(const http_request_task&) = delete;
 
-      std::string post_data() const;
-
       // Return error_code
       int join();
     private:
@@ -59,7 +59,7 @@ namespace reinforcement_learning {
       i_http_client* _client;
       std::string _host;
       std::string _auth;
-      std::string _post_data;
+      buffer _post_data;
 
       pplx::task<web::http::status_code> _task;
 
