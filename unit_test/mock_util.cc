@@ -14,32 +14,34 @@ namespace u = r::utility;
 using namespace fakeit;
 
 std::unique_ptr<fakeit::Mock<r::i_sender>> get_mock_sender(int send_return_code) {
-  auto mock = std::unique_ptr<fakeit::Mock<r::i_sender>>(
+  auto mock = std::unique_ptr<Mock<r::i_sender>>(
     new fakeit::Mock<r::i_sender>());
 
   When(Method((*mock), init)).AlwaysReturn(r::error_code::success);
-  When(Method((*mock), send)).AlwaysReturn(send_return_code);
+  When(OverloadedMethod((*mock), send, int(buffer_t&, r::api_status*))).AlwaysReturn(r::error_code::success);
   Fake(Dtor((*mock)));
 
   return mock;
 }
 
-std::unique_ptr<fakeit::Mock<r::i_sender>> get_mock_sender(std::vector<std::string>& recorded_messages) {
-  auto mock = std::unique_ptr<fakeit::Mock<r::i_sender>>(
+std::unique_ptr<fakeit::Mock<r::i_sender>> get_mock_sender(std::vector<buffer_t>& recorded_messages) {
+  auto mock = std::unique_ptr<Mock<r::i_sender>>(
     new fakeit::Mock<r::i_sender>());
+  const std::function<int(buffer_t&, r::api_status*&)> send_fn =
 
+    [&recorded_messages](buffer_t& message, r::api_status*& status) {
+      recorded_messages.push_back(message);
+      return r::error_code::success;
+    };
   When(Method((*mock), init)).AlwaysReturn(r::error_code::success);
-  When(Method((*mock), send)).AlwaysDo(
-    [&recorded_messages](const std::string& message, reinforcement_learning::api_status* status) {
-    recorded_messages.push_back(message); return r::error_code::success;
-  });
+  When(OverloadedMethod((*mock), send, int(buffer_t&, r::api_status*))).AlwaysDo(send_fn);
   Fake(Dtor((*mock)));
 
   return mock;
 }
 
 std::unique_ptr<fakeit::Mock<m::i_data_transport>> get_mock_data_transport() {
-  auto mock = std::unique_ptr<fakeit::Mock<m::i_data_transport>>(
+  auto mock = std::unique_ptr<Mock<m::i_data_transport>>(
     new fakeit::Mock<m::i_data_transport>());
 
   When(Method((*mock), get_data)).AlwaysReturn(r::error_code::success);
@@ -49,7 +51,7 @@ std::unique_ptr<fakeit::Mock<m::i_data_transport>> get_mock_data_transport() {
 }
 
 std::unique_ptr<fakeit::Mock<m::i_model>> get_mock_model() {
-  auto mock = std::unique_ptr<fakeit::Mock<m::i_model>>(
+  auto mock = std::unique_ptr<Mock<m::i_model>>(
     new fakeit::Mock<m::i_model>());
 
   When(Method((*mock), update)).AlwaysReturn(r::error_code::success);

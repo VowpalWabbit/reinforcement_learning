@@ -3,7 +3,7 @@
 #   define BOOST_TEST_MODULE Main
 #endif
 
-#include "utility/data_buffer.h"
+#include "data_buffer.h"
 #include "logger/event_queue.h"
 #include <boost/test/unit_test.hpp>
 
@@ -26,15 +26,8 @@ public:
     return _event_id.substr(0, 4) == "drop";
   }
 
-  void serialize(utility::data_buffer& buffer) override {
-    buffer << _event_id;
-  }
-
-  std::string str() {
-    utility::data_buffer buf;
-    serialize(buf);
-    return buf.str();
-  }
+  std::string get_event_id() {
+    return _event_id;
 
   size_t size() const override {
     return 10;
@@ -51,15 +44,15 @@ BOOST_AUTO_TEST_CASE(push_pop_test) {
 
   BOOST_CHECK_EQUAL(queue.size(), 3);
   queue.pop(&val);
-  BOOST_CHECK_EQUAL(val.str(), "1");
+  BOOST_CHECK_EQUAL(val.get_event_id(), "1");
 
   BOOST_CHECK_EQUAL(queue.size(), 2);
   queue.pop(&val);
-  BOOST_CHECK_EQUAL(val.str(), "2");
+  BOOST_CHECK_EQUAL(val.get_event_id(), "2");
 
   BOOST_CHECK_EQUAL(queue.size(), 1);
   queue.pop(&val);
-  BOOST_CHECK_EQUAL(val.str(), "3");
+  BOOST_CHECK_EQUAL(val.get_event_id(), "3");
   BOOST_CHECK_EQUAL(queue.size(), 0);
 }
 
@@ -81,13 +74,13 @@ BOOST_AUTO_TEST_CASE(prune_test) {
 
 
   queue.pop(&val);
-  BOOST_CHECK_EQUAL(val.str(), "no_drop_1");
+  BOOST_CHECK_EQUAL(val.get_event_id(), "no_drop_1");
 
   queue.pop(&val);
-  BOOST_CHECK_EQUAL(val.str(), "no_drop_2");
+  BOOST_CHECK_EQUAL(val.get_event_id(), "no_drop_2");
 
   queue.pop(&val);
-  BOOST_CHECK_EQUAL(val.str(), "no_drop_3");
+  BOOST_CHECK_EQUAL(val.get_event_id(), "no_drop_3");
 }
 
 BOOST_AUTO_TEST_CASE(queue_push_pop)
@@ -104,14 +97,14 @@ BOOST_AUTO_TEST_CASE(queue_push_pop)
   //pop front
   test_event item;
   queue.pop(&item);
-  BOOST_CHECK_EQUAL(item.str(), std::string("1"));
+  BOOST_CHECK_EQUAL(item.get_event_id(), std::string("1"));
 
   //pop all
   while (queue.size()>0)
       queue.pop(&item);
 
   //check last item
-  BOOST_CHECK_EQUAL(item.str(), std::to_string(n));
+  BOOST_CHECK_EQUAL(item.get_event_id(), std::to_string(n));
 
   //check queue size
   BOOST_CHECK_EQUAL(queue.size(), 0);
@@ -135,12 +128,12 @@ BOOST_AUTO_TEST_CASE(queue_move_push)
 
   // Contents of string moved into queue
   queue.push(test);
-  BOOST_CHECK_EQUAL(test.str(), "");
+  BOOST_CHECK_EQUAL(test.get_event_id(), "");
 
   // Contents of queue string moved into passed in string
   test_event item;
   queue.pop(&item);
-  BOOST_CHECK_EQUAL(item.str(), "hello");
+  BOOST_CHECK_EQUAL(item.get_event_id(), "hello");
 }
 
 BOOST_AUTO_TEST_CASE(queue_capacity_test)

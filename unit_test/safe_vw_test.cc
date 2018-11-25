@@ -5,7 +5,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include "vw_model/safe_vw.h"
-#include "utility/object_pool.h"
+#include "utility/versioned_object_pool.h"
 #include "model_mgmt.h"
 #include "data.h"
 
@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(factory_with_initial_model)
   get_model_data_from_raw((const char*)cb_data_5_model, cb_data_5_model_len, &model_data);
 
   const auto factory = new safe_vw_factory(model_data);
-  object_pool<safe_vw, safe_vw_factory> pool(factory);
+  versioned_object_pool<safe_vw, safe_vw_factory> pool(factory);
 
   {
     pooled_vw guard(pool, pool.get_or_create());
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(factory_with_empty_model) {
   // Start with empty model data
   model_management::model_data empty_data;
   const auto factory = new safe_vw_factory(empty_data);
-  object_pool<safe_vw, safe_vw_factory> pool(factory);
+  versioned_object_pool<safe_vw, safe_vw_factory> pool(factory);
 
   // Initial model & rank call
   {

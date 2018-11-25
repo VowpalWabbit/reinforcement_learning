@@ -7,8 +7,11 @@
 #include "mock_http_client.h"
 #include <boost/test/unit_test.hpp>
 #include "err_constants.h"
+#include "utility/data_buffer_streambuf.h"
 
-using namespace reinforcement_learning;
+using namespace web;
+using namespace http::experimental::listener;
+namespace r = reinforcement_learning;
 
 class error_counter {
 public:
@@ -19,9 +22,11 @@ public:
   int _err_count = 0;
 };
 
-void error_counter_func(const api_status&, void* counter) {
+void error_counter_func(const r::api_status&, void* counter) {
   static_cast<error_counter*>(counter)->_error_handler();
 }
+
+using namespace reinforcement_learning::utility;
 
 BOOST_AUTO_TEST_CASE(send_something)
 {
@@ -29,11 +34,25 @@ BOOST_AUTO_TEST_CASE(send_something)
 
   //create a client
   eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, 1, nullptr, nullptr);
+  r::api_status ret;
 
-  api_status ret;
+  std::shared_ptr<data_buffer> db1(new data_buffer());
+  data_buffer_streambuf sbuff1(db1.get());
+  std::ostream message1(&sbuff1);
+
+  message1 << "message 1";
+
+  std::shared_ptr<data_buffer> db2(new data_buffer());
+  data_buffer_streambuf sbuff2(db2.get());
+  std::ostream message2(&sbuff2);
+
+  message2 << "message 2";
+
   //send events
-  BOOST_CHECK_EQUAL(eh.send("message 1", &ret), error_code::success);
-  BOOST_CHECK_EQUAL(eh.send("message 2", &ret), error_code::success);
+  sbuff1.finalize();
+  sbuff2.finalize();
+  BOOST_CHECK_EQUAL(eh.send(db1, &ret), r::error_code::success);
+  BOOST_CHECK_EQUAL(eh.send(db2, &ret), r::error_code::success);
 }
 
 BOOST_AUTO_TEST_CASE(retry_http_send_success)
@@ -62,7 +81,13 @@ BOOST_AUTO_TEST_CASE(retry_http_send_success)
     eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, 8 /* retries */, nullptr, &error_callback);
 
     api_status ret;
-    BOOST_CHECK_EQUAL(eh.send("message 1", &ret), error_code::success);
+
+    std::shared_ptr<data_buffer> db1(new data_buffer());
+    data_buffer_streambuf sbuff1(db1.get());
+    std::ostream message1(&sbuff1);
+
+    message1 << "message 1";
+    BOOST_CHECK_EQUAL(eh.send(db1, &ret), r::error_code::success);
   }
 
   // Although it was allowed to retry 8 times, it should stop after succeeding at 4.
@@ -90,8 +115,13 @@ BOOST_AUTO_TEST_CASE(retry_http_send_fail)
     //create a client
     eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, MAX_RETRIES, nullptr, &error_callback);
 
-    api_status ret;
-    BOOST_CHECK_EQUAL(eh.send("message 1", &ret), error_code::success);
+    r::api_status ret;
+    std::shared_ptr<data_buffer> db1(new data_buffer());
+    data_buffer_streambuf sbuff1(db1.get());
+    std::ostream message1(&sbuff1);
+
+    message1 << "message 1";
+    BOOST_CHECK_EQUAL(eh.send(db1, &ret), r::error_code::success);
   }
 
   BOOST_CHECK_EQUAL(tries, MAX_RETRIES + 1);
@@ -112,7 +142,8 @@ BOOST_AUTO_TEST_CASE(http_in_order_after_retry)
     // Succeed every 4th attempt.
     if (tries >= 4) {
       // extract_string can only be called once on an http_request but we only do it once. Using const cast to avoid having to read out the stream.
-      received_messages.push_back(const_cast<http_request&>(message).extract_utf8string().get());
+      std::vector<unsigned char> data = const_cast<http_request&>(message).extract_vector().get();
+      received_messages.push_back(std::string(data.begin(),data.end()));
       resp.set_status_code(status_codes::Created);
       tries = 0;
     }
@@ -129,12 +160,41 @@ BOOST_AUTO_TEST_CASE(http_in_order_after_retry)
     //create a client
     eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, MAX_RETRIES, nullptr, &error_callback);
 
-    api_status ret;
-    BOOST_CHECK_EQUAL(eh.send("message 1", &ret), error_code::success);
-    BOOST_CHECK_EQUAL(eh.send("message 2", &ret), error_code::success);
-    BOOST_CHECK_EQUAL(eh.send("message 3", &ret), error_code::success);
-    BOOST_CHECK_EQUAL(eh.send("message 4", &ret), error_code::success);
-    BOOST_CHECK_EQUAL(eh.send("message 5", &ret), error_code::success);
+    r::api_status ret;
+    std::shared_ptr<data_buffer> db1(new data_buffer());
+    data_buffer_streambuf sbuff1(db1.get());
+    std::ostream message1(&sbuff1);
+
+    message1 << "message 1";
+    BOOST_CHECK_EQUAL(eh.send(db1, &ret), r::error_code::success);
+
+    std::shared_ptr<data_buffer> db2(new data_buffer());
+    data_buffer_streambuf sbuff2(db2.get());
+    std::ostream message2(&sbuff2);
+
+    message2 << "message 2";
+    BOOST_CHECK_EQUAL(eh.send(db2, &ret), r::error_code::success);
+
+    std::shared_ptr<data_buffer> db3(new data_buffer());
+    data_buffer_streambuf sbuff3(db3.get());
+    std::ostream message3(&sbuff3);
+
+    message3 << "message 3";
+    BOOST_CHECK_EQUAL(eh.send(db3, &ret), r::error_code::success);
+
+    std::shared_ptr<data_buffer> db4(new data_buffer());
+    data_buffer_streambuf sbuff4(db4.get());
+    std::ostream message4(&sbuff4);
+
+    message4 << "message 4";
+    BOOST_CHECK_EQUAL(eh.send(db4, &ret), r::error_code::success);
+
+    std::shared_ptr<data_buffer> db5(new data_buffer());
+    data_buffer_streambuf sbuff5(db5.get());
+    std::ostream message5(&sbuff5);
+
+    message5 << "message 5";
+    BOOST_CHECK_EQUAL(eh.send(db5, &ret), r::error_code::success);
   }
 
   BOOST_CHECK_EQUAL(received_messages[0], "message 1");

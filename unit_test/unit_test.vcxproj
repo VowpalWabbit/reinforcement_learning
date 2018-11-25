@@ -170,7 +170,9 @@
     <ClCompile Include="err_callback_test.cc" />
     <ClCompile Include="explore_test.cc" />
     <ClCompile Include="factory_test.cc" />
+    <ClCompile Include="fb_serializer_test.cc" />
     <ClCompile Include="json_context_parse_test.cc" />
+    <ClCompile Include="json_serializer_test.cc" />
     <ClCompile Include="live_model_test.cc" />
     <ClCompile Include="eventhub_client_test.cc" />
     <ClCompile Include="event_test.cc" />
@@ -181,6 +183,7 @@
     <ClCompile Include="event_queue_test.cc" />
     <ClCompile Include="moving_queue_test.cc" />
     <ClCompile Include="object_pool_test.cc" />
+    <ClCompile Include="preamble_test.cc" />
     <ClCompile Include="ranking_response_test.cc" />
     <ClCompile Include="safe_vw_test.cc" />
     <ClCompile Include="sleeper_test.cc" />
