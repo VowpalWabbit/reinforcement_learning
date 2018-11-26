@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <thread>
+#include "utility/data_buffer_streambuf.h"
 
 namespace r = reinforcement_learning;
 namespace u = r::utility;
@@ -78,6 +79,9 @@ int test_loop::load_file(const std::string& file_name, std::string& config_str) 
   return err::success;
 }
 
+using buffer_t = reinforcement_learning::utility::data_buffer;
+using bufferptr_t = std::shared_ptr<buffer_t>;
+
 void test_loop::run() {
   std::cout << "Testing...." << std::endl;
   const auto start = chrono::high_resolution_clock::now();
@@ -85,9 +89,12 @@ void test_loop::run() {
   for (size_t i = 0; i < _message_count; ++i) {
     if (step > 0 && i % step == 0) std::cout << "\r" << (i / step) << "%";
     auto message = get_message(i);
-    reinforcement_learning::utility::data_buffer buffer;
-    buffer << message;
-    _sender->send(std::move(buffer));
+    bufferptr_t buff(new buffer_t());
+    reinforcement_learning::utility::data_buffer_streambuf sbuff1(buff.get());
+    std::ostream strm(&sbuff1);
+    strm << std::unitbuf;
+    strm << message;
+    _sender->send(buff);
   }
   std::cout << std::endl << "Done" << std::endl << std::endl;
 
