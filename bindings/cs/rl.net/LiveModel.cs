@@ -25,6 +25,12 @@ namespace Rl.Net {
         private static extern int LiveModelChooseRank(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, [MarshalAs(NativeMethods.StringMarshalling)] string contextJson, IntPtr rankingResponse, IntPtr apiStatus);
 
         [DllImport("rl.net.native.dll")]
+        private static extern int LiveModelChooseRankEx(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, [MarshalAs(NativeMethods.StringMarshalling)] string contextJson, uint flags, IntPtr rankingResponse, IntPtr apiStatus);
+
+        [DllImport("rl.net.native.dll")]
+        private static extern int LiveModelReportActionTaken(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, IntPtr apiStatus);
+
+        [DllImport("rl.net.native.dll")]
         private static extern int LiveModelReportOutcomeF(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, float outcome, IntPtr apiStatus);
 
         [DllImport("rl.net.native.dll")]
@@ -68,6 +74,24 @@ namespace Rl.Net {
         public bool TryChooseRank(string actionId, string contextJson, RankingResponse response, ApiStatus apiStatus = null)
         {
             int result = LiveModelChooseRank(this.NativeHandle, actionId, contextJson, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public bool TryChooseRank(string actionId, string contextJson, ActionFlags flags, out RankingResponse response, ApiStatus apiStatus = null)
+        {
+            response = new RankingResponse();
+            return this.TryChooseRank(actionId, contextJson, flags, response, apiStatus);
+        }
+
+        public bool TryChooseRank(string actionId, string contextJson, ActionFlags flags, RankingResponse response, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelChooseRankEx(this.NativeHandle, actionId, contextJson, (uint)flags, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public bool TryReportActionTaken(string actionId, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelReportActionTaken(this.NativeHandle, actionId, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
         }
 
