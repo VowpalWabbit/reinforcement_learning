@@ -39,11 +39,11 @@ namespace reinforcement_learning {
     ranking_event& operator=(ranking_event&& other) = default;
 
     virtual size_t size() const override;
-    std::vector<unsigned char>& get_context();
-    std::vector<uint64_t>& get_action_ids();
-    std::vector<float>& get_probabilities();
-    std::string& get_model_id();
-    bool get_defered_action();
+    const std::vector<unsigned char>& get_context() const;
+    const std::vector<uint64_t>& get_action_ids() const;
+    const std::vector<float>& get_probabilities() const;
+    const std::string& get_model_id() const;
+    bool get_defered_action() const;
   
   public:
     static ranking_event choose_rank(const char* event_id, const char* context,
@@ -57,6 +57,7 @@ namespace reinforcement_learning {
     std::vector<float> _probilities_vector;
     std::string _model_id;
     bool _deferred_action;
+    size_t _approx_size;
   };
 
   //serializable outcome event
@@ -67,7 +68,7 @@ namespace reinforcement_learning {
     outcome_event& operator=(outcome_event&& other) = default;
 
     virtual size_t size() const override;
-    std::string& get_outcome() const;
+    const std::string& get_outcome() const;
     float get_numeric_outcome() const;
     bool get_deferred_action() const;
 
@@ -91,5 +92,6 @@ namespace reinforcement_learning {
     float _float_outcome;
     bool _deferred_action;
     unsigned int outcome_type = 0;
+    size_t _approx_size;
   };
 }

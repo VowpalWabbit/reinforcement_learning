@@ -28,6 +28,7 @@ public:
 
   std::string get_event_id() {
     return _event_id;
+  }
 
   size_t size() const override {
     return 10;

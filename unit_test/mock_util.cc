@@ -18,7 +18,7 @@ std::unique_ptr<fakeit::Mock<r::i_sender>> get_mock_sender(int send_return_code)
     new fakeit::Mock<r::i_sender>());
 
   When(Method((*mock), init)).AlwaysReturn(r::error_code::success);
-  When(OverloadedMethod((*mock), send, int(buffer_t&, r::api_status*))).AlwaysReturn(r::error_code::success);
+  When(Method((*mock), send)).AlwaysReturn(send_return_code);
   Fake(Dtor((*mock)));
 
   return mock;
@@ -34,7 +34,7 @@ std::unique_ptr<fakeit::Mock<r::i_sender>> get_mock_sender(std::vector<buffer_t>
       return r::error_code::success;
     };
   When(Method((*mock), init)).AlwaysReturn(r::error_code::success);
-  When(OverloadedMethod((*mock), send, int(buffer_t&, r::api_status*))).AlwaysDo(send_fn);
+  When(Method((*mock), send)).AlwaysDo(send_fn);
   Fake(Dtor((*mock)));
 
   return mock;

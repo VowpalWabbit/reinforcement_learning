@@ -198,21 +198,7 @@
     <ClInclude Include="utility\object_pool.h" />
     <ClInclude Include="utility\periodic_background_proc.h" />
     <ClInclude Include="utility\versioned_object_pool.h" />
-    <ClCompile Include="logger\async_batcher.cc" />
-    <ClCompile Include="azure_factories.cc" />
-    <ClCompile Include="console_tracer.cc" />
-    <ClCompile Include="utility\data_buffer_streambuf.cpp" />
-    <ClCompile Include="logger\endian.cc" />
-    <ClCompile Include="logger\event_logger.cc" />
-    <ClCompile Include="logger\flatbuffer_allocator.cc" />
-    <ClCompile Include="logger\preamble.cc" />
-    <ClCompile Include="logger\preamble_sender.cc" />
-    <ClCompile Include="trace_logger.cc" />
-    <ClCompile Include="utility\data_buffer.cc" />
-    <ClCompile Include="utility\http_authorization.cc" />
-    <ClCompile Include="utility\http_client.cc" />
-    <ClCompile Include="utility\http_helper.cc" />
-    <ClCompile Include="utility\http_helper.h" />
+    <ClInclude Include="utility\http_helper.h" />
     <ClInclude Include="model_mgmt\model_downloader.h" />
     <ClInclude Include="model_mgmt\data_callback_fn.h" />
     <ClInclude Include="model_mgmt\restapi_data_transport.h" />
@@ -248,6 +234,20 @@
     <ClCompile Include="live_model.cc" />
     <ClCompile Include="ranking_event.cc" />
     <ClCompile Include="ranking_response.cc" />
+    <ClCompile Include="logger\async_batcher.cc" />
+    <ClCompile Include="azure_factories.cc" />
+    <ClCompile Include="console_tracer.cc" />
+    <ClCompile Include="utility\data_buffer_streambuf.cc" />
+    <ClCompile Include="logger\endian.cc" />
+    <ClCompile Include="logger\event_logger.cc" />
+    <ClCompile Include="logger\flatbuffer_allocator.cc" />
+    <ClCompile Include="logger\preamble.cc" />
+    <ClCompile Include="logger\preamble_sender.cc" />
+    <ClCompile Include="trace_logger.cc" />
+    <ClCompile Include="utility\data_buffer.cc" />
+    <ClCompile Include="utility\http_authorization.cc" />
+    <ClCompile Include="utility\http_client.cc" />
+    <ClCompile Include="utility\http_helper.cc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ext_libs\vowpal_wabbit\vowpalwabbit\vw_core.vcxproj">

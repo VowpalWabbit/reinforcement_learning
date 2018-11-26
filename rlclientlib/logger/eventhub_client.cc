@@ -8,6 +8,7 @@
 #include "utility/http_client.h"
 
 #include <sstream>
+#include "utility/stl_container_adapter.h"
 
 using namespace std::chrono;
 using namespace utility; // Common utilities like string conversions

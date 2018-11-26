@@ -7,7 +7,7 @@ namespace reinforcement_learning {
     {}
 
     size_t stl_container_adapter::size() const {
-      return _db->body_filled_size();
+      return _db->buffer_filled_size();
     }
 
     stl_container_adapter::value_type& stl_container_adapter::operator[](size_t idx) {  

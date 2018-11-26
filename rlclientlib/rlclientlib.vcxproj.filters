@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="utility\http_helper.h" />
     <ClCompile Include="model_mgmt\model_downloader.cc" />
     <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="model_mgmt\data_callback_fn.cc" />
@@ -35,7 +34,7 @@
     <ClCompile Include="utility\http_authorization.cc" />
     <ClCompile Include="utility\data_buffer.cc" />
     <ClCompile Include="utility\stl_container_adapter.cc" />
-    <ClCompile Include="utility\data_buffer_streambuf.cpp" />
+    <ClCompile Include="utility\data_buffer_streambuf.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -88,6 +87,7 @@
     <ClInclude Include="utility\data_buffer_streambuf.h" />
     <ClInclude Include="utility\http_client.h" />
     <ClInclude Include="utility\http_authorization.h" />
+    <ClInclude Include="utility\http_helper.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

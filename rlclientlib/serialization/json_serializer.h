@@ -32,7 +32,7 @@ namespace reinforcement_learning { namespace logger {
       }
 
       // Add context
-      char* context = reinterpret_cast<char*>(&(evt.get_context()[0]));
+      const char* context = reinterpret_cast<const char*>(&(evt.get_context()[0]));
       //std::string context(evt.get_context().begin(), evt.get_context().end())
       buffer << R"(],"c":)" << context << R"(,"p":[)";
 

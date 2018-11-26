@@ -64,37 +64,42 @@ namespace reinforcement_learning {
       _probilities_vector.push_back(r.probability);
     }
 
-	string context_str(context);
-	copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
+    string context_str(context);
+    copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
+    _approx_size = _context.size() +
+      _action_ids_vector.size() * sizeof(uint64_t) +
+      _probilities_vector.size() * sizeof(float) +
+      _model_id.size();
   }
 
-	std::vector<unsigned char>& ranking_event::get_context() {
-    	return _context;
-	}
-  std::vector<uint64_t>& ranking_event::get_action_ids() {
+  const std::vector<unsigned char>& ranking_event::get_context() const {
+    return _context;
+  }
+  const std::vector<uint64_t>& ranking_event::get_action_ids() const {
     return _action_ids_vector;
   }
-  std::vector<float>& ranking_event::get_probabilities() {
+  const std::vector<float>& ranking_event::get_probabilities() const {
     return _probilities_vector;
   }
 
-  std::string& ranking_event::get_model_id() {
+  const std::string& ranking_event::get_model_id() const {
     return _model_id;
   }
 
-  bool ranking_event::get_defered_action() {
+  bool ranking_event::get_defered_action() const {
     return _deferred_action;
   }
 
   ranking_event ranking_event::choose_rank(const char* event_id, const char* context,
     unsigned int flags, const ranking_response& resp, float pass_prob) {
     return ranking_event(event_id, flags & action_flags::DEFERRED, pass_prob, context, resp);
-	}
+  }
 
+  // Estimated serialized size 
+  // (1) different serialization methods have different sizes
+  // (2) we don't want to pay cost of serializing 
   size_t ranking_event::size() const {
-	Estimated serialized size
-	Change name to esitmated size
-	Must be estimated (1) different serialization methods have different sizes (2) we don't want to pay cost of serializing 
+    return _approx_size;
   }
 
   outcome_event::outcome_event(const char* event_id, float pass_prob, const char* outcome, bool deferred_action)
@@ -102,6 +107,7 @@ namespace reinforcement_learning {
     , _outcome(outcome)
     , _deferred_action(deferred_action)
   {
+    _approx_size = _outcome.size() + sizeof(bool);
   }
 
   outcome_event::outcome_event(const char* event_id, float pass_prob, float outcome, bool deferred_action)
@@ -129,7 +135,7 @@ namespace reinforcement_learning {
     return evt;
   }
 
-  std::string& outcome_event::get_outcome() const {
+  const std::string& outcome_event::get_outcome() const {
     return _outcome;
   }
 
@@ -141,9 +147,10 @@ namespace reinforcement_learning {
     return _deferred_action;
   }
 
+  // Estimated serialized size 
+  // (1) different serialization methods have different sizes
+  // (2) we don't want to pay cost of serializing 
   size_t outcome_event::size() const {
-	Estimated serialized size
-	Change name to esitmated size
-	Must be estimated (1) different serialization methods have different sizes (2) we don't want to pay cost of serializing 
-  }  
+    return _approx_size;
+  }
 }

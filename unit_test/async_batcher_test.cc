@@ -22,8 +22,8 @@ class message_sender : public logger::i_message_sender {
   std::vector<std::string>& items;
 
 public:
-  explicit message_sender(std::vector<std::string>& _items) 
-  : items(_items), sender{nullptr} 
+  explicit message_sender(std::vector<std::string>& _items)
+    : items(_items), sender{ nullptr }
   {}
 
   int send(const uint16_t msg_type, buffer& db, api_status* status = nullptr) override {
@@ -57,13 +57,16 @@ public:
   std::string get_event_id() {
     return _event_id;
   }
+
+  size_t size() const override {
+    return 1;
+  }
 };
 
 class test_droppable_event : public event {
 public:
   test_droppable_event() {}
   test_droppable_event(const std::string& id) : event(id.c_str()) {}
-
   test_droppable_event(test_droppable_event&& other) : event(std::move(other)) {}
   test_droppable_event& operator=(test_droppable_event&& other)
   {
@@ -74,25 +77,30 @@ public:
   bool try_drop(float drop_prob, int _drop_pass) override {
     return true;
   }
+  size_t size() const override {
+    return 1;
+  }
 };
 
-namespace reinforcement_learning { namespace logger {
-  template<>
-  struct json_event_serializer<test_droppable_event> {
-    static int serialize(test_droppable_event& evt, std::ostream& out, api_status* status) {
-      out << evt.get_event_id();
-      return error_code::success;
-    }
-  };
-  
-  template<>
-  struct json_event_serializer<test_undroppable_event> {
-    static int serialize(test_undroppable_event& evt, std::ostream& out, api_status* status) {
-      out << evt.get_event_id();
-      return error_code::success;
-    }
-  };
-}}
+namespace reinforcement_learning {
+  namespace logger {
+    template<>
+    struct json_event_serializer<test_droppable_event> {
+      static int serialize(test_droppable_event& evt, std::ostream& out, api_status* status) {
+        out << evt.get_event_id();
+        return error_code::success;
+      }
+    };
+
+    template<>
+    struct json_event_serializer<test_undroppable_event> {
+      static int serialize(test_undroppable_event& evt, std::ostream& out, api_status* status) {
+        out << evt.get_event_id();
+        return error_code::success;
+      }
+    };
+  }
+}
 
 void expect_no_error(const api_status& s, void* cntxt)
 {
@@ -124,7 +132,7 @@ BOOST_AUTO_TEST_CASE(flush_timeout)
   batcher.append(test_undroppable_event(bar));
 
   //check the batch was sent
-  std::string expected = foo + "\n" + bar +"\n";
+  std::string expected = foo + "\n" + bar + "\n";
 
   std::this_thread::sleep_for(std::chrono::milliseconds(150));
 
