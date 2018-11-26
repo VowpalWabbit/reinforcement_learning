@@ -40,6 +40,16 @@ API int LiveModelChooseRank(livemodel_context_t* context, const char * event_id,
     return context->livemodel->choose_rank(event_id, context_json, *resp, status);
 }
 
+API int LiveModelChooseRankEx(livemodel_context_t* context, const char * event_id, const char * context_json, unsigned int flags, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status)
+{
+  return context->livemodel->choose_rank(event_id, context_json, flags, *resp, status);
+}
+
+API int LiveModelReportActionTaken(livemodel_context_t* context, const char * event_id, reinforcement_learning::api_status* status)
+{
+  return context->livemodel->report_action_taken(event_id, status);
+}
+
 API int LiveModelReportOutcomeF(livemodel_context_t* context, const char * event_id, float outcome, reinforcement_learning::api_status* status)
 {
     return context->livemodel->report_outcome(event_id, outcome, status);
