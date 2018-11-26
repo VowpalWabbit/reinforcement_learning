@@ -29,17 +29,13 @@ public:
   std::string get_event_id() {
     return _event_id;
   }
-
-  size_t size() const override {
-    return 10;
-  }
 };
 
 BOOST_AUTO_TEST_CASE(push_pop_test) {
   event_queue<test_event> queue;
-  queue.push(test_event("1"));
-  queue.push(test_event("2"));
-  queue.push(test_event("3"));
+  queue.push(test_event("1"),10);
+  queue.push(test_event("2"),10);
+  queue.push(test_event("3"),10);
 
   test_event val;
 
@@ -59,11 +55,11 @@ BOOST_AUTO_TEST_CASE(push_pop_test) {
 
 BOOST_AUTO_TEST_CASE(prune_test) {
   event_queue<test_event> queue;
-  queue.push(test_event("no_drop_1"));
-  queue.push(test_event("drop_1"));
-  queue.push(test_event("no_drop_2"));
-  queue.push(test_event("drop_2"));
-  queue.push(test_event("no_drop_3"));
+  queue.push(test_event("no_drop_1"),10);
+  queue.push(test_event("drop_1"),10);
+  queue.push(test_event("no_drop_2"),10);
+  queue.push(test_event("drop_2"),10);
+  queue.push(test_event("no_drop_3"),10);
 
   test_event val;
 
@@ -91,7 +87,7 @@ BOOST_AUTO_TEST_CASE(queue_push_pop)
   //push n elements in the queue
   int n = 10;
   for (int i=0; i<n; ++i)
-      queue.push(test_event(std::to_string(i+1)));
+      queue.push(test_event(std::to_string(i+1)),10);
 
   BOOST_CHECK_EQUAL(queue.size(), n);
 
@@ -128,7 +124,7 @@ BOOST_AUTO_TEST_CASE(queue_move_push)
   reinforcement_learning::event_queue<test_event> queue;
 
   // Contents of string moved into queue
-  queue.push(test);
+  queue.push(test,10);
   BOOST_CHECK_EQUAL(test.get_event_id(), "");
 
   // Contents of queue string moved into passed in string
@@ -144,7 +140,7 @@ BOOST_AUTO_TEST_CASE(queue_capacity_test)
 
   BOOST_CHECK_EQUAL(queue.capacity(), 0);
   // Contents of string moved into queue
-  queue.push(test);
+  queue.push(test,10);
   BOOST_CHECK_EQUAL(queue.capacity(), 10);
 
   // Contents of queue string moved into passed in string

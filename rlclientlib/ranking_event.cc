@@ -95,26 +95,22 @@ namespace reinforcement_learning {
     return ranking_event(event_id, flags & action_flags::DEFERRED, pass_prob, context, resp);
   }
 
-  // Estimated serialized size 
-  // (1) different serialization methods have different sizes
-  // (2) we don't want to pay cost of serializing 
-  size_t ranking_event::size() const {
-    return _approx_size;
-  }
-
   outcome_event::outcome_event(const char* event_id, float pass_prob, const char* outcome, bool deferred_action)
     : event(event_id, pass_prob)
     , _outcome(outcome)
+    , _float_outcome(0.0f)
     , _deferred_action(deferred_action)
   {
-    _approx_size = _outcome.size() + sizeof(bool);
+    _approx_size = _outcome.size() + sizeof(bool) + sizeof(float);
   }
 
   outcome_event::outcome_event(const char* event_id, float pass_prob, float outcome, bool deferred_action)
     : event(event_id, pass_prob)
+    , _outcome("")
     , _float_outcome(outcome)
     , _deferred_action(deferred_action)
   {
+    _approx_size = _outcome.size() + sizeof(bool) + sizeof(float);
   }
 
   outcome_event outcome_event::report_outcome(const char* event_id, const char* outcome, float pass_prob) {
@@ -145,12 +141,5 @@ namespace reinforcement_learning {
 
   bool outcome_event::get_deferred_action() const {
     return _deferred_action;
-  }
-
-  // Estimated serialized size 
-  // (1) different serialization methods have different sizes
-  // (2) we don't want to pay cost of serializing 
-  size_t outcome_event::size() const {
-    return _approx_size;
   }
 }

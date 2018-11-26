@@ -57,10 +57,6 @@ public:
   std::string get_event_id() {
     return _event_id;
   }
-
-  size_t size() const override {
-    return 1;
-  }
 };
 
 class test_droppable_event : public event {
@@ -77,26 +73,31 @@ public:
   bool try_drop(float drop_prob, int _drop_pass) override {
     return true;
   }
-  size_t size() const override {
-    return 1;
-  }
 };
 
 namespace reinforcement_learning {
   namespace logger {
     template<>
     struct json_event_serializer<test_droppable_event> {
+      using serializer_t = json_event_serializer<test_droppable_event>;
       static int serialize(test_droppable_event& evt, std::ostream& out, api_status* status) {
         out << evt.get_event_id();
         return error_code::success;
+      }
+      static size_t size_estimate(const test_droppable_event& evt) {
+        return 1;
       }
     };
 
     template<>
     struct json_event_serializer<test_undroppable_event> {
+      using serializer_t = json_event_serializer<test_undroppable_event>;
       static int serialize(test_undroppable_event& evt, std::ostream& out, api_status* status) {
         out << evt.get_event_id();
         return error_code::success;
+      }
+      static size_t size_estimate(const test_undroppable_event& evt) {
+        return 1;
       }
     };
   }

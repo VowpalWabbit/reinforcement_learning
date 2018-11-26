@@ -10,7 +10,7 @@ namespace reinforcement_learning {
     event();
     event(const char* event_id, float pass_prob = 1);
     event(event&& other);
-    std::string get_event_id() {
+    const std::string& get_event_id() const {
       return _event_id;
     }
 
@@ -19,7 +19,6 @@ namespace reinforcement_learning {
 
     virtual bool try_drop(float pass_prob, int drop_pass);
     float get_pass_prob() const;
-    virtual size_t size() const = 0;
   
   protected:
     float prg(int drop_pass) const;
@@ -38,7 +37,6 @@ namespace reinforcement_learning {
     ranking_event(ranking_event&& other) = default;
     ranking_event& operator=(ranking_event&& other) = default;
 
-    virtual size_t size() const override;
     const std::vector<unsigned char>& get_context() const;
     const std::vector<uint64_t>& get_action_ids() const;
     const std::vector<float>& get_probabilities() const;
@@ -67,7 +65,6 @@ namespace reinforcement_learning {
     outcome_event(outcome_event&& other) = default;
     outcome_event& operator=(outcome_event&& other) = default;
 
-    virtual size_t size() const override;
     const std::string& get_outcome() const;
     float get_numeric_outcome() const;
     bool get_deferred_action() const;

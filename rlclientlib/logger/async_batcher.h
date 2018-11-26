@@ -79,7 +79,7 @@ namespace reinforcement_learning { namespace logger {
 
   template<typename TEvent, template<typename> typename TSerializer>
   int async_batcher<TEvent, TSerializer>::append(TEvent&& evt, api_status* status) {
-    _queue.push(std::move(evt));
+    _queue.push(std::move(evt), TSerializer<TEvent>::serializer_t::size_estimate(evt));
 
     //block or drop events if the queue if full
     if (_queue.capacity() >= _queue_max_capacity) {

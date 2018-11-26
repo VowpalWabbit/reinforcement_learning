@@ -21,6 +21,16 @@ namespace reinforcement_learning { namespace logger {
     using offset_vector_t = typename std::vector<flatbuffers::Offset<fb_event_t>>;
     using batch_builder_t = RankingEventBatchBuilder;
 
+    static size_t size_estimate(const ranking_event& evt) {
+      return  evt.get_event_id().size() +
+        evt.get_action_ids().size() * sizeof(evt.get_action_ids()[0]) +
+        evt.get_probabilities().size() * sizeof(evt.get_probabilities()[0]) +
+        evt.get_context().size() +
+        evt.get_model_id().size() +
+        sizeof(evt.get_defered_action()) +
+        sizeof(evt.get_pass_prob());
+    }
+
     static int serialize(ranking_event& evt, flatbuffers::FlatBufferBuilder& builder, flatbuffers::Offset<fb_event_t>& ret_val, api_status* status) {
       const auto event_id_offset = builder.CreateString(evt.get_event_id());
       const auto action_ids_vector_offset = builder.CreateVector(evt.get_action_ids());
@@ -44,6 +54,12 @@ namespace reinforcement_learning { namespace logger {
     using fb_event_t = OutcomeEventHolder;
     using offset_vector_t = std::vector<flatbuffers::Offset<fb_event_t>>;
     using batch_builder_t = OutcomeEventBatchBuilder;
+
+    static size_t size_estimate(const outcome_event& evt) {
+      return  evt.get_event_id().size() +
+        evt.get_outcome().size() +
+        sizeof(evt.get_numeric_outcome());
+    }
 
     static int serialize(outcome_event& evt, flatbuffers::FlatBufferBuilder& builder, flatbuffers::Offset<fb_event_t>& retval, api_status* status)
     {
