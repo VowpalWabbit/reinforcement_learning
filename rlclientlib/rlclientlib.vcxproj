@@ -161,6 +161,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\action_flags.h" />
     <ClInclude Include="..\include\api_status.h" />
     <ClInclude Include="..\include\configuration.h" />
     <ClInclude Include="..\include\live_model.h" />
