@@ -25,7 +25,7 @@ namespace Rl.Net {
         private static extern int LiveModelChooseRank(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, [MarshalAs(NativeMethods.StringMarshalling)] string contextJson, IntPtr rankingResponse, IntPtr apiStatus);
 
         [DllImport("rl.net.native.dll")]
-        private static extern int LiveModelChooseRankEx(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, [MarshalAs(NativeMethods.StringMarshalling)] string contextJson, uint flags, IntPtr rankingResponse, IntPtr apiStatus);
+        private static extern int LiveModelChooseRankWithFlags(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, [MarshalAs(NativeMethods.StringMarshalling)] string contextJson, uint flags, IntPtr rankingResponse, IntPtr apiStatus);
 
         [DllImport("rl.net.native.dll")]
         private static extern int LiveModelReportActionTaken(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, IntPtr apiStatus);
@@ -85,7 +85,7 @@ namespace Rl.Net {
 
         public bool TryChooseRank(string actionId, string contextJson, ActionFlags flags, RankingResponse response, ApiStatus apiStatus = null)
         {
-            int result = LiveModelChooseRankEx(this.NativeHandle, actionId, contextJson, (uint)flags, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            int result = LiveModelChooseRankWithFlags(this.NativeHandle, actionId, contextJson, (uint)flags, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
         }
 
