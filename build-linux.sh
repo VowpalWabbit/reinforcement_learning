@@ -31,7 +31,7 @@ cd /reinforcement_learning
 # Build reinforcement_learning
 mkdir -p build
 cd build
-cmake .. -DTURN_OFF_DEVIRTUALIZE=On -DFlatBuffers_DIR=/usr/local/lib/cmake/flatbuffers
+cmake .. -DTURN_OFF_DEVIRTUALIZE=On -DCMAKE_PREFIX_PATH=/root/flatbuffers/CMake
 NUM_PROCESSORS=$(cat nprocs.txt)
 make -j${NUM_PROCESSORS}
 
