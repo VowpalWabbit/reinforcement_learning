@@ -33,7 +33,6 @@ namespace reinforcement_learning { namespace utility {
       _db->resize_body_region(old_body_size + GROW_BY);
 
       setp(
-        reinterpret_cast<char*> (_db->body_begin()),
         reinterpret_cast<char*> (_db->body_begin() + old_body_size),
         reinterpret_cast<char*> (_db->body_begin() + old_body_size + GROW_BY));
 

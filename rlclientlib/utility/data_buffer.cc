@@ -82,7 +82,7 @@ namespace reinforcement_learning {
       return _buffer.data() + _body_beginoffset - _preamble_size;
     }
 
-    constexpr size_t data_buffer::preamble_size() const {
+    size_t data_buffer::preamble_size() const {
       return _preamble_size;
     }
   }

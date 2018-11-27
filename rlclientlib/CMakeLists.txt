@@ -18,6 +18,9 @@ set(PROJECT_SOURCES
   logger/event_logger.cc
   logger/eventhub_client.cc
   logger/flatbuffer_allocator.cc
+  logger/preamble.cc
+  logger/preamble_sender.cc
+  logger/endian.cc
   model_mgmt/data_callback_fn.cc
   model_mgmt/model_downloader.cc
   model_mgmt/model_mgmt.cc
@@ -25,10 +28,12 @@ set(PROJECT_SOURCES
   ranking_event.cc
   ranking_response.cc
   trace_logger.cc
+  utility/stl_container_adapter.cc
   utility/config_utility.cc
   utility/configuration.cc
   utility/context_helper.cc
   utility/data_buffer.cc
+  utility/data_buffer_streambuf.cc
   utility/http_authorization.cc
   utility/http_client.cc
   utility/http_helper.cc
