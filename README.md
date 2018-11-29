@@ -3,6 +3,10 @@
 
 # reinforcement_learning
 
+```
+git submodule update --init --recursive
+```
+
 ## Ubuntu
 
 ### Dependencies
