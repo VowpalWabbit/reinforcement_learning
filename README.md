@@ -61,7 +61,7 @@ vcpkg install cpprestsdk:x64-windows
 Open `rl.sln` in Visual Studio 2017.
 
 ### Experimental - CMake on Windows
-Using CMake is an alternative way to configure and build the project. Currently it only supports the C++ projects.
+Using CMake is an alternate way to configure and build the project. Currently it only supports the C++ projects.
 All dependencies are managed through Vcpkg:
 ```
 vcpkg install cpprestsdk:x64-windows
