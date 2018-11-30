@@ -1,4 +1,5 @@
 #pragma once
+#include "experiment_controller.h"
 #include "test_data_provider.h"
 #include "live_model.h"
 
@@ -17,14 +18,14 @@ private:
     reinforcement_learning::utility::configuration& config,
     reinforcement_learning::api_status* status) const;
   std::string generate_experiment_name(const std::string& experiment_name_base,
-	size_t threads, size_t examples, size_t features, size_t actions);
+	size_t threads, size_t features, size_t actions);
 
   void validity_loop(size_t thread_id);
   void perf_loop(size_t thread_id);
 
 private:
   const size_t threads;
-  const size_t examples;
+  std::unique_ptr<experiment_controller> controller;
   const size_t sleep_interval;
   const std::string experiment_name;
   const std::string json_config;

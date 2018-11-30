@@ -154,11 +154,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="experiment_controller.cc" />
     <ClCompile Include="main.cc" />
     <ClCompile Include="test_data_provider.cc" />
     <ClCompile Include="test_loop.cc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="experiment_controller.h" />
     <ClInclude Include="test_data_provider.h" />
     <ClInclude Include="test_loop.h" />
   </ItemGroup>

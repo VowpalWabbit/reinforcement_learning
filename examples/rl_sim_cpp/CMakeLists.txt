@@ -5,4 +5,4 @@ add_executable(rl_sim_cpp.out
   simulation_stats.cc
 )
 
-target_link_libraries(rl_sim_cpp.out PRIVATE rlclientlib)
+target_link_libraries(rl_sim_cpp.out PRIVATE Boost::program_options rlclientlib)

@@ -18,18 +18,15 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="http_server\http_server.h">
+    <ClInclude Include="mock_util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mock_util.h">
+    <ClInclude Include="mock_http_client.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="http_server\http_server.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="async_batcher_test.cc">
@@ -99,6 +96,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="configuration_test.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mock_http_client.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
