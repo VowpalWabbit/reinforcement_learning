@@ -1,5 +1,4 @@
 #pragma once
-
 #include <vector>
 #include <flatbuffers/flatbuffers.h>
 #include "logger/flatbuffer_allocator.h"
@@ -7,106 +6,83 @@
 #include "generated/RankingEvent_generated.h"
 #include "logger/message_type.h"
 #include "err_constants.h"
-
 using namespace reinforcement_learning::messages::flatbuff;
-
 namespace reinforcement_learning { namespace logger {
-
-  template<typename T>
+  template <typename T>
   struct fb_event_serializer;
-
-  template<>
+  template <>
   struct fb_event_serializer<ranking_event> {
     using fb_event_t = RankingEvent;
     using offset_vector_t = typename std::vector<flatbuffers::Offset<fb_event_t>>;
     using batch_builder_t = RankingEventBatchBuilder;
 
     static size_t size_estimate(const ranking_event& evt) {
-      return  evt.get_event_id().size() +
-        evt.get_action_ids().size() * sizeof(evt.get_action_ids()[0]) +
-        evt.get_probabilities().size() * sizeof(evt.get_probabilities()[0]) +
-        evt.get_context().size() +
-        evt.get_model_id().size() +
-        sizeof(evt.get_defered_action()) +
-        sizeof(evt.get_pass_prob());
+      return evt.get_event_id().size() + evt.get_action_ids().size() * sizeof(evt.get_action_ids()[0]) 
+            + evt.get_probabilities().size() * sizeof(evt.get_probabilities()[0]) + evt.get_context().size() 
+            + evt.get_model_id().size() + sizeof(evt.get_defered_action()) + sizeof(evt.get_pass_prob());
     }
 
-    static int serialize(ranking_event& evt, flatbuffers::FlatBufferBuilder& builder, flatbuffers::Offset<fb_event_t>& ret_val, api_status* status) {
+    static int serialize(ranking_event& evt, flatbuffers::FlatBufferBuilder& builder,
+                         flatbuffers::Offset<fb_event_t>& ret_val, api_status* status) {
       const auto event_id_offset = builder.CreateString(evt.get_event_id());
       const auto action_ids_vector_offset = builder.CreateVector(evt.get_action_ids());
       const auto probabilities_vector_offset = builder.CreateVector(evt.get_probabilities());
       const auto context_offset = builder.CreateVector(evt.get_context());
       const auto model_id_offset = builder.CreateString(evt.get_model_id());
-      ret_val = CreateRankingEvent(builder,
-        event_id_offset,
-        evt.get_defered_action(),
-        action_ids_vector_offset,
-        context_offset,
-        probabilities_vector_offset,
-        model_id_offset,
-        evt.get_pass_prob());
+      ret_val = CreateRankingEvent(builder, event_id_offset, evt.get_defered_action(), action_ids_vector_offset,
+                                   context_offset, probabilities_vector_offset, model_id_offset, evt.get_pass_prob());
       return error_code::success;
     }
   };
-
-  template<>
+  template <>
   struct fb_event_serializer<outcome_event> {
     using fb_event_t = OutcomeEventHolder;
     using offset_vector_t = std::vector<flatbuffers::Offset<fb_event_t>>;
     using batch_builder_t = OutcomeEventBatchBuilder;
 
     static size_t size_estimate(const outcome_event& evt) {
-      return  evt.get_event_id().size() +
-        evt.get_outcome().size() +
-        sizeof(evt.get_numeric_outcome());
+      return evt.get_event_id().size() + evt.get_outcome().size() + sizeof(evt.get_numeric_outcome());
     }
 
-    static int serialize(outcome_event& evt, flatbuffers::FlatBufferBuilder& builder, flatbuffers::Offset<fb_event_t>& retval, api_status* status)
-    {
+    static int serialize(outcome_event& evt, flatbuffers::FlatBufferBuilder& builder,
+                         flatbuffers::Offset<fb_event_t>& retval, api_status* status) {
       const auto event_id = builder.CreateString(evt.get_event_id());
-      switch(evt.get_outcome_type())
-      {
-        case outcome_event::outcome_type_string:
-        {
+      switch (evt.get_outcome_type()) {
+        case outcome_event::outcome_type_string: {
           const auto outcome_str = builder.CreateString(evt.get_outcome());
           const auto str_event = CreateStringEvent(builder, outcome_str).Union();
-          retval = CreateOutcomeEventHolder(builder, event_id, evt.get_pass_prob(), OutcomeEvent_StringEvent, str_event);
+          retval = CreateOutcomeEventHolder(builder, event_id, evt.get_pass_prob(), OutcomeEvent_StringEvent,
+                                            str_event);
           break;
         }
-        case outcome_event::outcome_type_numeric:
-        {
+        case outcome_event::outcome_type_numeric: {
           const auto number_event = CreateNumericEvent(builder, evt.get_numeric_outcome()).Union();
-          retval = CreateOutcomeEventHolder(builder, event_id, evt.get_pass_prob(), OutcomeEvent_NumericEvent, number_event);
+          retval = CreateOutcomeEventHolder(builder, event_id, evt.get_pass_prob(), OutcomeEvent_NumericEvent,
+                                            number_event);
           break;
         }
-        case outcome_event::outcome_type_action_taken:
-        {
+        case outcome_event::outcome_type_action_taken: {
           const auto action_taken_event = CreateActionTakenEvent(builder, evt.get_deferred_action()).Union();
-          retval = CreateOutcomeEventHolder(builder, event_id, evt.get_pass_prob(), OutcomeEvent_ActionTakenEvent, action_taken_event);
+          retval = CreateOutcomeEventHolder(builder, event_id, evt.get_pass_prob(), OutcomeEvent_ActionTakenEvent,
+                                            action_taken_event);
           break;
         }
-        default:
-        {
-          return report_error(status, error_code::serialize_unknown_outcome_type, error_code::serialize_unknown_outcome_type_s);
+        default: {
+          return report_error(status, error_code::serialize_unknown_outcome_type,
+                              error_code::serialize_unknown_outcome_type_s);
         }
       }
-
       return error_code::success;
     }
   };
-
   template <typename event_t>
   struct fb_collection_serializer {
     using serializer_t = fb_event_serializer<event_t>;
     using buffer_t = utility::data_buffer;
-
     static int message_id() { return message_type::UNKNOWN; }
 
-    fb_collection_serializer(buffer_t& buffer) :
-      _allocator(buffer),
-      _builder(buffer.body_capacity(), &_allocator),
-      _buffer(buffer)
-    {}
+    fb_collection_serializer(buffer_t& buffer)
+      : _allocator(buffer), _builder(buffer.body_capacity(), &_allocator), _buffer(buffer) {}
 
     int add(event_t& evt, api_status* status = nullptr) {
       flatbuffers::Offset<typename serializer_t::fb_event_t> offset;
@@ -115,17 +91,14 @@ namespace reinforcement_learning { namespace logger {
       return error_code::success;
     }
 
-    uint64_t size() const {
-      return _builder.GetSize();
-    }
+    uint64_t size() const { return _builder.GetSize(); }
 
     void finalize() {
       auto event_offsets = _builder.CreateVector(_event_offsets);
       typename serializer_t::batch_builder_t batch_builder(_builder);
       batch_builder.add_events(event_offsets);
       auto batch_offset = batch_builder.Finish();
-      _builder.Finish(batch_offset);
-      // Where does the body of the data begin in relation to the start
+      _builder.Finish(batch_offset); // Where does the body of the data begin in relation to the start
       // of the raw buffer
       const auto offset = _builder.GetBufferPointer() - _buffer.raw_begin();
       _buffer.set_body_endoffset(_buffer.preamble_size() + _buffer.body_capacity());
@@ -138,9 +111,9 @@ namespace reinforcement_learning { namespace logger {
     buffer_t& _buffer;
   };
 
-  template<>
+  template <>
   inline int fb_collection_serializer<outcome_event>::message_id() { return message_type::fb_outcome_event_collection; }
 
-  template<>
+  template <>
   inline int fb_collection_serializer<ranking_event>::message_id() { return message_type::fb_ranking_event_collection; }
 }}

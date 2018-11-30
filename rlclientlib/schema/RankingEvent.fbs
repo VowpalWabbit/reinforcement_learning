@@ -9,7 +9,7 @@ table RankingEvent {
     context:[ubyte];          // context
     probabilities:[float];    // probabilities
     model_id:string;          // model ID
-	pass_probability:float;	  // Probability of event surviving throttling operation
+    pass_probability:float;	  // Probability of event surviving throttling operation
 }
 
 // Collection of Ranking events

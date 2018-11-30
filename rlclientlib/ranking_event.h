@@ -55,7 +55,6 @@ namespace reinforcement_learning {
     std::vector<float> _probilities_vector;
     std::string _model_id;
     bool _deferred_action;
-    size_t _approx_size;
   };
 
   //serializable outcome event
@@ -89,6 +88,5 @@ namespace reinforcement_learning {
     float _float_outcome;
     bool _deferred_action;
     unsigned int outcome_type = 0;
-    size_t _approx_size;
   };
 }

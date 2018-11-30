@@ -27,7 +27,7 @@ public:
   // Return pointer to beginning of buffer, starting at offset from the real beginning.
   value_type *body_begin();
 
-  // Body size (does not include the preamble.)
+  // Body size (does not include the preamble)
   size_t body_filled_size() const;
 
   // How large can we make the Body? (does not include the preamble.)
