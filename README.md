@@ -61,6 +61,7 @@ vcpkg install cpprestsdk:x64-windows
 Open `rl.sln` in Visual Studio 2017.
 
 ### Experimental - CMake on Windows
+Using CMake is an alternative way to configure and build the project. Currently it only supports the C++ projects.
 All dependencies are managed through Vcpkg:
 ```
 vcpkg install cpprestsdk:x64-windows
@@ -71,7 +72,7 @@ vcpkg install boost-test:x64-windows
 vcpkg install boost-uuid:x64-windows
 ```
 
-Configure and build:
+Run the following to generate a solution file to open in Visual Studio 2017:
 ```
 mkdir build
 cd build
@@ -80,6 +81,7 @@ cmake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\sc
 ```
 
 ## Make targets
+The following are targets for `make`, used like `make <target>`:
 - `rl_doc` - Python and C++ docs
 - `_rl_client` - Python bindings
 - `rlclient` - rlclient library
