@@ -34,7 +34,7 @@ public:
   }
 
 protected:
-  virtual int v_send(buffer &data, r::api_status *status) override
+  int v_send(const buffer &data, r::api_status *status) override
   {
     std::lock_guard<std::mutex> lock(_mutex);
     _stream.write(reinterpret_cast<const char *>(data->body_begin()), data->body_filled_size());

@@ -9,13 +9,13 @@ namespace reinforcement_learning {
   public:
     using buffer = std::shared_ptr<utility::data_buffer>;
     virtual int init(api_status *status) = 0;
-    int send(buffer &data, api_status *status = nullptr) {
+    int send(const buffer &data, api_status *status = nullptr) {
       return v_send(data, status);
     }
 
     virtual ~i_sender() = default;
 
   protected:
-    virtual int v_send(buffer &data, api_status *status = nullptr) = 0;
+    virtual int v_send(const buffer &data, api_status *status = nullptr) = 0;
   };
 } // namespace reinforcement_learning

@@ -10,7 +10,7 @@ namespace reinforcement_learning {
       return _db->buffer_filled_size();
     }
 
-    stl_container_adapter::value_type& stl_container_adapter::operator[](size_t idx) {  
+    const stl_container_adapter::value_type& stl_container_adapter::operator[](size_t idx) const {  
       assert(idx < size());
       return *(_db->preamble_begin() + idx);
     }

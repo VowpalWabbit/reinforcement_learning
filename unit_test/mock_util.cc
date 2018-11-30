@@ -27,9 +27,9 @@ std::unique_ptr<fakeit::Mock<r::i_sender>> get_mock_sender(int send_return_code)
 std::unique_ptr<fakeit::Mock<r::i_sender>> get_mock_sender(std::vector<buffer_t>& recorded_messages) {
   auto mock = std::unique_ptr<Mock<r::i_sender>>(
     new fakeit::Mock<r::i_sender>());
-  const std::function<int(buffer_t&, r::api_status*&)> send_fn =
+  const std::function<int(const buffer_t&, r::api_status*&)> send_fn =
 
-    [&recorded_messages](buffer_t& message, r::api_status*& status) {
+    [&recorded_messages](const buffer_t& message, r::api_status*& status) {
       recorded_messages.push_back(message);
       return r::error_code::success;
     };

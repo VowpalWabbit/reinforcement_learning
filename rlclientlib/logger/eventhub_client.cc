@@ -21,7 +21,7 @@ namespace reinforcement_learning {
     i_http_client* client,
     const std::string& host,
     const std::string& auth,
-    buffer& post_data,
+    const buffer& post_data,
     size_t max_retries,
     error_callback_fn* error_callback,
     i_trace* trace)
@@ -112,7 +112,7 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int eventhub_client::v_send(buffer& post_data, api_status* status) {
+  int eventhub_client::v_send(const buffer& post_data, api_status* status) {
 
     std::string auth_str;
     RETURN_IF_FAIL(_authorization.get(auth_str, status));
@@ -123,7 +123,7 @@ namespace reinforcement_learning {
         RETURN_IF_FAIL(pop_task(status));
       }
 
-      std::unique_ptr<http_request_task> request_task(new http_request_task(_client.get(), _eventhub_host, auth_str, std::move(post_data), _max_retries, _error_callback, _trace));
+      std::unique_ptr<http_request_task> request_task(new http_request_task(_client.get(), _eventhub_host, auth_str, post_data, _max_retries, _error_callback, _trace));
       _tasks.push(std::move(request_task));
     }
     catch (const std::exception& e) {

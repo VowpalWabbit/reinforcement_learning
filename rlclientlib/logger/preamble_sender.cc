@@ -8,7 +8,7 @@ namespace reinforcement_learning { namespace logger {
     preamble_message_sender::preamble_message_sender(i_sender* sender) :_sender{sender} 
     {}
 
-    int preamble_message_sender::send(const uint16_t msg_type, buffer& db, api_status* status) {
+    int preamble_message_sender::send(const uint16_t msg_type, const buffer& db, api_status* status) {
       // Set the preamble for this message
       preamble pre;
       pre.msg_type = msg_type;

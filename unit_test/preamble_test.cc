@@ -19,7 +19,7 @@ struct dummy_sender : i_sender {
     return error_code::success;
   };
 
-  int v_send(buffer& data, api_status* status = nullptr) override {
+  int v_send(const buffer& data, api_status* status = nullptr) override {
     v_data = data;
     return error_code::success;
   }

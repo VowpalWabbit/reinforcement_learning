@@ -12,7 +12,7 @@ namespace reinforcement_learning {namespace utility {
     stl_container_adapter(const stl_container_adapter& rhs) = default;
     stl_container_adapter(stl_container_adapter&& rhs) noexcept = default;
     size_t size() const;
-    value_type& operator[] (size_t idx);
+    const value_type& operator[] (size_t idx) const;
     void resize(size_t);
 
     #ifdef _WIN32

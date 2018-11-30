@@ -28,7 +28,7 @@ namespace reinforcement_learning {
                     size_t tasks_count, size_t MAX_RETRIES, i_trace* trace, error_callback_fn* _error_cb);
     ~eventhub_client();
   protected:
-    int v_send(buffer& data, api_status* status) override;
+    int v_send(const buffer& data, api_status* status) override;
 
   private:
     class http_request_task {
@@ -39,7 +39,7 @@ namespace reinforcement_learning {
         i_http_client* client,
         const std::string& host,
         const std::string& auth,
-        buffer& data,
+        const buffer& data,
         size_t max_retries = 1, // If MAX_RETRIES is set to 1, only the initial request will be attempted.
         error_callback_fn* error_callback = nullptr,
         i_trace* trace = nullptr);
