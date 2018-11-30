@@ -159,7 +159,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="http_server\http_server.h" />
+    <ClInclude Include="mock_http_client.h" />
     <ClInclude Include="mock_util.h" />
   </ItemGroup>
   <ItemGroup>
@@ -174,8 +174,8 @@
     <ClCompile Include="live_model_test.cc" />
     <ClCompile Include="eventhub_client_test.cc" />
     <ClCompile Include="event_test.cc" />
-    <ClCompile Include="http_server\http_server.cc" />
     <ClCompile Include="main.cc" />
+    <ClCompile Include="mock_http_client.cc" />
     <ClCompile Include="mock_util.cc" />
     <ClCompile Include="model_mgmt_test.cc" />
     <ClCompile Include="event_queue_test.cc" />

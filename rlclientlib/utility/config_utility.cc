@@ -1,4 +1,5 @@
 #include <map>
+#include <set>
 #include <regex>
 #include "config_utility.h"
 #include "cpprest/json.h"
@@ -7,6 +8,7 @@
 #include "err_constants.h"
 #include "api_status.h"
 #include "str_util.h"
+#include "trace_logger.h"
 #include "../model_mgmt/restapi_data_transport.h"
 
 using namespace web;
@@ -97,16 +99,20 @@ namespace reinforcement_learning { namespace utility { namespace config {
       { "ApplicationID"             , name::APP_ID },
       { "ModelBlobUri"              , name::MODEL_BLOB_URI },
       { "SendHighMaterMark"         , name::INTERACTION_SEND_HIGH_WATER_MARK },
-      { "QueueMaxSize"              , name::INTERACTION_SEND_QUEUE_MAXSIZE },
       { "SendBatchIntervalMs"       , name::INTERACTION_SEND_BATCH_INTERVAL_MS },
       { "InitialExplorationEpsilon" , name::INITIAL_EPSILON },
       { "ModelRefreshIntervalMs"    , name::MODEL_REFRESH_INTERVAL_MS },
       { "QueueMode"                 , name::QUEUE_MODE } // expect either DROP or BLOCK, default is DROP
     };
 
+    const std::set<std::string> deprecated = {
+     "QueueMaxSize"
+    };
+
     web::json::value obj;
     try {
       obj = json::value::parse(to_string_t(config_json));
+
     }
     catch (const web::json::json_exception& e) {
       RETURN_ERROR_LS(trace, status, json_parse_error) << e.what();
@@ -118,7 +124,10 @@ namespace reinforcement_learning { namespace utility { namespace config {
       auto const& prop_value = prop_pair.second;
       auto const string_value = to_utf8string(prop_value.is_string() ? prop_value.as_string() : prop_value.serialize());
       prop_name = translate(legacy_translation_mapping, prop_name);
-
+      if (deprecated.find(prop_name) != deprecated.end()) {
+        auto message = concat("Field '", prop_name, "' is unresponsive.");
+        TRACE_WARN(trace, message);
+      }
       // Check if the current field is an EventHub connect string that needs to be parsed.
       if (prop_name == "EventHubInteractionConnectionString") {
         RETURN_IF_FAIL(set_eventhub_config(string_value, "interaction", cc, trace, status));
