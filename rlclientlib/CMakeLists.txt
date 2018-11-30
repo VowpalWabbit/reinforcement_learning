@@ -8,7 +8,6 @@ build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgenerator "" "${CMAKE_CURRENT_S
 
 set(PROJECT_SOURCES
   api_status.cc
-  async_batcher.cc
   azure_factories.cc
   console_tracer.cc
   error_callback_fn.cc
@@ -19,6 +18,9 @@ set(PROJECT_SOURCES
   logger/event_logger.cc
   logger/eventhub_client.cc
   logger/flatbuffer_allocator.cc
+  logger/preamble.cc
+  logger/preamble_sender.cc
+  logger/endian.cc
   model_mgmt/data_callback_fn.cc
   model_mgmt/model_downloader.cc
   model_mgmt/model_mgmt.cc
@@ -26,10 +28,12 @@ set(PROJECT_SOURCES
   ranking_event.cc
   ranking_response.cc
   trace_logger.cc
+  utility/stl_container_adapter.cc
   utility/config_utility.cc
   utility/configuration.cc
   utility/context_helper.cc
   utility/data_buffer.cc
+  utility/data_buffer_streambuf.cc
   utility/http_authorization.cc
   utility/http_client.cc
   utility/http_helper.cc
@@ -55,6 +59,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/sender.h
   ../include/str_util.h
   ../include/trace_logger.h
+  ../include/data_buffer.h
 )
 
 set(PROJECT_PRIVATE_HEADERS
@@ -71,7 +76,6 @@ set(PROJECT_PRIVATE_HEADERS
   moving_queue.h
   ranking_event.h
   utility/context_helper.h
-  utility/data_buffer.h
   utility/http_authorization.h
   utility/http_client.h
   utility/http_helper.h

@@ -22,7 +22,7 @@ public:
   // Get a pointer to beginning of preamble
   value_type *preamble_begin();
 
-  constexpr size_t preamble_size() const;
+  size_t preamble_size() const;
 
   // Return pointer to beginning of buffer, starting at offset from the real beginning.
   value_type *body_begin();

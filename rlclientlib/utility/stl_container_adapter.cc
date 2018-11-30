@@ -25,7 +25,7 @@ namespace reinforcement_learning {
     }
     #else
     stl_container_adapter::value_type* stl_container_adapter::begin() const {
-      return _db.preamble();
+      return _db->preamble_begin();
     }
     #endif
   }
