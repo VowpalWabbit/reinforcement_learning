@@ -30,6 +30,7 @@ nuget install -o packages bindings\cs\rl.net.native\packages.config
 nuget install -o packages rlclientlib\packages.config
 nuget install -o packages unit_tests\packages.config
 
+
 dotnet restore rl.sln
 
 "%InstallDir%\MSBuild\15.0\Bin\MSBuild.exe" "rl.sln" /m /verbosity:normal /p:Configuration=Debug;Platform=x64
