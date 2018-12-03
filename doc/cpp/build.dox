@@ -9,9 +9,9 @@ Linux:
     + cpprestsdk (https://github.com/Microsoft/cpprestsdk)
     + boost
 - Make targets:
-    + rl_clientlib (API)
-    + rl_clientlib_test (Unit tests)
-    + rl_example (Examples)
+    + rlclientlib (API)
+    + rltest (Unit tests)
+    + _rl_python (Python Bindings)
 
 Windows:
 --------
