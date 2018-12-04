@@ -12,12 +12,12 @@ if(DOXYGEN_FOUND)
 
   add_custom_target(doxygen_cpp
     COMMAND ${DOXYGEN_EXECUTABLE}
-    WORKING_DIRECTORY cpp
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cpp
   )
 
   add_custom_target(doxygen_python
     COMMAND ${DOXYGEN_EXECUTABLE}
-    WORKING_DIRECTORY python
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python
   )
 
   add_dependencies(doxygen_cpp copy_docs_file_build_dir)
