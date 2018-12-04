@@ -69,6 +69,7 @@
     <ClInclude Include="azure_factories.h" />
     <ClInclude Include="utility\http_client.h" />
     <ClInclude Include="utility\http_authorization.h" />
+    <ClInclude Include="..\include\action_flags.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
