@@ -21,6 +21,10 @@ python3.6 -m pip install rl_client-0.1.1-cp36-cp36m-linux_x86_64.whl
 
 Note: `https://aka.ms/rl_client_python` points to a binary targeting x64 Linux Python3.6
 
+## Exception handling
+All exceptions inherit from rl_client.rl_exception. Exception types are generated from the following where the _exception is appended to the name of the error.
+\snippet include/errors_data.h Error Definitions
+
 \class rl_client
 \brief Module namespace for Python API. Note: Although the documentation website contains both C++ and Python all classes and functions under the rl_client namespace are for Python only.
 

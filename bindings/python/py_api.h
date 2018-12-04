@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <exception>
 
 #include "configuration.h"
 #include "live_model.h"
@@ -25,8 +26,24 @@ namespace reinforcement_learning {
       std::vector<float> probabilities;
     };
 
-// This is defined in the interface file instead so that custom Python can be injected
 #ifndef SWIG
+    class rl_exception_internal : public std::runtime_error
+    {
+      public:
+        rl_exception_internal(const std::string& what_arg, int error_code)
+          : std::runtime_error(what_arg), _error_code{error_code}
+        {}
+        rl_exception_internal(const char* what_arg, int error_code)
+          : std::runtime_error(what_arg), _error_code{error_code}
+        {}
+
+        int error_code() const { return _error_code; }
+
+      private:
+        int _error_code;
+    };
+
+    // This is defined in the interface file instead so that custom Python can be injected
     class live_model {
     public:
       live_model(const reinforcement_learning::utility::configuration config, error_callback& callback);

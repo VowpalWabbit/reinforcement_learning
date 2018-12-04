@@ -36,9 +36,7 @@ namespace reinforcement_learning {
 
     void check_api_status(const reinforcement_learning::api_status& status) {
       if (status.get_error_code() != reinforcement_learning::error_code::success) {
-        std::stringstream ss;
-        ss << "Error code: " << status.get_error_code() << ", Message: " << status.get_error_msg() << std::endl;
-        throw std::runtime_error(ss.str());
+        throw rl_exception_internal(status.get_error_msg(), status.get_error_code());
       }
     }
 
