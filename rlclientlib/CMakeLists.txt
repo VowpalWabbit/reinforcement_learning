@@ -37,6 +37,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/configuration.h
   ../include/constants.h
   ../include/err_constants.h
+  ../include/errors_data.h
   ../include/factory_resolver.h
   ../include/live_model.h
   ../include/model_mgmt.h

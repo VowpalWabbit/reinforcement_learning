@@ -15,11 +15,15 @@ for examples of usage of the Python API.
 ## Installation
 
 ~~~
-wget -O rl_client-0.0.9-cp36-cp36m-linux_x86_64.whl https://aka.ms/rl_client_python
-python3.6 -m pip install rl_client-0.0.9-cp36-cp36m-linux_x86_64.whl
+wget -O rl_client-0.1.1-cp36-cp36m-linux_x86_64.whl https://aka.ms/rl_client_python
+python3.6 -m pip install rl_client-0.1.1-cp36-cp36m-linux_x86_64.whl
 ~~~
 
 Note: `https://aka.ms/rl_client_python` points to a binary targeting x64 Linux Python3.6
+
+## Exception handling
+All exceptions inherit from rl_client.rl_exception. Exception types are generated from the following where the _exception is appended to the name of the error.
+\snippet include/errors_data.h Error Definitions
 
 \class rl_client
 \brief Module namespace for Python API. Note: Although the documentation website contains both C++ and Python all classes and functions under the rl_client namespace are for Python only.
@@ -58,11 +62,11 @@ Note: `https://aka.ms/rl_client_python` points to a binary targeting x64 Linux P
 \exception RuntimeError Thrown if initialization fails
 \return void
 
-\fn rl_client::live_model::choose_rank(event_id, context_json, deferred = False)
+\fn rl_client::live_model::choose_rank(context_json, event_id, deferred = False)
 \memberof rl_client::live_model
 \brief Choose an action, given a list of actions, action features and context features. The inference library chooses an action by creating a probability distribution over the actions and then sampling from it.
-\param event_id The unique identifier for this interaction. This event_id must be used when reporting the outcome for this action
 \param context_json Contains action, action features and context features in JSON format
+\param event_id The unique identifier for this interaction. This event_id must be used when reporting the outcome for this action
 \param deferred Identifies if action is deferred or not. Deferred one requires additional call of report_action_taken to be involved in training.
 \exception RuntimeError Thrown if an internal error occurs
 \return model_id, chosen_action_id, actions_probabilities
