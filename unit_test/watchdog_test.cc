@@ -11,7 +11,7 @@
 
 using namespace reinforcement_learning;
 
-constexpr int timeout = 400;
+constexpr int timeout = 100;
 constexpr int fail_timeout = timeout * 2;
 constexpr int safe_timeout = timeout / 4;
 
@@ -87,8 +87,8 @@ BOOST_AUTO_TEST_CASE(watchdog_multiple_threads) {
   watchdog.start(nullptr);
 
   std::vector<std::thread> threads;
-  const auto num_threads = 100;
-  const auto num_iterations = 100;
+  const auto num_threads = 2;
+  const auto num_iterations = 10;
   threads.reserve(num_threads);
   for(auto i = 0 ; i < num_threads; i++) {
     threads.emplace_back([&, i]() {
