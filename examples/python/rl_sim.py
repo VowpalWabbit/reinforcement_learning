@@ -58,7 +58,7 @@ class rl_sim:
 
                 # random.sample() returns a list
                 person = random.sample(self._people, 1)[0]
-                
+
                 # create context
                 shared_features = person.get_features()
                 action_features = '"_multi":[' + ','.join('{"a":{"topic":"'+action+'"}}' for action in self._actions) + ']'
@@ -78,7 +78,7 @@ class rl_sim:
                 print('Round: {}, ctr: {:.1%}'.format(round, ctr[0]/ctr[1]), stats)
 
                 time.sleep(0.1)
-            except Exception as e:
+            except rl_client.rl_exception as e:
                 print(e)
                 time.sleep(2)
                 continue

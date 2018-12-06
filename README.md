@@ -51,7 +51,7 @@ make
 mkdir build
 cd build
 cmake .. -DTURN_OFF_DEVIRTUALIZE=On
-make rl_clientlib_test
+make rltest
 make test
 ```
 
@@ -64,7 +64,7 @@ cmake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\sc
 ```
 
 ## Make targets
-- `rl_doc` - Python and C++ docs
+- `doc` - Python and C++ docs
 - `_rl_client` - Python bindings
-- `rlclient` - rlclient library
+- `rlclientlib` - rlclient library
 - `rltest` - unit tests
