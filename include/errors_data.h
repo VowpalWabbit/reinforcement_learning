@@ -28,4 +28,7 @@ ERROR_CODE_DEFINITION(26, pdf_sampling_error, "")
 ERROR_CODE_DEFINITION(27, eh_connstr_parse_error, "Unable to parse event hub connection string.")
 ERROR_CODE_DEFINITION(28, unhandled_background_error_occurred, "A background thread encountered an error but there was no error handler registered. Register an error handler to see the error code and message.")
 ERROR_CODE_DEFINITION(29, thread_unresponsive_timeout, "A background thread exceeded the watchdog timer.")
+ERROR_CODE_DEFINITION(30, incorrect_buffer_preamble_size, "Buffer preamble is pre-allocated and does not match the size requested.")
+ERROR_CODE_DEFINITION(31, serialize_unknown_outcome_type, "Unable to serialize unknown outcome type.")
+ERROR_CODE_DEFINITION(32, preamble_error, "Unable to read or write the preamble.")
 //! [Error Definitions]

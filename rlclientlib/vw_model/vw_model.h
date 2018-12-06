@@ -1,7 +1,7 @@
 #pragma once
 #include "model_mgmt.h"
 #include "safe_vw.h"
-#include "../utility/object_pool.h"
+#include "../utility/versioned_object_pool.h"
 
 namespace reinforcement_learning {
   class i_trace;
@@ -16,7 +16,7 @@ namespace reinforcement_learning { namespace model_management {
   private:
     using vw_ptr = std::shared_ptr<safe_vw>;
     using pooled_vw = utility::pooled_object_guard<safe_vw, safe_vw_factory>;
-    utility::object_pool<safe_vw, safe_vw_factory> _vw_pool;
+    utility::versioned_object_pool<safe_vw, safe_vw_factory> _vw_pool;
     i_trace* _trace_logger;
   };
 }}

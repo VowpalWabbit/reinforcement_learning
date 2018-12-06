@@ -8,7 +8,6 @@
 #include "error_callback_fn.h"
 #include "ranking_response.h"
 #include "live_model_impl.h"
-#include "ranking_event.h"
 #include "err_constants.h"
 #include "constants.h"
 #include "vw_model/safe_vw.h"
@@ -16,6 +15,7 @@
 #include "explore_internal.h"
 #include "hash.h"
 #include "factory_resolver.h"
+#include "logger/preamble_sender.h"
 
 // Some namespace changes for more concise code
 namespace e = exploration;
@@ -25,6 +25,7 @@ namespace reinforcement_learning {
   // Some namespace changes for more concise code
   namespace m = model_management;
   namespace u = utility;
+  namespace l = logger;
 
   // Some typdefs for more concise code
   using vw_ptr = std::shared_ptr<safe_vw>;
@@ -143,16 +144,38 @@ namespace reinforcement_learning {
   }
 
   int live_model_impl::init_loggers(api_status* status) {
+    // Get the name of raw data (as opposed to message) sender for interactions.
     const auto ranking_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);
-    i_sender* ranking_sender;
-    RETURN_IF_FAIL(_sender_factory->create(&ranking_sender, ranking_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
-    _ranking_logger.reset(new interaction_logger(_configuration, ranking_sender, _watchdog, &_error_cb));
+    i_sender* ranking_data_sender;
+
+    // Use the name to create an instance of raw data sender for interactions
+    RETURN_IF_FAIL(_sender_factory->create(&ranking_data_sender, ranking_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
+    RETURN_IF_FAIL(ranking_data_sender->init(status));
+
+    // Create a message sender that will prepend the message with a preamble and send the raw data using the 
+    // factory created raw data sender
+    l::i_message_sender* ranking_msg_sender = new l::preamble_message_sender(ranking_data_sender);
+    RETURN_IF_FAIL(ranking_msg_sender->init(status));
+
+    // Create a logger for interactions that will use msg sender to send interaction messages
+    _ranking_logger.reset(new logger::interaction_logger(_configuration, ranking_msg_sender, _watchdog, &_error_cb));
     RETURN_IF_FAIL(_ranking_logger->init(status));
 
+    // Get the name of raw data (as opposed to message) sender for observations.
     const auto outcome_sender_impl = _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::OBSERVATION_EH_SENDER);
     i_sender* outcome_sender;
+
+    // Use the name to create an instance of raw data sender for observations
     RETURN_IF_FAIL(_sender_factory->create(&outcome_sender, outcome_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
-    _outcome_logger.reset(new observation_logger(_configuration, outcome_sender, _watchdog, &_error_cb));
+    RETURN_IF_FAIL(outcome_sender->init(status));
+
+    // Create a message sender that will prepend the message with a preamble and send the raw data using the 
+    // factory created raw data sender
+    l::i_message_sender* outcome_msg_sender = new l::preamble_message_sender(outcome_sender);
+    RETURN_IF_FAIL(outcome_msg_sender->init(status));
+
+    // Create a logger for interactions that will use msg sender to send interaction messages
+    _outcome_logger.reset(new logger::observation_logger(_configuration, outcome_msg_sender, _watchdog, &_error_cb));
     RETURN_IF_FAIL(_outcome_logger->init(status));
 
     return error_code::success;

@@ -13,7 +13,7 @@ namespace reinforcement_learning {
   template <class T>
   class event_queue {
   private:
-    using queue_t = std::list<T>;
+    using queue_t = std::list<std::pair<T,size_t>>;
     using iterator_t = typename queue_t::iterator;
 
     queue_t _queue;
@@ -31,28 +31,29 @@ namespace reinforcement_learning {
       std::unique_lock<std::mutex> mlock(_mutex);
       if (!_queue.empty())
       {
-        *item = std::move(_queue.front());
-        _capacity = (std::max)(0, static_cast<int>(_capacity) - static_cast<int>(item->size()));
+        auto entry(std::move(_queue.front()));
+        *item = std::move(entry.first);
+        _capacity = (std::max)(0, static_cast<int>(_capacity) - static_cast<int>(entry.second));
         _queue.pop_front();
       }
     }
 
-    void push(T& item) {
-      push(std::move(item));
+    void push(T& item, size_t item_size) {
+      push(std::move(item), item_size);
     }
 
-    void push(T&& item)
+    void push(T&& item, size_t item_size)
     {
       std::unique_lock<std::mutex> mlock(_mutex);
-      _capacity += item.size();
-      _queue.push_back(std::forward<T>(item));
+      _capacity += item_size;
+      _queue.push_back({std::forward<T>(item),item_size});
     }
 
     void prune(float pass_prob)
     {
       std::unique_lock<std::mutex> mlock(_mutex);
       for (auto it = _queue.begin(); it != _queue.end();) {
-        it = it->try_drop(pass_prob, _drop_pass) ? erase(it) : (++it);
+        it = it->first.try_drop(pass_prob, _drop_pass) ? erase(it) : (++it);
       }
       ++_drop_pass;
     }
@@ -72,7 +73,7 @@ namespace reinforcement_learning {
   private:
     //thread-unsafe
     iterator_t erase(iterator_t it) {
-      _capacity = (std::max)(0, static_cast<int>(_capacity) - static_cast<int>(it->size()));
+      _capacity = (std::max)(0, static_cast<int>(_capacity) - static_cast<int>(it->second));
       return _queue.erase(it);
     }
   };

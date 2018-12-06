@@ -1,9 +1,10 @@
 #include "test_data_provider.h"
 
-#include "utility/data_buffer.h"
+#include "data_buffer.h"
 #include "ranking_event.h"
 
 #include <sstream>
+#include "serialization/json_serializer.h"
 
 test_data_provider::test_data_provider(const std::string& experiment_name, size_t threads, size_t features, size_t actions, bool _is_float_outcome)
   : _experiment_name(experiment_name)
@@ -99,20 +100,23 @@ void test_data_provider::log(size_t thread_id, size_t example_id, const reinforc
   if (is_rewarded(thread_id, example_id)) {
     reinforcement_learning::outcome_event outcome_evt;
     if (is_float_outcome)
-      outcome_evt = reinforcement_learning::outcome_event::report_outcome(buffer, event_id.c_str(), get_outcome(thread_id, example_id));
+      outcome_evt = reinforcement_learning::outcome_event::report_outcome(event_id.c_str(), get_outcome(thread_id, example_id));
     else
-      outcome_evt = reinforcement_learning::outcome_event::report_outcome(buffer, event_id.c_str(), get_outcome_json(thread_id, example_id));
+      outcome_evt = reinforcement_learning::outcome_event::report_outcome(event_id.c_str(), get_outcome_json(thread_id, example_id));
     buffer.reset();
-    outcome_evt.serialize(buffer);
-    logger << R"("o":[)" << buffer.str() << "],";
+    reinforcement_learning::logger::json_collection_serializer<reinforcement_learning::outcome_event> jserial(buffer);
+    jserial.add(outcome_evt);
+    jserial.finalize();
+    logger << R"("o":[)" << buffer.body_begin() << "],";
     buffer.reset();
   }
 
-  auto ranking_evt = reinforcement_learning::ranking_event::choose_rank(buffer, event_id.c_str(), get_context(thread_id, example_id), reinforcement_learning::action_flags::DEFAULT, response);
+  auto ranking_evt = reinforcement_learning::ranking_event::choose_rank(event_id.c_str(), get_context(thread_id, example_id), reinforcement_learning::action_flags::DEFAULT, response);
   buffer.reset();
-  ranking_evt.serialize(buffer);
-  const std::string buffer_str = buffer.str();
-  logger << buffer_str.substr(1, buffer_str.length() - 1) << std::endl;
+  reinforcement_learning::logger::json_collection_serializer<reinforcement_learning::ranking_event> jserial(buffer);
+  jserial.add(ranking_evt);
+  jserial.finalize();
+  logger << buffer.body_begin() << std::endl;
 }
 
 int test_data_provider::report_outcome(reinforcement_learning::live_model* rl, size_t thread_id, size_t example_id, reinforcement_learning::api_status* status) const {
