@@ -9,11 +9,8 @@ namespace reinforcement_learning {
   namespace u = utility;
 
   int restapi_data_tranport_create(m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status);
-  int vw_model_create(m::i_model** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
   int observation_sender_create(i_sender** retval, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status);
   int interaction_sender_create(i_sender** retval, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status);
-  int null_tracer_create(i_trace** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
-  int console_tracer_create(i_trace** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
 
   void register_azure_factories() {
     data_transport_factory.register_type(value::AZURE_STORAGE_BLOB, restapi_data_tranport_create);
@@ -27,7 +24,6 @@ namespace reinforcement_learning {
       api_status::try_update(status, error_code::http_uri_not_provided, error_code::http_uri_not_provided_s);
       return error_code::http_uri_not_provided;
     }
-
     auto pret = new m::restapi_data_tranport(new http_client(uri), trace_logger);
     const auto scode = pret->check(status);
     if (scode != error_code::success) {

@@ -1,0 +1,29 @@
+﻿// EventHubInteraction Schema used by FlatBuffer
+
+namespace reinforcement_learning.messages.flatbuff;
+
+table StringEvent {
+    value:string;
+}
+
+table NumericEvent {
+    value:float;
+}
+
+table ActionTakenEvent {
+	value:bool = false;
+}
+
+union OutcomeEvent { StringEvent, NumericEvent, ActionTakenEvent }
+
+table OutcomeEventHolder {
+    event_id:string;
+	pass_probability:float;	  // Probability of event surviving throttling operation
+    the_event:OutcomeEvent;
+}
+
+table OutcomeEventBatch {
+    events:[OutcomeEventHolder];
+}
+
+root_type OutcomeEventBatch;

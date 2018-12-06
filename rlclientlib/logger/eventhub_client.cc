@@ -8,6 +8,7 @@
 #include "utility/http_client.h"
 
 #include <sstream>
+#include "utility/stl_container_adapter.h"
 
 using namespace std::chrono;
 using namespace utility; // Common utilities like string conversions
@@ -20,14 +21,14 @@ namespace reinforcement_learning {
     i_http_client* client,
     const std::string& host,
     const std::string& auth,
-    std::string&& post_data,
+    const buffer& post_data,
     size_t max_retries,
     error_callback_fn* error_callback,
     i_trace* trace)
     : _client(client),
     _host(host),
     _auth(auth),
-    _post_data(std::move(post_data)),
+    _post_data(post_data),
     _max_retries(max_retries),
     _error_callback(error_callback),
     _trace(trace)
@@ -39,7 +40,11 @@ namespace reinforcement_learning {
     http_request request(methods::POST);
     request.headers().add(_XPLATSTR("Authorization"), _auth.c_str());
     request.headers().add(_XPLATSTR("Host"), _host.c_str());
-    request.set_body(_post_data.c_str());
+
+    utility::stl_container_adapter container(_post_data.get());
+    const size_t container_size = container.size();
+    const auto stream = concurrency::streams::bytestream::open_istream(container);
+    request.set_body(stream, container_size);
 
     return _client->request(request).then([this, try_count](pplx::task<http_response> response) {
       web::http::status_code code = status_codes::InternalError;
@@ -83,10 +88,6 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  std::string eventhub_client::http_request_task::post_data() const {
-    return _post_data;
-  }
-
   int eventhub_client::init(api_status* status) {
     RETURN_IF_FAIL(_authorization.init(status));
     return error_code::success;
@@ -111,7 +112,8 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int eventhub_client::v_send(std::string&& post_data, api_status* status) {
+  int eventhub_client::v_send(const buffer& post_data, api_status* status) {
+
     std::string auth_str;
     RETURN_IF_FAIL(_authorization.get(auth_str, status));
 
@@ -121,11 +123,11 @@ namespace reinforcement_learning {
         RETURN_IF_FAIL(pop_task(status));
       }
 
-      std::unique_ptr<http_request_task> request_task(new http_request_task(_client.get(), _eventhub_host, auth_str, std::move(post_data), _max_retries, _error_callback, _trace));
+      std::unique_ptr<http_request_task> request_task(new http_request_task(_client.get(), _eventhub_host, auth_str, post_data, _max_retries, _error_callback, _trace));
       _tasks.push(std::move(request_task));
     }
     catch (const std::exception& e) {
-      RETURN_ERROR_LS(_trace, status, eventhub_http_generic) << e.what() << ", post_data: " << post_data;
+      RETURN_ERROR_LS(_trace, status, eventhub_http_generic) << e.what();
     }
     return error_code::success;
   }
