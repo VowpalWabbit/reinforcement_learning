@@ -3,7 +3,6 @@
 #include <iterator>
 
 namespace reinforcement_learning {namespace utility {
-  class data_buffer;
   class stl_container_adapter {
   public:
     using value_type = data_buffer::value_type;

@@ -5,14 +5,14 @@
 namespace reinforcement_learning { namespace utility {
 
 /*
-     * Data buffer used for serialized messages.  Data buffer
-     * consists of 2 parts.  1) preamble 2) body
-     *
-     * body: can start somewhere in the middle and end before the
-     * buffer ends.
-     * preamble: is n bytes immediately before the body.
-     * preamble is usually 8 bytes and sometimes zero if there is no preamble
-     */
+ * Data buffer used for serialized messages.  Data buffer
+ * consists of 2 parts.  1) preamble 2) body
+ *
+ * body: can start somewhere in the middle and end before the
+ * buffer ends.
+ * preamble: is n bytes immediately before the body.
+ * preamble is usually 8 bytes and sometimes zero if there is no preamble
+ */
 class data_buffer {
 public:
   using value_type = unsigned char;

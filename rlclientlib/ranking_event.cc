@@ -71,19 +71,19 @@ namespace reinforcement_learning {
 
   outcome_event outcome_event::report_outcome(const char* event_id, const char* outcome, float pass_prob) {
     outcome_event evt(event_id, pass_prob, outcome, true);
-    evt.outcome_type = outcome_type_string;
+    evt._outcome_type = outcome_type_string;
     return evt;
   }
 
   outcome_event outcome_event::report_outcome(const char* event_id, float outcome, float pass_prob) {
     outcome_event evt(event_id, pass_prob, outcome, true);
-    evt.outcome_type = outcome_type_numeric;
+    evt._outcome_type = outcome_type_numeric;
     return evt;
   }
 
   outcome_event outcome_event::report_action_taken(const char* event_id, float pass_prob) {
     outcome_event evt(event_id, pass_prob, "", false);
-    evt.outcome_type = outcome_type_action_taken;
+    evt._outcome_type = outcome_type_action_taken;
     return evt;
   }
 

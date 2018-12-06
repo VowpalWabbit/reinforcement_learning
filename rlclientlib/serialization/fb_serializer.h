@@ -98,7 +98,8 @@ namespace reinforcement_learning { namespace logger {
       typename serializer_t::batch_builder_t batch_builder(_builder);
       batch_builder.add_events(event_offsets);
       auto batch_offset = batch_builder.Finish();
-      _builder.Finish(batch_offset); // Where does the body of the data begin in relation to the start
+      _builder.Finish(batch_offset); 
+      // Where does the body of the data begin in relation to the start
       // of the raw buffer
       const auto offset = _builder.GetBufferPointer() - _buffer.raw_begin();
       _buffer.set_body_endoffset(_buffer.preamble_size() + _buffer.body_capacity());
