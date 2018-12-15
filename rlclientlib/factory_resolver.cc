@@ -10,6 +10,8 @@
 
 #include <type_traits>
 #include "console_tracer.h"
+#include "error_callback_fn.h"
+#include "logger/file/file_logger.h"
 
 namespace reinforcement_learning {
   namespace m = model_management;
@@ -57,14 +59,39 @@ namespace reinforcement_learning {
   int null_tracer_create(i_trace** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
   int console_tracer_create(i_trace** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
 
+  int file_sender_create(
+    i_sender** retval, const u::configuration& cfg,
+    const char * file_name,
+    error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
+  {
+    *retval = new logger::file::file_logger(file_name, trace_logger);
+    return error_code::success;
+  }
+
   void factory_initializer::register_default_factories() {
     register_azure_factories();
     model_factory.register_type(value::VW, vw_model_create);
     trace_logger_factory.register_type(value::NULL_TRACE_LOGGER, null_tracer_create);
     trace_logger_factory.register_type(value::CONSOLE_TRACE_LOGGER, console_tracer_create);
+
+    // Register File loggers
+    sender_factory.register_type(value::OBSERVATION_FILE_SENDER, 
+      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status){
+      const char* file_name =  c.get(name::OBSERVATION_FILE_NAME,"observation.fb.data");
+      return file_sender_create(retval, c ,
+        file_name,
+        cb, trace_logger, status);
+    });
+    sender_factory.register_type(value::INTERACTION_FILE_SENDER,
+      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status) {
+      const char* file_name = c.get(name::INTERACTION_FILE_NAME, "interaction.fb.data");
+      return file_sender_create(retval, c,
+        file_name,
+        cb, trace_logger, status);
+    });
   }
 
-  int vw_model_create(m::i_model** retval, const u::configuration&, i_trace* trace_logger, api_status* status) {
+  int vw_model_create(m::i_model** retval, const u::configuration&, reinforcement_learning::i_trace* trace_logger, reinforcement_learning::api_status* status) {
     *retval = new m::vw_model(trace_logger);
     return error_code::success;
   }

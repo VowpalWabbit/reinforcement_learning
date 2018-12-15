@@ -31,4 +31,5 @@ ERROR_CODE_DEFINITION(29, thread_unresponsive_timeout, "A background thread exce
 ERROR_CODE_DEFINITION(30, incorrect_buffer_preamble_size, "Buffer preamble is pre-allocated and does not match the size requested.")
 ERROR_CODE_DEFINITION(31, serialize_unknown_outcome_type, "Unable to serialize unknown outcome type.")
 ERROR_CODE_DEFINITION(32, preamble_error, "Unable to read or write the preamble.")
+ERROR_CODE_DEFINITION(33, file_open_error, "Unable to open file.")
 //! [Error Definitions]
