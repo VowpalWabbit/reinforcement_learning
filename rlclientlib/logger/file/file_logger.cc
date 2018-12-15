@@ -5,7 +5,7 @@
 #include <fstream>
 namespace reinforcement_learning { namespace logger { namespace file {
 
-  file_logger::file_logger(const std::string& file_name, i_trace* trace) 
+  file_logger::file_logger(const std::string& file_name, i_trace* trace)
   : _file_name(file_name),
   _trace(trace)
   {}

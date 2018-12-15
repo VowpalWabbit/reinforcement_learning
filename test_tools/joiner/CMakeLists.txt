@@ -3,4 +3,4 @@ add_executable(joiner.out
   text_converter.cc
 )
 
-target_link_libraries(rl_sim_cpp.out PRIVATE Boost::program_options rlclientlib)
+target_link_libraries(joiner.out PRIVATE Boost::program_options rlclientlib)
