@@ -28,6 +28,7 @@ add_subdirectory(doc EXCLUDE_FROM_ALL)
 add_subdirectory(ext_libs)
 add_subdirectory(rlclientlib)
 add_subdirectory(examples)
+add_subdirectory(test_tools/joiner)
 
 # enable_testing should be run after ext_libs so that the vw unit tests arent turned on.
 enable_testing()
