@@ -216,7 +216,7 @@
     <ClInclude Include="ranking_event.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="logger\file\file_logger.cpp" />
+    <ClCompile Include="logger\file\file_logger.cc" />
     <ClCompile Include="model_mgmt\model_downloader.cc" />
     <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="model_mgmt\data_callback_fn.cc" />

@@ -1,7 +1,6 @@
 ﻿// main.cc : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include "pch.h"
 #include <iostream>
 #include <boost/program_options.hpp>
 #include "text_converter.h"

@@ -35,7 +35,7 @@
     <ClCompile Include="utility\data_buffer.cc" />
     <ClCompile Include="utility\stl_container_adapter.cc" />
     <ClCompile Include="utility\data_buffer_streambuf.cc" />
-    <ClCompile Include="logger\file\file_logger.cpp" />
+    <ClCompile Include="logger\file\file_logger.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
