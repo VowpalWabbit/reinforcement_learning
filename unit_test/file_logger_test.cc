@@ -18,7 +18,7 @@ bool file_exists(const std::string& file) {
   return f.good();
 }
 
-BOOST_AUTO_TEST_CASE(file_logger_usage) {
+BOOST_AUTO_TEST_CASE(file_logger_test) {
 
   const std::string file("file_logger_test");
   {
@@ -27,12 +27,12 @@ BOOST_AUTO_TEST_CASE(file_logger_usage) {
 
     BOOST_CHECK(!file_exists(file));
 
-    rlog::file::file_logger logger("file_logger_test", nullptr);
+    rlog::file::file_logger logger(file, nullptr);
     BOOST_CHECK_EQUAL(logger.init(nullptr), rerr::success);
     const auto buff = rl::i_sender::buffer(new rutil::data_buffer());
     logger.send(buff);
   }
 
   BOOST_CHECK(file_exists(file));
-  remove("file_logger_test");
+  remove(file.c_str());
 }
