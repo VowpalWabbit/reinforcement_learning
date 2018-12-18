@@ -60,7 +60,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(check_null_or_empty(event_id, context, status));
     if (!_model_data_received) {
       RETURN_IF_FAIL(explore_only(event_id, context, response, status));
-      response.set_model_id("N / A");
+      response.set_model_id("N/A");
     }
     else {
       RETURN_IF_FAIL(explore_exploit(event_id, context, response, status));
