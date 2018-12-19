@@ -62,7 +62,7 @@ namespace reinforcement_learning { namespace logger {
           break;
         }
         case outcome_event::outcome_type_action_taken: {
-          const auto action_taken_event = CreateActionTakenEvent(builder, evt.get_deferred_action()).Union();
+          const auto action_taken_event = CreateActionTakenEvent(builder, evt.get_action_taken()).Union();
           retval = CreateOutcomeEventHolder(builder, event_id, evt.get_pass_prob(), OutcomeEvent_ActionTakenEvent,
                                             action_taken_event);
           break;

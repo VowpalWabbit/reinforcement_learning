@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(fb_serializer_outcome_event) {
   BOOST_CHECK_EQUAL(event->event_id()->str(), event_id);
   BOOST_CHECK_EQUAL(event->pass_probability(), 0.54f);
   const auto ae = event->the_event_as_ActionTakenEvent();
-  BOOST_CHECK_EQUAL(ae->value(),false);
+  BOOST_CHECK_EQUAL(ae->value(),true);
 }
 
 BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {

@@ -63,31 +63,31 @@ namespace reinforcement_learning {
     return ranking_event(event_id, flags & action_flags::DEFERRED, pass_prob, context, resp);
   }
 
-  outcome_event::outcome_event(const char* event_id, float pass_prob, const char* outcome, bool deferred_action)
-    : event(event_id, pass_prob), _outcome(outcome), _float_outcome(0.0f), _deferred_action(deferred_action) { }
+  outcome_event::outcome_event(const char* event_id, float pass_prob, const char* outcome, bool action_taken)
+    : event(event_id, pass_prob), _outcome(outcome), _float_outcome(0.0f), _action_taken(action_taken) { }
 
-  outcome_event::outcome_event(const char* event_id, float pass_prob, float outcome, bool deferred_action)
-    : event(event_id, pass_prob), _outcome(""), _float_outcome(outcome), _deferred_action(deferred_action) { }
+  outcome_event::outcome_event(const char* event_id, float pass_prob, float outcome, bool action_taken)
+    : event(event_id, pass_prob), _outcome(""), _float_outcome(outcome), _action_taken(action_taken) { }
 
   outcome_event outcome_event::report_outcome(const char* event_id, const char* outcome, float pass_prob) {
-    outcome_event evt(event_id, pass_prob, outcome, true);
+    outcome_event evt(event_id, pass_prob, outcome, false);
     evt._outcome_type = outcome_type_string;
     return evt;
   }
 
   outcome_event outcome_event::report_outcome(const char* event_id, float outcome, float pass_prob) {
-    outcome_event evt(event_id, pass_prob, outcome, true);
+    outcome_event evt(event_id, pass_prob, outcome, false);
     evt._outcome_type = outcome_type_numeric;
     return evt;
   }
 
   outcome_event outcome_event::report_action_taken(const char* event_id, float pass_prob) {
-    outcome_event evt(event_id, pass_prob, "", false);
+    outcome_event evt(event_id, pass_prob, "", true);
     evt._outcome_type = outcome_type_action_taken;
     return evt;
   }
 
   const std::string& outcome_event::get_outcome() const { return _outcome; }
   float outcome_event::get_numeric_outcome() const { return _float_outcome; }
-  bool outcome_event::get_deferred_action() const { return _deferred_action; }
+  bool outcome_event::get_action_taken() const { return _action_taken; }
 }
