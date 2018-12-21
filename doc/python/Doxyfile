@@ -5,7 +5,7 @@ PROJECT_NUMBER = 1.1
 
 # Input files
 INPUT = python.dox
-EXAMPLE_PATH += ../../examples/python/basic_usage.py ../../examples/python/rl_sim.py
+EXAMPLE_PATH += ../../examples/python/basic_usage.py ../../examples/python/rl_sim.py ../../include/errors_data.h
 
 HTML_STYLESHEET = ../doxygen.css
 LAYOUT_FILE = ../layout.xml

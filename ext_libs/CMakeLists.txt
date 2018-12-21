@@ -1,5 +1,9 @@
 add_subdirectory(fakeit)
 
-set(VW_TEST OFF CACHE BOOL "Disable VW test target")
-set(WARNINGS OFF CACHE BOOL "Disable VW warnings")
+set(VW_INSTALL OFF CACHE BOOL "")
+set(BUILD_TESTS OFF CACHE BOOL "")
+set(BUILD_JAVA OFF CACHE BOOL "")
+set(BUILD_PYTHON OFF CACHE BOOL "")
+set(BUILD_DOCS OFF CACHE BOOL "")
+set(WARNINGS OFF CACHE BOOL "")
 add_subdirectory(vowpal_wabbit EXCLUDE_FROM_ALL)

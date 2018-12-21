@@ -32,7 +32,7 @@ extension_module = setuptools.Extension(
 )
 
 setuptools.setup(
-    version = '0.1.1',
+    version = '0.1.2',
     name = 'rl_client',
     url = 'https://github.com/JohnLangford/vowpal_wabbit',
     description = 'Python binding for reinforcement learning client library',

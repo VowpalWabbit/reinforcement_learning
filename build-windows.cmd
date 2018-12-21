@@ -20,6 +20,9 @@ call "%InstallDir%\Common7\Tools\VsDevCmd.bat"
 set VcpkgIntegration=%VcpkgInstallRoot%scripts\buildsystems\msbuild\vcpkg.targets
 
 vcpkg install cpprestsdk:x64-windows
+vcpkg install flatbuffers:x64-windows
+
+SET PATH=%PATH%;%VcpkgInstallRoot%installed\x64-windows\tools\flatbuffers
 
 REM Need to install nuget packages before Visual Studio starts to make ANTLR targets available.
 nuget install -o packages ext_libs\vowpal_wabbit\vowpalwabbit\packages.config
@@ -27,6 +30,7 @@ nuget install -o packages bindings\cs\rl.net.native\packages.config
 nuget install -o packages rlclientlib\packages.config
 nuget install -o packages unit_tests\packages.config
 
+
 dotnet restore rl.sln
 
-"%InstallDir%\MSBuild\15.0\Bin\MSBuild.exe" "rl.sln" /m /verbosity:normal /p:Configuration=Debug;Platform=x64
+"%InstallDir%\MSBuild\15.0\Bin\MSBuild.exe" "rl.sln" /m /verbosity:normal /p:Configuration=Release;Platform=x64

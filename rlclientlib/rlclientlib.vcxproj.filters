@@ -1,8 +1,6 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="utility\data_buffer.cc" />
-    <ClCompile Include="utility\http_helper.h" />
     <ClCompile Include="model_mgmt\model_downloader.cc" />
     <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="model_mgmt\data_callback_fn.cc" />
@@ -26,10 +24,17 @@
     <ClCompile Include="console_tracer.cc" />
     <ClCompile Include="trace_logger.cc" />
     <ClCompile Include="azure_factories.cc" />
-    <ClCompile Include="async_batcher.cc" />
+    <ClCompile Include="logger\flatbuffer_allocator.cc" />
+    <ClCompile Include="logger\async_batcher.cc" />
+    <ClCompile Include="logger\preamble_sender.cc" />
+    <ClCompile Include="logger\endian.cc" />
+    <ClCompile Include="logger\preamble.cc" />
     <ClCompile Include="utility\http_helper.cc" />
     <ClCompile Include="utility\http_client.cc" />
     <ClCompile Include="utility\http_authorization.cc" />
+    <ClCompile Include="utility\data_buffer.cc" />
+    <ClCompile Include="utility\stl_container_adapter.cc" />
+    <ClCompile Include="utility\data_buffer_streambuf.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -44,10 +49,8 @@
     <ClInclude Include="..\include\model_mgmt.h" />
     <ClInclude Include="..\include\str_util.h" />
     <ClInclude Include="utility\context_helper.h" />
-    <ClInclude Include="utility\data_buffer.h" />
     <ClInclude Include="utility\interruptable_sleeper.h" />
     <ClInclude Include="utility\periodic_background_proc.h" />
-    <ClInclude Include="utility\object_pool.h" />
     <ClInclude Include="model_mgmt\model_downloader.h" />
     <ClInclude Include="model_mgmt\data_callback_fn.h" />
     <ClInclude Include="model_mgmt\restapi_data_transport.h" />
@@ -63,16 +66,34 @@
     <ClInclude Include="..\include\sender.h" />
     <ClInclude Include="..\include\object_factory.h" />
     <ClInclude Include="utility\watchdog.h" />
+    <ClInclude Include="generated\RankingEvent_generated.h" />
     <ClInclude Include="moving_queue.h" />
     <ClInclude Include="..\include\trace_logger.h" />
     <ClInclude Include="console_tracer.h" />
+    <ClInclude Include="generated\OutcomeEvent_generated.h" />
     <ClInclude Include="azure_factories.h" />
+    <ClInclude Include="logger\flatbuffer_allocator.h" />
+    <ClInclude Include="serialization\fb_serializer.h" />
+    <ClInclude Include="serialization\json_serializer.h" />
+    <ClInclude Include="logger\message_sender.h" />
+    <ClInclude Include="logger\preamble_sender.h" />
+    <ClInclude Include="logger\message_type.h" />
+    <ClInclude Include="logger\endian.h" />
+    <ClInclude Include="logger\preamble.h" />
+    <ClInclude Include="utility\stl_container_adapter.h" />
+    <ClInclude Include="..\include\data_buffer.h" />
+    <ClInclude Include="utility\versioned_object_pool.h" />
+    <ClInclude Include="utility\object_pool.h" />
+    <ClInclude Include="utility\data_buffer_streambuf.h" />
     <ClInclude Include="utility\http_client.h" />
     <ClInclude Include="utility\http_authorization.h" />
+    <ClInclude Include="utility\http_helper.h" />
     <ClInclude Include="..\include\action_flags.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="schema\OutcomeEvent.fbs" />
+    <None Include="schema\RankingEvent.fbs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

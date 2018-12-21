@@ -1,0 +1,20 @@
+﻿// EventHubInteraction Schema used by FlatBuffer
+
+namespace reinforcement_learning.messages.flatbuff;
+
+table RankingEvent {
+    event_id:string;          // event IDs
+    deferred_action:bool = false;
+    action_ids:[uint64];      // action IDs
+    context:[ubyte];          // context
+    probabilities:[float];    // probabilities
+    model_id:string;          // model ID
+    pass_probability:float;	  // Probability of event surviving throttling operation
+}
+
+// Collection of Ranking events
+table RankingEventBatch {
+    events:[RankingEvent];
+}
+
+root_type RankingEventBatch;

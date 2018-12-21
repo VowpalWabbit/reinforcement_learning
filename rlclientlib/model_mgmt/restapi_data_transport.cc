@@ -128,7 +128,7 @@ namespace reinforcement_learning { namespace model_management {
       RETURN_ERROR_LS(_trace, status, exception_during_http_req) << error_code::unknown_s;
     }
 
-    return error_code::success;
+    return request_task.get();
   }
 
   int restapi_data_tranport::check(api_status* status) {
