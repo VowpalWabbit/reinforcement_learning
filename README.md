@@ -3,12 +3,16 @@
 
 # reinforcement_learning
 
-## Dependencies
+```
+git submodule update --init --recursive
+```
 
-### Ubuntu
+## Ubuntu
+
+### Dependencies
 
 ```
-sudo apt-get install libboost-all-dev
+sudo apt-get install libboost-all-dev libssl-dev
 ```
 
 Cpprest needs to be installed:
@@ -27,9 +31,38 @@ cd ../../../
 rm -rf cpprestsdk
 ```
 
-### Windows
+### Build
+
+```
+mkdir build
+cd build
+cmake ..
+make
+```
+
+### Test
+```
+mkdir build
+cd build
+cmake .. -DTURN_OFF_DEVIRTUALIZE=On
+make rltest
+make test
+```
+
+## Windows
 Windows dependencies are managed through Vcpkg and Nuget.
 
+```
+vcpkg install cpprestsdk:x64-windows
+```
+
+### Build + Test
+
+Open `rl.sln` in Visual Studio 2017.
+
+### Experimental - CMake on Windows
+Using CMake is an alternate way to configure and build the project. Currently it only supports the C++ projects.
+All dependencies are managed through Vcpkg:
 ```
 vcpkg install cpprestsdk:x64-windows
 vcpkg install zlib:x64-windows
@@ -39,23 +72,7 @@ vcpkg install boost-test:x64-windows
 vcpkg install boost-uuid:x64-windows
 ```
 
-## Build
-
-```
-mkdir build
-cd build
-cmake ..
-make
-
-# Test
-mkdir build
-cd build
-cmake .. -DTURN_OFF_DEVIRTUALIZE=On
-make rltest
-make test
-```
-
-### Experimental - CMake on Windows
+Run the following to generate a solution file to open in Visual Studio 2017:
 ```
 mkdir build
 cd build
