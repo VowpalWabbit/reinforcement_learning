@@ -142,6 +142,10 @@ namespace reinforcement_learning {
     for (auto&& ex : examples)
       _example_pool.emplace_back(ex);
 
+    for (auto e : examples) {
+      e->pred.a_s.delete_v();
+    }
+
     // cleanup
     examples.delete_v();
   }
