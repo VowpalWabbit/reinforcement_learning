@@ -137,9 +137,9 @@ namespace reinforcement_learning {
       _error_cb.set(&default_error_callback, &_watchdog);
     }
 
-	if (_configuration.get_bool(name::MODEL_BACKGROUND_REFRESH, value::MODEL_BACKGROUND_REFRESH)) {
-		_bg_model_proc.reset(new utility::periodic_background_proc<model_management::model_downloader>(config.get_int(name::MODEL_REFRESH_INTERVAL_MS, 60 * 1000), _watchdog, "Model downloader", &_error_cb));
-	}
+    if (_configuration.get_bool(name::MODEL_BACKGROUND_REFRESH, value::MODEL_BACKGROUND_REFRESH)) {
+      _bg_model_proc.reset(new utility::periodic_background_proc<model_management::model_downloader>(config.get_int(name::MODEL_REFRESH_INTERVAL_MS, 60 * 1000), _watchdog, "Model downloader", &_error_cb));
+    }
   }
 
   int live_model_impl::init_trace(api_status* status) {
@@ -287,7 +287,7 @@ namespace reinforcement_learning {
 	    this->_model_download.reset(new m::model_downloader(ptransport, &_data_cb, _trace_logger.get()));
 	    return _bg_model_proc->init(_model_download.get(), status);
 	  }
-    
+
     return refresh_model(status);
   }
 

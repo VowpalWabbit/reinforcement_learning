@@ -22,8 +22,8 @@ namespace reinforcement_learning
 		model_factory_t* m_factory,
 		sender_factory_t* sender_factory)
 	{
-		_pimpl = std::unique_ptr<live_model_impl>(
-			new live_model_impl(config, fn, err_context, trace_factory, t_factory, m_factory, sender_factory));
+    _pimpl = std::unique_ptr<live_model_impl>(
+      new live_model_impl(config, fn, err_context, trace_factory, t_factory, m_factory, sender_factory));
 	}
 
 	live_model::live_model(live_model&& other) {

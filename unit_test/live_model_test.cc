@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(live_model_outcome) {
   config.set(r::name::EH_TEST, "true");
 
   //create a ds live_model, and initialize with configuration
-  r::live_model ds(config);
+  r::live_model ds = create_mock_live_model(config);
 
   //check api_status content when errors are returned
   r::api_status status;
