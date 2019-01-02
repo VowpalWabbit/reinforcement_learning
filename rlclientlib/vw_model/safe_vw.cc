@@ -138,12 +138,10 @@ namespace reinforcement_learning {
       scores[i] = predictions[i].score;
     }
 
-    // push examples back into pool for re-use
-    for (auto&& ex : examples)
+    // push examples back into pool for re-use and clean up examples
+    for (auto&& ex : examples) {
       _example_pool.emplace_back(ex);
-
-    for (auto e : examples) {
-      e->pred.a_s.delete_v();
+      ex->pred.a_s.delete_v();
     }
 
     // cleanup
