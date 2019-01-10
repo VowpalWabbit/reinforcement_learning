@@ -168,6 +168,13 @@ namespace reinforcement_learning {
      */
     int report_outcome(const char* event_id, float outcome, api_status* status= nullptr);
 
+    /*
+     * @brief Refreshes the model if it has background refresh disabled.
+     * @param status  Optional field with detailed string description if there is an error
+     * @return int Return error code.  This will also be returned in the api_status object
+     */
+    int refresh_model(api_status* status = nullptr);
+
     /**
      * @brief Error callback function.
      * When live_model is constructed, a background error callback and a
@@ -206,14 +213,14 @@ namespace reinforcement_learning {
       sender_factory_t* sender_factory = &sender_factory);
 
     /**
-     * @brief Default move constructor for live model object.
+     * @brief Move constructor for live model object.
      */
-    live_model(live_model&&) = default;
+    live_model(live_model&& other);
 
     /**
-     * @brief Default move assignment operator swaps implementation.
+     * @brief Move assignment operator swaps implementation.
      */
-    live_model& operator=(live_model&&) = default;
+    live_model& operator=(live_model&& other);
 
     live_model(const live_model&) = delete;       //! Prevent accidental copy, since destructor will deallocate the implementation
     live_model& operator=(live_model&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
