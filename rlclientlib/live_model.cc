@@ -34,8 +34,9 @@ namespace reinforcement_learning
   live_model::~live_model() = default;
 
   live_model& live_model::operator=(live_model&& other) {
-	  std::swap(_pimpl, other._pimpl);
-	  _initialized = other._initialized;
+    std::swap(_pimpl, other._pimpl);
+    _initialized = other._initialized;
+    return *this;
   }
   int live_model::init(api_status* status) {
     if (_initialized)
