@@ -38,11 +38,12 @@ namespace reinforcement_learning
     _initialized = other._initialized;
     return *this;
   }
-  int live_model::init(api_status* status) {
+
+  int live_model::init(api_status* status, trace_callback binding_trace) {
     if (_initialized)
       return error_code::success;
 
-    const auto err_code = _pimpl->init(status);
+    const auto err_code = _pimpl->init(status, new binding_tracer(binding_trace));
     if (err_code == error_code::success) {
       _initialized = true;
     }

@@ -3,6 +3,7 @@
 #include "rl.net.native.h"
 
 typedef void (*managed_callback_t)(const reinforcement_learning::api_status&);
+typedef void (*trace_logger_t)(int log_level, const std::string msg);
 
 typedef struct livemodel_context {
     reinforcement_learning::live_model* livemodel;
@@ -15,7 +16,7 @@ extern "C" {
     API livemodel_context_t* CreateLiveModel(reinforcement_learning::utility::configuration* config);
     API void DeleteLiveModel(livemodel_context_t* livemodel);
 
-    API int LiveModelInit(livemodel_context_t* livemodel, reinforcement_learning::api_status* status = nullptr);
+    API int LiveModelInit(livemodel_context_t* livemodel, reinforcement_learning::api_status* status = nullptr, trace_logger_t binding_trace = nullptr);
     API int LiveModelChooseRank(livemodel_context_t* livemodel, const char * event_id, const char * context_json, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status = nullptr);
     API int LiveModelChooseRankWithFlags(livemodel_context_t* livemodel, const char * event_id, const char * context_json, unsigned int flags, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status = nullptr);
     API int LiveModelReportActionTaken(livemodel_context_t* livemodel, const char * event_id, reinforcement_learning::api_status* status = nullptr);

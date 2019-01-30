@@ -22,7 +22,7 @@ namespace reinforcement_learning
   public:
     using error_fn = void(*)( const api_status&, void* user_context );
 
-    int init(api_status* status);
+    int init(api_status* status, i_trace* binding_trace);
 
     int choose_rank(const char* event_id, const char* context, unsigned int flags, ranking_response& response, api_status* status);
     //here the event_id is auto-generated
@@ -54,7 +54,7 @@ namespace reinforcement_learning
     int init_model(api_status* status);
     int init_model_mgmt(api_status* status);
     int init_loggers(api_status* status);
-    int init_trace(api_status* status);
+    int init_trace(api_status* status, i_trace* binding_trace);
     static void _handle_model_update(const model_management::model_data& data, live_model_impl* ctxt);
     void handle_model_update(const model_management::model_data& data);
     int explore_only(const char* event_id, const char* context, ranking_response& response, api_status* status) const;

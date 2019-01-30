@@ -39,8 +39,8 @@ namespace reinforcement_learning {
     watchdog->set_unhandled_background_error(true);
   }
 
-  int live_model_impl::init(api_status* status) {
-    RETURN_IF_FAIL(init_trace(status));
+  int live_model_impl::init(api_status* status, i_trace* binding_trace) {
+    RETURN_IF_FAIL(init_trace(status, binding_trace));
     RETURN_IF_FAIL(init_model(status));
     RETURN_IF_FAIL(init_model_mgmt(status));
     RETURN_IF_FAIL(init_loggers(status));
@@ -142,12 +142,23 @@ namespace reinforcement_learning {
     }
   }
 
-  int live_model_impl::init_trace(api_status* status) {
-    const auto trace_impl = _configuration.get(name::TRACE_LOG_IMPLEMENTATION, value::NULL_TRACE_LOGGER);
+  int live_model_impl::init_trace(api_status* status, i_trace* binding_trace) {
+
     i_trace* plogger;
-    RETURN_IF_FAIL(_trace_factory->create(&plogger, trace_impl,_configuration, nullptr, status));
+
+    if (binding_trace != nullptr) {
+      const auto trace_impl = _configuration.get(name::TRACE_LOG_IMPLEMENTATION, value::BINDING_TRACE_LOGGER);
+      RETURN_IF_FAIL(_trace_factory->create(&plogger, trace_impl, _configuration, binding_trace, status));
+    }
+    else {
+      const auto trace_impl = _configuration.get(name::TRACE_LOG_IMPLEMENTATION, value::CONSOLE_TRACE_LOGGER);
+      RETURN_IF_FAIL(_trace_factory->create(&plogger, trace_impl, _configuration, binding_trace, status));
+    }
+
     _trace_logger.reset(plogger);
+    TRACE_INFO(_trace_logger, "test");
     TRACE_INFO(_trace_logger, "API Tracing initialized");
+    TRACE_INFO(_trace_logger, "TEST  0.12312312312312312312312123");
     _watchdog.set_trace_log(_trace_logger.get());
     return error_code::success;
   }

@@ -1,4 +1,5 @@
 #include "rl.net.live_model.h"
+#include "trace_logger.h"
 
 static void pipe_managed_callback(const reinforcement_learning::api_status& status, livemodel_context_t* context)
 {
@@ -30,9 +31,9 @@ API void DeleteLiveModel(livemodel_context_t* context)
     delete context;
 }
 
-API int LiveModelInit(livemodel_context_t* context, reinforcement_learning::api_status* status)
+API int LiveModelInit(livemodel_context_t* context, reinforcement_learning::api_status* status, trace_logger_t binding_trace)
 {
-    return context->livemodel->init(status);
+    return context->livemodel->init(status, binding_trace);
 }
 
 API int LiveModelChooseRank(livemodel_context_t* context, const char * event_id, const char * context_json, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status)

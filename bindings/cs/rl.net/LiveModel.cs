@@ -1,12 +1,14 @@
 using System;
-using System.Threading;
 using System.Runtime.InteropServices;
 
 using Rl.Net.Native;
 
-namespace Rl.Net {
-    public sealed class LiveModel: NativeObject<LiveModel>
+namespace Rl.Net
+{
+    public sealed class LiveModel : NativeObject<LiveModel>
     {
+        public delegate void trace_logger_callback_t(int logLevel, [MarshalAs(NativeMethods.StringMarshalling)] string message);
+
         [DllImport("rl.net.native.dll")]
         private static extern IntPtr CreateLiveModel(IntPtr config);
 
@@ -19,7 +21,7 @@ namespace Rl.Net {
         }
 
         [DllImport("rl.net.native.dll")]
-        private static extern int LiveModelInit(IntPtr liveModel, IntPtr apiStatus);
+        private static extern int LiveModelInit(IntPtr liveModel, IntPtr apiStatus, trace_logger_callback_t traceLogger);
 
         [DllImport("rl.net.native.dll")]
         private static extern int LiveModelChooseRank(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, [MarshalAs(NativeMethods.StringMarshalling)] string contextJson, IntPtr rankingResponse, IntPtr apiStatus);
@@ -52,16 +54,12 @@ namespace Rl.Net {
         {
             ApiStatus status = new ApiStatus(apiStatusHandle);
 
-            EventHandler<ApiStatus> localEvent = this.BackgroundErrorInternal;
-            if (localEvent != null)
-            {
-                localEvent(this, status);
-            }
+            this.BackgroundErrorInternal?.Invoke(this, status);
         }
 
-        public bool TryInit(ApiStatus apiStatus = null)
+        public bool TryInit(ApiStatus apiStatus = null, trace_logger_callback_t traceLogger = null)
         {
-            int result = LiveModelInit(this.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            int result = LiveModelInit(this.NativeHandle, apiStatus.ToNativeHandleOrNullptr(), traceLogger);
             return result == NativeMethods.SuccessStatus;
         }
 

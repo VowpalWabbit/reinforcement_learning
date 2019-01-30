@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 
+typedef void(*trace_callback)(int, const std::string);
+
 namespace reinforcement_learning {
   const int LEVEL_DEBUG = -10;
   const int LEVEL_INFO  = 0;
