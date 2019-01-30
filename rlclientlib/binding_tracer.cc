@@ -7,6 +7,6 @@ namespace reinforcement_learning {
   }
 
   void binding_tracer::log(int log_level, const std::string& msg) {
-    this->callback(log_level, msg);
+    this->callback(log_level, msg.c_str());
   }
 }

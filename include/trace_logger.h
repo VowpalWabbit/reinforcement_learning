@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-typedef void(*trace_callback)(int, const std::string);
+typedef void(*trace_callback)(int, const char*);
 
 namespace reinforcement_learning {
   const int LEVEL_DEBUG = -10;

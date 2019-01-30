@@ -156,9 +156,7 @@ namespace reinforcement_learning {
     }
 
     _trace_logger.reset(plogger);
-    TRACE_INFO(_trace_logger, "test");
     TRACE_INFO(_trace_logger, "API Tracing initialized");
-    TRACE_INFO(_trace_logger, "TEST  0.12312312312312312312312123");
     _watchdog.set_trace_log(_trace_logger.get());
     return error_code::success;
   }

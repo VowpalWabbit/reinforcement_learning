@@ -3,7 +3,7 @@
 #include "rl.net.native.h"
 
 typedef void (*managed_callback_t)(const reinforcement_learning::api_status&);
-typedef void (*trace_logger_t)(int log_level, const std::string msg);
+typedef void (*trace_logger_t)(int log_level, const char* msg);
 
 typedef struct livemodel_context {
     reinforcement_learning::live_model* livemodel;

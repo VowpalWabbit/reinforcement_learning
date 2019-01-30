@@ -52,8 +52,6 @@ namespace reinforcement_learning {
 
       try {
         code = response.get().status_code();
-        TRACE_ERROR(_trace, std::to_string(code));
-        TRACE_ERROR(_trace, "test2");
       }
       catch (const std::exception& e) {
         TRACE_ERROR(_trace, e.what());
