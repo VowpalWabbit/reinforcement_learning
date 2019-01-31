@@ -9,6 +9,7 @@ build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgenerator "" "${CMAKE_CURRENT_S
 set(PROJECT_SOURCES
   api_status.cc
   azure_factories.cc
+  binding_tracer.cc
   console_tracer.cc
   error_callback_fn.cc
   factory_resolver.cc
