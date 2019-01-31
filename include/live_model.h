@@ -80,10 +80,10 @@ namespace reinforcement_learning {
      * Initialize the library and start the background threads used for
      * model managment and sending actions and outcomes to the online trainer
      * @param status  Optional field with detailed string description if there is an error
-     * @param trace_callback Optional trace logger callback
+     * @param binding_trace_callback Optional trace logger callback
      * @return int Return error code.  This will also be returned in the api_status object
      */
-    int init(api_status* status=nullptr, trace_callback binding_trace=nullptr);
+    int init(api_status* status=nullptr, trace_callback binding_trace_callback=nullptr);
 
     /**
      * @brief Choose an action, given a list of actions, action features and context features. The

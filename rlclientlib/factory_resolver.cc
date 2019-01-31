@@ -56,7 +56,7 @@ namespace reinforcement_learning {
   int vw_model_create(m::i_model** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
   int null_tracer_create(i_trace** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
   int console_tracer_create(i_trace** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
-  int binding_tracer_create(i_trace** retval, const u::configuration& cfg, i_trace* trace_logger, api_status* status);
+  int binding_tracer_create(i_trace** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
 
   void factory_initializer::register_default_factories() {
     register_azure_factories();
