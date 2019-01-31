@@ -43,7 +43,9 @@ namespace reinforcement_learning
     if (_initialized)
       return error_code::success;
 
-    const auto err_code = _pimpl->init(status, new binding_tracer(binding_trace));
+    binding_tracer* tracer = (binding_trace != nullptr) ? new binding_tracer(binding_trace) : nullptr;
+
+    const auto err_code = _pimpl->init(status, tracer);
     if (err_code == error_code::success) {
       _initialized = true;
     }
