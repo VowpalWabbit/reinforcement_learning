@@ -143,18 +143,9 @@ namespace reinforcement_learning {
   }
 
   int live_model_impl::init_trace(api_status* status, i_trace* binding_trace) {
-
     i_trace* plogger;
-
-    if (binding_trace != nullptr) {
-      const auto trace_impl = _configuration.get(name::TRACE_LOG_IMPLEMENTATION, value::BINDING_TRACE_LOGGER);
-      RETURN_IF_FAIL(_trace_factory->create(&plogger, trace_impl, _configuration, binding_trace, status));
-    }
-    else {
-      const auto trace_impl = _configuration.get(name::TRACE_LOG_IMPLEMENTATION, value::CONSOLE_TRACE_LOGGER);
-      RETURN_IF_FAIL(_trace_factory->create(&plogger, trace_impl, _configuration, binding_trace, status));
-    }
-
+    const auto trace_impl = _configuration.get(name::TRACE_LOG_IMPLEMENTATION, value::NULL_TRACE_LOGGER);
+    RETURN_IF_FAIL(_trace_factory->create(&plogger, trace_impl, _configuration, binding_trace, status));
     _trace_logger.reset(plogger);
     TRACE_INFO(_trace_logger, "API Tracing initialized");
     _watchdog.set_trace_log(_trace_logger.get());
