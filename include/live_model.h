@@ -7,7 +7,6 @@
  */
 #pragma once
 #include "action_flags.h"
-#include "binding_tracer.h"
 #include "ranking_response.h"
 #include "err_constants.h"
 #include "factory_resolver.h"

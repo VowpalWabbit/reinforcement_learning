@@ -6,11 +6,11 @@
 
 static void pipe_managed_callback(const reinforcement_learning::api_status& status, livemodel_context_t* context)
 {
-    auto managed_callback_local = context->callback;
-    if (managed_callback_local)
-    {
-        managed_callback_local(status);
-    }
+  auto managed_callback_local = context->callback;
+  if (managed_callback_local)
+  {
+    managed_callback_local(status);
+  }
 }
 
 API livemodel_context_t* CreateLiveModel(reinforcement_learning::utility::configuration* config)
@@ -40,25 +40,26 @@ API livemodel_context_t* CreateLiveModel(reinforcement_learning::utility::config
 
 API void DeleteLiveModel(livemodel_context_t* context)
 {
-    // Since the livemodel destructor waits for queues to drain, this can have unhappy consequences,
-    // so detach the callback pipe first. This will cause all background callbacks to no-op in the
-    // unmanaged side, which maintains expected thread semantics (the user of the bindings)
-    context->callback = nullptr;
-    context->trace_logger_callback = nullptr;
-    context->trace_logger_factory = nullptr;
+  // Since the livemodel destructor waits for queues to drain, this can have unhappy consequences,
+  // so detach the callback pipe first. This will cause all background callbacks to no-op in the
+  // unmanaged side, which maintains expected thread semantics (the user of the bindings)
+  context->callback = nullptr;
+  context->trace_logger_callback = nullptr;
 
-    delete context->livemodel;
-    delete context;
+  delete context->trace_logger_factory;
+  delete context->livemodel;
+  delete context;
 }
+
 
 API int LiveModelInit(livemodel_context_t* context, reinforcement_learning::api_status* status)
 {
-    return context->livemodel->init(status);
+  return context->livemodel->init(status);
 }
 
 API int LiveModelChooseRank(livemodel_context_t* context, const char * event_id, const char * context_json, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status)
 {
-    return context->livemodel->choose_rank(event_id, context_json, *resp, status);
+  return context->livemodel->choose_rank(event_id, context_json, *resp, status);
 }
 
 API int LiveModelChooseRankWithFlags(livemodel_context_t* context, const char * event_id, const char * context_json, unsigned int flags, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status)
@@ -73,20 +74,20 @@ API int LiveModelReportActionTaken(livemodel_context_t* context, const char * ev
 
 API int LiveModelReportOutcomeF(livemodel_context_t* context, const char * event_id, float outcome, reinforcement_learning::api_status* status)
 {
-    return context->livemodel->report_outcome(event_id, outcome, status);
+  return context->livemodel->report_outcome(event_id, outcome, status);
 }
 
 API int LiveModelReportOutcomeJson(livemodel_context_t* context, const char * event_id, const char * outcomeJson, reinforcement_learning::api_status* status)
 {
-    return context->livemodel->report_outcome(event_id, outcomeJson, status);
+  return context->livemodel->report_outcome(event_id, outcomeJson, status);
 }
 
 API void LiveModelSetCallback(livemodel_context_t* livemodel, managed_callback_t callback)
 {
-    livemodel->callback = callback;
+  livemodel->callback = callback;
 }
 
 API void LiveModelSetTrace(livemodel_context_t* livemodel, trace_logger_t trace_logger_callback)
 {
-    livemodel->trace_logger_callback = trace_logger_callback;
+  livemodel->trace_logger_callback = trace_logger_callback;
 }

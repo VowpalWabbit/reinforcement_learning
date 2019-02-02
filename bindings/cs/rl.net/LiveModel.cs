@@ -60,6 +60,7 @@ namespace Rl.Net
 
             this.BackgroundErrorInternal?.Invoke(this, status);
         }
+
         private void SendTrace(int logLevel, string msg)
         {
             this.TraceLoggerInternal?.Invoke(this, new TraceLogEventArgs(logLevel, msg));
