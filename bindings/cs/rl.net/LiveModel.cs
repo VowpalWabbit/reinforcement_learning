@@ -63,7 +63,7 @@ namespace Rl.Net
 
         private void SendTrace(int logLevel, string msg)
         {
-            this.TraceLoggerInternal?.Invoke(this, new TraceLogEventArgs(logLevel, msg));
+            this.OnTraceLoggerEventInternal?.Invoke(this, new TraceLogEventArgs(logLevel, msg));
         }
 
         public bool TryInit(ApiStatus apiStatus = null)
@@ -139,24 +139,24 @@ namespace Rl.Net
             }
         }
 
-        private event EventHandler<TraceLogEventArgs> TraceLoggerInternal;
+        private event EventHandler<TraceLogEventArgs> OnTraceLoggerEventInternal;
         // TODO: This class need a pass to ensure thread-safety (or explicit declaration of non-thread-safe)
-        public event EventHandler<TraceLogEventArgs> TraceLogger
+        public event EventHandler<TraceLogEventArgs> OnTraceLoggerEvent
         {
             add
             {
-                if (this.TraceLoggerInternal == null)
+                if (this.OnTraceLoggerEventInternal == null)
                 {
                     LiveModelSetTrace(this.NativeHandle, this.managedTraceCallback);
                 }
 
-                this.TraceLoggerInternal += value;
+                this.OnTraceLoggerEventInternal += value;
             }
             remove
             {
-                this.TraceLoggerInternal -= value;
+                this.OnTraceLoggerEventInternal -= value;
 
-                if (this.TraceLoggerInternal == null)
+                if (this.OnTraceLoggerEventInternal == null)
                 {
                     LiveModelSetTrace(this.NativeHandle, null);
                 }

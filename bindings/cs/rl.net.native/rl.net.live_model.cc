@@ -6,19 +6,19 @@
 #include "trace_logger.h"
 
 
-static void pipe_managed_callback(const reinforcement_learning::api_status& status, livemodel_context_t* context)
+static void pipe_backgroud_error_callback(const reinforcement_learning::api_status& status, livemodel_context_t* context)
 {
-    auto managed_callback_local = context->callback;
-    if (managed_callback_local)
+    auto managed_backgroud_error_callback_local = context->background_error_callback;
+    if (managed_backgroud_error_callback_local)
     {
-        managed_callback_local(status);
+        managed_backgroud_error_callback_local(status);
     }
 }
 
 API livemodel_context_t* CreateLiveModel(reinforcement_learning::utility::configuration* config)
 {
     livemodel_context_t* context = new livemodel_context_t;
-    context->callback = nullptr;
+    context->background_error_callback = nullptr;
     context->trace_logger_callback = nullptr;
     context->trace_logger_factory = nullptr;
 
@@ -35,7 +35,7 @@ API livemodel_context_t* CreateLiveModel(reinforcement_learning::utility::config
     context->trace_logger_factory = new reinforcement_learning::trace_logger_factory_t();;
     context->trace_logger_factory->register_type(reinforcement_learning::value::BINDING_TRACE_LOGGER, binding_tracer_create);
 
-    context->livemodel = new reinforcement_learning::live_model(*config, pipe_managed_callback, context, context->trace_logger_factory);
+    context->livemodel = new reinforcement_learning::live_model(*config, pipe_backgroud_error_callback, context, context->trace_logger_factory);
 
     return context;
 }
@@ -45,7 +45,7 @@ API void DeleteLiveModel(livemodel_context_t* context)
     // Since the livemodel destructor waits for queues to drain, this can have unhappy consequences,
     // so detach the callback pipe first. This will cause all background callbacks to no-op in the
     // unmanaged side, which maintains expected thread semantics (the user of the bindings)
-    context->callback = nullptr;
+    context->background_error_callback = nullptr;
     context->trace_logger_callback = nullptr;
 
     delete context->trace_logger_factory;
@@ -83,9 +83,9 @@ API int LiveModelReportOutcomeJson(livemodel_context_t* context, const char * ev
     return context->livemodel->report_outcome(event_id, outcomeJson, status);
 }
 
-API void LiveModelSetCallback(livemodel_context_t* livemodel, managed_callback_t callback)
+API void LiveModelSetCallback(livemodel_context_t* livemodel, background_callback_t callback)
 {
-    livemodel->callback = callback;
+    livemodel->background_error_callback = callback;
 }
 
 API void LiveModelSetTrace(livemodel_context_t* livemodel, trace_logger_t trace_logger_callback)

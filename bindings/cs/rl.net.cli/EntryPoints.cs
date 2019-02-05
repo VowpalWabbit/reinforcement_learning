@@ -44,7 +44,7 @@ namespace Rl.Net.Cli {
             LiveModel liveModel = new LiveModel(config);
 
             liveModel.BackgroundError += LiveModel_BackgroundError;
-            liveModel.TraceLogger += LiveModel_TraceLog;
+            liveModel.OnTraceLoggerEvent += LiveModel_TraceLog;
 
             if (!liveModel.TryInit(apiStatus))
             {

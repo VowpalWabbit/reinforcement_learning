@@ -2,12 +2,12 @@
 
 #include "rl.net.native.h"
 
-typedef void (*managed_callback_t)(const reinforcement_learning::api_status&);
+typedef void (*background_callback_t)(const reinforcement_learning::api_status&);
 typedef void (*trace_logger_t)(int log_level, const char* msg);
 
 typedef struct livemodel_context {
     reinforcement_learning::live_model* livemodel;
-    managed_callback_t callback;
+    background_callback_t background_error_callback;
     trace_logger_t trace_logger_callback;
     reinforcement_learning::trace_logger_factory_t* trace_logger_factory;
 } livemodel_context_t;
@@ -25,6 +25,6 @@ extern "C" {
     API int LiveModelReportOutcomeF(livemodel_context_t* livemodel, const char * event_id, float outcome, reinforcement_learning::api_status* status = nullptr);
     API int LiveModelReportOutcomeJson(livemodel_context_t* livemodel, const char * event_id, const char * outcomeJson, reinforcement_learning::api_status* status = nullptr);
 
-    API void LiveModelSetCallback(livemodel_context_t* livemodel, managed_callback_t callback = nullptr);
+    API void LiveModelSetCallback(livemodel_context_t* livemodel, background_callback_t callback = nullptr);
     API void LiveModelSetTrace(livemodel_context_t* livemodel, trace_logger_t trace_logger_callback = nullptr);
 }
