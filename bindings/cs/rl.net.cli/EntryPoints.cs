@@ -44,7 +44,7 @@ namespace Rl.Net.Cli {
             LiveModel liveModel = new LiveModel(config);
 
             liveModel.BackgroundError += LiveModel_BackgroundError;
-            liveModel.OnTraceLoggerEvent += LiveModel_TraceLog;
+            liveModel.TraceLoggerEvent += LiveModel_TraceLogEvent;
 
             if (!liveModel.TryInit(apiStatus))
             {
@@ -59,7 +59,7 @@ namespace Rl.Net.Cli {
             Console.Error.WriteLine(e.ErrorMessage);
         }
 
-        private static void LiveModel_TraceLog(object sender, TraceLogEventArgs e)
+        private static void LiveModel_TraceLogEvent(object sender, TraceLogEventArgs e)
         {
             Console.WriteLine($"LogLevel: {e.LogLevel} LogMessage: {e.Message}");
         }

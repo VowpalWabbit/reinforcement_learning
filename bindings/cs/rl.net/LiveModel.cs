@@ -141,7 +141,7 @@ namespace Rl.Net
 
         private event EventHandler<TraceLogEventArgs> OnTraceLoggerEventInternal;
         // TODO: This class need a pass to ensure thread-safety (or explicit declaration of non-thread-safe)
-        public event EventHandler<TraceLogEventArgs> OnTraceLoggerEvent
+        public event EventHandler<TraceLogEventArgs> TraceLoggerEvent
         {
             add
             {
