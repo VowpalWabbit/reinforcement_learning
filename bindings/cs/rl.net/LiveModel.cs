@@ -36,11 +36,11 @@ namespace Rl.Net
         [DllImport("rl.net.native.dll")]
         private static extern int LiveModelReportOutcomeJson(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, [MarshalAs(NativeMethods.StringMarshalling)] string outcomeJson, IntPtr apiStatus);
 
-        private delegate void managed_callback_t(IntPtr apiStatus);
-        private readonly managed_callback_t managedCallback;
+        private delegate void managed_background_error_callback_t(IntPtr apiStatus);
+        private readonly managed_background_error_callback_t managedErrorCallback;
 
         [DllImport("rl.net.native.dll")]
-        private static extern void LiveModelSetCallback(IntPtr liveModel, [MarshalAs(UnmanagedType.FunctionPtr)] managed_callback_t callback = null);
+        private static extern void LiveModelSetCallback(IntPtr liveModel, [MarshalAs(UnmanagedType.FunctionPtr)] managed_background_error_callback_t callback = null);
 
         private delegate void managed_trace_callback_t(int logLevel, [MarshalAs(NativeMethods.StringMarshalling)] string msg);
         private readonly managed_trace_callback_t managedTraceCallback;
@@ -50,7 +50,7 @@ namespace Rl.Net
 
         public LiveModel(Configuration config) : base(BindConstructorArguments(config), new Delete<LiveModel>(DeleteLiveModel))
         {
-            this.managedCallback = new managed_callback_t(this.WrapStatusAndRaiseBackgroundError);
+            this.managedErrorCallback = new managed_background_error_callback_t(this.WrapStatusAndRaiseBackgroundError);
             this.managedTraceCallback = new managed_trace_callback_t(this.SendTrace);
         }
 
@@ -123,7 +123,7 @@ namespace Rl.Net
             {
                 if (this.BackgroundErrorInternal == null)
                 {
-                    LiveModelSetCallback(this.NativeHandle, this.managedCallback);
+                    LiveModelSetCallback(this.NativeHandle, this.managedErrorCallback);
                 }
 
                 this.BackgroundErrorInternal += value;
