@@ -83,7 +83,7 @@ API int LiveModelReportOutcomeJson(livemodel_context_t* context, const char * ev
     return context->livemodel->report_outcome(event_id, outcomeJson, status);
 }
 
-API void LiveModelSetCallback(livemodel_context_t* livemodel, background_callback_t callback)
+API void LiveModelSetCallback(livemodel_context_t* livemodel, background_error_callback_t callback)
 {
     livemodel->background_error_callback = callback;
 }
