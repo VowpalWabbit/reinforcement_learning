@@ -5,14 +5,16 @@ for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio
   set InstallDir=%%i
 )
 
-if not exist "%InstallDir%\MSBuild\15.0\Bin\MSBuild.exe" (
-  echo ERROR: MsBuild couldn't be found
-  exit /b 1
-)
-
-if not defined VcpkgInstallRoot (
-  echo ERROR: VcpkgInstallRoot must be set
-  exit /b 1
+REM Enable injecting of msbuild path (rather than relying on an installed version of Visual Studio),
+REM but fallback to detection path if not provided.
+if not defined msBuildPath (
+  if not exist "%InstallDir%\MSBuild\15.0\Bin\MSBuild.exe" (
+    echo ERROR: MsBuild couldn't be found
+    exit /b 1
+  )
+  else (
+    SET "msBuildPath=%InstallDir%\MSBuild\15.0\Bin\MSBuild.exe"
+  )
 )
 
 call "%InstallDir%\Common7\Tools\VsDevCmd.bat"
@@ -29,7 +31,6 @@ nuget install -o packages ext_libs\vowpal_wabbit\vowpalwabbit\packages.config
 nuget install -o packages bindings\cs\rl.net.native\packages.config
 nuget install -o packages rlclientlib\packages.config
 nuget install -o packages unit_tests\packages.config
-
 
 dotnet restore rl.sln
 

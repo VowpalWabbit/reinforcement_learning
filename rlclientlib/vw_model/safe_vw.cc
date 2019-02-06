@@ -3,6 +3,7 @@
 // VW headers
 #include "example.h"
 #include "parse_example_json.h"
+#include "parser.h"
 
 namespace reinforcement_learning {
 
@@ -85,7 +86,6 @@ namespace reinforcement_learning {
 
     // cleanup VW instance
     reset_source(*_vw, _vw->num_bits);
-    release_parser_datastructures(*_vw);
 
     VW::finish(*_vw);
   }
