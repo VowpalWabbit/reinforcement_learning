@@ -6,7 +6,7 @@
 #include "trace_logger.h"
 
 
-static void pipe_backgroud_error_callback(const reinforcement_learning::api_status& status, livemodel_context_t* context)
+static void pipe_background_error_callback(const reinforcement_learning::api_status& status, livemodel_context_t* context)
 {
     auto managed_backgroud_error_callback_local = context->background_error_callback;
     if (managed_backgroud_error_callback_local)
@@ -22,20 +22,25 @@ API livemodel_context_t* CreateLiveModel(reinforcement_learning::utility::config
     context->trace_logger_callback = nullptr;
     context->trace_logger_factory = nullptr;
 
+    // Create a trace log factory by passing in below creator. It allows LiveModel to use trace_logger provided by user.
     const auto binding_tracer_create = [context](reinforcement_learning::i_trace** retval,
       const reinforcement_learning::utility::configuration& cfg,
       reinforcement_learning::i_trace* trace_logger,
       reinforcement_learning::api_status* status)
     {
-      *retval = new reinforcement_learning::binding_tracer(context->trace_logger_callback);
+      *retval = new rl_net_native::binding_tracer(context->trace_logger_callback);
       return reinforcement_learning::error_code::success;
     };
 
-    config->set(reinforcement_learning::name::TRACE_LOG_IMPLEMENTATION, reinforcement_learning::value::BINDING_TRACE_LOGGER);
     context->trace_logger_factory = new reinforcement_learning::trace_logger_factory_t();;
-    context->trace_logger_factory->register_type(reinforcement_learning::value::BINDING_TRACE_LOGGER, binding_tracer_create);
 
-    context->livemodel = new reinforcement_learning::live_model(*config, pipe_backgroud_error_callback, context, context->trace_logger_factory);
+    // Register the type in factor to use trace logger creatation function.
+    context->trace_logger_factory->register_type(rl_net_native::constants::BINDING_TRACE_LOGGER, binding_tracer_create);
+
+    // Set TRACE_LOG_IMPLEMENTATION configuration to use trace logger.
+    config->set(reinforcement_learning::name::TRACE_LOG_IMPLEMENTATION, rl_net_native::constants::BINDING_TRACE_LOGGER);
+
+    context->livemodel = new reinforcement_learning::live_model(*config, pipe_background_error_callback, context, context->trace_logger_factory);
 
     return context;
 }
@@ -83,12 +88,12 @@ API int LiveModelReportOutcomeJson(livemodel_context_t* context, const char * ev
     return context->livemodel->report_outcome(event_id, outcomeJson, status);
 }
 
-API void LiveModelSetCallback(livemodel_context_t* livemodel, background_error_callback_t callback)
+API void LiveModelSetCallback(livemodel_context_t* livemodel, rl_net_native::background_error_callback_t callback)
 {
     livemodel->background_error_callback = callback;
 }
 
-API void LiveModelSetTrace(livemodel_context_t* livemodel, trace_logger_t trace_logger_callback)
+API void LiveModelSetTrace(livemodel_context_t* livemodel, rl_net_native::trace_logger_callback_t callback)
 {
-    livemodel->trace_logger_callback = trace_logger_callback;
+    livemodel->trace_logger_callback = callback;
 }

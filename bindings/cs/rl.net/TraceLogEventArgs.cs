@@ -2,13 +2,13 @@
 {
     public class TraceLogEventArgs
     {
-        public TraceLogEventArgs(int logLevel, string msg)
+        public TraceLogEventArgs(RLLogLevel logLevel, string msg)
         {
             LogLevel = logLevel;
             Message = msg;
         }
 
-        public int LogLevel { get; }
+        public RLLogLevel LogLevel { get; }
         public string Message { get; }
     }
 }

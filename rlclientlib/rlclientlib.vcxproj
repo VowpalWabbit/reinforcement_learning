@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -177,7 +177,6 @@
     <ClInclude Include="..\include\str_util.h" />
     <ClInclude Include="..\include\trace_logger.h" />
     <ClInclude Include="..\include\data_buffer.h" />
-    <ClInclude Include="binding_tracer.h" />
     <ClInclude Include="utility\data_buffer_streambuf.h" />
     <ClInclude Include="generated\OutcomeEvent_generated.h" />
     <ClInclude Include="generated\RankingEvent_generated.h" />
@@ -216,7 +215,6 @@
     <ClInclude Include="ranking_event.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="binding_tracer.cc" />
     <ClCompile Include="model_mgmt\model_downloader.cc" />
     <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="model_mgmt\data_callback_fn.cc" />

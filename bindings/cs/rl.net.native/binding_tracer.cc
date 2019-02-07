@@ -1,8 +1,8 @@
 #include "binding_tracer.h"
 
-namespace reinforcement_learning {
+namespace rl_net_native {
 
-  binding_tracer::binding_tracer(trace_callback &callback) {
+  binding_tracer::binding_tracer(trace_logger_callback_t &callback) {
     this->callback = callback;
   }
 

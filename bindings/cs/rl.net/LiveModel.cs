@@ -63,7 +63,7 @@ namespace Rl.Net
 
         private void SendTrace(int logLevel, string msg)
         {
-            this.OnTraceLoggerEventInternal?.Invoke(this, new TraceLogEventArgs(logLevel, msg));
+            this.OnTraceLoggerEventInternal?.Invoke(this, new TraceLogEventArgs((RLLogLevel)logLevel, msg));
         }
 
         public bool TryInit(ApiStatus apiStatus = null)

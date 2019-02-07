@@ -41,7 +41,6 @@ namespace reinforcement_learning {  namespace value {
       const char *const INTERACTION_EH_SENDER = "INTERACTION_EH_SENDER";
       const char *const NULL_TRACE_LOGGER = "NULL_TRACE_LOGGER";
       const char *const CONSOLE_TRACE_LOGGER = "CONSOLE_TRACE_LOGGER";
-      const char *const BINDING_TRACE_LOGGER = "BINDING_TRACE_LOGGER";
       const bool MODEL_BACKGROUND_REFRESH = true;
 }}
 

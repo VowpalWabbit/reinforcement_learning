@@ -61,7 +61,16 @@ namespace Rl.Net.Cli {
 
         private static void LiveModel_TraceLogEvent(object sender, TraceLogEventArgs e)
         {
-            Console.WriteLine($"LogLevel: {e.LogLevel} LogMessage: {e.Message}");
+            RLLogLevel logLevel = e.LogLevel;
+            switch (logLevel)
+            {
+                case RLLogLevel.LEVEL_ERROR:
+                    Console.Error.WriteLine($"LogLevel: {e.LogLevel} LogMessage: {e.Message}");
+                    break;
+                default:
+                    Console.WriteLine($"LogLevel: {e.LogLevel} LogMessage: {e.Message}");
+                    break;
+            }
         }
 
         // TODO: Pull this out to a separate sample.

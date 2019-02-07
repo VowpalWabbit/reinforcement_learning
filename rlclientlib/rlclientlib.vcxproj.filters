@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="model_mgmt\model_downloader.cc" />
@@ -35,7 +35,6 @@
     <ClCompile Include="utility\data_buffer.cc" />
     <ClCompile Include="utility\stl_container_adapter.cc" />
     <ClCompile Include="utility\data_buffer_streambuf.cc" />
-    <ClCompile Include="binding_tracer.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -90,7 +89,6 @@
     <ClInclude Include="utility\http_authorization.h" />
     <ClInclude Include="utility\http_helper.h" />
     <ClInclude Include="..\include\action_flags.h" />
-    <ClInclude Include="binding_tracer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
