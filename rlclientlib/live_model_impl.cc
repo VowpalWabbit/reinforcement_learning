@@ -145,7 +145,7 @@ namespace reinforcement_learning {
   int live_model_impl::init_trace(api_status* status) {
     const auto trace_impl = _configuration.get(name::TRACE_LOG_IMPLEMENTATION, value::NULL_TRACE_LOGGER);
     i_trace* plogger;
-    RETURN_IF_FAIL(_trace_factory->create(&plogger, trace_impl, _configuration, nullptr, status));
+    RETURN_IF_FAIL(_trace_factory->create(&plogger, trace_impl,_configuration, nullptr, status));
     _trace_logger.reset(plogger);
     TRACE_INFO(_trace_logger, "API Tracing initialized");
     _watchdog.set_trace_log(_trace_logger.get());

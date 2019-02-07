@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 
-
 namespace reinforcement_learning {
   const int LEVEL_DEBUG = -10;
   const int LEVEL_INFO  = 0;

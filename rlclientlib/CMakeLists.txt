@@ -9,7 +9,6 @@ build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgenerator "" "${CMAKE_CURRENT_S
 set(PROJECT_SOURCES
   api_status.cc
   azure_factories.cc
-  binding_tracer.cc
   console_tracer.cc
   error_callback_fn.cc
   factory_resolver.cc
@@ -62,7 +61,6 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/str_util.h
   ../include/trace_logger.h
   ../include/data_buffer.h
-  ../include/binding_tracer.h
 )
 
 set(PROJECT_PRIVATE_HEADERS
