@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "err_constants.h"
 #include "model_mgmt/restapi_data_transport.h"
+#include "vw_model/pdf_model.h"
 #include "vw_model/vw_model.h"
 #include "logger/event_logger.h"
 #include "utility/watchdog.h"
@@ -55,7 +56,13 @@ namespace reinforcement_learning {
     }
   }
 
-  int vw_model_create(m::i_model** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
+  template <typename model_t>
+  int model_create(m::i_model** retval, const u::configuration&, i_trace* trace_logger, api_status* status)
+  {
+    *retval = new model_t(trace_logger);
+    return error_code::success;
+  }
+
   int null_tracer_create(i_trace** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
   int console_tracer_create(i_trace** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
 
@@ -70,7 +77,8 @@ namespace reinforcement_learning {
 
   void factory_initializer::register_default_factories() {
     register_azure_factories();
-    model_factory.register_type(value::VW, vw_model_create);
+    model_factory.register_type(value::VW, model_create<m::vw_model>);
+    model_factory.register_type(value::PASSTHROUGH_PDF_MODEL, model_create<m::pdf_model>);
     trace_logger_factory.register_type(value::NULL_TRACE_LOGGER, null_tracer_create);
     trace_logger_factory.register_type(value::CONSOLE_TRACE_LOGGER, console_tracer_create);
 
@@ -89,11 +97,6 @@ namespace reinforcement_learning {
         file_name,
         cb, trace_logger, status);
     });
-  }
-
-  int vw_model_create(m::i_model** retval, const u::configuration&, reinforcement_learning::i_trace* trace_logger, reinforcement_learning::api_status* status) {
-    *retval = new m::vw_model(trace_logger);
-    return error_code::success;
   }
 
   int null_tracer_create(i_trace** retval, const u::configuration& cfg, i_trace* trace_logger, api_status* status) {

@@ -19,10 +19,13 @@ namespace reinforcement_learning {
   public:
     safe_vw(const std::shared_ptr<safe_vw>& master);
     safe_vw(const char* model_data, size_t len);
+	safe_vw(std::string vw_parameters);
 
     ~safe_vw();
 
+    void parse_context_with_pdf(const char* context, std::vector<int>& actions, std::vector<float>& scores);
     void rank(const char* context, std::vector<int>& actions, std::vector<float>& scores);
+
     const char* id() const;
 
     friend class safe_vw_factory;

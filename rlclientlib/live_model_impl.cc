@@ -112,6 +112,8 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_transport->get_data(md, status));
     RETURN_IF_FAIL(_model->update(md, status));
 
+    _model_data_received = true;
+
     return error_code::success;
   }
 

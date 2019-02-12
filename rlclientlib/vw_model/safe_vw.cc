@@ -76,6 +76,11 @@ namespace reinforcement_learning {
     _vw = VW::initialize("--quiet --json", &buf, false, nullptr, nullptr);
   }
 
+  safe_vw::safe_vw(std::string vw_commandline)
+  {
+	_vw = VW::initialize(vw_commandline, nullptr, true, nullptr, nullptr);
+  }
+
   safe_vw::~safe_vw()
   {
     // cleanup examples
@@ -111,6 +116,41 @@ namespace reinforcement_learning {
   }
 
   example& safe_vw::get_or_create_example_f(void* vw) { return *(((safe_vw*)vw)->get_or_create_example()); }
+
+  void safe_vw::parse_context_with_pdf(const char* context, std::vector<int>& actions, std::vector<float>& scores)
+  {
+    DecisionServiceInteraction interaction;
+
+    auto examples = v_init<example*>();
+    examples.push_back(get_or_create_example());
+
+    std::vector<char> line_vec(context, context + strlen(context) + 1);
+
+    VW::read_line_decision_service_json<false>(*_vw, examples, &line_vec[0], line_vec.size(), false, get_or_create_example_f, this, &interaction);
+
+    // finalize example
+    VW::setup_examples(*_vw, examples);
+
+    actions.resize(interaction.probabilities.size());
+    for (int i = 0; i < interaction.actions.size(); i++)
+    {
+      actions[i] = i;
+    }
+
+    scores.resize(interaction.probabilities.size());
+    for (int i = 0; i < interaction.probabilities.size(); i++)
+    {
+      scores[i] = interaction.probabilities[i];
+    }
+
+    // clean up examples and push examples back into pool for re-use
+    for (auto&& ex : examples) {
+      _example_pool.emplace_back(ex);
+    }
+
+    // cleanup
+    examples.delete_v();
+  }
 
   void safe_vw::rank(const char* context, std::vector<int>& actions, std::vector<float>& scores)
   {

@@ -40,7 +40,9 @@ set(PROJECT_SOURCES
   utility/http_helper.cc
   utility/str_util.cc
   utility/watchdog.cc
+  vw_model/pdf_model.cc
   vw_model/safe_vw.cc
+  vw_model/sampling.cc
   vw_model/vw_model.cc
 )
 
@@ -85,7 +87,9 @@ set(PROJECT_PRIVATE_HEADERS
   utility/object_pool.h
   utility/periodic_background_proc.h
   utility/watchdog.h
+  vw_model/pdf_model.h
   vw_model/safe_vw.h
+  vw_model/sampling.h
   vw_model/vw_model.h
 )
 
