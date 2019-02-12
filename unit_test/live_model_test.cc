@@ -42,6 +42,7 @@ namespace {
   )";
 
   const auto JSON_CONTEXT = R"({"_multi":[{},{}]})";
+  const auto JSON_CONTEXT_PDF = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":1}}],"p":[0.5, 0.5]})";
 
   r::live_model create_mock_live_model(
     const u::configuration& config,
@@ -114,6 +115,30 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request) {
   ds.choose_rank(event_id, JSON_CONTEXT, response, &status);
   BOOST_CHECK_EQUAL(status.get_error_code(), 0);
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+}
+
+BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
+  //create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_IMPLEMENTATION, r::value::PASSTHROUGH_PDF_MODEL);
+  config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
+
+  r::api_status status;
+
+  //create the ds live_model, and initialize it with the config
+  
+  r::live_model model = create_mock_live_model(config, nullptr, &r::model_factory, nullptr);
+  BOOST_CHECK_EQUAL(model.init(&status), err::success);
+  BOOST_CHECK_EQUAL(model.refresh_model(&status), err::success);
+
+  const auto event_id = "event_id";
+
+  r::ranking_response response;
+
+  // request ranking
+  BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CONTEXT_PDF, response), err::success);
 }
 
 BOOST_AUTO_TEST_CASE(live_model_outcome) {
