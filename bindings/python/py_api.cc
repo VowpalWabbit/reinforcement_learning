@@ -128,5 +128,12 @@ namespace reinforcement_learning {
       _impl.report_outcome(event_id, outcome, &status);
       check_api_status(status);
     }
+
+    void live_model::refresh_model()
+    {
+      reinforcement_learning::api_status status;
+      _impl.refresh_model(&status);
+      check_api_status(status);
+    }
   }
 }

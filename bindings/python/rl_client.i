@@ -96,6 +96,8 @@ namespace reinforcement_learning {
       void report_outcome(const char* event_id, const char* outcome);
       void report_outcome(const char* event_id, float outcome);
 
+      void refresh_model();
+
       %pythoncode %{
         def choose_rank(self, context, event_id = None, deferred = False):
             if event_id == None:
