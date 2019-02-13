@@ -17,3 +17,13 @@ API int LoadConfigurationFromJson(const int length, const char* json, reinforcem
 
     return reinforcement_learning::utility::config::create_from_json(json_str, *config, /* i_trace */ nullptr, status);
 }
+
+API void ConfigurationSet(reinforcement_learning::utility::configuration* instance, const char* name, const char* value)
+{
+    instance->set(name, value);
+}
+
+API const char* ConfigurationGet(reinforcement_learning::utility::configuration* instance, const char* name, const char* defVal)
+{
+    return instance->get(name, defVal);
+}
