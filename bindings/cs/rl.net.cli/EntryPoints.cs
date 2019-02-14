@@ -42,12 +42,14 @@ namespace Rl.Net.Cli {
             }
 
             LiveModel liveModel = new LiveModel(config);
+
+            liveModel.BackgroundError += LiveModel_BackgroundError;
+            liveModel.TraceLoggerEvent += LiveModel_TraceLogEvent;
+
             if (!liveModel.TryInit(apiStatus))
             {
                 WriteStatusAndExit(apiStatus);
             }
-
-            liveModel.BackgroundError += LiveModel_BackgroundError;
 
             return liveModel;
         }
@@ -55,6 +57,20 @@ namespace Rl.Net.Cli {
         private static void LiveModel_BackgroundError(object sender, ApiStatus e)
         {
             Console.Error.WriteLine(e.ErrorMessage);
+        }
+
+        private static void LiveModel_TraceLogEvent(object sender, TraceLogEventArgs e)
+        {
+            RLLogLevel logLevel = e.LogLevel;
+            switch (logLevel)
+            {
+                case RLLogLevel.LEVEL_ERROR:
+                    Console.Error.WriteLine($"LogLevel: {e.LogLevel} LogMessage: {e.Message}");
+                    break;
+                default:
+                    Console.WriteLine($"LogLevel: {e.LogLevel} LogMessage: {e.Message}");
+                    break;
+            }
         }
 
         // TODO: Pull this out to a separate sample.

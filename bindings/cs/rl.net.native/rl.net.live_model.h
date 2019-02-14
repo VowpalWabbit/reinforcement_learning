@@ -2,11 +2,23 @@
 
 #include "rl.net.native.h"
 
-typedef void (*managed_callback_t)(const reinforcement_learning::api_status&);
+namespace rl_net_native {
+    namespace constants {
+        const char *const BINDING_TRACE_LOGGER = "BINDING_TRACE_LOGGER";
+    }
+    typedef void(*background_error_callback_t)(const reinforcement_learning::api_status&);
+    typedef void(*trace_logger_callback_t)(int log_level, const char* msg);
+}
 
 typedef struct livemodel_context {
+    // reinforcement learning live_model instance.
     reinforcement_learning::live_model* livemodel;
-    managed_callback_t callback;
+    // callback funtion to user when there is background error.
+    rl_net_native::background_error_callback_t background_error_callback;
+    // callback funtion to user for trace log.
+    rl_net_native::trace_logger_callback_t trace_logger_callback;
+    // A trace log factory instance holder of one live_model instance for binding calls.
+    reinforcement_learning::trace_logger_factory_t* trace_logger_factory;
 } livemodel_context_t;
 
 // Global exports
@@ -22,5 +34,6 @@ extern "C" {
     API int LiveModelReportOutcomeF(livemodel_context_t* livemodel, const char * event_id, float outcome, reinforcement_learning::api_status* status = nullptr);
     API int LiveModelReportOutcomeJson(livemodel_context_t* livemodel, const char * event_id, const char * outcomeJson, reinforcement_learning::api_status* status = nullptr);
 
-    API void LiveModelSetCallback(livemodel_context_t* livemodel, managed_callback_t callback = nullptr);
+    API void LiveModelSetCallback(livemodel_context_t* livemodel, rl_net_native::background_error_callback_t callback = nullptr);
+    API void LiveModelSetTrace(livemodel_context_t* livemodel, rl_net_native::trace_logger_callback_t trace_logger_callback = nullptr);
 }

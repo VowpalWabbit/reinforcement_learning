@@ -101,6 +101,20 @@ namespace reinforcement_learning {
     return report_outcome_internal(event_id, outcome, status);
   }
 
+  int live_model_impl::refresh_model(api_status* status) {
+
+    if (_bg_model_proc) {
+      RETURN_ERROR_LS(_trace_logger.get(), status, model_update_error)
+        << "Cannot manually refresh model when backround polling is enabled";
+    }
+
+    model_management::model_data md;
+    RETURN_IF_FAIL(_transport->get_data(md, status));
+    RETURN_IF_FAIL(_model->update(md, status));
+
+    return error_code::success;
+  }
+
   live_model_impl::live_model_impl(
     const utility::configuration& config,
     const error_fn fn,
@@ -117,11 +131,14 @@ namespace reinforcement_learning {
       _trace_factory(trace_factory),
       _t_factory{t_factory},
       _m_factory{m_factory},
-      _sender_factory{sender_factory},
-      _bg_model_proc(config.get_int(name::MODEL_REFRESH_INTERVAL_MS, 60 * 1000), _watchdog, "Model downloader", &_error_cb) {
+      _sender_factory{sender_factory} {
     // If there is no user supplied error callback, supply a default one that does nothing but report unhandled background errors.
     if (fn == nullptr) {
       _error_cb.set(&default_error_callback, &_watchdog);
+    }
+
+    if (_configuration.get_bool(name::MODEL_BACKGROUND_REFRESH, value::MODEL_BACKGROUND_REFRESH)) {
+      _bg_model_proc.reset(new utility::periodic_background_proc<model_management::model_downloader>(config.get_int(name::MODEL_REFRESH_INTERVAL_MS, 60 * 1000), _watchdog, "Model downloader", &_error_cb));
     }
   }
 
@@ -264,9 +281,14 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_t_factory->create(&ptransport, tranport_impl, _configuration, status));
     // This class manages lifetime of transport
     this->_transport.reset(ptransport);
-    // Initialize background process and start downloading models
-    this->_model_download.reset(new m::model_downloader(ptransport, &_data_cb, _trace_logger.get()));
-    return _bg_model_proc.init(_model_download.get(), status);
+
+	  if (_bg_model_proc) {
+      // Initialize background process and start downloading models
+	    this->_model_download.reset(new m::model_downloader(ptransport, &_data_cb, _trace_logger.get()));
+	    return _bg_model_proc->init(_model_download.get(), status);
+	  }
+
+    return refresh_model(status);
   }
 
   //helper: check if at least one of the arguments is null or empty

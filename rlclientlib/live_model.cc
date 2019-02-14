@@ -13,21 +13,31 @@
 
 namespace reinforcement_learning
 {
-  live_model::live_model(
-    const utility::configuration& config,
-    error_fn fn,
-    void* err_context,
-    trace_logger_factory_t* trace_factory,
-    data_transport_factory_t* t_factory,
-    model_factory_t* m_factory,
-    sender_factory_t* sender_factory)
-  {
+	live_model::live_model(
+		const utility::configuration& config,
+		error_fn fn,
+		void* err_context,
+		trace_logger_factory_t* trace_factory,
+		data_transport_factory_t* t_factory,
+		model_factory_t* m_factory,
+		sender_factory_t* sender_factory)
+	{
     _pimpl = std::unique_ptr<live_model_impl>(
-    new live_model_impl(config, fn, err_context, trace_factory, t_factory, m_factory, sender_factory));
-  }
+      new live_model_impl(config, fn, err_context, trace_factory, t_factory, m_factory, sender_factory));
+	}
+
+	live_model::live_model(live_model&& other) {
+		std::swap(_pimpl, other._pimpl);
+		_initialized = other._initialized;
+	}
 
   live_model::~live_model() = default;
 
+  live_model& live_model::operator=(live_model&& other) {
+    std::swap(_pimpl, other._pimpl);
+    _initialized = other._initialized;
+    return *this;
+  }
   int live_model::init(api_status* status) {
     if (_initialized)
       return error_code::success;
@@ -84,5 +94,11 @@ namespace reinforcement_learning
   {
     INIT_CHECK();
     return _pimpl->report_outcome(event_id, outcome, status);
+  }
+
+  int live_model::refresh_model(api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->refresh_model(status);
   }
 }

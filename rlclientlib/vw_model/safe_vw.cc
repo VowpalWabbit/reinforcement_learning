@@ -3,6 +3,7 @@
 // VW headers
 #include "example.h"
 #include "parse_example_json.h"
+#include "parser.h"
 
 namespace reinforcement_learning {
 
@@ -85,7 +86,6 @@ namespace reinforcement_learning {
 
     // cleanup VW instance
     reset_source(*_vw, _vw->num_bits);
-    release_parser_datastructures(*_vw);
 
     VW::finish(*_vw);
   }
@@ -138,9 +138,11 @@ namespace reinforcement_learning {
       scores[i] = predictions[i].score;
     }
 
-    // push examples back into pool for re-use
-    for (auto&& ex : examples)
+    // clean up examples and push examples back into pool for re-use
+    for (auto&& ex : examples) {
+      ex->pred.a_s.delete_v();
       _example_pool.emplace_back(ex);
+    }
 
     // cleanup
     examples.delete_v();

@@ -1,11 +1,11 @@
 using System;
-using System.Threading;
 using System.Runtime.InteropServices;
 
 using Rl.Net.Native;
 
-namespace Rl.Net {
-    public sealed class LiveModel: NativeObject<LiveModel>
+namespace Rl.Net
+{
+    public sealed class LiveModel : NativeObject<LiveModel>
     {
         [DllImport("rl.net.native.dll")]
         private static extern IntPtr CreateLiveModel(IntPtr config);
@@ -36,27 +36,34 @@ namespace Rl.Net {
         [DllImport("rl.net.native.dll")]
         private static extern int LiveModelReportOutcomeJson(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, [MarshalAs(NativeMethods.StringMarshalling)] string outcomeJson, IntPtr apiStatus);
 
-        private delegate void managed_callback_t(IntPtr apiStatus);
+        private delegate void managed_background_error_callback_t(IntPtr apiStatus);
+        private readonly managed_background_error_callback_t managedErrorCallback;
 
         [DllImport("rl.net.native.dll")]
-        private static extern void LiveModelSetCallback(IntPtr liveModel, [MarshalAs(UnmanagedType.FunctionPtr)] managed_callback_t callback = null);
+        private static extern void LiveModelSetCallback(IntPtr liveModel, [MarshalAs(UnmanagedType.FunctionPtr)] managed_background_error_callback_t callback = null);
 
-        private readonly managed_callback_t managedCallback;
+        private delegate void managed_trace_callback_t(int logLevel, [MarshalAs(NativeMethods.StringMarshalling)] string msg);
+        private readonly managed_trace_callback_t managedTraceCallback;
+
+        [DllImport("rl.net.native.dll")]
+        private static extern void LiveModelSetTrace(IntPtr liveModel, [MarshalAs(UnmanagedType.FunctionPtr)] managed_trace_callback_t callback = null);
 
         public LiveModel(Configuration config) : base(BindConstructorArguments(config), new Delete<LiveModel>(DeleteLiveModel))
         {
-            this.managedCallback = new managed_callback_t(this.WrapStatusAndRaiseBackgroundError);
+            this.managedErrorCallback = new managed_background_error_callback_t(this.WrapStatusAndRaiseBackgroundError);
+            this.managedTraceCallback = new managed_trace_callback_t(this.SendTrace);
         }
 
         private void WrapStatusAndRaiseBackgroundError(IntPtr apiStatusHandle)
         {
             ApiStatus status = new ApiStatus(apiStatusHandle);
 
-            EventHandler<ApiStatus> localEvent = this.BackgroundErrorInternal;
-            if (localEvent != null)
-            {
-                localEvent(this, status);
-            }
+            this.BackgroundErrorInternal?.Invoke(this, status);
+        }
+
+        private void SendTrace(int logLevel, string msg)
+        {
+            this.OnTraceLoggerEventInternal?.Invoke(this, new TraceLogEventArgs((RLLogLevel)logLevel, msg));
         }
 
         public bool TryInit(ApiStatus apiStatus = null)
@@ -116,7 +123,7 @@ namespace Rl.Net {
             {
                 if (this.BackgroundErrorInternal == null)
                 {
-                    LiveModelSetCallback(this.NativeHandle, this.managedCallback);
+                    LiveModelSetCallback(this.NativeHandle, this.managedErrorCallback);
                 }
 
                 this.BackgroundErrorInternal += value;
@@ -128,6 +135,30 @@ namespace Rl.Net {
                 if (this.BackgroundErrorInternal == null)
                 {
                     LiveModelSetCallback(this.NativeHandle, null);
+                }
+            }
+        }
+
+        private event EventHandler<TraceLogEventArgs> OnTraceLoggerEventInternal;
+        // TODO: This class need a pass to ensure thread-safety (or explicit declaration of non-thread-safe)
+        public event EventHandler<TraceLogEventArgs> TraceLoggerEvent
+        {
+            add
+            {
+                if (this.OnTraceLoggerEventInternal == null)
+                {
+                    LiveModelSetTrace(this.NativeHandle, this.managedTraceCallback);
+                }
+
+                this.OnTraceLoggerEventInternal += value;
+            }
+            remove
+            {
+                this.OnTraceLoggerEventInternal -= value;
+
+                if (this.OnTraceLoggerEventInternal == null)
+                {
+                    LiveModelSetTrace(this.NativeHandle, null);
                 }
             }
         }

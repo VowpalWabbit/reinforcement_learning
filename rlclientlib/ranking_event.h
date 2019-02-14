@@ -66,7 +66,7 @@ namespace reinforcement_learning {
 
     const std::string& get_outcome() const;
     float get_numeric_outcome() const;
-    bool get_deferred_action() const;
+    bool get_action_taken() const;
 
     static const unsigned int outcome_type_unset = 0;
     static const unsigned int outcome_type_string = 1;
@@ -80,13 +80,13 @@ namespace reinforcement_learning {
     static outcome_event report_outcome(const char* event_id, float outcome, float pass_prob = 1);
 
   private:
-    outcome_event(const char* event_id, float pass_prob, const char* outcome, bool _deferred_action);
-    outcome_event(const char* event_id, float pass_prob, float outcome, bool _deferred_action);
+    outcome_event(const char* event_id, float pass_prob, const char* outcome, bool _action_taken);
+    outcome_event(const char* event_id, float pass_prob, float outcome, bool _action_taken);
   
   private:
     std::string _outcome;
     float _float_outcome;
-    bool _deferred_action;
+    bool _action_taken;
     unsigned int _outcome_type = 0;
   };
 }
