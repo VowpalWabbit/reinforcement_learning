@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "err_constants.h"
 #include "model_mgmt/restapi_data_transport.h"
+#include "model_mgmt/empty_data_transport.h"
 #include "vw_model/pdf_model.h"
 #include "vw_model/vw_model.h"
 #include "logger/event_logger.h"
@@ -75,8 +76,15 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
+  int empty_data_transport_create(m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
+  {
+    *retval = new model_management::empty_data_transport();
+    return error_code::success;
+  }
+
   void factory_initializer::register_default_factories() {
     register_azure_factories();
+    data_transport_factory.register_type(value::NO_MODEL_DATA, empty_data_transport_create);
     model_factory.register_type(value::VW, model_create<m::vw_model>);
     model_factory.register_type(value::PASSTHROUGH_PDF_MODEL, model_create<m::pdf_model>);
     trace_logger_factory.register_type(value::NULL_TRACE_LOGGER, null_tracer_create);

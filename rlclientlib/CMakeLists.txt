@@ -23,6 +23,7 @@ set(PROJECT_SOURCES
   logger/endian.cc
   logger/file/file_logger.cc
   model_mgmt/data_callback_fn.cc
+  model_mgmt/empty_data_transport.cc
   model_mgmt/model_downloader.cc
   model_mgmt/model_mgmt.cc
   model_mgmt/restapi_data_transport.cc
@@ -75,6 +76,7 @@ set(PROJECT_PRIVATE_HEADERS
   logger/event_logger.h
   logger/eventhub_client.h
   model_mgmt/data_callback_fn.h
+  model_mgmt/empty_data_transport.h
   model_mgmt/model_downloader.h
   model_mgmt/restapi_data_transport.h
   moving_queue.h

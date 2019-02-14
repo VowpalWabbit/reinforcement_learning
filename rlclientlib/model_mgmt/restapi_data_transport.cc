@@ -14,7 +14,7 @@ namespace u = reinforcement_learning::utility;
 
 namespace reinforcement_learning { namespace model_management {
 
-  restapi_data_tranport::restapi_data_tranport(i_http_client* httpcli, i_trace* trace)
+  restapi_data_transport::restapi_data_transport(i_http_client* httpcli, i_trace* trace)
     : _httpcli(httpcli), _datasz{ 0 }, _trace{ trace }
   {}
 
@@ -38,7 +38,7 @@ namespace reinforcement_learning { namespace model_management {
    * x-ms-version = 2017-04-17
    */
 
-  int restapi_data_tranport::get_data_info(::utility::datetime& last_modified, ::utility::size64_t& sz, api_status* status) {
+  int restapi_data_transport::get_data_info(::utility::datetime& last_modified, ::utility::size64_t& sz, api_status* status) {
 
     // Build request URI and start the request.
     auto request_task = _httpcli->request(methods::HEAD)
@@ -69,7 +69,7 @@ namespace reinforcement_learning { namespace model_management {
     }
   }
 
-  int restapi_data_tranport::get_data(model_data& ret, api_status* status) {
+  int restapi_data_transport::get_data(model_data& ret, api_status* status) {
 
     ::utility::datetime curr_last_modified;
     ::utility::size64_t curr_datasz;
@@ -131,7 +131,7 @@ namespace reinforcement_learning { namespace model_management {
     return request_task.get();
   }
 
-  int restapi_data_tranport::check(api_status* status) {
+  int restapi_data_transport::check(api_status* status) {
     ::utility::datetime last_modified;
     ::utility::size64_t datasz;
     return get_data_info(last_modified, datasz, status);

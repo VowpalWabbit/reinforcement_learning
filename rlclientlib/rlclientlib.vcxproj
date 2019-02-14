@@ -203,6 +203,7 @@
     <ClInclude Include="utility\http_helper.h" />
     <ClInclude Include="model_mgmt\model_downloader.h" />
     <ClInclude Include="model_mgmt\data_callback_fn.h" />
+    <ClInclude Include="model_mgmt\empty_data_transport.h" />
     <ClInclude Include="model_mgmt\restapi_data_transport.h" />
     <ClInclude Include="logger\async_batcher.h" />
     <ClInclude Include="logger\event_queue.h" />
@@ -219,10 +220,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="logger\file\file_logger.cc" />
-    <ClCompile Include="model_mgmt\model_downloader.cc" />
-    <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="model_mgmt\data_callback_fn.cc" />
+    <ClCompile Include="model_mgmt\empty_data_transport.cc" />
+    <ClCompile Include="model_mgmt\model_downloader.cc" />
     <ClCompile Include="model_mgmt\model_mgmt.cc" />
+    <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="logger\eventhub_client.cc" />
     <ClCompile Include="utility\config_utility.cc" />
     <ClCompile Include="utility\stl_container_adapter.cc" />
