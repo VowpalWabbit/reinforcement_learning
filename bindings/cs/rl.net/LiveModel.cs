@@ -72,46 +72,106 @@ namespace Rl.Net
             return result == NativeMethods.SuccessStatus;
         }
 
-        public bool TryChooseRank(string actionId, string contextJson, out RankingResponse response, ApiStatus apiStatus = null)
+        public void Init()
+        {
+            ApiStatus apiStatus = new ApiStatus();
+            if (!this.TryInit(apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+        }
+
+        public bool TryChooseRank(string eventId, string contextJson, out RankingResponse response, ApiStatus apiStatus = null)
         {
             response = new RankingResponse();
-            return this.TryChooseRank(actionId, contextJson, response, apiStatus);
+            return this.TryChooseRank(eventId, contextJson, response, apiStatus);
         }
 
-        public bool TryChooseRank(string actionId, string contextJson, RankingResponse response, ApiStatus apiStatus = null)
+        public bool TryChooseRank(string eventId, string contextJson, RankingResponse response, ApiStatus apiStatus = null)
         {
-            int result = LiveModelChooseRank(this.NativeHandle, actionId, contextJson, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            int result = LiveModelChooseRank(this.NativeHandle, eventId, contextJson, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
         }
 
-        public bool TryChooseRank(string actionId, string contextJson, ActionFlags flags, out RankingResponse response, ApiStatus apiStatus = null)
+        public RankingResponse ChooseRank(string eventId, string contextJson)
+        {
+            ApiStatus apiStatus = new ApiStatus();
+            RankingResponse result = new RankingResponse();
+            if (!this.TryChooseRank(eventId, contextJson, result, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+
+            return result;
+        }
+
+        public bool TryChooseRank(string eventId, string contextJson, ActionFlags flags, out RankingResponse response, ApiStatus apiStatus = null)
         {
             response = new RankingResponse();
-            return this.TryChooseRank(actionId, contextJson, flags, response, apiStatus);
+            return this.TryChooseRank(eventId, contextJson, flags, response, apiStatus);
         }
 
-        public bool TryChooseRank(string actionId, string contextJson, ActionFlags flags, RankingResponse response, ApiStatus apiStatus = null)
+        public bool TryChooseRank(string eventId, string contextJson, ActionFlags flags, RankingResponse response, ApiStatus apiStatus = null)
         {
-            int result = LiveModelChooseRankWithFlags(this.NativeHandle, actionId, contextJson, (uint)flags, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            int result = LiveModelChooseRankWithFlags(this.NativeHandle, eventId, contextJson, (uint)flags, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
         }
 
-        public bool TryReportActionTaken(string actionId, ApiStatus apiStatus = null)
+        public RankingResponse ChooseRank(string eventId, string contextJson, ActionFlags flags)
         {
-            int result = LiveModelReportActionTaken(this.NativeHandle, actionId, apiStatus.ToNativeHandleOrNullptr());
+            ApiStatus apiStatus = new ApiStatus();
+            RankingResponse result = new RankingResponse();
+            if (!this.TryChooseRank(eventId, contextJson, flags, result, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+
+            return result;
+        }
+
+        public bool TryReportActionTaken(string eventId, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelReportActionTaken(this.NativeHandle, eventId, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
         }
 
-        public bool TryReportOutcome(string actionId, float outcome, ApiStatus apiStatus = null)
+        public void ReportActionTaken(string eventId)
         {
-            int result = LiveModelReportOutcomeF(this.NativeHandle, actionId, outcome, apiStatus.ToNativeHandleOrNullptr());
+            ApiStatus apiStatus = new ApiStatus();
+            if (!this.TryReportActionTaken(eventId, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+        }
+
+        public bool TryReportOutcome(string eventId, float outcome, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelReportOutcomeF(this.NativeHandle, eventId, outcome, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
         }
 
-        public bool TryReportOutcome(string actionId, string outcomeJson, ApiStatus apiStatus = null)
+        public void ReportOutcome(string eventId, float outcome)
         {
-            int result = LiveModelReportOutcomeJson(this.NativeHandle, actionId, outcomeJson, apiStatus.ToNativeHandleOrNullptr());
+            ApiStatus apiStatus = new ApiStatus();
+            if (!this.TryReportOutcome(eventId, outcome, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+        }
+
+        public bool TryReportOutcome(string eventId, string outcomeJson, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelReportOutcomeJson(this.NativeHandle, eventId, outcomeJson, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
+        }
+
+        public void ReportOutcome(string eventId, string outcomeJson)
+        {
+            ApiStatus apiStatus = new ApiStatus();
+            if (!this.TryReportOutcome(eventId, outcomeJson, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
         }
 
         private event EventHandler<ApiStatus> BackgroundErrorInternal;
