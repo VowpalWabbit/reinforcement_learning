@@ -129,46 +129,70 @@ namespace Rl.Net
             return result;
         }
 
-        public bool TryReportActionTaken(string eventId, ApiStatus apiStatus = null)
+        [Obsolete("Use TryQueueActionTakenEvent instead.")]
+        public bool TryReportActionTaken(string eventId, ApiStatus apiStatus = null) 
+        => this.TryQueueActionTakenEvent(eventId, apiStatus);
+
+        public bool TryQueueActionTakenEvent(string eventId, ApiStatus apiStatus = null)
         {
             int result = LiveModelReportActionTaken(this.NativeHandle, eventId, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
         }
 
+        [Obsolete("Use QueueActionTakenEvent instead.")]
         public void ReportActionTaken(string eventId)
+            => this.QueueActionTakenEvent(eventId);
+
+        public void QueueActionTakenEvent(string eventId)
         {
             ApiStatus apiStatus = new ApiStatus();
-            if (!this.TryReportActionTaken(eventId, apiStatus))
+            if (!this.TryQueueActionTakenEvent(eventId, apiStatus))
             {
                 throw new RLException(apiStatus);
             }
         }
 
+        [Obsolete("Use TryQueueOutcomeEvent instead.")]
         public bool TryReportOutcome(string eventId, float outcome, ApiStatus apiStatus = null)
+            => this.TryQueueOutcomeEvent(eventId, outcome, apiStatus);
+
+        public bool TryQueueOutcomeEvent(string eventId, float outcome, ApiStatus apiStatus = null)
         {
             int result = LiveModelReportOutcomeF(this.NativeHandle, eventId, outcome, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
         }
 
+        [Obsolete("Use QueueOutcomeReport insteaed.")]
         public void ReportOutcome(string eventId, float outcome)
+            => this.QueueOutcomeEvent(eventId, outcome);
+
+        public void QueueOutcomeEvent(string eventId, float outcome)
         {
             ApiStatus apiStatus = new ApiStatus();
-            if (!this.TryReportOutcome(eventId, outcome, apiStatus))
+            if (!this.TryQueueOutcomeEvent(eventId, outcome, apiStatus))
             {
                 throw new RLException(apiStatus);
             }
         }
 
+        [Obsolete("Use TryQueueOutcomeEvent instead.")]
         public bool TryReportOutcome(string eventId, string outcomeJson, ApiStatus apiStatus = null)
+            => this.TryQueueOutcomeEvent(eventId, outcomeJson, apiStatus);
+
+        public bool TryQueueOutcomeEvent(string eventId, string outcomeJson, ApiStatus apiStatus = null)
         {
             int result = LiveModelReportOutcomeJson(this.NativeHandle, eventId, outcomeJson, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
         }
 
+        [Obsolete("Use QueueOutcomeEvent instead.")]
         public void ReportOutcome(string eventId, string outcomeJson)
+            => this.QueueOutcomeEvent(eventId, outcomeJson);
+
+        public void QueueOutcomeEvent(string eventId, string outcomeJson)
         {
             ApiStatus apiStatus = new ApiStatus();
-            if (!this.TryReportOutcome(eventId, outcomeJson, apiStatus))
+            if (!this.TryQueueOutcomeEvent(eventId, outcomeJson, apiStatus))
             {
                 throw new RLException(apiStatus);
             }
