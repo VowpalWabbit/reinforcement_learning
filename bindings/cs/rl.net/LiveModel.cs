@@ -51,14 +51,37 @@ namespace Rl.Net
         public LiveModel(Configuration config) : base(BindConstructorArguments(config), new Delete<LiveModel>(DeleteLiveModel))
         {
             this.managedErrorCallback = new managed_background_error_callback_t(this.WrapStatusAndRaiseBackgroundError);
+            LiveModelSetCallback(this.NativeHandle, this.managedErrorCallback);
+
             this.managedTraceCallback = new managed_trace_callback_t(this.SendTrace);
         }
 
         private void WrapStatusAndRaiseBackgroundError(IntPtr apiStatusHandle)
         {
-            ApiStatus status = new ApiStatus(apiStatusHandle);
+            using (ApiStatus status = new ApiStatus(apiStatusHandle)) 
+            {
+                EventHandler<ApiStatus> trargetEventLocal = this.BackgroundErrorInternal;
+                if (trargetEventLocal != null)
+                {
+                    trargetEventLocal.Invoke(this, status);
+                }
+                else
+                {
+                    // This comes strictly from the background thread - so simply throwing here has
+                    // the right semantics with respect to AppDomain.UnhandledException. Unfortunately,
+                    // that seems to bring down the process, if there is nothing Managed under the native
+                    // stack this will cause an application-level unhandled native exception, and will
+                    // likely terminate the applciation. So new up a thread, and throw from it.
+                    // See https://stackoverflow.com/questions/42298126/raising-exception-on-managed-and-unmanaged-callback-chain-with-p-invoke
 
-            this.BackgroundErrorInternal?.Invoke(this, status);
+                    // IMPORTANT: This is safe solely because the status string is marshaled into the
+                    // exception message on construction (in other words, before control returns to the
+                    // unmanaged call-stack - the Dispose() is a no-op because in this case NativeObject does
+                    // not own the unmanaged pointer, but we use it to remove itself from the finalizer queue)
+                    RLException e = new RLException(status);
+                    new System.Threading.Thread(() => throw e).Start();
+                }
+            }
         }
 
         private void SendTrace(int logLevel, string msg)
@@ -74,7 +97,7 @@ namespace Rl.Net
 
         public void Init()
         {
-            ApiStatus apiStatus = new ApiStatus();
+            using (ApiStatus apiStatus = new ApiStatus())
             if (!this.TryInit(apiStatus))
             {
                 throw new RLException(apiStatus);
@@ -95,8 +118,9 @@ namespace Rl.Net
 
         public RankingResponse ChooseRank(string eventId, string contextJson)
         {
-            ApiStatus apiStatus = new ApiStatus();
             RankingResponse result = new RankingResponse();
+            
+            using (ApiStatus apiStatus = new ApiStatus())
             if (!this.TryChooseRank(eventId, contextJson, result, apiStatus))
             {
                 throw new RLException(apiStatus);
@@ -119,8 +143,9 @@ namespace Rl.Net
 
         public RankingResponse ChooseRank(string eventId, string contextJson, ActionFlags flags)
         {
-            ApiStatus apiStatus = new ApiStatus();
             RankingResponse result = new RankingResponse();
+
+            using (ApiStatus apiStatus = new ApiStatus())
             if (!this.TryChooseRank(eventId, contextJson, flags, result, apiStatus))
             {
                 throw new RLException(apiStatus);
@@ -145,7 +170,7 @@ namespace Rl.Net
 
         public void QueueActionTakenEvent(string eventId)
         {
-            ApiStatus apiStatus = new ApiStatus();
+            using (ApiStatus apiStatus = new ApiStatus())
             if (!this.TryQueueActionTakenEvent(eventId, apiStatus))
             {
                 throw new RLException(apiStatus);
@@ -168,7 +193,7 @@ namespace Rl.Net
 
         public void QueueOutcomeEvent(string eventId, float outcome)
         {
-            ApiStatus apiStatus = new ApiStatus();
+            using (ApiStatus apiStatus = new ApiStatus())
             if (!this.TryQueueOutcomeEvent(eventId, outcome, apiStatus))
             {
                 throw new RLException(apiStatus);
@@ -191,7 +216,7 @@ namespace Rl.Net
 
         public void QueueOutcomeEvent(string eventId, string outcomeJson)
         {
-            ApiStatus apiStatus = new ApiStatus();
+            using (ApiStatus apiStatus = new ApiStatus())
             if (!this.TryQueueOutcomeEvent(eventId, outcomeJson, apiStatus))
             {
                 throw new RLException(apiStatus);
@@ -200,31 +225,25 @@ namespace Rl.Net
 
         private event EventHandler<ApiStatus> BackgroundErrorInternal;
 
-        // TODO: This class need a pass to ensure thread-safety (or explicit declaration of non-thread-safe)
+        // This event is thread-safe, because we do not hook/unhook the event in user-schedulable code anymore.
         public event EventHandler<ApiStatus> BackgroundError
         {
             add
             {
-                if (this.BackgroundErrorInternal == null)
-                {
-                    LiveModelSetCallback(this.NativeHandle, this.managedErrorCallback);
-                }
-
                 this.BackgroundErrorInternal += value;
             }
             remove
             {
                 this.BackgroundErrorInternal -= value;
-
-                if (this.BackgroundErrorInternal == null)
-                {
-                    LiveModelSetCallback(this.NativeHandle, null);
-                }
             }
         }
 
         private event EventHandler<TraceLogEventArgs> OnTraceLoggerEventInternal;
-        // TODO: This class need a pass to ensure thread-safety (or explicit declaration of non-thread-safe)
+        
+        // TODO:
+        /// <remarks>
+        /// Add/remove here is not thread safe.
+        /// </remarks>
         public event EventHandler<TraceLogEventArgs> TraceLoggerEvent
         {
             add
