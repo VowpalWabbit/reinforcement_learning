@@ -25,7 +25,7 @@ namespace reinforcement_learning { namespace joiner {
   ////
 
   void convert_to_text(const std::vector<std::string>& files) {
-    for(const auto& file:files) {
+    for(const auto& file : files) {
       convert_to_text(file);
     }
   }
