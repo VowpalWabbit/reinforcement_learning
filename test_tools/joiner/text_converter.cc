@@ -17,11 +17,12 @@ namespace reinforcement_learning { namespace joiner {
 
   // forward declarations 
   void convert_to_text(const std::string& file);
-  void print_ranking_event(void* buff);
-  void print_outcome_event(void* buff);
-  void print_numeric_outcome(const flat::OutcomeEventHolder* evt);
-  void print_string_outcome(const flat::OutcomeEventHolder* evt);
-  void print_action_outcome(const flat::OutcomeEventHolder* evt);
+  void convert_to_text(std::istream& in_strm, std::ostream& out_strm);
+  void print_ranking_event(void* buff, std::ostream& out_strm);
+  void print_outcome_event(void* buff, std::ostream& out_strm);
+  void print_numeric_outcome(const flat::OutcomeEventHolder* evt, std::ostream& out_strm);
+  void print_string_outcome(const flat::OutcomeEventHolder* evt, std::ostream& out_strm);
+  void print_action_outcome(const flat::OutcomeEventHolder* evt, std::ostream& out_strm);
   ////
 
   void convert_to_text(const std::vector<std::string>& files) {
@@ -34,32 +35,37 @@ namespace reinforcement_learning { namespace joiner {
     std::ifstream infile;
     infile.open(file, std::ios_base::binary);
     if (infile.fail() || infile.bad()){
-      std::cout << "Unable to open file: " << file << std::endl;
+      std::cerr << "Unable to open file: " << file << std::endl;
     }
     std::cout << "File:" << file << std::endl;
+
+    convert_to_text(infile, std::cout);
+  }
+
+  void convert_to_text(std::istream& in_strm, std::ostream& out_strm) {
     do {
-      char raw_preamble[8];
-      if (infile.fail() || infile.bad())
+      if (in_strm.fail() || in_strm.bad())
         return;
-      infile.read(raw_preamble, 8);
+      char raw_preamble[8];
+      in_strm.read(raw_preamble, 8);
       rlog::preamble p;
       p.read_from_bytes(reinterpret_cast<uint8_t*>(raw_preamble), 8);
       std::unique_ptr<char> msg_data(new char[p.msg_size]);
-      infile.read(msg_data.get(), p.msg_size);
-      if (infile.fail() || infile.bad())
+      in_strm.read(msg_data.get(), p.msg_size);
+      if (in_strm.fail() || in_strm.bad())
         return;
-      
+
       switch (p.msg_type) {
       case rlog::message_type::fb_ranking_event_collection:
-        print_ranking_event(msg_data.get());
+        print_ranking_event(msg_data.get(), out_strm);
         break;
       case rlog::message_type::fb_outcome_event_collection:
-        print_outcome_event(msg_data.get());
+        print_outcome_event(msg_data.get(), out_strm);
         break;
       default:
         break;
       }
-    } while (!infile.fail() && !infile.bad());
+    } while (!in_strm.fail() && !in_strm.bad());
   }
 
   inline std::string to_str(const flatbuffers::String* pstr) {
@@ -70,78 +76,78 @@ namespace reinforcement_learning { namespace joiner {
     return std::string(pstr->begin(), pstr->end());
   }
 
-  void print_ranking_event(void* buff)
+  void print_ranking_event(void* buff, std::ostream& out_strm)
   {
     const auto rank = flat::GetRankingEventBatch(buff);
     const auto events = rank->events();
-    std::cout << "RankingBatch: ";
+    out_strm << "RankingBatch: ";
     for (auto evt : *events) {
-      std::cout << "Int: ";
+      out_strm << "Int: ";
 
-      std::cout << "id [" << to_str(evt->event_id()) << "]";
+      out_strm << "id [" << to_str(evt->event_id()) << "]";
 
-      std::cout << ", a [ ";
+      out_strm << ", a [ ";
       for (auto i : *evt->action_ids()) {
-        std::cout << i << ' ';
+        out_strm << i << ' ';
       }
-      std::cout << "]";
+      out_strm << "]";
 
-      std::cout << ", p [ ";
+      out_strm << ", p [ ";
       for (auto i : *evt->probabilities()) {
-        std::cout << i << ' ';
+        out_strm << i << ' ';
       }
-      std::cout << "]";
+      out_strm << "]";
 
-      std::cout << ", c [";
-      std::cout << to_str(evt->context());
-      std::cout << "]";
+      out_strm << ", c [";
+      out_strm << to_str(evt->context());
+      out_strm << "]";
 
-      std::cout << ", m [";
-      std::cout << to_str(evt->model_id());
-      std::cout << "]";
+      out_strm << ", m [";
+      out_strm << to_str(evt->model_id());
+      out_strm << "]";
 
-      std::cout << ", pass [" << evt->pass_probability() << "]";
-      std::cout << ", def [" << evt->deferred_action() << "]" << std::endl;
+      out_strm << ", pass [" << evt->pass_probability() << "]";
+      out_strm << ", def [" << evt->deferred_action() << "]" << std::endl;
     }
   }
 
-  void print_outcome_event(void* buff) {
+  void print_outcome_event(void* buff, std::ostream& out_strm) {
     const auto outcome = flat::GetOutcomeEventBatch(buff);
     const auto events = outcome->events();
-    std::cout << "OutcomeBatch: ";
+    out_strm << "OutcomeBatch: ";
     for (auto evt : *events)
     {
-      std::cout << "id [" << to_str(evt->event_id())  << "]";
+      out_strm << "id [" << to_str(evt->event_id())  << "]";
       switch (evt->the_event_type()) {
       case flat::OutcomeEvent::OutcomeEvent_NumericEvent:
-        print_numeric_outcome(evt);
+        print_numeric_outcome(evt, out_strm);
         break;
       case flat::OutcomeEvent::OutcomeEvent_StringEvent:
-        print_string_outcome(evt);
+        print_string_outcome(evt, out_strm);
         break;
       case flat::OutcomeEvent::OutcomeEvent_ActionTakenEvent:
-        print_action_outcome(evt);
+        print_action_outcome(evt, out_strm);
         break;
       default:
-        std::cout << ", outcome [UNKNOWN]";
+        out_strm << ", outcome [UNKNOWN]";
       }
-      std::cout << ", pass_prob [" << evt->pass_probability() << "]" << std::endl;
+      out_strm << ", pass_prob [" << evt->pass_probability() << "]" << std::endl;
     }
   }
 
-  void print_numeric_outcome(const flat::OutcomeEventHolder* evt) {
+  void print_numeric_outcome(const flat::OutcomeEventHolder* evt, std::ostream& out_strm) {
     const auto number = evt->the_event_as_NumericEvent();
-    std::cout << ", outcome [" << number->value() << "]";
+    out_strm << ", outcome [" << number->value() << "]";
   }
 
-  void print_string_outcome(const flat::OutcomeEventHolder* evt) {
+  void print_string_outcome(const flat::OutcomeEventHolder* evt, std::ostream& out_strm) {
     const auto str = evt->the_event_as_StringEvent();
-    std::cout << ", outcome ['" << str->value() << "']";
+    out_strm << ", outcome ['" << str->value() << "']";
   }
 
-  void print_action_outcome(const flat::OutcomeEventHolder* evt) {
+  void print_action_outcome(const flat::OutcomeEventHolder* evt, std::ostream& out_strm) {
     const auto act = evt->the_event_as_ActionTakenEvent();
-    std::cout << ", outcome [action_taken=" << act->value() << "]";
+    out_strm << ", outcome [action_taken=" << act->value() << "]";
   }
 
 }}
