@@ -34,7 +34,7 @@ namespace reinforcement_learning { namespace joiner {
     std::ifstream infile;
     infile.open(file, std::ios_base::binary);
     if (infile.fail() || infile.bad()){
-      std::cout << "Unable to open file: " << file << std::endl;
+      std::cerr<< "Unable to open file: " << file << std::endl;
     }
     std::cout << "File:" << file << std::endl;
     do {
