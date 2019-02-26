@@ -26,7 +26,7 @@ namespace reinforcement_learning { namespace joiner {
   ////
 
   void convert_to_text(const std::vector<std::string>& files) {
-    for(const auto& file:files) {
+    for(const auto& file : files) {
       convert_to_text(file);
     }
   }
@@ -35,7 +35,7 @@ namespace reinforcement_learning { namespace joiner {
     std::ifstream infile;
     infile.open(file, std::ios_base::binary);
     if (infile.fail() || infile.bad()){
-      std::cerr << "Unable to open file: " << file << std::endl;
+      std::cout << "Unable to open file: " << file << std::endl;
     }
     std::cout << "File:" << file << std::endl;
 
