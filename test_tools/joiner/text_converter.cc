@@ -44,16 +44,21 @@ namespace reinforcement_learning { namespace joiner {
 
   void convert_to_text(std::istream& in_strm, std::ostream& out_strm) {
     do {
-      if (in_strm.fail() || in_strm.bad())
+      if (in_strm.fail() || in_strm.bad()) {
+        std::cerr << "Error in input stream." << std::endl;
         return;
+      }
+
       char raw_preamble[8];
       in_strm.read(raw_preamble, 8);
       rlog::preamble p;
       p.read_from_bytes(reinterpret_cast<uint8_t*>(raw_preamble), 8);
       std::unique_ptr<char> msg_data(new char[p.msg_size]);
       in_strm.read(msg_data.get(), p.msg_size);
-      if (in_strm.fail() || in_strm.bad())
+      if (in_strm.fail() || in_strm.bad()) {
+        std::cerr << "Error reading from input file." << std::endl;
         return;
+      }
 
       switch (p.msg_type) {
       case rlog::message_type::fb_ranking_event_collection:
