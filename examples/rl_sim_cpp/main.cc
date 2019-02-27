@@ -25,7 +25,9 @@ po::variables_map process_cmd_line(const int argc, char** argv) {
   desc.add_options()
     ( "help", "produce help message" )
     ( "json_config,j", po::value<std::string>()->
-      default_value("client.json"), "JSON file with config information for hosted RL loop" );
+      default_value("client.json"), "JSON file with config information for hosted RL loop" )
+    ("log_to_file,l", po::value<bool>()->
+      default_value(false), "Log interactions and observations to local files");
 
   po::variables_map vm;
   store(parse_command_line(argc, argv, desc), vm);

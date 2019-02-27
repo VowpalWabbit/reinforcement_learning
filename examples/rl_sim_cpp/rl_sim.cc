@@ -100,6 +100,11 @@ int rl_sim::init_rl() {
     return -1;
   }
 
+  if(_options["log_to_file"].as<bool>()) {
+    config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
+    config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
+  }
+
   // Trace log API calls to the console
   config.set(r::name::TRACE_LOG_IMPLEMENTATION, r::value::CONSOLE_TRACE_LOGGER);
 

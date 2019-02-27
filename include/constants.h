@@ -32,6 +32,8 @@ namespace reinforcement_learning {  namespace name {
       const char *const  EH_TEST                 = "eventhub.mock";
       const char *const  TRACE_LOG_IMPLEMENTATION = "trace.logger.implementation";
       const char *const  QUEUE_MODE = "queue.mode";
+      const char *const  INTERACTION_FILE_NAME = "interaction.file.name";
+      const char *const  OBSERVATION_FILE_NAME = "observation.file.name";
 }}
 
 namespace reinforcement_learning {  namespace value {
@@ -39,6 +41,8 @@ namespace reinforcement_learning {  namespace value {
       const char *const VW                 = "VW";
       const char *const OBSERVATION_EH_SENDER = "OBSERVATION_EH_SENDER";
       const char *const INTERACTION_EH_SENDER = "INTERACTION_EH_SENDER";
+      const char *const OBSERVATION_FILE_SENDER = "OBSERVATION_FILE_SENDER";
+      const char *const INTERACTION_FILE_SENDER = "INTERACTION_FILE_SENDER";
       const char *const NULL_TRACE_LOGGER = "NULL_TRACE_LOGGER";
       const char *const CONSOLE_TRACE_LOGGER = "CONSOLE_TRACE_LOGGER";
       const bool MODEL_BACKGROUND_REFRESH = true;

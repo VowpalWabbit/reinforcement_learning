@@ -1,8 +1,8 @@
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(FlatBuffers REQUIRED)
 
-set(RL_FLAT_BUFFER_FILES 
-	"${CMAKE_CURRENT_SOURCE_DIR}/schema/OutcomeEvent.fbs" 
+set(RL_FLAT_BUFFER_FILES
+	"${CMAKE_CURRENT_SOURCE_DIR}/schema/OutcomeEvent.fbs"
 	"${CMAKE_CURRENT_SOURCE_DIR}/schema/RankingEvent.fbs" )
 build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgenerator "" "${CMAKE_CURRENT_SOURCE_DIR}/generated" "" "")
 
@@ -21,6 +21,7 @@ set(PROJECT_SOURCES
   logger/preamble.cc
   logger/preamble_sender.cc
   logger/endian.cc
+  logger/file/file_logger.cc
   model_mgmt/data_callback_fn.cc
   model_mgmt/model_downloader.cc
   model_mgmt/model_mgmt.cc
