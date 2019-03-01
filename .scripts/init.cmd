@@ -12,8 +12,7 @@ IF NOT DEFINED msbuildPath (
     if not exist "%InstallDir%\MSBuild\15.0\Bin\MSBuild.exe" (
         echo ERROR: MsBuild couldn't be found
         exit /b 1
-    )
-    else (
+    ) else (
         SET "msBuildPath=%InstallDir%\MSBuild\15.0\Bin\MSBuild.exe"
     )
 )
