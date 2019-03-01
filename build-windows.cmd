@@ -1,11 +1,11 @@
 @echo off
 setlocal
 
-.scripts\init.cmd
+CALL .scripts\init.cmd
 
 REM TODO: Is this necessary?
 call "%InstallDir%\Common7\Tools\VsDevCmd.bat"
 
-.scripts\restore.cmd
+CALL .scripts\restore.cmd
 
-.scripts\build.cmd
+CALL .scripts\build.cmd
