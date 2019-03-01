@@ -37,7 +37,7 @@ int sample_and_populate_response(uint64_t rnd_seed, std::vector<int>& action_ids
       RETURN_ERROR_LS(trace_logger, status, model_rank_error) << e.what();
     }
     catch ( ... ) {
-      RETURN_ERROR_LS(trace_logger, status, model_rank_error) << "Unkown error";
+      RETURN_ERROR_LS(trace_logger, status, model_rank_error) << "Unknown error";
     }
   }
 }

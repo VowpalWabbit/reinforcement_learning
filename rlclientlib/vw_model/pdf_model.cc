@@ -40,7 +40,7 @@ namespace reinforcement_learning { namespace model_management {
       RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << e.what();
     }
     catch ( ... ) {
-      RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << "Unkown error";
+      RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << "Unknown error";
     }
   }
 }}

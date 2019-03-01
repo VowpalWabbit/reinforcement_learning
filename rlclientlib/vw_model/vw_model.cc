@@ -14,7 +14,7 @@ namespace reinforcement_learning { namespace model_management {
 
   int vw_model::update(const model_data& data, bool& model_ready, api_status* status) {
     try {
-      TRACE_INFO(_trace_logger, utility::concat("Recieved new model data. With size ", data.data_sz()));
+      TRACE_INFO(_trace_logger, utility::concat("Received new model data. With size ", data.data_sz()));
 	  
       if (data.data_sz() > 0)
       {
@@ -27,7 +27,7 @@ namespace reinforcement_learning { namespace model_management {
       RETURN_ERROR_LS(_trace_logger, status, model_update_error) << e.what();
     }
     catch ( ... ) {
-      RETURN_ERROR_LS(_trace_logger, status, model_update_error) << "Unkown error";
+      RETURN_ERROR_LS(_trace_logger, status, model_update_error) << "Unknown error";
     }
 
     return error_code::success;
@@ -55,7 +55,7 @@ namespace reinforcement_learning { namespace model_management {
       RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << e.what();
     }
     catch ( ... ) {
-      RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << "Unkown error";
+      RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << "Unknown error";
     }
   }
 }}
