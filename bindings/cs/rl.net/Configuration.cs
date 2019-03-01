@@ -41,8 +41,7 @@ namespace Rl.Net {
                 IntPtr result = ConfigurationGet(this.NativeHandle, key, string.Empty);
                 if (result == IntPtr.Zero)
                 {
-                    // TODO: Should we use string.Empty?
-                    return null;
+                    return string.Empty;
                 }
 
                 return NativeMethods.StringMarshallingFunc(result);
