@@ -29,6 +29,7 @@ set(PROJECT_SOURCES
   model_mgmt/restapi_data_transport.cc
   ranking_event.cc
   ranking_response.cc
+  sampling.cc
   trace_logger.cc
   utility/stl_container_adapter.cc
   utility/config_utility.cc
@@ -43,7 +44,6 @@ set(PROJECT_SOURCES
   utility/watchdog.cc
   vw_model/pdf_model.cc
   vw_model/safe_vw.cc
-  vw_model/sampling.cc
   vw_model/vw_model.cc
 )
 
@@ -81,6 +81,7 @@ set(PROJECT_PRIVATE_HEADERS
   model_mgmt/restapi_data_transport.h
   moving_queue.h
   ranking_event.h
+  sampling.h
   utility/context_helper.h
   utility/http_authorization.h
   utility/http_client.h
@@ -91,7 +92,6 @@ set(PROJECT_PRIVATE_HEADERS
   utility/watchdog.h
   vw_model/pdf_model.h
   vw_model/safe_vw.h
-  vw_model/sampling.h
   vw_model/vw_model.h
 )
 

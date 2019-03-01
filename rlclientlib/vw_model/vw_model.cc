@@ -1,7 +1,6 @@
 #include "vw_model.h"
 #include "err_constants.h"
 #include "object_factory.h"
-#include "sampling.h"
 #include "ranking_response.h"
 #include "trace_logger.h"
 #include "str_util.h"
@@ -9,7 +8,7 @@
 namespace reinforcement_learning { namespace model_management {
 
   vw_model::vw_model(i_trace* trace_logger) :
-    _vw_pool(nullptr) , _trace_logger(trace_logger) {
+    _vw_pool(nullptr), _trace_logger(trace_logger) {
   }
 
   int vw_model::update(const model_data& data, bool& model_ready, api_status* status) {
@@ -33,21 +32,20 @@ namespace reinforcement_learning { namespace model_management {
     return error_code::success;
   }
 
-  int vw_model::choose_rank(uint64_t rnd_seed, const char* features, ranking_response& response, api_status* status) {
+  int vw_model::choose_rank(
+    uint64_t rnd_seed, 
+    const char* features, 
+    std::vector<int>& action_ids, 
+    std::vector<float>& action_pdf, 
+    const char*& model_version,
+    api_status* status) {
     try {
       pooled_vw vw(_vw_pool, _vw_pool.get_or_create());
 
-      // Rank actions using the model.  Should generate a pdf
-      std::vector<int> action_ids;
-      std::vector<float> pdf;
-
       // Get a ranked list of action_ids and corresponding pdf
-      vw->rank(features, action_ids, pdf);
+      vw->rank(features, action_ids, action_pdf);
 
-      // TODO: Should there be an i_pdf_model? It seems like the ability to integrate at the PDF level easily would be nice.
-      ::reinforcement_learning::sample_and_populate_response(rnd_seed, action_ids, pdf, response, _trace_logger, status);
-      
-      response.set_model_id(vw->id());
+      model_version = vw->id();
 
       return error_code::success;
     }

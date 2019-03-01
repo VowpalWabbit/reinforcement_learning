@@ -16,6 +16,7 @@
 #include "hash.h"
 #include "factory_resolver.h"
 #include "logger/preamble_sender.h"
+#include "sampling.h"
 
 // Some namespace changes for more concise code
 namespace e = exploration;
@@ -277,7 +278,14 @@ namespace reinforcement_learning {
     api_status* status) const {
     // The seed used is composed of uniform_hash(app_id) + uniform_hash(event_id)
     const uint64_t seed = uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
-    return _model->choose_rank(seed, context, response, status);
+
+    std::vector<int> action_ids;
+    std::vector<float> action_pdf;
+    const char* model_version;
+
+    RETURN_IF_FAIL(_model->choose_rank(seed, context, action_ids, action_pdf, model_version, status));
+
+    return sample_and_populate_response(seed, action_ids, action_pdf, response, _trace_logger.get(), status);
   }
 
   int live_model_impl::init_model_mgmt(api_status* status) {

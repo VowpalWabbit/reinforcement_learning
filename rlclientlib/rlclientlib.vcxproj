@@ -212,7 +212,7 @@
     <ClInclude Include="utility\watchdog.h" />
     <ClInclude Include="vw_model\vw_model.h" />
     <ClInclude Include="vw_model\pdf_model.h" />
-    <ClInclude Include="vw_model\sampling.h" />
+    <ClInclude Include="sampling.h" />
     <ClInclude Include="vw_model\safe_vw.h" />
     <ClInclude Include="live_model_impl.h" />
     <ClInclude Include="error_callback_fn.h" />
@@ -235,7 +235,7 @@
     <ClCompile Include="vw_model\vw_model.cc" />
     <ClCompile Include="vw_model\pdf_model.cc" />
     <ClCompile Include="vw_model\safe_vw.cc" />
-    <ClCompile Include="vw_model\sampling.cc" />
+    <ClCompile Include="sampling.cc" />
     <ClCompile Include="factory_resolver.cc" />
     <ClCompile Include="live_model_impl.cc" />
     <ClCompile Include="error_callback_fn.cc" />
