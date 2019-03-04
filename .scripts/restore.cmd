@@ -15,19 +15,19 @@ REM TODO: This really should be out-of-source (also, can we switch to vcpkg for 
 ECHO Restoring "%rlRoot%\ext_libs\vowpal_wabbit\vowpalwabbit\packages.config"
 
 REM Do not remove the space at the end of the "solutionDir" specifier, as otherwise it breaks NuGet
-"%nugetPath%" install -o packages "%rlRoot%\ext_libs\vowpal_wabbit\vowpalwabbit\packages.config" -solutionDir "%rlRoot%\ "
+"%nugetPath%" install -o "%rlRoot%\packages" "%rlRoot%\ext_libs\vowpal_wabbit\vowpalwabbit\packages.config" -solutionDir "%rlRoot%\ "
 ECHO.
 
 ECHO Restoring "%rlRoot%\bindings\cs\rl.net.native\packages.config"
-"%nugetPath%" install -o packages "%rlRoot%\bindings\cs\rl.net.native\packages.config"
+"%nugetPath%" install -o "%rlRoot%\packages" "%rlRoot%\bindings\cs\rl.net.native\packages.config"
 ECHO.
 
-ECHO Restoring "%rlRoot%\ext_libs\vowpal_wabbit\vowpalwabbit\packages.config"
-"%nugetPath%" install -o packages "%rlRoot%\rlclientlib\packages.config"
+ECHO Restoring "%rlRoot%\rlclientlib\packages.config"
+"%nugetPath%" install -o "%rlRoot%\packages" "%rlRoot%\rlclientlib\packages.config"
 ECHO.
 
-ECHO Restoring "%rlRoot%\ext_libs\vowpal_wabbit\vowpalwabbit\packages.config"
-"%nugetPath%" install -o packages "%rlRoot%\unit_tests\packages.config"
+ECHO Restoring "%rlRoot%\unit_tests\packages.config"
+"%nugetPath%" install -o "%rlRoot%\packages" "%rlRoot%\unit_tests\packages.config"
 ECHO.
 
 ECHO Restoring SDK-Style projects in "%rlRoot%\rl.sln"
