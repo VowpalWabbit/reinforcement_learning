@@ -78,6 +78,22 @@ namespace Rl.Net {
             return true;
         }
 
+        public long ChosenAction
+        {
+            get
+            {
+                ApiStatus apiStatus = new ApiStatus();
+
+                long result;
+                if (!this.TryGetChosenAction(out result, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
+
+                return result;
+            }
+        }
+
         public IEnumerator<ActionProbability> GetEnumerator()
         {
             return new RankingResponseEnumerator(this);

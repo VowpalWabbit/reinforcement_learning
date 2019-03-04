@@ -51,14 +51,37 @@ namespace Rl.Net
         public LiveModel(Configuration config) : base(BindConstructorArguments(config), new Delete<LiveModel>(DeleteLiveModel))
         {
             this.managedErrorCallback = new managed_background_error_callback_t(this.WrapStatusAndRaiseBackgroundError);
+            LiveModelSetCallback(this.NativeHandle, this.managedErrorCallback);
+
             this.managedTraceCallback = new managed_trace_callback_t(this.SendTrace);
         }
 
         private void WrapStatusAndRaiseBackgroundError(IntPtr apiStatusHandle)
         {
-            ApiStatus status = new ApiStatus(apiStatusHandle);
+            using (ApiStatus status = new ApiStatus(apiStatusHandle)) 
+            {
+                EventHandler<ApiStatus> trargetEventLocal = this.BackgroundErrorInternal;
+                if (trargetEventLocal != null)
+                {
+                    trargetEventLocal.Invoke(this, status);
+                }
+                else
+                {
+                    // This comes strictly from the background thread - so simply throwing here has
+                    // the right semantics with respect to AppDomain.UnhandledException. Unfortunately,
+                    // that seems to bring down the process, if there is nothing Managed under the native
+                    // stack this will cause an application-level unhandled native exception, and will
+                    // likely terminate the applciation. So new up a thread, and throw from it.
+                    // See https://stackoverflow.com/questions/42298126/raising-exception-on-managed-and-unmanaged-callback-chain-with-p-invoke
 
-            this.BackgroundErrorInternal?.Invoke(this, status);
+                    // IMPORTANT: This is safe solely because the status string is marshaled into the
+                    // exception message on construction (in other words, before control returns to the
+                    // unmanaged call-stack - the Dispose() is a no-op because in this case NativeObject does
+                    // not own the unmanaged pointer, but we use it to remove itself from the finalizer queue)
+                    RLException e = new RLException(status);
+                    new System.Threading.Thread(() => throw e).Start();
+                }
+            }
         }
 
         private void SendTrace(int logLevel, string msg)
@@ -72,75 +95,155 @@ namespace Rl.Net
             return result == NativeMethods.SuccessStatus;
         }
 
-        public bool TryChooseRank(string actionId, string contextJson, out RankingResponse response, ApiStatus apiStatus = null)
+        public void Init()
+        {
+            using (ApiStatus apiStatus = new ApiStatus())
+            if (!this.TryInit(apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+        }
+
+        public bool TryChooseRank(string eventId, string contextJson, out RankingResponse response, ApiStatus apiStatus = null)
         {
             response = new RankingResponse();
-            return this.TryChooseRank(actionId, contextJson, response, apiStatus);
+            return this.TryChooseRank(eventId, contextJson, response, apiStatus);
         }
 
-        public bool TryChooseRank(string actionId, string contextJson, RankingResponse response, ApiStatus apiStatus = null)
+        public bool TryChooseRank(string eventId, string contextJson, RankingResponse response, ApiStatus apiStatus = null)
         {
-            int result = LiveModelChooseRank(this.NativeHandle, actionId, contextJson, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            int result = LiveModelChooseRank(this.NativeHandle, eventId, contextJson, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
         }
 
-        public bool TryChooseRank(string actionId, string contextJson, ActionFlags flags, out RankingResponse response, ApiStatus apiStatus = null)
+        public RankingResponse ChooseRank(string eventId, string contextJson)
+        {
+            RankingResponse result = new RankingResponse();
+            
+            using (ApiStatus apiStatus = new ApiStatus())
+            if (!this.TryChooseRank(eventId, contextJson, result, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+
+            return result;
+        }
+
+        public bool TryChooseRank(string eventId, string contextJson, ActionFlags flags, out RankingResponse response, ApiStatus apiStatus = null)
         {
             response = new RankingResponse();
-            return this.TryChooseRank(actionId, contextJson, flags, response, apiStatus);
+            return this.TryChooseRank(eventId, contextJson, flags, response, apiStatus);
         }
 
-        public bool TryChooseRank(string actionId, string contextJson, ActionFlags flags, RankingResponse response, ApiStatus apiStatus = null)
+        public bool TryChooseRank(string eventId, string contextJson, ActionFlags flags, RankingResponse response, ApiStatus apiStatus = null)
         {
-            int result = LiveModelChooseRankWithFlags(this.NativeHandle, actionId, contextJson, (uint)flags, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            int result = LiveModelChooseRankWithFlags(this.NativeHandle, eventId, contextJson, (uint)flags, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
         }
 
-        public bool TryReportActionTaken(string actionId, ApiStatus apiStatus = null)
+        public RankingResponse ChooseRank(string eventId, string contextJson, ActionFlags flags)
         {
-            int result = LiveModelReportActionTaken(this.NativeHandle, actionId, apiStatus.ToNativeHandleOrNullptr());
+            RankingResponse result = new RankingResponse();
+
+            using (ApiStatus apiStatus = new ApiStatus())
+            if (!this.TryChooseRank(eventId, contextJson, flags, result, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+
+            return result;
+        }
+
+        [Obsolete("Use TryQueueActionTakenEvent instead.")]
+        public bool TryReportActionTaken(string eventId, ApiStatus apiStatus = null) 
+        => this.TryQueueActionTakenEvent(eventId, apiStatus);
+
+        public bool TryQueueActionTakenEvent(string eventId, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelReportActionTaken(this.NativeHandle, eventId, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
         }
 
-        public bool TryReportOutcome(string actionId, float outcome, ApiStatus apiStatus = null)
+        [Obsolete("Use QueueActionTakenEvent instead.")]
+        public void ReportActionTaken(string eventId)
+            => this.QueueActionTakenEvent(eventId);
+
+        public void QueueActionTakenEvent(string eventId)
         {
-            int result = LiveModelReportOutcomeF(this.NativeHandle, actionId, outcome, apiStatus.ToNativeHandleOrNullptr());
+            using (ApiStatus apiStatus = new ApiStatus())
+            if (!this.TryQueueActionTakenEvent(eventId, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+        }
+
+        [Obsolete("Use TryQueueOutcomeEvent instead.")]
+        public bool TryReportOutcome(string eventId, float outcome, ApiStatus apiStatus = null)
+            => this.TryQueueOutcomeEvent(eventId, outcome, apiStatus);
+
+        public bool TryQueueOutcomeEvent(string eventId, float outcome, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelReportOutcomeF(this.NativeHandle, eventId, outcome, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
         }
 
-        public bool TryReportOutcome(string actionId, string outcomeJson, ApiStatus apiStatus = null)
+        [Obsolete("Use QueueOutcomeReport insteaed.")]
+        public void ReportOutcome(string eventId, float outcome)
+            => this.QueueOutcomeEvent(eventId, outcome);
+
+        public void QueueOutcomeEvent(string eventId, float outcome)
         {
-            int result = LiveModelReportOutcomeJson(this.NativeHandle, actionId, outcomeJson, apiStatus.ToNativeHandleOrNullptr());
+            using (ApiStatus apiStatus = new ApiStatus())
+            if (!this.TryQueueOutcomeEvent(eventId, outcome, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+        }
+
+        [Obsolete("Use TryQueueOutcomeEvent instead.")]
+        public bool TryReportOutcome(string eventId, string outcomeJson, ApiStatus apiStatus = null)
+            => this.TryQueueOutcomeEvent(eventId, outcomeJson, apiStatus);
+
+        public bool TryQueueOutcomeEvent(string eventId, string outcomeJson, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelReportOutcomeJson(this.NativeHandle, eventId, outcomeJson, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
+        }
+
+        [Obsolete("Use QueueOutcomeEvent instead.")]
+        public void ReportOutcome(string eventId, string outcomeJson)
+            => this.QueueOutcomeEvent(eventId, outcomeJson);
+
+        public void QueueOutcomeEvent(string eventId, string outcomeJson)
+        {
+            using (ApiStatus apiStatus = new ApiStatus())
+            if (!this.TryQueueOutcomeEvent(eventId, outcomeJson, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
         }
 
         private event EventHandler<ApiStatus> BackgroundErrorInternal;
 
-        // TODO: This class need a pass to ensure thread-safety (or explicit declaration of non-thread-safe)
+        // This event is thread-safe, because we do not hook/unhook the event in user-schedulable code anymore.
         public event EventHandler<ApiStatus> BackgroundError
         {
             add
             {
-                if (this.BackgroundErrorInternal == null)
-                {
-                    LiveModelSetCallback(this.NativeHandle, this.managedErrorCallback);
-                }
-
                 this.BackgroundErrorInternal += value;
             }
             remove
             {
                 this.BackgroundErrorInternal -= value;
-
-                if (this.BackgroundErrorInternal == null)
-                {
-                    LiveModelSetCallback(this.NativeHandle, null);
-                }
             }
         }
 
         private event EventHandler<TraceLogEventArgs> OnTraceLoggerEventInternal;
-        // TODO: This class need a pass to ensure thread-safety (or explicit declaration of non-thread-safe)
+        
+        // TODO:
+        /// <remarks>
+        /// Add/remove here is not thread safe.
+        /// </remarks>
         public event EventHandler<TraceLogEventArgs> TraceLoggerEvent
         {
             add
