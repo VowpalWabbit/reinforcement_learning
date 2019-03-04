@@ -13,7 +13,9 @@ PUSHD %~dp0
 
 REM TODO: This really should be out-of-source (also, can we switch to vcpkg for these?)
 ECHO Restoring "%rlRoot%\ext_libs\vowpal_wabbit\vowpalwabbit\packages.config"
-"%nugetPath%" install "%rlRoot%\ext_libs\vowpal_wabbit\vowpalwabbit\packages.config" -solutionDir "%rlRoot%\"
+
+REM Do not remove the space at the end of the "solutionDir" specifier, as otherwise it breaks NuGet
+"%nugetPath%" install -o packages "%rlRoot%\ext_libs\vowpal_wabbit\vowpalwabbit\packages.config" -solutionDir "%rlRoot%\ "
 ECHO.
 
 ECHO Restoring "%rlRoot%\bindings\cs\rl.net.native\packages.config"
