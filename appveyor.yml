@@ -4,10 +4,11 @@ configuration: Release
 platform: x64
 clone_folder: c:\reinforcement_learning\
 cache:
-  - c:\tools\vcpkg\installed\ -> build-windows.cmd
-  - packages -> **\packages.config, build-windows.cmd
+  - c:\tools\vcpkg\installed\ -> build-windows.cmd, .scripts\restore.cmd
+  - packages -> **\packages.config, build-windows.cmd, .scripts\restore.cmd
 environment:
   VcpkgInstallRoot: c:\tools\vcpkg\
+  rlRoot: C:\reinforcement_learning
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
 install:
   - git submodule update --init --recursive
@@ -18,4 +19,4 @@ build_script:
   - cd c:\reinforcement_learning
   - .\build-windows.cmd
 test_script:
-  - c:\reinforcement_learning\x64\Release\unit_test.exe
+  - .scripts\test.cmd

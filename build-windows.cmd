@@ -1,37 +1,11 @@
 @echo off
 setlocal
 
-for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.Component.MSBuild -property installationPath`) do (
-  set InstallDir=%%i
-)
+CALL .scripts\init.cmd
 
-REM Enable injecting of msbuild path (rather than relying on an installed version of Visual Studio),
-REM but fallback to detection path if not provided.
-if not defined msBuildPath (
-  if not exist "%InstallDir%\MSBuild\15.0\Bin\MSBuild.exe" (
-    echo ERROR: MsBuild couldn't be found
-    exit /b 1
-  )
-  else (
-    SET "msBuildPath=%InstallDir%\MSBuild\15.0\Bin\MSBuild.exe"
-  )
-)
-
+REM TODO: Is this necessary?
 call "%InstallDir%\Common7\Tools\VsDevCmd.bat"
 
-set VcpkgIntegration=%VcpkgInstallRoot%scripts\buildsystems\msbuild\vcpkg.targets
+CALL .scripts\restore.cmd
 
-vcpkg install cpprestsdk:x64-windows
-vcpkg install flatbuffers:x64-windows
-
-SET PATH=%PATH%;%VcpkgInstallRoot%installed\x64-windows\tools\flatbuffers
-
-REM Need to install nuget packages before Visual Studio starts to make ANTLR targets available.
-nuget install -o packages ext_libs\vowpal_wabbit\vowpalwabbit\packages.config
-nuget install -o packages bindings\cs\rl.net.native\packages.config
-nuget install -o packages rlclientlib\packages.config
-nuget install -o packages unit_tests\packages.config
-
-dotnet restore rl.sln
-
-"%InstallDir%\MSBuild\15.0\Bin\MSBuild.exe" "rl.sln" /m /verbosity:normal /p:Configuration=Release;Platform=x64
+CALL .scripts\build.cmd
