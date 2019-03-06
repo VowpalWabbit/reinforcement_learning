@@ -12,12 +12,16 @@ namespace reinforcement_learning { namespace model_management {
     _vw_pool(nullptr) , _trace_logger(trace_logger) {
   }
 
-  int vw_model::update(const model_data& data, api_status* status) {
+  int vw_model::update(const model_data& data, bool& model_ready, api_status* status) {
     try {
       TRACE_INFO(_trace_logger, utility::concat("Recieved new model data. With size ", data.data_sz()));
-      
-      // safe_vw_factory will create a copy of the model data to use for vw object construction.
-      _vw_pool.update_factory(new safe_vw_factory(std::move(data)));
+	  
+      if (data.data_sz() > 0)
+      {
+        // safe_vw_factory will create a copy of the model data to use for vw object construction.
+        _vw_pool.update_factory(new safe_vw_factory(std::move(data)));
+        model_ready = true;
+      }
     }
     catch(const std::exception& e) {
       RETURN_ERROR_LS(_trace_logger, status, model_update_error) << e.what();

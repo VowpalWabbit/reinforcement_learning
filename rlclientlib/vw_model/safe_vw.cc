@@ -132,14 +132,10 @@ namespace reinforcement_learning {
     VW::setup_examples(*_vw, examples);
 
     actions.resize(interaction.probabilities.size());
-    for (int i = 0; i < interaction.actions.size(); i++)
-    {
-      actions[i] = i;
-    }
-
     scores.resize(interaction.probabilities.size());
     for (int i = 0; i < interaction.probabilities.size(); i++)
     {
+      actions[i] = i;
       scores[i] = interaction.probabilities[i];
     }
 

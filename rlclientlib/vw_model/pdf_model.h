@@ -11,7 +11,7 @@ namespace reinforcement_learning { namespace model_management {
   class pdf_model : public i_model {
   public:
     pdf_model(i_trace* trace_logger);
-    int update(const model_data& data, api_status* status = nullptr) override;
+    int update(const model_data& data, bool& model_ready, api_status* status = nullptr) override;
     int choose_rank(uint64_t rnd_seed, const char* features, ranking_response& response, api_status* status = nullptr) override;
   private:
 	std::unique_ptr<safe_vw> _vw;

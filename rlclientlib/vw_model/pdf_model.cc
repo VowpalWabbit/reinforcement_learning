@@ -12,7 +12,8 @@ namespace reinforcement_learning { namespace model_management {
     _trace_logger(trace_logger), _vw(new safe_vw("--json --quiet --cb_adf")) {
   }
 
-  int pdf_model::update(const model_data& data, api_status* status) {
+  int pdf_model::update(const model_data& data, bool& model_ready, api_status* status) {
+    model_ready = true;
     return error_code::success;
   }
 

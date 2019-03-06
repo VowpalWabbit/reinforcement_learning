@@ -58,7 +58,7 @@ namespace reinforcement_learning {
 
     //check arguments
     RETURN_IF_FAIL(check_null_or_empty(event_id, context, status));
-    if (!_model_data_received) {
+    if (!_model_ready) {
       RETURN_IF_FAIL(explore_only(event_id, context, response, status));
       response.set_model_id("N/A");
     }
@@ -110,9 +110,11 @@ namespace reinforcement_learning {
 
     model_management::model_data md;
     RETURN_IF_FAIL(_transport->get_data(md, status));
-    RETURN_IF_FAIL(_model->update(md, status));
 
-    _model_data_received = true;
+	bool model_ready = false;
+    RETURN_IF_FAIL(_model->update(md, model_ready, status));
+
+    _model_ready = model_ready;
 
     return error_code::success;
   }
@@ -205,12 +207,14 @@ namespace reinforcement_learning {
   }
 
   void live_model_impl::handle_model_update(const model_management::model_data& data) {
-    api_status status;
-    if (_model->update(data, &status) != error_code::success) {
+	api_status status;
+	bool model_ready = false;
+
+    if (_model->update(data, model_ready, &status) != error_code::success) {
       _error_cb.report_error(status);
       return;
     }
-    _model_data_received = true;
+    _model_ready = model_ready;
   }
 
   int live_model_impl::explore_only(const char* event_id, const char* context, ranking_response& response,
