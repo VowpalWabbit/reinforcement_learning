@@ -24,6 +24,7 @@
     <RootNamespace>rlclientlib</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
     <ProjectName>rlclientlib</ProjectName>
+    <flatcPath Condition="'$(flatcPath)'==''">flatc.exe</flatcPath>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
