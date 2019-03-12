@@ -204,6 +204,7 @@
     <ClInclude Include="utility\http_helper.h" />
     <ClInclude Include="model_mgmt\model_downloader.h" />
     <ClInclude Include="model_mgmt\data_callback_fn.h" />
+    <ClInclude Include="model_mgmt\empty_data_transport.h" />
     <ClInclude Include="model_mgmt\restapi_data_transport.h" />
     <ClInclude Include="logger\async_batcher.h" />
     <ClInclude Include="logger\event_queue.h" />
@@ -211,6 +212,8 @@
     <ClInclude Include="utility\stl_container_adapter.h" />
     <ClInclude Include="utility\watchdog.h" />
     <ClInclude Include="vw_model\vw_model.h" />
+    <ClInclude Include="vw_model\pdf_model.h" />
+    <ClInclude Include="sampling.h" />
     <ClInclude Include="vw_model\safe_vw.h" />
     <ClInclude Include="live_model_impl.h" />
     <ClInclude Include="error_callback_fn.h" />
@@ -218,10 +221,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="logger\file\file_logger.cc" />
-    <ClCompile Include="model_mgmt\model_downloader.cc" />
-    <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="model_mgmt\data_callback_fn.cc" />
+    <ClCompile Include="model_mgmt\empty_data_transport.cc" />
+    <ClCompile Include="model_mgmt\model_downloader.cc" />
     <ClCompile Include="model_mgmt\model_mgmt.cc" />
+    <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="logger\eventhub_client.cc" />
     <ClCompile Include="utility\config_utility.cc" />
     <ClCompile Include="utility\stl_container_adapter.cc" />
@@ -230,7 +234,9 @@
     <ClCompile Include="utility\configuration.cc" />
     <ClCompile Include="utility\watchdog.cc" />
     <ClCompile Include="vw_model\vw_model.cc" />
+    <ClCompile Include="vw_model\pdf_model.cc" />
     <ClCompile Include="vw_model\safe_vw.cc" />
+    <ClCompile Include="sampling.cc" />
     <ClCompile Include="factory_resolver.cc" />
     <ClCompile Include="live_model_impl.cc" />
     <ClCompile Include="error_callback_fn.cc" />

@@ -30,11 +30,6 @@ namespace reinforcement_learning { namespace model_management {
     model_data md;
     RETURN_IF_FAIL(_ptrans->get_data(md, status));
 
-    // If the data size is zero, it's not a valid model
-    if (md.data_sz() <= 0) {
-      return error_code::success;
-    }
-
     const auto scode = _pdata_cb->report_data(md, _trace, status);
     return scode;
   }

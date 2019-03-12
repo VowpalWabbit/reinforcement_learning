@@ -9,8 +9,9 @@ namespace Rl.Net.Cli {
         public static void Main(string [] args)
         {
             //BasicUsageExample(args);
+            PdfPassthroughExample(args);
             //RunSimulator(args);
-            RunReplay(args);
+            //RunReplay(args);
         }
 
         private static void WriteErrorAndExit(string errorMessage, int exitCode = -1)
@@ -86,6 +87,37 @@ namespace Rl.Net.Cli {
             }
 
             LiveModel liveModel = CreateLiveModelOrExit(args[0]);
+
+            ApiStatus apiStatus = new ApiStatus();
+
+            RankingResponse rankingResponse = new RankingResponse();
+            if (!liveModel.TryChooseRank(eventId, contextJson, rankingResponse, apiStatus))
+            {
+                WriteStatusAndExit(apiStatus);
+            }
+
+            long actionId;
+            if (!rankingResponse.TryGetChosenAction(out actionId, apiStatus))
+            {
+                WriteStatusAndExit(apiStatus);
+            }
+
+            Console.WriteLine($"Chosen action id: {actionId}");
+
+            if (!liveModel.TryReportOutcome(eventId, outcome, apiStatus))
+            {
+                WriteStatusAndExit(apiStatus);
+            }
+        }
+
+        public static void PdfPassthroughExample(string [] args)
+        {
+            const float outcome = 1.0f;
+            const string eventId = "event_id";
+            const string contextJson = "{\"GUser\":{\"id\":\"a\",\"major\":\"eng\",\"hobby\":\"hiking\"},\"_multi\":[ { \"TAction\":{\"a1\":\"f1\"} },{\"TAction\":{\"a2\":\"f2\"}}],\"p\":[0.2, 0.8]}";
+
+            LiveModel liveModel = CreateLiveModelOrExit(args[0]);
+
 
             ApiStatus apiStatus = new ApiStatus();
 

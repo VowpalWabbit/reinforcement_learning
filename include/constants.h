@@ -38,7 +38,9 @@ namespace reinforcement_learning {  namespace name {
 
 namespace reinforcement_learning {  namespace value {
       const char *const AZURE_STORAGE_BLOB = "AZURE_STORAGE_BLOB";
+      const char *const NO_MODEL_DATA = "NO_MODEL_DATA";
       const char *const VW                 = "VW";
+      const char *const PASSTHROUGH_PDF_MODEL = "PASSTHROUGH_PDF";
       const char *const OBSERVATION_EH_SENDER = "OBSERVATION_EH_SENDER";
       const char *const INTERACTION_EH_SENDER = "INTERACTION_EH_SENDER";
       const char *const OBSERVATION_FILE_SENDER = "OBSERVATION_FILE_SENDER";

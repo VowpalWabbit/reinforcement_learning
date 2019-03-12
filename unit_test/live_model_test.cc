@@ -5,6 +5,7 @@
 
 #include <thread>
 #include <boost/test/unit_test.hpp>
+#include <vector>
 
 #include "live_model.h"
 #include "config_utility.h"
@@ -42,6 +43,8 @@ namespace {
   )";
 
   const auto JSON_CONTEXT = R"({"_multi":[{},{}]})";
+  const auto JSON_CONTEXT_PDF = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}}],"p":[0.4, 0.6]})";
+  const float EXPECTED_PDF[2] = { 0.4f, 0.6f }; 
 
   r::live_model create_mock_live_model(
     const u::configuration& config,
@@ -114,6 +117,42 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request) {
   ds.choose_rank(event_id, JSON_CONTEXT, response, &status);
   BOOST_CHECK_EQUAL(status.get_error_code(), 0);
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+}
+
+BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
+  //create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::MODEL_IMPLEMENTATION, r::value::PASSTHROUGH_PDF_MODEL);
+
+  r::api_status status;
+
+  //create the ds live_model, and initialize it with the config
+  
+  r::live_model model = create_mock_live_model(config, &r::data_transport_factory, &r::model_factory, nullptr);
+  BOOST_CHECK_EQUAL(model.init(&status), err::success);
+
+  const auto event_id = "event_id";
+
+  r::ranking_response response;
+
+  // request ranking
+  BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CONTEXT_PDF, response), err::success);
+  
+  size_t num_actions = response.size();
+  BOOST_CHECK_EQUAL(num_actions, 2);
+
+  // check that our PDF is what we expected
+  r::ranking_response::iterator it = response.begin();
+  const float* expected_probability = EXPECTED_PDF;
+
+  for (uint32_t i = 0; i < num_actions; i++)
+  {
+    auto action_probability = *(it + i);
+    BOOST_CHECK_EQUAL(action_probability.probability, EXPECTED_PDF[action_probability.action_id]);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(live_model_outcome) {

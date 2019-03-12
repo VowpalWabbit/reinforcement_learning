@@ -16,6 +16,7 @@
 #include "hash.h"
 #include "factory_resolver.h"
 #include "logger/preamble_sender.h"
+#include "sampling.h"
 
 // Some namespace changes for more concise code
 namespace e = exploration;
@@ -58,7 +59,7 @@ namespace reinforcement_learning {
 
     //check arguments
     RETURN_IF_FAIL(check_null_or_empty(event_id, context, status));
-    if (!_model_data_received) {
+    if (!_model_ready) {
       RETURN_IF_FAIL(explore_only(event_id, context, response, status));
       response.set_model_id("N/A");
     }
@@ -110,7 +111,11 @@ namespace reinforcement_learning {
 
     model_management::model_data md;
     RETURN_IF_FAIL(_transport->get_data(md, status));
-    RETURN_IF_FAIL(_model->update(md, status));
+
+	bool model_ready = false;
+    RETURN_IF_FAIL(_model->update(md, model_ready, status));
+
+    _model_ready = model_ready;
 
     return error_code::success;
   }
@@ -203,12 +208,14 @@ namespace reinforcement_learning {
   }
 
   void live_model_impl::handle_model_update(const model_management::model_data& data) {
-    api_status status;
-    if (_model->update(data, &status) != error_code::success) {
+	api_status status;
+	bool model_ready = false;
+
+    if (_model->update(data, model_ready, &status) != error_code::success) {
       _error_cb.report_error(status);
       return;
     }
-    _model_data_received = true;
+    _model_ready = model_ready;
   }
 
   int live_model_impl::explore_only(const char* event_id, const char* context, ranking_response& response,
@@ -271,7 +278,14 @@ namespace reinforcement_learning {
     api_status* status) const {
     // The seed used is composed of uniform_hash(app_id) + uniform_hash(event_id)
     const uint64_t seed = uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
-    return _model->choose_rank(seed, context, response, status);
+
+    std::vector<int> action_ids;
+    std::vector<float> action_pdf;
+    const char* model_version;
+
+    RETURN_IF_FAIL(_model->choose_rank(seed, context, action_ids, action_pdf, model_version, status));
+
+    return sample_and_populate_response(seed, action_ids, action_pdf, response, _trace_logger.get(), status);
   }
 
   int live_model_impl::init_model_mgmt(api_status* status) {

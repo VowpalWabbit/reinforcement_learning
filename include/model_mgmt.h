@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include <utility>
+#include <vector>
 
 // Declare const pointer for internal linkage
 namespace reinforcement_learning {
@@ -62,8 +63,8 @@ namespace reinforcement_learning { namespace model_management {
     //! The i_model interfaces provides the resolution from the raw model_data to a consumable object.
     class i_model {
     public:
-      virtual int update(const model_data& data, api_status* status = nullptr) = 0;
-      virtual int choose_rank(uint64_t rnd_seed, const char* features, ranking_response& response, api_status* status = nullptr) = 0;
+      virtual int update(const model_data& data, bool& model_ready, api_status* status = nullptr) = 0;
+      virtual int choose_rank(uint64_t rnd_seed, const char* features, std::vector<int>& action_ids, std::vector<float>& action_pdf, const char*& model_version, api_status* status = nullptr) = 0;
       virtual ~i_model() = default;
     };
 }}

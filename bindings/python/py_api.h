@@ -60,6 +60,8 @@ namespace reinforcement_learning {
       void report_outcome(const char* event_id, const char* outcome);
       void report_outcome(const char* event_id, float outcome);
 
+      void refresh_model();
+
       private:
         reinforcement_learning::live_model _impl;
     };

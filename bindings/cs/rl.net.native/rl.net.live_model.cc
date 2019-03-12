@@ -88,6 +88,11 @@ API int LiveModelReportOutcomeJson(livemodel_context_t* context, const char * ev
     return context->livemodel->report_outcome(event_id, outcomeJson, status);
 }
 
+API int LiveModelRefreshModel(livemodel_context_t* context, reinforcement_learning::api_status* status)
+{
+    return context->livemodel->refresh_model(status);
+}
+
 API void LiveModelSetCallback(livemodel_context_t* livemodel, rl_net_native::background_error_callback_t callback)
 {
     livemodel->background_error_callback = callback;

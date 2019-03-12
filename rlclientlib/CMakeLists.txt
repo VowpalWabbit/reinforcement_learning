@@ -23,11 +23,13 @@ set(PROJECT_SOURCES
   logger/endian.cc
   logger/file/file_logger.cc
   model_mgmt/data_callback_fn.cc
+  model_mgmt/empty_data_transport.cc
   model_mgmt/model_downloader.cc
   model_mgmt/model_mgmt.cc
   model_mgmt/restapi_data_transport.cc
   ranking_event.cc
   ranking_response.cc
+  sampling.cc
   trace_logger.cc
   utility/stl_container_adapter.cc
   utility/config_utility.cc
@@ -40,6 +42,7 @@ set(PROJECT_SOURCES
   utility/http_helper.cc
   utility/str_util.cc
   utility/watchdog.cc
+  vw_model/pdf_model.cc
   vw_model/safe_vw.cc
   vw_model/vw_model.cc
 )
@@ -73,10 +76,12 @@ set(PROJECT_PRIVATE_HEADERS
   logger/event_logger.h
   logger/eventhub_client.h
   model_mgmt/data_callback_fn.h
+  model_mgmt/empty_data_transport.h
   model_mgmt/model_downloader.h
   model_mgmt/restapi_data_transport.h
   moving_queue.h
   ranking_event.h
+  sampling.h
   utility/context_helper.h
   utility/http_authorization.h
   utility/http_client.h
@@ -85,6 +90,7 @@ set(PROJECT_PRIVATE_HEADERS
   utility/object_pool.h
   utility/periodic_background_proc.h
   utility/watchdog.h
+  vw_model/pdf_model.h
   vw_model/safe_vw.h
   vw_model/vw_model.h
 )

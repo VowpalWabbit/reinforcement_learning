@@ -36,6 +36,9 @@ namespace Rl.Net
         [DllImport("rl.net.native.dll")]
         private static extern int LiveModelReportOutcomeJson(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, [MarshalAs(NativeMethods.StringMarshalling)] string outcomeJson, IntPtr apiStatus);
 
+        [DllImport("rl.net.native.dll")]
+        private static extern int LiveModelRefreshModel(IntPtr liveModel, IntPtr apiStatus);
+
         private delegate void managed_background_error_callback_t(IntPtr apiStatus);
         private readonly managed_background_error_callback_t managedErrorCallback;
 
@@ -71,7 +74,7 @@ namespace Rl.Net
                     // the right semantics with respect to AppDomain.UnhandledException. Unfortunately,
                     // that seems to bring down the process, if there is nothing Managed under the native
                     // stack this will cause an application-level unhandled native exception, and will
-                    // likely terminate the applciation. So new up a thread, and throw from it.
+                    // likely terminate the application. So new up a thread, and throw from it.
                     // See https://stackoverflow.com/questions/42298126/raising-exception-on-managed-and-unmanaged-callback-chain-with-p-invoke
 
                     // IMPORTANT: This is safe solely because the status string is marshaled into the
@@ -221,6 +224,21 @@ namespace Rl.Net
             {
                 throw new RLException(apiStatus);
             }
+        }
+
+        public void RefreshModel()
+        {
+            using (ApiStatus apiStatus = new ApiStatus())
+            if (!this.TryRefreshModel(apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+        }
+
+        public bool TryRefreshModel(ApiStatus apiStatus = null)
+        {
+            int result = LiveModelRefreshModel(this.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            return result == NativeMethods.SuccessStatus;
         }
 
         private event EventHandler<ApiStatus> BackgroundErrorInternal;
