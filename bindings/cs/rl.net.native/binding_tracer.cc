@@ -2,13 +2,13 @@
 
 namespace rl_net_native {
 
-  binding_tracer::binding_tracer(trace_logger_callback_t &callback) {
-    this->callback = callback;
+  binding_tracer::binding_tracer(livemodel_context& _context) 
+  : context(_context) {
   }
 
   void binding_tracer::log(int log_level, const std::string& msg) {
-    if (this->callback != nullptr) {
-      this->callback(log_level, msg.c_str());
+    if (context.trace_logger_callback != nullptr) {
+      context.trace_logger_callback(log_level, msg.c_str());
     }
   }
 }
