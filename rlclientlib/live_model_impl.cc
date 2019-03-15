@@ -285,7 +285,7 @@ namespace reinforcement_learning {
 
     RETURN_IF_FAIL(_model->choose_rank(seed, context, action_ids, action_pdf, model_version, status));
 
-    return sample_and_populate_response(seed, action_ids, action_pdf, response, _trace_logger.get(), status);
+    return sample_and_populate_response(seed, action_ids, action_pdf, model_version, response, _trace_logger.get(), status);
   }
 
   int live_model_impl::init_model_mgmt(api_status* status) {
