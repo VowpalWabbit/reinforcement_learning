@@ -16,5 +16,8 @@ namespace reinforcement_learning { namespace model_management {
   private:
     std::unique_ptr<safe_vw> _vw;
     i_trace* _trace_logger;
+    // TODO Should we provide some mechanism for the user to inject the model ID?
+    // model_version = ??
+    const std::string _model_version = "fake_version";
   };
 }}

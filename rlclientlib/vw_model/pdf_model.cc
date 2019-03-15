@@ -30,8 +30,7 @@ namespace reinforcement_learning { namespace model_management {
       // Get a ranked list of action_ids and corresponding pdf
       _vw->parse_context_with_pdf(features, action_ids, action_pdf);
       
-      // TODO Should we provide some mechanism for the user to inject the model ID?
-      // model_version = ??
+      model_version = _model_version.c_str();
 
       return error_code::success;
     }
