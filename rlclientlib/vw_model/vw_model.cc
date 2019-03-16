@@ -13,6 +13,12 @@ namespace reinforcement_learning { namespace model_management {
 
   int vw_model::update(const model_data& data, bool& model_ready, api_status* status) {
     try {
+      if (data.refresh_count() == 0) {
+        TRACE_INFO(_trace_logger, "Model was not updated since previous download");
+        model_ready = true;
+        return error_code::success;
+      }
+
       TRACE_INFO(_trace_logger, utility::concat("Received new model data. With size ", data.data_sz()));
 	  
       if (data.data_sz() > 0)
