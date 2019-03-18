@@ -63,10 +63,9 @@ std::unique_ptr<fakeit::Mock<m::i_data_transport>> get_mock_failing_data_transpo
 std::unique_ptr<fakeit::Mock<m::i_model>> get_mock_model() {
   auto mock = std::unique_ptr<Mock<m::i_model>>(
     new fakeit::Mock<m::i_model>());
-  const std::function<int(uint64_t, const char*, std::vector<int>&, std::vector<float>&, const char*&, r::api_status*)> choose_rank_fn =
-    [](uint64_t, const char*, std::vector<int>&, std::vector<float>&, const char*& model_version, r::api_status*) {
-    static const std::string model_id = "model_id";
-    model_version = model_id.c_str();
+  const std::function<int(uint64_t, const char*, std::vector<int>&, std::vector<float>&, std::string&, r::api_status*)> choose_rank_fn =
+    [](uint64_t, const char*, std::vector<int>&, std::vector<float>&, std::string& model_version, r::api_status*) {
+    model_version = "model_id";
     return r::error_code::success;
   };
   When(Method((*mock), update)).AlwaysReturn(r::error_code::success);
