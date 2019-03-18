@@ -208,8 +208,14 @@ namespace reinforcement_learning {
   }
 
   void live_model_impl::handle_model_update(const model_management::model_data& data) {
-	api_status status;
-	bool model_ready = false;
+    if (data.refresh_count() == 0) {
+      TRACE_INFO(_trace_logger, "Model was not updated since previous download");
+      return;
+    }
+
+    api_status status;
+
+    bool model_ready = false;
 
     if (_model->update(data, model_ready, &status) != error_code::success) {
       _error_cb.report_error(status);
