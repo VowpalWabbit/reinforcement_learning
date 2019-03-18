@@ -4,6 +4,7 @@
 
 #include <utility>
 #include <vector>
+#include <string>
 
 // Declare const pointer for internal linkage
 namespace reinforcement_learning {
