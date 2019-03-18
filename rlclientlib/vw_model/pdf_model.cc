@@ -23,7 +23,7 @@ namespace reinforcement_learning { namespace model_management {
     const char* features, 
     std::vector<int>& action_ids, 
     std::vector<float>& action_pdf, 
-    const char*& model_version,
+    std::string& model_version,
     api_status* status) {
     try 
     {
