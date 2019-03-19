@@ -126,14 +126,16 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
   config.set(r::name::EH_TEST, "true");
   config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
   config.set(r::name::MODEL_IMPLEMENTATION, r::value::PASSTHROUGH_PDF_MODEL);
+  config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
 
   r::api_status status;
 
   //create the ds live_model, and initialize it with the config
   
   r::live_model model = create_mock_live_model(config, &r::data_transport_factory, &r::model_factory, nullptr);
-  BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
+  BOOST_CHECK_EQUAL(model.init(&status), err::success);
+  BOOST_CHECK_EQUAL(model.refresh_model(&status), err::success);
   const auto event_id = "event_id";
 
   r::ranking_response response;

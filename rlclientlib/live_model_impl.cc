@@ -208,8 +208,14 @@ namespace reinforcement_learning {
   }
 
   void live_model_impl::handle_model_update(const model_management::model_data& data) {
-	api_status status;
-	bool model_ready = false;
+    if (data.refresh_count() == 0) {
+      TRACE_INFO(_trace_logger, "Model was not updated since previous download");
+      return;
+    }
+
+    api_status status;
+
+    bool model_ready = false;
 
     if (_model->update(data, model_ready, &status) != error_code::success) {
       _error_cb.report_error(status);
@@ -281,11 +287,11 @@ namespace reinforcement_learning {
 
     std::vector<int> action_ids;
     std::vector<float> action_pdf;
-    const char* model_version;
+    std::string model_version;
 
     RETURN_IF_FAIL(_model->choose_rank(seed, context, action_ids, action_pdf, model_version, status));
 
-    return sample_and_populate_response(seed, action_ids, action_pdf, model_version, response, _trace_logger.get(), status);
+    return sample_and_populate_response(seed, action_ids, action_pdf, std::move(model_version), response, _trace_logger.get(), status);
   }
 
   int live_model_impl::init_model_mgmt(api_status* status) {

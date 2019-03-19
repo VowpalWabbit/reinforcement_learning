@@ -44,6 +44,10 @@ namespace reinforcement_learning {
     _model_id = model_id;
   }
 
+  void ranking_response::set_model_id(std::string&& model_id) {
+    _model_id.assign(std::move(model_id));
+  }
+
   const char* ranking_response::get_model_id() const {
     return _model_id.c_str();
   }
