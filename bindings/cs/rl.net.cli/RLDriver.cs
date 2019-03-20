@@ -76,7 +76,7 @@ namespace Rl.Net.Cli
                 this.Step(runContext, outcomeReporter, step);
 
                 // TODO: Change this to be a command-line arg
-                Thread.Sleep(25);
+                Thread.Sleep(StepInterval);
 
                 if (++stepsCount % 1000 == 0)
                 {
