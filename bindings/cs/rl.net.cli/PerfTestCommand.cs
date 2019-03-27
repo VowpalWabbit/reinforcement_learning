@@ -34,10 +34,7 @@ namespace Rl.Net.Cli
             rlDriver.StepInterval = TimeSpan.FromMilliseconds(this.SleepIntervalMs);
             PerfTestStepProvider stepProvider = new PerfTestStepProvider(this.ActionsCount, this.SharedFeatures, this.ActionFeatures) { Duration = TimeSpan.FromMilliseconds(this.DurationMs) , Tag = this.Tag};
             rlDriver.Run(stepProvider);
-            Console.WriteLine($"Data sent: {stepProvider.DataSent / 1024} Kb");
-            Console.WriteLine($"Throughput: {stepProvider.DataSent / (1024 * this.DurationMs / 1000)} Kb / s");
-            Console.WriteLine($"Messages sent: {stepProvider.MessagesSent}");
-            Console.WriteLine($"Qps: {stepProvider.MessagesSent / (this.DurationMs / 1000)}");
+            stepProvider.Stats.Print();
         }
     }
 }

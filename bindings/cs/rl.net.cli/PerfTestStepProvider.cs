@@ -14,6 +14,31 @@ namespace Rl.Net.Cli
 
     class PerfTestStepProvider : IDriverStepProvider<float>
     {
+        public class Statistics
+        {
+            public int Messages { get; private set; }
+
+            public int Bytes { get; private set; }
+
+            public Stopwatch Timer { get; } = Stopwatch.StartNew();
+
+            public long ElapsedMs { get; private set; }
+
+            public void Update(PerfTestStep step)
+            {
+                Bytes += Encoding.UTF8.GetByteCount(step.DecisionContext) + Encoding.UTF8.GetByteCount(step.EventId);
+                Messages++;
+                ElapsedMs = Timer.ElapsedMilliseconds;
+            }
+
+            public void Print()
+            {
+                Console.WriteLine($"Data sent: {this.Bytes / 1024} Kb");
+                Console.WriteLine($"Throughput: {this.Bytes / (1024 * this.ElapsedMs / 1000)} Kb / s");
+                Console.WriteLine($"Messages sent: {this.Messages}");
+                Console.WriteLine($"Qps: {this.Messages / (this.ElapsedMs / 1000)}");
+            }
+        }
 
         private IList<string> Contexts { get; set; } = new List<string>();
 
@@ -44,67 +69,42 @@ namespace Rl.Net.Cli
 
         public string Tag { get; set; } = "Id";
 
-        public long DataSent { get; set; } = 0;
-
-        public long MessagesSent { get; set; } = 0;
-
         public TimeSpan Duration { get; set; } = TimeSpan.FromSeconds(20);
+
+        public Statistics Stats { get; private set; }
 
         public PerfTestStepProvider(int actionsCount, int sharedFeatures, int actionFeatures)
         {
-            FeatureSet shared = Enumerable.Range(1, sharedFeatures).ToDictionary(i => $"f{i}");
-            List<Dictionary<string, FeatureSet>> actions = Enumerable.Range(1, actionsCount).Select(i => new Dictionary<string, FeatureSet> { { $"a{i}", Enumerable.Range(1, actionFeatures).ToDictionary(j => $"af{j}") } }).ToList();
-            var context = new Dictionary<string, object> { { "GUser", shared }, { "_multi", actions } };
             for (int i = 0; i < this.RingSize; ++i)
             {
+                FeatureSet shared = Enumerable.Range(1, sharedFeatures).ToDictionary(f => $"f{f}", f => f + i);
+                List<Dictionary<string, FeatureSet>> actions = Enumerable.Range(1, actionsCount).Select(a => new Dictionary<string, FeatureSet> { { $"a{a}", Enumerable.Range(1, actionFeatures).ToDictionary(f => $"af{f}", f => f + i) } }).ToList();
+                var context = new Dictionary<string, object> { { "GUser", shared }, { "_multi", actions } };
                 var message = JsonConvert.SerializeObject(context);
                 Contexts.Add(message);
-                UpdateFeatures(shared, actions);
             }
         }
 
         public IEnumerator<IStepContext<float>> GetEnumerator()
         {
-            StatisticsCalculator stats = new StatisticsCalculator();
-
-            var timer = Stopwatch.StartNew();
-            while (timer.ElapsedMilliseconds < this.Duration.TotalMilliseconds)
+            this.Stats = new Statistics();
+            while (this.Stats.ElapsedMs < this.Duration.TotalMilliseconds)
             {
-                DataSent += Encoding.UTF8.GetByteCount(this.Contexts[(int)MessagesSent % this.RingSize]);
-                MessagesSent++;
                 var step = new PerfTestStep
                 {
-                    EventId = $"{Tag}-{MessagesSent}",
-                    DecisionContext = this.Contexts[(int)MessagesSent % this.RingSize],
-                    Outcome = MessagesSent % 100
+                    EventId = $"{Tag}-{this.Stats.Messages}",
+                    DecisionContext = this.Contexts[this.Stats.Messages % this.RingSize],
+                    Outcome = this.Stats.Messages % 100
                 };
 
                 yield return step;
+                this.Stats.Update(step);
             }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
-        }
-
-        private void UpdateFeatures(FeatureSet shared, List<Dictionary<string, FeatureSet>> actions)
-        {
-    /*        foreach (var v in shared.Values)
-            {
-                v++;
-            }
-            foreach (var a in actions)
-            {
-                foreach (var k in a.Keys)
-                {
-                    foreach (var f in a[k].Keys)
-                    {
-                        a[k][f]++;
-                    }
-                }
-            }*/
-
         }
     }
 }
