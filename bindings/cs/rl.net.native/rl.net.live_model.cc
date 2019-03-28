@@ -65,6 +65,11 @@ API int LiveModelInit(livemodel_context_t* context, reinforcement_learning::api_
 
 API int LiveModelChooseRank(livemodel_context_t* context, const char * event_id, const char * context_json, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status)
 {
+	if (event_id == nullptr)
+	{
+		return context->livemodel->choose_rank(event_id, context_json, *resp, status);
+	}
+
     return context->livemodel->choose_rank(event_id, context_json, *resp, status);
 }
 
