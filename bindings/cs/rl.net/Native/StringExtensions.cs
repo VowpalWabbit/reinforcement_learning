@@ -28,6 +28,11 @@ namespace Rl.Net.Native
 
         unsafe internal static string PtrToStringUtf8(this IntPtr intPtr)
         {
+            if (intPtr == IntPtr.Zero)
+            {
+                return String.Empty; 
+            }
+
             Encoding utf8 = Encoding.UTF8;
 
             // Go through the string twice - would be nice to do it all at once, but that is non-trivial for some reason.
