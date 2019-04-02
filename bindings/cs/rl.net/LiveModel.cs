@@ -102,7 +102,7 @@ namespace Rl.Net
             [DllImport("rl.net.native.dll")]
             public static extern void LiveModelSetCallback(IntPtr liveModel, [MarshalAs(UnmanagedType.FunctionPtr)] managed_background_error_callback_t callback = null);
 
-            public delegate void managed_trace_callback_t(int logLevel, [MarshalAs(NativeMethods.StringMarshalling)] string msg);
+            public delegate void managed_trace_callback_t(int logLevel, IntPtr msgUtf8Ptr);
 
             [DllImport("rl.net.native.dll")]
             public static extern void LiveModelSetTrace(IntPtr liveModel, [MarshalAs(UnmanagedType.FunctionPtr)] managed_trace_callback_t callback = null);
@@ -250,8 +250,10 @@ namespace Rl.Net
             }
         }
 
-        private void SendTrace(int logLevel, string msg)
+        private void SendTrace(int logLevel, IntPtr msgUtf8Ptr)
         {
+            string msg = NativeMethods.StringMarshallingFunc(msgUtf8Ptr);
+
             this.OnTraceLoggerEventInternal?.Invoke(this, new TraceLogEventArgs((RLLogLevel)logLevel, msg));
         }
 
