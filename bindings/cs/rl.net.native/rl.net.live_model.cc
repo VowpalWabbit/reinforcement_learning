@@ -67,7 +67,7 @@ API int LiveModelChooseRank(livemodel_context_t* context, const char * event_id,
 {
     if (event_id == nullptr)
     {
-        return context->livemodel->choose_rank(event_id, context_json, *resp, status);
+        return context->livemodel->choose_rank(context_json, *resp, status);
     }
 
     return context->livemodel->choose_rank(event_id, context_json, *resp, status);
