@@ -52,7 +52,7 @@ namespace Rl.Net.Cli.Test
         const string PseudoLocJson =
 @"{
 ""áβç"": ""δèƒ"",
-""ϱλï"": ""ℓƙωèř áωèℓ ωèJƙř"",
+""ϱλï"": ""ℓƙωèř effective. Power لُلُصّبُلُلصّبُررً ॣ ॣh ॣ ॣ 冗 ωèJƙř"",
 ""ωôω"": 1,
 ""ℓôřú₥ ïƥƨú₥ δôℓôř"": ""áβç { δèƒ: ϱλï }""
 }
@@ -60,22 +60,11 @@ namespace Rl.Net.Cli.Test
         const string PseudoLocJsonKey1 = "áβç";
         const string PseudoLocJsonValue1 = "δèƒ";
         const string PseudoLocJsonKey2 = "ϱλï";
-        const string PseudoLocJsonValue2 = "ℓƙωèř áωèℓ ωèJƙř";
+        const string PseudoLocJsonValue2 = "ℓƙωèř effective. Power لُلُصّبُلُلصّبُررً ॣ ॣh ॣ ॣ 冗 ωèJƙř"; // Includes the iOS Message crash text
         const string PseudoLocJsonKey3 = "ωôω";
         const string PseudoLocJsonValue3 = "1";
         const string PseudoLocJsonKey4 = "ℓôřú₥ ïƥƨú₥ δôℓôř";
         const string PseudoLocJsonValue4 = "áβç { δèƒ: ϱλï }";
-
-        /*
-         
-          "ApplicationID": "rnc-123456-a",
-    "EventHubInteractionConnectionString": "Endpoint=sb://localhost:8080/;SharedAccessKeyName=RMSAKey;SharedAccessKey=<ASharedAccessKey>=;EntityPath=interaction",
-    "EventHubObservationConnectionString": "Endpoint=sb://localhost:8080/;SharedAccessKeyName=RMSAKey;SharedAccessKey=<ASharedAccessKey>=;EntityPath=observation",
-    "IsExplorationEnabled": true,
-    "ModelBlobUri": "http://localhost:8080",
-    "InitialExplorationEpsilon": 1.0   
-             
-             */
 
         const string PseudoLocConfigJson =
 @"{
@@ -123,7 +112,7 @@ namespace Rl.Net.Cli.Test
                     IntPtr strUtf8Ptr = new IntPtr(strUtf8Bytes);
 
                     // Act
-                    string marshalledBack = StringExtensions.PtrToStringUtf8(strUtf8Ptr);
+                    string marshalledBack = NativeMethods.StringMarshallingFunc(strUtf8Ptr);
 
                     // Assert
                     Assert.AreEqual(str, marshalledBack, message);
@@ -151,6 +140,28 @@ namespace Rl.Net.Cli.Test
         {
             string result = StringExtensions.PtrToStringUtf8(IntPtr.Zero);
             Assert.AreEqual(String.Empty, result, "Failed to marshal nullptr to .NET empty string");
+        }
+
+        [TestMethod]
+        public void Test_StringExtensions_EmptyCStringToStringUtf8_NullPtr()
+        {
+            byte[] stringBytes = new byte[1];
+            stringBytes[0] = 0;
+
+            unsafe
+            {
+                fixed (byte* stringBytesPtr = stringBytes)
+                {
+                    // Arrange
+                    IntPtr strPtr = new IntPtr(stringBytesPtr);
+
+                    // Act
+                    string marshalledBack = StringExtensions.PtrToStringUtf8(strPtr);
+
+                    // Assert
+                    Assert.AreEqual(String.Empty, marshalledBack, "Unable to marshal back a non-null empty cstring.");
+                }
+            }
         }
 
         // If this test has failed, the rest of the tests are inconclusive
@@ -312,9 +323,6 @@ namespace Rl.Net.Cli.Test
 
             RankingResponse rankingResponse2 = liveModel.ChooseRank(PseudoLocEventId, PseudoLocContextJsonWithPdf, ActionFlags.Deferred);
             ValidatePdf(rankingResponse2);
-
-            Run_LiveModelChooseRank_Test(liveModel, PseudoLocEventId, PseudoLocContextJsonWithPdf);
-            Run_LiveModelChooseRankWithFlags_Test(liveModel, PseudoLocEventId, PseudoLocContextJsonWithPdf);
         }
 
         private void Run_LiveModelChooseRank_Test(LiveModel liveModel, string eventId, string contextJson)
@@ -419,16 +427,6 @@ namespace Rl.Net.Cli.Test
             Run_LiveModelReportOutcomeF_Test(liveModel, PseudoLocEventId, 1.0f);
             Run_LiveModelReportOutcomeJson_Test(liveModel, PseudoLocEventId, PseudoLocOutcomeJson);
         }
-
-        //[TestMethod]
-        //public void Test_LiveModel_ChooseRankWithFlags()
-        //{
-        //    LiveModel liveModel = ConfigureLiveModel();
-
-        //    RankingResponse rankingResponse = liveModel.ChooseRankWithFlags(PseudoLocEventId, PseudoLocContextJson);
-        //}
-
-
 
         // TODO: Figure out how to project the mock objects from the C++ unit testing code to be
         // usable 
