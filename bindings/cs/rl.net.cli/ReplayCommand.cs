@@ -16,7 +16,7 @@ namespace Rl.Net.Cli
 
         public override void Run()
         {
-            LiveModel liveModel = CreateLiveModelOrExit(this.ConfigPath);
+            LiveModel liveModel = Helpers.CreateLiveModelOrExit(this.ConfigPath);
             RLDriver rlDriver = new RLDriver(liveModel);
             rlDriver.StepInterval = TimeSpan.FromMilliseconds(this.SleepIntervalMs);
 

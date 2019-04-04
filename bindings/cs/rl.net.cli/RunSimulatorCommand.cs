@@ -14,11 +14,11 @@ namespace Rl.Net.Cli
 
         public override void Run()
         {
-            LiveModel liveModel = CreateLiveModelOrExit(this.ConfigPath);
+            LiveModel liveModel = Helpers.CreateLiveModelOrExit(this.ConfigPath);
 
             RLSimulator rlSim = new RLSimulator(liveModel);
             rlSim.StepInterval = TimeSpan.FromMilliseconds(this.SleepIntervalMs);
-            rlSim.OnError += (sender, apiStatus) => WriteStatusAndExit(apiStatus);
+            rlSim.OnError += (sender, apiStatus) => Helpers.WriteStatusAndExit(apiStatus);
             rlSim.Run(this.Steps);
         }
     }
