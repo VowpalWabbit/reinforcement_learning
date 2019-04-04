@@ -11,7 +11,7 @@ namespace Rl.Net.Cli
         [Option(longName: "log", HelpText = "path to the log file to replay", Required = true)]
         public string LogPath { get; set; }
 
-        [Option(longName: "sleep", HelpText = "sleep interval in milliseconds", Required = true)]
+        [Option(longName: "sleep", HelpText = "sleep interval in milliseconds", Required = false, Default = 100)]
         public int SleepIntervalMs { get; set; }
 
         public override void Run()
