@@ -8,6 +8,7 @@ namespace reinforcement_learning {
   }
   void console_tracer::log(int log_level, const std::string& msg) {
     if (log_level >= min_level) {
+      std::unique_lock<std::mutex> lock(_mutex);
       std::cout << get_log_level_string(log_level) << ": " << msg << std::endl;
     }
   }

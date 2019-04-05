@@ -1,6 +1,8 @@
 #pragma once
 #include "trace_logger.h"
 
+#include <mutex>
+
 namespace reinforcement_learning {
 class console_tracer : public i_trace {
   public:
@@ -10,5 +12,6 @@ class console_tracer : public i_trace {
 
   private:
     int min_level;
+    std::mutex _mutex;
   };
 }
