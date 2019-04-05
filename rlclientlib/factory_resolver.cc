@@ -113,7 +113,8 @@ namespace reinforcement_learning {
   }
 
   int console_tracer_create(i_trace** retval, const u::configuration& cfg, i_trace* trace_logger, api_status* status) {
-    *retval = new console_tracer();
+    const char* level = cfg.get(name::TRACE_LOG_LEVEL, STR_LEVEL_WARN);
+    *retval = new console_tracer(get_log_level(level));
     return error_code::success;
   }
 }

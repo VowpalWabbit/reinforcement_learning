@@ -3,7 +3,12 @@
 #include "str_util.h"
 
 namespace reinforcement_learning {
+  console_tracer::console_tracer(int _min_level) 
+    : min_level(_min_level) {
+  }
   void console_tracer::log(int log_level, const std::string& msg) {
-    std::cout << get_log_level_string(log_level) << ": " << msg << std::endl;
+    if (log_level >= min_level) {
+      std::cout << get_log_level_string(log_level) << ": " << msg << std::endl;
+    }
   }
 }

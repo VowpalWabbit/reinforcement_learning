@@ -31,6 +31,7 @@ namespace reinforcement_learning {  namespace name {
       const char *const  INTERACTION_SENDER_IMPLEMENTATION    = "interaction.sender.implementation";
       const char *const  EH_TEST                 = "eventhub.mock";
       const char *const  TRACE_LOG_IMPLEMENTATION = "trace.logger.implementation";
+      const char *const  TRACE_LOG_LEVEL = "trace.logger.level";
       const char *const  QUEUE_MODE = "queue.mode";
       const char *const  INTERACTION_FILE_NAME = "interaction.file.name";
       const char *const  OBSERVATION_FILE_NAME = "observation.file.name";

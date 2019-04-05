@@ -14,6 +14,7 @@ namespace reinforcement_learning {
 }
 
 const char* get_log_level_string(int log_level);
+int get_log_level(const char* log_level_str);
 
 #define TRACE_LOG( logger, level, msg ) do{  \
     if(logger != nullptr) {           \
