@@ -1,6 +1,7 @@
 #pragma once
 
 #include "event_queue.h"
+#include "events_sequence_id.h"
 #include "api_status.h"
 #include "../error_callback_fn.h"
 #include "err_constants.h"
@@ -40,7 +41,8 @@ namespace reinforcement_learning { namespace logger {
 
   private:
     int fill_buffer(std::shared_ptr<utility::data_buffer>& retbuffer,
-      size_t& remaining, 
+      size_t& remaining,
+      events_sequence_id& buffer_id,
       api_status* status);
 
     void flush(); //flush all batches
@@ -48,6 +50,7 @@ namespace reinforcement_learning { namespace logger {
   public:
     async_batcher(i_message_sender* sender,
                   utility::watchdog& watchdog,
+                  i_trace* trace,
                   error_callback_fn* perror_cb = nullptr,
                   size_t send_high_water_mark = (1024 * 1024 * 4),
                   size_t batch_timeout_ms = 1000,
@@ -57,6 +60,7 @@ namespace reinforcement_learning { namespace logger {
 
   private:
     std::unique_ptr<i_message_sender> _sender;
+    i_trace* _trace;
 
     event_queue<TEvent> _queue;       // A queue to accumulate batch of events.
     size_t _send_high_water_mark;
@@ -109,21 +113,25 @@ namespace reinforcement_learning { namespace logger {
   template<typename TEvent, template<typename> class TSerializer>
   int async_batcher<TEvent, TSerializer>::fill_buffer(
                                                       std::shared_ptr<utility::data_buffer>& buffer, 
-                                                      size_t& remaining, 
+                                                      size_t& remaining, events_sequence_id& buffer_id,
                                                       api_status* status)
   {
     TEvent evt;
     TSerializer<TEvent> collection_serializer(*buffer.get());
-
+    size_t count = 0;
     while (remaining > 0 && collection_serializer.size() < _send_high_water_mark) {
       _queue.pop(&evt);
+      if (count++ == 0) {
+        buffer_id.set_first(evt);
+      }
       if (BLOCK == _queue_mode) {
         _cv.notify_one();
       }
       RETURN_IF_FAIL(collection_serializer.add(evt, status));
       --remaining;
     }
-
+    buffer_id.set_last(evt);
+    buffer_id.set_count(count);
     collection_serializer.finalize();
 
     return error_code::success;
@@ -144,29 +152,35 @@ namespace reinforcement_learning { namespace logger {
       api_status status;
 
       auto buffer = _buffer_pool.acquire();
-
-      if (fill_buffer(buffer, remaining, &status) != error_code::success) {
+      events_sequence_id buffer_id;
+      if (fill_buffer(buffer, remaining, buffer_id, &status) != error_code::success) {
         ERROR_CALLBACK(_perror_cb, status);
       }
 
       if (_sender->send(TSerializer<TEvent>::message_id(), buffer, &status) != error_code::success) {
+        const std::string message = utility::concat("[SENT] Messages are not sent: ", buffer_id.get());
+        TRACE_DEBUG(_trace, message);
         ERROR_CALLBACK(_perror_cb, status);
       }
+      const std::string message = utility::concat("[SENT] Messages are sent: ", buffer_id.get());
+      TRACE_DEBUG(_trace, message);
     }
   }
 
   template<typename TEvent, template<typename> class TSerializer>
   async_batcher<TEvent, TSerializer>::async_batcher(
-    i_message_sender* sender, utility::watchdog& watchdog, 
+    i_message_sender* sender, utility::watchdog& watchdog, i_trace* trace,
 	error_callback_fn* perror_cb, const size_t send_high_water_mark,
     const size_t batch_timeout_ms, const size_t queue_max_capacity, queue_mode_enum queue_mode)
-    : _sender(sender),
-    _send_high_water_mark(send_high_water_mark),
-    _queue_max_capacity(queue_max_capacity),
-    _perror_cb(perror_cb),
-    _periodic_background_proc(static_cast<int>(batch_timeout_ms), watchdog, "Async batcher thread", perror_cb),
-    _pass_prob(0.5),
-    _queue_mode(queue_mode)
+    : _sender(sender)
+    , _trace(trace)
+    , _queue(_trace)
+    , _send_high_water_mark(send_high_water_mark)
+    , _queue_max_capacity(queue_max_capacity)
+    , _perror_cb(perror_cb)
+    , _periodic_background_proc(static_cast<int>(batch_timeout_ms), watchdog, "Async batcher thread", perror_cb)
+    , _pass_prob(0.5)
+    , _queue_mode(queue_mode)
   {}
 
   template<typename TEvent, template<typename> class TSerializer>

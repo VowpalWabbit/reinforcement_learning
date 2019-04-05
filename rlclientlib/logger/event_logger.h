@@ -30,6 +30,7 @@ namespace reinforcement_learning { namespace logger {
       int send_queue_max_capacity,
       const char* queue_mode,
       utility::watchdog& watchdog,
+      i_trace* trace,
       error_callback_fn* perror_cb = nullptr);
 
     int init(api_status* status);
@@ -53,11 +54,13 @@ namespace reinforcement_learning { namespace logger {
     int send_queue_max_capacity,
     const char* queue_mode,
     utility::watchdog& watchdog,
+    i_trace* trace,
     error_callback_fn* perror_cb
   )
     : _batcher(
       sender,
       watchdog,
+      trace,
       perror_cb,
       send_high_watermark,
       send_batch_interval_ms,
@@ -91,7 +94,7 @@ namespace reinforcement_learning { namespace logger {
 
   class interaction_logger : public event_logger<ranking_event> {
   public:
-    interaction_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, error_callback_fn* perror_cb = nullptr)
+    interaction_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_trace* trace, error_callback_fn* perror_cb = nullptr)
       : event_logger(
         sender,
         c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
@@ -99,6 +102,7 @@ namespace reinforcement_learning { namespace logger {
         c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
         c.get(name::QUEUE_MODE, "DROP"),
         watchdog,
+        trace,
         perror_cb)
     {}
 
@@ -107,7 +111,7 @@ namespace reinforcement_learning { namespace logger {
 
   class observation_logger : public event_logger<outcome_event> {
   public:
-    observation_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, error_callback_fn* perror_cb = nullptr)
+    observation_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_trace* trace, error_callback_fn* perror_cb = nullptr)
       : event_logger(
         sender,
         c.get_int(name::OBSERVATION_SEND_HIGH_WATER_MARK, 198 * 1024),
@@ -115,6 +119,7 @@ namespace reinforcement_learning { namespace logger {
         c.get_int(name::OBSERVATION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
         c.get(name::QUEUE_MODE, "DROP"),
         watchdog,
+        trace,
         perror_cb)
     {}
 

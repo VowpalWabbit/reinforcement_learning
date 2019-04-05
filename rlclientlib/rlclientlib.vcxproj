@@ -178,6 +178,7 @@
     <ClInclude Include="..\include\str_util.h" />
     <ClInclude Include="..\include\trace_logger.h" />
     <ClInclude Include="..\include\data_buffer.h" />
+    <ClInclude Include="events_sequence_id.h" />
     <ClInclude Include="logger\file\file_logger.h" />
     <ClInclude Include="utility\data_buffer_streambuf.h" />
     <ClInclude Include="generated\OutcomeEvent_generated.h" />
@@ -220,6 +221,7 @@
     <ClInclude Include="ranking_event.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="events_sequence_id.cpp" />
     <ClCompile Include="logger\file\file_logger.cc" />
     <ClCompile Include="model_mgmt\data_callback_fn.cc" />
     <ClCompile Include="model_mgmt\empty_data_transport.cc" />
