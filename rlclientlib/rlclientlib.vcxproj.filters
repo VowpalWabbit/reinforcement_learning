@@ -39,7 +39,7 @@
     <ClCompile Include="model_mgmt\empty_data_transport.cc" />
     <ClCompile Include="vw_model\pdf_model.cc" />
     <ClCompile Include="sampling.cc" />
-    <ClCompile Include="events_sequence_id.cpp" />
+    <ClCompile Include="events_sequence_id.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
