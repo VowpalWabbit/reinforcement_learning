@@ -72,6 +72,6 @@ BOOST_AUTO_TEST_CASE(test_trace_logging) {
 }
 
 BOOST_AUTO_TEST_CASE(test_console_logging) {
-  reinforcement_learning::console_tracer trace;
+  reinforcement_learning::console_tracer trace(0);
   trace.log(0, "Test message");
 }

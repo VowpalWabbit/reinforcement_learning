@@ -32,7 +32,7 @@ public:
 };
 
 BOOST_AUTO_TEST_CASE(push_pop_test) {
-  event_queue<test_event> queue;
+  event_queue<test_event> queue("test");
   queue.push(test_event("1"),10);
   queue.push(test_event("2"),10);
   queue.push(test_event("3"),10);
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(push_pop_test) {
 }
 
 BOOST_AUTO_TEST_CASE(prune_test) {
-  event_queue<test_event> queue;
+  event_queue<test_event> queue("test");
   queue.push(test_event("no_drop_1"),10);
   queue.push(test_event("drop_1"),10);
   queue.push(test_event("no_drop_2"),10);
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(prune_test) {
 
 BOOST_AUTO_TEST_CASE(queue_push_pop)
 {
-  reinforcement_learning::event_queue<test_event> queue;
+  reinforcement_learning::event_queue<test_event> queue("test");
 
   //push n elements in the queue
   int n = 10;
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(queue_push_pop)
 
 BOOST_AUTO_TEST_CASE(queue_pop_empty)
 {
-  reinforcement_learning::event_queue<test_event> queue;
+  reinforcement_learning::event_queue<test_event> queue("test");
 
   //the pop call on an empty queue should do nothing
   test_event* item = NULL;
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(queue_pop_empty)
 BOOST_AUTO_TEST_CASE(queue_move_push)
 {
   test_event test("hello");
-  reinforcement_learning::event_queue<test_event> queue;
+  reinforcement_learning::event_queue<test_event> queue("test");
 
   // Contents of string moved into queue
   queue.push(test,10);
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(queue_move_push)
 BOOST_AUTO_TEST_CASE(queue_capacity_test)
 {
   test_event test("hello");
-  reinforcement_learning::event_queue<test_event> queue;
+  reinforcement_learning::event_queue<test_event> queue("test");
 
   BOOST_CHECK_EQUAL(queue.capacity(), 0);
   // Contents of string moved into queue

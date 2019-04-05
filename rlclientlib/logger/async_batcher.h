@@ -51,7 +51,7 @@ namespace reinforcement_learning { namespace logger {
     async_batcher(const char* name,
                   i_message_sender* sender,
                   utility::watchdog& watchdog,
-                  i_trace* trace,
+                  i_trace* trace = nullptr,
                   error_callback_fn* perror_cb = nullptr,
                   size_t send_high_water_mark = (1024 * 1024 * 4),
                   size_t batch_timeout_ms = 1000,

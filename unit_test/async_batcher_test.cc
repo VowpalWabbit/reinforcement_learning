@@ -95,7 +95,8 @@ BOOST_AUTO_TEST_CASE(flush_timeout) {
   size_t timeout_ms = 100; //set a short timeout
   error_callback_fn error_fn(expect_no_error, nullptr);
   utility::watchdog watchdog(nullptr);
-  logger::async_batcher<test_undroppable_event> batcher(s, watchdog, &error_fn, 262143, timeout_ms, 8192);
+  
+  logger::async_batcher<test_undroppable_event> batcher("test", s, watchdog, nullptr, &error_fn, 262143, timeout_ms, 8192);
   batcher.init(nullptr); // Allow periodic_background_proc inside async_batcher to start waiting
   // on a timer before sending any events to it. Else we risk not
   // triggering the batch mechanism and might get triggered by initial
@@ -119,7 +120,7 @@ BOOST_AUTO_TEST_CASE(flush_batches) {
   error_callback_fn error_fn(expect_no_error, nullptr);
   utility::watchdog watchdog(nullptr);
   auto batcher = new logger::async_batcher<test_undroppable_event>
-      (s, watchdog, &error_fn, send_high_water_mark, 100000);
+      ("test", s, watchdog, nullptr, &error_fn, send_high_water_mark, 100000);
   batcher->init(nullptr); // Allow periodic_background_proc inside async_batcher to start waiting
   // on a timer before sending any events to it.   Else we risk not
   // triggering the batch mechanism and might get triggered by initial
@@ -145,7 +146,7 @@ BOOST_AUTO_TEST_CASE(flush_after_deletion) {
   auto s = new message_sender(items);
   utility::watchdog watchdog(nullptr);
   auto* batcher = new logger::async_batcher<test_undroppable_event>
-      (s, watchdog);
+      ("test", s, watchdog);
   batcher->init(nullptr); // Allow periodic_background_proc to start waiting
   std::this_thread::sleep_for(std::chrono::milliseconds(20));
   std::string foo("foo");
@@ -166,7 +167,7 @@ BOOST_AUTO_TEST_CASE(queue_overflow_do_not_drop_event) {
   queue_mode_enum queue_mode = BLOCK;
   error_callback_fn error_fn(expect_no_error, nullptr);
   utility::watchdog watchdog(nullptr);
-  auto batcher = new logger::async_batcher<test_droppable_event>(s, watchdog, &error_fn, 262143, timeout_ms,
+  auto batcher = new logger::async_batcher<test_droppable_event>("test", s, watchdog, nullptr, &error_fn, 262143, timeout_ms,
                                                                  queue_max_size, queue_mode);
   batcher->init(nullptr); // Allow periodic_background_proc to start waiting
   std::this_thread::sleep_for(std::chrono::milliseconds(20));

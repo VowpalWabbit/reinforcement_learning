@@ -27,9 +27,9 @@ namespace reinforcement_learning {
     size_t _capacity{ 0 };
 
   public:
-    event_queue(const char* name, i_trace* trace)
-      : _trace(trace)
-      , _name(name) {
+    event_queue(const char* name, i_trace* trace = nullptr)
+      : _name(name)
+      , _trace(trace) {
       static_assert(std::is_base_of<event, T>::value, "T must be a descendant of event");
     }
 
