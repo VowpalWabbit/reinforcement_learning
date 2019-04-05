@@ -24,6 +24,7 @@ namespace reinforcement_learning { namespace logger {
   class event_logger {
   public:
     event_logger(
+      const char* name,
       i_message_sender* sender,
       int send_high_watermark,
       int send_batch_interval_ms,
@@ -48,6 +49,7 @@ namespace reinforcement_learning { namespace logger {
 
   template<typename TEvent>
   event_logger<TEvent>::event_logger(
+    const char* name,
     i_message_sender* sender,
     int send_high_watermark,
     int send_batch_interval_ms,
@@ -58,6 +60,7 @@ namespace reinforcement_learning { namespace logger {
     error_callback_fn* perror_cb
   )
     : _batcher(
+      name,
       sender,
       watchdog,
       trace,
@@ -96,6 +99,7 @@ namespace reinforcement_learning { namespace logger {
   public:
     interaction_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_trace* trace, error_callback_fn* perror_cb = nullptr)
       : event_logger(
+        "interactions",
         sender,
         c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
         c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
@@ -113,6 +117,7 @@ namespace reinforcement_learning { namespace logger {
   public:
     observation_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_trace* trace, error_callback_fn* perror_cb = nullptr)
       : event_logger(
+        "observations",
         sender,
         c.get_int(name::OBSERVATION_SEND_HIGH_WATER_MARK, 198 * 1024),
         c.get_int(name::OBSERVATION_SEND_BATCH_INTERVAL_MS, 1000),

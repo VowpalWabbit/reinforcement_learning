@@ -48,7 +48,8 @@ namespace reinforcement_learning { namespace logger {
     void flush(); //flush all batches
 
   public:
-    async_batcher(i_message_sender* sender,
+    async_batcher(const char* name,
+                  i_message_sender* sender,
                   utility::watchdog& watchdog,
                   i_trace* trace,
                   error_callback_fn* perror_cb = nullptr,
@@ -59,6 +60,7 @@ namespace reinforcement_learning { namespace logger {
     ~async_batcher();
 
   private:
+    const std::string _name;
     std::unique_ptr<i_message_sender> _sender;
     i_trace* _trace;
 
@@ -158,23 +160,24 @@ namespace reinforcement_learning { namespace logger {
       }
 
       if (_sender->send(TSerializer<TEvent>::message_id(), buffer, &status) != error_code::success) {
-        const std::string message = utility::concat("[SENT] Messages are not sent: ", buffer_id.get());
+        const std::string message = utility::concat("[SENT] [", _name, "] Messages are not sent: ", buffer_id.get());
         TRACE_DEBUG(_trace, message);
         ERROR_CALLBACK(_perror_cb, status);
       }
-      const std::string message = utility::concat("[SENT] Messages are sent: ", buffer_id.get());
+      const std::string message = utility::concat("[SENT] [", _name, "] Messages are sent: ", buffer_id.get());
       TRACE_DEBUG(_trace, message);
     }
   }
 
   template<typename TEvent, template<typename> class TSerializer>
   async_batcher<TEvent, TSerializer>::async_batcher(
-    i_message_sender* sender, utility::watchdog& watchdog, i_trace* trace,
-	error_callback_fn* perror_cb, const size_t send_high_water_mark,
+    const char* name, i_message_sender* sender, utility::watchdog& watchdog, i_trace* trace,
+	  error_callback_fn* perror_cb, const size_t send_high_water_mark,
     const size_t batch_timeout_ms, const size_t queue_max_capacity, queue_mode_enum queue_mode)
-    : _sender(sender)
+    : _name(name)
+    , _sender(sender)
     , _trace(trace)
-    , _queue(_trace)
+    , _queue(name, _trace)
     , _send_high_water_mark(send_high_water_mark)
     , _queue_max_capacity(queue_max_capacity)
     , _perror_cb(perror_cb)

@@ -19,6 +19,7 @@ namespace reinforcement_learning {
     using queue_t = std::list<std::pair<T,size_t>>;
     using iterator_t = typename queue_t::iterator;
 
+    const std::string _name;
     queue_t _queue;
     i_trace* _trace;
     std::mutex _mutex;
@@ -26,7 +27,9 @@ namespace reinforcement_learning {
     size_t _capacity{ 0 };
 
   public:
-    event_queue(i_trace* trace) : _trace(trace) {
+    event_queue(const char* name, i_trace* trace)
+      : _trace(trace)
+      , _name(name) {
       static_assert(std::is_base_of<event, T>::value, "T must be a descendant of event");
     }
 
@@ -64,7 +67,7 @@ namespace reinforcement_learning {
       for (auto it = _queue.begin(); it != _queue.end();) {
         it = it->first.try_drop(pass_prob, _drop_pass) ? erase(it, dropped) : (++it);
       }
-      const std::string message = utility::concat("[DROP] Messages range: ", sequence_id.get(), " Dropped: ", dropped);
+      const std::string message = utility::concat("[DROP] [", _name, "] Messages range: ", sequence_id.get(), " Dropped: ", dropped);
       TRACE_DEBUG(_trace, message);
       ++_drop_pass;
     }
@@ -83,7 +86,7 @@ namespace reinforcement_learning {
 
   private:
     //thread-unsafe
-    iterator_t erase(iterator_t it, size_t counter) {
+    iterator_t erase(iterator_t it, size_t& counter) {
       _capacity = (std::max)(0, static_cast<int>(_capacity) - static_cast<int>(it->second));
       ++counter;
       return _queue.erase(it);
