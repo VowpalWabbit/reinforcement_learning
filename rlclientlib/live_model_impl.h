@@ -76,12 +76,12 @@ namespace reinforcement_learning
     model_factory_t* _m_factory;
     sender_factory_t* _sender_factory;
 
+    std::unique_ptr<i_trace> _trace_logger{ nullptr };
     std::unique_ptr<model_management::i_data_transport> _transport{nullptr};
     std::unique_ptr<model_management::i_model> _model{nullptr};
     std::unique_ptr<logger::interaction_logger> _ranking_logger{nullptr};
     std::unique_ptr<logger::observation_logger> _outcome_logger{nullptr};
     std::unique_ptr<model_management::model_downloader> _model_download{nullptr};
-    std::unique_ptr<i_trace> _trace_logger{nullptr};
 
     std::unique_ptr<utility::periodic_background_proc<model_management::model_downloader>> _bg_model_proc;
     uint64_t _seed_shift;
