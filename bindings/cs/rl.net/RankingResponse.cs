@@ -8,6 +8,56 @@ using Rl.Net.Native;
 using System.Collections;
 
 namespace Rl.Net {
+    namespace Native
+    {
+        internal partial class NativeMethods
+        {
+            [DllImport("rl.net.native.dll")]
+            public static extern IntPtr CreateRankingResponse();
+
+            [DllImport("rl.net.native.dll")]
+            public static extern void DeleteRankingResponse(IntPtr rankingResponse);
+
+            [DllImport("rl.net.native.dll", EntryPoint = "GetRankingEventId")]
+            private static extern IntPtr GetRankingEventIdNative(IntPtr rankingResponse);
+
+            internal static Func<IntPtr, IntPtr> GetRankingEventIdOverride { get; set; }
+
+            public static IntPtr GetRankingEventId(IntPtr rankingResponse)
+            {
+                if (GetRankingEventIdOverride != null)
+                {
+                    return GetRankingEventIdOverride(rankingResponse);
+                }
+
+                return GetRankingEventIdNative(rankingResponse);
+            }
+
+            [DllImport("rl.net.native.dll", EntryPoint = "GetRankingModelId")]
+            private static extern IntPtr GetRankingModelIdNative(IntPtr rankingResponse);
+
+            internal static Func<IntPtr, IntPtr> GetRankingModelIdOverride { get; set; }
+
+            public static IntPtr GetRankingModelId(IntPtr rankingResponse)
+            {
+                if (GetRankingModelIdOverride != null)
+                {
+                    return GetRankingModelIdOverride(rankingResponse);
+                }
+
+                return GetRankingModelIdNative(rankingResponse);
+            }
+
+            // TODO: CLS-compliance requires that we not publically expose unsigned types.
+            // Probably not a big issue ("9e18 actions ought to be enough for anyone...")
+            [DllImport("rl.net.native.dll")]
+            public static extern UIntPtr GetRankingActionCount(IntPtr rankingResponse);
+
+            [DllImport("rl.net.native.dll")]
+            public static extern int GetRankingChosenAction(IntPtr rankingResponse, out UIntPtr action_id, IntPtr status);
+        }
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct ActionProbability
     {
@@ -19,43 +69,37 @@ namespace Rl.Net {
         public float Probability => this.probability;
     }
 
-    public sealed class RankingResponse: NativeObject<RankingResponse>, IEnumerable<ActionProbability>
+    public sealed class RankingResponse : NativeObject<RankingResponse>, IEnumerable<ActionProbability>
     {
-        [DllImport("rl.net.native.dll")]
-        private static extern IntPtr CreateRankingResponse();
-
-        [DllImport("rl.net.native.dll")]
-        private static extern void DeleteRankingResponse(IntPtr rankingResponse);
-
-        [DllImport("rl.net.native.dll")]
-        [return: MarshalAs(NativeMethods.StringMarshalling)]
-        private static extern string GetRankingEventId(IntPtr rankingResponse);
-        
-        [DllImport("rl.net.native.dll")]
-        [return: MarshalAs(NativeMethods.StringMarshalling)]
-        private static extern string GetRankingModelId(IntPtr rankingResponse);
-
-        // TODO: CLS-compliance requires that we not publically expose unsigned types.
-        // Probably not a big issue ("9e18 actions ought to be enough for anyone...")
-        [DllImport("rl.net.native.dll")]
-        private static extern UIntPtr GetRankingActionCount(IntPtr rankingResponse);
-
-        [DllImport("rl.net.native.dll")]
-        private static extern int GetRankingChosenAction(IntPtr rankingResponse, out UIntPtr action_id, IntPtr status);
-
-        public RankingResponse() : base(new New<RankingResponse>(CreateRankingResponse), new Delete<RankingResponse>(DeleteRankingResponse))
+        public RankingResponse() : base(new New<RankingResponse>(NativeMethods.CreateRankingResponse), new Delete<RankingResponse>(NativeMethods.DeleteRankingResponse))
         {
         }
 
-        public string EventId => GetRankingEventId(this.NativeHandle);
+        public string EventId
+        {
+            get
+            {
+                IntPtr eventIdUtf8Ptr = NativeMethods.GetRankingEventId(this.NativeHandle);
 
-        public string ModelId => GetRankingModelId(this.NativeHandle);
+                return NativeMethods.StringMarshallingFunc(eventIdUtf8Ptr);
+            }
+        }
+
+        public string ModelId
+        {
+            get
+            {
+                IntPtr modelIdUtf8Ptr = NativeMethods.GetRankingModelId(this.NativeHandle);
+
+                return NativeMethods.StringMarshallingFunc(modelIdUtf8Ptr);
+            }
+        }
 
         public long Count
         {
             get
             {
-                ulong unsignedSize = GetRankingActionCount(this.NativeHandle).ToUInt64();
+                ulong unsignedSize = NativeMethods.GetRankingActionCount(this.NativeHandle).ToUInt64();
                 Debug.Assert(unsignedSize < Int64.MaxValue, "We do not support collections with size larger than _I64_MAX/Int64.MaxValue");
     
                 return (long)unsignedSize;
@@ -67,7 +111,7 @@ namespace Rl.Net {
         {
             actionIndex = -1;
             UIntPtr chosenAction;
-            int result = GetRankingChosenAction(this.NativeHandle, out chosenAction, status.ToNativeHandleOrNullptr());
+            int result = NativeMethods.GetRankingChosenAction(this.NativeHandle, out chosenAction, status.ToNativeHandleOrNullptr());
 
             if (result != NativeMethods.SuccessStatus)
             {

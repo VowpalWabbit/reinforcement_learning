@@ -2,12 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
+    <OutputPath>$(SolutionDir)$(Platform)\$(Configuration)</OutputPath>
     <IsPackable>false</IsPackable>
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AssemblyName>Rl.Net.Cli.Test</AssemblyName>
     <RootNamespace>Rl.Net.Cli.Test</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\rl.net.cli\rl.net.cli.csproj" />
+    <ProjectReference Include="..\rl.net\rl.net.csproj" />
   </ItemGroup>
 
 </Project>
