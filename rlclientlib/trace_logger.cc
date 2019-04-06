@@ -1,4 +1,5 @@
 #include "trace_logger.h"
+#include <cstring>
 #include <map>
 
 const std::map<int, const char* const> debug_levels = {
