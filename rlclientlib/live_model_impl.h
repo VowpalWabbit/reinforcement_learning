@@ -27,11 +27,13 @@ namespace reinforcement_learning
     int choose_rank(const char* event_id, const char* context, unsigned int flags, ranking_response& response, api_status* status);
     //here the event_id is auto-generated
     int choose_rank(const char* context, unsigned int flags, ranking_response& response, api_status* status);
+    int choose_decisions(const char* context_json, unsigned int flags, ranking_responses& resp, api_status* status);
 
     int report_action_taken(const char* event_id, api_status* status);
 
     int report_outcome(const char* event_id, const char* outcome_data, api_status* status);
     int report_outcome(const char* event_id, float reward, api_status* status);
+
 
     int refresh_model(api_status* status);
 
@@ -80,6 +82,7 @@ namespace reinforcement_learning
     std::unique_ptr<model_management::i_model> _model{nullptr};
     std::unique_ptr<logger::interaction_logger> _ranking_logger{nullptr};
     std::unique_ptr<logger::observation_logger> _outcome_logger{nullptr};
+    std::unique_ptr<logger::ccb_logger> _decisions_logger{};
     std::unique_ptr<model_management::model_downloader> _model_download{nullptr};
     std::unique_ptr<i_trace> _trace_logger{nullptr};
 

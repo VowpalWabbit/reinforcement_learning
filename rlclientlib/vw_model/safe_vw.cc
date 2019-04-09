@@ -184,6 +184,49 @@ namespace reinforcement_learning {
     examples.delete_v();
   }
 
+  void safe_vw::rank_decisions(const char* context, std::vector<std::vector<int>>& actions, std::vector<std::vector<float>>& scores)
+  {
+    auto examples = v_init<example*>();
+    examples.push_back(get_or_create_example());
+
+    std::vector<char> line_vec(context, context + strlen(context) + 1);
+
+    VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
+
+    // finalize example
+    VW::setup_examples(*_vw, examples);
+
+    // TODO: refactor setup_examples/read_line_json to take in multi_ex
+    multi_ex examples2(examples.begin(), examples.end());
+
+    _vw->predict(examples2);
+
+    // prediction are in the first-example
+    auto& predictions = examples2[0]->pred.decision_scores;
+    actions.reserve(predictions.size());
+    scores.reserve(predictions.size());
+    for (size_t i = 0; i < predictions.size(); ++i) {
+      actions[i].reserve(predictions[i].size());
+      scores[i].reserve(predictions[i].size());
+      for (size_t j = 0; j < predictions.size(); ++j) {
+         actions[i].push_back(predictions[i][j].action);
+         scores[i].push_back(predictions[i][j].score);
+      }
+    }
+
+    // clean up examples and push examples back into pool for re-use
+    for (auto&& ex : examples) {
+      for(auto action_scores : ex->pred.decision_scores) {
+        action_scores.delete_v();
+      }
+      ex->pred.decision_scores.delete_v();
+      _example_pool.emplace_back(ex);
+    }
+
+    // cleanup
+    examples.delete_v();
+  }
+
 const char* safe_vw::id() const {
   return _vw->id.c_str();
 }

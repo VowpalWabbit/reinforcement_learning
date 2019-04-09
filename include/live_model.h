@@ -135,7 +135,8 @@ namespace reinforcement_learning {
     * @return int Return error code.  This will also be returned in the api_status object
     */
     int choose_rank(const char * context_json, unsigned int flags, ranking_response& resp, api_status* status = nullptr); //event_id is auto-generated
-    
+
+    int choose_decisions(const char * context_json, unsigned int flags, ranking_responses& resp, api_status* status = nullptr);
     /**
     * @brief Report that action was taken.
     *

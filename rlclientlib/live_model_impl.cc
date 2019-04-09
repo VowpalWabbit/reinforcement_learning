@@ -83,6 +83,73 @@ namespace reinforcement_learning {
       status);
   }
 
+  int live_model_impl::choose_decisions(const char* context_json, unsigned int flags, ranking_responses& resp, api_status* status)
+  {
+    resp.clear();
+    //clear previous errors if any
+    api_status::try_clear(status);
+
+    //check arguments
+    RETURN_IF_FAIL(check_null_or_empty(context_json, status));
+
+    // TODO incorporate into model
+    //const uint64_t seed = uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
+
+    std::vector<std::vector<int>> actions_ids;
+    std::vector<std::vector<float>> actions_pdfs;
+    std::string model_version;
+
+
+    size_t num_decisions;
+    RETURN_IF_FAIL(utility::get_decision_count(num_decisions, context_json, nullptr, status));
+
+    std::vector<const char*> event_ids(num_decisions, nullptr);
+    std::vector<std::pair<size_t, std::string>> found_ids;
+    RETURN_IF_FAIL(utility::get_event_ids(found_ids, context_json, nullptr, status));
+
+    for (auto ids : found_ids)
+    {
+      char* dest;
+      strcpy_s(dest, strlen(ids.second.c_str()), ids.second.c_str());
+      event_ids[ids.first] = dest;
+    }
+
+    for (int i = 0; i < event_ids.size(); i++)
+    {
+      if(event_ids[i] == nullptr)
+      {
+          event_ids[i] = boost::uuids::to_string(boost::uuids::random_generator()()).c_str();
+      }
+    }
+
+     if (!_model_ready) {
+       // todo add pool
+      static thread_local auto explore_vw = safe_vw::safe_vw("--ccb_explore_adf --json --quiet");
+      explore_vw.rank_decisions(context_json, actions_ids, actions_pdfs);
+      model_version = "N/A";
+    }
+    else {
+      RETURN_IF_FAIL(_model->choose_decisions(context_json, actions_ids, actions_pdfs, model_version, status));
+    }
+
+    resp.resize(actions_ids.size());
+    for(int i = 0; i < actions_ids.size(); i++)
+    {
+      populate_response(0, actions_ids[i], actions_pdfs[i], std::move(std::string(model_version)), resp[i], _trace_logger.get(), status);
+      resp[i].set_model_id(model_version.c_str());
+    }
+
+    RETURN_IF_FAIL(_decisions_logger->log_decisions(event_ids, context_json, flags, resp, status));
+
+    // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
+    if (_watchdog.has_background_error_been_reported()) {
+      RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+    }
+
+    return error_code::success;
+  }
+
+
   int live_model_impl::report_action_taken(const char* event_id, api_status* status) {
     // Clear previous errors if any
     api_status::try_clear(status);
@@ -174,7 +241,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_sender_factory->create(&ranking_data_sender, ranking_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
     RETURN_IF_FAIL(ranking_data_sender->init(status));
 
-    // Create a message sender that will prepend the message with a preamble and send the raw data using the 
+    // Create a message sender that will prepend the message with a preamble and send the raw data using the
     // factory created raw data sender
     l::i_message_sender* ranking_msg_sender = new l::preamble_message_sender(ranking_data_sender);
     RETURN_IF_FAIL(ranking_msg_sender->init(status));
@@ -191,7 +258,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_sender_factory->create(&outcome_sender, outcome_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
     RETURN_IF_FAIL(outcome_sender->init(status));
 
-    // Create a message sender that will prepend the message with a preamble and send the raw data using the 
+    // Create a message sender that will prepend the message with a preamble and send the raw data using the
     // factory created raw data sender
     l::i_message_sender* outcome_msg_sender = new l::preamble_message_sender(outcome_sender);
     RETURN_IF_FAIL(outcome_msg_sender->init(status));
@@ -199,6 +266,23 @@ namespace reinforcement_learning {
     // Create a logger for interactions that will use msg sender to send interaction messages
     _outcome_logger.reset(new logger::observation_logger(_configuration, outcome_msg_sender, _watchdog, &_error_cb));
     RETURN_IF_FAIL(_outcome_logger->init(status));
+
+    // Get the name of raw data (as opposed to message) sender for interactions.
+    const auto decisions_sender_impl = _configuration.get(name::DECISIONS_SENDER_IMPLEMENTATION, value::DECISIONS_EH_SENDER);
+    i_sender* decisions_data_sender;
+
+    // Use the name to create an instance of raw data sender for interactions
+    RETURN_IF_FAIL(_sender_factory->create(&decisions_data_sender, decisions_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
+    RETURN_IF_FAIL(decisions_data_sender->init(status));
+
+    // Create a message sender that will prepend the message with a preamble and send the raw data using the
+    // factory created raw data sender
+    l::i_message_sender* decisions_msg_sender = new l::preamble_message_sender(decisions_data_sender);
+    RETURN_IF_FAIL(decisions_msg_sender->init(status));
+
+    // Create a logger for interactions that will use msg sender to send interaction messages
+    _decisions_logger.reset(new logger::ccb_logger(_configuration, decisions_msg_sender, _watchdog, &_error_cb));
+    RETURN_IF_FAIL(_decisions_logger->init(status));
 
     return error_code::success;
   }

@@ -66,6 +66,7 @@ namespace reinforcement_learning { namespace model_management {
     public:
       virtual int update(const model_data& data, bool& model_ready, api_status* status = nullptr) = 0;
       virtual int choose_rank(uint64_t rnd_seed, const char* features, std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) = 0;
+      virtual int choose_decisions(const char* features, std::vector<std::vector<int>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status = nullptr) = 0;
       virtual ~i_model() = default;
     };
 }}

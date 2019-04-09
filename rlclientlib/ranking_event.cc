@@ -10,15 +10,15 @@ namespace reinforcement_learning {
   namespace u = utility;
   event::event() {}
 
-  event::event(const char* event_id, float pass_prob)
-    : _event_id(event_id), _pass_prob(pass_prob) {}
+  event::event(const char* seed_id, float pass_prob)
+    : _seed_id(seed_id), _pass_prob(pass_prob) {}
 
   event::event(event&& other)
-    : _event_id(std::move(other._event_id)), _pass_prob(other._pass_prob) {}
+    : _seed_id(std::move(other._seed_id)), _pass_prob(other._pass_prob) {}
 
   event& event::operator=(event&& other) {
     if (&other != this) {
-      _event_id = std::move(other._event_id);
+      _seed_id = std::move(other._seed_id);
       _pass_prob = other._pass_prob;
     }
     return *this;
@@ -34,7 +34,7 @@ namespace reinforcement_learning {
   float event::get_pass_prob() const { return _pass_prob; }
 
   float event::prg(int drop_pass) const {
-    const auto seed_str = _event_id + std::to_string(drop_pass);
+    const auto seed_str = _seed_id + std::to_string(drop_pass);
     const auto seed = uniform_hash(seed_str.c_str(), seed_str.length(), 0);
     return exploration::uniform_random_merand48(seed);
   }
@@ -61,6 +61,37 @@ namespace reinforcement_learning {
   ranking_event ranking_event::choose_rank(const char* event_id, const char* context, unsigned int flags,
                                            const ranking_response& resp, float pass_prob) {
     return ranking_event(event_id, flags & action_flags::DEFERRED, pass_prob, context, resp);
+  }
+
+  decision_ranking_event::decision_ranking_event() { }
+
+  decision_ranking_event::decision_ranking_event(std::vector<const char*> event_ids, bool deferred_action, float pass_prob, const char* context, const ranking_responses& response)
+    : event(event_ids[0], pass_prob), _deferred_action(deferred_action), _model_id(response[0].get_model_id()) {
+    for(int i = 0; i < response.size(); i++)
+    {
+      for (auto const& r : response[i]) {
+        _action_ids_vector[i].push_back(r.action_id + 1);
+        _probilities_vector[i].push_back(r.probability);
+      }
+    }
+
+    string context_str(context);
+    for(auto evt : event_ids)
+    {
+      _event_ids.emplace_back(evt);
+    }
+    copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
+  }
+
+  const std::vector<unsigned char>& decision_ranking_event::get_context() const { return _context; }
+  const std::vector<std::vector<uint64_t>>& decision_ranking_event::get_actions_ids() const { return _action_ids_vector; }
+  const std::vector<std::vector<float>>& decision_ranking_event::get_probabilities() const { return _probilities_vector; }
+  const std::string& decision_ranking_event::get_model_id() const { return _model_id; }
+  bool decision_ranking_event::get_defered_action() const { return _deferred_action; }
+
+  decision_ranking_event decision_ranking_event::choose_decisions(std::vector<const char*> event_ids, const char* context, unsigned int flags,
+                                           const ranking_responses& resp, float pass_prob) {
+    return decision_ranking_event(event_ids, flags & action_flags::DEFERRED, pass_prob, context, resp);
   }
 
   outcome_event::outcome_event(const char* event_id, float pass_prob, const char* outcome, bool action_taken)

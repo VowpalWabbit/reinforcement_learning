@@ -4,6 +4,7 @@
 #include "logger/flatbuffer_allocator.h"
 #include "generated/OutcomeEvent_generated.h"
 #include "generated/RankingEvent_generated.h"
+#include "generated/DecisionRankingEvent_generated.h"
 #include "logger/message_type.h"
 #include "err_constants.h"
 using namespace reinforcement_learning::messages::flatbuff;
@@ -17,8 +18,8 @@ namespace reinforcement_learning { namespace logger {
     using batch_builder_t = RankingEventBatchBuilder;
 
     static size_t size_estimate(const ranking_event& evt) {
-      return evt.get_event_id().size() + evt.get_action_ids().size() * sizeof(evt.get_action_ids()[0]) 
-            + evt.get_probabilities().size() * sizeof(evt.get_probabilities()[0]) + evt.get_context().size() 
+      return evt.get_event_id().size() + evt.get_action_ids().size() * sizeof(evt.get_action_ids()[0])
+            + evt.get_probabilities().size() * sizeof(evt.get_probabilities()[0]) + evt.get_context().size()
             + evt.get_model_id().size() + sizeof(evt.get_defered_action()) + sizeof(evt.get_pass_prob());
     }
 
@@ -34,6 +35,32 @@ namespace reinforcement_learning { namespace logger {
       return error_code::success;
     }
   };
+
+  template <>
+  struct fb_event_serializer<decision_ranking_event> {
+    using fb_event_t = DecisionsEvent;
+    using offset_vector_t = typename std::vector<flatbuffers::Offset<fb_event_t>>;
+    using batch_builder_t = DecisionsEventBatchBuilder;
+
+    static size_t size_estimate(const decision_ranking_event& evt) {
+        return 1;/*evt.get_event_id().size() + evt.get_action_ids().size() * sizeof(evt.get_action_ids()[0])
+            + evt.get_probabilities().size() * sizeof(evt.get_probabilities()[0]) + evt.get_context().size()
+            + evt.get_model_id().size() + sizeof(evt.get_defered_action()) + sizeof(evt.get_pass_prob());
+    */}
+
+    static int serialize(decision_ranking_event& evt, flatbuffers::FlatBufferBuilder& builder,
+                         flatbuffers::Offset<fb_event_t>& ret_val, api_status* status) {
+      // const auto event_id_offset = builder.CreateString(evt.get_event_id());
+      // const auto action_ids_vector_offset = builder.CreateVector(evt.get_action_ids());
+      // const auto probabilities_vector_offset = builder.CreateVector(evt.get_probabilities());
+      // const auto context_offset = builder.CreateVector(evt.get_context());
+      // const auto model_id_offset = builder.CreateString(evt.get_model_id());
+      // ret_val = CreateRankingEvent(builder, event_id_offset, evt.get_defered_action(), action_ids_vector_offset,
+      //                              context_offset, probabilities_vector_offset, model_id_offset, evt.get_pass_prob());
+      return error_code::success;
+    }
+  };
+
   template <>
   struct fb_event_serializer<outcome_event> {
     using fb_event_t = OutcomeEventHolder;
@@ -75,6 +102,7 @@ namespace reinforcement_learning { namespace logger {
       return error_code::success;
     }
   };
+
   template <typename event_t>
   struct fb_collection_serializer {
     using serializer_t = fb_event_serializer<event_t>;
@@ -98,7 +126,7 @@ namespace reinforcement_learning { namespace logger {
       typename serializer_t::batch_builder_t batch_builder(_builder);
       batch_builder.add_events(event_offsets);
       auto batch_offset = batch_builder.Finish();
-      _builder.Finish(batch_offset); 
+      _builder.Finish(batch_offset);
       // Where does the body of the data begin in relation to the start
       // of the raw buffer
       const auto offset = _builder.GetBufferPointer() - _buffer.raw_begin();
@@ -114,6 +142,9 @@ namespace reinforcement_learning { namespace logger {
 
   template <>
   inline int fb_collection_serializer<outcome_event>::message_id() { return message_type::fb_outcome_event_collection; }
+
+  template <>
+  inline int fb_collection_serializer<decision_ranking_event>::message_id() { return message_type::fb_decision_event_collection; }
 
   template <>
   inline int fb_collection_serializer<ranking_event>::message_id() { return message_type::fb_ranking_event_collection; }

@@ -32,4 +32,5 @@ ERROR_CODE_DEFINITION(30, incorrect_buffer_preamble_size, "Buffer preamble is pr
 ERROR_CODE_DEFINITION(31, serialize_unknown_outcome_type, "Unable to serialize unknown outcome type.")
 ERROR_CODE_DEFINITION(32, preamble_error, "Unable to read or write the preamble.")
 ERROR_CODE_DEFINITION(33, file_open_error, "Unable to open file.")
+ERROR_CODE_DEFINITION(34, json_no_decisions_found, "Context json did not have decisions (_df array empty or not found)")
 //! [Error Definitions]
