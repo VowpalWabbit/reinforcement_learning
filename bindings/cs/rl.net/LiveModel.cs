@@ -64,7 +64,7 @@ namespace Rl.Net
                 return LiveModelReportActionTakenNative(liveModel, eventId, apiStatus);
             }
 
-            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelReportOutcomeFNative")]
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelReportOutcomeF")]
             private static extern int LiveModelReportOutcomeFNative(IntPtr liveModel, IntPtr eventId, float outcome, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, float, IntPtr, int> LiveModelReportOutcomeFOverride { get; set; }
@@ -79,7 +79,7 @@ namespace Rl.Net
                 return LiveModelReportOutcomeFNative(liveModel, eventId, outcome, apiStatus);
             }
 
-            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelReportOutcomeJsonNative")]
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelReportOutcomeJson")]
             private static extern int LiveModelReportOutcomeJsonNative(IntPtr liveModel, IntPtr eventId, IntPtr outcomeJson, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelReportOutcomeJsonOverride { get; set; }
