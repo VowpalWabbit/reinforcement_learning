@@ -15,8 +15,8 @@ git submodule update --init --recursive
 sudo apt-get install libboost-all-dev libssl-dev
 ```
 
-Cpprest needs to be installed:
-```
+#### Install Cpprest
+```bash
 cd ~
 git clone https://github.com/Microsoft/cpprestsdk.git cpprestsdk
 cd cpprestsdk/Release
@@ -29,6 +29,23 @@ make
 make install
 cd ../../../
 rm -rf cpprestsdk
+```
+
+
+#### Install Flatbuffers
+```bash
+cd ~
+git clone https://github.com/google/flatbuffers.git flatbuffers
+cd ./flatbuffers
+# 1.10.0 release commit
+git checkout 925c1d77fcc72636924c3c13428a34180c30f96f
+mkdir build
+cd build
+cmake .. -DFLATBUFFERS_BUILD_TESTS=Off -DFLATBUFFERS_INSTALL=On -DCMAKE_BUILD_TYPE=Release -DFLATBUFFERS_BUILD_FLATHASH=Off
+make
+sudo make install
+cd ../../
+rm -rf flatbuffers
 ```
 
 ### Build
@@ -54,16 +71,18 @@ Windows dependencies are managed through Vcpkg and Nuget.
 
 ```
 vcpkg install cpprestsdk:x64-windows
+vcpkg install flatbuffers:x64-windows
 ```
 
 ### Build + Test
 
 Open `rl.sln` in Visual Studio 2017.
 
-### Experimental - CMake on Windows
+### Experimental - CMake on Windows (Do not mix with checked in solution)
 Using CMake is an alternate way to configure and build the project. Currently it only supports the C++ projects.
 All dependencies are managed through Vcpkg:
 ```
+# Warning only use if generating solution with CMake)
 vcpkg install cpprestsdk:x64-windows
 vcpkg install zlib:x64-windows
 vcpkg install boost-system:x64-windows
