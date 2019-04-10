@@ -1,5 +1,6 @@
 #pragma once
 #include <cpprest/http_client.h>
+#include "configuration.h"
 
 namespace reinforcement_learning {
   class i_http_client {
@@ -19,7 +20,7 @@ namespace reinforcement_learning {
 
   class http_client : public i_http_client {
   public:
-    http_client(const char* url);
+    http_client(const char* url, const utility::configuration &cfg);
 
     http_client(http_client&& other) = delete;
     http_client& operator=(http_client&& other) = delete;
