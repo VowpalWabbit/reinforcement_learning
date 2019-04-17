@@ -83,7 +83,7 @@ namespace reinforcement_learning { namespace joiner {
   }
 
   inline std::string to_str(const messages::flatbuff::Metadata* pmeta) {
-    // "04/11/19 hh:mm:ss.mmm.uuu"
+    // "04/11/19 hh:mm:ss.mmm.xxxx"
     std::ostringstream s;
     s << std::setfill('0') << std::setw(2);
     s << (int)pmeta->client_time_utc()->month() << "/";
@@ -94,8 +94,8 @@ namespace reinforcement_learning { namespace joiner {
     s << (int)pmeta->client_time_utc()->hour() << ":";
     s << (int)pmeta->client_time_utc()->minute() << ":";
     s << (int)pmeta->client_time_utc()->second() << ".";
-    const auto us = pmeta->client_time_utc()->microsecond() % 10000;
-    const auto ms = (pmeta->client_time_utc()->microsecond() - us) / 10000;
+    const auto us = pmeta->client_time_utc()->subsecond() % 10000;
+    const auto ms = (pmeta->client_time_utc()->subsecond() - us) / 10000;
     s << ms << ".";
     s << std::setw(4);
     s << us;
