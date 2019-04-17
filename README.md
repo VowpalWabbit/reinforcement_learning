@@ -19,9 +19,11 @@ sudo apt-get install libboost-all-dev libssl-dev
 ```bash
 cd ~
 git clone https://github.com/Microsoft/cpprestsdk.git cpprestsdk
-cd cpprestsdk/Release
+cd cpprestsdk
 # Checkout 2.10.1 version of cpprestsdk
 git checkout e8dda215426172cd348e4d6d455141f40768bf47
+git submodule update --init
+cd Release
 mkdir build
 cd build
 cmake ..
