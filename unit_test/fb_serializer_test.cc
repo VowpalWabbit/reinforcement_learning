@@ -16,12 +16,13 @@ BOOST_AUTO_TEST_CASE(fb_serializer_outcome_event) {
   data_buffer db;
   fb_collection_serializer<outcome_event> serializer(db);
   std::string event_id("an_event_id");
-  auto ro = outcome_event::report_outcome(event_id.c_str(),0.75f,0.54f);
+  const timestamp ts;
+  auto ro = outcome_event::report_outcome(event_id.c_str(),0.75f,ts,0.54f);
   serializer.add(ro);
   std::string outcome_str("{stuff}");
-  ro = outcome_event::report_outcome(event_id.c_str(), outcome_str.c_str(), 0.54f);
+  ro = outcome_event::report_outcome(event_id.c_str(), outcome_str.c_str(),ts,0.54f);
   serializer.add(ro);
-  ro = outcome_event::report_action_taken(event_id.c_str(), 0.54f);
+  ro = outcome_event::report_action_taken(event_id.c_str(),ts,0.54f);
   serializer.add(ro);
   serializer.finalize();
 
@@ -64,7 +65,8 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
   resp.push_back(1, .2f / 3);
   std::string event_id("an_event_id");
   std::string context("some_context");
-  auto re = ranking_event::choose_rank(event_id.c_str(),context.c_str(),0,resp,0.33f);
+  const timestamp ts;
+  auto re = ranking_event::choose_rank(event_id.c_str(),context.c_str(),0,resp,ts,0.33f);
   serializer.add(re);
   serializer.finalize();
 

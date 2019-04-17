@@ -36,6 +36,10 @@
     <ClCompile Include="utility\stl_container_adapter.cc" />
     <ClCompile Include="utility\data_buffer_streambuf.cc" />
     <ClCompile Include="logger\file\file_logger.cc" />
+    <ClCompile Include="model_mgmt\empty_data_transport.cc" />
+    <ClCompile Include="vw_model\pdf_model.cc" />
+    <ClCompile Include="sampling.cc" />
+    <ClCompile Include="time_helper.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -91,11 +95,16 @@
     <ClInclude Include="utility\http_helper.h" />
     <ClInclude Include="..\include\action_flags.h" />
     <ClInclude Include="logger\file\file_logger.h" />
+    <ClInclude Include="model_mgmt\empty_data_transport.h" />
+    <ClInclude Include="vw_model\pdf_model.h" />
+    <ClInclude Include="sampling.h" />
+    <ClInclude Include="time_helper.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="schema\OutcomeEvent.fbs" />
     <None Include="schema\RankingEvent.fbs" />
+    <None Include="schema\Metadata.fbs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

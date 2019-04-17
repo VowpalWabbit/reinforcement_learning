@@ -127,7 +127,8 @@ namespace reinforcement_learning {
     trace_logger_factory_t* trace_factory,
     data_transport_factory_t* t_factory,
     model_factory_t* m_factory,
-    sender_factory_t* sender_factory
+    sender_factory_t* sender_factory,
+    time_provider_factory_t* time_provider_factory
   )
     : _configuration(config),
       _error_cb(fn, err_context),
@@ -136,7 +137,9 @@ namespace reinforcement_learning {
       _trace_factory(trace_factory),
       _t_factory{t_factory},
       _m_factory{m_factory},
-      _sender_factory{sender_factory} {
+      _sender_factory{sender_factory},
+      _time_provider_factory{time_provider_factory}
+  {
     // If there is no user supplied error callback, supply a default one that does nothing but report unhandled background errors.
     if (fn == nullptr) {
       _error_cb.set(&default_error_callback, &_watchdog);
@@ -179,8 +182,13 @@ namespace reinforcement_learning {
     l::i_message_sender* ranking_msg_sender = new l::preamble_message_sender(ranking_data_sender);
     RETURN_IF_FAIL(ranking_msg_sender->init(status));
 
+    // Get time provider factory and implementation
+    const auto time_provider_impl = _configuration.get(name::TIME_PROVIDER_IMPLEMENTATION, value::NULL_TIME_PROVIDER);
+    i_time_provider* interaction_time_provider;
+    RETURN_IF_FAIL(_time_provider_factory->create(&interaction_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
+
     // Create a logger for interactions that will use msg sender to send interaction messages
-    _ranking_logger.reset(new logger::interaction_logger(_configuration, ranking_msg_sender, _watchdog, &_error_cb));
+    _ranking_logger.reset(new logger::interaction_logger(_configuration, ranking_msg_sender, _watchdog, interaction_time_provider, &_error_cb));
     RETURN_IF_FAIL(_ranking_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for observations.
@@ -196,8 +204,12 @@ namespace reinforcement_learning {
     l::i_message_sender* outcome_msg_sender = new l::preamble_message_sender(outcome_sender);
     RETURN_IF_FAIL(outcome_msg_sender->init(status));
 
+    // Get time provider implementation
+    i_time_provider* observation_time_provider;
+    RETURN_IF_FAIL(_time_provider_factory->create(&observation_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
+
     // Create a logger for interactions that will use msg sender to send interaction messages
-    _outcome_logger.reset(new logger::observation_logger(_configuration, outcome_msg_sender, _watchdog, &_error_cb));
+    _outcome_logger.reset(new logger::observation_logger(_configuration, outcome_msg_sender, _watchdog, observation_time_provider,&_error_cb));
     RETURN_IF_FAIL(_outcome_logger->init(status));
 
     return error_code::success;
