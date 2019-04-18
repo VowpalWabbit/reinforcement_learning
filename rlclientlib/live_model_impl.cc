@@ -142,7 +142,7 @@ namespace reinforcement_learning {
       _error_cb.set(&default_error_callback, &_watchdog);
     }
 
-    if (_configuration.get_bool(name::MODEL_BACKGROUND_REFRESH, value::MODEL_BACKGROUND_REFRESH)) {
+    if (_configuration.get_bool(name::MODEL_BACKGROUND_REFRESH, value::DEFAULT_MODEL_BACKGROUND_REFRESH)) {
       _bg_model_proc.reset(new utility::periodic_background_proc<model_management::model_downloader>(config.get_int(name::MODEL_REFRESH_INTERVAL_MS, 60 * 1000), _watchdog, "Model downloader", &_error_cb));
     }
   }
