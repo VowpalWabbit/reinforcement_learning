@@ -5,8 +5,8 @@ namespace reinforcement_learning
   timestamp clock_time_provider::gmt_now() {
     timestamp ts;
     const auto tp = std::chrono::system_clock::now();
-    const auto dp = floor<date::days>(tp);
-    const auto ymd = date::year_month_day {dp};
+    const auto dp = date::floor<date::days>(tp);
+    const auto ymd = date::year_month_day(dp);
     const auto time = date::make_time(tp-dp);
     ts.year = int(ymd.year());
     ts.month = unsigned(ymd.month());
