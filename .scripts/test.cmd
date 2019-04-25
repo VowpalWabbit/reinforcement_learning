@@ -15,7 +15,7 @@ ECHO Running RL Unit Tests
 "%rlRoot%\x64\Release\unit_test.exe"
 
 ECHO Running RL.Net Unit Tests
-REM %vstestPath% /Platform:x64 /inIsolation "%vwRoot%\vowpalwabbit\x64\Release\cs_unittest.dll" /TestCaseFilter:"TestCategory!=NotOnVSO"
+%vstestPath% /Platform:x64 /inIsolation "%rlRoot%\x64\Release\Rl.Net.Cli.Test.dll" /TestCaseFilter:"TestCategory!=NotOnVSO"
 
 POPD
 
