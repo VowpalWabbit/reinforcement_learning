@@ -105,6 +105,9 @@ int rl_sim::init_rl() {
     config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
   }
 
+  // Trace log API calls to the console
+  config.set(r::name::TRACE_LOG_IMPLEMENTATION, r::value::CONSOLE_TRACE_LOGGER);
+
   // Initialize the API
   _rl = std::unique_ptr<r::live_model>(new r::live_model(config,_on_error,this));
   if ( _rl->init(&status) != err::success ) {
