@@ -4,9 +4,9 @@
 #include <chrono>
 
 namespace reinforcement_learning {
-  http_client::http_client(const char* url)
+  http_client::http_client(const char* url, const utility::configuration& cfg)
     : _url(url)
-    , _impl(::utility::conversions::to_string_t(url), utility::get_http_config()) {
+    , _impl(::utility::conversions::to_string_t(url), utility::get_http_config(cfg)) {
   }
 
   http_client::response_t http_client::request(http_client::method_t method) {
