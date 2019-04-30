@@ -35,6 +35,8 @@ namespace reinforcement_learning {  namespace name {
       const char *const  INTERACTION_FILE_NAME = "interaction.file.name";
       const char *const  OBSERVATION_FILE_NAME = "observation.file.name";
       const char *const  TIME_PROVIDER_IMPLEMENTATION = "time_provider.implementation";
+      const char *const  HTTP_CLIENT_DISABLE_CERT_VALIDATION  = "http.certvalidation.disable";
+      const char *const  HTTP_CLIENT_TIMEOUT                  = "http.timeout"; // Timeout is in seconds, default is 30.
 }}
 
 namespace reinforcement_learning {  namespace value {
