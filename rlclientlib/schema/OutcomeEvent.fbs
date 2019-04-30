@@ -1,4 +1,5 @@
 ﻿// EventHubInteraction Schema used by FlatBuffer
+include "Metadata.fbs";
 
 namespace reinforcement_learning.messages.flatbuff;
 
@@ -18,8 +19,9 @@ union OutcomeEvent { StringEvent, NumericEvent, ActionTakenEvent }
 
 table OutcomeEventHolder {
     event_id:string;
-	pass_probability:float;	  // Probability of event surviving throttling operation
+	pass_probability:float;			// Probability of event surviving throttling operation
     the_event:OutcomeEvent;
+	meta:Metadata;
 }
 
 table OutcomeEventBatch {
