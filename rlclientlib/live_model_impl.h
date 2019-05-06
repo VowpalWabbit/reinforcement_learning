@@ -42,7 +42,8 @@ namespace reinforcement_learning
       trace_logger_factory_t* trace_factory,
       data_transport_factory_t* t_factory,
       model_factory_t* m_factory,
-      sender_factory_t* sender_factory);
+      sender_factory_t* sender_factory,
+      time_provider_factory_t* time_provider_factory);
 
     live_model_impl(const live_model_impl&) = delete;
     live_model_impl(live_model_impl&&) = delete;
@@ -75,6 +76,7 @@ namespace reinforcement_learning
     data_transport_factory_t* _t_factory;
     model_factory_t* _m_factory;
     sender_factory_t* _sender_factory;
+    time_provider_factory_t* _time_provider_factory;
 
     std::unique_ptr<model_management::i_data_transport> _transport{nullptr};
     std::unique_ptr<model_management::i_model> _model{nullptr};

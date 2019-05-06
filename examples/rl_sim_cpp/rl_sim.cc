@@ -105,6 +105,16 @@ int rl_sim::init_rl() {
     config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
   }
 
+  if (!_options["get_model"].as<bool>()) {
+    // Set the time provider to the clock time provider
+    config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  }
+
+  if (_options["log_timestamp"].as<bool>()) {
+    // Set the time provider to the clock time provider
+    config.set(r::name::TIME_PROVIDER_IMPLEMENTATION, r::value::CLOCK_TIME_PROVIDER);
+  }
+
   // Trace log API calls to the console
   config.set(r::name::TRACE_LOG_IMPLEMENTATION, r::value::CONSOLE_TRACE_LOGGER);
 

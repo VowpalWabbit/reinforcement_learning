@@ -1,4 +1,5 @@
 add_subdirectory(fakeit)
+add_subdirectory(date)
 
 set(VW_INSTALL OFF CACHE BOOL "")
 set(BUILD_TESTS OFF CACHE BOOL "")

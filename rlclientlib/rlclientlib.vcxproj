@@ -81,13 +81,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
     </Link>
     <PreBuildEvent>
-      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs</Command>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -100,13 +100,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
     </Link>
     <PreBuildEvent>
-      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs</Command>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -121,7 +121,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -129,7 +129,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs</Command>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -144,7 +144,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -152,7 +152,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs</Command>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -179,9 +179,11 @@
     <ClInclude Include="..\include\trace_logger.h" />
     <ClInclude Include="..\include\data_buffer.h" />
     <ClInclude Include="logger\file\file_logger.h" />
+    <ClInclude Include="time_helper.h" />
     <ClInclude Include="utility\data_buffer_streambuf.h" />
     <ClInclude Include="generated\OutcomeEvent_generated.h" />
     <ClInclude Include="generated\RankingEvent_generated.h" />
+    <ClInclude Include="generated\Metadata_generated.h" />
     <ClInclude Include="azure_factories.h" />
     <ClInclude Include="console_tracer.h" />
     <ClInclude Include="logger\endian.h" />
@@ -227,6 +229,7 @@
     <ClCompile Include="model_mgmt\model_mgmt.cc" />
     <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="logger\eventhub_client.cc" />
+    <ClCompile Include="time_helper.cc" />
     <ClCompile Include="utility\config_utility.cc" />
     <ClCompile Include="utility\stl_container_adapter.cc" />
     <ClCompile Include="utility\str_util.cc" />
@@ -266,6 +269,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="schema\Metadata.fbs" />
     <None Include="schema\OutcomeEvent.fbs" />
     <None Include="schema\RankingEvent.fbs" />
   </ItemGroup>

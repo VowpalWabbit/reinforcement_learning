@@ -2,7 +2,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(FlatBuffers REQUIRED)
 
 set(RL_FLAT_BUFFER_FILES
-	"${CMAKE_CURRENT_SOURCE_DIR}/schema/OutcomeEvent.fbs"
+"${CMAKE_CURRENT_SOURCE_DIR}/schema/Metadata.fbs"
+"${CMAKE_CURRENT_SOURCE_DIR}/schema/OutcomeEvent.fbs"
 	"${CMAKE_CURRENT_SOURCE_DIR}/schema/RankingEvent.fbs" )
 build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgenerator "" "${CMAKE_CURRENT_SOURCE_DIR}/generated" "" "")
 
@@ -14,6 +15,7 @@ set(PROJECT_SOURCES
   factory_resolver.cc
   live_model_impl.cc
   live_model.cc
+  time_helper.cc
   logger/async_batcher.cc
   logger/event_logger.cc
   logger/eventhub_client.cc
@@ -102,7 +104,14 @@ source_group("Private headers" FILES ${PROJECT_PRIVATE_HEADERS})
 add_library(rlclientlib ${PROJECT_SOURCES} ${PROJECT_PUBLIC_HEADERS} ${PROJECT_PRIVATE_HEADERS})
 add_dependencies(rlclientlib fbgenerator)
 set_target_properties(rlclientlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_include_directories(rlclientlib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${FLATBUFFERS_INCLUDE_DIRS})
+target_include_directories( rlclientlib
+                            PUBLIC
+                            ${CMAKE_CURRENT_SOURCE_DIR}/../include
+                            PRIVATE
+                            ${CMAKE_CURRENT_SOURCE_DIR}
+                            ${FLATBUFFERS_INCLUDE_DIRS}
+                            ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date
+                            )
 target_link_libraries(rlclientlib PUBLIC Boost::system vw OpenSSL::SSL OpenSSL::Crypto cpprestsdk::cpprest)
 # Consuming Boost uuid requires BCrypt, normally this is automatically linked but vcpkg turns this feature off.
 if(WIN32)

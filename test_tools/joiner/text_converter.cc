@@ -3,11 +3,12 @@
 #include <fstream>
 #include <flatbuffers/flatbuffers.h>
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 #include "../../rlclientlib/logger/preamble.h"
 #include "../../rlclientlib/logger/message_type.h"
 #include "../../rlclientlib/generated/RankingEvent_generated.h"
 #include "../../rlclientlib/generated/OutcomeEvent_generated.h"
-
 // namespace aliases
 namespace rlog = reinforcement_learning::logger;
 namespace flat = reinforcement_learning::messages::flatbuff;
@@ -81,6 +82,26 @@ namespace reinforcement_learning { namespace joiner {
     return std::string(pstr->begin(), pstr->end());
   }
 
+  inline std::string to_str(const messages::flatbuff::Metadata* pmeta) {
+    // "04/11/19 hh:mm:ss.mmm.xxxx"
+    std::ostringstream s;
+    s << std::setfill('0') << std::setw(2);
+    s << (int)pmeta->client_time_utc()->month() << "/";
+    s << (int)pmeta->client_time_utc()->day() << "/";
+    s << std::setw(4);
+    s << pmeta->client_time_utc()->year() << " ";
+    s << std::setw(2);
+    s << (int)pmeta->client_time_utc()->hour() << ":";
+    s << (int)pmeta->client_time_utc()->minute() << ":";
+    s << (int)pmeta->client_time_utc()->second() << ".";
+    const auto us = pmeta->client_time_utc()->subsecond() % 10000;
+    const auto ms = (pmeta->client_time_utc()->subsecond() - us) / 10000;
+    s << ms << ".";
+    s << std::setw(4);
+    s << us;
+    return s.str();
+  }
+
   void print_ranking_event(void* buff, std::ostream& out_strm)
   {
     const auto rank = flat::GetRankingEventBatch(buff);
@@ -88,6 +109,8 @@ namespace reinforcement_learning { namespace joiner {
     out_strm << "RankingBatch: ";
     for (auto evt : *events) {
       out_strm << "Int: ";
+
+      out_strm << "[" << to_str(evt->meta()) << "]";
 
       out_strm << "id [" << to_str(evt->event_id()) << "]";
 
@@ -122,6 +145,7 @@ namespace reinforcement_learning { namespace joiner {
     out_strm << "OutcomeBatch: ";
     for (auto evt : *events)
     {
+      out_strm << "[" << to_str(evt->meta()) << "] ";
       out_strm << "id [" << to_str(evt->event_id())  << "]";
       switch (evt->the_event_type()) {
       case flat::OutcomeEvent::OutcomeEvent_NumericEvent:

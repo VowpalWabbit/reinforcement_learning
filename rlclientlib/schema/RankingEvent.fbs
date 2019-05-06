@@ -1,4 +1,5 @@
 ﻿// EventHubInteraction Schema used by FlatBuffer
+include "Metadata.fbs";
 
 namespace reinforcement_learning.messages.flatbuff;
 
@@ -10,6 +11,7 @@ table RankingEvent {
     probabilities:[float];    // probabilities
     model_id:string;          // model ID
     pass_probability:float;	  // Probability of event surviving throttling operation
+	meta:Metadata;
 }
 
 // Collection of Ranking events
