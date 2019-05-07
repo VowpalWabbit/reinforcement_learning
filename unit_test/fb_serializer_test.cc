@@ -87,3 +87,43 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
   BOOST_CHECK_EQUAL(event.deferred_action(), false);
   BOOST_CHECK_EQUAL(event.pass_probability(), 0.33f);
 }
+
+BOOST_AUTO_TEST_CASE(fb_serializer_multiple_ranking_event) {
+  data_buffer db;
+  fb_collection_serializer<ranking_event> serializer(db);
+  ranking_response resp;
+  std::string model_id("a_model_id");
+  resp.set_model_id(model_id.c_str());
+  resp.push_back(2, .8f + .2f / 3);
+  resp.push_back(0, .2f / 3);
+  resp.push_back(1, .2f / 3);
+  std::string context("some_context");
+  const timestamp ts;
+  size_t count = 4;
+  std::string event_id("first");
+  for (size_t i = 0; i < count; ++i) {
+    std::string local_context("some_context");
+    auto re = ranking_event::choose_rank(event_id.c_str(), context.c_str(), 0, resp, ts, 0.33f);
+    serializer.add(re);
+  }
+  serializer.finalize();
+
+  flatbuffers::Verifier v(db.body_begin(), db.body_filled_size());
+  const RankingEventBatch* ranking_event_batch = GetRankingEventBatch(db.body_begin());
+  BOOST_CHECK(ranking_event_batch->Verify(v));
+  const auto& events = *(ranking_event_batch->events());
+  BOOST_CHECK_EQUAL(events.size(), count);
+  for (size_t i = 0; i < count; ++i) {
+    const auto& event = *events[i];
+    BOOST_CHECK_EQUAL(event.action_ids()->size(), 3);
+    std::vector<int> expected_ids{ 3,1,2 };
+    BOOST_CHECK_EQUAL_COLLECTIONS(event.action_ids()->begin(), event.action_ids()->end(), expected_ids.begin(), expected_ids.end());
+    BOOST_CHECK_EQUAL_COLLECTIONS(event.context()->begin(), event.context()->end(), context.begin(), context.end());
+    BOOST_CHECK_EQUAL(event.model_id()->str(), model_id);
+    BOOST_CHECK_EQUAL(event.event_id()->str(), event_id);
+    std::vector<float> expected_prob{ .8f + .2f / 3, .2f / 3, .2f / 3 };
+    BOOST_CHECK_EQUAL_COLLECTIONS(event.probabilities()->begin(), event.probabilities()->end(), expected_prob.begin(), expected_prob.end());
+    BOOST_CHECK_EQUAL(event.deferred_action(), false);
+    BOOST_CHECK_EQUAL(event.pass_probability(), 0.33f);
+  }
+}
