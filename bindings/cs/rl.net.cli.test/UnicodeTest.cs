@@ -417,6 +417,8 @@ namespace Rl.Net.Cli.Test
 
                     return NativeMethods.SuccessStatus;
                 };
+
+            liveModel.QueueOutcomeEvent(eventId, outcomeJson);
         }
 
         [TestMethod]
