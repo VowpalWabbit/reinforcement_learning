@@ -26,4 +26,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <Import Project="$(PackagingIntegration)" Condition="Exists('$(PackagingIntegration)')" />
+
 </Project>
