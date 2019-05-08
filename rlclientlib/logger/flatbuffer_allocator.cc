@@ -16,7 +16,11 @@ namespace reinforcement_learning {
                                                      size_t in_use_back, size_t in_use_front) {
     assert(new_size > old_size); // vector_downward only grows
     _buffer.resize_body_region(new_size);
-    memcpy_downward(_buffer.body_begin(), old_size, _buffer.body_begin(), new_size, in_use_back, in_use_front);
+    //implementation is almost identical with memcpy_downward from https://github.com/google/flatbuffers/blob/master/include/flatbuffers/flatbuffers.h,
+    //but since we are staying at the same chunk, we
+    //1) cannot use memcpy which has undefined behavior on copying data between overlapping regions (https://en.cppreference.com/w/cpp/string/byte/memcpy)
+    //2) do not need to copy head
+    memmove(_buffer.body_begin() + new_size - in_use_back, _buffer.body_begin() + old_size - in_use_back, in_use_back);
     return _buffer.body_begin();
   }
 }
