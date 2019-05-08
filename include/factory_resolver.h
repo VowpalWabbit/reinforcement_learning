@@ -1,7 +1,5 @@
 #pragma once
 #include "object_factory.h"
-#include  "trace_logger.h"
-
 namespace reinforcement_learning  {
   namespace utility {
     class configuration;
@@ -14,7 +12,7 @@ namespace reinforcement_learning  {
     class i_model;
   }
   class i_sender;
-  class i_trace;
+  class i_time_provider;
   class error_callback_fn;
 
   /**
@@ -42,11 +40,18 @@ namespace reinforcement_learning  {
    * provide the mechanism used when logging interaction and observation events.
    */
   using sender_factory_t = utility::object_factory<i_sender, const utility::configuration&, error_callback_fn*>;
+  /**
+   * @brief Factory to create time provider to set the client timestamp in messages.
+   * Advanced extension point:  Register another implementation of i_time_provider to
+   * provide the mechanism used to set timestamps
+   */
+  using time_provider_factory_t = utility::object_factory<i_time_provider, const utility::configuration&>;
 
   extern data_transport_factory_t& data_transport_factory;
   extern model_factory_t& model_factory;
   extern sender_factory_t& sender_factory;
   extern trace_logger_factory_t& trace_logger_factory;
+  extern time_provider_factory_t& time_provider_factory;
 
   // For proper static intialization
   // Check https://en.wikibooks.org/wiki/More_C++_Idioms/Nifty_Counter for explanation

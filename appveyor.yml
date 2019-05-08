@@ -10,6 +10,8 @@ environment:
   VcpkgInstallRoot: c:\tools\vcpkg\
   rlRoot: C:\reinforcement_learning
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
+  msbuildPath: msbuild
+  vstestPath: vstest.console
 install:
   - git submodule update --init --recursive
 build_script:

@@ -30,19 +30,22 @@ namespace reinforcement_learning {
   static natural_align<model_factory_t>::type modelfactory_buf;
   static natural_align<sender_factory_t>::type senderfactory_buf;
   static natural_align<trace_logger_factory_t>::type traceloggerfactory_buf;
+  static natural_align<time_provider_factory_t>::type time_provider_factory_buf;
 
   // Reference should point to the allocated memory to be initialized by placement new in factory_initializer::factory_initializer()
   data_transport_factory_t& data_transport_factory = (data_transport_factory_t&)( dtfactory_buf );
   model_factory_t& model_factory = (model_factory_t&)( modelfactory_buf );
   sender_factory_t& sender_factory = (sender_factory_t&)( senderfactory_buf );
   trace_logger_factory_t& trace_logger_factory = (trace_logger_factory_t&)( traceloggerfactory_buf );
+  time_provider_factory_t& time_provider_factory = (time_provider_factory_t&)(time_provider_factory_buf);
 
   factory_initializer::factory_initializer() {
     if ( init_guard++ == 0 ) {
       new ( &data_transport_factory ) data_transport_factory_t();
       new ( &model_factory ) model_factory_t();
       new ( &sender_factory ) sender_factory_t();
-      new ( &trace_logger_factory ) trace_logger_factory_t();
+      new (&trace_logger_factory) trace_logger_factory_t();
+      new (&time_provider_factory) time_provider_factory_t();
 
       register_default_factories();
     }
@@ -54,6 +57,7 @@ namespace reinforcement_learning {
       ( &model_factory )->~model_factory_t();
       ( &sender_factory )->~sender_factory_t();
       ( &trace_logger_factory )->~trace_logger_factory_t();
+      ( &time_provider_factory )->~time_provider_factory_t();
     }
   }
 
@@ -78,7 +82,22 @@ namespace reinforcement_learning {
 
   int empty_data_transport_create(m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
   {
+    TRACE_INFO(trace_logger, "Empty data transport created.");
     *retval = new model_management::empty_data_transport();
+    return error_code::success;
+  }
+
+  int null_time_provider_create(i_time_provider** retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
+  {
+    TRACE_INFO(trace_logger, "Null time provider created.");
+    *retval = nullptr;
+    return error_code::success;
+  }
+
+  int clock_time_provider_create(i_time_provider** retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
+  {
+    TRACE_INFO(trace_logger, "Clock time provider created.");
+    *retval = new clock_time_provider();
     return error_code::success;
   }
 
@@ -89,6 +108,8 @@ namespace reinforcement_learning {
     model_factory.register_type(value::PASSTHROUGH_PDF_MODEL, model_create<m::pdf_model>);
     trace_logger_factory.register_type(value::NULL_TRACE_LOGGER, null_tracer_create);
     trace_logger_factory.register_type(value::CONSOLE_TRACE_LOGGER, console_tracer_create);
+    time_provider_factory.register_type(value::NULL_TIME_PROVIDER, null_time_provider_create);
+    time_provider_factory.register_type(value::CLOCK_TIME_PROVIDER, clock_time_provider_create);
 
     // Register File loggers
     sender_factory.register_type(value::OBSERVATION_FILE_SENDER, 
