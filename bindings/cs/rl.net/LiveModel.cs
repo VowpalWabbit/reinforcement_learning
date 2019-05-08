@@ -216,7 +216,7 @@ namespace Rl.Net
             CheckJsonString(outcomeJson);
 
             fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
-            fixed (byte* outcomeJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+            fixed (byte* outcomeJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(outcomeJson))
             {
                 return NativeMethods.LiveModelReportOutcomeJson(liveModel, new IntPtr(eventIdUtf8Bytes), new IntPtr(outcomeJsonUtf8Bytes), apiStatus);
             }
