@@ -83,6 +83,8 @@ set(PROJECT_PRIVATE_HEADERS
   moving_queue.h
   ranking_event.h
   sampling.h
+  serialization/fb_serializer.h
+  serialization/json_serializer.h
   utility/context_helper.h
   utility/http_authorization.h
   utility/http_client.h
