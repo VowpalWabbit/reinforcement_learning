@@ -1,22 +1,22 @@
 namespace reinforcement_learning.messages.flatbuff;
 
-table DecisionEvent {
-    decision_id:string;    // decision id
+table SlotEvent {
+    decision_slot_id:string;
     action_ids:[uint32];   // ranked action ids
     probabilities:[float]; // probabilities
 }
 
-table DecisionsEvent {
-    context:[ubyte];              // context json
-    decisions:[DecisionEvent];    // the collection of individual decisions
-    model_id:string;              // model id
-    pass_probability:float;       // Probability of event surviving throttling operation
-    deferred_action:bool = false; // delayed activation flag
+table DecisionEvent {
+    context:[ubyte];                // context json
+    slots:[SlotEvent];              // the collection of individual slots
+    model_id:string;                // model id
+    pass_probability:float;         // Probability of event surviving throttling operation
+    deferred_action:bool = false;   // delayed activation flag
 }
 
-// Collection of decisions events
-table DecisionsEventBatch {
-    events:[DecisionsEvent];
+// Collection of ranking events
+table DecisionEventBatch {
+    events:[DecisionEvent];
 }
 
-root_type DecisionsEventBatch;
+root_type DecisionEventBatch;

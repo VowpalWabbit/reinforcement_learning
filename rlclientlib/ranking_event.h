@@ -67,11 +67,11 @@ namespace reinforcement_learning {
     decision_ranking_event& operator=(decision_ranking_event&& other) = default;
 
     const std::vector<unsigned char>& get_context() const;
-    const std::vector<std::vector<uint64_t>>& get_actions_ids() const;
+    const std::vector<std::vector<uint32_t>>& get_actions_ids() const;
     const std::vector<std::vector<float>>& get_probabilities() const;
     const std::string& get_model_id() const;
     bool get_defered_action() const;
-    const std::vector<std::string>& get_event_id() const;
+    const std::vector<std::string>& get_event_ids() const;
 
   public:
     static decision_ranking_event choose_decisions(std::vector<const char*> event_ids, const char* context,
@@ -81,7 +81,7 @@ namespace reinforcement_learning {
     decision_ranking_event(std::vector<const char*> event_ids, bool deferred_action, float pass_prob, const char* context, const ranking_responses& response);
 
     std::vector<unsigned char> _context;
-    std::vector<std::vector<uint64_t>> _action_ids_vector;
+    std::vector<std::vector<uint32_t>> _action_ids_vector;
     std::vector<std::vector<float>> _probilities_vector;
     std::vector<std::string> _event_ids;
 

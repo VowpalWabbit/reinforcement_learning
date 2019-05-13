@@ -84,10 +84,11 @@ namespace reinforcement_learning {
   }
 
   const std::vector<unsigned char>& decision_ranking_event::get_context() const { return _context; }
-  const std::vector<std::vector<uint64_t>>& decision_ranking_event::get_actions_ids() const { return _action_ids_vector; }
+  const std::vector<std::vector<uint32_t>>& decision_ranking_event::get_actions_ids() const { return _action_ids_vector; }
   const std::vector<std::vector<float>>& decision_ranking_event::get_probabilities() const { return _probilities_vector; }
   const std::string& decision_ranking_event::get_model_id() const { return _model_id; }
   bool decision_ranking_event::get_defered_action() const { return _deferred_action; }
+  const std::vector<std::string>& decision_ranking_event::get_event_ids() const { return _event_ids; }
 
   decision_ranking_event decision_ranking_event::choose_decisions(std::vector<const char*> event_ids, const char* context, unsigned int flags,
                                            const ranking_responses& resp, float pass_prob) {
