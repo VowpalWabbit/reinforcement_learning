@@ -18,6 +18,8 @@
 #include "logger/preamble_sender.h"
 #include "sampling.h"
 
+#include <cstring>
+
 // Some namespace changes for more concise code
 namespace e = exploration;
 using namespace std;
@@ -110,7 +112,7 @@ namespace reinforcement_learning {
     for (auto ids : found_ids)
     {
       char* dest;
-      strcpy_s(dest, strlen(ids.second.c_str()), ids.second.c_str());
+      std::strcpy(dest, ids.second.c_str());
       event_ids[ids.first] = dest;
     }
 
@@ -124,7 +126,7 @@ namespace reinforcement_learning {
 
      if (!_model_ready) {
        // todo add pool
-      static thread_local auto explore_vw = safe_vw::safe_vw("--ccb_explore_adf --json --quiet");
+      static thread_local safe_vw explore_vw("--ccb_explore_adf --json --quiet");
       explore_vw.rank_decisions(context_json, actions_ids, actions_pdfs);
       model_version = "N/A";
     }
