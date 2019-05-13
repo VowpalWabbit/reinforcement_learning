@@ -105,22 +105,23 @@ namespace reinforcement_learning {
     size_t num_decisions;
     RETURN_IF_FAIL(utility::get_decision_count(num_decisions, context_json, nullptr, status));
 
+    std::vector<std::string> event_ids_str(num_decisions);
     std::vector<const char*> event_ids(num_decisions, nullptr);
     std::vector<std::pair<size_t, std::string>> found_ids;
     RETURN_IF_FAIL(utility::get_event_ids(found_ids, context_json, nullptr, status));
 
     for (auto ids : found_ids)
     {
-      char* dest;
-      std::strcpy(dest, ids.second.c_str());
-      event_ids[ids.first] = dest;
+      event_ids_str[ids.first] = ids.second;
+      event_ids[ids.first] = event_ids_str[ids.first].c_str();
     }
 
     for (int i = 0; i < event_ids.size(); i++)
     {
       if(event_ids[i] == nullptr)
       {
-          event_ids[i] = boost::uuids::to_string(boost::uuids::random_generator()()).c_str();
+        event_ids_str[i] = boost::uuids::to_string(boost::uuids::random_generator()());
+        event_ids[i] = event_ids_str[i].c_str();
       }
     }
 
