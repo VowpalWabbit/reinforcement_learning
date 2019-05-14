@@ -224,5 +224,5 @@ namespace reinforcement_learning {
     iterator end();
   };
 
-  using ranking_responses = std::vector<ranking_response>;
+  using decision_response = std::vector<ranking_response>;
 }

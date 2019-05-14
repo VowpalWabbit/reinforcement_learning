@@ -85,7 +85,7 @@ namespace reinforcement_learning {
       status);
   }
 
-  int live_model_impl::request_decision(const char* context_json, unsigned int flags, ranking_responses& resp, api_status* status)
+  int live_model_impl::request_decision(const char* context_json, unsigned int flags, decision_response& resp, api_status* status)
   {
     resp.clear();
     //clear previous errors if any

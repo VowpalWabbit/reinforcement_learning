@@ -75,10 +75,10 @@ namespace reinforcement_learning {
 
   public:
     static decision_ranking_event request_decision(std::vector<const char*> event_ids, const char* context,
-      unsigned int flags, const ranking_responses& resp, float pass_prob = 1);
+      unsigned int flags, const decision_response& resp, float pass_prob = 1);
 
   private:
-    decision_ranking_event(std::vector<const char*> event_ids, bool deferred_action, float pass_prob, const char* context, const ranking_responses& response);
+    decision_ranking_event(std::vector<const char*> event_ids, bool deferred_action, float pass_prob, const char* context, const decision_response& response);
 
     std::vector<unsigned char> _context;
     std::vector<std::vector<uint32_t>> _action_ids_vector;
