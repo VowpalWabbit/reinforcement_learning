@@ -38,25 +38,42 @@ namespace reinforcement_learning { namespace logger {
 
   template <>
   struct fb_event_serializer<decision_ranking_event> {
-    using fb_event_t = DecisionsEvent;
+    using fb_event_t = DecisionEvent;
     using offset_vector_t = typename std::vector<flatbuffers::Offset<fb_event_t>>;
-    using batch_builder_t = DecisionsEventBatchBuilder;
+    using batch_builder_t = DecisionEventBatchBuilder;
 
     static size_t size_estimate(const decision_ranking_event& evt) {
-        return 1;/*evt.get_event_id().size() + evt.get_action_ids().size() * sizeof(evt.get_action_ids()[0])
-            + evt.get_probabilities().size() * sizeof(evt.get_probabilities()[0]) + evt.get_context().size()
-            + evt.get_model_id().size() + sizeof(evt.get_defered_action()) + sizeof(evt.get_pass_prob());
-    */}
+      size_t estimate = 0;
+      auto action_ids = evt.get_actions_ids();
+      auto probs = evt.get_probabilities();
+      auto evt_ids = evt.get_event_ids();
+
+      for (size_t i = 0; i < evt_ids.size(); i++)
+      {
+        estimate += action_ids[i].size() * sizeof(action_ids[0][0]);
+        estimate += probs[i].size() * sizeof(probs[0][0]);
+        estimate += evt_ids[i].size();
+      }
+      estimate += evt.get_context().size() + evt.get_model_id().size() + sizeof(evt.get_defered_action()) + sizeof(evt.get_pass_prob());
+      return estimate;
+    }
 
     static int serialize(decision_ranking_event& evt, flatbuffers::FlatBufferBuilder& builder,
                          flatbuffers::Offset<fb_event_t>& ret_val, api_status* status) {
-      // const auto event_id_offset = builder.CreateString(evt.get_event_id());
-      // const auto action_ids_vector_offset = builder.CreateVector(evt.get_action_ids());
-      // const auto probabilities_vector_offset = builder.CreateVector(evt.get_probabilities());
-      // const auto context_offset = builder.CreateVector(evt.get_context());
-      // const auto model_id_offset = builder.CreateString(evt.get_model_id());
-      // ret_val = CreateRankingEvent(builder, event_id_offset, evt.get_defered_action(), action_ids_vector_offset,
-      //                              context_offset, probabilities_vector_offset, model_id_offset, evt.get_pass_prob());
+      const auto context_offset = builder.CreateVector(evt.get_context());
+      const auto model_id_offset = builder.CreateString(evt.get_model_id());
+
+      auto action_ids = evt.get_actions_ids();
+      const auto probabilities = evt.get_probabilities();
+      const auto decision_slot_ids = evt.get_event_ids();
+      std::vector<flatbuffers::Offset<SlotEvent>> slots;
+      for (size_t i = 0; i < decision_slot_ids.size(); i++)
+      {
+        slots.push_back(CreateSlotEvent(builder, builder.CreateString(decision_slot_ids[i]), builder.CreateVector(action_ids[i]), builder.CreateVector(probabilities[i])));
+      }
+      const auto slots_offset = builder.CreateVector(slots);
+
+      ret_val = CreateDecisionEvent(builder, context_offset, slots_offset, model_id_offset, evt.get_pass_prob(), evt.get_defered_action());
       return error_code::success;
     }
   };

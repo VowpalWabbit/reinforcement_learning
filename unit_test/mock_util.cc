@@ -82,6 +82,8 @@ std::unique_ptr<r::sender_factory_t> get_mock_sender_factory(fakeit::Mock<r::i_s
     [mock_observation_sender](r::i_sender** retval, const u::configuration&, r::error_callback_fn* error_callback, r::i_trace*, r::api_status*) { *retval = &mock_observation_sender->get(); return r::error_code::success; });
   factory->register_type(r::value::INTERACTION_EH_SENDER,
     [mock_interaction_sender](r::i_sender** retval, const u::configuration&, r::error_callback_fn* error_callback, r::i_trace*, r::api_status*) { *retval = &mock_interaction_sender->get(); return r::error_code::success; });
+  factory->register_type(r::value::DECISION_EH_SENDER,
+    [mock_interaction_sender](r::i_sender** retval, const u::configuration&, r::error_callback_fn* error_callback, r::i_trace*, r::api_status*) { *retval = &mock_interaction_sender->get(); return r::error_code::success; });
   return factory;
 }
 

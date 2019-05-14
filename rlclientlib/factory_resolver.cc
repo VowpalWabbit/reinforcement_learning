@@ -91,7 +91,7 @@ namespace reinforcement_learning {
     trace_logger_factory.register_type(value::CONSOLE_TRACE_LOGGER, console_tracer_create);
 
     // Register File loggers
-    sender_factory.register_type(value::OBSERVATION_FILE_SENDER, 
+    sender_factory.register_type(value::OBSERVATION_FILE_SENDER,
       [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status){
       const char* file_name =  c.get(name::OBSERVATION_FILE_NAME,"observation.fb.data");
       return file_sender_create(retval, c ,

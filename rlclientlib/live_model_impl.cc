@@ -101,13 +101,12 @@ namespace reinforcement_learning {
     std::vector<std::vector<float>> actions_pdfs;
     std::string model_version;
 
-
     size_t num_decisions;
-    RETURN_IF_FAIL(utility::get_decision_count(num_decisions, context_json, nullptr, status));
+    RETURN_IF_FAIL(utility::get_slot_count(num_decisions, context_json, nullptr, status));
 
     std::vector<std::string> event_ids_str(num_decisions);
     std::vector<const char*> event_ids(num_decisions, nullptr);
-    std::vector<std::pair<size_t, std::string>> found_ids;
+    std::map<size_t, std::string> found_ids;
     RETURN_IF_FAIL(utility::get_event_ids(found_ids, context_json, nullptr, status));
 
     for (auto ids : found_ids)
@@ -142,7 +141,7 @@ namespace reinforcement_learning {
       resp[i].set_model_id(model_version.c_str());
     }
 
-    RETURN_IF_FAIL(_decisions_logger->log_decisions(event_ids, context_json, flags, resp, status));
+    RETURN_IF_FAIL(_decision_logger->log_decisions(event_ids, context_json, flags, resp, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -271,21 +270,21 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_outcome_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for interactions.
-    const auto decisions_sender_impl = _configuration.get(name::DECISIONS_SENDER_IMPLEMENTATION, value::DECISIONS_EH_SENDER);
-    i_sender* decisions_data_sender;
+    const auto decision_sender_impl = _configuration.get(name::DECISION_SENDER_IMPLEMENTATION, value::DECISION_EH_SENDER);
+    i_sender* decision_data_sender;
 
     // Use the name to create an instance of raw data sender for interactions
-    RETURN_IF_FAIL(_sender_factory->create(&decisions_data_sender, decisions_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
-    RETURN_IF_FAIL(decisions_data_sender->init(status));
+    RETURN_IF_FAIL(_sender_factory->create(&decision_data_sender, decision_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
+    RETURN_IF_FAIL(decision_data_sender->init(status));
 
     // Create a message sender that will prepend the message with a preamble and send the raw data using the
     // factory created raw data sender
-    l::i_message_sender* decisions_msg_sender = new l::preamble_message_sender(decisions_data_sender);
-    RETURN_IF_FAIL(decisions_msg_sender->init(status));
+    l::i_message_sender* decision_msg_sender = new l::preamble_message_sender(decision_data_sender);
+    RETURN_IF_FAIL(decision_msg_sender->init(status));
 
     // Create a logger for interactions that will use msg sender to send interaction messages
-    _decisions_logger.reset(new logger::ccb_logger(_configuration, decisions_msg_sender, _watchdog, &_error_cb));
-    RETURN_IF_FAIL(_decisions_logger->init(status));
+    _decision_logger.reset(new logger::ccb_logger(_configuration, decision_msg_sender, _watchdog, &_error_cb));
+    RETURN_IF_FAIL(_decision_logger->init(status));
 
     return error_code::success;
   }

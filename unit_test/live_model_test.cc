@@ -44,7 +44,7 @@ namespace {
 
   const auto JSON_CONTEXT = R"({"_multi":[{},{}]})";
   const auto JSON_CONTEXT_PDF = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}}],"p":[0.4, 0.6]})";
-  const float EXPECTED_PDF[2] = { 0.4f, 0.6f }; 
+  const float EXPECTED_PDF[2] = { 0.4f, 0.6f };
 
   r::live_model create_mock_live_model(
     const u::configuration& config,
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
   r::api_status status;
 
   //create the ds live_model, and initialize it with the config
-  
+
   r::live_model model = create_mock_live_model(config, &r::data_transport_factory, &r::model_factory, nullptr);
 
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
 
   // request ranking
   BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CONTEXT_PDF, response), err::success);
-  
+
   size_t num_actions = response.size();
   BOOST_CHECK_EQUAL(num_actions, 2);
 
@@ -287,7 +287,7 @@ BOOST_AUTO_TEST_CASE(live_model_mocks) {
     BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CONTEXT, response), err::success);
     BOOST_CHECK_EQUAL(model.report_outcome(event_id, 1.0), err::success);
 
-    Verify(Method((*mock_sender), init)).Exactly(2);
+    Verify(Method((*mock_sender), init)).Exactly(3);
   }
   BOOST_CHECK_EQUAL(recorded.size(), 2);
 }
