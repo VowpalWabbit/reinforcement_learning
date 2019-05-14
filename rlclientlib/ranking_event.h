@@ -74,7 +74,7 @@ namespace reinforcement_learning {
     const std::vector<std::string>& get_event_ids() const;
 
   public:
-    static decision_ranking_event choose_decisions(std::vector<const char*> event_ids, const char* context,
+    static decision_ranking_event request_decision(std::vector<const char*> event_ids, const char* context,
       unsigned int flags, const ranking_responses& resp, float pass_prob = 1);
 
   private:

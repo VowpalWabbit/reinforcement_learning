@@ -44,7 +44,7 @@ namespace reinforcement_learning { namespace model_management {
     }
   }
 
-  int pdf_model::choose_decisions(const char* features, std::vector<std::vector<int>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string & model_version, api_status * status)
+  int pdf_model::request_decision(const char* features, std::vector<std::vector<int>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string & model_version, api_status * status)
   {
       return error_code::invalid_argument;
   }

@@ -10,7 +10,7 @@ namespace reinforcement_learning { namespace logger {
   }
 
   int ccb_logger::log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const ranking_responses& response, api_status* status) {
-    return append(std::move(decision_ranking_event::choose_decisions(event_ids, context, flags, response)), status);
+    return append(std::move(decision_ranking_event::request_decision(event_ids, context, flags, response)), status);
   }
 
   int observation_logger::report_action_taken(const char* event_id, api_status* status) {

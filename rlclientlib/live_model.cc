@@ -78,10 +78,10 @@ namespace reinforcement_learning
     return _pimpl->choose_rank(context_json, flags, response, status);
   }
 
-  int live_model::choose_decisions(const char * context_json, unsigned int flags, ranking_responses& resp, api_status* status)
+  int live_model::request_decision(const char * context_json, unsigned int flags, ranking_responses& resp, api_status* status)
   {
     INIT_CHECK();
-    return _pimpl->choose_decisions(context_json, flags, resp, status);
+    return _pimpl->request_decision(context_json, flags, resp, status);
   }
 
   //not implemented yet

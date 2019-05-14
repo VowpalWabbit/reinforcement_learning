@@ -85,7 +85,7 @@ namespace reinforcement_learning {
       status);
   }
 
-  int live_model_impl::choose_decisions(const char* context_json, unsigned int flags, ranking_responses& resp, api_status* status)
+  int live_model_impl::request_decision(const char* context_json, unsigned int flags, ranking_responses& resp, api_status* status)
   {
     resp.clear();
     //clear previous errors if any
@@ -131,7 +131,7 @@ namespace reinforcement_learning {
       model_version = "N/A";
     }
     else {
-      RETURN_IF_FAIL(_model->choose_decisions(context_json, actions_ids, actions_pdfs, model_version, status));
+      RETURN_IF_FAIL(_model->request_decision(context_json, actions_ids, actions_pdfs, model_version, status));
     }
 
     resp.resize(actions_ids.size());

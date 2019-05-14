@@ -76,7 +76,7 @@ std::unique_ptr<fakeit::Mock<m::i_model>> get_mock_model() {
 
   When(Method((*mock), update)).AlwaysReturn(r::error_code::success);
   When(Method((*mock), choose_rank)).AlwaysDo(choose_rank_fn);
-  When(Method((*mock), choose_decisions)).AlwaysDo(request_decision_fn);
+  When(Method((*mock), request_decision)).AlwaysDo(request_decision_fn);
   Fake(Dtor((*mock)));
 
   return mock;

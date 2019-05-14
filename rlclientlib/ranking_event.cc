@@ -90,7 +90,7 @@ namespace reinforcement_learning {
   bool decision_ranking_event::get_defered_action() const { return _deferred_action; }
   const std::vector<std::string>& decision_ranking_event::get_event_ids() const { return _event_ids; }
 
-  decision_ranking_event decision_ranking_event::choose_decisions(std::vector<const char*> event_ids, const char* context, unsigned int flags,
+  decision_ranking_event decision_ranking_event::request_decision(std::vector<const char*> event_ids, const char* context, unsigned int flags,
                                            const ranking_responses& resp, float pass_prob) {
     return decision_ranking_event(event_ids, flags & action_flags::DEFERRED, pass_prob, context, resp);
   }
