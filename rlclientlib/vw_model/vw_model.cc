@@ -11,6 +11,10 @@ namespace reinforcement_learning { namespace model_management {
     _vw_pool(nullptr), _trace_logger(trace_logger) {
   }
 
+  vw_model::vw_model(i_trace* trace_logger, std::string& initial_command_line) :
+    _vw_pool(new safe_vw_factory(initial_command_line)), _trace_logger(trace_logger) {
+  }
+
   int vw_model::update(const model_data& data, bool& model_ready, api_status* status) {
     try {
       TRACE_INFO(_trace_logger, utility::concat("Received new model data. With size ", data.data_sz()));

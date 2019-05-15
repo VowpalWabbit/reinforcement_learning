@@ -124,15 +124,8 @@ namespace reinforcement_learning {
       }
     }
 
-     if (!_model_ready) {
-       // todo add pool
-      static thread_local safe_vw explore_vw("--ccb_explore_adf --json --quiet");
-      explore_vw.rank_decisions(context_json, actions_ids, actions_pdfs);
-      model_version = "N/A";
-    }
-    else {
-      RETURN_IF_FAIL(_model->request_decision(context_json, actions_ids, actions_pdfs, model_version, status));
-    }
+    // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
+    RETURN_IF_FAIL(_model->request_decision(context_json, actions_ids, actions_pdfs, model_version, status));
 
     resp.resize(actions_ids.size());
     for(int i = 0; i < actions_ids.size(); i++)
@@ -181,7 +174,7 @@ namespace reinforcement_learning {
     model_management::model_data md;
     RETURN_IF_FAIL(_transport->get_data(md, status));
 
-	bool model_ready = false;
+	  bool model_ready = false;
     RETURN_IF_FAIL(_model->update(md, model_ready, status));
 
     _model_ready = model_ready;

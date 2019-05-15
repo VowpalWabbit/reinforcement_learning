@@ -16,6 +16,7 @@
 #include "sender.h"
 #include "model_mgmt.h"
 #include "str_util.h"
+#include "factory_resolver.h"
 
 #include "mock_util.h"
 
@@ -43,6 +44,7 @@ namespace {
   )";
 
   const auto JSON_CONTEXT = R"({"_multi":[{},{}]})";
+  const auto JSON_CONTEXT_WITH_SLOTS = R"({"_multi":[{},{}],"_slots":[{}]})";
   const auto JSON_CONTEXT_PDF = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}}],"p":[0.4, 0.6]})";
   const float EXPECTED_PDF[2] = { 0.4f, 0.6f };
 
@@ -119,6 +121,74 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request) {
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
 }
 
+BOOST_AUTO_TEST_CASE(live_model_request_decision) {
+  //create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+
+  r::api_status status;
+
+  //create the ds live_model, and initialize it with the config
+  r::live_model ds = create_mock_live_model(config);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  const auto invalid_context = "";
+
+  r::decision_response response;
+
+  // request ranking
+  BOOST_CHECK_EQUAL(ds.request_decision(JSON_CONTEXT_WITH_SLOTS, response, &status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_code(), 0);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+  // check expected returned codes
+  BOOST_CHECK_EQUAL(ds.request_decision(JSON_CONTEXT_WITH_SLOTS, response, &status), err::invalid_argument); // invalid event_id
+  BOOST_CHECK_EQUAL(status.get_error_code(), err::invalid_argument);
+
+  BOOST_CHECK_EQUAL(ds.request_decision(invalid_context, response, &status), err::invalid_argument); // invalid context
+  BOOST_CHECK_EQUAL(status.get_error_code(), err::invalid_argument);
+}
+
+//BOOST_AUTO_TEST_CASE(live_model_ranking_request) {
+//  //create a simple ds configuration
+//  u::configuration config;
+//  cfg::create_from_json(JSON_CFG, config);
+//  config.set(r::name::EH_TEST, "true");
+//
+//  r::api_status status;
+//
+//  //create the ds live_model, and initialize it with the config
+//  r::live_model ds = create_mock_live_model(config);
+//  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+//
+//  const auto event_id = "event_id";
+//  const auto invalid_event_id = "";
+//  const auto invalid_context = "";
+//
+//  r::ranking_response response;
+//
+//  // request ranking
+//  BOOST_CHECK_EQUAL(ds.choose_rank(event_id, JSON_CONTEXT, response), err::success);
+//
+//  // check expected returned codes
+//  BOOST_CHECK_EQUAL(ds.choose_rank(invalid_event_id, JSON_CONTEXT, response), err::invalid_argument); // invalid event_id
+//  BOOST_CHECK_EQUAL(ds.choose_rank(event_id, invalid_context, response), err::invalid_argument); // invalid context
+//
+//  // invalid event_id
+//  ds.choose_rank(event_id, invalid_context, response, &status);
+//  BOOST_CHECK_EQUAL(status.get_error_code(), err::invalid_argument);
+//
+//  //invalid context
+//  ds.choose_rank(invalid_event_id, JSON_CONTEXT, response, &status);
+//  BOOST_CHECK_EQUAL(status.get_error_code(), err::invalid_argument);
+//
+//  //valid request => status is reset
+//  r::api_status::try_update(&status, -42, "hello");
+//  ds.choose_rank(event_id, JSON_CONTEXT, response, &status);
+//  BOOST_CHECK_EQUAL(status.get_error_code(), 0);
+//  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+//}
+
 BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
   //create a simple ds configuration
   u::configuration config;
@@ -184,8 +254,8 @@ BOOST_AUTO_TEST_CASE(live_model_outcome) {
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
 
   // check expected returned codes
-  BOOST_CHECK_EQUAL(ds.report_outcome(invalid_event_id, outcome), err::invalid_argument);//invalid event_id
-  BOOST_CHECK_EQUAL(ds.report_outcome(event_id, invalid_outcome), err::invalid_argument);//invalid outcome
+  BOOST_CHECK_EQUAL(ds.report_outcome(invalid_event_id, outcome), err::invalid_argument); //invalid event_id
+  BOOST_CHECK_EQUAL(ds.report_outcome(event_id, invalid_outcome), err::invalid_argument); //invalid outcome
 
   //invalid event_id
   ds.report_outcome(invalid_event_id, outcome, &status);

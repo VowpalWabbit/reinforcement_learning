@@ -64,6 +64,15 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
+  template <>
+  int model_create<m::vw_model>(m::i_model** retval, const u::configuration& c, i_trace* trace_logger, api_status* status)
+  {
+    // cb will not use the initial command line model, but ccb will use it. Therefore by default create using ccb options.
+    std::string initial_command_line = c.get(name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet");
+    *retval = new m::vw_model(trace_logger, initial_command_line);
+    return error_code::success;
+  }
+
   int null_tracer_create(i_trace** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
   int console_tracer_create(i_trace** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
 

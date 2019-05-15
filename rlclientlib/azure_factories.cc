@@ -82,18 +82,18 @@ namespace reinforcement_learning {
   }
 
   int decision_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status) {
-    const auto eh_host = cfg.get(name::DECISION_EH_HOST, "localhost:8080");
-    const auto eh_name = cfg.get(name::DECISION_EH_NAME, "observation");
+    const auto eh_host = cfg.get(name::INTERACTION_EH_HOST, "localhost:8080");
+    const auto eh_name = cfg.get(name::INTERACTION_EH_NAME, "interaction");
     const auto eh_url = build_eh_url(eh_host, eh_name);
 
     *retval = new eventhub_client(
       new http_client(eh_url.c_str()),
-      eh_host,
-      cfg.get(name::DECISION_EH_KEY_NAME, ""),
-      cfg.get(name::DECISION_EH_KEY, ""),
-      eh_name,
-      cfg.get_int(name::DECISION_EH_TASKS_LIMIT, 16),
-      cfg.get_int(name::DECISION_EH_MAX_HTTP_RETRIES, 4),
+      cfg.get(name::INTERACTION_EH_HOST, "localhost:8080"),
+      cfg.get(name::INTERACTION_EH_KEY_NAME, ""),
+      cfg.get(name::INTERACTION_EH_KEY, ""),
+      cfg.get(name::INTERACTION_EH_NAME, "interaction"),
+      cfg.get_int(name::INTERACTION_EH_TASKS_LIMIT, 16),
+      cfg.get_int(name::INTERACTION_EH_MAX_HTTP_RETRIES, 4),
       trace_logger,
       error_cb);
     return error_code::success;

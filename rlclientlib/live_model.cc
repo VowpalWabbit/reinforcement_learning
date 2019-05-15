@@ -84,6 +84,11 @@ namespace reinforcement_learning
     return _pimpl->request_decision(context_json, flags, resp, status);
   }
 
+  int live_model::request_decision(const char * context_json, decision_response& resp, api_status* status)
+  {
+    INIT_CHECK();
+    return request_decision(context_json, action_flags::DEFAULT, resp, status);
+  }
   //not implemented yet
   int live_model::report_action_taken(const char* event_id, api_status* status) {
     INIT_CHECK();

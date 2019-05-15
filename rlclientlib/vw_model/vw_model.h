@@ -11,6 +11,7 @@ namespace reinforcement_learning { namespace model_management {
   class vw_model : public i_model {
   public:
     vw_model(i_trace* trace_logger);
+    vw_model(i_trace* trace_logger, std::string& initial_command_line);
     int update(const model_data& data, bool& model_ready, api_status* status = nullptr) override;
     int choose_rank(uint64_t rnd_seed, const char* features, std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) override;
     int request_decision(const char* features, std::vector<std::vector<int>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status = nullptr) override;

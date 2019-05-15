@@ -42,6 +42,24 @@ std::string test_data_provider::create_action_features(size_t actions, size_t fe
   return oss.str();
 }
 
+std::string test_data_provider::create_slot_features(size_t slots, size_t features, size_t slot_decision_id) const {
+  std::ostringstream oss;
+  oss << R"("_slots": [ )";
+  for (size_t a = 0; a < slots; ++a) {
+    oss << R"({ "TSlot":{)";
+    oss << R"("_id":")" << slot_decision_id << R"(")";
+    if (features > 0) oss << ",";
+    for (size_t f = 0; f < features; ++f) {
+      oss << R"("a_f_)" << f << R"(":"value_)" << (a + f + slot_decision_id) << R"(")";
+      if (f + 1 < features) oss << ",";
+    }
+    oss << "}}";
+    if (a + 1 < slots) oss << ",";
+  }
+  oss << R"(])";
+  return oss.str();
+}
+
 std::string test_data_provider::create_features(size_t features, size_t thread_id, size_t example_id) const {
   std::ostringstream oss;
   oss << R"("GUser":{)";

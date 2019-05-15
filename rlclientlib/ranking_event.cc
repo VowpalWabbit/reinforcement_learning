@@ -69,6 +69,8 @@ namespace reinforcement_learning {
     : event(event_ids[0], pass_prob), _deferred_action(deferred_action), _model_id(response[0].get_model_id()) {
     for(int i = 0; i < response.size(); i++)
     {
+      _action_ids_vector.push_back(std::vector<uint32_t>());
+      _probilities_vector.push_back(std::vector<float>());
       for (auto const& r : response[i]) {
         _action_ids_vector[i].push_back(r.action_id + 1);
         _probilities_vector[i].push_back(r.probability);

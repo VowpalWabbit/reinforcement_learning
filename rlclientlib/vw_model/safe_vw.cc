@@ -78,7 +78,7 @@ namespace reinforcement_learning {
 
   safe_vw::safe_vw(std::string vw_commandline)
   {
-	_vw = VW::initialize(vw_commandline, nullptr, true, nullptr, nullptr);
+	  _vw = VW::initialize(vw_commandline);
   }
 
   safe_vw::~safe_vw()
@@ -203,12 +203,12 @@ namespace reinforcement_learning {
 
     // prediction are in the first-example
     auto& predictions = examples2[0]->pred.decision_scores;
-    actions.reserve(predictions.size());
-    scores.reserve(predictions.size());
+    actions.resize(predictions.size());
+    scores.resize(predictions.size());
     for (size_t i = 0; i < predictions.size(); ++i) {
       actions[i].reserve(predictions[i].size());
       scores[i].reserve(predictions[i].size());
-      for (size_t j = 0; j < predictions.size(); ++j) {
+      for (size_t j = 0; j < predictions[i].size(); ++j) {
          actions[i].push_back(predictions[i][j].action);
          scores[i].push_back(predictions[i][j].score);
       }
@@ -216,10 +216,6 @@ namespace reinforcement_learning {
 
     // clean up examples and push examples back into pool for re-use
     for (auto&& ex : examples) {
-      for(auto action_scores : ex->pred.decision_scores) {
-        action_scores.delete_v();
-      }
-      ex->pred.decision_scores.delete_v();
       _example_pool.emplace_back(ex);
     }
 
@@ -231,6 +227,10 @@ const char* safe_vw::id() const {
   return _vw->id.c_str();
 }
 
+safe_vw_factory::safe_vw_factory(const std::string& command_line)
+  : _command_line(command_line)
+{}
+
 safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data)
   : _master_data(master_data)
   {}
@@ -241,7 +241,14 @@ safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_dat
 
   safe_vw* safe_vw_factory::operator()()
   {
-    // Construct new vw object from raw model data.
-    return new safe_vw(_master_data.data(), _master_data.data_sz());
+    if (_master_data.data())
+    {
+      // Construct new vw object from raw model data.
+      return new safe_vw(_master_data.data(), _master_data.data_sz());
+    }
+    else
+    {
+      return new safe_vw(_command_line);
+    }
   }
 }

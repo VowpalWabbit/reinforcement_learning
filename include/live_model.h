@@ -137,6 +137,8 @@ namespace reinforcement_learning {
     int choose_rank(const char * context_json, unsigned int flags, ranking_response& resp, api_status* status = nullptr); //event_id is auto-generated
 
     int request_decision(const char * context_json, unsigned int flags, decision_response& resp, api_status* status = nullptr);
+    int request_decision(const char * context_json, decision_response& resp, api_status* status = nullptr);
+
     /**
     * @brief Report that action was taken.
     *
