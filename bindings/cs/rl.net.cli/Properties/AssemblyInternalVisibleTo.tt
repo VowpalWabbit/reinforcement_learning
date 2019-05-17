@@ -28,6 +28,8 @@ using System.Text;
 	{
 		if(string.IsNullOrWhiteSpace(boolval))
 			return defval;
-		return bool.Parse(boolval);
+		bool retval = defval;
+		bool.TryParse(boolval,out retval);
+		return retval;
 	}
 #>
