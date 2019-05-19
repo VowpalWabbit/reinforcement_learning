@@ -12,6 +12,7 @@ set(PROJECT_SOURCES
   api_status.cc
   azure_factories.cc
   console_tracer.cc
+  decision_response.cc
   error_callback_fn.cc
   factory_resolver.cc
   live_model_impl.cc
@@ -56,6 +57,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/config_utility.h
   ../include/configuration.h
   ../include/constants.h
+  ../include/decision_response.h
   ../include/err_constants.h
   ../include/errors_data.h
   ../include/factory_resolver.h

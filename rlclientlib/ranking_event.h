@@ -2,6 +2,8 @@
 #include <string>
 #include "ranking_response.h"
 #include "time_helper.h"
+#include "decision_response.h"
+
 namespace reinforcement_learning {
 	struct timestamp;
 	namespace utility { class data_buffer; }
@@ -56,7 +58,7 @@ namespace reinforcement_learning {
 
 
   private:
-    ranking_event(const char* event_id, bool deferred_action, float pass_prob, const char* context, 
+    ranking_event(const char* event_id, bool deferred_action, float pass_prob, const char* context,
 		const ranking_response& response,const timestamp& ts);
 
     std::vector<unsigned char> _context;
