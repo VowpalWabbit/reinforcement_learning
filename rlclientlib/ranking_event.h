@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "ranking_response.h"
+#include "decision_response.h"
 
 namespace reinforcement_learning {
   namespace utility { class data_buffer; }
