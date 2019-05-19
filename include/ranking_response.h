@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <iterator>
 #include <vector>
+#include <string>
 
 namespace reinforcement_learning {
   class api_status;
