@@ -5,58 +5,221 @@ using Rl.Net.Native;
 
 namespace Rl.Net
 {
+    namespace Native
+    {
+        // The publics in this class are just a verbose, but jittably-efficient way of enabling overriding a native invocation
+        internal static partial class NativeMethods
+        {
+            [DllImport("rl.net.native.dll")]
+            public static extern IntPtr CreateLiveModel(IntPtr config);
+
+            [DllImport("rl.net.native.dll")]
+            public static extern void DeleteLiveModel(IntPtr liveModel);
+
+            [DllImport("rl.net.native.dll")]
+            public static extern int LiveModelInit(IntPtr liveModel, IntPtr apiStatus);
+
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelChooseRank")]
+            private static extern int LiveModelChooseRankNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr rankingResponse, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelChooseRankOverride { get; set; }
+
+            public static int LiveModelChooseRank(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr rankingResponse, IntPtr apiStatus)
+            {
+                if (LiveModelChooseRankOverride != null)
+                {
+                    return LiveModelChooseRankOverride(liveModel, eventId, contextJson, rankingResponse, apiStatus);
+                }
+
+                return LiveModelChooseRankNative(liveModel, eventId, contextJson, rankingResponse, apiStatus);
+            }
+
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelChooseRankWithFlags")]
+            private static extern int LiveModelChooseRankWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr rankingResponse, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, int> LiveModelChooseRankWithFlagsOverride { get; set; }
+
+            public static int LiveModelChooseRankWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr rankingResponse, IntPtr apiStatus)
+            {
+                if (LiveModelChooseRankWithFlagsOverride != null)
+                {
+                    return LiveModelChooseRankWithFlagsOverride(liveModel, eventId, contextJson, flags, rankingResponse, apiStatus);
+                }
+
+                return LiveModelChooseRankWithFlagsNative(liveModel, eventId, contextJson, flags, rankingResponse, apiStatus);
+            }
+
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelReportActionTaken")]
+            private static extern int LiveModelReportActionTakenNative(IntPtr liveModel, IntPtr eventId, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, int> LiveModelReportActionTakenOverride { get; set; }
+
+            public static int LiveModelReportActionTaken(IntPtr liveModel, IntPtr eventId, IntPtr apiStatus)
+            {
+                if (LiveModelReportActionTakenOverride != null)
+                {
+                    return LiveModelReportActionTakenOverride(liveModel, eventId, apiStatus);
+                }
+            
+                return LiveModelReportActionTakenNative(liveModel, eventId, apiStatus);
+            }
+
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelReportOutcomeF")]
+            private static extern int LiveModelReportOutcomeFNative(IntPtr liveModel, IntPtr eventId, float outcome, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, float, IntPtr, int> LiveModelReportOutcomeFOverride { get; set; }
+
+            public static int LiveModelReportOutcomeF(IntPtr liveModel, IntPtr eventId, float outcome, IntPtr apiStatus)
+            {
+                if (LiveModelReportOutcomeFOverride != null)
+                {
+                    return LiveModelReportOutcomeFOverride(liveModel, eventId, outcome, apiStatus);
+                }
+
+                return LiveModelReportOutcomeFNative(liveModel, eventId, outcome, apiStatus);
+            }
+
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelReportOutcomeJson")]
+            private static extern int LiveModelReportOutcomeJsonNative(IntPtr liveModel, IntPtr eventId, IntPtr outcomeJson, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelReportOutcomeJsonOverride { get; set; }
+
+            public static int LiveModelReportOutcomeJson(IntPtr liveModel, IntPtr eventId, IntPtr outcomeJson, IntPtr apiStatus)
+            {
+                if (LiveModelReportOutcomeJsonOverride != null)
+                {
+                    return LiveModelReportOutcomeJsonOverride(liveModel, eventId, outcomeJson, apiStatus);
+                }
+
+                return LiveModelReportOutcomeJsonNative(liveModel, eventId, outcomeJson, apiStatus);
+            }
+
+            [DllImport("rl.net.native.dll")]
+            public static extern int LiveModelRefreshModel(IntPtr liveModel, IntPtr apiStatus);
+
+            public delegate void managed_background_error_callback_t(IntPtr apiStatus);
+
+            [DllImport("rl.net.native.dll")]
+            public static extern void LiveModelSetCallback(IntPtr liveModel, [MarshalAs(UnmanagedType.FunctionPtr)] managed_background_error_callback_t callback = null);
+
+            public delegate void managed_trace_callback_t(int logLevel, IntPtr msgUtf8Ptr);
+
+            [DllImport("rl.net.native.dll")]
+            public static extern void LiveModelSetTrace(IntPtr liveModel, [MarshalAs(UnmanagedType.FunctionPtr)] managed_trace_callback_t callback = null);
+        }
+    }
+
     public sealed class LiveModel : NativeObject<LiveModel>
     {
-        [DllImport("rl.net.native.dll")]
-        private static extern IntPtr CreateLiveModel(IntPtr config);
-
-        [DllImport("rl.net.native.dll")]
-        private static extern void DeleteLiveModel(IntPtr liveModel);
-
+        private readonly NativeMethods.managed_background_error_callback_t managedErrorCallback;
+        private readonly NativeMethods.managed_trace_callback_t managedTraceCallback;
+        
         private static New<LiveModel> BindConstructorArguments(Configuration config)
         {
-            return new New<LiveModel>(() => CreateLiveModel(config.NativeHandle));
+            return new New<LiveModel>(() => NativeMethods.CreateLiveModel(config.NativeHandle));
+        }
+        
+        public LiveModel(Configuration config) : base(BindConstructorArguments(config), new Delete<LiveModel>(NativeMethods.DeleteLiveModel))
+        {
+            this.managedErrorCallback = new NativeMethods.managed_background_error_callback_t(this.WrapStatusAndRaiseBackgroundError);
+            NativeMethods.LiveModelSetCallback(this.NativeHandle, this.managedErrorCallback);
+
+            this.managedTraceCallback = new NativeMethods.managed_trace_callback_t(this.SendTrace);
         }
 
-        [DllImport("rl.net.native.dll")]
-        private static extern int LiveModelInit(IntPtr liveModel, IntPtr apiStatus);
-
-        [DllImport("rl.net.native.dll")]
-        private static extern int LiveModelChooseRank(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, [MarshalAs(NativeMethods.StringMarshalling)] string contextJson, IntPtr rankingResponse, IntPtr apiStatus);
-
-        [DllImport("rl.net.native.dll")]
-        private static extern int LiveModelChooseRankWithFlags(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, [MarshalAs(NativeMethods.StringMarshalling)] string contextJson, uint flags, IntPtr rankingResponse, IntPtr apiStatus);
-
-        [DllImport("rl.net.native.dll")]
-        private static extern int LiveModelReportActionTaken(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, IntPtr apiStatus);
-
-        [DllImport("rl.net.native.dll")]
-        private static extern int LiveModelReportOutcomeF(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, float outcome, IntPtr apiStatus);
-
-        [DllImport("rl.net.native.dll")]
-        private static extern int LiveModelReportOutcomeJson(IntPtr liveModel, [MarshalAs(NativeMethods.StringMarshalling)] string eventId, [MarshalAs(NativeMethods.StringMarshalling)] string outcomeJson, IntPtr apiStatus);
-
-        [DllImport("rl.net.native.dll")]
-        private static extern int LiveModelRefreshModel(IntPtr liveModel, IntPtr apiStatus);
-
-        private delegate void managed_background_error_callback_t(IntPtr apiStatus);
-        private readonly managed_background_error_callback_t managedErrorCallback;
-
-        [DllImport("rl.net.native.dll")]
-        private static extern void LiveModelSetCallback(IntPtr liveModel, [MarshalAs(UnmanagedType.FunctionPtr)] managed_background_error_callback_t callback = null);
-
-        private delegate void managed_trace_callback_t(int logLevel, [MarshalAs(NativeMethods.StringMarshalling)] string msg);
-        private readonly managed_trace_callback_t managedTraceCallback;
-
-        [DllImport("rl.net.native.dll")]
-        private static extern void LiveModelSetTrace(IntPtr liveModel, [MarshalAs(UnmanagedType.FunctionPtr)] managed_trace_callback_t callback = null);
-
-        public LiveModel(Configuration config) : base(BindConstructorArguments(config), new Delete<LiveModel>(DeleteLiveModel))
+        private static void CheckJsonString(string json)
         {
-            this.managedErrorCallback = new managed_background_error_callback_t(this.WrapStatusAndRaiseBackgroundError);
-            LiveModelSetCallback(this.NativeHandle, this.managedErrorCallback);
+            if (String.IsNullOrWhiteSpace(json))
+            {
+                throw new ArgumentException("Configuration json is empty", "json");
+            }
+        }
 
-            this.managedTraceCallback = new managed_trace_callback_t(this.SendTrace);
+        unsafe private static int LiveModelChooseRank(IntPtr liveModel, string eventId, string contextJson, IntPtr rankingResponse, IntPtr apiStatus)
+        {
+            CheckJsonString(contextJson);
+
+            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            {
+                IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
+
+                // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
+                // eventId and use supplied eventId at the rl.net.native layer.
+                if (eventId == null)
+                {
+                    return NativeMethods.LiveModelChooseRank(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, rankingResponse, apiStatus);
+                }
+                
+                fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+                {
+                    return NativeMethods.LiveModelChooseRank(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, rankingResponse, apiStatus);
+                }
+            }
+        }
+
+        // TODO: Should we reduce the rl.net.native interface to only have one of these?
+        unsafe private static int LiveModelChooseRankWithFlags(IntPtr liveModel, string eventId, string contextJson, uint flags, IntPtr rankingResponse, IntPtr apiStatus)
+        {
+            CheckJsonString(contextJson);
+
+            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            {
+                IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
+
+                // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
+                // eventId and use supplied eventId at the rl.net.native layer.
+                if (eventId == null)
+                {
+                    return NativeMethods.LiveModelChooseRankWithFlags(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, flags, rankingResponse, apiStatus);
+                }
+
+                fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+                {
+                    return NativeMethods.LiveModelChooseRankWithFlags(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, flags, rankingResponse, apiStatus);
+                }
+            }
+        }
+
+        unsafe private static int LiveModelReportActionTaken(IntPtr liveModel, string eventId, IntPtr apiStatus)
+        {
+            if (eventId == null)
+            {
+                throw new ArgumentNullException("eventId");
+            }
+
+            fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+            {
+                return NativeMethods.LiveModelReportActionTaken(liveModel, new IntPtr(eventIdUtf8Bytes), apiStatus);
+            }
+        }
+
+        unsafe private static int LiveModelReportOutcomeF(IntPtr liveModel, string eventId, float outcome, IntPtr apiStatus)
+        {
+            if (eventId == null)
+            {
+                throw new ArgumentNullException("eventId");
+            }
+
+            fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+            {
+                return NativeMethods.LiveModelReportOutcomeF(liveModel, new IntPtr(eventIdUtf8Bytes), outcome, apiStatus);
+            }
+        }
+
+        unsafe private static int LiveModelReportOutcomeJson(IntPtr liveModel, string eventId, string outcomeJson, IntPtr apiStatus)
+        {
+            if (eventId == null)
+            {
+                throw new ArgumentNullException("eventId");
+            }
+
+            CheckJsonString(outcomeJson);
+
+            fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+            fixed (byte* outcomeJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+            {
+                return NativeMethods.LiveModelReportOutcomeJson(liveModel, new IntPtr(eventIdUtf8Bytes), new IntPtr(outcomeJsonUtf8Bytes), apiStatus);
+            }
         }
 
         private void WrapStatusAndRaiseBackgroundError(IntPtr apiStatusHandle)
@@ -87,14 +250,16 @@ namespace Rl.Net
             }
         }
 
-        private void SendTrace(int logLevel, string msg)
+        private void SendTrace(int logLevel, IntPtr msgUtf8Ptr)
         {
+            string msg = NativeMethods.StringMarshallingFunc(msgUtf8Ptr);
+
             this.OnTraceLoggerEventInternal?.Invoke(this, new TraceLogEventArgs((RLLogLevel)logLevel, msg));
         }
 
         public bool TryInit(ApiStatus apiStatus = null)
         {
-            int result = LiveModelInit(this.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            int result = NativeMethods.LiveModelInit(this.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
         }
 
@@ -237,7 +402,7 @@ namespace Rl.Net
 
         public bool TryRefreshModel(ApiStatus apiStatus = null)
         {
-            int result = LiveModelRefreshModel(this.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            int result = NativeMethods.LiveModelRefreshModel(this.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
             return result == NativeMethods.SuccessStatus;
         }
 
@@ -268,7 +433,7 @@ namespace Rl.Net
             {
                 if (this.OnTraceLoggerEventInternal == null)
                 {
-                    LiveModelSetTrace(this.NativeHandle, this.managedTraceCallback);
+                    NativeMethods.LiveModelSetTrace(this.NativeHandle, this.managedTraceCallback);
                 }
 
                 this.OnTraceLoggerEventInternal += value;
@@ -279,7 +444,7 @@ namespace Rl.Net
 
                 if (this.OnTraceLoggerEventInternal == null)
                 {
-                    LiveModelSetTrace(this.NativeHandle, null);
+                    NativeMethods.LiveModelSetTrace(this.NativeHandle, null);
                 }
             }
         }
