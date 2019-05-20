@@ -87,7 +87,7 @@ namespace reinforcement_learning {
     const auto eh_url = build_eh_url(eh_host, eh_name);
 
     *retval = new eventhub_client(
-      new http_client(eh_url.c_str()),
+      new http_client(eh_url.c_str(), cfg),
       cfg.get(name::INTERACTION_EH_HOST, "localhost:8080"),
       cfg.get(name::INTERACTION_EH_KEY_NAME, ""),
       cfg.get(name::INTERACTION_EH_KEY, ""),

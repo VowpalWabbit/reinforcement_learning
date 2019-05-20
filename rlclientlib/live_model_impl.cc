@@ -287,8 +287,11 @@ namespace reinforcement_learning {
     l::i_message_sender* decision_msg_sender = new l::preamble_message_sender(decision_data_sender);
     RETURN_IF_FAIL(decision_msg_sender->init(status));
 
+    i_time_provider* decision_time_provider;
+    RETURN_IF_FAIL(_time_provider_factory->create(&decision_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
+
     // Create a logger for interactions that will use msg sender to send interaction messages
-    _decision_logger.reset(new logger::ccb_logger(_configuration, decision_msg_sender, _watchdog, &_error_cb));
+    _decision_logger.reset(new logger::ccb_logger(_configuration, decision_msg_sender, _watchdog, decision_time_provider, &_error_cb));
     RETURN_IF_FAIL(_decision_logger->init(status));
 
     return error_code::success;

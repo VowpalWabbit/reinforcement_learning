@@ -76,12 +76,12 @@ namespace reinforcement_learning {
   const std::vector<std::string>& decision_ranking_event::get_event_ids() const { return _event_ids; }
 
   decision_ranking_event decision_ranking_event::request_decision(std::vector<const char*> event_ids, const char* context, unsigned int flags,
-                                           const decision_response& resp, float pass_prob) {
-    return decision_ranking_event(event_ids, flags & action_flags::DEFERRED, pass_prob, context, resp);
+                                           const decision_response& resp, const timestamp& ts, float pass_prob) {
+    return decision_ranking_event(event_ids, flags & action_flags::DEFERRED, pass_prob, context, resp, ts);
   }
 
   outcome_event::outcome_event(const char* event_id, float pass_prob, const char* outcome, bool action_taken, const timestamp& ts)
-    : event(event_id, ts, pass_prob), _outcome(outcome), _float_outcome(0.0f), _action_taken(action_taken) { }=======
+    : event(event_id, ts, pass_prob), _outcome(outcome), _float_outcome(0.0f), _action_taken(action_taken) { }
 
   outcome_event::outcome_event(const char* event_id, float pass_prob, float outcome, bool action_taken, const timestamp& ts)
     : event(event_id, ts, pass_prob), _outcome(""), _float_outcome(outcome), _action_taken(action_taken) { }
