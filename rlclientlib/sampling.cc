@@ -1,6 +1,5 @@
 #include "sampling.h"
 #include "err_constants.h"
-#include "ranking_response.h"
 #include "trace_logger.h"
 #include "api_status.h"
 #include "explore.h"
@@ -15,6 +14,32 @@ int populate_response(size_t chosen_action_index, std::vector<int>& action_ids, 
 
   RETURN_IF_FAIL(response.set_chosen_action_id(action_ids[chosen_action_index]));
   response.set_model_id(std::move(model_id));
+  return error_code::success;
+}
+
+// TODO: write test for this
+int populate_response(std::vector<std::vector<int>>& action_ids, std::vector<std::vector<float>>& pdfs, std::string&& model_id, decision_response& response, i_trace* trace_logger, api_status* status) {
+  if(action_ids.size() != pdfs.size())
+  {
+    RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids and pdfs must be the same size";
+  }
+
+  response.set_model_id(std::move(model_id));
+  for(size_t i = 0; i < action_ids.size(); i++)
+  {
+    if(action_ids[i].size() != pdfs[i].size())
+    {
+      RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids[i] and pdfs[i] must be the same size";
+    }
+
+    ranking_response current;
+    for (size_t j = 0; j < action_ids[i].size(); j++) {
+      current.push_back(action_ids[i][j], pdfs[i][j]);
+    }
+
+    response.push_back(std::move(current));
+  }
+
   return error_code::success;
 }
 

@@ -126,14 +126,7 @@ namespace reinforcement_learning {
 
     // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
     RETURN_IF_FAIL(_model->request_decision(context_json, actions_ids, actions_pdfs, model_version, status));
-
-    resp.resize(actions_ids.size());
-    for(int i = 0; i < actions_ids.size(); i++)
-    {
-      populate_response(0, actions_ids[i], actions_pdfs[i], std::move(std::string(model_version)), resp[i], _trace_logger.get(), status);
-      resp[i].set_model_id(model_version.c_str());
-    }
-
+    RETURN_IF_FAIL(populate_response(actions_ids, actions_pdfs, std::move(std::string(model_version)), resp, _trace_logger.get(), status));
     RETURN_IF_FAIL(_decision_logger->log_decisions(event_ids, context_json, flags, resp, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.

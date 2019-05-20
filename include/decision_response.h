@@ -11,14 +11,15 @@ namespace reinforcement_learning {
 
   class decision_response {
   public:
-    using coll_t = std::vector<decision_response>;
+    using coll_t = std::vector<ranking_response>;
     using iterator_t = coll_t::iterator;
     using const_iterator_t = coll_t::const_iterator;
 
     decision_response() = default;
     ~decision_response() = default;
 
-    void push_back(const size_t action_id, const float prob);
+    // Cannot copy ranking_response, so must do a move here.
+    void push_back(ranking_response&& r_response);
 
     size_t size() const;
 
