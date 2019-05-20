@@ -115,12 +115,14 @@ void test_data_provider::log(size_t thread_id, size_t example_id, const reinforc
   reinforcement_learning::utility::data_buffer buffer;
   logger << R"({"_label_cost":)" << -get_outcome(thread_id, example_id) << R"(,"_label_probability":)" << prob << R"(,"_label_Action":)" << (action_id + 1) << R"(,"_labelIndex":)" << action_id << ",";
 
+  reinforcement_learning::timestamp ts;
+
   if (is_rewarded(thread_id, example_id)) {
     reinforcement_learning::outcome_event outcome_evt;
     if (is_float_outcome)
-      outcome_evt = reinforcement_learning::outcome_event::report_outcome(event_id.c_str(), get_outcome(thread_id, example_id));
+      outcome_evt = reinforcement_learning::outcome_event::report_outcome(event_id.c_str(), get_outcome(thread_id, example_id), ts);
     else
-      outcome_evt = reinforcement_learning::outcome_event::report_outcome(event_id.c_str(), get_outcome_json(thread_id, example_id));
+      outcome_evt = reinforcement_learning::outcome_event::report_outcome(event_id.c_str(), get_outcome_json(thread_id, example_id), ts);
     buffer.reset();
     reinforcement_learning::logger::json_collection_serializer<reinforcement_learning::outcome_event> jserial(buffer);
     jserial.add(outcome_evt);
@@ -129,7 +131,7 @@ void test_data_provider::log(size_t thread_id, size_t example_id, const reinforc
     buffer.reset();
   }
 
-  auto ranking_evt = reinforcement_learning::ranking_event::choose_rank(event_id.c_str(), get_context(thread_id, example_id), reinforcement_learning::action_flags::DEFAULT, response);
+  auto ranking_evt = reinforcement_learning::ranking_event::choose_rank(event_id.c_str(), get_context(thread_id, example_id), reinforcement_learning::action_flags::DEFAULT, response, ts);
   buffer.reset();
   reinforcement_learning::logger::json_collection_serializer<reinforcement_learning::ranking_event> jserial(buffer);
   jserial.add(ranking_evt);

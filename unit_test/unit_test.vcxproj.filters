@@ -110,6 +110,9 @@
     <ClCompile Include="file_logger_test.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="time_tests.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -18,9 +18,9 @@ namespace reinforcement_learning { namespace logger {
     using batch_builder_t = RankingEventBatchBuilder;
 
     static size_t size_estimate(const ranking_event& evt) {
-      return evt.get_event_id().size() + evt.get_action_ids().size() * sizeof(evt.get_action_ids()[0])
-            + evt.get_probabilities().size() * sizeof(evt.get_probabilities()[0]) + evt.get_context().size()
-            + evt.get_model_id().size() + sizeof(evt.get_defered_action()) + sizeof(evt.get_pass_prob());
+      return evt.get_event_id().size() + evt.get_action_ids().size() * sizeof(evt.get_action_ids()[0]) 
+            + evt.get_probabilities().size() * sizeof(evt.get_probabilities()[0]) + evt.get_context().size() 
+            + evt.get_model_id().size() + sizeof(evt.get_defered_action()) + sizeof(evt.get_pass_prob()) + sizeof(evt.get_client_time_gmt());
     }
 
     static int serialize(ranking_event& evt, flatbuffers::FlatBufferBuilder& builder,
@@ -30,8 +30,13 @@ namespace reinforcement_learning { namespace logger {
       const auto probabilities_vector_offset = builder.CreateVector(evt.get_probabilities());
       const auto context_offset = builder.CreateVector(evt.get_context());
       const auto model_id_offset = builder.CreateString(evt.get_model_id());
-      ret_val = CreateRankingEvent(builder, event_id_offset, evt.get_defered_action(), action_ids_vector_offset,
-                                   context_offset, probabilities_vector_offset, model_id_offset, evt.get_pass_prob());
+	  const auto &ts = evt.get_client_time_gmt();
+      TimeStamp client_ts(	ts.year, ts.month, ts.day, ts.hour,
+							ts.minute, ts.second, ts.sub_second);
+	  const auto meta_id_offset = CreateMetadata(builder,&client_ts);
+      ret_val = CreateRankingEvent(	builder, event_id_offset, evt.get_defered_action(), action_ids_vector_offset,
+									context_offset, probabilities_vector_offset, model_id_offset, 
+									evt.get_pass_prob(), meta_id_offset);
       return error_code::success;
     }
   };
@@ -85,30 +90,34 @@ namespace reinforcement_learning { namespace logger {
     using batch_builder_t = OutcomeEventBatchBuilder;
 
     static size_t size_estimate(const outcome_event& evt) {
-      return evt.get_event_id().size() + evt.get_outcome().size() + sizeof(evt.get_numeric_outcome());
+      return evt.get_event_id().size() + evt.get_outcome().size() + sizeof(evt.get_numeric_outcome()) + sizeof(evt.get_client_time_gmt());
     }
 
     static int serialize(outcome_event& evt, flatbuffers::FlatBufferBuilder& builder,
                          flatbuffers::Offset<fb_event_t>& retval, api_status* status) {
       const auto event_id = builder.CreateString(evt.get_event_id());
-      switch (evt.get_outcome_type()) {
+	  const auto &ts = evt.get_client_time_gmt();
+	  TimeStamp client_ts(ts.year, ts.month, ts.day, ts.hour,
+		  ts.minute, ts.second, ts.sub_second);
+	  const auto meta_id_offset = CreateMetadata(builder, &client_ts);
+	  switch (evt.get_outcome_type()) {
         case outcome_event::outcome_type_string: {
           const auto outcome_str = builder.CreateString(evt.get_outcome());
           const auto str_event = CreateStringEvent(builder, outcome_str).Union();
           retval = CreateOutcomeEventHolder(builder, event_id, evt.get_pass_prob(), OutcomeEvent_StringEvent,
-                                            str_event);
+                                            str_event, meta_id_offset);
           break;
         }
         case outcome_event::outcome_type_numeric: {
           const auto number_event = CreateNumericEvent(builder, evt.get_numeric_outcome()).Union();
           retval = CreateOutcomeEventHolder(builder, event_id, evt.get_pass_prob(), OutcomeEvent_NumericEvent,
-                                            number_event);
+                                            number_event, meta_id_offset);
           break;
         }
         case outcome_event::outcome_type_action_taken: {
           const auto action_taken_event = CreateActionTakenEvent(builder, evt.get_action_taken()).Union();
           retval = CreateOutcomeEventHolder(builder, event_id, evt.get_pass_prob(), OutcomeEvent_ActionTakenEvent,
-                                            action_taken_event);
+                                            action_taken_event, meta_id_offset);
           break;
         }
         default: {

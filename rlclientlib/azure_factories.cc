@@ -28,7 +28,7 @@ namespace reinforcement_learning {
       api_status::try_update(status, error_code::http_uri_not_provided, error_code::http_uri_not_provided_s);
       return error_code::http_uri_not_provided;
     }
-    auto pret = new m::restapi_data_transport(new http_client(uri), trace_logger);
+    auto pret = new m::restapi_data_transport(new http_client(uri, config), trace_logger);
     const auto scode = pret->check(status);
     if (scode != error_code::success) {
       delete pret;
@@ -51,7 +51,7 @@ namespace reinforcement_learning {
     const auto eh_url = build_eh_url(eh_host, eh_name);
 
     *retval = new eventhub_client(
-      new http_client(eh_url.c_str()),
+      new http_client(eh_url.c_str(), cfg),
       eh_host,
       cfg.get(name::OBSERVATION_EH_KEY_NAME, ""),
       cfg.get(name::OBSERVATION_EH_KEY, ""),
@@ -69,7 +69,7 @@ namespace reinforcement_learning {
     const auto eh_url = build_eh_url(eh_host, eh_name);
 
     *retval = new eventhub_client(
-      new http_client(eh_url.c_str()),
+      new http_client(eh_url.c_str(), cfg),
       cfg.get(name::INTERACTION_EH_HOST, "localhost:8080"),
       cfg.get(name::INTERACTION_EH_KEY_NAME, ""),
       cfg.get(name::INTERACTION_EH_KEY, ""),

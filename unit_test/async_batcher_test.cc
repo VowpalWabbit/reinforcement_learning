@@ -30,7 +30,7 @@ public:
   test_undroppable_event() {}
 
   test_undroppable_event(const std::string& id)
-    : event(id.c_str()) {}
+    : event(id.c_str(), timestamp{}) {}
 
   test_undroppable_event(test_undroppable_event&& other)
     : event(std::move(other)) {}
@@ -48,7 +48,7 @@ public:
   test_droppable_event() {}
 
   test_droppable_event(const std::string& id)
-    : event(id.c_str()) {}
+    : event(id.c_str(), timestamp{}) {}
 
   test_droppable_event(test_droppable_event&& other)
     : event(std::move(other)) {}

@@ -10,6 +10,7 @@ add_executable(rltest
   eventhub_client_test.cc
   explore_test.cc
   factory_test.cc
+  fb_serializer_test.cc
   json_context_parse_test.cc
   live_model_test.cc
   main.cc

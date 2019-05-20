@@ -13,7 +13,7 @@ using namespace std;
 class test_event : public event {
 public:
   test_event() {}
-  test_event(const string& id) : event(id.c_str()) {}
+  test_event(const string& id) : event(id.c_str(), timestamp{}) {}
 
   test_event(test_event&& other) : event(std::move(other)) {}
   test_event& operator=(test_event&& other)

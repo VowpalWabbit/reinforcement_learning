@@ -17,7 +17,7 @@
 
 #include "serialization/fb_serializer.h"
 #include "message_sender.h"
-
+#include "time_helper.h"
 namespace reinforcement_learning { namespace logger {
   // This class wraps logging event to event_hub in a generic way that live_model can consume.
   template<typename TEvent>
@@ -30,6 +30,7 @@ namespace reinforcement_learning { namespace logger {
       int send_queue_max_capacity,
       const char* queue_mode,
       utility::watchdog& watchdog,
+      i_time_provider* time_provider,
       error_callback_fn* perror_cb = nullptr);
 
     int init(api_status* status);
@@ -40,6 +41,7 @@ namespace reinforcement_learning { namespace logger {
 
   protected:
     bool _initialized = false;
+    std::unique_ptr<i_time_provider> _time_provider;
 
     // Handle batching for the data sent to the eventhub client
     async_batcher<TEvent, fb_collection_serializer> _batcher;
@@ -53,6 +55,7 @@ namespace reinforcement_learning { namespace logger {
     int send_queue_max_capacity,
     const char* queue_mode,
     utility::watchdog& watchdog,
+    i_time_provider* time_provider,
     error_callback_fn* perror_cb
   )
     : _batcher(
@@ -62,7 +65,8 @@ namespace reinforcement_learning { namespace logger {
       send_high_watermark,
       send_batch_interval_ms,
       send_queue_max_capacity,
-      to_queue_mode_enum(queue_mode))
+      to_queue_mode_enum(queue_mode)),
+      _time_provider(time_provider)
   {}
 
   template<typename TEvent>
@@ -91,7 +95,7 @@ namespace reinforcement_learning { namespace logger {
 
   class interaction_logger : public event_logger<ranking_event> {
   public:
-    interaction_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, error_callback_fn* perror_cb = nullptr)
+    interaction_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider,error_callback_fn* perror_cb = nullptr)
       : event_logger(
         sender,
         c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
@@ -99,6 +103,7 @@ namespace reinforcement_learning { namespace logger {
         c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
         c.get(name::QUEUE_MODE, "DROP"),
         watchdog,
+        time_provider,
         perror_cb)
     {}
 
@@ -124,7 +129,7 @@ class ccb_logger : public event_logger<decision_ranking_event> {
 
   class observation_logger : public event_logger<outcome_event> {
   public:
-    observation_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, error_callback_fn* perror_cb = nullptr)
+    observation_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
       : event_logger(
         sender,
         c.get_int(name::OBSERVATION_SEND_HIGH_WATER_MARK, 198 * 1024),
@@ -132,12 +137,14 @@ class ccb_logger : public event_logger<decision_ranking_event> {
         c.get_int(name::OBSERVATION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
         c.get(name::QUEUE_MODE, "DROP"),
         watchdog,
+        time_provider,
         perror_cb)
     {}
 
     template <typename D>
     int log(const char* event_id, D outcome, api_status* status) {
-      return append(std::move(outcome_event::report_outcome(event_id, outcome)), status);
+      const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
+      return append(outcome_event::report_outcome(event_id, outcome, now), status);
     }
 
     int report_action_taken(const char* event_id, api_status* status);

@@ -1,0 +1,16 @@
+namespace reinforcement_learning.messages.flatbuff;
+
+struct TimeStamp {
+    year:uint16;
+    month:uint8;
+    day:uint8;
+    hour:uint8;
+    minute:uint8;
+    second:uint8;
+    subsecond:uint32;
+}
+
+table Metadata {
+	client_time_utc:TimeStamp;      
+	app_id:string;
+}
