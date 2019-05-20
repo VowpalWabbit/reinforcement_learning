@@ -4,11 +4,9 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
-
+using System.Reflection;	
+using System.Runtime.CompilerServices;	
+using System.Runtime.InteropServices;
 <#
 	try{
 		string snRequired = this.Host.ResolveParameterValue("","","SNRequired");
@@ -21,7 +19,9 @@ using System.Text;
 			#>[assembly: InternalsVisibleTo("rl.net.cli.test")]<#
 		}
 	}
-	catch{}
+	catch{
+		#>[assembly: InternalsVisibleTo("rl.net.cli.test")]<#
+	}
 #>
 <#+ 
 	public bool ParseBool(string boolval, bool defval)
