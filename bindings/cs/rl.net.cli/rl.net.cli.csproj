@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
@@ -43,6 +43,17 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>AA.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <TextTransformParameter Include="SNRequired">
+      <Value>false</Value>
+      <InProject>false</InProject>
+    </TextTransformParameter>
+    <TextTransformParameter Include="PublicKey">
+      <Value> </Value>
+      <InProject>false</InProject>
+    </TextTransformParameter>
   </ItemGroup>
 
   <Import Project="$(PackagingIntegration)" Condition="Exists('$(PackagingIntegration)')" />
