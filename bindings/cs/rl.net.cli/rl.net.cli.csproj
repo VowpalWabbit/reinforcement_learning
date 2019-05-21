@@ -31,17 +31,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Properties\AssemblyInternalVisibleTo.cs">
+    <Compile Update="Properties\AA.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>AssemblyInternalVisibleTo.tt</DependentUpon>
+      <DependentUpon>AA.tt</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Properties\AssemblyInternalVisibleTo.tt">
+    <None Update="Properties\AA.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>AssemblyInternalVisibleTo.cs</LastGenOutput>
+      <LastGenOutput>AA.cs</LastGenOutput>
     </None>
   </ItemGroup>
 

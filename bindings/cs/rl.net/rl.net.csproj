@@ -36,9 +36,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="AssemblyAnnotations.tt">
+    <None Update="AA.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>AssemblyAnnotations.cs</LastGenOutput>
+      <LastGenOutput>AA.cs</LastGenOutput>
     </None>
   </ItemGroup>
 
@@ -47,10 +47,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="AssemblyAnnotations.cs">
+    <Compile Update="AA.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>AssemblyAnnotations.tt</DependentUpon>
+      <DependentUpon>AA.tt</DependentUpon>
     </Compile>
   </ItemGroup>
 
