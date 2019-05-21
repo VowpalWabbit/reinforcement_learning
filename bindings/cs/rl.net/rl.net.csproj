@@ -36,24 +36,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="AA.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>AA.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <TextTransformParameter Include="SNRequired">
-      <Value>false</Value>
-      <InProject>false</InProject>
-    </TextTransformParameter>
-    <TextTransformParameter Include="PublicKey">
-      <Value> </Value>
-      <InProject>false</InProject>
-    </TextTransformParameter>
-  </ItemGroup>
-
-  <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
@@ -65,4 +47,15 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="AA.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>AA.cs</LastGenOutput>
+    </None>
+    <Compile Include="AA.cs" Exclude="@(Compile)" >
+      <DependentUpon>AA.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>
+

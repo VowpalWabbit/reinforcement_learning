@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Properties\AA.cs">
+    <Compile Update="AA.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>AA.tt</DependentUpon>
@@ -39,21 +39,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Properties\AA.tt">
+    <None Update="AA.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>AA.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <TextTransformParameter Include="SNRequired">
-      <Value>false</Value>
-      <InProject>false</InProject>
-    </TextTransformParameter>
-    <TextTransformParameter Include="PublicKey">
-      <Value> </Value>
-      <InProject>false</InProject>
-    </TextTransformParameter>
+    <Compile Include="AA.cs" Exclude="@(Compile)" >
+      <DependentUpon>AA.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <Import Project="$(PackagingIntegration)" Condition="Exists('$(PackagingIntegration)')" />
