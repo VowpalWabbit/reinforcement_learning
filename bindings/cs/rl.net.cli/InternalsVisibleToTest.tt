@@ -1,0 +1,38 @@
+﻿<#@ template language="C#" hostspecific="true" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+<#
+	try{
+		string snRequired = this.Host.ResolveParameterValue("","","SNRequired");
+		string publicKey = this.Host.ResolveParameterValue("","","PublicKey");
+
+		if(ParseBool(snRequired,false) && !string.IsNullOrWhiteSpace(publicKey)){
+			#>[assembly: InternalsVisibleTo("rl.net.cli.test, PublicKey=<#=publicKey#>")]<#
+		}
+		else{
+			#>[assembly: InternalsVisibleTo("rl.net.cli.test")]<#
+		}
+	}
+	catch(Exception e) {
+		#>[assembly: InternalsVisibleTo( "rl.net.cli.test" )]<#
+	}
+#>
+<#+
+	public bool ParseBool(string boolval, bool defval)
+	{
+		if(string.IsNullOrWhiteSpace(boolval))
+			return defval;
+		bool retval = defval;
+		bool.TryParse(boolval,out retval);
+		return retval;
+	}
+#>
