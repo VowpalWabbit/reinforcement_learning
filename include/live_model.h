@@ -8,6 +8,7 @@
 #pragma once
 #include "action_flags.h"
 #include "ranking_response.h"
+#include "decision_response.h"
 #include "err_constants.h"
 #include "factory_resolver.h"
 #include "sender.h"

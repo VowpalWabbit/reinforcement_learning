@@ -49,14 +49,14 @@ namespace reinforcement_learning {
   decision_ranking_event::decision_ranking_event() { }
 
   decision_ranking_event::decision_ranking_event(std::vector<const char*> event_ids, bool deferred_action, float pass_prob, const char* context, const decision_response& response, const timestamp& ts)
-    : event(event_ids[0], ts, pass_prob), _deferred_action(deferred_action), _model_id(response[0].get_model_id()) {
-    for(int i = 0; i < response.size(); i++)
+    : event(event_ids[0], ts, pass_prob), _deferred_action(deferred_action), _model_id(response.get_model_id()) {
+    for(auto const& ranking_res : response)
     {
       _action_ids_vector.push_back(std::vector<uint32_t>());
       _probilities_vector.push_back(std::vector<float>());
-      for (auto const& r : response[i]) {
-        _action_ids_vector[i].push_back(r.action_id + 1);
-        _probilities_vector[i].push_back(r.probability);
+      for (auto const& r : ranking_res) {
+        _action_ids_vector.back().push_back(r.action_id + 1);
+        _probilities_vector.back().push_back(r.probability);
       }
     }
 
