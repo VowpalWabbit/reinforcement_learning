@@ -48,6 +48,15 @@
     </Compile>
   </ItemGroup>
 
+  <Target Name="OutputVars" BeforeTargets="Build">
+    <Message Importance="high" Text="INFO: PackagingIntegration = $(PackagingIntegration)" />
+    <Message Importance="high" Text="INFO: SignAssembly = $(SignAssembly)" />
+    <Message Importance="high" Text="INFO: DelaySign = $(DelaySign)" />
+    <Message Importance="high" Text="INFO: KeyFile = $(KeyFile)" />
+    <Message Importance="high" Text="INFO: AssemblyOriginatorKeyFile = $(AssemblyOriginatorKeyFile)" />
+    <Message Importance="high" Text="INFO: TextTransformerParams = @(TextTransformParameter)" />
+  </Target>
+
   <Import Project="$(PackagingIntegration)" Condition="Exists('$(PackagingIntegration)')" />
 
 </Project>

@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 			#>[assembly: InternalsVisibleTo("rl.net.cli.test")]<#
 		}
 	}
-	catch(Exception e) {
+	catch(Exception) {
 		#>[assembly: InternalsVisibleTo( "rl.net.cli.test" )]<#
 	}
 #>
