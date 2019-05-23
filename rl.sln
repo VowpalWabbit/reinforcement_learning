@@ -37,6 +37,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{409EF620-8451-4722-806F-4BDDCD456661}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "joiner", "test_tools\joiner\joiner.vcxproj", "{E6EFAF56-301D-492F-B7D1-10179895A0A3}"
+	ProjectSection(ProjectDependencies) = postProject	
+		{C40E3263-B6FF-46D5-92F7-D67E6F9FCEDD} = {C40E3263-B6FF-46D5-92F7-D67E6F9FCEDD}	
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
