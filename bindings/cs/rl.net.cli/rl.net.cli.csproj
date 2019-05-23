@@ -13,6 +13,8 @@
     <RootNamespace>Rl.Net.Cli</RootNamespace>
   </PropertyGroup>
 
+  <Import Project="$(PackagingIntegration)" Condition="Exists('$(PackagingIntegration)')" />
+
   <ItemGroup>
     <ProjectReference Include="..\rl.net\rl.net.csproj" />
   </ItemGroup>
@@ -27,21 +29,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="InternalsVisibleToTest.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>InternalsVisibleToTest.cs</LastGenOutput>
     </None>
     <Compile Include="InternalsVisibleToTest.cs" Exclude="@(Compile)">
-      <DependentUpon>InternalsVisibleToTest.tt</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="InternalsVisibleToTest.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>InternalsVisibleToTest.tt</DependentUpon>
@@ -56,7 +48,5 @@
     <Message Importance="high" Text="INFO: AssemblyOriginatorKeyFile = $(AssemblyOriginatorKeyFile)" />
     <Message Importance="high" Text="INFO: TextTransformerParams = @(TextTransformParameter)" />
   </Target>
-
-  <Import Project="$(PackagingIntegration)" Condition="Exists('$(PackagingIntegration)')" />
 
 </Project>

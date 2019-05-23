@@ -10,6 +10,8 @@
     <RootNamespace>Rl.Net</RootNamespace>
   </PropertyGroup>
 
+  <Import Project="$(PackagingIntegration)" Condition="Exists('$(PackagingIntegration)')" />
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -26,8 +28,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <Import Project="$(PackagingIntegration)" Condition="Exists('$(PackagingIntegration)')" />
-
   <ItemGroup>
     <PackageReference Include="Clarius.TransformOnBuild" Version="1.22.0">
       <PrivateAssets>all</PrivateAssets>
@@ -36,14 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="InternalsVisibleToTest.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>InternalsVisibleToTest.tt</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -53,6 +46,8 @@
       <LastGenOutput>InternalsVisibleToTest.cs</LastGenOutput>
     </None>
     <Compile Include="InternalsVisibleToTest.cs" Exclude="@(Compile)">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
       <DependentUpon>InternalsVisibleToTest.tt</DependentUpon>
     </Compile>
   </ItemGroup>
