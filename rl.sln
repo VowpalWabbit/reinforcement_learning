@@ -17,19 +17,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rl.net.native", "bindings\cs\rl.net.native\rl.net.native.vcxproj", "{72FE899E-F26B-4DCB-B08E-7CF0F3FEE619}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "rl.net", "bindings\cs\rl.net\rl.net.csproj", "{B7A1DDE1-6CD5-4BC6-ABC9-CE005CA7AD29}"
-	ProjectSection(ProjectDependencies) = postProject
-		{72FE899E-F26B-4DCB-B08E-7CF0F3FEE619} = {72FE899E-F26B-4DCB-B08E-7CF0F3FEE619}
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "rl.net.cli", "bindings\cs\rl.net.cli\rl.net.cli.csproj", "{D0A78C03-F8E9-447F-99D4-795F6E33D8CE}"
-	ProjectSection(ProjectDependencies) = postProject
-		{72FE899E-F26B-4DCB-B08E-7CF0F3FEE619} = {72FE899E-F26B-4DCB-B08E-7CF0F3FEE619}
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "rl.net.cli.test", "bindings\cs\rl.net.cli.test\rl.net.cli.test.csproj", "{B817AD70-825A-4B01-9C4C-EB673743F143}"
-	ProjectSection(ProjectDependencies) = postProject
-		{72FE899E-F26B-4DCB-B08E-7CF0F3FEE619} = {72FE899E-F26B-4DCB-B08E-7CF0F3FEE619}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "override_interface", "examples\override_interface\override_interface.vcxproj", "{8FF15F05-0D62-4B54-92B8-70A0EE2363AF}"
 EndProject
@@ -46,9 +37,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "native", "native", "{409EF620-8451-4722-806F-4BDDCD456661}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "joiner", "test_tools\joiner\joiner.vcxproj", "{E6EFAF56-301D-492F-B7D1-10179895A0A3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{C40E3263-B6FF-46D5-92F7-D67E6F9FCEDD} = {C40E3263-B6FF-46D5-92F7-D67E6F9FCEDD}
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
