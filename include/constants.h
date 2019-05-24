@@ -52,7 +52,6 @@ namespace reinforcement_learning {  namespace value {
       const char *const CONSOLE_TRACE_LOGGER = "CONSOLE_TRACE_LOGGER";
       const char *const NULL_TIME_PROVIDER = "NULL_TIME_PROVIDER";
       const char *const CLOCK_TIME_PROVIDER = "CLOCK_TIME_PROVIDER";
-      const bool MODEL_BACKGROUND_REFRESH = true;
       const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
 }}
 
