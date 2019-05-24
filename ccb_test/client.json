@@ -1,8 +1,0 @@
-{
-  "ApplicationID": "jagerrit-test-look",
-  "EventHubInteractionConnectionString": "Endpoint=sb://ccb-test.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=TXFBmrZOG076Zje16YKLEwRItNNcSLkVkkPxVxHa0II=;EntityPath=interaction",
-  "EventHubObservationConnectionString": "Endpoint=sb://ccb-test.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=TXFBmrZOG076Zje16YKLEwRItNNcSLkVkkPxVxHa0II=;EntityPath=observation",
-  "IsExplorationEnabled": true,
-  "ModelBlobUri": "https://jagerritdstest.blob.core.windows.net/jagerrit-test01/exported-models/current?sv=2017-07-29&sr=b&sig=K%2BWlxWfi5x9x5pCdjNIueb3l40HyxMKjpS4p6zNbyH4%3D&st=2018-09-20T15%3A26%3A10Z&se=2028-09-20T15%3A27%3A10Z&sp=r",
-  "InitialExplorationEpsilon": 1.0
-}
