@@ -4,8 +4,12 @@
 #include "example.h"
 #include "parse_example_json.h"
 #include "parser.h"
+#include "v_array.h"
+
+#include <iostream>
 
 namespace reinforcement_learning {
+  static const std::string SEED_TAG = "seed=";
 
   class in_memory_buf : public io_buf
   {
@@ -184,7 +188,7 @@ namespace reinforcement_learning {
     examples.delete_v();
   }
 
-  void safe_vw::rank_decisions(const char* context, std::vector<std::vector<int>>& actions, std::vector<std::vector<float>>& scores)
+  void safe_vw::rank_decisions(std::vector<const char*>& event_ids, const char* context, std::vector<std::vector<size_t>>& actions, std::vector<std::vector<float>>& scores)
   {
     auto examples = v_init<example*>();
     examples.push_back(get_or_create_example());
@@ -192,6 +196,13 @@ namespace reinforcement_learning {
     std::vector<char> line_vec(context, context + strlen(context) + 1);
 
     VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
+
+    // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the example tag.
+    for(int i = 0; i < event_ids.size(); i++)
+    {
+      push_many(examples[i]->tag, SEED_TAG.c_str(), SEED_TAG.size());
+      push_many(examples[i]->tag, event_ids[i], strlen(event_ids[i]));
+    }
 
     // finalize example
     VW::setup_examples(*_vw, examples);

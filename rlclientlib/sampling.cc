@@ -18,7 +18,7 @@ int populate_response(size_t chosen_action_index, std::vector<int>& action_ids, 
 }
 
 // TODO: write test for this
-int populate_response(std::vector<std::vector<int>>& action_ids, std::vector<std::vector<float>>& pdfs, std::string&& model_id, decision_response& response, i_trace* trace_logger, api_status* status) {
+int populate_response(std::vector<std::vector<size_t>>& action_ids, std::vector<std::vector<float>>& pdfs, std::vector<const char*>& event_ids, std::string&& model_id, decision_response& response, i_trace* trace_logger, api_status* status) {
   if(action_ids.size() != pdfs.size())
   {
     RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids and pdfs must be the same size";
@@ -36,6 +36,8 @@ int populate_response(std::vector<std::vector<int>>& action_ids, std::vector<std
     for (size_t j = 0; j < action_ids[i].size(); j++) {
       current.push_back(action_ids[i][j], pdfs[i][j]);
     }
+    current.set_chosen_action_id(action_ids[i][0]);
+    current.set_event_id(event_ids[i]);
 
     response.push_back(std::move(current));
   }

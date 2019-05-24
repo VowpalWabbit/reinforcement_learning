@@ -94,10 +94,7 @@ namespace reinforcement_learning {
     //check arguments
     RETURN_IF_FAIL(check_null_or_empty(context_json, status));
 
-    // TODO incorporate into model
-    //const uint64_t seed = uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
-
-    std::vector<std::vector<int>> actions_ids;
+    std::vector<std::vector<size_t>> actions_ids;
     std::vector<std::vector<float>> actions_pdfs;
     std::string model_version;
 
@@ -111,7 +108,7 @@ namespace reinforcement_learning {
 
     for (auto ids : found_ids)
     {
-      event_ids_str[ids.first] = ids.second;
+      event_ids_str[ids.first] = ids.second + std::to_string(_seed_shift);
       event_ids[ids.first] = event_ids_str[ids.first].c_str();
     }
 
@@ -119,14 +116,14 @@ namespace reinforcement_learning {
     {
       if(event_ids[i] == nullptr)
       {
-        event_ids_str[i] = boost::uuids::to_string(boost::uuids::random_generator()());
+        event_ids_str[i] = boost::uuids::to_string(boost::uuids::random_generator()()) + std::to_string(_seed_shift);
         event_ids[i] = event_ids_str[i].c_str();
       }
     }
 
     // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
-    RETURN_IF_FAIL(_model->request_decision(context_json, actions_ids, actions_pdfs, model_version, status));
-    RETURN_IF_FAIL(populate_response(actions_ids, actions_pdfs, std::move(std::string(model_version)), resp, _trace_logger.get(), status));
+    RETURN_IF_FAIL(_model->request_decision(event_ids, context_json, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(populate_response(actions_ids, actions_pdfs, event_ids, std::move(std::string(model_version)), resp, _trace_logger.get(), status));
     RETURN_IF_FAIL(_decision_logger->log_decisions(event_ids, context_json, flags, resp, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.

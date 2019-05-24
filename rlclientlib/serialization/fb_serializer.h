@@ -7,6 +7,7 @@
 #include "generated/DecisionRankingEvent_generated.h"
 #include "logger/message_type.h"
 #include "err_constants.h"
+
 using namespace reinforcement_learning::messages::flatbuff;
 namespace reinforcement_learning { namespace logger {
   template <typename T>

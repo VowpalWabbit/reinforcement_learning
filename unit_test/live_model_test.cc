@@ -129,8 +129,8 @@ BOOST_AUTO_TEST_CASE(live_model_request_decision) {
 
   r::api_status status;
 
-  //create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(config);
+  // Create the ds live_model, and initialize it with the config
+  r::live_model ds = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto invalid_context = "";
@@ -139,55 +139,16 @@ BOOST_AUTO_TEST_CASE(live_model_request_decision) {
 
   // request ranking
   BOOST_CHECK_EQUAL(ds.request_decision(JSON_CONTEXT_WITH_SLOTS, response, &status), err::success);
+  BOOST_CHECK_EQUAL(response.size(), 1);
+  size_t chosen;
+  BOOST_CHECK_EQUAL((*response.begin()).get_chosen_action_id(chosen), err::success);
+  BOOST_CHECK_EQUAL(chosen, 0);
   BOOST_CHECK_EQUAL(status.get_error_code(), 0);
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
-  // check expected returned codes
-  BOOST_CHECK_EQUAL(ds.request_decision(JSON_CONTEXT_WITH_SLOTS, response, &status), err::invalid_argument); // invalid event_id
-  BOOST_CHECK_EQUAL(status.get_error_code(), err::invalid_argument);
 
   BOOST_CHECK_EQUAL(ds.request_decision(invalid_context, response, &status), err::invalid_argument); // invalid context
   BOOST_CHECK_EQUAL(status.get_error_code(), err::invalid_argument);
 }
-
-//BOOST_AUTO_TEST_CASE(live_model_ranking_request) {
-//  //create a simple ds configuration
-//  u::configuration config;
-//  cfg::create_from_json(JSON_CFG, config);
-//  config.set(r::name::EH_TEST, "true");
-//
-//  r::api_status status;
-//
-//  //create the ds live_model, and initialize it with the config
-//  r::live_model ds = create_mock_live_model(config);
-//  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
-//
-//  const auto event_id = "event_id";
-//  const auto invalid_event_id = "";
-//  const auto invalid_context = "";
-//
-//  r::ranking_response response;
-//
-//  // request ranking
-//  BOOST_CHECK_EQUAL(ds.choose_rank(event_id, JSON_CONTEXT, response), err::success);
-//
-//  // check expected returned codes
-//  BOOST_CHECK_EQUAL(ds.choose_rank(invalid_event_id, JSON_CONTEXT, response), err::invalid_argument); // invalid event_id
-//  BOOST_CHECK_EQUAL(ds.choose_rank(event_id, invalid_context, response), err::invalid_argument); // invalid context
-//
-//  // invalid event_id
-//  ds.choose_rank(event_id, invalid_context, response, &status);
-//  BOOST_CHECK_EQUAL(status.get_error_code(), err::invalid_argument);
-//
-//  //invalid context
-//  ds.choose_rank(invalid_event_id, JSON_CONTEXT, response, &status);
-//  BOOST_CHECK_EQUAL(status.get_error_code(), err::invalid_argument);
-//
-//  //valid request => status is reset
-//  r::api_status::try_update(&status, -42, "hello");
-//  ds.choose_rank(event_id, JSON_CONTEXT, response, &status);
-//  BOOST_CHECK_EQUAL(status.get_error_code(), 0);
-//  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
-//}
 
 BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
   //create a simple ds configuration

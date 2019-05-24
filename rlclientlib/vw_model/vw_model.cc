@@ -61,13 +61,13 @@ namespace reinforcement_learning { namespace model_management {
     }
   }
 
-  int vw_model::request_decision(const char* features, std::vector<std::vector<int>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
+  int vw_model::request_decision(std::vector<const char*>& event_ids, const char* features, std::vector<std::vector<size_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
     try {
       pooled_vw vw(_vw_pool, _vw_pool.get_or_create());
 
       // Get a ranked list of action_ids and corresponding pdf
-      vw->rank_decisions(features, actions_ids, action_pdfs);
+      vw->rank_decisions(event_ids, features, actions_ids, action_pdfs);
 
       model_version = vw->id();
 
