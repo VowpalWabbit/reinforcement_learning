@@ -1,3 +1,5 @@
+include "Metadata.fbs";
+
 namespace reinforcement_learning.messages.flatbuff;
 
 table SlotEvent {
@@ -12,6 +14,7 @@ table DecisionEvent {
     model_id:string;                // model id
     pass_probability:float;         // Probability of event surviving throttling operation
     deferred_action:bool = false;   // delayed activation flag
+    meta:Metadata;                  // contains metadata like timestamp
 }
 
 // Collection of ranking events

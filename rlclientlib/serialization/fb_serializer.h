@@ -19,8 +19,8 @@ namespace reinforcement_learning { namespace logger {
     using batch_builder_t = RankingEventBatchBuilder;
 
     static size_t size_estimate(const ranking_event& evt) {
-      return evt.get_event_id().size() + evt.get_action_ids().size() * sizeof(evt.get_action_ids()[0]) 
-            + evt.get_probabilities().size() * sizeof(evt.get_probabilities()[0]) + evt.get_context().size() 
+      return evt.get_event_id().size() + evt.get_action_ids().size() * sizeof(evt.get_action_ids()[0])
+            + evt.get_probabilities().size() * sizeof(evt.get_probabilities()[0]) + evt.get_context().size()
             + evt.get_model_id().size() + sizeof(evt.get_defered_action()) + sizeof(evt.get_pass_prob()) + sizeof(evt.get_client_time_gmt());
     }
 
@@ -31,12 +31,12 @@ namespace reinforcement_learning { namespace logger {
       const auto probabilities_vector_offset = builder.CreateVector(evt.get_probabilities());
       const auto context_offset = builder.CreateVector(evt.get_context());
       const auto model_id_offset = builder.CreateString(evt.get_model_id());
-	  const auto &ts = evt.get_client_time_gmt();
+	    const auto &ts = evt.get_client_time_gmt();
       TimeStamp client_ts(	ts.year, ts.month, ts.day, ts.hour,
 							ts.minute, ts.second, ts.sub_second);
-	  const auto meta_id_offset = CreateMetadata(builder,&client_ts);
+	    const auto meta_id_offset = CreateMetadata(builder,&client_ts);
       ret_val = CreateRankingEvent(	builder, event_id_offset, evt.get_defered_action(), action_ids_vector_offset,
-									context_offset, probabilities_vector_offset, model_id_offset, 
+									context_offset, probabilities_vector_offset, model_id_offset,
 									evt.get_pass_prob(), meta_id_offset);
       return error_code::success;
     }
@@ -61,6 +61,7 @@ namespace reinforcement_learning { namespace logger {
         estimate += evt_ids[i].size();
       }
       estimate += evt.get_context().size() + evt.get_model_id().size() + sizeof(evt.get_defered_action()) + sizeof(evt.get_pass_prob());
+      estimate += sizeof(evt.get_client_time_gmt());
       return estimate;
     }
 
@@ -79,7 +80,12 @@ namespace reinforcement_learning { namespace logger {
       }
       const auto slots_offset = builder.CreateVector(slots);
 
-      ret_val = CreateDecisionEvent(builder, context_offset, slots_offset, model_id_offset, evt.get_pass_prob(), evt.get_defered_action());
+      const auto &ts = evt.get_client_time_gmt();
+      TimeStamp client_ts(ts.year, ts.month, ts.day, ts.hour,
+        ts.minute, ts.second, ts.sub_second);
+      const auto meta_id_offset = CreateMetadata(builder, &client_ts);
+
+      ret_val = CreateDecisionEvent(builder, context_offset, slots_offset, model_id_offset, evt.get_pass_prob(), evt.get_defered_action(), meta_id_offset);
       return error_code::success;
     }
   };
