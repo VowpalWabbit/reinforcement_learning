@@ -59,6 +59,25 @@ cmake ..
 make
 ```
 
+#### Troubleshooting
+If you get an error similar to the following on MacOS when running `cmake ..`, then you may be able to fix it by supplying the OpenSSL path to CMake.
+```
+Make Error at /usr/local/Cellar/cmake/3.14.4/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:137 (message):
+  Could NOT find OpenSSL, try to set the path to OpenSSL root folder in the
+  system variable OPENSSL_ROOT_DIR (missing: OPENSSL_INCLUDE_DIR)
+Call Stack (most recent call first):
+  /usr/local/Cellar/cmake/3.14.4/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:378 (_FPHSA_FAILURE_MESSAGE)
+  /usr/local/Cellar/cmake/3.14.4/share/cmake/Modules/FindOpenSSL.cmake:413 (find_package_handle_standard_args)
+  /usr/local/Cellar/cmake/3.14.4/share/cmake/Modules/CMakeFindDependencyMacro.cmake:48 (find_package)
+  /usr/local/lib/cpprestsdk/cpprestsdk-config.cmake:11 (find_dependency)
+  CMakeLists.txt:9 (find_package)
+```
+
+This can be fixed by invoking CMake similar to the following:
+```bash
+cmake -DOPENSSL_ROOT_DIR=/usr/local/Cellar/openssl/1.0.2r -DOPENSSL_LIBRARIES=/usr/local/Cellar/openssl/1.0.2r/lib ..
+```
+
 ### Test
 ```
 mkdir build
