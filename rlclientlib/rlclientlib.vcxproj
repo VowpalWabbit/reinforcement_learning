@@ -170,6 +170,7 @@
     <ClInclude Include="..\include\object_factory.h" />
     <ClInclude Include="..\include\personalization.h" />
     <ClInclude Include="..\include\ranking_response.h" />
+    <ClInclude Include="..\include\decision_response.h" />
     <ClInclude Include="..\include\config_utility.h" />
     <ClInclude Include="..\include\constants.h" />
     <ClInclude Include="..\include\err_constants.h" />
@@ -247,6 +248,7 @@
     <ClCompile Include="live_model.cc" />
     <ClCompile Include="ranking_event.cc" />
     <ClCompile Include="ranking_response.cc" />
+    <ClCompile Include="decision_response.cc" />
     <ClCompile Include="logger\async_batcher.cc" />
     <ClCompile Include="azure_factories.cc" />
     <ClCompile Include="console_tracer.cc" />

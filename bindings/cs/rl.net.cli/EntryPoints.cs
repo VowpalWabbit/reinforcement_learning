@@ -40,7 +40,7 @@ namespace Rl.Net.Cli {
 
             Console.WriteLine($"Chosen action id: {actionId}");
 
-            if (!liveModel.TryReportOutcome(eventId, outcome, apiStatus))
+            if (!liveModel.TryQueueOutcomeEvent(eventId, outcome, apiStatus))
             {
                 Helpers.WriteStatusAndExit(apiStatus);
             }
@@ -71,7 +71,7 @@ namespace Rl.Net.Cli {
 
             Console.WriteLine($"Chosen action id: {actionId}");
 
-            if (!liveModel.TryReportOutcome(eventId, outcome, apiStatus))
+            if (!liveModel.TryQueueOutcomeEvent(eventId, outcome, apiStatus))
             {
                 Helpers.WriteStatusAndExit(apiStatus);
             }

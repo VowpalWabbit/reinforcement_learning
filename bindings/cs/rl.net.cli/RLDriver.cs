@@ -89,12 +89,12 @@ namespace Rl.Net.Cli
 
         bool IOutcomeReporter<float>.TryReportOutcome(RunContext runContext, string eventId, float outcome)
         {
-            return this.liveModel.TryReportOutcome(eventId, outcome, runContext.ApiStatusContainer);
+            return this.liveModel.TryQueueOutcomeEvent(eventId, outcome, runContext.ApiStatusContainer);
         }
 
         bool IOutcomeReporter<string>.TryReportOutcome(RunContext runContext, string eventId, string outcome)
         {
-            return this.liveModel.TryReportOutcome(eventId, outcome, runContext.ApiStatusContainer);
+            return this.liveModel.TryQueueOutcomeEvent(eventId, outcome, runContext.ApiStatusContainer);
         }
 
         private void Step<TOutcome>(RunContext runContext, IOutcomeReporter<TOutcome> outcomeReporter, IStepContext<TOutcome> step)
