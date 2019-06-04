@@ -112,11 +112,14 @@ namespace reinforcement_learning { namespace utility { namespace config {
     web::json::value obj;
     try {
       obj = json::value::parse(to_string_t(config_json));
-
     }
     catch (const web::json::json_exception& e) {
       RETURN_ERROR_LS(trace, status, json_parse_error) << e.what();
     }
+    catch (const std::exception& e) {
+      RETURN_ERROR_LS(trace, status, json_parse_error) << e.what();
+    }
+
     auto jsonObj = obj.as_object();
 
     for (auto const& prop_pair : jsonObj) {
