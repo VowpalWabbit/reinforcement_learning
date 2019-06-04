@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
   const auto& events = *(ranking_event_batch->events());
   BOOST_CHECK_EQUAL(events.size(), events_count);
   for (size_t i = 0; i < events_count; ++i) {
-    const auto& event = *events[i];
+    const auto& event = *events[(flatbuffers::uoffset_t)i];
     BOOST_CHECK_EQUAL(event.action_ids()->size(), 3);
     std::vector<int> expected_ids{3,1,2};
     BOOST_CHECK_EQUAL_COLLECTIONS(event.action_ids()->begin(), event.action_ids()->end(), expected_ids.begin(), expected_ids.end());
