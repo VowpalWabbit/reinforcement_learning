@@ -40,7 +40,7 @@ namespace Rl.Net.Cli {
 
             Console.WriteLine($"Chosen action id: {actionId}");
 
-            if (!liveModel.TryReportOutcome(eventId, outcome, apiStatus))
+            if (!liveModel.TryQueueOutcomeEvent(eventId, outcome, apiStatus))
             {
                 Helpers.WriteStatusAndExit(apiStatus);
             }
@@ -53,7 +53,6 @@ namespace Rl.Net.Cli {
             const string contextJson = "{\"GUser\":{\"id\":\"a\",\"major\":\"eng\",\"hobby\":\"hiking\"},\"_multi\":[ { \"TAction\":{\"a1\":\"f1\"} },{\"TAction\":{\"a2\":\"f2\"}}],\"p\":[0.2, 0.8]}";
 
             LiveModel liveModel = Helpers.CreateLiveModelOrExit(configPath);
-
 
             ApiStatus apiStatus = new ApiStatus();
 
@@ -71,7 +70,7 @@ namespace Rl.Net.Cli {
 
             Console.WriteLine($"Chosen action id: {actionId}");
 
-            if (!liveModel.TryReportOutcome(eventId, outcome, apiStatus))
+            if (!liveModel.TryQueueOutcomeEvent(eventId, outcome, apiStatus))
             {
                 Helpers.WriteStatusAndExit(apiStatus);
             }

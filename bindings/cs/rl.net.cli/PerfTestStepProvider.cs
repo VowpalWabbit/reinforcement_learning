@@ -59,8 +59,6 @@ namespace Rl.Net.Cli
 
             public string DecisionContext { get; set; }
             
-
-            private IEnumerable<ActionProbability> actionDistributionCache;
             public float GetOutcome(long actionIndex, IEnumerable<ActionProbability> actionDistribution)
             {
                 return this.Outcome;
