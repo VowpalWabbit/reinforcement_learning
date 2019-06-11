@@ -97,7 +97,12 @@ vcpkg install flatbuffers:x64-windows
 
 ### Build + Test
 
+Set VcpkgIntegration environment variable to vcpkg.targets file on your machine
+Example:
+VcpkgIntegration=c:\s\vcpkg\scripts\buildsystems\msbuild\vcpkg.targets
+
 Open `rl.sln` in Visual Studio 2017.
+Build Release or Debug x64 configuration.
 
 ### Experimental - CMake on Windows (Do not mix with checked in solution)
 Using CMake is an alternate way to configure and build the project. Currently it only supports the C++ projects.
