@@ -40,6 +40,7 @@
     <ClCompile Include="vw_model\pdf_model.cc" />
     <ClCompile Include="sampling.cc" />
     <ClCompile Include="time_helper.cc" />
+    <ClCompile Include="model_mgmt\file_model_loader.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -99,6 +100,8 @@
     <ClInclude Include="vw_model\pdf_model.h" />
     <ClInclude Include="sampling.h" />
     <ClInclude Include="time_helper.h" />
+    <ClInclude Include="generated\Metadata_generated.h" />
+    <ClInclude Include="model_mgmt\file_model_loader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -179,6 +179,7 @@
     <ClInclude Include="..\include\trace_logger.h" />
     <ClInclude Include="..\include\data_buffer.h" />
     <ClInclude Include="logger\file\file_logger.h" />
+    <ClInclude Include="model_mgmt\file_model_loader.h" />
     <ClInclude Include="time_helper.h" />
     <ClInclude Include="utility\data_buffer_streambuf.h" />
     <ClInclude Include="generated\OutcomeEvent_generated.h" />
@@ -225,6 +226,7 @@
     <ClCompile Include="logger\file\file_logger.cc" />
     <ClCompile Include="model_mgmt\data_callback_fn.cc" />
     <ClCompile Include="model_mgmt\empty_data_transport.cc" />
+    <ClCompile Include="model_mgmt\file_model_loader.cc" />
     <ClCompile Include="model_mgmt\model_downloader.cc" />
     <ClCompile Include="model_mgmt\model_mgmt.cc" />
     <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
