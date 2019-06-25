@@ -470,44 +470,8 @@ namespace Rl.Net.Cli.Test
             Run_LiveModelReportOutcomeJson_Test(liveModel, PseudoLocEventId, PseudoLocOutcomeJson);
         }
 
-        private void Run_GetRankingEventId_Test(string eventIdToReturn)
-        {
-            RankingResponse rankingResponse = new RankingResponse();
-            GCHandle valueToReturnHandle = default(GCHandle);
-
-            try
-            {
-                IntPtr valueToReturnPtr = IntPtr.Zero;
-                if (eventIdToReturn != null)
-                {
-                    byte[] valueToReturnUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventIdToReturn);
-                    valueToReturnHandle = GCHandle.Alloc(valueToReturnUtf8Bytes, GCHandleType.Pinned);
-                    valueToReturnPtr = valueToReturnHandle.AddrOfPinnedObject();
-                }
-
-                NativeMethods.GetRankingEventIdOverride =
-                    (IntPtr rankingResponsePtr) =>
-                    {
-                        return valueToReturnPtr;
-                    };
-
-                string getResult = rankingResponse.EventId;
-                Assert.AreEqual(eventIdToReturn, getResult, "Marshalling result does not work properly in GetRankingEventId");
-            }
-            finally
-            {
-                if (valueToReturnHandle != null && valueToReturnHandle.IsAllocated)
-                {
-                    valueToReturnHandle.Free();
-                }
-
-                rankingResponse?.Dispose();
-                rankingResponse = null;
-            }
-        }
-
         private void Run_StringReturnMarshallingTest<TNativeObject>(string valueToReturn, Action<Func<IntPtr, IntPtr>> registerNativeOverride, Func<TNativeObject, string> targetInvocation, string targetInvocationName)
-            where TNativeObject : NativeObject, new()
+            where TNativeObject : NativeObject<TNativeObject>, new()
         {
             TNativeObject targetObject = new TNativeObject();
             GCHandle valueToReturnHandle = default(GCHandle);
