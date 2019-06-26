@@ -108,7 +108,7 @@ namespace reinforcement_learning {
 
     for (auto ids : found_ids)
     {
-      event_ids_str[ids.first] = ids.second + std::to_string(_seed_shift);
+      event_ids_str[ids.first] = ids.second;
       event_ids[ids.first] = event_ids_str[ids.first].c_str();
     }
 

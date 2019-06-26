@@ -133,8 +133,6 @@ BOOST_AUTO_TEST_CASE(live_model_request_decision) {
   r::live_model ds = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
-  const auto invalid_context = "";
-
   r::decision_response response;
 
   // request ranking
@@ -146,8 +144,27 @@ BOOST_AUTO_TEST_CASE(live_model_request_decision) {
   BOOST_CHECK_EQUAL(status.get_error_code(), 0);
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
 
+  const auto invalid_context = "";
   BOOST_CHECK_EQUAL(ds.request_decision(invalid_context, response, &status), err::invalid_argument); // invalid context
   BOOST_CHECK_EQUAL(status.get_error_code(), err::invalid_argument);
+
+  const auto context_with_ids = R"({"GUser":{"hobby":"hiking","id":"a","major":"eng"},"_multi":[{"TAction":{"a1":"f1"}},{"TAction":{"a2":"f2"}}],"_slots":[{"TSlot":{"s1":"f1"},"_id":"817985e8-74ac-415c-bb69-735099c94d4d"},{"TSlot":{"s2":"f2"},"_id":"afb1da57-d4cd-4691-97d8-2b24bfb4e07f"}]})";
+  BOOST_CHECK_EQUAL(ds.request_decision(context_with_ids, response, &status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_code(), 0);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+  BOOST_CHECK_EQUAL(response.get_model_id(), "");
+
+  BOOST_CHECK_EQUAL(response.size(), 2);
+  //check first decision
+  auto decision = response.begin();
+  BOOST_CHECK_EQUAL(decision->get_event_id(), "817985e8-74ac-415c-bb69-735099c94d4d");
+  decision->get_chosen_action_id(chosen);
+  BOOST_CHECK_EQUAL(chosen, 0);
+  //check second decision
+  decision++;
+  BOOST_CHECK_EQUAL(decision->get_event_id(), "afb1da57-d4cd-4691-97d8-2b24bfb4e07f");
+  decision->get_chosen_action_id(chosen);
+  BOOST_CHECK_EQUAL(chosen, 0);
 }
 
 BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
