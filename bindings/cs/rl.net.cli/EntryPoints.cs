@@ -54,7 +54,6 @@ namespace Rl.Net.Cli {
 
             LiveModel liveModel = Helpers.CreateLiveModelOrExit(configPath);
 
-
             ApiStatus apiStatus = new ApiStatus();
 
             RankingResponse rankingResponse = new RankingResponse();
