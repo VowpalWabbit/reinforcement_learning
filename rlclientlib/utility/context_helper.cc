@@ -5,6 +5,7 @@
 #include "http_helper.h"
 
 #include <chrono>
+#include <cstring>
 
 namespace sutil = ::utility::conversions;
 
@@ -89,5 +90,18 @@ namespace reinforcement_learning { namespace utility {
     catch ( ... ) {
       RETURN_ERROR_LS(trace, status, json_parse_error) << error_code::unknown_s;
     }
+  }
+
+  int validate_multi_before_slots(const char *context, i_trace* trace, api_status* status)
+  {
+    auto slots_pos = strstr(context, "_slots");
+    auto multi_pos = strstr(context, "_multi");
+
+    if(slots_pos != nullptr && multi_pos != nullptr && slots_pos < multi_pos)
+    {
+      RETURN_ERROR_LS(trace, status, json_parse_error) << " There must be both a _multi field and _slots, and _multi must come first.";
+    }
+
+    return reinforcement_learning::error_code::success;
   }
 }}

@@ -133,3 +133,15 @@ BOOST_AUTO_TEST_CASE(slot_count_empty) {
   BOOST_CHECK_EQUAL(count, 0);
 }
 
+BOOST_AUTO_TEST_CASE(slots_before_multi) {
+  const auto context = R"({
+    "UserAge":15,
+    "_slots": []
+    "_multi":[
+      {"_text":"elections maine", "Source":"TV"},
+      {"Source":"www", "topic":4, "_label":"2:3:.3"}
+    ],
+  })";
+  const auto scode = rlutil::validate_multi_before_slots(context, nullptr);
+  BOOST_CHECK_EQUAL(scode, error_code::json_parse_error);
+}

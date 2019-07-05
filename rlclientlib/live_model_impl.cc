@@ -94,6 +94,9 @@ namespace reinforcement_learning {
     //check arguments
     RETURN_IF_FAIL(check_null_or_empty(context_json, status));
 
+    // Ensure multi comes before slots, this is a current limitation of the parser.
+    RETURN_IF_FAIL(utility::validate_multi_before_slots(context_json, nullptr, status));
+
     std::vector<std::vector<size_t>> actions_ids;
     std::vector<std::vector<float>> actions_pdfs;
     std::string model_version;
