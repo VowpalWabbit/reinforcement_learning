@@ -6,8 +6,8 @@
 #include <sstream>
 #include "serialization/json_serializer.h"
 
-test_data_provider::test_data_provider(const std::string& experiment_name, size_t threads, size_t features, size_t actions, bool _is_float_outcome)
-  : _experiment_name(experiment_name)
+test_data_provider::test_data_provider(const std::string& experiment_name, size_t index, size_t threads, size_t features, size_t actions, bool _is_float_outcome)
+  : _experiment_name(experiment_name + std::to_string(index))
   , contexts(threads, std::vector<std::string>(preallocated_count))
   , outcomes(threads, std::vector<std::string>(preallocated_count))
   , is_float_outcome(_is_float_outcome)

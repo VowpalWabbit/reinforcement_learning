@@ -8,7 +8,7 @@
 
 class test_loop {
 public:
-  test_loop(const boost::program_options::variables_map& vm);
+  test_loop(size_t index, const boost::program_options::variables_map& vm);
   bool init();
   void run();
 
