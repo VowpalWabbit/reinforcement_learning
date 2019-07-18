@@ -149,6 +149,13 @@ void test_loop::perf_loop(size_t thread_id)
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
+
+    if (test_inputs.is_rewarded(thread_id, controller->get_iteration())) {
+      if (test_inputs.report_outcome(rl.get(), thread_id, controller->get_iteration(), &status) != err::success) {
+        std::cout << status.get_error_msg() << std::endl;
+        continue;
+      }
+    }
   }
   if (thread_id == 0) controller->progress_bar();
   std::cout << std::endl;
