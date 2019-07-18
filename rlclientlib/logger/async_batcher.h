@@ -60,7 +60,6 @@ namespace reinforcement_learning { namespace logger {
 
     event_queue<TEvent> _queue;       // A queue to accumulate batch of events.
     size_t _send_high_water_mark;
-    size_t _queue_max_capacity;
     error_callback_fn* _perror_cb;
 
     utility::periodic_background_proc<async_batcher> _periodic_background_proc;
@@ -82,10 +81,10 @@ namespace reinforcement_learning { namespace logger {
     _queue.push(std::move(evt), TSerializer<TEvent>::serializer_t::size_estimate(evt));
 
     //block or drop events if the queue if full
-    if (_queue.capacity() >= _queue_max_capacity) {
+    if (_queue.is_full()) {
       if (BLOCK == _queue_mode) {
         std::unique_lock<std::mutex> lk(_m);
-        _cv.wait(lk, [this] { return _queue.capacity() < _queue_max_capacity; });
+        _cv.wait(lk, [this] { return !_queue.is_full(); });
       }
       else if (DROP == _queue_mode) {
         _queue.prune(_pass_prob);
@@ -116,12 +115,13 @@ namespace reinforcement_learning { namespace logger {
     TSerializer<TEvent> collection_serializer(*buffer.get());
 
     while (remaining > 0 && collection_serializer.size() < _send_high_water_mark) {
-      _queue.pop(&evt);
-      if (BLOCK == _queue_mode) {
-        _cv.notify_one();
+      if (_queue.pop(&evt)) {
+        if (BLOCK == _queue_mode) {
+          _cv.notify_one();
+        }
+        RETURN_IF_FAIL(collection_serializer.add(evt, status));
+        --remaining;
       }
-      RETURN_IF_FAIL(collection_serializer.add(evt, status));
-      --remaining;
     }
 
     collection_serializer.finalize();
@@ -158,15 +158,15 @@ namespace reinforcement_learning { namespace logger {
   template<typename TEvent, template<typename> class TSerializer>
   async_batcher<TEvent, TSerializer>::async_batcher(
     i_message_sender* sender, utility::watchdog& watchdog, 
-	error_callback_fn* perror_cb, const size_t send_high_water_mark,
+	  error_callback_fn* perror_cb, const size_t send_high_water_mark,
     const size_t batch_timeout_ms, const size_t queue_max_capacity, queue_mode_enum queue_mode)
-    : _sender(sender),
-    _send_high_water_mark(send_high_water_mark),
-    _queue_max_capacity(queue_max_capacity),
-    _perror_cb(perror_cb),
-    _periodic_background_proc(static_cast<int>(batch_timeout_ms), watchdog, "Async batcher thread", perror_cb),
-    _pass_prob(0.5),
-    _queue_mode(queue_mode)
+    : _sender(sender)
+    , _queue(queue_max_capacity)
+    , _send_high_water_mark(send_high_water_mark)
+    , _perror_cb(perror_cb)
+    , _periodic_background_proc(static_cast<int>(batch_timeout_ms), watchdog, "Async batcher thread", perror_cb)
+    , _pass_prob(0.5)
+    , _queue_mode(queue_mode)
   {}
 
   template<typename TEvent, template<typename> class TSerializer>
