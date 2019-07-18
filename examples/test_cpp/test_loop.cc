@@ -19,7 +19,7 @@ test_loop::test_loop(size_t index, const boost::program_options::variables_map& 
   , controller(experiment_controller_factory::create(vm))
   , experiment_name(generate_experiment_name(vm["experiment_name"].as<std::string>(), threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>()))
   , json_config(vm["json_config"].as<std::string>())
-  , test_inputs(experiment_name, index, threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>(), vm.count("float_outcome") > 0)
+  , test_inputs(experiment_name, index, threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>(), vm.count("float_outcome") > 0, vm["reward_period"].as<size_t>())
   , is_perf(vm.count("perf") > 0)
   , sleep_interval(vm["sleep"].as<size_t>())
 {

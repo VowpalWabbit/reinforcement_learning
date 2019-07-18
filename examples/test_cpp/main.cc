@@ -24,6 +24,7 @@ po::variables_map process_cmd_line(const int argc, char** argv) {
     ("sleep,s", po::value<size_t>()->default_value(0), "Milliseconds to sleep between loop iterations")
     ("duration,d", po::value<size_t>(), "Duration of experiment (in ms). Alternative to n")
     ("instances,i", po::value<size_t>(), "Number of test loop instances")
+    ("reward_period,r", po::value<size_t>(), "Ratio period (0 - no reward, otherwise - every $reward_period interaction is receiving reward)")
     ;
 
   po::variables_map vm;
