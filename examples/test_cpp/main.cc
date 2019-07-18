@@ -44,6 +44,7 @@ int run_test_instance(size_t index, const po::variables_map& vm) {
   }
 
   loop.run();
+  return 0;
 }
 
 int main(int argc, char** argv) {
