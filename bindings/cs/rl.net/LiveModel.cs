@@ -49,6 +49,36 @@ namespace Rl.Net
                 return LiveModelChooseRankWithFlagsNative(liveModel, eventId, contextJson, flags, rankingResponse, apiStatus);
             }
 
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestDecision")]
+            private static extern int LiveModelRequestDecisionNative(IntPtr liveModel, IntPtr contextJson, IntPtr decisionResponse, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestDecisionOverride { get; set; }
+
+            public static int LiveModelRequestDecision(IntPtr liveModel, IntPtr contextJson, IntPtr decisionResponse, IntPtr apiStatus)
+            {
+                if (LiveModelRequestDecisionOverride != null)
+                {
+                    return LiveModelRequestDecisionOverride(liveModel, contextJson, decisionResponse, apiStatus);
+                }
+
+                return LiveModelRequestDecisionNative(liveModel, contextJson, decisionResponse, apiStatus);
+            }
+
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestDecisionWithFlags")]
+            private static extern int LiveModelRequestDecisionWithFlagsNative(IntPtr liveModel, IntPtr contextJson, uint flags, IntPtr decisionResponse, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, uint, IntPtr, IntPtr, int> LiveModelRequestDecisionWithFlagsOverride { get; set; }
+
+            public static int LiveModelRequestDecisionWithFlags(IntPtr liveModel, IntPtr contextJson, uint flags, IntPtr decisionResponse, IntPtr apiStatus)
+            {
+                if (LiveModelRequestDecisionWithFlagsOverride != null)
+                {
+                    return LiveModelRequestDecisionWithFlagsOverride(liveModel, contextJson, flags, decisionResponse, apiStatus);
+                }
+
+                return LiveModelRequestDecisionWithFlagsNative(liveModel, contextJson, flags, decisionResponse, apiStatus);
+            }
+
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelReportActionTaken")]
             private static extern int LiveModelReportActionTakenNative(IntPtr liveModel, IntPtr eventId, IntPtr apiStatus);
 
@@ -131,7 +161,7 @@ namespace Rl.Net
         {
             if (String.IsNullOrWhiteSpace(json))
             {
-                throw new ArgumentException("Configuration json is empty", "json");
+                throw new ArgumentException("Input json is empty", "json");
             }
         }
 
@@ -177,6 +207,26 @@ namespace Rl.Net
                 {
                     return NativeMethods.LiveModelChooseRankWithFlags(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, flags, rankingResponse, apiStatus);
                 }
+            }
+        }
+
+        unsafe private static int LiveModelRequestDecision(IntPtr liveModel, string contextJson, IntPtr decisionResponse, IntPtr apiStatus)
+        {
+            CheckJsonString(contextJson);
+
+            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            {
+                return NativeMethods.LiveModelRequestDecision(liveModel, new IntPtr(contextJsonUtf8Bytes), decisionResponse, apiStatus);
+            }
+        }
+
+        unsafe private static int LiveModelRequestDecisionWithFlags(IntPtr liveModel, string contextJson, uint flags, IntPtr decisionResponse, IntPtr apiStatus)
+        {
+            CheckJsonString(contextJson);
+
+            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            {
+                return NativeMethods.LiveModelRequestDecisionWithFlags(liveModel, new IntPtr(contextJsonUtf8Bytes), flags, decisionResponse, apiStatus);
             }
         }
 
@@ -226,10 +276,10 @@ namespace Rl.Net
         {
             using (ApiStatus status = new ApiStatus(apiStatusHandle)) 
             {
-                EventHandler<ApiStatus> trargetEventLocal = this.BackgroundErrorInternal;
-                if (trargetEventLocal != null)
+                EventHandler<ApiStatus> targetEventLocal = this.BackgroundErrorInternal;
+                if (targetEventLocal != null)
                 {
-                    trargetEventLocal.Invoke(this, status);
+                    targetEventLocal.Invoke(this, status);
                 }
                 else
                 {
@@ -321,6 +371,57 @@ namespace Rl.Net
 
             return result;
         }
+
+        public bool TryRequestDecision(string contextJson, out DecisionResponse response, ApiStatus apiStatus = null)
+        {
+            response = new DecisionResponse();
+            return this.TryRequestDecision(contextJson, response, apiStatus);
+        }
+
+        public bool TryRequestDecision(string contextJson, DecisionResponse response, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelRequestDecision(this.NativeHandle, contextJson, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public DecisionResponse RequestDecision(string contextJson)
+        {
+            DecisionResponse result = new DecisionResponse();
+
+            using (ApiStatus apiStatus = new ApiStatus())
+            if (!this.TryRequestDecision(contextJson, result, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+
+            return result;
+        }
+
+        public bool TryRequestDecision(string contextJson, ActionFlags flags, out DecisionResponse response, ApiStatus apiStatus)
+        {
+            response = new DecisionResponse();
+            return this.TryRequestDecision(contextJson, flags, response, apiStatus);
+        }
+
+        public bool TryRequestDecision(string contextJson, ActionFlags flags, DecisionResponse response, ApiStatus apiStatus)
+        {
+            int result = LiveModelRequestDecisionWithFlags(this.NativeHandle, contextJson, (uint)flags, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public DecisionResponse RequestDecision(string contextJson, ActionFlags flags)
+        {
+            DecisionResponse result = new DecisionResponse();
+
+            using (ApiStatus apiStatus = new ApiStatus())
+            if (!this.TryRequestDecision(contextJson, flags, result, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+
+            return result;
+        }
+
 
         [Obsolete("Use TryQueueActionTakenEvent instead.")]
         public bool TryReportActionTaken(string eventId, ApiStatus apiStatus = null) 

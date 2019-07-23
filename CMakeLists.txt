@@ -8,7 +8,12 @@ option(BUILD_PYTHON "Build the Python bindings" OFF)
 # TODO Compile cpprest into its own separate lib so that it doesn't have to be consumed
 find_package(cpprestsdk REQUIRED)
 find_package(OpenSSL REQUIRED)
-find_package(Boost COMPONENTS unit_test_framework system program_options REQUIRED)
+find_package(Boost COMPONENTS unit_test_framework system program_options thread REQUIRED)
+
+# On MacOS, Boost::thread needs to be linked separately.
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    find_package(Boost COMPONENTS thread REQUIRED)
+endif()
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: Debug, Release" FORCE)
@@ -29,6 +34,7 @@ add_subdirectory(ext_libs)
 add_subdirectory(rlclientlib)
 add_subdirectory(examples)
 add_subdirectory(test_tools/joiner)
+add_subdirectory(test_tools/sender_test)
 
 # enable_testing should be run after ext_libs so that the vw unit tests arent turned on.
 enable_testing()

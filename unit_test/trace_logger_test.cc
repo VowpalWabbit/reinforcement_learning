@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(test_trace_logging) {
   auto mock_data_transport = get_mock_data_transport();
   auto mock_model = get_mock_model();
 
-  auto logger_factory = get_mock_sender_factory(mock_logger.get(), mock_logger.get());
+  auto logger_factory = get_mock_sender_factory(mock_logger.get(), mock_logger.get(), mock_logger.get());
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
   auto model_factory = get_mock_model_factory(mock_model.get());
 

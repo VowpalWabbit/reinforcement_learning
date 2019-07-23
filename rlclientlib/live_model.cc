@@ -20,11 +20,11 @@ namespace reinforcement_learning
 		trace_logger_factory_t* trace_factory,
 		data_transport_factory_t* t_factory,
 		model_factory_t* m_factory,
-		sender_factory_t* sender_factory,
-    time_provider_factory_t* time_provider_factory)
+		sender_factory_t* s_factory,
+    time_provider_factory_t* time_prov_factory)
 	{
     _pimpl = std::unique_ptr<live_model_impl>(
-      new live_model_impl(config, fn, err_context, trace_factory, t_factory, m_factory, sender_factory, time_provider_factory));
+      new live_model_impl(config, fn, err_context, trace_factory, t_factory, m_factory, s_factory, time_prov_factory));
 	}
 
 	live_model::live_model(live_model&& other) {
@@ -79,6 +79,17 @@ namespace reinforcement_learning
     return _pimpl->choose_rank(context_json, flags, response, status);
   }
 
+  int live_model::request_decision(const char * context_json, unsigned int flags, decision_response& resp, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->request_decision(context_json, flags, resp, status);
+  }
+
+  int live_model::request_decision(const char * context_json, decision_response& resp, api_status* status)
+  {
+    INIT_CHECK();
+    return request_decision(context_json, action_flags::DEFAULT, resp, status);
+  }
   //not implemented yet
   int live_model::report_action_taken(const char* event_id, api_status* status) {
     INIT_CHECK();

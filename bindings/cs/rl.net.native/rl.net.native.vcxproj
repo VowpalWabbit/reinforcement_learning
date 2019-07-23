@@ -93,6 +93,7 @@
     <ClCompile Include="rl.net.api_status.cc" />
     <ClCompile Include="rl.net.live_model.cc" />
     <ClCompile Include="rl.net.ranking_response.cc" />
+    <ClCompile Include="rl.net.decision_response.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="binding_tracer.h" />
@@ -101,6 +102,7 @@
     <ClInclude Include="rl.net.api_status.h" />
     <ClInclude Include="rl.net.live_model.h" />
     <ClInclude Include="rl.net.ranking_response.h" />
+    <ClInclude Include="rl.net.decision_response.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\rlclientlib\rlclientlib.vcxproj">

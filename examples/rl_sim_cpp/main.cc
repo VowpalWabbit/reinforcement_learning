@@ -6,7 +6,7 @@ int main(int argc, char** argv) {
     const auto vm = process_cmd_line(argc, argv);
     if ( is_help(vm) ) return 0;
 
-    // Instantiate reinforcement learning simulator 
+    // Instantiate reinforcement learning simulator
     rl_sim sim(vm);
 
     // Run loop: (1) world event (2) choose action (3) report outcome
@@ -31,7 +31,9 @@ po::variables_map process_cmd_line(const int argc, char** argv) {
     ("get_model,m", po::value<bool>()->
       default_value(true), "Download model from model source")
     ("log_timestamp,t", po::value<bool>()->
-      default_value(true), "Apply timestamp to all logged message");
+      default_value(true), "Apply timestamp to all logged message")
+    ("ccb", po::value<bool>()->
+      default_value(false), "Run in ccb mode");
 
   po::variables_map vm;
   store(parse_command_line(argc, argv, desc), vm);

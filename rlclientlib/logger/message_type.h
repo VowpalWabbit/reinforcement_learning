@@ -5,7 +5,7 @@
 namespace reinforcement_learning { namespace logger {
   struct message_type {
     using const_int = const uint16_t;
-    
+
     // WARNING !
     // Do not reuse message ids.  This can cause
     // incompatibility with services that exist in the system.
@@ -20,5 +20,7 @@ namespace reinforcement_learning { namespace logger {
     static const_int json_outcome_event_collection = 4;
     static const_int fb_outcome_event = 5;
     static const_int fb_interaction_event = 6;
+    static const_int fb_decision_event = 7;
+    static const_int fb_decision_event_collection = 8;
   };
 }}

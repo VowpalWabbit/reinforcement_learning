@@ -8,6 +8,7 @@
 #pragma once
 #include "action_flags.h"
 #include "ranking_response.h"
+#include "decision_response.h"
 #include "err_constants.h"
 #include "factory_resolver.h"
 #include "sender.h"
@@ -72,8 +73,8 @@ namespace reinforcement_learning {
       trace_logger_factory_t* trace_factory = &trace_logger_factory,
       data_transport_factory_t* t_factory = &data_transport_factory,
       model_factory_t* m_factory = &model_factory,
-      sender_factory_t* sender_factory = &sender_factory,
-      time_provider_factory_t* time_provider_factory = &time_provider_factory);
+      sender_factory_t* s_factory = &sender_factory,
+      time_provider_factory_t* time_prov_factory = &time_provider_factory);
 
     /**
      * @brief Initialize inference library.
@@ -136,7 +137,34 @@ namespace reinforcement_learning {
     * @return int Return error code.  This will also be returned in the api_status object
     */
     int choose_rank(const char * context_json, unsigned int flags, ranking_response& resp, api_status* status = nullptr); //event_id is auto-generated
-    
+
+    /**
+    * @brief Choose an action from the given set for each slot, given a list of actions, slots,
+    * action features, slot feautres and context features. The inference library chooses an action
+    * per slot by sampling the probability distribution produced per slot. A unique event_id can be
+    * supplied for each slot using the `_id` json field. The corresponding event_id should be used
+    * when reporting the outcome for each slot.
+    * @param context_json Contains slots, slot_features, slot ids, actions, action features and context features in json format
+    * @param flags Action flags (see action_flags.h)
+    * @param resp Decision response contains the chosen action per slot, probability distribution used for sampling actions and ranked actions.
+    * @param status  Optional field with detailed string description if there is an error
+    * @return int Return error code.  This will also be returned in the api_status object
+    */
+    int request_decision(const char * context_json, unsigned int flags, decision_response& resp, api_status* status = nullptr);
+
+    /**
+    * @brief Choose an action from the given set for each slot, given a list of actions, slots,
+    * action features, slot feautres and context features. The inference library chooses an action
+    * per slot by sampling the probability distribution produced per slot. A unique event_id can be
+    * supplied for each slot using the `_id` json field. The corresponding event_id should be used
+    * when reporting the outcome for each slot.
+    * @param context_json Contains slots, slot_features, slot ids, actions, action features and context features in json format
+    * @param resp Decision response contains the chosen action per slot, probability distribution used for sampling actions and ranked actions.
+    * @param status  Optional field with detailed string description if there is an error
+    * @return int Return error code.  This will also be returned in the api_status object
+    */
+    int request_decision(const char * context_json, decision_response& resp, api_status* status = nullptr);
+
     /**
     * @brief Report that action was taken.
     *
@@ -211,8 +239,8 @@ namespace reinforcement_learning {
       trace_logger_factory_t* trace_factory = &trace_logger_factory,
       data_transport_factory_t* t_factory = &data_transport_factory,
       model_factory_t* m_factory = &model_factory,
-      sender_factory_t* sender_factory = &sender_factory,
-      time_provider_factory_t* time_provider_factory = &time_provider_factory);
+      sender_factory_t* s_factory = &sender_factory,
+      time_provider_factory_t* time_prov_factory = &time_provider_factory);
 
     /**
      * @brief Move constructor for live model object.
@@ -255,8 +283,8 @@ namespace reinforcement_learning {
     trace_logger_factory_t* trace_factory,
     data_transport_factory_t* t_factory,
     model_factory_t* m_factory,
-    sender_factory_t* sender_factory,
-    time_provider_factory_t* time_provider_factory)
-    : live_model(config, (error_fn)(fn), (void*)(err_context), trace_factory, t_factory, m_factory, sender_factory, time_provider_factory)
+    sender_factory_t* s_factory,
+    time_provider_factory_t* time_prov_factory)
+    : live_model(config, (error_fn)(fn), (void*)(err_context), trace_factory, t_factory, m_factory, s_factory, time_prov_factory)
   {}
 }

@@ -19,12 +19,13 @@ namespace reinforcement_learning {
   public:
     safe_vw(const std::shared_ptr<safe_vw>& master);
     safe_vw(const char* model_data, size_t len);
-	safe_vw(std::string vw_parameters);
+    safe_vw(std::string vw_parameters);
 
     ~safe_vw();
 
     void parse_context_with_pdf(const char* context, std::vector<int>& actions, std::vector<float>& scores);
     void rank(const char* context, std::vector<int>& actions, std::vector<float>& scores);
+    void rank_decisions(std::vector<const char*>& event_ids, const char* context, std::vector<std::vector<size_t>>& actions, std::vector<std::vector<float>>& scores);
 
     const char* id() const;
 
@@ -33,9 +34,11 @@ namespace reinforcement_learning {
 
   class safe_vw_factory {
     model_management::model_data _master_data;
+    std::string _command_line;
 
   public:
     // model_data is copied and stored in the factory object.
+    safe_vw_factory(const std::string& command_line);
     safe_vw_factory(const model_management::model_data& master_data);
     safe_vw_factory(const model_management::model_data&& master_data);
 

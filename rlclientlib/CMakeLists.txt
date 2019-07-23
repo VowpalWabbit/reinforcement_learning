@@ -2,15 +2,17 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(FlatBuffers REQUIRED)
 
 set(RL_FLAT_BUFFER_FILES
-"${CMAKE_CURRENT_SOURCE_DIR}/schema/Metadata.fbs"
-"${CMAKE_CURRENT_SOURCE_DIR}/schema/OutcomeEvent.fbs"
-	"${CMAKE_CURRENT_SOURCE_DIR}/schema/RankingEvent.fbs" )
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/Metadata.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/OutcomeEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/RankingEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/DecisionRankingEvent.fbs" )
 build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgenerator "" "${CMAKE_CURRENT_SOURCE_DIR}/generated" "" "")
 
 set(PROJECT_SOURCES
   api_status.cc
   azure_factories.cc
   console_tracer.cc
+  decision_response.cc
   error_callback_fn.cc
   factory_resolver.cc
   live_model_impl.cc
@@ -29,6 +31,7 @@ set(PROJECT_SOURCES
   model_mgmt/model_downloader.cc
   model_mgmt/model_mgmt.cc
   model_mgmt/restapi_data_transport.cc
+  model_mgmt/file_model_loader.cc
   ranking_event.cc
   ranking_response.cc
   sampling.cc
@@ -55,6 +58,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/config_utility.h
   ../include/configuration.h
   ../include/constants.h
+  ../include/decision_response.h
   ../include/err_constants.h
   ../include/errors_data.h
   ../include/factory_resolver.h
@@ -81,9 +85,12 @@ set(PROJECT_PRIVATE_HEADERS
   model_mgmt/empty_data_transport.h
   model_mgmt/model_downloader.h
   model_mgmt/restapi_data_transport.h
+  model_mgmt/file_model_loader.h
   moving_queue.h
   ranking_event.h
   sampling.h
+  serialization/fb_serializer.h
+  serialization/json_serializer.h
   utility/context_helper.h
   utility/http_authorization.h
   utility/http_client.h
@@ -117,6 +124,12 @@ target_link_libraries(rlclientlib PUBLIC Boost::system vw OpenSSL::SSL OpenSSL::
 if(WIN32)
   target_link_libraries(rlclientlib PUBLIC bcrypt)
 endif()
+
+# On MacOS linking fails unless we explicitly add Boost::thread. It seems like CppRestSDK isn't exporting dependencies properly.
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  target_link_libraries(rlclientlib PUBLIC Boost::thread)
+endif()
+
 
 if(TURN_OFF_DEVIRTUALIZE)
   target_compile_options(rlclientlib PUBLIC -fno-devirtualize)

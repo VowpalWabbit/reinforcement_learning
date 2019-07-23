@@ -9,6 +9,11 @@ namespace reinforcement_learning { namespace logger {
     return append(ranking_event::choose_rank(event_id, context, flags, response, now), status);
   }
 
+  int ccb_logger::log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const decision_response& response, api_status* status) {
+    const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
+    return append(std::move(decision_ranking_event::request_decision(event_ids, context, flags, response, now)), status);
+  }
+
   int observation_logger::report_action_taken(const char* event_id, api_status* status) {
     const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
     return append(outcome_event::report_action_taken(event_id, now), status);

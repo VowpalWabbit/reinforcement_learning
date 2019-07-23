@@ -75,6 +75,10 @@ namespace Rl.Net {
         {
         }
 
+        internal RankingResponse(IntPtr sharedRankingResponseHandle) : base(sharedRankingResponseHandle, ownsHandle: false)
+        {
+        }
+
         public string EventId
         {
             get

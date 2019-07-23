@@ -42,7 +42,7 @@ namespace Rl.Net.Cli
 
     internal interface IOutcomeReporter<TOutcome>
     {
-        bool TryReportOutcome(RunContext runContext, string eventId, TOutcome outcome);
+        bool TryQueueOutcomeEvent(RunContext runContext, string eventId, TOutcome outcome);
     }
 
     public class RLDriver : IOutcomeReporter<float>, IOutcomeReporter<string>
@@ -87,14 +87,14 @@ namespace Rl.Net.Cli
 
         public event EventHandler<ApiStatus> OnError;
 
-        bool IOutcomeReporter<float>.TryReportOutcome(RunContext runContext, string eventId, float outcome)
+        bool IOutcomeReporter<float>.TryQueueOutcomeEvent(RunContext runContext, string eventId, float outcome)
         {
-            return this.liveModel.TryReportOutcome(eventId, outcome, runContext.ApiStatusContainer);
+            return this.liveModel.TryQueueOutcomeEvent(eventId, outcome, runContext.ApiStatusContainer);
         }
 
-        bool IOutcomeReporter<string>.TryReportOutcome(RunContext runContext, string eventId, string outcome)
+        bool IOutcomeReporter<string>.TryQueueOutcomeEvent(RunContext runContext, string eventId, string outcome)
         {
-            return this.liveModel.TryReportOutcome(eventId, outcome, runContext.ApiStatusContainer);
+            return this.liveModel.TryQueueOutcomeEvent(eventId, outcome, runContext.ApiStatusContainer);
         }
 
         private void Step<TOutcome>(RunContext runContext, IOutcomeReporter<TOutcome> outcomeReporter, IStepContext<TOutcome> step)
@@ -118,7 +118,7 @@ namespace Rl.Net.Cli
                 return;
             }
 
-            if (!outcomeReporter.TryReportOutcome(runContext, eventId, outcome))
+            if (!outcomeReporter.TryQueueOutcomeEvent(runContext, eventId, outcome))
             {
                 this.SafeRaiseError(runContext.ApiStatusContainer);
             }
