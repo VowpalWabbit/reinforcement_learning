@@ -145,6 +145,19 @@ namespace Rl.Net {
             return result == NativeMethods.SuccessStatus;
         }
 
+        public static Configuration LoadConfigurationFromJson(string json)
+        {
+            using (ApiStatus apiStatus = new ApiStatus())
+            {
+                if (TryLoadConfigurationFromJson(json, out Configuration config, apiStatus))
+                {
+                    return config;
+                }
+
+                throw new RLException(apiStatus);
+            }
+        }
+
         public string this[string key]
         {
             get
