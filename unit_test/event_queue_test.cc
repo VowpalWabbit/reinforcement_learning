@@ -32,7 +32,7 @@ public:
 };
 
 BOOST_AUTO_TEST_CASE(push_pop_test) {
-  event_queue<test_event> queue;
+  event_queue<test_event> queue(30);
   queue.push(test_event("1"),10);
   queue.push(test_event("2"),10);
   queue.push(test_event("3"),10);
@@ -54,9 +54,16 @@ BOOST_AUTO_TEST_CASE(push_pop_test) {
 }
 
 BOOST_AUTO_TEST_CASE(prune_test) {
-  event_queue<test_event> queue;
+  event_queue<test_event> queue(30);
   queue.push(test_event("no_drop_1"),10);
   queue.push(test_event("drop_1"),10);
+
+  BOOST_CHECK_EQUAL(queue.size(), 2);
+  BOOST_CHECK_EQUAL(queue.capacity(), 20);
+  queue.prune(1.0); // drop should not work since current capacity is less than limit (20 < 30)
+  BOOST_CHECK_EQUAL(queue.size(), 2);
+  BOOST_CHECK_EQUAL(queue.capacity(), 20);
+
   queue.push(test_event("no_drop_2"),10);
   queue.push(test_event("drop_2"),10);
   queue.push(test_event("no_drop_3"),10);
@@ -65,7 +72,7 @@ BOOST_AUTO_TEST_CASE(prune_test) {
 
   BOOST_CHECK_EQUAL(queue.size(), 5);
   BOOST_CHECK_EQUAL(queue.capacity(), 50);
-  queue.prune(1.0);
+  queue.prune(1.0); // drop should work since current capacity is more than limit (50 > 30)
   BOOST_CHECK_EQUAL(queue.size(), 3);
   BOOST_CHECK_EQUAL(queue.capacity(), 30);
 
@@ -82,7 +89,7 @@ BOOST_AUTO_TEST_CASE(prune_test) {
 
 BOOST_AUTO_TEST_CASE(queue_push_pop)
 {
-  reinforcement_learning::event_queue<test_event> queue;
+  reinforcement_learning::event_queue<test_event> queue(30);
 
   //push n elements in the queue
   int n = 10;
@@ -109,7 +116,7 @@ BOOST_AUTO_TEST_CASE(queue_push_pop)
 
 BOOST_AUTO_TEST_CASE(queue_pop_empty)
 {
-  reinforcement_learning::event_queue<test_event> queue;
+  reinforcement_learning::event_queue<test_event> queue(30);
 
   //the pop call on an empty queue should do nothing
   test_event* item = NULL;
@@ -121,7 +128,7 @@ BOOST_AUTO_TEST_CASE(queue_pop_empty)
 BOOST_AUTO_TEST_CASE(queue_move_push)
 {
   test_event test("hello");
-  reinforcement_learning::event_queue<test_event> queue;
+  reinforcement_learning::event_queue<test_event> queue(30);
 
   // Contents of string moved into queue
   queue.push(test,10);
@@ -136,7 +143,7 @@ BOOST_AUTO_TEST_CASE(queue_move_push)
 BOOST_AUTO_TEST_CASE(queue_capacity_test)
 {
   test_event test("hello");
-  reinforcement_learning::event_queue<test_event> queue;
+  reinforcement_learning::event_queue<test_event> queue(30);
 
   BOOST_CHECK_EQUAL(queue.capacity(), 0);
   // Contents of string moved into queue
