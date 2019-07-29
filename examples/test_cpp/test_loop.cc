@@ -14,12 +14,12 @@ namespace err = r::error_code;
 namespace po = boost::program_options;
 namespace chrono = std::chrono;
 
-test_loop::test_loop(const boost::program_options::variables_map& vm)
+test_loop::test_loop(size_t index, const boost::program_options::variables_map& vm)
   : threads(vm["threads"].as<size_t>())
   , controller(experiment_controller_factory::create(vm))
-  , experiment_name(generate_experiment_name(vm["experiment_name"].as<std::string>(), threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>()))
+  , experiment_name(generate_experiment_name(vm["experiment_name"].as<std::string>(), threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>(), index))
   , json_config(vm["json_config"].as<std::string>())
-  , test_inputs(experiment_name, threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>(), vm.count("float_outcome") > 0)
+  , test_inputs(experiment_name, threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>(), vm.count("float_outcome") > 0, vm["reward_period"].as<size_t>())
   , is_perf(vm.count("perf") > 0)
   , sleep_interval(vm["sleep"].as<size_t>())
 {
@@ -68,9 +68,9 @@ int test_loop::load_file(const std::string& file_name, std::string& config_str) 
   return err::success;
 }
 
-std::string test_loop::generate_experiment_name(const std::string& experiment_name_base, size_t threads, size_t features, size_t actions)
+std::string test_loop::generate_experiment_name(const std::string& experiment_name_base, size_t threads, size_t features, size_t actions, size_t index)
 {
-  return experiment_name_base + "-t" + std::to_string(threads) + "-f" + std::to_string(features) + "-a" + std::to_string(actions);
+  return experiment_name_base + "-t" + std::to_string(threads) + "-f" + std::to_string(features) + "-a" + std::to_string(actions) + "-i" + std::to_string(index);
 }
 
 void test_loop::run() {
@@ -148,6 +148,13 @@ void test_loop::perf_loop(size_t thread_id)
     if (rl->choose_rank(event_id.c_str(), test_inputs.get_context(thread_id, controller->get_iteration()), response, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;
       continue;
+    }
+
+    if (test_inputs.is_rewarded(thread_id, controller->get_iteration())) {
+      if (test_inputs.report_outcome(rl.get(), thread_id, controller->get_iteration(), &status) != err::success) {
+        std::cout << status.get_error_msg() << std::endl;
+        continue;
+      }
     }
   }
   if (thread_id == 0) controller->progress_bar();
