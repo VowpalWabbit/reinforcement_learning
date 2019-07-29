@@ -51,12 +51,12 @@ int main(int argc, char** argv) {
   try {
     const auto vm = process_cmd_line(argc, argv);
     if (is_help(vm)) return 0;
-    const size_t instancees = vm["instances"].as<size_t>();
+    const size_t instances = vm["instances"].as<size_t>();
     std::vector<std::thread> _threads;
-    for (size_t i = 0; i < instancees; ++i) {
+    for (size_t i = 0; i < instances; ++i) {
       _threads.push_back(std::thread(&run_test_instance, i, vm));
     }
-    for (size_t i = 0; i < instancees; ++i) {
+    for (size_t i = 0; i < instances; ++i) {
       _threads[i].join();
     }
   }
