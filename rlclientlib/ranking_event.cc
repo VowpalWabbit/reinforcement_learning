@@ -48,7 +48,7 @@ namespace reinforcement_learning {
 
   decision_ranking_event::decision_ranking_event() { }
 
-  decision_ranking_event::decision_ranking_event(std::vector<const char*> event_ids, bool deferred_action, float pass_prob, const char* context, const decision_response& response, const timestamp& ts)
+  decision_ranking_event::decision_ranking_event(const std::vector<const char*>& event_ids, bool deferred_action, float pass_prob, const char* context, const decision_response& response, const timestamp& ts)
     : event(event_ids[0], ts, pass_prob), _deferred_action(deferred_action), _model_id(response.get_model_id()) {
     for(auto const& ranking_res : response)
     {
@@ -75,7 +75,7 @@ namespace reinforcement_learning {
   bool decision_ranking_event::get_defered_action() const { return _deferred_action; }
   const std::vector<std::string>& decision_ranking_event::get_event_ids() const { return _event_ids; }
 
-  decision_ranking_event decision_ranking_event::request_decision(std::vector<const char*> event_ids, const char* context, unsigned int flags,
+  decision_ranking_event decision_ranking_event::request_decision(const std::vector<const char*>& event_ids, const char* context, unsigned int flags,
                                            const decision_response& resp, const timestamp& ts, float pass_prob) {
     return decision_ranking_event(event_ids, flags & action_flags::DEFERRED, pass_prob, context, resp, ts);
   }

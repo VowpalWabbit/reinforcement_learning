@@ -77,6 +77,16 @@ namespace reinforcement_learning {
     int set_chosen_action_id(size_t action_id, api_status* status = nullptr); // id of the top action chosen by the model
 
     /**
+     * @brief Set the chosen action id, but do not verify the index fits within the ranking.  (This is set internally by the API)
+     * This is used in CCB where subsequent ranking_responses have subsets of the orignal actionset.
+     *
+     * @param action_id Chosen action id
+     * @param status Optional field with detailed string description if there is an error
+     * @return int Error code
+     */
+    int set_chosen_action_id_unchecked(size_t action_id, api_status* = nullptr);
+
+    /**
      * @brief Set the event_id.  (This is set internally by the API)
      * @param event_id
      */

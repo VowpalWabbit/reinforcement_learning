@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(event_ids_json_malformed) {
   const auto context = R"({"UserAgeq09898u)(**&^(*&^*^* })";
 
   std::map<size_t, std::string> found;
-  const auto scode = rlutil::get_event_ids(found, context, nullptr, nullptr);
+  const auto scode = rlutil::get_event_ids(context, found, nullptr, nullptr);
   BOOST_CHECK_EQUAL(scode, error_code::json_parse_error);
 }
 
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(event_ids_json_no_slots) {
     ]
   })";
   std::map<size_t, std::string> found;
-  const auto scode = rlutil::get_event_ids(found, context, nullptr, nullptr);
+  const auto scode = rlutil::get_event_ids(context, found, nullptr, nullptr);
   BOOST_CHECK_EQUAL(scode, error_code::success);
   BOOST_CHECK_EQUAL(found.size(), 0);
 }
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(event_ids_json_basic) {
     ]
   })";
   std::map<size_t, std::string> found;
-  const auto scode = rlutil::get_event_ids(found, context, nullptr, nullptr);
+  const auto scode = rlutil::get_event_ids(context, found, nullptr, nullptr);
   BOOST_CHECK_EQUAL(scode, error_code::success);
 
   BOOST_CHECK_EQUAL(found.size(), 1);

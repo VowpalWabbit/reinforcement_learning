@@ -5,21 +5,21 @@
 #include "decision_response.h"
 
 namespace reinforcement_learning {
-	struct timestamp;
-	namespace utility { class data_buffer; }
+  struct timestamp;
+  namespace utility { class data_buffer; }
 
   class event {
   public:
-	  event() {} ;
-    event(const char* event_id, const timestamp& ts, float pass_prob = 1.f);
-	  event(const event&) = default;
-	  event(event&&) = default;
-	  event& operator=(const event&) = default;
-	  event& operator=(event&&) = default;
-	  virtual ~event() = default;
+    event() {} ;
+    event(const char* seed_id, const timestamp& ts, float pass_prob = 1.f);
+    event(const event&) = default;
+    event(event&&) = default;
+    event& operator=(const event&) = default;
+    event& operator=(event&&) = default;
+    virtual ~event() = default;
     float get_pass_prob() const;
-	  timestamp get_client_time_gmt() const; ;
-	  virtual bool try_drop(float pass_prob, int drop_pass);
+    timestamp get_client_time_gmt() const; ;
+    virtual bool try_drop(float pass_prob, int drop_pass);
     const std::string& get_seed_id() const {
       return _seed_id;
     }
@@ -30,7 +30,7 @@ namespace reinforcement_learning {
   protected:
     std::string _seed_id;
     float _pass_prob = 1.0;
-	  timestamp _client_time_gmt;
+    timestamp _client_time_gmt;
   };
 
   class ranking_response;
@@ -38,7 +38,7 @@ namespace reinforcement_learning {
   //serializable ranking event
   class ranking_event : public event {
   public:
-	ranking_event() {}
+  ranking_event() {}
     ranking_event(const ranking_event& other) = default;
     ranking_event(ranking_event&& other) = default;
     ranking_event& operator=(const ranking_event& other) = default;
@@ -59,7 +59,7 @@ namespace reinforcement_learning {
 
   private:
     ranking_event(const char* event_id, bool deferred_action, float pass_prob, const char* context,
-		const ranking_response& response,const timestamp& ts);
+    const ranking_response& response,const timestamp& ts);
 
     std::vector<unsigned char> _context;
     std::vector<uint64_t> _action_ids_vector;
@@ -83,11 +83,11 @@ namespace reinforcement_learning {
     const std::vector<std::string>& get_event_ids() const;
 
   public:
-    static decision_ranking_event request_decision(std::vector<const char*> event_ids, const char* context,
+    static decision_ranking_event request_decision(const std::vector<const char*>& event_ids, const char* context,
       unsigned int flags, const decision_response& resp, const timestamp& ts, float pass_prob = 1.f);
 
   private:
-    decision_ranking_event(std::vector<const char*> event_ids, bool deferred_action, float pass_prob, const char* context, const decision_response& response, const timestamp& ts);
+    decision_ranking_event(const std::vector<const char*>& event_ids, bool deferred_action, float pass_prob, const char* context, const decision_response& response, const timestamp& ts);
 
     std::vector<unsigned char> _context;
     std::vector<std::vector<uint32_t>> _action_ids_vector;
@@ -101,7 +101,7 @@ namespace reinforcement_learning {
   //serializable outcome event
   class outcome_event : public event {
   public:
-	outcome_event() {}
+  outcome_event() {}
     outcome_event(const outcome_event& other) = default;
     outcome_event& operator=(const outcome_event& other) = default;
     outcome_event(outcome_event&& other) = default;

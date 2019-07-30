@@ -45,7 +45,7 @@ namespace reinforcement_learning { namespace utility {
     }
   }
 
-  int get_event_ids(std::map<size_t, std::string>& event_ids, const char *context, i_trace* trace, api_status* status) {
+  int get_event_ids(const char* context, std::map<size_t, std::string>& event_ids, i_trace* trace, api_status* status) {
     try {
       const auto scontext = sutil::to_string_t(std::string(context));
       auto json_obj = web::json::value::parse(scontext);

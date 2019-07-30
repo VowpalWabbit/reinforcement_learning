@@ -74,7 +74,7 @@ namespace reinforcement_learning {
     // cb will not use the initial command line model, but ccb will use it. Therefore by default create using ccb options.
     // "--epsilon 0.0 --first_only" is used so that the first action is chosen for each slot initial exploration mode.
     // id N/A is set to ensure parity with cb running in no model mode.
-    std::string initial_command_line = c.get(name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
+    const std::string initial_command_line = c.get(name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
     *retval = new m::vw_model(trace_logger, initial_command_line);
     return error_code::success;
   }

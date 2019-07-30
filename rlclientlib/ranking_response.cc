@@ -28,6 +28,11 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
+  int ranking_response::set_chosen_action_id_unchecked(size_t action_id, api_status*) {
+    _chosen_action_id = action_id;
+    return error_code::success;
+  }
+
   void ranking_response::set_event_id(char const* event_id) {
     _event_id = event_id;
   }

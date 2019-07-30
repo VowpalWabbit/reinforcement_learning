@@ -17,8 +17,11 @@
 #include "model_mgmt.h"
 #include "str_util.h"
 #include "factory_resolver.h"
+#include "sampling.h"
 
 #include "mock_util.h"
+
+constexpr float FLOAT_TOL = 0.0001f;
 
 #include <fakeit/fakeit.hpp>
 
@@ -152,19 +155,19 @@ BOOST_AUTO_TEST_CASE(live_model_request_decision) {
   BOOST_CHECK_EQUAL(ds.request_decision(context_with_ids, response, &status), err::success);
   BOOST_CHECK_EQUAL(status.get_error_code(), 0);
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
-  BOOST_CHECK_EQUAL(response.get_model_id(), "");
+  BOOST_CHECK_EQUAL(response.get_model_id(), "N/A");
 
   BOOST_CHECK_EQUAL(response.size(), 2);
-  //check first decision
-  auto decision = response.begin();
-  BOOST_CHECK_EQUAL(decision->get_event_id(), "817985e8-74ac-415c-bb69-735099c94d4d");
-  decision->get_chosen_action_id(chosen);
+  //check first slot
+  auto it = response.begin();
+  BOOST_CHECK_EQUAL(it->get_event_id(), "817985e8-74ac-415c-bb69-735099c94d4d");
+  BOOST_CHECK_EQUAL(it->get_chosen_action_id(chosen), err::success);
   BOOST_CHECK_EQUAL(chosen, 0);
-  //check second decision
-  decision++;
-  BOOST_CHECK_EQUAL(decision->get_event_id(), "afb1da57-d4cd-4691-97d8-2b24bfb4e07f");
-  decision->get_chosen_action_id(chosen);
-  BOOST_CHECK_EQUAL(chosen, 0);
+  //check second slot
+  it++;
+  BOOST_CHECK_EQUAL(it->get_event_id(), "afb1da57-d4cd-4691-97d8-2b24bfb4e07f");
+  BOOST_CHECK_EQUAL(it->get_chosen_action_id(chosen), err::success);
+  BOOST_CHECK_EQUAL(chosen, 1);
 }
 
 BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
@@ -462,3 +465,59 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data) {
   //BOOST_CHECK_EQUAL(recorded_observations_all, expected_observations);
 }
 
+BOOST_AUTO_TEST_CASE(populate_response_same_size_test) {
+    r::api_status status;
+    std::vector<std::vector<size_t>> action_ids = {{0,1,2}, {1,2}, {2}};
+    std::vector<std::vector<float>> pdfs = {{0.8667f, 0.0667f, 0.0667f}, {0.9f, 0.1f}, {1.0f}};
+    std::vector<const char*> event_ids = {"a", "b", "c"};
+    std::string model_id = "id";
+
+    r::decision_response resp;
+
+    BOOST_CHECK_EQUAL(populate_response(action_ids, pdfs, event_ids, std::move(model_id), resp, nullptr, &status), err::success);
+
+    BOOST_CHECK(strcmp(resp.get_model_id(), "id") == 0);
+    BOOST_CHECK_EQUAL(resp.size(), 3);
+
+    auto it = resp.begin();
+    size_t action_id = 0;
+    auto& rank_resp = *it++;
+    BOOST_CHECK(strcmp(rank_resp.get_event_id(), "a") == 0);
+    BOOST_CHECK_EQUAL(rank_resp.get_chosen_action_id(action_id), err::success);
+    BOOST_CHECK_EQUAL(action_id, 0);
+    BOOST_CHECK_EQUAL(rank_resp.size(), 3);
+    BOOST_CHECK_EQUAL((*rank_resp.begin()).action_id, 0);
+    BOOST_CHECK_CLOSE((*rank_resp.begin()).probability, 0.8667f, FLOAT_TOL);
+
+    auto& rank_resp1 = *it++;
+    BOOST_CHECK(strcmp(rank_resp1.get_event_id(), "b") == 0);
+    BOOST_CHECK_EQUAL(rank_resp1.get_chosen_action_id(action_id), err::success);
+    BOOST_CHECK_EQUAL(action_id, 1);
+    BOOST_CHECK_EQUAL(rank_resp1.size(), 2);
+    BOOST_CHECK_EQUAL((*rank_resp1.begin()).action_id, 1);
+    BOOST_CHECK_CLOSE((*rank_resp1.begin()).probability, 0.9f, FLOAT_TOL);
+
+    auto& rank_resp2 = *it++;
+    BOOST_CHECK(strcmp(rank_resp2.get_event_id(), "c") == 0);
+    BOOST_CHECK_EQUAL(rank_resp2.get_chosen_action_id(action_id), err::success);
+    BOOST_CHECK_EQUAL(action_id, 2);
+    BOOST_CHECK_EQUAL(rank_resp2.size(), 1);
+    BOOST_CHECK_EQUAL((*rank_resp2.begin()).action_id, 2);
+    BOOST_CHECK_CLOSE((*rank_resp2.begin()).probability, 1.0f, FLOAT_TOL);
+}
+
+BOOST_AUTO_TEST_CASE(populate_response_different_size_test) {
+    r::api_status status;
+    std::vector<std::vector<size_t>> action_ids = {{0,1,2}, {1,2}};
+    std::vector<std::vector<float>> pdfs = {{0.8667f, 0.0667f, 0.0667f}, {0.9f, 0.1f}, {1.0f}};
+    std::vector<const char*> event_ids = {"a", "b", "c"};
+    std::string model_id = "id";
+
+    r::decision_response resp;
+
+    BOOST_CHECK_EQUAL(populate_response(action_ids, pdfs, event_ids, std::move(model_id), resp, nullptr, &status), err::invalid_argument);
+
+    action_ids = {{0,1}, {1,2}, {1}};
+    pdfs = {{0.8667f, 0.0667f, 0.0667f}, {0.9f, 0.1f}, {1.0f}};
+    BOOST_CHECK_EQUAL(populate_response(action_ids, pdfs, event_ids, std::move(model_id), resp, nullptr, &status), err::invalid_argument);
+}

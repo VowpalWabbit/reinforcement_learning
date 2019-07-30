@@ -11,7 +11,7 @@ namespace reinforcement_learning { namespace model_management {
     _vw_pool(nullptr), _trace_logger(trace_logger) {
   }
 
-  vw_model::vw_model(i_trace* trace_logger, std::string& initial_command_line) :
+  vw_model::vw_model(i_trace* trace_logger, const std::string& initial_command_line) :
     _vw_pool(new safe_vw_factory(initial_command_line)), _trace_logger(trace_logger) {
   }
 
@@ -61,7 +61,7 @@ namespace reinforcement_learning { namespace model_management {
     }
   }
 
-  int vw_model::request_decision(std::vector<const char*>& event_ids, const char* features, std::vector<std::vector<size_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
+  int vw_model::request_decision(const std::vector<const char*>& event_ids, const char* features, std::vector<std::vector<size_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
     try {
       pooled_vw vw(_vw_pool, _vw_pool.get_or_create());
