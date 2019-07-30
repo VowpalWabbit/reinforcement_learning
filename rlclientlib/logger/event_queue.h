@@ -20,13 +20,15 @@ namespace reinforcement_learning {
     std::mutex _mutex;
     int _drop_pass{ 0 };
     size_t _capacity{ 0 };
+    size_t _max_capacity{ 0 };
 
   public:
-    event_queue() {
+    event_queue(size_t max_capacity) 
+      : _max_capacity(max_capacity) {
       static_assert(std::is_base_of<event, T>::value, "T must be a descendant of event");
     }
 
-    void pop(T* item)
+    bool pop(T* item)
     {
       std::unique_lock<std::mutex> mlock(_mutex);
       if (!_queue.empty())
@@ -35,7 +37,9 @@ namespace reinforcement_learning {
         *item = std::move(entry.first);
         _capacity = (std::max)(0, static_cast<int>(_capacity) - static_cast<int>(entry.second));
         _queue.pop_front();
+        return true;
       }
+      return false;
     }
 
     void push(T& item, size_t item_size) {
@@ -52,6 +56,7 @@ namespace reinforcement_learning {
     void prune(float pass_prob)
     {
       std::unique_lock<std::mutex> mlock(_mutex);
+      if (!is_full()) return;
       for (auto it = _queue.begin(); it != _queue.end();) {
         it = it->first.try_drop(pass_prob, _drop_pass) ? erase(it) : (++it);
       }
@@ -63,6 +68,10 @@ namespace reinforcement_learning {
     {
       std::unique_lock<std::mutex> mlock(_mutex);
       return _queue.size();
+    }
+
+    bool is_full() const {
+      return capacity() >= _max_capacity;
     }
 
     size_t capacity() const 

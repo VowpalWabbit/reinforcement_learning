@@ -6,11 +6,12 @@
 #include <sstream>
 #include "serialization/json_serializer.h"
 
-test_data_provider::test_data_provider(const std::string& experiment_name, size_t threads, size_t features, size_t actions, bool _is_float_outcome)
+test_data_provider::test_data_provider(const std::string& experiment_name, size_t threads, size_t features, size_t actions, bool _is_float_outcome, size_t _reward_period)
   : _experiment_name(experiment_name)
   , contexts(threads, std::vector<std::string>(preallocated_count))
   , outcomes(threads, std::vector<std::string>(preallocated_count))
   , is_float_outcome(_is_float_outcome)
+  , reward_period(_reward_period)
 {
   for (size_t t = 0; t < threads; ++t) {
     for (size_t i = 0; i < preallocated_count; ++i) {
@@ -98,7 +99,7 @@ const char* test_data_provider::get_context(size_t thread_id, size_t example_id)
 }
 
 bool test_data_provider::is_rewarded(size_t thread_id, size_t example_id) const {
-  return example_id % 10 == 0;
+  return reward_period > 0 && example_id % reward_period == 0;
 }
 
 void test_data_provider::log(size_t thread_id, size_t example_id, const reinforcement_learning::ranking_response& response, std::ostream& logger) const {
