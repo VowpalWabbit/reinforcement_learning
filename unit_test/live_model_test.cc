@@ -521,3 +521,44 @@ BOOST_AUTO_TEST_CASE(populate_response_different_size_test) {
     pdfs = {{0.8667f, 0.0667f, 0.0667f}, {0.9f, 0.1f}, {1.0f}};
     BOOST_CHECK_EQUAL(populate_response(action_ids, pdfs, event_ids, std::move(model_id), resp, nullptr, &status), err::invalid_argument);
 }
+
+const auto JSON_CCB_CONTEXT = "{\"GUser\":{\"id\":\"a\",\"major\":\"eng\",\"hobby\":\"hiking\"},\"_multi\":[ { \"TAction\":{\"a1\":\"f1\"} },{\"TAction\":{\"a2\":\"f2\"}}],\"_slots\":[{\"Slot\":{\"a1\":\"f1\"}},{\"Slot\":{\"a1\":\"f1\"}}]}";
+
+BOOST_AUTO_TEST_CASE(ccb_explore_only_mode) {
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
+  config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
+  config.set(r::name::INTERACTION_FILE_NAME,"interaction.txt");
+  config.set(r::name::OBSERVATION_FILE_NAME,"observation.txt");
+
+  r::api_status status;
+  r::live_model model(config);
+  BOOST_CHECK_EQUAL(model.init(&status), err::success);
+
+  r::decision_response response;
+  BOOST_CHECK_EQUAL(model.request_decision(JSON_CCB_CONTEXT, response), err::success);
+
+  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.size(), 2);
+
+  auto it = response.begin();
+  size_t action_id = 0;
+  auto& rank_resp = *it++;
+  BOOST_CHECK(strcmp(rank_resp.get_event_id(), "") != 0);
+  BOOST_CHECK_EQUAL(rank_resp.get_chosen_action_id(action_id), err::success);
+  BOOST_CHECK_EQUAL(action_id, 0);
+  BOOST_CHECK_EQUAL(rank_resp.size(), 2);
+  BOOST_CHECK_EQUAL((*rank_resp.begin()).action_id, 0);
+  BOOST_CHECK_CLOSE((*rank_resp.begin()).probability, 1.f, FLOAT_TOL);
+
+  auto& rank_resp1 = *it++;
+  BOOST_CHECK(strcmp(rank_resp1.get_event_id(), "") != 0);
+  BOOST_CHECK_EQUAL(rank_resp1.get_chosen_action_id(action_id), err::success);
+  BOOST_CHECK_EQUAL(action_id, 1);
+  BOOST_CHECK_EQUAL(rank_resp1.size(), 1);
+  BOOST_CHECK_EQUAL((*rank_resp1.begin()).action_id, 1);
+  BOOST_CHECK_CLOSE((*rank_resp1.begin()).probability, 1.f, FLOAT_TOL);
+}
