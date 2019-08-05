@@ -8,7 +8,7 @@
 
 class test_data_provider {
 public:
-  test_data_provider(const std::string& experiment_name, size_t threads, size_t features, size_t actions, bool _is_float_outcome);
+  test_data_provider(const std::string& experiment_name, size_t threads, size_t features, size_t actions, bool _is_float_outcome, size_t reward_ratio);
 
   std::string create_event_id(size_t thread_id, size_t example_id) const;
 
@@ -37,4 +37,5 @@ private:
   std::vector<std::vector<std::string>> contexts;
   std::vector<std::vector<std::string>> outcomes;
   bool is_float_outcome;
+  size_t reward_period;
 };
