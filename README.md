@@ -78,6 +78,31 @@ This can be fixed by invoking CMake similar to the following:
 cmake -DOPENSSL_ROOT_DIR=/usr/local/Cellar/openssl/1.0.2r -DOPENSSL_LIBRARIES=/usr/local/Cellar/openssl/1.0.2r/lib ..
 ```
 
+
+Installing cpprestsdk on Ubuntu18.04 using apt-get may result in cmake failing with:
+```
+CMake Error at CMakeLists.txt:9 (find_package):
+  By not providing "Findcpprestsdk.cmake" in CMAKE_MODULE_PATH this project
+  has asked CMake to find a package configuration file provided by
+  "cpprestsdk", but CMake did not find one.
+
+  Could not find a package configuration file provided by "cpprestsdk" with
+  any of the following names:
+
+    cpprestsdkConfig.cmake
+    cpprestsdk-config.cmake
+
+  Add the installation prefix of "cpprestsdk" to CMAKE_PREFIX_PATH or set
+  "cpprestsdk_DIR" to a directory containing one of the above files.  If
+  "cpprestsdk" provides a separate development package or SDK, be sure it has
+  been installed.
+```
+
+The workaround is to specify where to search
+```
+cmake .. -DCMAKE_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake
+```
+
 ### Test
 ```
 mkdir build
