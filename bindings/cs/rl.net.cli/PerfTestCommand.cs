@@ -47,17 +47,19 @@ namespace Rl.Net.Cli
             Statistics stats = new Statistics();
             object lockObj = new object();
             Parallel.ForEach(processortags, item => 
+            {
+                PerfTestStepProvider step = DoWork(item);
+                lock (lockObj)
                 {
-                    PerfTestStepProvider step = DoWork(item);
-                    lock (lockObj)
-                    {
-                        stats += step.Stats;
-                    }
+                    stats += step.Stats;
                 }
-            );
+            });
 
-            Console.WriteLine("Overall stats");
-            stats.Print();
+            if (this.Parallelism > 1)
+            {
+                Console.WriteLine("Overall stats");
+                stats.Print();
+            }
         }
 
         private PerfTestStepProvider DoWork(string tag)

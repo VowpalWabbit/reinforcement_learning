@@ -37,7 +37,7 @@ namespace Rl.Net.Cli
             Console.WriteLine($"Time taken: {(this.ElapsedMs / 1000)} secs");
             Console.WriteLine($"Throughput: {this.Bytes / ((1024 * 1024) * this.ElapsedMs / 1000)} MB / s");
             Console.WriteLine($"Messages sent: {this.Messages}");
-            Console.WriteLine($"Avg Message size: {this.Bytes / (1024 * this.Messages)}");
+            Console.WriteLine($"Avg Message size: {this.Bytes / (1024 * this.Messages)} KB");
             Console.WriteLine($"Msg/s: {this.Messages / (this.ElapsedMs / 1000)}");
         }
     }
