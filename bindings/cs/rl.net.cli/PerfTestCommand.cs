@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using CommandLine;
 
 namespace Rl.Net.Cli
@@ -15,6 +19,9 @@ namespace Rl.Net.Cli
         [Option(longName: "duration", HelpText = "Duration of test in ms", Required = false, Default = 20000)]
         public int DurationMs { get; set; }
 
+        [Option(longName: "data", HelpText = "Total size of messages in GB", Required = false, Default = 0.0)]
+        public double DataSize { get; set; }
+
         [Option(longName: "actions", HelpText = "Amount of actions", Required = false, Default = 2)]
         public int ActionsCount { get; set; }
 
@@ -27,14 +34,51 @@ namespace Rl.Net.Cli
         [Option(longName: "tag", HelpText = "Tag of experiment", Required = false, Default = "test")]
         public string Tag { get; set; }
 
+        [Option(longName: "parallelism", shortName: 'p', HelpText = "Degree of parallelism to use. Use 0 to use all available processors", Required = false, Default = 1)]
+        public int Parallelism { get; set; }
+
         public override void Run()
         {
+            Console.WriteLine("The number of processors on this computer is {0}.", Environment.ProcessorCount);
+            this.Parallelism = this.Parallelism == 0 ? Environment.ProcessorCount : Math.Min(this.Parallelism, Environment.ProcessorCount);
+            Console.WriteLine("Parallelism to be used in this perf test {0}.", this.Parallelism);
+            IEnumerable<string> processortags = Enumerable.Range(0, Parallelism).Select(i => $"{this.Tag}-{i}");
+
+            Statistics stats = new Statistics();
+            object lockObj = new object();
+            Parallel.ForEach(processortags, item => 
+                {
+                    PerfTestStepProvider step = DoWork(item);
+                    lock (lockObj)
+                    {
+                        stats += step.Stats;
+                    }
+                }
+            );
+
+            Console.WriteLine("Overall stats");
+            stats.Print();
+        }
+
+        private PerfTestStepProvider DoWork(string tag)
+        {
             LiveModel liveModel = Helpers.CreateLiveModelOrExit(this.ConfigPath);
-            RLDriver rlDriver = new RLDriver(liveModel);
-            rlDriver.StepInterval = TimeSpan.FromMilliseconds(this.SleepIntervalMs);
-            PerfTestStepProvider stepProvider = new PerfTestStepProvider(this.ActionsCount, this.SharedFeatures, this.ActionFeatures) { Duration = TimeSpan.FromMilliseconds(this.DurationMs) , Tag = this.Tag};
+
+            PerfTestStepProvider stepProvider = new PerfTestStepProvider(this.ActionsCount, this.SharedFeatures, this.ActionFeatures)
+            {
+                Duration = TimeSpan.FromMilliseconds(this.DurationMs),
+                Tag = tag,
+                DataSize = this.DataSize * 1024 * 1024 * 1024 / this.Parallelism
+            };
+
+            Console.WriteLine(stepProvider.DataSize);
+            RLDriver rlDriver = new RLDriver(liveModel)
+            {
+                StepInterval = TimeSpan.FromMilliseconds(this.SleepIntervalMs)
+            };
             rlDriver.Run(stepProvider);
             stepProvider.Stats.Print();
+            return stepProvider;
         }
     }
 }
