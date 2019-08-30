@@ -8,6 +8,7 @@
 #pragma once
 #include "action_flags.h"
 #include "ranking_response.h"
+#include "decision_response.h"
 #include "err_constants.h"
 #include "factory_resolver.h"
 #include "sender.h"
@@ -136,7 +137,34 @@ namespace reinforcement_learning {
     * @return int Return error code.  This will also be returned in the api_status object
     */
     int choose_rank(const char * context_json, unsigned int flags, ranking_response& resp, api_status* status = nullptr); //event_id is auto-generated
-    
+
+    /**
+    * @brief Choose an action from the given set for each slot, given a list of actions, slots,
+    * action features, slot feautres and context features. The inference library chooses an action
+    * per slot by sampling the probability distribution produced per slot. A unique event_id can be
+    * supplied for each slot using the `_id` json field. The corresponding event_id should be used
+    * when reporting the outcome for each slot.
+    * @param context_json Contains slots, slot_features, slot ids, actions, action features and context features in json format
+    * @param flags Action flags (see action_flags.h)
+    * @param resp Decision response contains the chosen action per slot, probability distribution used for sampling actions and ranked actions.
+    * @param status  Optional field with detailed string description if there is an error
+    * @return int Return error code.  This will also be returned in the api_status object
+    */
+    int request_decision(const char * context_json, unsigned int flags, decision_response& resp, api_status* status = nullptr);
+
+    /**
+    * @brief Choose an action from the given set for each slot, given a list of actions, slots,
+    * action features, slot feautres and context features. The inference library chooses an action
+    * per slot by sampling the probability distribution produced per slot. A unique event_id can be
+    * supplied for each slot using the `_id` json field. The corresponding event_id should be used
+    * when reporting the outcome for each slot.
+    * @param context_json Contains slots, slot_features, slot ids, actions, action features and context features in json format
+    * @param resp Decision response contains the chosen action per slot, probability distribution used for sampling actions and ranked actions.
+    * @param status  Optional field with detailed string description if there is an error
+    * @return int Return error code.  This will also be returned in the api_status object
+    */
+    int request_decision(const char * context_json, decision_response& resp, api_status* status = nullptr);
+
     /**
     * @brief Report that action was taken.
     *

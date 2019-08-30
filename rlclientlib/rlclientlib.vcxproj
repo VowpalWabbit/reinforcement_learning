@@ -87,7 +87,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PreBuildEvent>
-      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs</Command>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\DecisionRankingEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -106,7 +106,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PreBuildEvent>
-      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs</Command>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\DecisionRankingEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -129,7 +129,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs</Command>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\DecisionRankingEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -152,7 +152,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs</Command>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\DecisionRankingEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -170,6 +170,7 @@
     <ClInclude Include="..\include\object_factory.h" />
     <ClInclude Include="..\include\personalization.h" />
     <ClInclude Include="..\include\ranking_response.h" />
+    <ClInclude Include="..\include\decision_response.h" />
     <ClInclude Include="..\include\config_utility.h" />
     <ClInclude Include="..\include\constants.h" />
     <ClInclude Include="..\include\err_constants.h" />
@@ -249,6 +250,7 @@
     <ClCompile Include="live_model.cc" />
     <ClCompile Include="ranking_event.cc" />
     <ClCompile Include="ranking_response.cc" />
+    <ClCompile Include="decision_response.cc" />
     <ClCompile Include="logger\async_batcher.cc" />
     <ClCompile Include="azure_factories.cc" />
     <ClCompile Include="console_tracer.cc" />
@@ -274,6 +276,7 @@
     <None Include="schema\Metadata.fbs" />
     <None Include="schema\OutcomeEvent.fbs" />
     <None Include="schema\RankingEvent.fbs" />
+    <None Include="schema\DecisionRankingEvent.fbs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

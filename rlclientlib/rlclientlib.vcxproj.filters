@@ -107,6 +107,7 @@
     <None Include="packages.config" />
     <None Include="schema\OutcomeEvent.fbs" />
     <None Include="schema\RankingEvent.fbs" />
+    <None Include="schema\DecisionRankingEvent.fbs" />
     <None Include="schema\Metadata.fbs" />
   </ItemGroup>
   <ItemGroup>

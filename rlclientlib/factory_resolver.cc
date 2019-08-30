@@ -68,6 +68,16 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
+  template <>
+  int model_create<m::vw_model>(m::i_model** retval, const u::configuration& c, i_trace* trace_logger, api_status* status)
+  {
+    // cb will not use the initial command line model, but ccb will use it. Therefore by default create using ccb options.
+    // "--epsilon 0.0 --first_only" is used so that the first action is chosen for each slot initial exploration mode.
+    std::string initial_command_line = c.get(name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only");
+    *retval = new m::vw_model(trace_logger, initial_command_line);
+    return error_code::success;
+  }
+
   int null_tracer_create(i_trace** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
   int console_tracer_create(i_trace** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
 
@@ -135,7 +145,7 @@ namespace reinforcement_learning {
     time_provider_factory.register_type(value::CLOCK_TIME_PROVIDER, clock_time_provider_create);
 
     // Register File loggers
-    sender_factory.register_type(value::OBSERVATION_FILE_SENDER, 
+    sender_factory.register_type(value::OBSERVATION_FILE_SENDER,
       [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status){
       const char* file_name =  c.get(name::OBSERVATION_FILE_NAME,"observation.fb.data");
       return file_sender_create(retval, c ,

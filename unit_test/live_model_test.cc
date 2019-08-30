@@ -16,6 +16,7 @@
 #include "sender.h"
 #include "model_mgmt.h"
 #include "str_util.h"
+#include "factory_resolver.h"
 
 #include "mock_util.h"
 
@@ -43,8 +44,9 @@ namespace {
   )";
 
   const auto JSON_CONTEXT = R"({"_multi":[{},{}]})";
+  const auto JSON_CONTEXT_WITH_SLOTS = R"({"_multi":[{},{}],"_slots":[{}]})";
   const auto JSON_CONTEXT_PDF = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}}],"p":[0.4, 0.6]})";
-  const float EXPECTED_PDF[2] = { 0.4f, 0.6f }; 
+  const float EXPECTED_PDF[2] = { 0.4f, 0.6f };
 
   r::live_model create_mock_live_model(
     const u::configuration& config,
@@ -56,7 +58,7 @@ namespace {
       static auto mock_data_transport = get_mock_data_transport();
       static auto mock_model = get_mock_model();
 
-      static auto default_sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
+      static auto default_sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get(), mock_sender.get());
       static auto default_data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
       static auto default_model_factory = get_mock_model_factory(mock_model.get());
 
@@ -119,6 +121,52 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request) {
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
 }
 
+BOOST_AUTO_TEST_CASE(live_model_request_decision) {
+  //create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+
+  r::api_status status;
+
+  // Create the ds live_model, and initialize it with the config
+  r::live_model ds = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  r::decision_response response;
+
+  // request ranking
+  BOOST_CHECK_EQUAL(ds.request_decision(JSON_CONTEXT_WITH_SLOTS, response, &status), err::success);
+  BOOST_CHECK_EQUAL(response.size(), 1);
+  size_t chosen;
+  BOOST_CHECK_EQUAL((*response.begin()).get_chosen_action_id(chosen), err::success);
+  BOOST_CHECK_EQUAL(chosen, 0);
+  BOOST_CHECK_EQUAL(status.get_error_code(), 0);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  const auto invalid_context = "";
+  BOOST_CHECK_EQUAL(ds.request_decision(invalid_context, response, &status), err::invalid_argument); // invalid context
+  BOOST_CHECK_EQUAL(status.get_error_code(), err::invalid_argument);
+
+  const auto context_with_ids = R"({"GUser":{"hobby":"hiking","id":"a","major":"eng"},"_multi":[{"TAction":{"a1":"f1"}},{"TAction":{"a2":"f2"}}],"_slots":[{"TSlot":{"s1":"f1"},"_id":"817985e8-74ac-415c-bb69-735099c94d4d"},{"TSlot":{"s2":"f2"},"_id":"afb1da57-d4cd-4691-97d8-2b24bfb4e07f"}]})";
+  BOOST_CHECK_EQUAL(ds.request_decision(context_with_ids, response, &status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_code(), 0);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+  BOOST_CHECK_EQUAL(response.get_model_id(), "");
+
+  BOOST_CHECK_EQUAL(response.size(), 2);
+  //check first decision
+  auto decision = response.begin();
+  BOOST_CHECK_EQUAL(decision->get_event_id(), "817985e8-74ac-415c-bb69-735099c94d4d");
+  decision->get_chosen_action_id(chosen);
+  BOOST_CHECK_EQUAL(chosen, 0);
+  //check second decision
+  decision++;
+  BOOST_CHECK_EQUAL(decision->get_event_id(), "afb1da57-d4cd-4691-97d8-2b24bfb4e07f");
+  decision->get_chosen_action_id(chosen);
+  BOOST_CHECK_EQUAL(chosen, 0);
+}
+
 BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
   //create a simple ds configuration
   u::configuration config;
@@ -130,7 +178,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
   r::api_status status;
 
   //create the ds live_model, and initialize it with the config
-  
+
   r::live_model model = create_mock_live_model(config, &r::data_transport_factory, &r::model_factory, nullptr);
 
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
@@ -140,7 +188,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
 
   // request ranking
   BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CONTEXT_PDF, response), err::success);
-  
+
   size_t num_actions = response.size();
   BOOST_CHECK_EQUAL(num_actions, 2);
 
@@ -182,8 +230,8 @@ BOOST_AUTO_TEST_CASE(live_model_outcome) {
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
 
   // check expected returned codes
-  BOOST_CHECK_EQUAL(ds.report_outcome(invalid_event_id, outcome), err::invalid_argument);//invalid event_id
-  BOOST_CHECK_EQUAL(ds.report_outcome(event_id, invalid_outcome), err::invalid_argument);//invalid outcome
+  BOOST_CHECK_EQUAL(ds.report_outcome(invalid_event_id, outcome), err::invalid_argument); //invalid event_id
+  BOOST_CHECK_EQUAL(ds.report_outcome(event_id, invalid_outcome), err::invalid_argument); //invalid outcome
 
   //invalid event_id
   ds.report_outcome(invalid_event_id, outcome, &status);
@@ -223,7 +271,7 @@ BOOST_AUTO_TEST_CASE(typesafe_err_callback) {
   auto mock_data_transport = get_mock_data_transport();
   auto mock_model = get_mock_model();
 
-  auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
+  auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get(), mock_sender.get());
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
   auto model_factory = get_mock_model_factory(mock_model.get());
 
@@ -266,7 +314,7 @@ BOOST_AUTO_TEST_CASE(live_model_mocks) {
   auto mock_data_transport = get_mock_data_transport();
   auto mock_model = get_mock_model();
 
-  auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
+  auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get(), mock_sender.get());
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
   auto model_factory = get_mock_model_factory(mock_model.get());
 
@@ -285,7 +333,7 @@ BOOST_AUTO_TEST_CASE(live_model_mocks) {
     BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CONTEXT, response), err::success);
     BOOST_CHECK_EQUAL(model.report_outcome(event_id, 1.0), err::success);
 
-    Verify(Method((*mock_sender), init)).Exactly(2);
+    Verify(Method((*mock_sender), init)).Exactly(3);
   }
   BOOST_CHECK_EQUAL(recorded.size(), 2);
 }
@@ -340,10 +388,12 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data) {
   std::vector<buffer_t> recorded_interactions;
   auto mock_interaction_sender = get_mock_sender(recorded_interactions);
 
+  auto mock_decision_sender = get_mock_sender(r::error_code::success);
+
   auto mock_data_transport = get_mock_data_transport();
   auto mock_model = get_mock_model();
 
-  auto logger_factory = get_mock_sender_factory(mock_observation_sender.get(), mock_interaction_sender.get());
+  auto logger_factory = get_mock_sender_factory(mock_observation_sender.get(), mock_interaction_sender.get(), mock_decision_sender.get());
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
   auto model_factory = get_mock_model_factory(mock_model.get());
 
@@ -390,6 +440,7 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data) {
 
     Verify(Method((*mock_observation_sender), init)).Exactly(1);
     Verify(Method((*mock_interaction_sender), init)).Exactly(1);
+    Verify(Method((*mock_decision_sender), init)).Exactly(1);
   }
   //std::string recorded_interactions_all;
   //for (size_t i = 0; i < recorded_interactions.size(); ++i) {

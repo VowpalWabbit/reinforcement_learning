@@ -104,7 +104,7 @@ namespace reinforcement_learning {
      * @param model_id
      */
     void set_model_id(const char* model_id);
- 
+
     /**
      * @brief Set the model_id.
      * Every call to choose action is associated with a unique model used to predict.  A unique model_id
