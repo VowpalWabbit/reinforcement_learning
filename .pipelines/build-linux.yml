@@ -1,6 +1,3 @@
-resources:
-- repo: self
-
 pr:
 - master
 
@@ -12,6 +9,8 @@ container:
   endpoint: DockerHub
 
 steps:
+- checkout: self
+  submodules: true
 - bash: ./.scripts/linux/build.sh
   displayName: Build C++
 - bash: ./.scripts/linux/test.sh

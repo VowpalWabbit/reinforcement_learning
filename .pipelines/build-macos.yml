@@ -1,6 +1,3 @@
-resources:
-- repo: self
-
 pr:
 - master
 
@@ -8,6 +5,8 @@ pool:
   vmImage: 'macOS-10.14'
 
 steps:
+- checkout: self
+  submodules: true
 - bash: .scripts/macos/restore.sh
   displayName: 'Restore dependencies'
 - bash: .scripts/macos/build.sh
