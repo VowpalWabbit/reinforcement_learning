@@ -15,3 +15,4 @@ steps:
   displayName: Build C++
 - bash: ./.scripts/linux/test.sh
   displayName: Test C++
+- task: PublishTestResults@2
