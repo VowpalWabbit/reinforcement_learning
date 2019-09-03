@@ -3,4 +3,5 @@
 set -e
 set -x
 
-brew install cmake boost cpprestsdk flatbuffers
+brew install cmake boost cpprestsdk flatbuffers openssl
+brew list openssl
