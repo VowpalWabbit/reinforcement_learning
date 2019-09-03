@@ -1,0 +1,13 @@
+pr:
+- master
+
+pool:
+  vmImage: 'macOS-10.14'
+
+steps:
+- bash: .scripts/macos/restore.sh
+  displayName: 'Restore dependencies'
+- bash: .scripts/macos/build.sh
+  displayName: 'Build'
+- bash: .scripts/macos/test.sh
+  displayName: 'Run tests'
