@@ -13,3 +13,4 @@ steps:
   displayName: 'Build'
 - bash: .scripts/macos/test.sh
   displayName: 'Run tests'
+- task: PublishTestResults@2
