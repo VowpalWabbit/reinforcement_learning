@@ -1,0 +1,18 @@
+pr:
+- master
+
+pool:
+  vmImage: 'ubuntu-16.04'
+
+container:
+  image: vowpalwabbit/rl-ubuntu-1604:0.2.0
+  endpoint: DockerHub
+
+steps:
+- checkout: self
+  submodules: true
+- bash: ./.scripts/linux/build.sh
+  displayName: Build C++
+- bash: ./.scripts/linux/test.sh
+  displayName: Test C++
+- task: PublishTestResults@2
