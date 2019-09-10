@@ -11,9 +11,9 @@
 
 using namespace reinforcement_learning;
 
-constexpr int timeout = 100;
+constexpr int timeout = 200;
 constexpr int fail_timeout = timeout * 2;
-constexpr int safe_timeout = timeout / 4;
+constexpr int safe_timeout = timeout / 8;
 
 BOOST_AUTO_TEST_CASE(watchdog_fail_after_registration) {
   utility::watchdog watchdog(nullptr);
