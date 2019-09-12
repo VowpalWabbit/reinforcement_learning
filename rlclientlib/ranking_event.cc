@@ -28,7 +28,7 @@ namespace reinforcement_learning {
     : event(event_id, ts, pass_prob), _model_id(response.get_model_id()),
       _deferred_action(deferred_action){
     for (auto const& r : response) {
-      _action_ids_vector.push_back(r.action_id + 1);
+      _action_ids_vector.push_back(r.action_id);
       _probilities_vector.push_back(r.probability);
     }
     string context_str(context);
