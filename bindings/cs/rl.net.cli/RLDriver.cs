@@ -78,7 +78,7 @@ namespace Rl.Net.Cli
                 // TODO: Change this to be a command-line arg
                 Thread.Sleep(StepInterval);
 
-                if (++stepsCount % 1000 == 0)
+                if (++stepsCount % 10000 == 0)
                 {
                     Console.Out.WriteLine($"Processed {stepsCount} steps.");
                 }
