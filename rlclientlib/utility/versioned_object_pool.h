@@ -55,25 +55,38 @@ namespace reinforcement_learning { namespace utility {
   };
 
   template<typename TObject, typename TFactory>
-  class versioned_object_pool {
+  class versioned_object_pool_unsafe {
     int _version;
     std::vector<pooled_object<TObject>*> _pool;
     TFactory* _factory;
-    std::mutex _mutex;
     int _used_objects;
+    int _objects_count;
 
   public:
-    versioned_object_pool(TFactory* factory)
-      : _version(0), _factory(factory), _used_objects(0)
+    versioned_object_pool_unsafe(TFactory* factory, int objects_count, int version)
+      : _version(version)
+      , _factory(factory)
+      , _used_objects(0)
+      , _objects_count(objects_count)
+    {
+      for (int i = 0; i < _objects_count; ++i) {
+        _pool.emplace_back(new pooled_object<TObject>((*_factory)(), _version));
+      }
+    }
+
+    versioned_object_pool_unsafe(TFactory* factory)
+      : versioned_object_pool_unsafe(factory, 0, 0)
     { }
 
-    versioned_object_pool(const versioned_object_pool&) = delete;
-    versioned_object_pool& operator=(const versioned_object_pool& other) = delete;
-    versioned_object_pool(versioned_object_pool&& other) = delete;
+    static versioned_object_pool_unsafe* update(const versioned_object_pool_unsafe& base, TFactory* factory) {
+      return new versioned_object_pool_unsafe(factory, base._objects_count, base._version + 1);
+    }
 
-    ~versioned_object_pool() {
-      std::lock_guard<std::mutex> lock(_mutex);
+    versioned_object_pool_unsafe(const versioned_object_pool_unsafe&) = delete;
+    versioned_object_pool_unsafe& operator=(const versioned_object_pool_unsafe& other) = delete;
+    versioned_object_pool_unsafe(versioned_object_pool_unsafe&& other) = delete;
 
+    ~versioned_object_pool_unsafe() {
       // delete factory
       delete _factory;
       _factory = nullptr;
@@ -85,10 +98,9 @@ namespace reinforcement_learning { namespace utility {
     }
 
     pooled_object<TObject>* get_or_create() {
-      std::lock_guard<std::mutex> lock(_mutex);
-
       if (_pool.size() == 0) {
         _used_objects++;
+        _objects_count++;
         return new pooled_object<TObject>((*_factory)(), _version);
       }
 
@@ -99,8 +111,6 @@ namespace reinforcement_learning { namespace utility {
     }
 
     void return_to_pool(pooled_object<TObject>* obj) {
-      std::lock_guard<std::mutex> lock(_mutex);
-
       if (_version == obj->version) {
         _pool.emplace_back(obj);
         return;
@@ -108,23 +118,43 @@ namespace reinforcement_learning { namespace utility {
 
       delete obj;
     }
+  };
+
+  template<typename TObject, typename TFactory>
+  class versioned_object_pool {
+    std::mutex _mutex;
+    using impl_type = versioned_object_pool_unsafe<TObject, TFactory>;
+    std::unique_ptr<impl_type> _impl;
+
+  public:
+    versioned_object_pool(TFactory* factory)
+    : _impl(new impl_type(factory))
+    { }
+
+    versioned_object_pool(const versioned_object_pool&) = delete;
+    versioned_object_pool& operator=(const versioned_object_pool& other) = delete;
+    versioned_object_pool(versioned_object_pool&& other) = delete;
+
+    ~versioned_object_pool() {
+      std::lock_guard<std::mutex> lock(_mutex);
+      _impl.reset();
+    }
+
+    pooled_object<TObject>* get_or_create() {
+      std::lock_guard<std::mutex> lock(_mutex);
+      return _impl->get_or_create();
+    }
+
+    void return_to_pool(pooled_object<TObject>* obj) {
+      std::lock_guard<std::mutex> lock(_mutex);
+      _impl->return_to_pool(obj);
+    }
 
     // takes owner-ship of factory (and will free using delete)
     void update_factory(TFactory* new_factory) {
+      std::unique_ptr<impl_type> new_impl(impl_type::update(*_impl.get(), new_factory));
       std::lock_guard<std::mutex> lock(_mutex);
-
-      // use new factory and delete old one
-      if (_factory)
-        delete _factory;
-      _factory = new_factory;
-
-      // increment the version
-      _version++;
-
-      // dispose old objects
-      for (auto&& obj : _pool)
-        delete obj;
-      _pool.clear();
+      _impl.swap(new_impl);
     }
   };
 }}
