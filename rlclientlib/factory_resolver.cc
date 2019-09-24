@@ -62,9 +62,9 @@ namespace reinforcement_learning {
   }
 
   template <typename model_t>
-  int model_create(m::i_model** retval, const u::configuration&, i_trace* trace_logger, api_status* status)
+  int model_create(m::i_model** retval, const u::configuration& c, i_trace* trace_logger, api_status* status)
   {
-    *retval = new model_t(trace_logger);
+    *retval = new model_t(trace_logger, c);
     return error_code::success;
   }
 
