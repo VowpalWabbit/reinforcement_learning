@@ -130,12 +130,10 @@ namespace reinforcement_learning { namespace utility {
     std::mutex _mutex;
     using impl_type = versioned_object_pool_unsafe<TObject, TFactory>;
     std::unique_ptr<impl_type> _impl;
-    int _init_size;
 
   public:
-    versioned_object_pool(TFactory* factory, int init_size)
+    versioned_object_pool(TFactory* factory)
     : _impl(new impl_type(factory))
-    , _init_size(init_size)
     { }
 
     versioned_object_pool(const versioned_object_pool&) = delete;
