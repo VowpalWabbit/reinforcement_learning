@@ -78,10 +78,6 @@ namespace reinforcement_learning { namespace utility {
       : versioned_object_pool_unsafe(factory, 0, 0)
     { }
 
-    static versioned_object_pool_unsafe* update(const versioned_object_pool_unsafe& base, TFactory* factory) {
-      return new versioned_object_pool_unsafe(factory, base._objects_count, base._version + 1);
-    }
-
     versioned_object_pool_unsafe(const versioned_object_pool_unsafe&) = delete;
     versioned_object_pool_unsafe& operator=(const versioned_object_pool_unsafe& other) = delete;
     versioned_object_pool_unsafe(versioned_object_pool_unsafe&& other) = delete;
@@ -118,6 +114,14 @@ namespace reinforcement_learning { namespace utility {
 
       delete obj;
     }
+
+    int size() const {
+      return _objects_count;
+    }
+
+    int version() const {
+      return _version;
+    }
   };
 
   template<typename TObject, typename TFactory>
@@ -152,7 +156,14 @@ namespace reinforcement_learning { namespace utility {
 
     // takes owner-ship of factory (and will free using delete)
     void update_factory(TFactory* new_factory) {
-      std::unique_ptr<impl_type> new_impl(impl_type::update(*_impl.get(), new_factory));
+      int objects_count = 0;
+      int version = 0;
+      {
+        std::lock_guard<std::mutex> lock(_mutex);
+        objects_count = _impl->size();
+        version = _impl->version();
+      }
+      std::unique_ptr<impl_type> new_impl(new impl_type(new_factory, objects_count, version));
       std::lock_guard<std::mutex> lock(_mutex);
       _impl.swap(new_impl);
     }
