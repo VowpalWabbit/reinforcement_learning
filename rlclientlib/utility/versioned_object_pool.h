@@ -133,7 +133,7 @@ namespace reinforcement_learning { namespace utility {
     int _init_size;
 
   public:
-    versioned_object_pool(TFactory* factory, int init_size)
+    versioned_object_pool(TFactory* factory, int init_size = 0)
     : _impl(new impl_type(factory))
     , _init_size(init_size)
     { }
