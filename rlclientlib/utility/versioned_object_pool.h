@@ -163,7 +163,7 @@ namespace reinforcement_learning { namespace utility {
         objects_count = _impl->size();
         version = _impl->version();
       }
-      std::unique_ptr<impl_type> new_impl(new impl_type(new_factory, objects_count, version));
+      std::unique_ptr<impl_type> new_impl(new impl_type(new_factory, objects_count, version + 1));
       std::lock_guard<std::mutex> lock(_mutex);
       _impl.swap(new_impl);
     }
