@@ -1,3 +1,4 @@
+#include "constants.h"
 #include "vw_model.h"
 #include "err_constants.h"
 #include "object_factory.h"
@@ -7,8 +8,8 @@
 
 namespace reinforcement_learning { namespace model_management {
 
-  vw_model::vw_model(i_trace* trace_logger) :
-    _vw_pool(nullptr), _trace_logger(trace_logger) {
+  vw_model::vw_model(i_trace* trace_logger, const utility::configuration& config) :
+    _vw_pool(nullptr, config.get_int(name::VW_POOL_INIT_SIZE, value::DEFAULT_VW_POOL_INIT_SIZE)), _trace_logger(trace_logger) {
   }
 
   vw_model::vw_model(i_trace* trace_logger, const std::string& initial_command_line) :

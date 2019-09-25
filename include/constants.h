@@ -9,6 +9,7 @@ namespace reinforcement_learning {  namespace name {
       const char *const  MODEL_BACKGROUND_REFRESH = "model.backgroundrefresh";
       const char *const  MODEL_VW_INITIAL_COMMAND_LINE = "model.vw.initial_command_line";
       const char *const  VW_CMDLINE              = "vw.commandline";
+      const char *const  VW_POOL_INIT_SIZE       = "vw.pool.init.size";
       const char *const  INITIAL_EPSILON         = "initial_exploration.epsilon";
 
       // Interaction
@@ -75,5 +76,6 @@ namespace reinforcement_learning {  namespace value {
       const char *const NULL_TIME_PROVIDER = "NULL_TIME_PROVIDER";
       const char *const CLOCK_TIME_PROVIDER = "CLOCK_TIME_PROVIDER";
       const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
+      const int DEFAULT_VW_POOL_INIT_SIZE = 4;
 }}
 
