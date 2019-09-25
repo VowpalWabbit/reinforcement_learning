@@ -1,5 +1,4 @@
 #pragma once
-#include <algorithm>
 #include <mutex>
 #include <vector>
 
@@ -70,8 +69,10 @@ namespace reinforcement_learning { namespace utility {
       , _used_objects(0)
       , _objects_count(objects_count)
     {
-      for (int i = 0; i < _objects_count; ++i) {
-        _pool.emplace_back(new pooled_object<TObject>((*_factory)(), _version));
+      if (factory != nullptr) {
+        for (int i = 0; i < _objects_count; ++i) {
+          _pool.emplace_back(new pooled_object<TObject>((*_factory)(), _version));
+        }
       }
     }
 
@@ -130,12 +131,10 @@ namespace reinforcement_learning { namespace utility {
     std::mutex _mutex;
     using impl_type = versioned_object_pool_unsafe<TObject, TFactory>;
     std::unique_ptr<impl_type> _impl;
-    int _init_size;
 
   public:
     versioned_object_pool(TFactory* factory, int init_size = 0)
-    : _impl(new impl_type(factory))
-    , _init_size(init_size)
+    : _impl(new impl_type(factory, init_size, 0))
     { }
 
     versioned_object_pool(const versioned_object_pool&) = delete;
@@ -163,7 +162,7 @@ namespace reinforcement_learning { namespace utility {
       int version = 0;
       {
         std::lock_guard<std::mutex> lock(_mutex);
-        objects_count = (std::max)(_impl->size(), _init_size);
+        objects_count = _impl->size();
         version = _impl->version() + 1;
       }
       std::unique_ptr<impl_type> new_impl(new impl_type(new_factory, objects_count, version));
