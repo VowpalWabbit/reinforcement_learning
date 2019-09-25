@@ -69,8 +69,10 @@ namespace reinforcement_learning { namespace utility {
       , _used_objects(0)
       , _objects_count(objects_count)
     {
-      for (int i = 0; i < _objects_count; ++i) {
-        _pool.emplace_back(new pooled_object<TObject>((*_factory)(), _version));
+      if (factory != nullptr) {
+        for (int i = 0; i < _objects_count; ++i) {
+          _pool.emplace_back(new pooled_object<TObject>((*_factory)(), _version));
+        }
       }
     }
 
@@ -131,8 +133,8 @@ namespace reinforcement_learning { namespace utility {
     std::unique_ptr<impl_type> _impl;
 
   public:
-    versioned_object_pool(TFactory* factory)
-    : _impl(new impl_type(factory))
+    versioned_object_pool(TFactory* factory, int init_size = 0)
+    : _impl(new impl_type(factory, init_size, 0))
     { }
 
     versioned_object_pool(const versioned_object_pool&) = delete;
@@ -154,16 +156,16 @@ namespace reinforcement_learning { namespace utility {
       _impl->return_to_pool(obj);
     }
 
-    // takes owner-ship of factory (and will free using delete)
+    // takes owner-ship of factory (and will free using delete) - !!!!THREAD-UNSAFE!!!!
     void update_factory(TFactory* new_factory) {
       int objects_count = 0;
       int version = 0;
       {
         std::lock_guard<std::mutex> lock(_mutex);
         objects_count = _impl->size();
-        version = _impl->version();
+        version = _impl->version() + 1;
       }
-      std::unique_ptr<impl_type> new_impl(new impl_type(new_factory, objects_count, version + 1));
+      std::unique_ptr<impl_type> new_impl(new impl_type(new_factory, objects_count, version));
       std::lock_guard<std::mutex> lock(_mutex);
       _impl.swap(new_impl);
     }

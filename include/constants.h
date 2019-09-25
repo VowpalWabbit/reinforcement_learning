@@ -8,6 +8,7 @@ namespace reinforcement_learning {  namespace name {
       const char *const  MODEL_IMPLEMENTATION    = "model.implementation";       // VW vs other ML
       const char *const  MODEL_BACKGROUND_REFRESH = "model.backgroundrefresh";
       const char *const  VW_CMDLINE              = "vw.commandline";
+      const char *const  VW_POOL_INIT_SIZE       = "vw.pool.init.size";
       const char *const  INITIAL_EPSILON         = "initial_exploration.epsilon";
       const char *const  INTERACTION_EH_HOST     = "interaction.eventhub.host";
       const char *const  INTERACTION_EH_NAME     = "interaction.eventhub.name";
@@ -56,5 +57,6 @@ namespace reinforcement_learning {  namespace value {
       const char *const NULL_TIME_PROVIDER = "NULL_TIME_PROVIDER";
       const char *const CLOCK_TIME_PROVIDER = "CLOCK_TIME_PROVIDER";
       const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
+      const int DEFAULT_VW_POOL_INIT_SIZE = 4;
 }}
 
