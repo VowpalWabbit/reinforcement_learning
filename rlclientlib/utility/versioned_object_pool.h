@@ -55,25 +55,36 @@ namespace reinforcement_learning { namespace utility {
   };
 
   template<typename TObject, typename TFactory>
-  class versioned_object_pool {
+  class versioned_object_pool_unsafe {
     int _version;
     std::vector<pooled_object<TObject>*> _pool;
     TFactory* _factory;
-    std::mutex _mutex;
     int _used_objects;
+    int _objects_count;
 
   public:
-    versioned_object_pool(TFactory* factory)
-      : _version(0), _factory(factory), _used_objects(0)
+    versioned_object_pool_unsafe(TFactory* factory, int objects_count, int version)
+      : _version(version)
+      , _factory(factory)
+      , _used_objects(0)
+      , _objects_count(objects_count)
+    {
+      if (factory != nullptr) {
+        for (int i = 0; i < _objects_count; ++i) {
+          _pool.emplace_back(new pooled_object<TObject>((*_factory)(), _version));
+        }
+      }
+    }
+
+    versioned_object_pool_unsafe(TFactory* factory)
+      : versioned_object_pool_unsafe(factory, 0, 0)
     { }
 
-    versioned_object_pool(const versioned_object_pool&) = delete;
-    versioned_object_pool& operator=(const versioned_object_pool& other) = delete;
-    versioned_object_pool(versioned_object_pool&& other) = delete;
+    versioned_object_pool_unsafe(const versioned_object_pool_unsafe&) = delete;
+    versioned_object_pool_unsafe& operator=(const versioned_object_pool_unsafe& other) = delete;
+    versioned_object_pool_unsafe(versioned_object_pool_unsafe&& other) = delete;
 
-    ~versioned_object_pool() {
-      std::lock_guard<std::mutex> lock(_mutex);
-
+    ~versioned_object_pool_unsafe() {
       // delete factory
       delete _factory;
       _factory = nullptr;
@@ -85,10 +96,9 @@ namespace reinforcement_learning { namespace utility {
     }
 
     pooled_object<TObject>* get_or_create() {
-      std::lock_guard<std::mutex> lock(_mutex);
-
       if (_pool.size() == 0) {
         _used_objects++;
+        _objects_count++;
         return new pooled_object<TObject>((*_factory)(), _version);
       }
 
@@ -99,8 +109,6 @@ namespace reinforcement_learning { namespace utility {
     }
 
     void return_to_pool(pooled_object<TObject>* obj) {
-      std::lock_guard<std::mutex> lock(_mutex);
-
       if (_version == obj->version) {
         _pool.emplace_back(obj);
         return;
@@ -109,22 +117,57 @@ namespace reinforcement_learning { namespace utility {
       delete obj;
     }
 
-    // takes owner-ship of factory (and will free using delete)
-    void update_factory(TFactory* new_factory) {
+    int size() const {
+      return _objects_count;
+    }
+
+    int version() const {
+      return _version;
+    }
+  };
+
+  template<typename TObject, typename TFactory>
+  class versioned_object_pool {
+    std::mutex _mutex;
+    using impl_type = versioned_object_pool_unsafe<TObject, TFactory>;
+    std::unique_ptr<impl_type> _impl;
+
+  public:
+    versioned_object_pool(TFactory* factory, int init_size = 0)
+    : _impl(new impl_type(factory, init_size, 0))
+    { }
+
+    versioned_object_pool(const versioned_object_pool&) = delete;
+    versioned_object_pool& operator=(const versioned_object_pool& other) = delete;
+    versioned_object_pool(versioned_object_pool&& other) = delete;
+
+    ~versioned_object_pool() {
       std::lock_guard<std::mutex> lock(_mutex);
+      _impl.reset();
+    }
 
-      // use new factory and delete old one
-      if (_factory)
-        delete _factory;
-      _factory = new_factory;
+    pooled_object<TObject>* get_or_create() {
+      std::lock_guard<std::mutex> lock(_mutex);
+      return _impl->get_or_create();
+    }
 
-      // increment the version
-      _version++;
+    void return_to_pool(pooled_object<TObject>* obj) {
+      std::lock_guard<std::mutex> lock(_mutex);
+      _impl->return_to_pool(obj);
+    }
 
-      // dispose old objects
-      for (auto&& obj : _pool)
-        delete obj;
-      _pool.clear();
+    // takes owner-ship of factory (and will free using delete) - !!!!THREAD-UNSAFE!!!!
+    void update_factory(TFactory* new_factory) {
+      int objects_count = 0;
+      int version = 0;
+      {
+        std::lock_guard<std::mutex> lock(_mutex);
+        objects_count = _impl->size();
+        version = _impl->version() + 1;
+      }
+      std::unique_ptr<impl_type> new_impl(new impl_type(new_factory, objects_count, version));
+      std::lock_guard<std::mutex> lock(_mutex);
+      _impl.swap(new_impl);
     }
   };
 }}
