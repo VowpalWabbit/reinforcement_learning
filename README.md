@@ -28,7 +28,7 @@ cd Release
 mkdir build
 cd build
 cmake ..
-make `nproc`
+make -j `nproc`
 make install
 cd ../../../
 rm -rf cpprestsdk
@@ -45,7 +45,7 @@ git checkout 925c1d77fcc72636924c3c13428a34180c30f96f
 mkdir build
 cd build
 cmake .. -DFLATBUFFERS_BUILD_TESTS=Off -DFLATBUFFERS_INSTALL=On -DCMAKE_BUILD_TYPE=Release -DFLATBUFFERS_BUILD_FLATHASH=Off
-make `nproc`
+make -j `nproc`
 sudo make install
 cd ../../
 rm -rf flatbuffers
