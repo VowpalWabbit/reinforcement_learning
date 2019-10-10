@@ -121,6 +121,8 @@ vcpkg install cpprestsdk:x64-windows
 vcpkg install flatbuffers:x64-windows
 ```
 
+You'll need to add the flatbuffers tool directory to your PATH aswell: `<vcpkg_root>\installed\x64-windows\tools\flatbuffers`
+
 ### Build + Test
 
 Set VcpkgIntegration environment variable to vcpkg.targets file on your machine
