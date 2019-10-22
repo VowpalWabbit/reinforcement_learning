@@ -164,6 +164,7 @@
   <ItemGroup>
     <ClInclude Include="..\include\action_flags.h" />
     <ClInclude Include="..\include\api_status.h" />
+    <ClInclude Include="..\include\cb_logger.h" />
     <ClInclude Include="..\include\configuration.h" />
     <ClInclude Include="..\include\live_model.h" />
     <ClInclude Include="..\include\sender.h" />
@@ -178,6 +179,7 @@
     <ClInclude Include="..\include\str_util.h" />
     <ClInclude Include="..\include\trace_logger.h" />
     <ClInclude Include="..\include\data_buffer.h" />
+    <ClInclude Include="cb_logger_impl.h" />
     <ClInclude Include="logger\file\file_logger.h" />
     <ClInclude Include="model_mgmt\file_model_loader.h" />
     <ClInclude Include="time_helper.h" />
@@ -201,6 +203,7 @@
     <ClInclude Include="utility\http_authorization.h" />
     <ClInclude Include="utility\http_client.h" />
     <ClInclude Include="utility\interruptable_sleeper.h" />
+    <ClInclude Include="utility\invariant_helpers.h" />
     <ClInclude Include="utility\object_pool.h" />
     <ClInclude Include="utility\periodic_background_proc.h" />
     <ClInclude Include="utility\versioned_object_pool.h" />
@@ -223,6 +226,8 @@
     <ClInclude Include="ranking_event.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cb_logger.cc" />
+    <ClCompile Include="cb_logger_impl.cc" />
     <ClCompile Include="logger\file\file_logger.cc" />
     <ClCompile Include="model_mgmt\data_callback_fn.cc" />
     <ClCompile Include="model_mgmt\empty_data_transport.cc" />
@@ -233,6 +238,7 @@
     <ClCompile Include="logger\eventhub_client.cc" />
     <ClCompile Include="time_helper.cc" />
     <ClCompile Include="utility\config_utility.cc" />
+    <ClCompile Include="utility\invariant_helpers.cc" />
     <ClCompile Include="utility\stl_container_adapter.cc" />
     <ClCompile Include="utility\str_util.cc" />
     <ClCompile Include="utility\context_helper.cc" />
