@@ -76,6 +76,7 @@ namespace reinforcement_learning
       std::unique_ptr<reinforcement_learning::logger::interaction_logger> _ranking_logger{ nullptr };
       std::unique_ptr<reinforcement_learning::logger::observation_logger> _outcome_logger{ nullptr };
       std::shared_ptr<i_trace> _trace_logger{ nullptr };
+      bool _trace_logger_init{ false };
     };
 
     template <typename D>

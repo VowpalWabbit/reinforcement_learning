@@ -40,7 +40,7 @@ namespace reinforcement_learning {
     }
 
     int logger_impl::init(api_status* status) {
-      if (_trace_logger.get() == nullptr) {
+      if (!_trace_logger_init) {
         RETURN_IF_FAIL(init_trace(status));
       }
       RETURN_IF_FAIL(init_loggers(status));
@@ -113,6 +113,7 @@ namespace reinforcement_learning {
     , _trace_logger(trace_logger)
     , _sender_factory(sender_factory)
     , _time_provider_factory(time_provider_factory)
+    , _trace_logger_init(true)
     {
     }
 
