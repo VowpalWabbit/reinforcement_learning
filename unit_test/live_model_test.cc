@@ -127,6 +127,10 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
   config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
   config.set(r::name::MODEL_IMPLEMENTATION, r::value::PASSTHROUGH_PDF_MODEL);
 
+  // Background refresh introduces a timing issue where the model might not have updated properly
+  // before the choose_rank() call.
+  config.set(r::name::MODEL_BACKGROUND_REFRESH, "false"); 
+
   r::api_status status;
 
   //create the ds live_model, and initialize it with the config
