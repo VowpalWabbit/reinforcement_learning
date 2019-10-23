@@ -10,9 +10,7 @@ struct GlobalConfig {
     reinforcement_learning::onnx::register_onnx_factory();
   }
 
-  ~GlobalConfig()
-  {
-  }
+  ~GlobalConfig() = default;
 };
 
 BOOST_GLOBAL_FIXTURE(GlobalConfig);

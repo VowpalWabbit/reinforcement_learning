@@ -11,36 +11,29 @@ SET(ONNX_EXTENSION_SOURCES
   
 SET(ONNX_EXTENSION_PUBLIC_HEADERS
   include/onnx_extension.h
-  #src/onnxrt_representation.h
 )
   
 SET(ONNX_EXTENSION_HEADERS
   src/onnx_model.h
   src/onnx_input.h
   src/tensor_parser.h
+  src/tensor_notation.h
 )
 
 #source_group("Sources" FILES ${ONNX_EXTENSION_SOURCES})
 #source_group("Public headers" FILES ${ONNX_EXTENSION_PUBLIC_HEADERS})
 #source_group("Private headers" FILES ${ONNX_EXTENSION_HEADERS})
 
-add_library(rlclientlib-onnx STATIC ${ONNX_EXTENSION_SOURCES} ${ONNX_EXTENSION_PUBLIC_HEADERS} ${ONNX_EXTENSION_PRIVATE_HEADERS})
+add_library(rlclientlib-onnx ${ONNX_EXTENSION_SOURCES} ${ONNX_EXTENSION_PUBLIC_HEADERS} ${ONNX_EXTENSION_PRIVATE_HEADERS})
 
 set_target_properties(rlclientlib-onnx PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-add_dependencies(rlclientlib-onnx rlclientlib)
-
-target_include_directories( rlclientlib-onnx
-                            PUBLIC
-                            ${CMAKE_CURRENT_SOURCE_DIR}/include
-                            PRIVATE
-                            $<TARGET_PROPERTY:rlclientlib,INTERFACE_INCLUDE_DIRECTORIES>
-                            ${CMAKE_CURRENT_SOURCE_DIR}/src
-                            ${ONNXRUNTIME_INCLUDE_DIRS}
-                            )
+target_include_directories(rlclientlib-onnx
+                           PUBLIC
+                           ${CMAKE_CURRENT_SOURCE_DIR}/include
+                           PRIVATE
+                           ${CMAKE_CURRENT_SOURCE_DIR}/src
+                           ${ONNXRUNTIME_INCLUDE_DIRS}
+                           )
 
 target_link_libraries(rlclientlib-onnx PUBLIC rlclientlib onnxruntime)
-
-if(TURN_OFF_DEVIRTUALIZE)
-  target_compile_options(rlclientlib-onnx PUBLIC -fno-devirtualize)
-endif()

@@ -22,15 +22,6 @@ add_custom_command(
           ${CMAKE_CURRENT_BINARY_DIR}/mnist_data/
 )
 
-# Devirtualization is an optimization that changes the vtable if the compiler decides a function
-# doesn't need to be virtual. This is incompatible with the mocking framework used in testing as it
-# makes the vtable structure unpredictable
-if(MSVC)
-  # MSVC doesn't optimize aggresively enough for this bug to be an issue right now.
-else()
-  target_compile_options(rltest-onnx PRIVATE -fno-devirtualize)
-endif()
-
 # Add the include directories from rlclientlib target for testing
 target_include_directories(rltest-onnx
   PRIVATE 

@@ -34,9 +34,8 @@ std::vector<Ort::Value> onnx_input_builder::inputs() const
 
   bool succeeded = false;
 
-  for (int i = 0; i < _inputs.size(); i++)
+  for (const tensor_data_t& tensor : _inputs)
   {
-    const tensor_data_t& tensor = _inputs[i];
     const bytes_t& dimensions_bytes = tensor.first;
     const bytes_t& values_bytes = tensor.second;
         

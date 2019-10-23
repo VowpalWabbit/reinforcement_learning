@@ -2,7 +2,6 @@
 
 from mnist.loader import MNIST;
 import base64;
-import numpy as np;
 import struct;
 
 

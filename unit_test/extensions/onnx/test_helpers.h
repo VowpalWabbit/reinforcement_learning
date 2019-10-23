@@ -53,7 +53,9 @@ inline void validate_input_context(o::onnx_input_builder& input_context, size_t 
 {
   size_t input_count = input_context.input_count();
   BOOST_REQUIRE_EQUAL(input_count, expected_count); 
+
   std::vector<const char*> input_names = input_context.input_names();
+  BOOST_REQUIRE_EQUAL(input_names.size(), input_count);
   BOOST_REQUIRE_EQUAL_COLLECTIONS(input_names.cbegin(), input_names.cend(), expected_names.cbegin(), expected_names.cend());
 }
 

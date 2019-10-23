@@ -5,9 +5,6 @@
 namespace r = reinforcement_learning;
 namespace u = reinforcement_learning::utility;
 
-//using namespace fakeit;
-//using fakeit::Mock;
-
 std::unique_ptr<fakeit::Mock<r::i_sender>> get_mock_sender(int send_return_code) {
   auto mock = std::unique_ptr<fakeit::Mock<r::i_sender>>(
     new fakeit::Mock<r::i_sender>());

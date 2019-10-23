@@ -3,6 +3,14 @@
 #include "factory_resolver.h"
 #include "sender.h"
 
+#ifdef __GNUG__
+
+// Fakeit does not work with GCC's devirtualization
+// which is enabled with -O2 (the default) or higher.
+#pragma GCC optimize("no-devirtualize")
+
+#endif
+
 #include <fakeit/fakeit.hpp>
 #include <memory>
 

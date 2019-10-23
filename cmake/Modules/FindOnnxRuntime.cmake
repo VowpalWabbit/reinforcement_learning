@@ -1,5 +1,3 @@
-#set(FLATBUFFERS_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
-
 find_library(ONNXRUNTIME_LIB 
   NAMES onnxruntime
   )

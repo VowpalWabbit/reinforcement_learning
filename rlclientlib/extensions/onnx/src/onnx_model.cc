@@ -11,18 +11,24 @@
 #include "api_status.h"
 
 #include "factory_resolver.h"
+#include "scope_exit.h"
 
 namespace reinforcement_learning { namespace onnx {
 
   // This is used for statically introspecting the model. It will be used regardless of whether the actual
   // inference is done on CPU/GPU/Accelerator.
   static Ort::AllocatorWithDefaultOptions DefaultOnnxAllocator;
+  static const OrtApi& OnnxRuntimeCApi = Ort::GetApi();
 
   inline void OrtLogCallback(
     void* param, OrtLoggingLevel severity, const char* category, const char* logid, const char* code_location,
     const char* message)
   {
-    i_trace* trace_logger = (i_trace*)param;
+    i_trace* trace_logger = static_cast<i_trace*>(param);
+    if ((trace_logger) == nullptr)
+    {
+      return;
+    }
 
     int loglevel = LEVEL_ERROR;
     switch (severity)
@@ -76,7 +82,7 @@ namespace reinforcement_learning { namespace onnx {
         RETURN_ERROR_LS(_trace_logger, status, model_update_error) << "Empty model data.";
       }
 
-      new_session =  new Ort::Session(_env, data.data(), data.data_sz(), _session_options);
+      new_session = new Ort::Session(_env, data.data(), data.data_sz(), _session_options);
       
       // Validate that the model makes sense
       // Rules: 
@@ -153,7 +159,7 @@ namespace reinforcement_learning { namespace onnx {
     api_status* status)
   {
     std::shared_ptr<Ort::Session> local_session = _master_session;
-    if (!(bool(local_session)))
+    if (!local_session)
     {
       // Model is not ready
       RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << "No model loaded.";
@@ -185,8 +191,18 @@ namespace reinforcement_learning { namespace onnx {
       RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << "Could not interpret input values to match expected inputs.";
     }
 
-    auto outputs = local_session->Run(Ort::RunOptions{nullptr}, input_names.data(), inputs.data(), input_context.input_count(), (const char* const*)&_output_name, 1);
-    assert(outputs.size() > _output_index && outputs[_output_index].IsTensor());
+    // Use the C API to avoid an unneeded throw in the error case
+    OrtValue* onnx_output = nullptr;
+
+    // This cast-chain is taken from the OnnxRuntime code implementation of the C++ API of Ort::Session::Run().
+    auto ort_input_values = reinterpret_cast<const OrtValue**>(const_cast<Ort::Value*>(inputs.data()));
+
+    OrtStatus* run_status = OnnxRuntimeCApi.Run(local_session->operator OrtSession *(), Ort::RunOptions{nullptr}, input_names.data(), ort_input_values, input_context.input_count(), (const char* const*)&_output_name, 1, &onnx_output);
+    if (run_status)
+    {
+      auto release_guard = VW::scope_exit([&run_status] { OnnxRuntimeCApi.ReleaseStatus(run_status); });
+      RETURN_ERROR_LS(_trace_logger, status, extension_error) << OnnxRuntimeCApi.GetErrorMessage(run_status);
+    }
 
     // Re-wrap in Ort::Value to ensure proper destruction (no point in using VW::scope_exit, since we allocate either way)
     Ort::Value target_output = Ort::Value(onnx_output);
@@ -196,7 +212,7 @@ namespace reinforcement_learning { namespace onnx {
     // TODO: Once we update to OnnxRuntime v1.5.1, we can change this to grab immutable data via GetTensorData<float>()
     float* floatarr = target_output.GetTensorMutableData<float>();
 
-    for (int i = 0; i < num_elements; i++)
+    for (size_t i = 0; i < num_elements; i++)
     {
       action_ids.push_back(i);
       action_pdf.push_back(floatarr[i]);
