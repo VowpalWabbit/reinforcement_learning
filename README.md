@@ -108,7 +108,7 @@ cmake .. -DCMAKE_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake
 ```
 mkdir build
 cd build
-cmake .. -DTURN_OFF_DEVIRTUALIZE=On
+cmake ..
 make rltest
 make test
 ```
