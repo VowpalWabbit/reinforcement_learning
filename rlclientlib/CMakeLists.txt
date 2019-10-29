@@ -123,7 +123,7 @@ endif()
 
 # On MacOS linking fails unless we explicitly add Boost::thread. It seems like CppRestSDK isn't exporting dependencies properly.
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  target_link_libraries(rlclientlib PUBLIC Boost::thread Boost::chrono)
+  target_link_libraries(rlclientlib PUBLIC Boost::thread)
 endif()
 
 
