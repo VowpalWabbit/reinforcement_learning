@@ -114,7 +114,6 @@ target_include_directories( rlclientlib
                             ${FLATBUFFERS_INCLUDE_DIRS}
                             ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date
                             )
-target_link_libraries(rlclientlib PUBLIC cpprestsdk::cpprest Boost::system vw OpenSSL::SSL OpenSSL::Crypto )
 
 # Consuming Boost uuid requires BCrypt, normally this is automatically linked but vcpkg turns this feature off.
 if(WIN32)
@@ -123,9 +122,10 @@ endif()
 
 # On MacOS linking fails unless we explicitly add Boost::thread. It seems like CppRestSDK isn't exporting dependencies properly.
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  target_link_libraries(rlclientlib PUBLIC Boost::thread)
+  #target_link_libraries(rlclientlib PUBLIC Boost::thread)
 endif()
 
+target_link_libraries(rlclientlib PUBLIC cpprestsdk::cpprest OpenSSL::SSL OpenSSL::Crypto vw)
 
 if(TURN_OFF_DEVIRTUALIZE)
   target_compile_options(rlclientlib PUBLIC -fno-devirtualize)
