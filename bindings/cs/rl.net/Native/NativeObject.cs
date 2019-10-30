@@ -32,14 +32,6 @@ namespace Rl.Net.Native
             this.SetHandle(sharedHandle);
         }
 
-        internal IntPtr NativeHandle
-        {
-            get
-            {
-                return this.handle;
-            }
-        }
-
         override public bool IsInvalid
         {
             get

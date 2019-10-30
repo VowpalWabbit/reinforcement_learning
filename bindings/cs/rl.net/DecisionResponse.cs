@@ -62,8 +62,9 @@ namespace Rl.Net {
         {
             get
             {
-                IntPtr modelIdUtf8Ptr = NativeMethods.GetSlotSlotId(this.NativeHandle);
+                IntPtr modelIdUtf8Ptr = NativeMethods.GetSlotSlotId(this.DangerousGetHandle());
 
+                GC.KeepAlive(this);
                 return NativeMethods.StringMarshallingFunc(modelIdUtf8Ptr);
             }
         }
@@ -72,7 +73,10 @@ namespace Rl.Net {
         {
             get
             {
-                return NativeMethods.GetSlotActionId(this.NativeHandle);
+                int result = NativeMethods.GetSlotActionId(this.DangerousGetHandle());
+
+                GC.KeepAlive(this);
+                return result;
             }
         }
 
@@ -80,7 +84,10 @@ namespace Rl.Net {
         {
             get
             {
-                return NativeMethods.GetSlotProbability(this.NativeHandle);
+                float result = NativeMethods.GetSlotProbability(this.DangerousGetHandle());
+
+                GC.KeepAlive(this);
+                return result;
             }
         }
     }
@@ -95,8 +102,9 @@ namespace Rl.Net {
         {
             get
             {
-                IntPtr modelIdUtf8Ptr = NativeMethods.GetDecisionModelId(this.NativeHandle);
+                IntPtr modelIdUtf8Ptr = NativeMethods.GetDecisionModelId(this.DangerousGetHandle());
 
+                GC.KeepAlive(this);
                 return NativeMethods.StringMarshallingFunc(modelIdUtf8Ptr);
             }
         }
@@ -105,9 +113,10 @@ namespace Rl.Net {
         {
             get
             {
-                ulong unsignedSize = NativeMethods.GetDecisionSize(this.NativeHandle).ToUInt64();
+                ulong unsignedSize = NativeMethods.GetDecisionSize(this.DangerousGetHandle()).ToUInt64();
                 Debug.Assert(unsignedSize < Int64.MaxValue, "We do not support collections with size larger than _I64_MAX/Int64.MaxValue");
     
+                GC.KeepAlive(this);
                 return (long)unsignedSize;
             }
         }
@@ -129,7 +138,14 @@ namespace Rl.Net {
 
             private static New<DecisionResponseEnumerator> BindConstructorArguments(DecisionResponse decisionResponse)
             {
-                return new New<DecisionResponseEnumerator>(() => CreateDecisionEnumeratorAdapter(decisionResponse.NativeHandle));
+                return new New<DecisionResponseEnumerator>(() => 
+                {
+                    IntPtr result = CreateDecisionEnumeratorAdapter(decisionResponse.DangerousGetHandle());
+
+                    GC.KeepAlive(decisionResponse); // Extend the lifetime of this handle because the delegate (and its data) is not stored on the heap.
+                    return result;
+                    
+                });
             }
 
             [DllImport("rl.net.native.dll")]
@@ -154,7 +170,9 @@ namespace Rl.Net {
             {
                 get
                 {
-                    IntPtr sharedRankingResponseHandle = GetDecisionEnumeratorCurrent(this.NativeHandle);
+                    IntPtr sharedRankingResponseHandle = GetDecisionEnumeratorCurrent(this.DangerousGetHandle());
+
+                    GC.KeepAlive(this);
                     return new SlotResponse(sharedRankingResponseHandle);
                 }
             }
@@ -167,14 +185,15 @@ namespace Rl.Net {
                 if (this.initialState)
                 {
                     this.initialState = false;
-                    result = DecisionEnumeratorInit(this.NativeHandle);
+                    result = DecisionEnumeratorInit(this.DangerousGetHandle());
                 }
                 else
                 {
-                    result = DecisionEnumeratorMoveNext(this.NativeHandle);
+                    result = DecisionEnumeratorMoveNext(this.DangerousGetHandle());
                 }
 
                 // The contract of result is to return 1 if true, 0 if false.
+                GC.KeepAlive(this);
                 return result == 1;
             }
 
