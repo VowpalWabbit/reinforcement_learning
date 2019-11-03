@@ -12,6 +12,6 @@ cd build
 # On MacOS CMake is unable to find brew installed OpenSSL, so we need to pass it where to look.
 OPEN_SSL_DIR="/usr/local/opt/openssl"
 
-cmake .. -DTURN_OFF_DEVIRTUALIZE=On -DOPENSSL_ROOT_DIR=$OPEN_SSL_DIR -DOPENSSL_LIBRARIES=$OPEN_SSL_DIR/lib
+cmake .. -DBoost_NO_BOOST_CMAKE=ON -DTURN_OFF_DEVIRTUALIZE=On -DOPENSSL_ROOT_DIR=$OPEN_SSL_DIR -DOPENSSL_LIBRARIES=$OPEN_SSL_DIR/lib
 NUM_PROCESSORS=$(cat nprocs.txt)
-make all -j${NUM_PROCESSORS} VERBOSE=1
+make all -j${NUM_PROCESSORS}
