@@ -4,6 +4,7 @@
 #include <fstream>
 #include "config_utility.h"
 #include "live_model.h"
+#include "cb_logger.h"
 
 #if defined(_MSC_VER)
     //  Microsoft

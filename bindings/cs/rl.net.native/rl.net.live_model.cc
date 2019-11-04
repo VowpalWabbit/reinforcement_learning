@@ -28,7 +28,7 @@ API livemodel_context_t* CreateLiveModel(reinforcement_learning::utility::config
       reinforcement_learning::i_trace* trace_logger,
       reinforcement_learning::api_status* status)
     {
-      *retval = new rl_net_native::binding_tracer(*context);
+      *retval = new rl_net_native::binding_tracer<livemodel_context_t>(*context);
       return reinforcement_learning::error_code::success;
     };
 

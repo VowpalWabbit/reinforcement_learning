@@ -55,6 +55,18 @@ namespace Rl.Net {
 
             [DllImport("rl.net.native.dll")]
             public static extern int GetRankingChosenAction(IntPtr rankingResponse, out UIntPtr action_id, IntPtr status);
+
+            [DllImport("rl.net.native.dll")]
+            public static extern void SetRankingEventId(IntPtr rankingResponse, IntPtr eventId);
+
+            [DllImport("rl.net.native.dll")]
+            public static extern void SetRankingModelId(IntPtr rankingResponse, IntPtr modelId);
+
+            [DllImport("rl.net.native.dll")]
+            public static extern void SetRankingChosenAction(IntPtr rankingResponse, int chosenAction);
+
+            [DllImport("rl.net.native.dll")]
+            public static extern void PushActionProbability(IntPtr rankingResponse, int action, float prob);
         }
     }
 
@@ -73,6 +85,16 @@ namespace Rl.Net {
     {
         public RankingResponse() : base(new New<RankingResponse>(NativeMethods.CreateRankingResponse), new Delete<RankingResponse>(NativeMethods.DeleteRankingResponse))
         {
+        }
+
+        public static RankingResponse CreateRankingResponse(string eventId, string modelId, int chosenAction, int[] actions, float[] probabilities)
+        {
+            var result = new RankingResponse();
+            RankingResponseSetEventId(result.NativeHandle, eventId);
+            RankingResponseSetModelId(result.NativeHandle, modelId);
+            NativeMethods.SetRankingChosenAction(result.NativeHandle, chosenAction);
+            RankingResponseSetPmf(result.NativeHandle, actions, probabilities);
+            return result;
         }
 
         public string EventId
@@ -146,6 +168,30 @@ namespace Rl.Net {
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
+        }
+
+        unsafe private static void RankingResponseSetEventId(IntPtr rankingResponse, string eventId)
+        {
+            fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+            {
+                NativeMethods.SetRankingEventId(rankingResponse, new IntPtr(eventIdUtf8Bytes));
+            }
+        }
+
+        unsafe private static void RankingResponseSetModelId(IntPtr rankingResponse, string modelId)
+        {
+            fixed (byte* modelIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(modelId))
+            {
+                NativeMethods.SetRankingModelId(rankingResponse, new IntPtr(modelIdUtf8Bytes));
+            }
+        }
+
+        private static void RankingResponseSetPmf(IntPtr rankingResponse, int[] actions, float[] probabilities)
+        {
+            for (int i = 0; i < actions.Length; ++i)
+            {
+                NativeMethods.PushActionProbability(rankingResponse, actions[i], probabilities[i]);
+            }
         }
 
         private class RankingResponseEnumerator : NativeObject<RankingResponseEnumerator>, IEnumerator<ActionProbability>

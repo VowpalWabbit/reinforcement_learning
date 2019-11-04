@@ -43,6 +43,26 @@ API reinforcement_learning::ranking_response* CreateRankingResponse()
     return new reinforcement_learning::ranking_response();
 }
 
+API void SetRankingEventId(reinforcement_learning::ranking_response* ranking, const char* event_id)
+{
+  ranking->set_event_id(event_id);
+}
+
+API void SetRankingModelId(reinforcement_learning::ranking_response* ranking, const char* model_id)
+{
+  ranking->set_model_id(model_id);
+}
+
+API void SetRankingChosenAction(reinforcement_learning::ranking_response* ranking, int chosen_action)
+{
+  ranking->set_chosen_action_id(chosen_action);
+}
+
+API void PushActionProbability(reinforcement_learning::ranking_response* ranking, int action, float prob)
+{
+  ranking->push_back(action, prob);
+}
+
 API void DeleteRankingResponse(reinforcement_learning::ranking_response* ranking)
 {
     delete ranking;
