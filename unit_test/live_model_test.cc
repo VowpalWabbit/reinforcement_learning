@@ -19,6 +19,14 @@
 
 #include "mock_util.h"
 
+#ifdef __GNUG__
+
+// Fakeit does not work with GCC's devirtualization
+// which is enabled with -O2 (the default) or higher.
+#pragma GCC optimize("no-devirtualize")
+
+#endif
+
 #include <fakeit/fakeit.hpp>
 
 namespace r = reinforcement_learning;
@@ -44,7 +52,7 @@ namespace {
 
   const auto JSON_CONTEXT = R"({"_multi":[{},{}]})";
   const auto JSON_CONTEXT_PDF = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}}],"p":[0.4, 0.6]})";
-  const float EXPECTED_PDF[2] = { 0.4f, 0.6f }; 
+  const float EXPECTED_PDF[2] = { 0.4f, 0.6f };
 
   r::live_model create_mock_live_model(
     const u::configuration& config,
@@ -129,12 +137,12 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
 
   // Background refresh introduces a timing issue where the model might not have updated properly
   // before the choose_rank() call.
-  config.set(r::name::MODEL_BACKGROUND_REFRESH, "false"); 
+  config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
 
   r::api_status status;
 
   //create the ds live_model, and initialize it with the config
-  
+
   r::live_model model = create_mock_live_model(config, &r::data_transport_factory, &r::model_factory, nullptr);
 
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
@@ -144,7 +152,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
 
   // request ranking
   BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CONTEXT_PDF, response), err::success);
-  
+
   size_t num_actions = response.size();
   BOOST_CHECK_EQUAL(num_actions, 2);
 

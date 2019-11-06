@@ -27,15 +27,6 @@ add_executable(rltest
   watchdog_test.cc
 )
 
-# Devirtualization is an optimization that changes the vtable if the compiler decides a function
-# doesn't need to be virtual. This is incompatible with the mocking framework used in testing as it
-# makes the vtable structure unpredictable
-if(MSVC)
-  # MSVC doesn't optimize aggresively enough for this bug to be an issue right now.
-else()
-  target_compile_options(rltest PRIVATE -fno-devirtualize)
-endif()
-
 # Add the include directories from rlclientlib target for testing
 target_include_directories(rltest PRIVATE $<TARGET_PROPERTY:rlclientlib,INCLUDE_DIRECTORIES>)
 

@@ -127,10 +127,6 @@ endif()
 
 target_link_libraries(rlclientlib PUBLIC cpprestsdk::cpprest OpenSSL::SSL OpenSSL::Crypto vw)
 
-if(TURN_OFF_DEVIRTUALIZE)
-  target_compile_options(rlclientlib PUBLIC -fno-devirtualize)
-endif()
-
 install(TARGETS rlclientlib
   INCLUDES DESTINATION rlclientlib
   ARCHIVE DESTINATION lib
