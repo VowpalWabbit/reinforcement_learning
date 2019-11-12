@@ -75,7 +75,7 @@ namespace reinforcement_learning {
     // "--epsilon 0.0 --first_only" is used so that the first action is chosen for each slot initial exploration mode.
     // id N/A is set to ensure parity with cb running in no model mode.
     const std::string initial_command_line = c.get(name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
-    *retval = new m::vw_model(trace_logger, initial_command_line);
+    *retval = new m::vw_model(trace_logger, c, initial_command_line);
     return error_code::success;
   }
 

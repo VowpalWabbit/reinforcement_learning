@@ -130,11 +130,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   target_link_libraries(rlclientlib PUBLIC Boost::thread)
 endif()
 
-
-if(TURN_OFF_DEVIRTUALIZE)
-  target_compile_options(rlclientlib PUBLIC -fno-devirtualize)
-endif()
-
 install(TARGETS rlclientlib
   INCLUDES DESTINATION rlclientlib
   ARCHIVE DESTINATION lib

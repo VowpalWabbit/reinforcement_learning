@@ -12,8 +12,8 @@ namespace reinforcement_learning { namespace model_management {
     _vw_pool(nullptr, config.get_int(name::VW_POOL_INIT_SIZE, value::DEFAULT_VW_POOL_INIT_SIZE)), _trace_logger(trace_logger) {
   }
 
-  vw_model::vw_model(i_trace* trace_logger, const std::string& initial_command_line) :
-    _vw_pool(new safe_vw_factory(initial_command_line)), _trace_logger(trace_logger) {
+  vw_model::vw_model(i_trace* trace_logger, const utility::configuration& config, const std::string& initial_command_line) :
+    _vw_pool(new safe_vw_factory(initial_command_line), config.get_int(name::VW_POOL_INIT_SIZE, value::DEFAULT_VW_POOL_INIT_SIZE)), _trace_logger(trace_logger) {
   }
 
   int vw_model::update(const model_data& data, bool& model_ready, api_status* status) {

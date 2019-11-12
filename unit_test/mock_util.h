@@ -3,9 +3,18 @@
 #include "factory_resolver.h"
 #include "sender.h"
 
+#include <memory>
+
+#ifdef __GNUG__
+
+// Fakeit does not work with GCC's devirtualization
+// which is enabled with -O2 (the default) or higher.
+#pragma GCC optimize("no-devirtualize")
+
+#endif
+
 #include <fakeit/fakeit.hpp>
 
-#include <memory>
 using buffer_t = std::shared_ptr <reinforcement_learning::utility::data_buffer>;
 
 std::unique_ptr<fakeit::Mock<reinforcement_learning::i_sender>> get_mock_sender(int send_return_code);
