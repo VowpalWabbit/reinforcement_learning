@@ -20,8 +20,15 @@
 #include "sampling.h"
 
 #include "mock_util.h"
+#include "test_common.h"
 
-constexpr float FLOAT_TOL = 0.0001f;
+#ifdef __GNUG__
+
+// Fakeit does not work with GCC's devirtualization
+// which is enabled with -O2 (the default) or higher.
+#pragma GCC optimize("no-devirtualize")
+
+#endif
 
 #include <fakeit/fakeit.hpp>
 
@@ -177,6 +184,10 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
   config.set(r::name::EH_TEST, "true");
   config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
   config.set(r::name::MODEL_IMPLEMENTATION, r::value::PASSTHROUGH_PDF_MODEL);
+
+  // Background refresh introduces a timing issue where the model might not have updated properly
+  // before the choose_rank() call.
+  config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
 
   r::api_status status;
 

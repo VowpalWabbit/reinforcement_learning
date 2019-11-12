@@ -10,6 +10,6 @@ cd $REPO_DIR
 # Build reinforcement_learning
 mkdir -p build
 cd build
-cmake .. -DTURN_OFF_DEVIRTUALIZE=On
+cmake ..
 NUM_PROCESSORS=$(cat nprocs.txt)
 make all -j${NUM_PROCESSORS}

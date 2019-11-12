@@ -28,7 +28,7 @@ cd Release
 mkdir build
 cd build
 cmake ..
-make
+make -j `nproc`
 make install
 cd ../../../
 rm -rf cpprestsdk
@@ -45,7 +45,7 @@ git checkout 925c1d77fcc72636924c3c13428a34180c30f96f
 mkdir build
 cd build
 cmake .. -DFLATBUFFERS_BUILD_TESTS=Off -DFLATBUFFERS_INSTALL=On -DCMAKE_BUILD_TYPE=Release -DFLATBUFFERS_BUILD_FLATHASH=Off
-make
+make -j `nproc`
 sudo make install
 cd ../../
 rm -rf flatbuffers
@@ -108,7 +108,7 @@ cmake .. -DCMAKE_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake
 ```
 mkdir build
 cd build
-cmake .. -DTURN_OFF_DEVIRTUALIZE=On
+cmake ..
 make rltest
 make test
 ```
@@ -120,6 +120,8 @@ Windows dependencies are managed through Vcpkg and Nuget.
 vcpkg install cpprestsdk:x64-windows
 vcpkg install flatbuffers:x64-windows
 ```
+
+You'll need to add the flatbuffers tool directory to your PATH aswell: `<vcpkg_root>\installed\x64-windows\tools\flatbuffers`
 
 ### Build + Test
 

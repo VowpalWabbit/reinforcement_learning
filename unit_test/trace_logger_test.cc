@@ -4,7 +4,6 @@
 #endif
 
 #include <boost/test/unit_test.hpp>
-#include <fakeit/fakeit.hpp>
 #include "mock_util.h"
 #include "live_model.h"
 #include "config_utility.h"
@@ -13,6 +12,16 @@
 #include "api_status.h"
 #include "err_constants.h"
 #include "console_tracer.h"
+
+#ifdef __GNUG__
+
+// Fakeit does not work with GCC's devirtualization
+// which is enabled with -O2 (the default) or higher.
+#pragma GCC optimize("no-devirtualize")
+
+#endif
+
+#include <fakeit/fakeit.hpp>
 
 namespace r = reinforcement_learning;
 namespace u = reinforcement_learning::utility;
