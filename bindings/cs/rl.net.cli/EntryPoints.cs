@@ -10,7 +10,7 @@ namespace Rl.Net.Cli {
         public static void Main(string [] args)
         {
             Parser.Default.ParseArguments
-                <RunSimulatorCommand, ReplayCommand, PerfTestCommand>(args)
+                <RunSimulatorCommand, ReplayCommand, PerfTestCommand, LoggingTestCommand>(args)
                 .WithParsed<CommandBase>(command => command.Run());
             //BasicUsage(args[0]);
             //PdfExample(args[0]);

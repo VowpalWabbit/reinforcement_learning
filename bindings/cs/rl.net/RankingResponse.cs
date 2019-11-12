@@ -87,12 +87,12 @@ namespace Rl.Net {
         {
         }
 
-        public static RankingResponse CreateRankingResponse(string eventId, string modelId, int chosenAction, int[] actions, float[] probabilities)
+        public static RankingResponse Create(string eventId, string modelId, long chosenAction, IList<int> actions, IList<float> probabilities)
         {
             var result = new RankingResponse();
             RankingResponseSetEventId(result.NativeHandle, eventId);
             RankingResponseSetModelId(result.NativeHandle, modelId);
-            NativeMethods.SetRankingChosenAction(result.NativeHandle, chosenAction);
+            NativeMethods.SetRankingChosenAction(result.NativeHandle, (int)chosenAction);
             RankingResponseSetPmf(result.NativeHandle, actions, probabilities);
             return result;
         }
@@ -186,9 +186,9 @@ namespace Rl.Net {
             }
         }
 
-        private static void RankingResponseSetPmf(IntPtr rankingResponse, int[] actions, float[] probabilities)
+        private static void RankingResponseSetPmf(IntPtr rankingResponse, IList<int> actions, IList<float> probabilities)
         {
-            for (int i = 0; i < actions.Length; ++i)
+            for (int i = 0; i < actions.Count; ++i)
             {
                 NativeMethods.PushActionProbability(rankingResponse, actions[i], probabilities[i]);
             }
