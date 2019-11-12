@@ -20,6 +20,7 @@
 #include "sampling.h"
 
 #include "mock_util.h"
+#include "test_common.h"
 
 constexpr float FLOAT_TOL = 0.0001f;
 #ifdef __GNUG__
