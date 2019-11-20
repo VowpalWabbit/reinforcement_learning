@@ -1,4 +1,5 @@
 #include "invariant_helpers.h"
+#include <cstring>
 namespace reinforcement_learning {
   namespace utility {
     //helper: check if at least one of the arguments is null or empty
