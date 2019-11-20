@@ -45,6 +45,7 @@ set(PROJECT_SOURCES
   utility/http_authorization.cc
   utility/http_client.cc
   utility/http_helper.cc
+  utility/invariant_helpers.cc
   utility/str_util.cc
   utility/watchdog.cc
   vw_model/pdf_model.cc
@@ -95,6 +96,7 @@ set(PROJECT_PRIVATE_HEADERS
   utility/http_client.h
   utility/http_helper.h
   utility/interruptable_sleeper.h
+  utility/invariant_helpers.h
   utility/object_pool.h
   utility/periodic_background_proc.h
   utility/watchdog.h
