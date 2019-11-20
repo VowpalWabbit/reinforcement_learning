@@ -3,7 +3,7 @@ add_library(rl.net.native SHARED
   rl.net.config.cc
   rl.net.live_model.cc
   rl.net.ranking_response.cc
-  binding_tracer.cc
+  rl.net.cb_logger.cc
 )
 
 if(MSVC)
