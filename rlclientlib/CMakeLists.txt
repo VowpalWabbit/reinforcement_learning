@@ -125,7 +125,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   target_link_libraries(rlclientlib PUBLIC Boost::thread)
 endif()
 
-target_link_libraries(rlclientlib PUBLIC cpprestsdk::cpprest OpenSSL::SSL OpenSSL::Crypto vw)
+target_link_libraries(rlclientlib PUBLIC Boost::system cpprestsdk::cpprest OpenSSL::SSL OpenSSL::Crypto vw)
 
 install(TARGETS rlclientlib
   INCLUDES DESTINATION rlclientlib
