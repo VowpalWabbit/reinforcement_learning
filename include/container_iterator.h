@@ -17,14 +17,14 @@ namespace reinforcement_learning {
     container_iterator(TColl& coll)
       : _coll(coll)
       , _idx(0) {
-      static_assert(std::is_same<TElem, TColl::value_type>::value, "TColl must be a collection of TElem");
+      static_assert(std::is_same<TElem, typename TColl::value_type>::value, "TColl must be a collection of TElem");
     }
 
     //! Construct an (action, probability) collection iterator using the ranking_response implementation and size
     container_iterator(TColl& coll, size_t idx)
       : _coll(coll)
       , _idx(idx) {
-      static_assert(std::is_same<TElem, TColl::value_type>::value, "TColl must be a collection of TElem");
+      static_assert(std::is_same<TElem, typename TColl::value_type>::value, "TColl must be a collection of TElem");
     }
     //! Move the iterator to the next element
     container_iterator& operator++() {
@@ -69,13 +69,13 @@ namespace reinforcement_learning {
     const_container_iterator(const TColl& coll)
       : _coll(coll)
       , _idx(0) {
-      static_assert(std::is_same<TElem, TColl::value_type>::value, "TColl must be a collection of TElem");
+      static_assert(std::is_same<TElem, typename TColl::value_type>::value, "TColl must be a collection of TElem");
     }
     //! Construct an (action, probability) collection iterator using the ranking_response implementation and size
     const_container_iterator(const TColl& coll, size_t idx)
       : _coll(coll)
       , _idx(idx) {
-      static_assert(std::is_same<TElem, TColl::value_type>::value, "TColl must be a collection of TElem");
+      static_assert(std::is_same<TElem, typename TColl::value_type>::value, "TColl must be a collection of TElem");
     }
     //! Move the iterator to the next element
     const_container_iterator& operator++() {
