@@ -100,7 +100,7 @@ namespace reinforcement_learning {
     }
     //! Increment the index
     const_container_iterator operator+(const uint32_t idx) const {
-      return { _p_resp,_idx + idx };
+      return { _coll, _idx + idx };
     }
 
   private:
