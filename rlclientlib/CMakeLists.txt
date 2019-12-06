@@ -58,6 +58,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/config_utility.h
   ../include/configuration.h
   ../include/constants.h
+  ../include/container_iterator.h
   ../include/decision_response.h
   ../include/err_constants.h
   ../include/errors_data.h

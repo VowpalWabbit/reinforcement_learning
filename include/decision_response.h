@@ -9,17 +9,34 @@
 namespace reinforcement_learning {
   class api_status;
 
+  struct slot_response {
+  public:
+    ~slot_response() = default;
+
+    slot_response(const char* _slot_id, uint32_t _action_id, float _probability);
+
+    const char* get_slot_id() const;
+    uint32_t get_action_id() const;
+    float get_probability() const;
+  private:
+    //! slot_id
+    const std::string slot_id;
+    //! action id
+    uint32_t action_id;
+    //! probability associated with the action id
+    float probability;
+  };
+
   class decision_response {
   public:
-    using coll_t = std::vector<ranking_response>;
-    using iterator_t = coll_t::iterator;
-    using const_iterator_t = coll_t::const_iterator;
+    using iterator_t = container_iterator<slot_response>;
+    using const_iterator_t = const_container_iterator<slot_response>;
 
     decision_response() = default;
     ~decision_response() = default;
 
     // Cannot copy ranking_response, so must do a move here.
-    void push_back(ranking_response&& r_response);
+    void push_back(const char* event_id, uint32_t action_id, float prob);
 
     size_t size() const;
 
@@ -38,6 +55,8 @@ namespace reinforcement_learning {
     decision_response(const decision_response&) = delete;
     decision_response& operator =(const decision_response&) = delete;
   private:
+    using coll_t = std::vector<slot_response>;
+
     std::string _model_id;
     coll_t _decision;
   };

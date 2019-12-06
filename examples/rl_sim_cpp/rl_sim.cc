@@ -11,6 +11,7 @@
 using namespace std;
 
 std::string get_dist_str(const reinforcement_learning::ranking_response& response);
+std::string get_dist_str(const reinforcement_learning::slot_response& response);
 
 int rl_sim::loop() {
   if ( !init() ) return -1;
@@ -98,12 +99,7 @@ int rl_sim::ccb_loop() {
     auto index = 0;
     for(auto& response : decision)
     {
-      size_t chosen_action;
-      if ( response.get_chosen_action_id(chosen_action) != err::success ) {
-        std::cout << status.get_error_msg() << std::endl;
-        continue;
-      }
-
+      const auto chosen_action = response.get_action_id();
       const auto outcome = p.get_outcome(_topics[chosen_action]);
 
       // Report outcome received
@@ -293,6 +289,17 @@ std::string get_dist_str(const reinforcement_learning::ranking_response& respons
     ret += to_string(ap_pair.probability) + "]";
     ret += " ,";
   }
+  ret += ")";
+  return ret;
+}
+
+std::string get_dist_str(const reinforcement_learning::slot_response& response) {
+  std::string ret;
+  ret += "(";
+  ret += "[" + std::string(response.get_slot_id()) + ",";
+  ret += to_string(response.get_action_id()) + ",";
+  ret += to_string(response.get_probability()) + "]";
+  ret += " ,";
   ret += ")";
   return ret;
 }

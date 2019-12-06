@@ -62,7 +62,7 @@ namespace reinforcement_learning { namespace model_management {
     }
   }
 
-  int vw_model::request_decision(const std::vector<const char*>& event_ids, const char* features, std::vector<std::vector<size_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
+  int vw_model::request_decision(const std::vector<const char*>& event_ids, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
     try {
       pooled_vw vw(_vw_pool, _vw_pool.get_or_create());

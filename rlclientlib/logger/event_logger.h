@@ -124,7 +124,8 @@ class ccb_logger : public event_logger<decision_ranking_event> {
         perror_cb)
     {}
 
-    int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const decision_response& response, api_status* status);
+    int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+      const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
   };
 
 

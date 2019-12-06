@@ -18,7 +18,7 @@ int populate_response(size_t chosen_action_index, std::vector<int>& action_ids, 
   return error_code::success;
 }
 
-int populate_response(const std::vector<std::vector<size_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::vector<const char*>& event_ids, std::string&& model_id, decision_response& response, i_trace* trace_logger, api_status* status) {
+int populate_response(const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::vector<const char*>& event_ids, std::string&& model_id, decision_response& response, i_trace* trace_logger, api_status* status) {
   if(action_ids.size() != pdfs.size())
   {
     RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids and pdfs must be the same size";
@@ -32,14 +32,7 @@ int populate_response(const std::vector<std::vector<size_t>>& action_ids, const 
       RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids[i] and pdfs[i] must be the same size";
     }
 
-    ranking_response current;
-    for (size_t j = 0; j < action_ids[i].size(); j++) {
-      current.push_back(action_ids[i][j], pdfs[i][j]);
-    }
-    RETURN_IF_FAIL(current.set_chosen_action_id_unchecked(action_ids[i][0]));
-    current.set_event_id(event_ids[i]);
-
-    response.push_back(std::move(current));
+    response.push_back(event_ids[i], action_ids[i][0], pdfs[i][0]);
   }
 
   return error_code::success;

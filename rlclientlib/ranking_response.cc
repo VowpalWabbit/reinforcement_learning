@@ -81,81 +81,19 @@ namespace reinforcement_learning {
   using iterator = ranking_response::iterator;
   using const_iterator = ranking_response::const_iterator;
 
-  iterator::iterator(ranking_response* p_resp)
-    : _p_resp(p_resp), _idx(0) {}
-
-  iterator::iterator(ranking_response* p_resp, const size_t idx)
-    : _p_resp(p_resp), _idx(idx) {}
-
-  iterator& iterator::operator++() {
-    ++_idx;
-    return *this;
-  }
-
-  bool iterator::operator!=(const iterator& other) const {
-    return _idx != other._idx;
-  }
-
-  action_prob& iterator::operator*() {
-    return _p_resp->_ranking[_idx];
-  }
-
-  bool iterator::operator<(const iterator& rhs) const {
-    return _idx < rhs._idx;
-  }
-
-  int64_t iterator::operator-(const iterator& rhs) const {
-    return _idx - rhs._idx;
-  }
-
-  iterator iterator::operator+(const uint32_t idx) const {
-    return { _p_resp,_idx + idx };
-  }
-
-  const_iterator::const_iterator(const ranking_response* p_resp)
-    : _p_resp { p_resp }, _idx { 0 } {}
-
-  const_iterator::const_iterator(const ranking_response* p_resp, const size_t idx)
-    : _p_resp { p_resp }, _idx { idx } {}
-
-  const_iterator& ranking_response::const_iterator::operator++() {
-    ++_idx;
-    return *this;
-  }
-
-  bool const_iterator::operator!=(const const_iterator& other) const {
-    return _idx != other._idx;
-  }
-
-  const action_prob& const_iterator::operator*() const {
-    return _p_resp->_ranking[_idx];
-  }
-
-  bool const_iterator::operator<(const const_iterator& rhs) const {
-    return _idx < rhs._idx;
-  }
-
-  int64_t const_iterator::operator-(const const_iterator& rhs) const {
-    return _idx - rhs._idx;
-  }
-
-  const_iterator const_iterator::operator+(const uint32_t idx) const {
-    return { _p_resp,_idx + idx };
-  }
-
   const_iterator ranking_response::begin() const {
-    return { this };
+    return { _ranking };
   }
 
   iterator ranking_response::begin() {
-    return { this };
+    return { _ranking };
   }
 
   const_iterator ranking_response::end() const {
-    return { this, _ranking.size() };
+    return { _ranking, _ranking.size() };
   }
 
   iterator ranking_response::end() {
-    return { this, _ranking.size() };
+    return { _ranking, _ranking.size() };
   }
 }

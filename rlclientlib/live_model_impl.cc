@@ -97,7 +97,7 @@ namespace reinforcement_learning {
     // Ensure multi comes before slots, this is a current limitation of the parser.
     RETURN_IF_FAIL(utility::validate_multi_before_slots(context_json, _trace_logger.get(), status));
 
-    std::vector<std::vector<size_t>> actions_ids;
+    std::vector<std::vector<uint32_t>> actions_ids;
     std::vector<std::vector<float>> actions_pdfs;
     std::string model_version;
 
@@ -127,7 +127,7 @@ namespace reinforcement_learning {
     // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
     RETURN_IF_FAIL(_model->request_decision(event_ids, context_json, actions_ids, actions_pdfs, model_version, status));
     RETURN_IF_FAIL(populate_response(actions_ids, actions_pdfs, event_ids, std::move(std::string(model_version)), resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_decision_logger->log_decisions(event_ids, context_json, flags, resp, status));
+    RETURN_IF_FAIL(_decision_logger->log_decisions(event_ids, context_json, flags, actions_ids, actions_pdfs, model_version, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {

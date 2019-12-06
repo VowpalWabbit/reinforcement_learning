@@ -165,6 +165,7 @@
     <ClInclude Include="..\include\action_flags.h" />
     <ClInclude Include="..\include\api_status.h" />
     <ClInclude Include="..\include\configuration.h" />
+    <ClInclude Include="..\include\container_iterator.h" />
     <ClInclude Include="..\include\live_model.h" />
     <ClInclude Include="..\include\sender.h" />
     <ClInclude Include="..\include\object_factory.h" />

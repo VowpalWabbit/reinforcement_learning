@@ -48,18 +48,13 @@ namespace reinforcement_learning {
 
   decision_ranking_event::decision_ranking_event() { }
 
-  decision_ranking_event::decision_ranking_event(const std::vector<const char*>& event_ids, bool deferred_action, float pass_prob, const char* context, const decision_response& response, const timestamp& ts)
-    : event(event_ids[0], ts, pass_prob), _deferred_action(deferred_action), _model_id(response.get_model_id()) {
-    for(auto const& ranking_res : response)
-    {
-      _action_ids_vector.push_back(std::vector<uint32_t>());
-      _probilities_vector.push_back(std::vector<float>());
-      for (auto const& r : ranking_res) {
-        _action_ids_vector.back().push_back(r.action_id);
-        _probilities_vector.back().push_back(r.probability);
-      }
-    }
-
+  decision_ranking_event::decision_ranking_event(const std::vector<const char*>& event_ids, bool deferred_action, float pass_prob, const char* context,
+    const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts)
+    : event(event_ids[0], ts, pass_prob)
+    , _deferred_action(deferred_action)
+    , _action_ids_vector(action_ids)
+    , _probilities_vector(pdfs)
+    , _model_id(model_version) {
     string context_str(context);
     for(auto evt : event_ids)
     {
@@ -76,8 +71,8 @@ namespace reinforcement_learning {
   const std::vector<std::string>& decision_ranking_event::get_event_ids() const { return _event_ids; }
 
   decision_ranking_event decision_ranking_event::request_decision(const std::vector<const char*>& event_ids, const char* context, unsigned int flags,
-                                           const decision_response& resp, const timestamp& ts, float pass_prob) {
-    return decision_ranking_event(event_ids, flags & action_flags::DEFERRED, pass_prob, context, resp, ts);
+    const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts, float pass_prob) {
+    return decision_ranking_event(event_ids, flags & action_flags::DEFERRED, pass_prob, context, action_ids, pdfs, model_version, ts);
   }
 
   outcome_event::outcome_event(const char* event_id, float pass_prob, const char* outcome, bool action_taken, const timestamp& ts)

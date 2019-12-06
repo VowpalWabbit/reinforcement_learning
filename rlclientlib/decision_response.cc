@@ -4,8 +4,26 @@
 
 namespace reinforcement_learning
 {
-  void decision_response::push_back(ranking_response&& r_response) {
-    _decision.emplace_back(std::move(r_response));
+  slot_response::slot_response(const char* _slot_id, uint32_t _action_id, float _probability)
+    : slot_id(_slot_id)
+    , action_id(_action_id)
+    , probability(_probability) {
+  }
+
+  const char* slot_response::get_slot_id() const {
+    return slot_id.c_str();
+  }
+
+  uint32_t slot_response::get_action_id() const {
+    return action_id;
+  }
+
+  float slot_response::get_probability() const {
+    return probability;
+  }
+
+  void decision_response::push_back(const char* event_id, uint32_t action_id, float prob) {
+    _decision.emplace_back(event_id, action_id, prob);
   }
 
   size_t decision_response::size() const {
@@ -28,19 +46,19 @@ namespace reinforcement_learning
   }
 
   decision_response::const_iterator_t decision_response::begin() const {
-    return _decision.cbegin();
+    return { _decision };
   }
 
   decision_response::iterator_t decision_response::begin() {
-    return _decision.begin();
+    return { _decision };
   }
 
   decision_response::const_iterator_t decision_response::end() const {
-    return _decision.cend();
+    return { _decision, _decision.size() };
   }
 
   decision_response::iterator_t decision_response::end() {
-    return _decision.end();
+    return { _decision, _decision.size() };
   }
 
   decision_response::decision_response(decision_response&& other) noexcept :

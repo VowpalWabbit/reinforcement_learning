@@ -13,6 +13,21 @@ namespace Rl.Net {
         internal partial class NativeMethods
         {
             [DllImport("rl.net.native.dll")]
+            public static extern IntPtr CreateSlotResponse();
+
+            [DllImport("rl.net.native.dll")]
+            public static extern void DeleteSlotResponse(IntPtr slotResponse);
+
+            [DllImport("rl.net.native.dll")]
+            public static extern IntPtr GetSlotSlotId(IntPtr slotResponse);
+
+            [DllImport("rl.net.native.dll")]
+            public static extern int GetSlotActionId(IntPtr slotResponse);
+
+            [DllImport("rl.net.native.dll")]
+            public static extern float GetSlotProbability(IntPtr slotResponse);
+
+            [DllImport("rl.net.native.dll")]
             public static extern IntPtr CreateDecisionResponse();
 
             [DllImport("rl.net.native.dll")]
@@ -40,7 +55,40 @@ namespace Rl.Net {
         }
     }
 
-    public sealed class DecisionResponse : NativeObject<DecisionResponse>, IEnumerable<RankingResponse>
+    public sealed class SlotResponse : NativeObject<SlotResponse>
+    {
+        internal SlotResponse(IntPtr sharedRankingResponseHandle) : base(sharedRankingResponseHandle, ownsHandle: false)
+        {
+        }
+
+        public string SlotId
+        {
+            get
+            {
+                IntPtr modelIdUtf8Ptr = NativeMethods.GetSlotSlotId(this.NativeHandle);
+
+                return NativeMethods.StringMarshallingFunc(modelIdUtf8Ptr);
+            }
+        }
+
+        public int ActionId
+        {
+            get
+            {
+                return NativeMethods.GetSlotActionId(this.NativeHandle);
+            }
+        }
+
+        public float Probability
+        {
+            get
+            {
+                return NativeMethods.GetSlotProbability(this.NativeHandle);
+            }
+        }
+    }
+
+    public sealed class DecisionResponse : NativeObject<DecisionResponse>, IEnumerable<SlotResponse>
     {
         public DecisionResponse() : base(new New<DecisionResponse>(NativeMethods.CreateDecisionResponse), new Delete<DecisionResponse>(NativeMethods.DeleteDecisionResponse))
         {
@@ -67,7 +115,7 @@ namespace Rl.Net {
             }
         }
 
-        public IEnumerator<RankingResponse> GetEnumerator()
+        public IEnumerator<SlotResponse> GetEnumerator()
         {
             return new DecisionResponseEnumerator(this);
         }
@@ -77,7 +125,7 @@ namespace Rl.Net {
             return this.GetEnumerator();
         }
 
-        private class DecisionResponseEnumerator : NativeObject<DecisionResponseEnumerator>, IEnumerator<RankingResponse>
+        private class DecisionResponseEnumerator : NativeObject<DecisionResponseEnumerator>, IEnumerator<SlotResponse>
         {
             [DllImport("rl.net.native.dll")]
             private static extern IntPtr CreateDecisionEnumeratorAdapter(IntPtr decisionResponse);
@@ -105,12 +153,12 @@ namespace Rl.Net {
             {
             }
 
-            public RankingResponse Current
+            public SlotResponse Current
             {
                 get
                 {
                     IntPtr sharedRankingResponseHandle = GetDecisionEnumeratorCurrent(this.NativeHandle);
-                    return new RankingResponse(sharedRankingResponseHandle);
+                    return new SlotResponse(sharedRankingResponseHandle);
                 }
             }
 

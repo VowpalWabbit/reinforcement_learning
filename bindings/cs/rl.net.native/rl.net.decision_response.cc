@@ -32,11 +32,31 @@ public:
         return 0;
     }
 
-    inline reinforcement_learning::ranking_response const* operator*() const
+    inline reinforcement_learning::slot_response const* operator*() const
     {
         return &*this->current;
     }
 };
+
+API void DeleteSlotResponse(reinforcement_learning::slot_response* slot)
+{
+  delete slot;
+}
+
+API const char* GetSlotSlotId(reinforcement_learning::slot_response* slot)
+{
+  return slot->get_slot_id();
+}
+
+API int GetSlotActionId(reinforcement_learning::slot_response* slot)
+{
+  return slot->get_action_id();
+}
+
+API float GetSlotProbability(reinforcement_learning::slot_response* slot)
+{
+  return slot->get_probability();
+}
 
 API reinforcement_learning::decision_response* CreateDecisionResponse()
 {
@@ -81,7 +101,7 @@ API int DecisionEnumeratorMoveNext(decision_enumerator_adapter* adapter)
     return adapter->move_next();
 }
 
-API reinforcement_learning::ranking_response const* GetDecisionEnumeratorCurrent(decision_enumerator_adapter* adapter)
+API reinforcement_learning::slot_response const* GetDecisionEnumeratorCurrent(decision_enumerator_adapter* adapter)
 {
     return adapter->operator*();
 }

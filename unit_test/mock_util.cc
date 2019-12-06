@@ -68,8 +68,8 @@ std::unique_ptr<fakeit::Mock<m::i_model>> get_mock_model() {
     return r::error_code::success;
   };
 
-  const std::function<int(const std::vector<const char*>& event_ids, const char*, std::vector<std::vector<size_t>>&, std::vector<std::vector<float>>&, std::string&, r::api_status*)> request_decision_fn =
-    [](const std::vector<const char*>& event_ids, const char*, std::vector<std::vector<size_t>>&, std::vector<std::vector<float>>&, std::string& model_version, r::api_status*) {
+  const std::function<int(const std::vector<const char*>& event_ids, const char*, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string&, r::api_status*)> request_decision_fn =
+    [](const std::vector<const char*>& event_ids, const char*, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string& model_version, r::api_status*) {
     model_version = "model_id";
     return r::error_code::success;
   };
