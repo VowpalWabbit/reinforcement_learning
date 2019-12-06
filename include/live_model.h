@@ -139,7 +139,7 @@ namespace reinforcement_learning {
     int choose_rank(const char * context_json, unsigned int flags, ranking_response& resp, api_status* status = nullptr); //event_id is auto-generated
 
     /**
-    * @brief Choose an action from the given set for each slot, given a list of actions, slots,
+    * @brief (DEPRECATED) Choose an action from the given set for each slot, given a list of actions, slots,
     * action features, slot feautres and context features. The inference library chooses an action
     * per slot by sampling the probability distribution produced per slot. A unique event_id can be
     * supplied for each slot using the `_id` json field. The corresponding event_id should be used
@@ -153,7 +153,7 @@ namespace reinforcement_learning {
     int request_decision(const char * context_json, unsigned int flags, decision_response& resp, api_status* status = nullptr);
 
     /**
-    * @brief Choose an action from the given set for each slot, given a list of actions, slots,
+    * @brief (DEPRECATED) Choose an action from the given set for each slot, given a list of actions, slots,
     * action features, slot feautres and context features. The inference library chooses an action
     * per slot by sampling the probability distribution produced per slot. A unique event_id can be
     * supplied for each slot using the `_id` json field. The corresponding event_id should be used
