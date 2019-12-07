@@ -13,14 +13,14 @@ namespace reinforcement_learning {
     std::forward_iterator_tag,
     TElem> {
   public:
-    //! Construct an (action, probability) collection iterator using the ranking_response implementation
+    //! Construct an iterator using container implementation
     container_iterator(TColl& coll)
       : _coll(coll)
       , _idx(0) {
       static_assert(std::is_same<TElem, typename TColl::value_type>::value, "TColl must be a collection of TElem");
     }
 
-    //! Construct an (action, probability) collection iterator using the ranking_response implementation and size
+    //! Construct an iterator using container implementation and size
     container_iterator(TColl& coll, size_t idx)
       : _coll(coll)
       , _idx(idx) {
@@ -35,7 +35,7 @@ namespace reinforcement_learning {
     bool operator!=(const container_iterator& other) const {
       return _idx != other._idx;
     }
-    //! Dereferencing operator to get the (action, probability) pair
+    //! Dereferencing operator to get the TElem
     TElem& operator*() {
       return _coll[_idx];
     }
@@ -65,13 +65,13 @@ namespace reinforcement_learning {
     std::forward_iterator_tag,
     TElem> {
   public:
-    //! Construct an (action, probability) collection iterator using the ranking_response implementation
+    //! Construct an iterator using container implementation
     const_container_iterator(const TColl& coll)
       : _coll(coll)
       , _idx(0) {
       static_assert(std::is_same<TElem, typename TColl::value_type>::value, "TColl must be a collection of TElem");
     }
-    //! Construct an (action, probability) collection iterator using the ranking_response implementation and size
+    //! Construct an iterator using container implementation and size
     const_container_iterator(const TColl& coll, size_t idx)
       : _coll(coll)
       , _idx(idx) {
@@ -86,7 +86,7 @@ namespace reinforcement_learning {
     bool operator!=(const const_container_iterator& other) const {
       return _idx != other._idx;
     }
-    //! Dereferencing operator to get the (action, probability) pair
+    //! Dereferencing operator to get the TElem
     const TElem& operator*() const {
       return _coll[_idx];
     }

@@ -28,9 +28,15 @@ namespace reinforcement_learning {
   };
 
   class decision_response {
+  private:
+    using coll_t = std::vector<slot_response>;
+
+    std::string _model_id;
+    coll_t _decision;
+
   public:
-    using iterator_t = container_iterator<slot_response>;
-    using const_iterator_t = const_container_iterator<slot_response>;
+    using iterator_t = container_iterator<slot_response, coll_t>;
+    using const_iterator_t = const_container_iterator<slot_response, coll_t>;
 
     decision_response() = default;
     ~decision_response() = default;
@@ -54,10 +60,5 @@ namespace reinforcement_learning {
     decision_response& operator=(decision_response&&) noexcept;
     decision_response(const decision_response&) = delete;
     decision_response& operator =(const decision_response&) = delete;
-  private:
-    using coll_t = std::vector<slot_response>;
-
-    std::string _model_id;
-    coll_t _decision;
   };
 }
