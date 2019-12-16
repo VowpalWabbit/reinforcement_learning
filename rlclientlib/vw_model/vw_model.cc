@@ -29,8 +29,7 @@ namespace reinforcement_learning { namespace model_management {
         }
         else {
           RETURN_ERROR_LS(_trace_logger, status, model_update_error) 
-            << "Received model is incompatible with initial configuration.\nInitialized: [" << _initial_command_line << "], Received:"
-            << "[TODO]";
+            << "Received model is incompatible with initial configuration " << _initial_command_line;
         }
       }
     }
