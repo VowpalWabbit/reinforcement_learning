@@ -29,6 +29,8 @@ namespace reinforcement_learning {
 
     const char* id() const;
 
+    bool is_compatible(const std::string& args) const;
+
     friend class safe_vw_factory;
   };
 
