@@ -63,6 +63,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/err_constants.h
   ../include/errors_data.h
   ../include/factory_resolver.h
+  ../include/future_compat.h
   ../include/live_model.h
   ../include/model_mgmt.h
   ../include/object_factory.h

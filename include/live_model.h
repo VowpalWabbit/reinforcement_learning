@@ -12,6 +12,7 @@
 #include "err_constants.h"
 #include "factory_resolver.h"
 #include "sender.h"
+#include "future_compat.h"
 
 #include <memory>
 
@@ -150,6 +151,7 @@ namespace reinforcement_learning {
     * @param status  Optional field with detailed string description if there is an error
     * @return int Return error code.  This will also be returned in the api_status object
     */
+    RL_DEPRECATED("New interface unifying CB with CCB is coming")
     int request_decision(const char * context_json, unsigned int flags, decision_response& resp, api_status* status = nullptr);
 
     /**
@@ -163,6 +165,7 @@ namespace reinforcement_learning {
     * @param status  Optional field with detailed string description if there is an error
     * @return int Return error code.  This will also be returned in the api_status object
     */
+    RL_DEPRECATED("New interface unifying CB with CCB is coming")
     int request_decision(const char * context_json, decision_response& resp, api_status* status = nullptr);
 
     /**

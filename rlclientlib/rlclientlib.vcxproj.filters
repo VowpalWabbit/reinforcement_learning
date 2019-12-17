@@ -105,6 +105,7 @@
     <ClInclude Include="model_mgmt\file_model_loader.h" />
     <ClInclude Include="..\include\decision_response.h" />
     <ClInclude Include="..\include\container_iterator.h" />
+    <ClInclude Include="..\include\future_compat.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
