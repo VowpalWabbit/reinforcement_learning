@@ -35,4 +35,5 @@ ERROR_CODE_DEFINITION(33, file_open_error, "Unable to open file.")
 ERROR_CODE_DEFINITION(34, json_no_slots_found, "Context json did not have slots (_slots array empty or not found)")
 ERROR_CODE_DEFINITION(34, file_read_error, "Unable to read from file.")
 ERROR_CODE_DEFINITION(36, file_stats_error, "Unable to read file statistics e.g. modified date time.")
+ERROR_CODE_DEFINITION(37, not_supported, "Not supported")
 //! [Error Definitions]

@@ -16,9 +16,6 @@ namespace Rl.Net {
             public static extern IntPtr CreateSlotResponse();
 
             [DllImport("rl.net.native.dll")]
-            public static extern void DeleteSlotResponse(IntPtr slotResponse);
-
-            [DllImport("rl.net.native.dll")]
             public static extern IntPtr GetSlotSlotId(IntPtr slotResponse);
 
             [DllImport("rl.net.native.dll")]

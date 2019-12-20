@@ -38,11 +38,6 @@ public:
     }
 };
 
-API void DeleteSlotResponse(reinforcement_learning::slot_response* slot)
-{
-  delete slot;
-}
-
 API const char* GetSlotSlotId(reinforcement_learning::slot_response* slot)
 {
   return slot->get_slot_id();

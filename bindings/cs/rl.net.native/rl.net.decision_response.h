@@ -8,8 +8,6 @@ class decision_enumerator_adapter;
 // Global exports
 extern "C" {
     // NOTE: THIS IS NOT POLYMORPHISM SAFE!
-    API void DeleteSlotResponse(reinforcement_learning::slot_response* slot);
-    
     API const char* GetSlotSlotId(reinforcement_learning::slot_response* slot);
     API int GetSlotActionId(reinforcement_learning::slot_response* slot);
     API float GetSlotProbability(reinforcement_learning::slot_response* slot);
