@@ -6,6 +6,8 @@
  * @date 2018-07-18
  */
 #pragma once
+#include "container_iterator.h"
+
 #include <cstddef>
 #include <iterator>
 #include <vector>
@@ -13,7 +15,6 @@
 
 namespace reinforcement_learning {
   class api_status;
-  class ranking_response_impl;
 
   /**
    * @brief Holds (action, probability) pairs, POD used for extern "C"
@@ -77,6 +78,16 @@ namespace reinforcement_learning {
     int set_chosen_action_id(size_t action_id, api_status* status = nullptr); // id of the top action chosen by the model
 
     /**
+     * @brief Set the chosen action id, but do not verify the index fits within the ranking.  (This is set internally by the API)
+     * This is used in CCB where subsequent ranking_responses have subsets of the orignal actionset.
+     *
+     * @param action_id Chosen action id
+     * @param status Optional field with detailed string description if there is an error
+     * @return int Error code
+     */
+    int set_chosen_action_id_unchecked(size_t action_id, api_status* = nullptr);
+
+    /**
      * @brief Set the event_id.  (This is set internally by the API)
      * @param event_id
      */
@@ -104,7 +115,7 @@ namespace reinforcement_learning {
      * @param model_id
      */
     void set_model_id(const char* model_id);
- 
+
     /**
      * @brief Set the model_id.
      * Every call to choose action is associated with a unique model used to predict.  A unique model_id
@@ -158,64 +169,8 @@ namespace reinforcement_learning {
     coll_t _ranking;
 
   public:
-    /**
-     * @brief Forward iterator class used to access the (action, probability) collection
-     */
-    class iterator : public std::iterator<
-      std::forward_iterator_tag,
-      action_prob> {
-    public:
-      //! Construct an (action, probability) collection iterator using the ranking_response implementation
-      iterator(ranking_response*);
-      //! Construct an (action, probability) collection iterator using the ranking_response implementation and size
-      iterator(ranking_response*, size_t);
-      //! Move the iterator to the next element
-      iterator& operator++();
-      //! Inequality comparison for the iterator
-      bool operator!=(const iterator& other) const;
-      //! Dereferencing operator to get the (action, probability) pair
-      action_prob& operator*();
-      //! Allow comparison of iterators
-      bool operator<(const iterator& rhs) const;
-      //! Allow distance measurement
-      int64_t operator-(const iterator& rhs) const;
-      //! Increment the index
-      iterator operator+(const uint32_t idx) const;
-
-    private:
-      ranking_response* _p_resp;
-      size_t _idx;
-    };
-
-    /**
-    * @brief Forward const iterator class used to access the (action, probability) collection
-    */
-    class const_iterator : public std::iterator<
-      std::forward_iterator_tag,
-      action_prob> {
-    public:
-      //! Construct an (action, probability) collection iterator using the ranking_response implementation
-      const_iterator(const ranking_response*);
-      //! Construct an (action, probability) collection iterator using the ranking_response implementation and size
-      const_iterator(const ranking_response*, size_t);
-      //! Move the iterator to the next element
-      const_iterator& operator++();
-      //! Inequality comparison for the iterator
-      bool operator!=(const const_iterator& other) const;
-      //! Dereferencing operator to get the (action, probability) pair
-      const action_prob& operator*() const;
-      //! Allow comparison of iterators
-      bool operator<(const const_iterator& rhs) const;
-      //! Allow distance measurement
-      int64_t operator-(const const_iterator& rhs) const;
-      //! Increment the index
-      const_iterator operator+(const uint32_t idx) const;
-
-    private:
-      const ranking_response* _p_resp;
-      size_t _idx;
-    };
-
+    using iterator = container_iterator<action_prob, coll_t>;
+    using const_iterator = const_container_iterator<action_prob, coll_t>;
     //! Returns an iterator pointing to the first element of the (action, probability) collection
     const_iterator begin() const;
     iterator begin();

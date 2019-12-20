@@ -41,7 +41,7 @@ public:
   }
 
   bool try_drop(float drop_prob, int _drop_pass) override { return false; }
-  std::string get_event_id() { return _event_id; }
+  std::string get_event_id() { return _seed_id; }
 };
 class test_droppable_event : public event {
 public:
@@ -66,7 +66,7 @@ namespace reinforcement_learning { namespace logger {
     using serializer_t = json_event_serializer<test_droppable_event>;
 
     static int serialize(test_droppable_event& evt, std::ostream& out, api_status* status) {
-      out << evt.get_event_id();
+      out << evt.get_seed_id();
       return error_code::success;
     }
 

@@ -41,6 +41,7 @@
     <ClCompile Include="sampling.cc" />
     <ClCompile Include="time_helper.cc" />
     <ClCompile Include="model_mgmt\file_model_loader.cc" />
+    <ClCompile Include="decision_response.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -102,11 +103,15 @@
     <ClInclude Include="time_helper.h" />
     <ClInclude Include="generated\Metadata_generated.h" />
     <ClInclude Include="model_mgmt\file_model_loader.h" />
+    <ClInclude Include="..\include\decision_response.h" />
+    <ClInclude Include="..\include\container_iterator.h" />
+    <ClInclude Include="..\include\future_compat.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="schema\OutcomeEvent.fbs" />
     <None Include="schema\RankingEvent.fbs" />
+    <None Include="schema\DecisionRankingEvent.fbs" />
     <None Include="schema\Metadata.fbs" />
   </ItemGroup>
   <ItemGroup>
