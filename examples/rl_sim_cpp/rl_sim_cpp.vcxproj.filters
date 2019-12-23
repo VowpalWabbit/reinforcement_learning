@@ -30,6 +30,9 @@
     <ClInclude Include="simulation_stats.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="error_context.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cc">
