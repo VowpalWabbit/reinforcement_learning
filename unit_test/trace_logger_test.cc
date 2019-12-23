@@ -13,6 +13,8 @@
 #include "err_constants.h"
 #include "console_tracer.h"
 
+#include <mutex>
+
 #ifdef __GNUG__
 
 // Fakeit does not work with GCC's devirtualization
@@ -43,9 +45,11 @@ const auto JSON_CONTEXT = R"({"_multi":[{},{}]})";
 
 struct vector_tracer : r::i_trace {
   void log(int log_level, const std::string& msg) override {
+    std::unique_lock<std::mutex> mlock(mutex);
     data.emplace_back(msg);
   }
   std::vector<std::string> data;
+  std::mutex mutex;
 };
 
 vector_tracer* the_tracer = new vector_tracer();
