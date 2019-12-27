@@ -3,6 +3,7 @@ add_library(rl.net.native SHARED
   rl.net.config.cc
   rl.net.live_model.cc
   rl.net.ranking_response.cc
+  rl.net.decision_response.cc
   binding_tracer.cc
 )
 

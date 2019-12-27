@@ -1,12 +1,43 @@
 #include "sampling.h"
 #include "err_constants.h"
-#include "ranking_response.h"
 #include "trace_logger.h"
 #include "api_status.h"
 #include "explore.h"
+#include <iostream>
 
 namespace e = exploration;
 namespace reinforcement_learning {
+
+int populate_response(size_t chosen_action_index, std::vector<int>& action_ids, std::vector<float>& pdf, std::string&& model_id, ranking_response& response, i_trace* trace_logger, api_status* status) {
+  for ( size_t idx = 0; idx < pdf.size(); ++idx ) {
+    response.push_back(action_ids[idx], pdf[idx]);
+  }
+
+  RETURN_IF_FAIL(response.set_chosen_action_id(action_ids[chosen_action_index]));
+  response.set_model_id(std::move(model_id));
+  return error_code::success;
+}
+
+int populate_response(const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::vector<const char*>& event_ids, std::string&& model_id, decision_response& response, i_trace* trace_logger, api_status* status) {
+  if(action_ids.size() != pdfs.size())
+  {
+    RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids and pdfs must be the same size";
+  }
+
+  response.set_model_id(std::move(model_id));
+  for(size_t i = 0; i < action_ids.size(); i++)
+  {
+    if(action_ids[i].size() != pdfs[i].size())
+    {
+      RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids[i] and pdfs[i] must be the same size";
+    }
+
+    response.push_back(event_ids[i], action_ids[i][0], pdfs[i][0]);
+  }
+
+  return error_code::success;
+}
+
 int sample_and_populate_response(uint64_t rnd_seed, std::vector<int>& action_ids, std::vector<float>& pdf, std::string&& model_id, ranking_response& response, i_trace* trace_logger, api_status* status) {
     try {
       // Pick a slot using the pdf. NOTE: sample_after_normalizing() can change the pdf
@@ -17,10 +48,7 @@ int sample_and_populate_response(uint64_t rnd_seed, std::vector<int>& action_ids
         RETURN_ERROR_LS(trace_logger, status, exploration_error) << scode;
       }
 
-      // Setup response with pdf from prediction and action indexes
-      for ( size_t idx = 0; idx < pdf.size(); ++idx ) {
-        response.push_back(action_ids[idx], pdf[idx]);
-      }
+      RETURN_IF_FAIL(populate_response(chosen_index, action_ids, pdf, std::move(model_id), response, trace_logger, status));
 
       // Swap values in first position with values in chosen index
       scode = e::swap_chosen(std::begin(response), std::end(response), chosen_index);
@@ -29,8 +57,6 @@ int sample_and_populate_response(uint64_t rnd_seed, std::vector<int>& action_ids
         RETURN_ERROR_LS(trace_logger, status, exploration_error) << "Exploration error code: " << scode;
       }
 
-      response.set_chosen_action_id(action_ids[chosen_index]);
-      response.set_model_id(std::move(model_id));
       return error_code::success;
     }
     catch ( const std::exception& e) {
