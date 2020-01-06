@@ -251,27 +251,23 @@ bool safe_vw::is_compatible(const std::string& args) const {
 }
 
 safe_vw_factory::safe_vw_factory(const std::string& command_line)
-  : _command_line(command_line)
-{}
+{
+	_safe_vw = std::make_shared<safe_vw>(command_line);
+}
 
 safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data)
-  : _master_data(master_data)
-  {}
+{
+	_safe_vw = std::make_shared<safe_vw>(master_data.data(), master_data.data_sz());
+}
 
 safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_data)
-  : _master_data(master_data)
-  {}
+{
+	_safe_vw = std::make_shared<safe_vw>(master_data.data(), master_data.data_sz());
+}
 
-  safe_vw* safe_vw_factory::operator()()
-  {
-    if (_master_data.data())
-    {
-      // Construct new vw object from raw model data.
-      return new safe_vw(_master_data.data(), _master_data.data_sz());
-    }
-    else
-    {
-      return new safe_vw(_command_line);
-    }
-  }
+safe_vw* safe_vw_factory::operator()()
+{
+    return new safe_vw(_safe_vw);
+}
+
 }

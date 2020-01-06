@@ -35,8 +35,7 @@ namespace reinforcement_learning {
   };
 
   class safe_vw_factory {
-    model_management::model_data _master_data;
-    std::string _command_line;
+	std::shared_ptr<safe_vw> _safe_vw;
 
   public:
     // model_data is copied and stored in the factory object.
