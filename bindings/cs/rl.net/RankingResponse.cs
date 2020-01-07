@@ -131,7 +131,7 @@ namespace Rl.Net {
             }
 
             GC.KeepAlive(this);
-            return true;
+            return success;
         }
 
         public long ChosenAction
@@ -171,7 +171,7 @@ namespace Rl.Net {
                 {
                     IntPtr result = CreateRankingEnumeratorAdapter(rankingResponse.DangerousGetHandle());
 
-                    GC.KeepAlive(rankingResponse); // TODO: Is this one necessary, or does it live on the heap inside of the delegate?
+                    GC.KeepAlive(rankingResponse); // Extend the lifetime of this handle because the delegate (and its data) is not stored on the heap.
                     return result;
                 });
             }
