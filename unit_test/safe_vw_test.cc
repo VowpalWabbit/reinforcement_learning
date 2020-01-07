@@ -73,40 +73,66 @@ BOOST_AUTO_TEST_CASE(factory_with_initial_model)
   }
 }
 
-BOOST_AUTO_TEST_CASE(factory_with_empty_model) {
+bool IsBadModelFormatException(const VW::vw_exception& ex)
+{
+	BOOST_CHECK_EQUAL(ex.what(), std::string("bad model format!"));
+	return true;
+}
+
+BOOST_AUTO_TEST_CASE(factory_with_initial_model_update_model) {
   const auto json = R"({"a":{"0":1,"5":2},"_multi":[{"b":{"0":1}},{"b":{"0":2}},{"b":{"0":3}}]})";
   std::vector<float> ranking_expected = { .8f, .1f, .1f };
+  std::vector<float> updated_model_ranking_expected = { 1, 0, 0 };
 
-  // Start with empty model data
-  model_management::model_data empty_data;
-  const auto factory = new safe_vw_factory(empty_data);
+  // Start with an initial model
+  model_management::model_data model_data;
+  get_model_data_from_raw((const char*)cb_data_5_model, cb_data_5_model_len, &model_data);
+
+  const auto factory = new safe_vw_factory(model_data);
   versioned_object_pool<safe_vw, safe_vw_factory> pool(factory);
 
-  // Initial model & rank call
+  // Initial model & rank call, update with a bad formatted model
   {
-    model_management::model_data new_model;
-    get_model_data_from_raw((const char*)cb_data_5_model, cb_data_5_model_len, &new_model);
-    pool.update_factory(new safe_vw_factory(new_model));
     pooled_vw vw(pool, pool.get_or_create());
 
     std::vector<int> actions;
     std::vector<float> ranking;
     vw->rank(json, actions, ranking);
+	
+	BOOST_CHECK_EQUAL_COLLECTIONS(ranking.begin(), ranking.end(), ranking_expected.begin(), ranking_expected.end());
 
-    BOOST_CHECK_EQUAL_COLLECTIONS(ranking.begin(), ranking.end(), ranking_expected.begin(), ranking_expected.end());
+	model_management::model_data new_model;
+	BOOST_CHECK_EXCEPTION(pool.update_factory(new safe_vw_factory(new_model)), VW::vw_exception, IsBadModelFormatException);
+	
+	pooled_vw vwNew(pool, pool.get_or_create());
+	vwNew->rank(json, actions, ranking);
+
+	BOOST_CHECK_EQUAL_COLLECTIONS(ranking.begin(), ranking.end(), ranking_expected.begin(), ranking_expected.end());
   }
-
   // Update model & rank call
   {
-    model_management::model_data new_model;
-    get_model_data_from_raw((const char*)cb_data_5_model, cb_data_5_model_len, &new_model);
-    pool.update_factory(new safe_vw_factory(new_model));
     pooled_vw vw(pool, pool.get_or_create());
 
-    std::vector<int> actions;
-    std::vector<float> ranking;
-    vw->rank(json, actions, ranking);
+	std::vector<int> actions;
+	std::vector<float> ranking;
+	vw->rank(json, actions, ranking);
+		
+	BOOST_CHECK_EQUAL_COLLECTIONS(ranking.begin(), ranking.end(), ranking_expected.begin(), ranking_expected.end());
 
-    BOOST_CHECK_EQUAL_COLLECTIONS(ranking.begin(), ranking.end(), ranking_expected.begin(), ranking_expected.end());
+    model_management::model_data new_model;
+    get_model_data_from_raw((const char*)cb_data_7_model, cb_data_7_model_len, &new_model);
+    pool.update_factory(new safe_vw_factory(new_model));
+    
+	pooled_vw vwNew(pool, pool.get_or_create());
+	vwNew->rank(json, actions, ranking);
+
+	BOOST_CHECK_EQUAL_COLLECTIONS(ranking.begin(), ranking.end(), updated_model_ranking_expected.begin(), updated_model_ranking_expected.end());
   }
+}
+
+BOOST_AUTO_TEST_CASE(factory_with_empty_model) {
+	{
+		model_management::model_data empty_data;
+		BOOST_CHECK_EXCEPTION(new safe_vw_factory(empty_data), VW::vw_exception, IsBadModelFormatException);
+	}
 }
