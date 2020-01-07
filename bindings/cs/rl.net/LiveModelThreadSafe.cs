@@ -18,10 +18,10 @@ namespace Rl.Net
         private void InvokeDangerous(Action action)
         {
             bool refAdded = false;
-            this.liveModel.DangerousAddRef(ref refAdded);
 
             try
             {
+                this.liveModel.DangerousAddRef(ref refAdded);
                 action();
             }
             finally
@@ -36,10 +36,10 @@ namespace Rl.Net
         private TResult InvokeDangerous<TResult>(Func<TResult> func)
         {
             bool refAdded = false;
-            this.liveModel.DangerousAddRef(ref refAdded);
             
             try
             {
+                this.liveModel.DangerousAddRef(ref refAdded);
                 return func();
             }
             finally
