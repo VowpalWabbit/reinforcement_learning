@@ -83,9 +83,12 @@ namespace Rl.Net {
         {
             get
             {
-                IntPtr eventIdUtf8Ptr = NativeMethods.GetRankingEventId(this.NativeHandle);
+                IntPtr eventIdUtf8Ptr = NativeMethods.GetRankingEventId(this.DangerousGetHandle());
 
-                return NativeMethods.StringMarshallingFunc(eventIdUtf8Ptr);
+                string result = NativeMethods.StringMarshallingFunc(eventIdUtf8Ptr);
+
+                GC.KeepAlive(this);
+                return result;
             }
         }
 
@@ -93,9 +96,12 @@ namespace Rl.Net {
         {
             get
             {
-                IntPtr modelIdUtf8Ptr = NativeMethods.GetRankingModelId(this.NativeHandle);
+                IntPtr modelIdUtf8Ptr = NativeMethods.GetRankingModelId(this.DangerousGetHandle());
 
-                return NativeMethods.StringMarshallingFunc(modelIdUtf8Ptr);
+                string result = NativeMethods.StringMarshallingFunc(modelIdUtf8Ptr);
+
+                GC.KeepAlive(this);
+                return result;
             }
         }
 
@@ -103,9 +109,10 @@ namespace Rl.Net {
         {
             get
             {
-                ulong unsignedSize = NativeMethods.GetRankingActionCount(this.NativeHandle).ToUInt64();
+                ulong unsignedSize = NativeMethods.GetRankingActionCount(this.DangerousGetHandle()).ToUInt64();
                 Debug.Assert(unsignedSize < Int64.MaxValue, "We do not support collections with size larger than _I64_MAX/Int64.MaxValue");
     
+                GC.KeepAlive(this);
                 return (long)unsignedSize;
             }
         }
@@ -115,15 +122,16 @@ namespace Rl.Net {
         {
             actionIndex = -1;
             UIntPtr chosenAction;
-            int result = NativeMethods.GetRankingChosenAction(this.NativeHandle, out chosenAction, status.ToNativeHandleOrNullptr());
+            int result = NativeMethods.GetRankingChosenAction(this.DangerousGetHandle(), out chosenAction, status.ToNativeHandleOrNullptrDangerous());
 
-            if (result != NativeMethods.SuccessStatus)
+            bool success = (result == NativeMethods.SuccessStatus);
+            if (success)
             {
-                return false;
+                actionIndex = (long)(chosenAction.ToUInt64());
             }
 
-            actionIndex = (long)(chosenAction.ToUInt64());
-            return true;
+            GC.KeepAlive(this);
+            return success;
         }
 
         public long ChosenAction
@@ -159,7 +167,13 @@ namespace Rl.Net {
 
             private static New<RankingResponseEnumerator> BindConstructorArguments(RankingResponse rankingResponse)
             {
-                return new New<RankingResponseEnumerator>(() => CreateRankingEnumeratorAdapter(rankingResponse.NativeHandle));
+                return new New<RankingResponseEnumerator>(() => 
+                {
+                    IntPtr result = CreateRankingEnumeratorAdapter(rankingResponse.DangerousGetHandle());
+
+                    GC.KeepAlive(rankingResponse); // Extend the lifetime of this handle because the delegate (and its data) is not stored on the heap.
+                    return result;
+                });
             }
 
             [DllImport("rl.net.native.dll")]
@@ -184,7 +198,10 @@ namespace Rl.Net {
             {
                 get
                 {
-                    return GetRankingEnumeratorCurrent(this.NativeHandle);
+                    ActionProbability result = GetRankingEnumeratorCurrent(this.DangerousGetHandle());
+
+                    GC.KeepAlive(this);
+                    return result;
                 }
             }
 
@@ -196,14 +213,15 @@ namespace Rl.Net {
                 if (this.initialState)
                 {
                     this.initialState = false;
-                    result = RankingEnumeratorInit(this.NativeHandle);
+                    result = RankingEnumeratorInit(this.DangerousGetHandle());
                 }
                 else
                 {
-                    result = RankingEnumeratorMoveNext(this.NativeHandle);
+                    result = RankingEnumeratorMoveNext(this.DangerousGetHandle());
                 }
 
                 // The contract of result is to return 1 if true, 0 if false.
+                GC.KeepAlive(this);
                 return result == 1;
             }
 

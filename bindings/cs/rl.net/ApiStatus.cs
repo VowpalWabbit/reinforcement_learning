@@ -27,18 +27,29 @@ namespace Rl.Net {
         {
         }
 
-        public int ErrorCode => GetApiStatusErrorCode(this.handle);
+        public int ErrorCode
+        {
+            get
+            {
+                int result = GetApiStatusErrorCode(this.DangerousGetHandle());
+
+                GC.KeepAlive(this);
+                return result;
+            }
+        } 
 
         public string ErrorMessage
         {
             get
             {
-                IntPtr errorMessagePtr = GetApiStatusErrorMessage(this.handle);
+                IntPtr errorMessagePtr = GetApiStatusErrorMessage(this.DangerousGetHandle());
 
                 // We cannot rely on P/Invoke's marshalling here, because it assumes that it can deallocate the string
                 // it receives, after converting it to a managed string. We cannot do this, in this case.
+                string result = NativeMethods.StringMarshallingFunc(errorMessagePtr);
 
-                return NativeMethods.StringMarshallingFunc(errorMessagePtr);
+                GC.KeepAlive(this);
+                return result;
             }
         }
     }

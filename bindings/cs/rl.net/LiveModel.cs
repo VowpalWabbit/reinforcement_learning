@@ -146,13 +146,22 @@ namespace Rl.Net
         
         private static New<LiveModel> BindConstructorArguments(Configuration config)
         {
-            return new New<LiveModel>(() => NativeMethods.CreateLiveModel(config.NativeHandle));
+            return new New<LiveModel>(() => 
+            {
+                IntPtr result = NativeMethods.CreateLiveModel(config.DangerousGetHandle());
+
+                GC.KeepAlive(config); // TODO: Is this one necessary, or does it live on the heap inside of the delegate?
+                return result;
+            });
         }
         
         public LiveModel(Configuration config) : base(BindConstructorArguments(config), new Delete<LiveModel>(NativeMethods.DeleteLiveModel))
         {
             this.managedErrorCallback = new NativeMethods.managed_background_error_callback_t(this.WrapStatusAndRaiseBackgroundError);
-            NativeMethods.LiveModelSetCallback(this.NativeHandle, this.managedErrorCallback);
+
+            // DangerousGetHandle here is trivially safe, because .Dispose() cannot be called before the object is
+            // constructed.
+            NativeMethods.LiveModelSetCallback(this.DangerousGetHandle(), this.managedErrorCallback);
 
             this.managedTraceCallback = new NativeMethods.managed_trace_callback_t(this.SendTrace);
         }
@@ -309,7 +318,9 @@ namespace Rl.Net
 
         public bool TryInit(ApiStatus apiStatus = null)
         {
-            int result = NativeMethods.LiveModelInit(this.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            int result = NativeMethods.LiveModelInit(this.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
@@ -330,7 +341,9 @@ namespace Rl.Net
 
         public bool TryChooseRank(string eventId, string contextJson, RankingResponse response, ApiStatus apiStatus = null)
         {
-            int result = LiveModelChooseRank(this.NativeHandle, eventId, contextJson, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            int result = LiveModelChooseRank(this.DangerousGetHandle(), eventId, contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
@@ -355,7 +368,9 @@ namespace Rl.Net
 
         public bool TryChooseRank(string eventId, string contextJson, ActionFlags flags, RankingResponse response, ApiStatus apiStatus = null)
         {
-            int result = LiveModelChooseRankWithFlags(this.NativeHandle, eventId, contextJson, (uint)flags, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            int result = LiveModelChooseRankWithFlags(this.DangerousGetHandle(), eventId, contextJson, (uint)flags, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
@@ -380,7 +395,9 @@ namespace Rl.Net
 
         public bool TryRequestDecision(string contextJson, DecisionResponse response, ApiStatus apiStatus = null)
         {
-            int result = LiveModelRequestDecision(this.NativeHandle, contextJson, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            int result = LiveModelRequestDecision(this.DangerousGetHandle(), contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
@@ -400,12 +417,14 @@ namespace Rl.Net
         public bool TryRequestDecision(string contextJson, ActionFlags flags, out DecisionResponse response, ApiStatus apiStatus)
         {
             response = new DecisionResponse();
+
+            GC.KeepAlive(this);
             return this.TryRequestDecision(contextJson, flags, response, apiStatus);
         }
 
         public bool TryRequestDecision(string contextJson, ActionFlags flags, DecisionResponse response, ApiStatus apiStatus)
         {
-            int result = LiveModelRequestDecisionWithFlags(this.NativeHandle, contextJson, (uint)flags, response.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            int result = LiveModelRequestDecisionWithFlags(this.DangerousGetHandle(), contextJson, (uint)flags, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
             return result == NativeMethods.SuccessStatus;
         }
 
@@ -429,7 +448,9 @@ namespace Rl.Net
 
         public bool TryQueueActionTakenEvent(string eventId, ApiStatus apiStatus = null)
         {
-            int result = LiveModelReportActionTaken(this.NativeHandle, eventId, apiStatus.ToNativeHandleOrNullptr());
+            int result = LiveModelReportActionTaken(this.DangerousGetHandle(), eventId, apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
@@ -452,11 +473,13 @@ namespace Rl.Net
 
         public bool TryQueueOutcomeEvent(string eventId, float outcome, ApiStatus apiStatus = null)
         {
-            int result = LiveModelReportOutcomeF(this.NativeHandle, eventId, outcome, apiStatus.ToNativeHandleOrNullptr());
+            int result = LiveModelReportOutcomeF(this.DangerousGetHandle(), eventId, outcome, apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
-        [Obsolete("Use QueueOutcomeReport insteaed.")]
+        [Obsolete("Use QueueOutcomeReport instead.")]
         public void ReportOutcome(string eventId, float outcome)
             => this.QueueOutcomeEvent(eventId, outcome);
 
@@ -475,7 +498,9 @@ namespace Rl.Net
 
         public bool TryQueueOutcomeEvent(string eventId, string outcomeJson, ApiStatus apiStatus = null)
         {
-            int result = LiveModelReportOutcomeJson(this.NativeHandle, eventId, outcomeJson, apiStatus.ToNativeHandleOrNullptr());
+            int result = LiveModelReportOutcomeJson(this.DangerousGetHandle(), eventId, outcomeJson, apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
@@ -503,13 +528,13 @@ namespace Rl.Net
 
         public bool TryRefreshModel(ApiStatus apiStatus = null)
         {
-            int result = NativeMethods.LiveModelRefreshModel(this.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            int result = NativeMethods.LiveModelRefreshModel(this.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
             return result == NativeMethods.SuccessStatus;
         }
 
         private event EventHandler<ApiStatus> BackgroundErrorInternal;
 
-        // This event is thread-safe, because we do not hook/unhook the event in user-schedulable code anymore.
+        // This event is thread-safe, because we do not hook/unhook the event in user-scheduleable code anymore.
         public event EventHandler<ApiStatus> BackgroundError
         {
             add
@@ -534,7 +559,8 @@ namespace Rl.Net
             {
                 if (this.OnTraceLoggerEventInternal == null)
                 {
-                    NativeMethods.LiveModelSetTrace(this.NativeHandle, this.managedTraceCallback);
+                    NativeMethods.LiveModelSetTrace(this.DangerousGetHandle(), this.managedTraceCallback);
+                    GC.KeepAlive(this);
                 }
 
                 this.OnTraceLoggerEventInternal += value;
@@ -545,7 +571,8 @@ namespace Rl.Net
 
                 if (this.OnTraceLoggerEventInternal == null)
                 {
-                    NativeMethods.LiveModelSetTrace(this.NativeHandle, null);
+                    NativeMethods.LiveModelSetTrace(this.DangerousGetHandle(), null);
+                    GC.KeepAlive(this);
                 }
             }
         }

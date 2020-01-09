@@ -141,7 +141,7 @@ namespace Rl.Net {
         {
             config = new Configuration();
 
-            int result = LoadConfigurationFromJson(json, config.NativeHandle, apiStatus.ToNativeHandleOrNullptr());
+            int result = LoadConfigurationFromJson(json, config.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
             return result == NativeMethods.SuccessStatus;
         }
 
@@ -162,11 +162,16 @@ namespace Rl.Net {
         {
             get
             {
-                return ConfigurationGet(this.NativeHandle, key, string.Empty);
+                string result = ConfigurationGet(this.DangerousGetHandle(), key, string.Empty);
+
+                GC.KeepAlive(this);
+                return result;
             }
             set
             {
-                ConfigurationSet(this.NativeHandle, key, value ?? string.Empty);
+                ConfigurationSet(this.DangerousGetHandle(), key, value ?? string.Empty);
+
+                GC.KeepAlive(this);
             }
         }
     }

@@ -11,14 +11,14 @@ namespace Rl.Net.Native {
 
         public const int SuccessStatus = 0; // See err_constants.h
 
-        public static IntPtr ToNativeHandleOrNullptr<TObject>(this NativeObject<TObject> nativeObject) where TObject : NativeObject<TObject>
+        public static IntPtr ToNativeHandleOrNullptrDangerous<TObject>(this NativeObject<TObject> nativeObject) where TObject : NativeObject<TObject>
         {
             if (nativeObject == null)
             {
                 return IntPtr.Zero;
             }
 
-            return nativeObject.NativeHandle;
+            return nativeObject.DangerousGetHandle();
         }
     }
 }
