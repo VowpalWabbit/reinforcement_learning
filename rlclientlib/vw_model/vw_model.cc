@@ -9,7 +9,7 @@
 namespace reinforcement_learning { namespace model_management {
 
   vw_model::vw_model(i_trace* trace_logger, const utility::configuration& config)
-    : _initial_command_line(config.get(name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A"))
+    : _initial_command_line(config.get(name::MODEL_VW_INITIAL_COMMAND_LINE, "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A"))
     , _vw_pool(new safe_vw_factory(_initial_command_line), config.get_int(name::VW_POOL_INIT_SIZE, value::DEFAULT_VW_POOL_INIT_SIZE))
     , _trace_logger(trace_logger) {
   }
