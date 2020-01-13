@@ -136,6 +136,7 @@ BOOST_AUTO_TEST_CASE(live_model_request_decision) {
   u::configuration config;
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
 
@@ -536,6 +537,7 @@ BOOST_AUTO_TEST_CASE(ccb_explore_only_mode) {
   config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
   config.set(r::name::INTERACTION_FILE_NAME,"interaction.txt");
   config.set(r::name::OBSERVATION_FILE_NAME,"observation.txt");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
   r::live_model model(config);
