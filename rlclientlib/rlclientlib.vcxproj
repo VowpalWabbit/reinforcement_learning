@@ -164,7 +164,7 @@
   <ItemGroup>
     <ClInclude Include="..\include\action_flags.h" />
     <ClInclude Include="..\include\api_status.h" />
-    <ClInclude Include="..\include\cb_logger.h" />
+    <ClInclude Include="..\include\rl_logger.h" />
     <ClInclude Include="..\include\configuration.h" />
     <ClInclude Include="..\include\live_model.h" />
     <ClInclude Include="..\include\sender.h" />
@@ -179,7 +179,7 @@
     <ClInclude Include="..\include\str_util.h" />
     <ClInclude Include="..\include\trace_logger.h" />
     <ClInclude Include="..\include\data_buffer.h" />
-    <ClInclude Include="cb_logger_impl.h" />
+    <ClInclude Include="rl_logger_impl.h" />
     <ClInclude Include="logger\file\file_logger.h" />
     <ClInclude Include="model_mgmt\file_model_loader.h" />
     <ClInclude Include="time_helper.h" />
@@ -226,8 +226,8 @@
     <ClInclude Include="ranking_event.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cb_logger.cc" />
-    <ClCompile Include="cb_logger_impl.cc" />
+    <ClCompile Include="rl_logger.cc" />
+    <ClCompile Include="rl_logger_impl.cc" />
     <ClCompile Include="logger\file\file_logger.cc" />
     <ClCompile Include="model_mgmt\data_callback_fn.cc" />
     <ClCompile Include="model_mgmt\empty_data_transport.cc" />

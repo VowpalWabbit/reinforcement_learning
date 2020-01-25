@@ -61,4 +61,6 @@ namespace reinforcement_learning {
       i_trace* _trace_logger;
     };
   }
+
+  void default_error_callback(const api_status& status, void* watchdog_context);
 }

@@ -33,11 +33,6 @@ namespace reinforcement_learning {
   using vw_ptr = std::shared_ptr<safe_vw>;
   using pooled_vw = utility::pooled_object_guard<safe_vw, safe_vw_factory>;
 
-  void default_error_callback(const api_status& status, void* watchdog_context) {
-    auto watchdog = static_cast<utility::watchdog*>(watchdog_context);
-    watchdog->set_unhandled_background_error(true);
-  }
-
   int live_model_impl::init(api_status* status) {
     RETURN_IF_FAIL(init_trace(status));
     RETURN_IF_FAIL(init_model(status));

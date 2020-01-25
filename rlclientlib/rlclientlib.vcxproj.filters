@@ -41,9 +41,9 @@
     <ClCompile Include="sampling.cc" />
     <ClCompile Include="time_helper.cc" />
     <ClCompile Include="model_mgmt\file_model_loader.cc" />
-    <ClCompile Include="cb_logger_impl.cc" />
     <ClCompile Include="utility\invariant_helpers.cc" />
-    <ClCompile Include="cb_logger.cc" />
+    <ClCompile Include="rl_logger.cc" />
+    <ClCompile Include="rl_logger_impl.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -105,9 +105,9 @@
     <ClInclude Include="time_helper.h" />
     <ClInclude Include="generated\Metadata_generated.h" />
     <ClInclude Include="model_mgmt\file_model_loader.h" />
-    <ClInclude Include="cb_logger_impl.h" />
     <ClInclude Include="utility\invariant_helpers.h" />
-    <ClInclude Include="..\include\cb_logger.h" />
+    <ClInclude Include="..\include\rl_logger.h" />
+    <ClInclude Include="rl_logger_impl.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

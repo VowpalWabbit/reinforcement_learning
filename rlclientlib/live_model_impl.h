@@ -4,7 +4,7 @@
 #include "model_mgmt/data_callback_fn.h"
 #include "model_mgmt/model_downloader.h"
 #include "utility/periodic_background_proc.h"
-#include "cb_logger_impl.h"
+#include "rl_logger_impl.h"
 
 #include "factory_resolver.h"
 #include "utility/watchdog.h"
@@ -82,7 +82,7 @@ namespace reinforcement_learning
     std::unique_ptr<model_management::i_model> _model{nullptr};
     std::unique_ptr<model_management::model_downloader> _model_download{nullptr};
     std::shared_ptr<i_trace> _trace_logger{nullptr};
-    cb::logger_impl _logger_impl;
+    rl_logger_impl _logger_impl;
 
     std::unique_ptr<utility::periodic_background_proc<model_management::model_downloader>> _bg_model_proc;
     uint64_t _seed_shift;
