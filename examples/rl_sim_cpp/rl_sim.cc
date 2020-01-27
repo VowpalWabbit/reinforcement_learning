@@ -11,10 +11,21 @@
 using namespace std;
 
 std::string get_dist_str(const reinforcement_learning::ranking_response& response);
+std::string get_dist_str(const reinforcement_learning::slot_response& response);
 
 int rl_sim::loop() {
   if ( !init() ) return -1;
-  
+
+  if(ccb_mode)
+  {
+    return ccb_loop();
+  }
+  else {
+    return cb_loop();
+  }
+}
+
+int rl_sim::cb_loop() {
   r::ranking_response response;
   simulation_stats stats;
 
@@ -23,7 +34,7 @@ int rl_sim::loop() {
     const auto context_features = p.get_features();
     const auto action_features = get_action_features();
     const auto context_json = create_context_json(context_features,action_features);
-    const auto req_id = create_event_id();  
+    const auto req_id = create_event_id();
     r::api_status status;
 
     // Choose an action
@@ -59,11 +70,62 @@ int rl_sim::loop() {
   return 0;
 }
 
+int rl_sim::ccb_loop() {
+  r::decision_response decision;
+  simulation_stats stats;
+
+  while ( _run_loop ) {
+    auto& p = pick_a_random_person();
+    const auto context_features = p.get_features();
+    const auto action_features = get_action_features();
+
+    std::vector<std::string> ids;
+    for(int i = 0; i < NUM_SLOTS; i++)
+    {
+      ids.push_back(create_event_id());
+    }
+
+    const auto slot_json =  get_slot_features(ids);
+    const auto context_json = create_context_json(context_features,action_features, slot_json);
+    std::cout << context_json <<std::endl;
+    r::api_status status;
+
+    // Choose an action
+    if ( _rl->request_decision(context_json.c_str(), decision, &status) != err::success ) {
+      std::cout << status.get_error_msg() << std::endl;
+      continue;
+    }
+
+    auto index = 0;
+    for(auto& response : decision)
+    {
+      const auto chosen_action = response.get_action_id();
+      const auto outcome = p.get_outcome(_topics[chosen_action]);
+
+      // Report outcome received
+      if ( _rl->report_outcome(ids[index].c_str(), outcome, &status) != err::success && outcome > 0.00001f ) {
+        std::cout << status.get_error_msg() << std::endl;
+        continue;
+      }
+
+      stats.record(p.id(), chosen_action, outcome);
+
+      std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", slot, " << index << ", outcome, " << outcome
+        << ", dist, " << get_dist_str(response) << ", " << stats.get_stats(p.id(), chosen_action) << std::endl;
+      index++;
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+  }
+
+  return 0;
+}
+
 person& rl_sim::pick_a_random_person() {
   return _people[rand() % _people.size()];
 }
 
-int rl_sim::load_config_from_json(  const std::string& file_name, 
+int rl_sim::load_config_from_json(  const std::string& file_name,
                                     u::configuration& config,
                                     r::api_status* status) {
   std::string config_str;
@@ -134,7 +196,7 @@ bool rl_sim::init_sim_world() {
 
   //  Initilize topics
   _topics = {
-    "SkiConditions-VT", 
+    "SkiConditions-VT",
     "HerbGarden",
     "BeyBlades",
     "NYCLiving",
@@ -144,7 +206,7 @@ bool rl_sim::init_sim_world() {
   // Initialize click probability for p1
   person::topic_prob tp = {
     { _topics[0],0.08f },
-    { _topics[1],0.03f }, 
+    { _topics[1],0.03f },
     { _topics[2],0.05f },
     { _topics[3],0.03f },
     { _topics[4],0.25f }
@@ -182,6 +244,19 @@ std::string rl_sim::get_action_features() {
   return oss.str();
 }
 
+
+std::string rl_sim::get_slot_features(const std::vector<std::string>& ids) {
+  std::ostringstream oss;
+  // example
+  // R"("_slots": [ { "_id":"abc"}, {"_id":"def"} ])";
+  oss << R"("_slots": [ )";
+   for ( auto idx = 0; idx < ids.size() - 1; ++idx) {
+    oss << R"({ "_id":")" << ids[idx] << R"("}, )";
+  }
+  oss << R"({ "_id":")" << ids.back() << R"("}] )";
+  return oss.str();
+}
+
 void rl_sim::on_error(const reinforcement_learning::api_status& status) {
   std::cout << "Background error in Inference API: " << status.get_error_msg() << std::endl;
   std::cout << "Exiting simulation loop." << std::endl;
@@ -194,11 +269,17 @@ std::string rl_sim::create_context_json(const std::string& cntxt, const std::str
   return oss.str();
 }
 
+std::string rl_sim::create_context_json(const std::string& cntxt, const std::string& action, const std::string& slots ) {
+  std::ostringstream oss;
+  oss << "{ " << cntxt << ", " << action << ", " << slots << " }";
+  return oss.str();
+}
+
 std::string rl_sim::create_event_id() {
   return boost::uuids::to_string(boost::uuids::random_generator()());
 }
 
-rl_sim::rl_sim(boost::program_options::variables_map vm) :_options(std::move(vm)) {}
+rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm)), ccb_mode(_options["ccb"].as<bool>()) {}
 
 std::string get_dist_str(const reinforcement_learning::ranking_response& response) {
   std::string ret;
@@ -206,6 +287,28 @@ std::string get_dist_str(const reinforcement_learning::ranking_response& respons
   for (const auto& ap_pair : response) {
     ret += "[" + to_string(ap_pair.action_id) + ",";
     ret += to_string(ap_pair.probability) + "]";
+    ret += " ,";
+  }
+  ret += ")";
+  return ret;
+}
+
+std::string get_dist_str(const reinforcement_learning::slot_response& response) {
+  std::string ret;
+  ret += "(";
+  ret += "[" + std::string(response.get_slot_id()) + ",";
+  ret += to_string(response.get_action_id()) + ",";
+  ret += to_string(response.get_probability()) + "]";
+  ret += " ,";
+  ret += ")";
+  return ret;
+}
+
+std::string get_dist_str(const reinforcement_learning::decision_response& response) {
+  std::string ret;
+  ret += "(";
+  for (const auto& resp : response) {
+    ret += get_dist_str(resp);
     ret += " ,";
   }
   ret += ")";

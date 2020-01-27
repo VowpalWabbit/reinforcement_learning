@@ -93,7 +93,7 @@ namespace reinforcement_learning {
     const char* file_name = config.get(name::MODEL_FILE_NAME, "current");
     const bool file_must_exist = config.get_bool(name::MODEL_FILE_MUST_EXIST, false);
     auto file_loader = new model_management::file_model_loader(file_name, file_must_exist, trace_logger);
-    
+
     const auto success = file_loader->init(status);
 
     if (success != error_code::success) {
@@ -104,7 +104,7 @@ namespace reinforcement_learning {
     *retval = file_loader;
     return error_code::success;
   }
-  
+
   int null_time_provider_create(i_time_provider** retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
   {
     TRACE_INFO(trace_logger, "Null time provider created.");
@@ -121,21 +121,21 @@ namespace reinforcement_learning {
 
   void factory_initializer::register_default_factories() {
     register_azure_factories();
-    
+
     data_transport_factory.register_type(value::NO_MODEL_DATA, empty_data_transport_create);
     data_transport_factory.register_type(value::FILE_MODEL_DATA, file_model_loader_create);
 
     model_factory.register_type(value::VW, model_create<m::vw_model>);
     model_factory.register_type(value::PASSTHROUGH_PDF_MODEL, model_create<m::pdf_model>);
-    
+
     trace_logger_factory.register_type(value::NULL_TRACE_LOGGER, null_tracer_create);
     trace_logger_factory.register_type(value::CONSOLE_TRACE_LOGGER, console_tracer_create);
-    
+
     time_provider_factory.register_type(value::NULL_TIME_PROVIDER, null_time_provider_create);
     time_provider_factory.register_type(value::CLOCK_TIME_PROVIDER, clock_time_provider_create);
 
     // Register File loggers
-    sender_factory.register_type(value::OBSERVATION_FILE_SENDER, 
+    sender_factory.register_type(value::OBSERVATION_FILE_SENDER,
       [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status){
       const char* file_name =  c.get(name::OBSERVATION_FILE_NAME,"observation.fb.data");
       return file_sender_create(retval, c ,

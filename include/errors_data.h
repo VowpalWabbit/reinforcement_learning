@@ -32,6 +32,8 @@ ERROR_CODE_DEFINITION(30, incorrect_buffer_preamble_size, "Buffer preamble is pr
 ERROR_CODE_DEFINITION(31, serialize_unknown_outcome_type, "Unable to serialize unknown outcome type.")
 ERROR_CODE_DEFINITION(32, preamble_error, "Unable to read or write the preamble.")
 ERROR_CODE_DEFINITION(33, file_open_error, "Unable to open file.")
+ERROR_CODE_DEFINITION(34, json_no_slots_found, "Context json did not have slots (_slots array empty or not found)")
 ERROR_CODE_DEFINITION(34, file_read_error, "Unable to read from file.")
-ERROR_CODE_DEFINITION(35, file_stats_error, "Unable to read file statistics e.g. modified date time.")
+ERROR_CODE_DEFINITION(36, file_stats_error, "Unable to read file statistics e.g. modified date time.")
+ERROR_CODE_DEFINITION(37, not_supported, "Not supported")
 //! [Error Definitions]

@@ -42,6 +42,7 @@
     <ClCompile Include="time_helper.cc" />
     <ClCompile Include="model_mgmt\file_model_loader.cc" />
     <ClCompile Include="utility\invariant_helpers.cc" />
+    <ClCompile Include="decision_response.cc" />
     <ClCompile Include="rl_logger.cc" />
     <ClCompile Include="rl_logger_impl.cc" />
   </ItemGroup>
@@ -108,11 +109,15 @@
     <ClInclude Include="utility\invariant_helpers.h" />
     <ClInclude Include="..\include\rl_logger.h" />
     <ClInclude Include="rl_logger_impl.h" />
+    <ClInclude Include="..\include\decision_response.h" />
+    <ClInclude Include="..\include\container_iterator.h" />
+    <ClInclude Include="..\include\future_compat.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="schema\OutcomeEvent.fbs" />
     <None Include="schema\RankingEvent.fbs" />
+    <None Include="schema\DecisionRankingEvent.fbs" />
     <None Include="schema\Metadata.fbs" />
   </ItemGroup>
   <ItemGroup>

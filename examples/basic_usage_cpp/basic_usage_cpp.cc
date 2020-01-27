@@ -1,5 +1,5 @@
 /**
- * @brief Simple RL Inference API sample implementation 
+ * @brief Simple RL Inference API sample implementation
  *
  * @file basic_usage_cpp.cc
  * @author Rajan Chari et al
@@ -10,7 +10,7 @@
 /**
  * @brief Basic API usage example
  *
- * @return int Error code 
+ * @return int Error code
  */
 int main() {
   //! name, value based config object used to initialise the API
@@ -22,8 +22,8 @@ int main() {
     return -1;
   }
 
-  /** api_status is an optional argument used to get detailed 
-   *  error description from all API calls 
+  /** api_status is an optional argument used to get detailed
+   *  error description from all API calls
    */
   r::api_status status;
 
@@ -81,7 +81,7 @@ int load_config_from_json(const std::string& file_name, u::configuration& config
   //! [Create a configuration from json string]
   // Use library supplied convenience method to parse json and build config object
   // namespace cfg=reinforcement_learning::utility::config;
-  
+
   return cfg::create_from_json(config_str, config);
   //! [Create a configuration from json string]
 }

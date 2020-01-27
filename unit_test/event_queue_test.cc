@@ -23,11 +23,11 @@ public:
   }
 
   bool try_drop(float drop_prob, int _drop_pass) override {
-    return _event_id.substr(0, 4) == "drop";
+    return _seed_id.substr(0, 4) == "drop";
   }
 
   std::string get_event_id() {
-    return _event_id;
+    return _seed_id;
   }
 };
 

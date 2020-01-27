@@ -25,6 +25,7 @@ public:
 
 private:
   std::string create_action_features(size_t actions, size_t features, size_t example_id) const;
+  std::string create_slot_features(size_t slots, size_t features, size_t slot_decision_id) const;
   std::string create_features(size_t features, size_t thread_id, size_t example_id) const;
   std::string create_context_json(const std::string& cntxt, const std::string& action) const;
   std::string create_json_outcome(size_t thread_id, size_t example_id) const;

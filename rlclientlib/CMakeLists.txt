@@ -2,15 +2,17 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(FlatBuffers REQUIRED)
 
 set(RL_FLAT_BUFFER_FILES
-"${CMAKE_CURRENT_SOURCE_DIR}/schema/Metadata.fbs"
-"${CMAKE_CURRENT_SOURCE_DIR}/schema/OutcomeEvent.fbs"
-	"${CMAKE_CURRENT_SOURCE_DIR}/schema/RankingEvent.fbs" )
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/Metadata.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/OutcomeEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/RankingEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/DecisionRankingEvent.fbs" )
 build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgenerator "" "${CMAKE_CURRENT_SOURCE_DIR}/generated" "" "")
 
 set(PROJECT_SOURCES
   api_status.cc
   azure_factories.cc
   console_tracer.cc
+  decision_response.cc
   error_callback_fn.cc
   factory_resolver.cc
   cb_logger.cc
@@ -60,9 +62,12 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/config_utility.h
   ../include/configuration.h
   ../include/constants.h
+  ../include/container_iterator.h
+  ../include/decision_response.h
   ../include/err_constants.h
   ../include/errors_data.h
   ../include/factory_resolver.h
+  ../include/future_compat.h
   ../include/live_model.h
   ../include/model_mgmt.h
   ../include/object_factory.h
@@ -91,6 +96,8 @@ set(PROJECT_PRIVATE_HEADERS
   moving_queue.h
   ranking_event.h
   sampling.h
+  serialization/fb_serializer.h
+  serialization/json_serializer.h
   utility/context_helper.h
   utility/http_authorization.h
   utility/http_client.h
@@ -120,7 +127,7 @@ target_include_directories( rlclientlib
                             ${FLATBUFFERS_INCLUDE_DIRS}
                             ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date
                             )
-target_link_libraries(rlclientlib PUBLIC Boost::system vw OpenSSL::SSL OpenSSL::Crypto cpprestsdk::cpprest)
+target_link_libraries(rlclientlib PUBLIC Boost::system vw OpenSSL::SSL OpenSSL::Crypto cpprestsdk::cpprest PRIVATE rapidjson)
 # Consuming Boost uuid requires BCrypt, normally this is automatically linked but vcpkg turns this feature off.
 if(WIN32)
   target_link_libraries(rlclientlib PUBLIC bcrypt)
