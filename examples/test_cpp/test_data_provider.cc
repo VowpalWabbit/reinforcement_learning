@@ -132,7 +132,7 @@ void test_data_provider::log(size_t thread_id, size_t example_id, const reinforc
     buffer.reset();
   }
 
-  auto ranking_evt = reinforcement_learning::ranking_event::choose_rank(event_id.c_str(), get_context(thread_id, example_id), reinforcement_learning::action_flags::DEFAULT, response, ts);
+  auto ranking_evt = reinforcement_learning::ranking_event::choose_rank(get_context(thread_id, example_id), reinforcement_learning::action_flags::DEFAULT, response, ts);
   buffer.reset();
   reinforcement_learning::logger::json_collection_serializer<reinforcement_learning::ranking_event> jserial(buffer);
   jserial.add(ranking_evt);

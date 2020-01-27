@@ -50,7 +50,7 @@ namespace Rl.Net.Cli
             return liveModel;
         }
 
-        public static Cb.Logger CreateCbLoggerOrExit(string clientJsonPath)
+        public static RlLogger CreateRlLoggerOrExit(string clientJsonPath)
         {
             if (!File.Exists(clientJsonPath))
             {
@@ -67,7 +67,7 @@ namespace Rl.Net.Cli
                 WriteStatusAndExit(apiStatus);
             }
 
-            Cb.Logger logger = new Cb.Logger(config);
+            RlLogger logger = new RlLogger(config);
 
             logger.BackgroundError += LiveModel_BackgroundError;
             logger.TraceLoggerEvent += LiveModel_TraceLogEvent;

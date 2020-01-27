@@ -20,7 +20,7 @@ namespace Rl.Net.Cli
             this.OnError = (sender, apiStatus) => Helpers.WriteStatusAndExit(apiStatus);
 
             LiveModel rankingModel = Helpers.CreateLiveModelOrExit(this.ConfigPath);
-            Cb.Logger loggingModel = Helpers.CreateCbLoggerOrExit(this.LoggingConfigPath);
+            RlLogger loggingModel = Helpers.CreateRlLoggerOrExit(this.LoggingConfigPath);
 
             SimulatorStepProvider stepProvider = new SimulatorStepProvider(this.Steps);
             RunContext runContext = new RunContext();
