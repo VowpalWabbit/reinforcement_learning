@@ -52,6 +52,15 @@ namespace reinforcement_learning {
       return { _coll, _idx + idx };
     }
 
+    size_t index() const {
+      return _idx;
+    }
+
+    TElem* operator->()
+    {
+      return &_coll[_idx];
+    }
+
   private:
     TColl& _coll;
     size_t _idx;
@@ -101,6 +110,15 @@ namespace reinforcement_learning {
     //! Increment the index
     const_container_iterator operator+(const uint32_t idx) const {
       return { _coll, _idx + idx };
+    }
+
+    size_t index() const {
+      return _idx;
+    }
+
+    const TElem* operator-> () const
+    {
+      return &_coll[_idx];
     }
 
   private:

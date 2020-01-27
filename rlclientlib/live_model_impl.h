@@ -1,5 +1,5 @@
 #pragma once
-#include "logger/event_logger.h"
+
 #include "model_mgmt.h"
 #include "model_mgmt/data_callback_fn.h"
 #include "model_mgmt/model_downloader.h"
@@ -82,9 +82,9 @@ namespace reinforcement_learning
 
     std::unique_ptr<model_management::i_data_transport> _transport{nullptr};
     std::unique_ptr<model_management::i_model> _model{nullptr};
-    std::unique_ptr<logger::ccb_logger> _decision_logger{};
     std::unique_ptr<model_management::model_downloader> _model_download{nullptr};
     std::shared_ptr<i_trace> _trace_logger{nullptr};
+
     rl_logger_impl _logger_impl;
 
     std::unique_ptr<utility::periodic_background_proc<model_management::model_downloader>> _bg_model_proc;

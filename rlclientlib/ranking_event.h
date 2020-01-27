@@ -53,13 +53,10 @@ namespace reinforcement_learning {
     const std::string& get_event_id() const {return get_seed_id();}
 
   public:
-    static ranking_event choose_rank(const char* event_id, const char* context,
-      unsigned int flags, const ranking_response& resp, const timestamp& ts, float pass_prob = 1);
-
+    static ranking_event choose_rank(const char* context, unsigned int flags, const ranking_response& resp, const timestamp& ts, float pass_prob = 1);
 
   private:
-    ranking_event(const char* event_id, bool deferred_action, float pass_prob, const char* context,
-    const ranking_response& response,const timestamp& ts);
+    ranking_event(bool deferred_action, float pass_prob, const char* context, const ranking_response& response,const timestamp& ts);
 
     std::vector<unsigned char> _context;
     std::vector<uint64_t> _action_ids_vector;
@@ -83,12 +80,10 @@ namespace reinforcement_learning {
     const std::vector<std::string>& get_event_ids() const;
 
   public:
-    static decision_ranking_event request_decision(const std::vector<const char*>& event_ids, const char* context,
-      unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts, float pass_prob = 1.f);
+    static decision_ranking_event request_decision(const char* context, unsigned int flags, const decision_response& response, const timestamp& ts, float pass_prob = 1.f);
 
   private:
-    decision_ranking_event(const std::vector<const char*>& event_ids, bool deferred_action, float pass_prob, const char* context,
-      const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts);
+    decision_ranking_event(bool deferred_action, float pass_prob, const char* context, const decision_response& response, const timestamp& ts);
 
     std::vector<unsigned char> _context;
     std::vector<std::vector<uint32_t>> _action_ids_vector;

@@ -22,8 +22,36 @@ namespace reinforcement_learning
     return probability;
   }
 
-  void decision_response::push_back(const char* event_id, uint32_t action_id, float prob) {
+  using iterator = slot_response::iterator;
+  using const_iterator = slot_response::const_iterator;
+
+  const_iterator slot_response::begin() const {
+    return { _ranking };
+  }
+
+  iterator slot_response::begin() {
+    return { _ranking };
+  }
+
+  const_iterator slot_response::end() const {
+    return { _ranking, _ranking.size() };
+  }
+
+  iterator slot_response::end() {
+    return { _ranking, _ranking.size() };
+  }
+
+  size_t slot_response::size() const {
+    return _ranking.size();
+  }
+
+  void slot_response::push_back(uint32_t action_id, float prob) {
+    _ranking.emplace_back(action_id, prob);
+  }
+
+  slot_response& decision_response::push_back(const char* event_id, uint32_t action_id, float prob) {
     _decision.emplace_back(event_id, action_id, prob);
+    return _decision.back();
   }
 
   size_t decision_response::size() const {

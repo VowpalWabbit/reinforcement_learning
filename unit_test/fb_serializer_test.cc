@@ -59,16 +59,17 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
   fb_collection_serializer<ranking_event> serializer(db);
   ranking_response resp;
   std::string model_id("a_model_id");
+  const std::string event_id("_an_event_id");
   resp.set_model_id(model_id.c_str());
   resp.push_back(2, .8f+.2f/3);
   resp.push_back(0, .2f / 3);
   resp.push_back(1, .2f / 3);
-  std::string event_id("an_event_id");
+  resp.set_event_id(event_id.c_str());
   std::string context("some_context");
   const timestamp ts;
   const size_t events_count = 10;
   for (size_t i = 0; i < events_count; ++i) {
-    auto re = ranking_event::choose_rank(event_id.c_str(),context.c_str(),0,resp,ts,0.33f);
+    auto re = ranking_event::choose_rank(context.c_str(),0,resp,ts,0.33f);
     serializer.add(re);
   }
   serializer.finalize();

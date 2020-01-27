@@ -32,7 +32,10 @@ int populate_response(const std::vector<std::vector<uint32_t>>& action_ids, cons
       RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids[i] and pdfs[i] must be the same size";
     }
 
-    response.push_back(event_ids[i], action_ids[i][0], pdfs[i][0]);
+    auto& slot = response.push_back(event_ids[i], action_ids[i][0], pdfs[i][0]);
+    for (size_t j = 0; j < action_ids[i].size(); ++i) {
+      slot.push_back(action_ids[i][j], pdfs[i][j]);
+    }
   }
 
   return error_code::success;

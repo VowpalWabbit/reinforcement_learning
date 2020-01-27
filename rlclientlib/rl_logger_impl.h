@@ -16,6 +16,7 @@
 namespace reinforcement_learning
 {
   class ranking_response;
+  class decision_response;
   class api_status;
 }
 
@@ -27,7 +28,8 @@ namespace reinforcement_learning
 
     int init(api_status* status);
 
-    int report_decision(const char* event_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status);
+    int report_decision(const char* context, unsigned int flags, const ranking_response& response, api_status* status);
+    int report_decision(const char* context, unsigned int flags, const decision_response& response, api_status* status);
 
     int report_action_taken(const char* event_id, api_status* status);
 
@@ -74,6 +76,7 @@ namespace reinforcement_learning
 
     std::unique_ptr<reinforcement_learning::logger::interaction_logger> _ranking_logger{ nullptr };
     std::unique_ptr<reinforcement_learning::logger::observation_logger> _outcome_logger{ nullptr };
+    std::unique_ptr<reinforcement_learning::logger::ccb_logger> _ccb_logger{ nullptr };
     std::shared_ptr<i_trace> _trace_logger{ nullptr };
     bool _trace_logger_init{ false };
   };

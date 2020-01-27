@@ -18,6 +18,9 @@ namespace reinforcement_learning {
     const char* get_slot_id() const;
     uint32_t get_action_id() const;
     float get_probability() const;
+
+    void push_back(uint32_t action_id, float prob);
+
   private:
     //! slot_id
     const std::string slot_id;
@@ -25,6 +28,22 @@ namespace reinforcement_learning {
     uint32_t action_id;
     //! probability associated with the action id
     float probability;
+
+    using coll_t = std::vector<action_prob>;
+    coll_t _ranking;
+
+  public:
+    using iterator = container_iterator<action_prob, coll_t>;
+    using const_iterator = const_container_iterator<action_prob, coll_t>;
+    //! Returns an iterator pointing to the first element of the (action, probability) collection
+    const_iterator begin() const;
+    iterator begin();
+
+    //! Returns an iterator referring to the past-the-end element of the (action, probability) collection.
+    const_iterator end() const;
+    iterator end();
+
+    size_t size() const;
   };
 
   class decision_response {
@@ -41,8 +60,7 @@ namespace reinforcement_learning {
     decision_response() = default;
     ~decision_response() = default;
 
-    // Cannot copy ranking_response, so must do a move here.
-    void push_back(const char* event_id, uint32_t action_id, float prob);
+    slot_response& push_back(const char* event_id, uint32_t action_id, float prob);
 
     size_t size() const;
 

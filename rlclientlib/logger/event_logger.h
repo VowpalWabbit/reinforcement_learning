@@ -107,10 +107,10 @@ namespace reinforcement_learning { namespace logger {
         perror_cb)
     {}
 
-    int log(const char* event_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status);
+    int log(const char* context, unsigned int flags, const ranking_response& response, api_status* status);
   };
 
-class ccb_logger : public event_logger<decision_ranking_event> {
+  class ccb_logger : public event_logger<decision_ranking_event> {
   public:
     ccb_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
       : event_logger(
@@ -124,8 +124,7 @@ class ccb_logger : public event_logger<decision_ranking_event> {
         perror_cb)
     {}
 
-    int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
-      const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
+    int log(const char* context, unsigned int flags, const decision_response& response, api_status* status);
   };
 
 

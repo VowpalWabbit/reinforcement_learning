@@ -53,33 +53,17 @@ namespace reinforcement_learning
     return err_code;
   }
 
-  int rl_logger::log(const char * event_id, const char * context_json, const ranking_response& resp, float outcome, api_status* status)
-  {
-    INIT_CHECK();
-    RETURN_IF_FAIL(_pimpl->report_decision(event_id, context_json, action_flags::DEFAULT, resp, status));
-    return _pimpl->report_outcome(event_id, outcome, status);
-  }
-
-  int rl_logger::log(const char * event_id, const char * context_json, const ranking_response& resp, const char* outcome, api_status* status)
-  {
-    INIT_CHECK();
-    RETURN_IF_FAIL(_pimpl->report_decision(event_id, context_json, action_flags::DEFAULT, resp, status));
-    return _pimpl->report_outcome(event_id, outcome, status);
-  }
-
   int rl_logger::log(const char * context_json, const ranking_response& resp, float outcome, api_status* status)
   {
     INIT_CHECK();
-    const auto event_id = boost::uuids::to_string(boost::uuids::random_generator()());
-    RETURN_IF_FAIL(_pimpl->report_decision(event_id.c_str(), context_json, action_flags::DEFAULT, resp, status));
-    return _pimpl->report_outcome(event_id.c_str(), outcome, status);
+    RETURN_IF_FAIL(_pimpl->report_decision(context_json, action_flags::DEFAULT, resp, status));
+    return _pimpl->report_outcome(resp.get_event_id(), outcome, status);
   }
 
   int rl_logger::log(const char * context_json, const ranking_response& resp, const char* outcome, api_status* status)
   {
     INIT_CHECK();
-    const auto event_id = boost::uuids::to_string(boost::uuids::random_generator()());
-    RETURN_IF_FAIL(_pimpl->report_decision(event_id.c_str(), context_json, action_flags::DEFAULT, resp, status));
-    return _pimpl->report_outcome(event_id.c_str(), outcome, status);
+    RETURN_IF_FAIL(_pimpl->report_decision(context_json, action_flags::DEFAULT, resp, status));
+    return _pimpl->report_outcome(resp.get_event_id(), outcome, status);
   }
 }
