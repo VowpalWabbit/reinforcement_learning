@@ -159,6 +159,6 @@ namespace reinforcement_learning {
     trace_logger_factory_t* trace_factory,
     sender_factory_t* s_factory,
     time_provider_factory_t* time_prov_factory)
-    : logger(config, (error_fn)(fn), (void*)(err_context), trace_factory, s_factory, time_prov_factory)
+    : rl_logger(config, (error_fn)(fn), (void*)(err_context), trace_factory, s_factory, time_prov_factory)
   {}
 }

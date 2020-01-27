@@ -88,7 +88,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="rl.net.cb_logger.cc" />
+    <ClCompile Include="rl.net.rl_logger.cc" />
     <ClCompile Include="rl.net.config.cc" />
     <ClCompile Include="rl.net.api_status.cc" />
     <ClCompile Include="rl.net.live_model.cc" />
@@ -98,7 +98,7 @@
   <ItemGroup>
     <ClInclude Include="binding_tracer.h" />
     <ClInclude Include="rl.net.callback.h" />
-    <ClInclude Include="rl.net.cb_logger.h" />
+    <ClInclude Include="rl.net.rl_logger.h" />
     <ClInclude Include="rl.net.native.h" />
     <ClInclude Include="rl.net.config.h" />
     <ClInclude Include="rl.net.api_status.h" />

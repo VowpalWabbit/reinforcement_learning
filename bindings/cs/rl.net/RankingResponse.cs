@@ -90,10 +90,10 @@ namespace Rl.Net {
         public static RankingResponse Create(string eventId, string modelId, long chosenAction, IList<int> actions, IList<float> probabilities)
         {
             var result = new RankingResponse();
-            RankingResponseSetEventId(result.NativeHandle, eventId);
-            RankingResponseSetModelId(result.NativeHandle, modelId);
-            NativeMethods.SetRankingChosenAction(result.NativeHandle, (int)chosenAction);
-            RankingResponseSetPmf(result.NativeHandle, actions, probabilities);
+            RankingResponseSetEventId(result.DangerousGetHandle(), eventId);
+            RankingResponseSetModelId(result.DangerousGetHandle(), modelId);
+            NativeMethods.SetRankingChosenAction(result.DangerousGetHandle(), (int)chosenAction);
+            RankingResponseSetPmf(result.DangerousGetHandle(), actions, probabilities);
             return result;
         }
 

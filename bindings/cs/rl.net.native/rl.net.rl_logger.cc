@@ -1,4 +1,4 @@
-#include "rl.net.cb_logger.h"
+#include "rl.net.rl_logger.h"
 #include "binding_tracer.h"
 #include "constants.h"
 #include "err_constants.h"
@@ -6,7 +6,7 @@
 #include "trace_logger.h"
 
 
-static void pipe_background_error_callback(const reinforcement_learning::api_status& status, cb_logger_context_t* context)
+static void pipe_background_error_callback(const reinforcement_learning::api_status& status, rl_logger_context_t* context)
 {
   auto managed_backgroud_error_callback_local = context->background_error_callback;
   if (managed_backgroud_error_callback_local)
@@ -15,9 +15,9 @@ static void pipe_background_error_callback(const reinforcement_learning::api_sta
   }
 }
 
-API cb_logger_context_t* CreateCbLogger(reinforcement_learning::utility::configuration* config)
+API rl_logger_context_t* CreateRlLogger(reinforcement_learning::utility::configuration* config)
 {
-  cb_logger_context_t* context = new cb_logger_context_t;
+  rl_logger_context_t* context = new rl_logger_context_t();
   context->background_error_callback = nullptr;
   context->trace_logger_callback = nullptr;
   context->trace_logger_factory = nullptr;
@@ -28,7 +28,7 @@ API cb_logger_context_t* CreateCbLogger(reinforcement_learning::utility::configu
     reinforcement_learning::i_trace* trace_logger,
     reinforcement_learning::api_status* status)
   {
-    *retval = new rl_net_native::binding_tracer<cb_logger_context_t>(*context);
+    *retval = new rl_net_native::binding_tracer<rl_logger_context_t>(*context);
     return reinforcement_learning::error_code::success;
   };
 
@@ -40,12 +40,12 @@ API cb_logger_context_t* CreateCbLogger(reinforcement_learning::utility::configu
   // Set TRACE_LOG_IMPLEMENTATION configuration to use trace logger.
   config->set(reinforcement_learning::name::TRACE_LOG_IMPLEMENTATION, rl_net_native::constants::BINDING_TRACE_LOGGER);
 
-  context->logger = new reinforcement_learning::cb::logger(*config, pipe_background_error_callback, context, context->trace_logger_factory);
+  context->logger = new reinforcement_learning::rl_logger(*config, pipe_background_error_callback, context, context->trace_logger_factory);
 
   return context;
 }
 
-API void DeleteCbLogger(cb_logger_context_t* context)
+API void DeleteRlLogger(rl_logger_context_t* context)
 {
   // Since the livemodel destructor waits for queues to drain, this can have unhappy consequences,
   // so detach the callback pipe first. This will cause all background callbacks to no-op in the
@@ -58,37 +58,37 @@ API void DeleteCbLogger(cb_logger_context_t* context)
   delete context;
 }
 
-API int CbLoggerInit(cb_logger_context_t* context, reinforcement_learning::api_status* status)
+API int RlLoggerInit(rl_logger_context_t* context, reinforcement_learning::api_status* status)
 {
   return context->logger->init(status);
 }
 
-API int CbLoggerLogF(cb_logger_context_t* context, const char * event_id, const char * context_json, const reinforcement_learning::ranking_response* resp, float outcome, reinforcement_learning::api_status* status)
+API int RlLoggerLogF(rl_logger_context_t* context, const char * event_id, const char * context_json, const reinforcement_learning::ranking_response* resp, float outcome, reinforcement_learning::api_status* status)
 {
   if (event_id == nullptr)
   {
     return context->logger->log(context_json, *resp, outcome, status);
   }
 
-  return context->logger->log(event_id, context_json, *resp, outcome, status);
+  return context->logger->log(context_json, *resp, outcome, status);
 }
 
-API int CbLoggerLogJson(cb_logger_context_t* context, const char * event_id, const char * context_json, const  reinforcement_learning::ranking_response* resp, const char* outcome, reinforcement_learning::api_status* status)
+API int RlLoggerLogJson(rl_logger_context_t* context, const char * event_id, const char * context_json, const  reinforcement_learning::ranking_response* resp, const char* outcome, reinforcement_learning::api_status* status)
 {
   if (event_id == nullptr)
   {
     return context->logger->log(context_json, *resp, outcome, status);
   }
 
-  return context->logger->log(event_id, context_json, *resp, outcome, status);
+  return context->logger->log(context_json, *resp, outcome, status);
 }
 
-API void CbLoggerSetCallback(cb_logger_context_t* context, rl_net_native::background_error_callback_t callback)
+API void RlLoggerSetCallback(rl_logger_context_t* context, rl_net_native::background_error_callback_t callback)
 {
   context->background_error_callback = callback;
 }
 
-API void CbLoggerSetTrace(cb_logger_context_t* context, rl_net_native::trace_logger_callback_t callback)
+API void RlLoggerSetTrace(rl_logger_context_t* context, rl_net_native::trace_logger_callback_t callback)
 {
   context->trace_logger_callback = callback;
 }
