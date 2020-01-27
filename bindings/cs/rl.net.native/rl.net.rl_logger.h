@@ -22,9 +22,10 @@ extern "C" {
 
   API int RlLoggerInit(rl_logger_context_t* context, reinforcement_learning::api_status* status = nullptr);
 
-  API int RlLoggerLogF(rl_logger_context_t* context, const char * event_id, const char * context_json, const reinforcement_learning::ranking_response* resp, float outcome, reinforcement_learning::api_status* status = nullptr);
-  API int RlLoggerLogJson(rl_logger_context_t* context, const char * event_id, const char * context_json, const reinforcement_learning::ranking_response* resp, const char* outcomeJson, reinforcement_learning::api_status* status = nullptr);
-
+  API int RlLoggerLogCbInteraction(rl_logger_context_t* context, const char * context_json, const reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status = nullptr);
+  API int RlLoggerLogOutcomeJson(rl_logger_context_t* context, const char * event_id,  const char* outcomeJson, reinforcement_learning::api_status* status = nullptr);
+  API int RlLoggerLogOutcomeF(rl_logger_context_t* context, const char * event_id, float outcome, reinforcement_learning::api_status* status = nullptr);
+  
   API void RRllLoggerSetCallback(rl_logger_context_t* context, rl_net_native::background_error_callback_t callback = nullptr);
   API void CbLoggerSetTrace(rl_logger_context_t* context, rl_net_native::trace_logger_callback_t trace_logger_callback = nullptr);
 }

@@ -53,17 +53,21 @@ namespace reinforcement_learning
     return err_code;
   }
 
-  int rl_logger::log(const char * context_json, const ranking_response& resp, float outcome, api_status* status)
+  int rl_logger::log(const char * context_json, const ranking_response& resp, api_status* status)
   {
     INIT_CHECK();
-    RETURN_IF_FAIL(_pimpl->report_decision(context_json, action_flags::DEFAULT, resp, status));
-    return _pimpl->report_outcome(resp.get_event_id(), outcome, status);
+    return _pimpl->report_decision(context_json, action_flags::DEFAULT, resp, status);
   }
 
-  int rl_logger::log(const char * context_json, const ranking_response& resp, const char* outcome, api_status* status)
+  int rl_logger::log(const char * event_id, const char* outcome, api_status* status)
   {
     INIT_CHECK();
-    RETURN_IF_FAIL(_pimpl->report_decision(context_json, action_flags::DEFAULT, resp, status));
-    return _pimpl->report_outcome(resp.get_event_id(), outcome, status);
+    return _pimpl->report_outcome(event_id, outcome, status);
+  }
+
+  int rl_logger::log(const char * event_id, float outcome, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->report_outcome(event_id, outcome, status);
   }
 }

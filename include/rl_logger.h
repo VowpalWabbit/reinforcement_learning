@@ -73,24 +73,31 @@ namespace reinforcement_learning {
     int init(api_status* status = nullptr);
 
     /**
-     * @brief Log contextual bandit event
+     * @brief Log contextual bandit interaction
      * @param context_json Contains action, action features and context features in json format
      * @param resp Ranking response contains the chosen action, probability distribution used for sampling actions and ranked actions
+     * @param status  Optional field with detailed string description if there is an error
+     * @return int Return error code.  This will also be returned in the api_status object
+     */
+    int log(const char * context_json, const ranking_response& resp, api_status* status = nullptr);
+
+    /**
+     * @brief Log contextual bandit or contextual conditional bandit reward
+     * @param event_id EventId for CB / SlotId for CCB
+     * @param outcome Outcome as JSON
+     * @param status  Optional field with detailed string description if there is an error
+     * @return int Return error code.  This will also be returned in the api_status object
+     */
+    int log(const char * event_id, const char* outcome, api_status* status = nullptr);
+
+    /**
+     * @brief Log contextual bandit or contextual conditional bandit reward
+     * @param event_id EventId for CB / SlotId for CCB
      * @param outcome Outcome as float
      * @param status  Optional field with detailed string description if there is an error
      * @return int Return error code.  This will also be returned in the api_status object
      */
-    int log(const char * context_json, const ranking_response& resp, float outcome, api_status* status = nullptr);
-
-    /**
-     * @brief Log contextual bandit event
-     * @param context_json Contains action, action features and context features in json format
-     * @param resp Ranking response contains the chosen action, probability distribution used for sampling actions and ranked actions
-     * @param outcome Outcome serialized as a string
-     * @param status  Optional field with detailed string description if there is an error
-     * @return int Return error code.  This will also be returned in the api_status object
-     */
-    int log(const char * context_json, const ranking_response& resp, const char* outcome, api_status* status = nullptr);
+    int log(const char * event_id, float outcome, api_status* status = nullptr);
 
     template<typename ErrCntxt>
     using error_fn_t = void(*)(const api_status&, ErrCntxt*);

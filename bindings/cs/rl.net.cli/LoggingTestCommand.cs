@@ -54,7 +54,8 @@ namespace Rl.Net.Cli
                     actions.Add((int)action_score.ActionIndex);
                     probabilities.Add((int)action_score.Probability);
                 }
-                if (!loggingModel.TryLog(eventId, step.DecisionContext, RankingResponse.Create(eventId, modelId, actionIndex, actions, probabilities), outcome))
+                if (!loggingModel.TryLog(step.DecisionContext, RankingResponse.Create(eventId, modelId, actionIndex, actions, probabilities))
+                    || !loggingModel.TryLog(eventId, outcome))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
                 }

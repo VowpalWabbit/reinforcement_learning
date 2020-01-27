@@ -20,34 +20,49 @@ namespace Rl.Net
             [DllImport("rl.net.native.dll")]
             public static extern int RlLoggerInit(IntPtr logger, IntPtr apiStatus);
 
-            [DllImport("rl.net.native.dll", EntryPoint = "RlLoggerLogF")]
-            private static extern int RlLoggerLogFNative(IntPtr logger, IntPtr eventId, IntPtr contextJson, IntPtr rankingResponse, float outcome, IntPtr apiStatus);
+            [DllImport("rl.net.native.dll", EntryPoint = "RlLoggerLoCbInteraction")]
+            private static extern int RlLoggerLogCbInteractionNative(IntPtr logger, IntPtr contextJson, IntPtr rankingResponse, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, float, IntPtr, int> RlLoggerLogFOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> RlLoggerLogCbInteractionOverride { get; set; }
 
-            [DllImport("rl.net.native.dll", EntryPoint = "RlLoggerLogJson")]
-            private static extern int RlLoggerLogJsonNative(IntPtr logger, IntPtr eventId, IntPtr contextJson, IntPtr rankingResponse, IntPtr outcome, IntPtr apiStatus);
+            [DllImport("rl.net.native.dll", EntryPoint = "RlLoggerLogOutcomeF")]
+            private static extern int RlLoggerLogOutcomeFNative(IntPtr logger, IntPtr eventId, float outcome, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> RlLoggerLogJsonOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, float, IntPtr, int> RlLoggerLogOutcomeFOverride { get; set; }
 
-            public static int RlLoggerLogF(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr rankingResponse, float outcome, IntPtr apiStatus)
+            [DllImport("rl.net.native.dll", EntryPoint = "RlLoggerLogOutcomeJson")]
+            private static extern int RlLoggerLogOutcomeJsonNative(IntPtr logger, IntPtr eventId, IntPtr outcome, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> RlLoggerLogOutcomeJsonOverride { get; set; }
+
+            public static int RlLoggerLogCbInteraction(IntPtr liveModel, IntPtr contextJson, IntPtr rankingResponse, IntPtr apiStatus)
             {
-                if (RlLoggerLogFOverride != null)
+                if (RlLoggerLogCbInteractionOverride != null)
                 {
-                    return RlLoggerLogFOverride(liveModel, eventId, contextJson, rankingResponse, outcome, apiStatus);
+                    return RlLoggerLogCbInteractionOverride(liveModel, contextJson, rankingResponse, apiStatus);
                 }
 
-                return RlLoggerLogFNative(liveModel, eventId, contextJson, rankingResponse, outcome, apiStatus);
+                return RlLoggerLogCbInteractionNative(liveModel, contextJson, rankingResponse, apiStatus);
             }
 
-            public static int RlLoggerLogJson(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr rankingResponse, IntPtr outcome, IntPtr apiStatus)
+            public static int RlLoggerLogOutcomeF(IntPtr liveModel, IntPtr eventId, float outcome, IntPtr apiStatus)
             {
-                if (RlLoggerLogJsonOverride != null)
+                if (RlLoggerLogOutcomeFOverride != null)
                 {
-                    return RlLoggerLogJsonOverride(liveModel, eventId, contextJson, rankingResponse, outcome, apiStatus);
+                    return RlLoggerLogOutcomeFOverride(liveModel, eventId, outcome, apiStatus);
                 }
 
-                return RlLoggerLogJsonNative(liveModel, eventId, contextJson, rankingResponse, outcome, apiStatus);
+                return RlLoggerLogOutcomeFNative(liveModel, eventId, outcome, apiStatus);
+            }
+
+            public static int RlLoggerLogOutcomeJson(IntPtr liveModel, IntPtr eventId, IntPtr outcome, IntPtr apiStatus)
+            {
+                if (RlLoggerLogOutcomeJsonOverride != null)
+                {
+                    return RlLoggerLogOutcomeJsonOverride(liveModel, eventId, outcome, apiStatus);
+                }
+
+                return RlLoggerLogOutcomeJsonNative(liveModel, eventId, outcome, apiStatus);
             }
 
             [DllImport("rl.net.native.dll")]
@@ -84,49 +99,31 @@ namespace Rl.Net
             }
         }
 
-        unsafe private static int LoggerLogF(IntPtr liveModel, string eventId, string contextJson, IntPtr rankingResponse, float outcome, IntPtr apiStatus)
+        unsafe private static int LoggerLogCbInteraction(IntPtr liveModel, string contextJson, IntPtr rankingResponse, IntPtr apiStatus)
         {
             CheckJsonString(contextJson);
 
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
             {
                 IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
-
-                // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
-                // eventId and use supplied eventId at the rl.net.native layer.
-                if (eventId == null)
-                {
-                    return NativeMethods.RlLoggerLogF(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, rankingResponse, outcome, apiStatus);
-                }
-
-                fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
-                {
-                    return NativeMethods.RlLoggerLogF(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, rankingResponse, outcome, apiStatus);
-                }
+                return NativeMethods.RlLoggerLogCbInteraction(liveModel, contextJsonUtf8Ptr, rankingResponse, apiStatus);
             }
         }
 
-        unsafe private static int LoggerLogJson(IntPtr liveModel, string eventId, string contextJson, IntPtr rankingResponse, string outcomeJson, IntPtr apiStatus)
+        unsafe private static int LoggerLogOutcomeF(IntPtr liveModel, string eventId, float outcome, IntPtr apiStatus)
         {
-            CheckJsonString(contextJson);
-
-            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
-            fixed (byte* outcomeJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(outcomeJson))
+            fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
             {
-                IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
-                IntPtr outcomeJsonUtf8Ptr = new IntPtr(outcomeJsonUtf8Bytes);
+                return NativeMethods.RlLoggerLogOutcomeF(liveModel, new IntPtr(eventIdUtf8Bytes), outcome, apiStatus);
+            }
+        }
 
-                // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
-                // eventId and use supplied eventId at the rl.net.native layer.
-                if (eventId == null)
-                {
-                    return NativeMethods.RlLoggerLogJson(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, rankingResponse, outcomeJsonUtf8Ptr, apiStatus);
-                }
-
-                fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
-                {
-                    return NativeMethods.RlLoggerLogJson(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, rankingResponse, outcomeJsonUtf8Ptr, apiStatus);
-                }
+        unsafe private static int LoggerLogOutcomeJson(IntPtr liveModel, string eventId, string outcomeJson, IntPtr apiStatus)
+        {
+            fixed (byte* outcomeJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(outcomeJson))
+            fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+            {
+                return NativeMethods.RlLoggerLogOutcomeJson(liveModel, new IntPtr(eventIdUtf8Bytes), new IntPtr(outcomeJsonUtf8Bytes), apiStatus);
             }
         }
 
@@ -180,44 +177,70 @@ namespace Rl.Net
                 }
         }
 
-        public bool Log(string eventId, string contextJson, RankingResponse response, float outcome, ApiStatus apiStatus = null)
+        public bool Log(string contextJson, RankingResponse response, ApiStatus apiStatus = null)
         {
-            return this.TryLog(eventId, contextJson, response, outcome, apiStatus);
+            return this.TryLog(contextJson, response, apiStatus);
         }
 
-        public bool TryLog(string eventId, string contextJson, RankingResponse response, float outcome, ApiStatus apiStatus = null)
+        public bool TryLog(string contextJson, RankingResponse response, ApiStatus apiStatus = null)
         {
-            int result = LoggerLogF(this.DangerousGetHandle(), eventId, contextJson, response.DangerousGetHandle(), outcome, apiStatus.ToNativeHandleOrNullptrDangerous());
+            int result = LoggerLogCbInteraction(this.DangerousGetHandle(), contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public void Log(string contextJson, RankingResponse response, float outcome)
+        {
+            using (ApiStatus apiStatus = new ApiStatus())
+            {
+                if (!this.TryLog(contextJson, response, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
+            }
+        }
+
+        public bool Log(string eventId, float outcome, ApiStatus apiStatus = null)
+        {
+            return this.TryLog(eventId, outcome, apiStatus);
+        }
+
+        public bool TryLog(string eventId, float outcome, ApiStatus apiStatus = null)
+        {
+            int result = LoggerLogOutcomeF(this.DangerousGetHandle(), eventId, outcome, apiStatus.ToNativeHandleOrNullptrDangerous());
             return result == NativeMethods.SuccessStatus;
         }
 
         public void Log(string eventId, string contextJson, RankingResponse response, float outcome)
         {
             using (ApiStatus apiStatus = new ApiStatus())
-                if (!this.TryLog(eventId, contextJson, response, outcome, apiStatus))
+            {
+                if (!this.TryLog(eventId, outcome, apiStatus))
                 {
                     throw new RLException(apiStatus);
                 }
+            }
         }
 
-        public bool Log(string eventId, string contextJson, RankingResponse response, string outcome, ApiStatus apiStatus = null)
+        public bool Log(string eventId, string outcome, ApiStatus apiStatus = null)
         {
-            return this.TryLog(eventId, contextJson, response, outcome, apiStatus);
+            return this.TryLog(eventId, outcome, apiStatus);
         }
 
-        public bool TryLog(string eventId, string contextJson, RankingResponse response, string outcome, ApiStatus apiStatus = null)
+        public bool TryLog(string eventId, string outcome, ApiStatus apiStatus = null)
         {
-            int result = LoggerLogJson(this.DangerousGetHandle(), eventId, contextJson, response.DangerousGetHandle(), outcome, apiStatus.ToNativeHandleOrNullptrDangerous());
+            int result = LoggerLogOutcomeJson(this.DangerousGetHandle(), eventId, outcome, apiStatus.ToNativeHandleOrNullptrDangerous());
             return result == NativeMethods.SuccessStatus;
         }
 
-        public void Log(string eventId, string contextJson, RankingResponse response, string outcome)
+        public void Log(string eventId, string outcome)
         {
             using (ApiStatus apiStatus = new ApiStatus())
-                if (!this.TryLog(eventId, contextJson, response, outcome, apiStatus))
+            {
+                if (!this.TryLog(eventId, outcome, apiStatus))
                 {
                     throw new RLException(apiStatus);
                 }
+            }
         }
 
         private event EventHandler<ApiStatus> BackgroundErrorInternal;

@@ -63,24 +63,19 @@ API int RlLoggerInit(rl_logger_context_t* context, reinforcement_learning::api_s
   return context->logger->init(status);
 }
 
-API int RlLoggerLogF(rl_logger_context_t* context, const char * event_id, const char * context_json, const reinforcement_learning::ranking_response* resp, float outcome, reinforcement_learning::api_status* status)
+API int RlLoggerLogCbInteraction(rl_logger_context_t* context, const char * context_json, const reinforcement_learning::ranking_response* resp, float outcome, reinforcement_learning::api_status* status)
 {
-  if (event_id == nullptr)
-  {
-    return context->logger->log(context_json, *resp, outcome, status);
-  }
-
-  return context->logger->log(context_json, *resp, outcome, status);
+  return context->logger->log(context_json, *resp, status);
 }
 
-API int RlLoggerLogJson(rl_logger_context_t* context, const char * event_id, const char * context_json, const  reinforcement_learning::ranking_response* resp, const char* outcome, reinforcement_learning::api_status* status)
+API int RlLoggerLogOutcomeJson(rl_logger_context_t* context, const char * event_id, const char* outcome, reinforcement_learning::api_status* status)
 {
-  if (event_id == nullptr)
-  {
-    return context->logger->log(context_json, *resp, outcome, status);
-  }
+  return context->logger->log(event_id, outcome, status);
+}
 
-  return context->logger->log(context_json, *resp, outcome, status);
+API int RlLoggerLogOutcomeF(rl_logger_context_t* context, const char * event_id, float outcome, reinforcement_learning::api_status* status)
+{
+  return context->logger->log(event_id, outcome, status);
 }
 
 API void RlLoggerSetCallback(rl_logger_context_t* context, rl_net_native::background_error_callback_t callback)
