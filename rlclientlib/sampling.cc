@@ -33,7 +33,7 @@ int populate_response(const std::vector<std::vector<uint32_t>>& action_ids, cons
     }
 
     auto& slot = response.push_back(event_ids[i], action_ids[i][0], pdfs[i][0]);
-    for (size_t j = 0; j < action_ids[i].size(); ++i) {
+    for (size_t j = 0; j < action_ids[i].size(); ++j) {
       slot.push_back(action_ids[i][j], pdfs[i][j]);
     }
   }
