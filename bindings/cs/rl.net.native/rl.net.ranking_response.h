@@ -9,8 +9,6 @@ class ranking_enumerator_adapter;
 extern "C" {
     // NOTE: THIS IS NOT POLYMORPHISM SAFE!
     API reinforcement_learning::ranking_response* CreateRankingResponse();
-    API const reinforcement_learning::ranking_response* InitRankingResponse(int chosen_action, const char* event_id, int* actions, float* probs, size_t actions_count, const char* model_id);
-
     API void DeleteRankingResponse(reinforcement_learning::ranking_response* ranking);
 
     // TODO: We should think about how to avoid extra string copies; ideally, err constants

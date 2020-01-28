@@ -13,13 +13,13 @@ namespace Rl.Net {
         internal partial class NativeMethods
         {
             [DllImport("rl.net.native.dll")]
-            public static extern IntPtr CreateSlotResponse();
-
-            [DllImport("rl.net.native.dll")]
             public static extern IntPtr GetSlotSlotId(IntPtr slotResponse);
 
             [DllImport("rl.net.native.dll")]
             public static extern int GetSlotActionId(IntPtr slotResponse);
+
+            [DllImport("rl.net.native.dll")]
+            public static extern void PushSlotActionProbability(IntPtr slot, int action, float prob);
 
             [DllImport("rl.net.native.dll")]
             public static extern float GetSlotProbability(IntPtr slotResponse);
@@ -34,6 +34,14 @@ namespace Rl.Net {
             private static extern IntPtr GetDecisionModelIdNative(IntPtr decisionResponse);
 
             internal static Func<IntPtr, IntPtr> GetDecisionModelIdOverride { get; set; }
+
+            [DllImport("rl.net.native.dll")]
+            public static extern void SetDecisionModelId(IntPtr decision, IntPtr modelId);
+
+
+            [DllImport("rl.net.native.dll")]
+            public static extern IntPtr PushSlotResponse(IntPtr decisionResponse, IntPtr slotId);
+
 
             public static IntPtr GetDecisionModelId(IntPtr decisionResponse)
             {
@@ -98,6 +106,19 @@ namespace Rl.Net {
         {
         }
 
+        public static DecisionResponse Create(string modelId)
+        {
+            var result = new DecisionResponse();
+            DecisionResponseSetModelId(result.DangerousGetHandle(), modelId);
+            return result;
+        }
+
+
+        public DecisionResponse AddSlot(string eventId, IList<int> actions, IList<float> probabilities)
+        {
+            return this;
+        }
+
         public string ModelId
         {
             get
@@ -129,6 +150,26 @@ namespace Rl.Net {
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
+        }
+
+        unsafe private static void DecisionResponseSetModelId(IntPtr decisionResponse, string modelId)
+        {
+            fixed (byte* modelIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(modelId))
+            {
+                NativeMethods.SetDecisionModelId(decisionResponse, new IntPtr(modelIdUtf8Bytes));
+            }
+        }
+
+        unsafe private static void DecisionResponsePushSlot(IntPtr decisionResponse, string slotId, IList<int> actions, IList<float> probabilities)
+        {
+            fixed (byte* slotIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(slotId))
+            {
+                IntPtr slot = NativeMethods.PushSlotResponse(decisionResponse, new IntPtr(slotIdUtf8Bytes));
+                for (int i = 0; i < actions.Count; ++i)
+                {
+                    NativeMethods.PushSlotActionProbability(slot, actions[i], probabilities[i]);
+                }
+            }
         }
 
         private class DecisionResponseEnumerator : NativeObject<DecisionResponseEnumerator>, IEnumerator<SlotResponse>

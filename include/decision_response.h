@@ -13,7 +13,7 @@ namespace reinforcement_learning {
   public:
     ~slot_response() = default;
 
-    slot_response(const char* _slot_id, uint32_t _action_id, float _probability);
+    slot_response(const char* _slot_id);
 
     const char* get_slot_id() const;
     uint32_t get_action_id() const;
@@ -24,11 +24,6 @@ namespace reinforcement_learning {
   private:
     //! slot_id
     const std::string slot_id;
-    //! action id
-    uint32_t action_id;
-    //! probability associated with the action id
-    float probability;
-
     using coll_t = std::vector<action_prob>;
     coll_t _ranking;
 
@@ -60,7 +55,7 @@ namespace reinforcement_learning {
     decision_response() = default;
     ~decision_response() = default;
 
-    slot_response& push_back(const char* event_id, uint32_t action_id, float prob);
+    slot_response& push_back(const char* event_id);
 
     size_t size() const;
 

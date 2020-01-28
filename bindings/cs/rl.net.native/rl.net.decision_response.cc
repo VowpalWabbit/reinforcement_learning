@@ -38,6 +38,12 @@ public:
     }
 };
 
+API reinforcement_learning::slot_response* PushSlotResponse(reinforcement_learning::decision_response* decision, const char* slot_id)
+{
+  auto& slot = decision->push_back(slot_id);
+  return &slot;
+}
+
 API const char* GetSlotSlotId(reinforcement_learning::slot_response* slot)
 {
   return slot->get_slot_id();
@@ -51,6 +57,11 @@ API int GetSlotActionId(reinforcement_learning::slot_response* slot)
 API float GetSlotProbability(reinforcement_learning::slot_response* slot)
 {
   return slot->get_probability();
+}
+
+API void PushSlotActionProbability(reinforcement_learning::slot_response* slot, int action, float prob)
+{
+  slot->push_back(action, prob);
 }
 
 API reinforcement_learning::decision_response* CreateDecisionResponse()
@@ -75,6 +86,12 @@ API const char* GetDecisionModelId(reinforcement_learning::decision_response* de
 {
     return decision->get_model_id();
 }
+
+API void SetDecisionModelId(reinforcement_learning::decision_response* decision, const char* model_id)
+{
+  decision->set_model_id(model_id);
+}
+
 
 API decision_enumerator_adapter* CreateDecisionEnumeratorAdapter(reinforcement_learning::decision_response* decision)
 {
