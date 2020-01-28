@@ -23,6 +23,7 @@ extern "C" {
   API int RlLoggerInit(rl_logger_context_t* context, reinforcement_learning::api_status* status = nullptr);
 
   API int RlLoggerLogCbInteraction(rl_logger_context_t* context, const char * context_json, const reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status = nullptr);
+  API int RlLoggerLogCcbInteraction(rl_logger_context_t* context, const char * context_json, const reinforcement_learning::decision_response* resp, reinforcement_learning::api_status* status = nullptr);
   API int RlLoggerLogOutcomeJson(rl_logger_context_t* context, const char * event_id,  const char* outcomeJson, reinforcement_learning::api_status* status = nullptr);
   API int RlLoggerLogOutcomeF(rl_logger_context_t* context, const char * event_id, float outcome, reinforcement_learning::api_status* status = nullptr);
   

@@ -16,6 +16,7 @@ namespace reinforcement_learning {
   //// Forward declarations ////////
          //
   class ranking_response;         //
+  class decision_response;        //
   class api_status;               //
                                   //
   namespace utility {             //
@@ -80,6 +81,15 @@ namespace reinforcement_learning {
      * @return int Return error code.  This will also be returned in the api_status object
      */
     int log(const char * context_json, const ranking_response& resp, api_status* status = nullptr);
+
+    /**
+     * @brief Log conditional contextual bandit interaction
+     * @param context_json Contains action, action features and context features in json format
+     * @param resp Decision response contains slots with slot id, chosen action, probability distribution used for sampling actions and ranked actions
+     * @param status  Optional field with detailed string description if there is an error
+     * @return int Return error code.  This will also be returned in the api_status object
+     */
+    int log(const char * context_json, const decision_response& resp, api_status* status = nullptr);
 
     /**
      * @brief Log contextual bandit or contextual conditional bandit reward

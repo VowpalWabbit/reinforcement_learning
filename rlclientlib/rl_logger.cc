@@ -59,6 +59,12 @@ namespace reinforcement_learning
     return _pimpl->report_decision(context_json, action_flags::DEFAULT, resp, status);
   }
 
+  int rl_logger::log(const char * context_json, const decision_response& resp, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->report_decision(context_json, action_flags::DEFAULT, resp, status);
+  }
+
   int rl_logger::log(const char * event_id, const char* outcome, api_status* status)
   {
     INIT_CHECK();

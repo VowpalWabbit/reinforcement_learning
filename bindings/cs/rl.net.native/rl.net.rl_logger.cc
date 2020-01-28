@@ -68,6 +68,11 @@ API int RlLoggerLogCbInteraction(rl_logger_context_t* context, const char * cont
   return context->logger->log(context_json, *resp, status);
 }
 
+API int RlLoggerLogCcbInteraction(rl_logger_context_t* context, const char * context_json, const reinforcement_learning::decision_response* resp, float outcome, reinforcement_learning::api_status* status)
+{
+  return context->logger->log(context_json, *resp, status);
+}
+
 API int RlLoggerLogOutcomeJson(rl_logger_context_t* context, const char * event_id, const char* outcome, reinforcement_learning::api_status* status)
 {
   return context->logger->log(event_id, outcome, status);

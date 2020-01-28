@@ -25,6 +25,11 @@ namespace Rl.Net
 
             internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> RlLoggerLogCbInteractionOverride { get; set; }
 
+            [DllImport("rl.net.native.dll", EntryPoint = "RlLoggerLoCcbInteraction")]
+            private static extern int RlLoggerLogCcbInteractionNative(IntPtr logger, IntPtr contextJson, IntPtr decisionResponse, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> RlLoggerLogCcbInteractionOverride { get; set; }
+
             [DllImport("rl.net.native.dll", EntryPoint = "RlLoggerLogOutcomeF")]
             private static extern int RlLoggerLogOutcomeFNative(IntPtr logger, IntPtr eventId, float outcome, IntPtr apiStatus);
 
@@ -43,6 +48,16 @@ namespace Rl.Net
                 }
 
                 return RlLoggerLogCbInteractionNative(liveModel, contextJson, rankingResponse, apiStatus);
+            }
+
+            public static int RlLoggerLogCcbInteraction(IntPtr liveModel, IntPtr contextJson, IntPtr decisionResponse, IntPtr apiStatus)
+            {
+                if (RlLoggerLogCcbInteractionOverride != null)
+                {
+                    return RlLoggerLogCcbInteractionOverride(liveModel, contextJson, decisionResponse, apiStatus);
+                }
+
+                return RlLoggerLogCcbInteractionNative(liveModel, contextJson, decisionResponse, apiStatus);
             }
 
             public static int RlLoggerLogOutcomeF(IntPtr liveModel, IntPtr eventId, float outcome, IntPtr apiStatus)
@@ -107,6 +122,17 @@ namespace Rl.Net
             {
                 IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
                 return NativeMethods.RlLoggerLogCbInteraction(liveModel, contextJsonUtf8Ptr, rankingResponse, apiStatus);
+            }
+        }
+
+        unsafe private static int LoggerLogCcbInteraction(IntPtr liveModel, string contextJson, IntPtr decisionResponse, IntPtr apiStatus)
+        {
+            CheckJsonString(contextJson);
+
+            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            {
+                IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
+                return NativeMethods.RlLoggerLogCbInteraction(liveModel, contextJsonUtf8Ptr, decisionResponse, apiStatus);
             }
         }
 
@@ -189,6 +215,28 @@ namespace Rl.Net
         }
 
         public void Log(string contextJson, RankingResponse response, float outcome)
+        {
+            using (ApiStatus apiStatus = new ApiStatus())
+            {
+                if (!this.TryLog(contextJson, response, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
+            }
+        }
+
+        public bool Log(string contextJson, DecisionResponse response, ApiStatus apiStatus = null)
+        {
+            return this.TryLog(contextJson, response, apiStatus);
+        }
+
+        public bool TryLog(string contextJson, DecisionResponse response, ApiStatus apiStatus = null)
+        {
+            int result = LoggerLogCbInteraction(this.DangerousGetHandle(), contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public void Log(string contextJson, DecisionResponse response, float outcome)
         {
             using (ApiStatus apiStatus = new ApiStatus())
             {
