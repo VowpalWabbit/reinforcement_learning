@@ -63,12 +63,12 @@ API int RlLoggerInit(rl_logger_context_t* context, reinforcement_learning::api_s
   return context->logger->init(status);
 }
 
-API int RlLoggerLogCbInteraction(rl_logger_context_t* context, const char * context_json, const reinforcement_learning::ranking_response* resp, float outcome, reinforcement_learning::api_status* status)
+API int RlLoggerLogCbInteraction(rl_logger_context_t* context, const char * context_json, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status)
 {
   return context->logger->log(context_json, *resp, status);
 }
 
-API int RlLoggerLogCcbInteraction(rl_logger_context_t* context, const char * context_json, const reinforcement_learning::decision_response* resp, float outcome, reinforcement_learning::api_status* status)
+API int RlLoggerLogCcbInteraction(rl_logger_context_t* context, const char * context_json, reinforcement_learning::decision_response* resp, reinforcement_learning::api_status* status)
 {
   return context->logger->log(context_json, *resp, status);
 }

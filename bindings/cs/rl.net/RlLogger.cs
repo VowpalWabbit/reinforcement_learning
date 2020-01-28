@@ -20,12 +20,12 @@ namespace Rl.Net
             [DllImport("rl.net.native.dll")]
             public static extern int RlLoggerInit(IntPtr logger, IntPtr apiStatus);
 
-            [DllImport("rl.net.native.dll", EntryPoint = "RlLoggerLoCbInteraction")]
+            [DllImport("rl.net.native.dll", EntryPoint = "RlLoggerLogCbInteraction")]
             private static extern int RlLoggerLogCbInteractionNative(IntPtr logger, IntPtr contextJson, IntPtr rankingResponse, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> RlLoggerLogCbInteractionOverride { get; set; }
 
-            [DllImport("rl.net.native.dll", EntryPoint = "RlLoggerLoCcbInteraction")]
+            [DllImport("rl.net.native.dll", EntryPoint = "RlLoggerLogCcbInteraction")]
             private static extern int RlLoggerLogCcbInteractionNative(IntPtr logger, IntPtr contextJson, IntPtr decisionResponse, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> RlLoggerLogCcbInteractionOverride { get; set; }
