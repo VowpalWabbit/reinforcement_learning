@@ -13,6 +13,7 @@ namespace Rl.Net.Cli {
                 <RunSimulatorCommand, ReplayCommand, PerfTestCommand, LoggingTestCommand>(args)
                 .WithParsed<CommandBase>(command => command.Run());
             //BasicUsage(args[0]);
+            //BasicUsageLogging(args[0]);
             //PdfExample(args[0]);
         }
 
@@ -41,6 +42,29 @@ namespace Rl.Net.Cli {
             Console.WriteLine($"Chosen action id: {actionId}");
 
             if (!liveModel.TryQueueOutcomeEvent(eventId, outcome, apiStatus))
+            {
+                Helpers.WriteStatusAndExit(apiStatus);
+            }
+        }
+
+        public static void BasicUsageLogging(string configPath)
+        {
+            const float outcome = 1.0f;
+            const string eventId = "event_id";
+            const string contextJson = "{\"GUser\":{\"id\":\"a\",\"major\":\"eng\",\"hobby\":\"hiking\"},\"_multi\":[ { \"TAction\":{\"a1\":\"f1\"} },{\"TAction\":{\"a2\":\"f2\"}}]}";
+
+            RlLogger liveModel = Helpers.CreateRlLoggerOrExit(configPath);
+
+            ApiStatus apiStatus = new ApiStatus();
+
+            RankingResponse rankingResponse = RankingResponse.Create(eventId, "some_model", 1, new[] { 1, 0, 2, 3 }, new[] { 0.2f, 0.2f, 0.3f, 0.3f });
+
+            if (!liveModel.TryLog(contextJson, rankingResponse, apiStatus))
+            {
+                Helpers.WriteStatusAndExit(apiStatus);
+            }
+
+            if (!liveModel.TryLog(eventId, outcome, apiStatus))
             {
                 Helpers.WriteStatusAndExit(apiStatus);
             }
