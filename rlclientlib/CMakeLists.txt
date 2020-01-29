@@ -15,8 +15,8 @@ set(PROJECT_SOURCES
   decision_response.cc
   error_callback_fn.cc
   factory_resolver.cc
-  cb_logger.cc
-  cb_logger_impl.cc
+  rl_logger.cc
+  rl_logger_impl.cc
   live_model_impl.cc
   live_model.cc
   time_helper.cc
@@ -58,7 +58,7 @@ set(PROJECT_SOURCES
 set(PROJECT_PUBLIC_HEADERS
   ../include/action_flags.h
   ../include/api_status.h
-  ../include/cb_logger.h
+  ../include/rl_logger.h
   ../include/config_utility.h
   ../include/configuration.h
   ../include/constants.h
@@ -83,7 +83,7 @@ set(PROJECT_PRIVATE_HEADERS
   azure_factories.h
   console_tracer.h
   error_callback_fn.h
-  cb_logger_impl.h
+  rl_logger_impl.h
   live_model_impl.h
   logger/async_batcher.h
   logger/event_logger.h
