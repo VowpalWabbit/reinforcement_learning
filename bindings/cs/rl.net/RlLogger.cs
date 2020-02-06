@@ -214,7 +214,7 @@ namespace Rl.Net
             return result == NativeMethods.SuccessStatus;
         }
 
-        public void Log(string contextJson, RankingResponse response, float outcome)
+        public void Log(string contextJson, RankingResponse response)
         {
             using (ApiStatus apiStatus = new ApiStatus())
             {
@@ -236,7 +236,7 @@ namespace Rl.Net
             return result == NativeMethods.SuccessStatus;
         }
 
-        public void Log(string contextJson, DecisionResponse response, float outcome)
+        public void Log(string contextJson, DecisionResponse response)
         {
             using (ApiStatus apiStatus = new ApiStatus())
             {
@@ -258,7 +258,7 @@ namespace Rl.Net
             return result == NativeMethods.SuccessStatus;
         }
 
-        public void Log(string eventId, string contextJson, RankingResponse response, float outcome)
+        public void Log(string eventId, float outcome)
         {
             using (ApiStatus apiStatus = new ApiStatus())
             {
