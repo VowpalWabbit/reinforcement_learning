@@ -37,10 +37,10 @@ def image_to_bytes(mnist_image):
 #%%
 
 dims = [1, 1, 28, 28]
-prefix = "'" + base64.b64encode(struct.pack('4Q', *dims)).decode() + ";"
+prefix = "\"" + base64.b64encode(struct.pack('4Q', *dims)).decode() + ";"
 
 def image_to_tensor_notation(mnist_image):
-    return prefix + base64.b64encode(image_to_bytes(mnist_image)).decode() + "'";
+    return prefix + base64.b64encode(image_to_bytes(mnist_image)).decode() + "\"";
 
 
 #%%

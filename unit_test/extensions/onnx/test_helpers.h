@@ -152,7 +152,7 @@ std::string encode_tensor_data(const dimensions& dimensions, const tensor_raw& v
   }
 
   std::stringstream result_stream;
-  result_stream << '\'' << dimensions_base64 << ';' << values_base64 << '\'';
+  result_stream << '\"' << dimensions_base64 << ';' << values_base64 << '\"';
 
   return result_stream.str();
 }
@@ -172,7 +172,7 @@ std::string create_tensor_notation(const expectations<string_t>& expectations)
 
     std::tie(name, dimensions, rawdata) = expectations[i];
 
-    tensor_notation_builder << '\'' << name << "\':" << encode_tensor_data<roundtrip>(dimensions, rawdata);
+    tensor_notation_builder << '\"' << name << "\":" << encode_tensor_data<roundtrip>(dimensions, rawdata);
   }
 
   tensor_notation_builder << '}';

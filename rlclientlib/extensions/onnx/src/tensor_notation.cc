@@ -18,7 +18,7 @@ namespace reinforcement_learning { namespace onnx {
 // The format is:
 // <TENSORS> := "{" <TENSOR-LIST> "}"
 // <TENSOR-LIST> := <TENSOR> ["," [<TENSOR-LIST>]]
-// <TENSOR> := "'" <INPUT-NAME> "':'" <TENSOR-DATA> "'"
+// <TENSOR> := "\"" <INPUT-NAME> "\":\"" <TENSOR-DATA> "\""
 // <TENSOR-DATA> := <DIMS-BASE64> ";" <VALUES-BASE64>
 // <DIMS-BASE64> := { base64 encoding of int64[] representing dimensions of the tensor }
 // <VALUES-BASE64> := { base64 encoding of float[] representing values of the tensor }
@@ -30,7 +30,7 @@ namespace reinforcement_learning { namespace onnx {
 namespace tokens {
   const char NULL_TERMINATOR = '\0';
   const char ESCAPE = '\\';
-  const char SQUOTE = '\'';
+  const char DQUOTE = '\"';
   const char SEMICOLON = ';';
   const char COLON = ':';
   const char COMMA = ',';
@@ -163,7 +163,7 @@ private:
     NO_ERROR_OR_RETURN_DEFAULT(std::string(""));
 
     // Consume \'
-    read_character<tokens::SQUOTE>();
+    read_character<tokens::DQUOTE>();
     
     _token_start = _reading_head;
 
@@ -173,7 +173,7 @@ private:
     {
       switch (*_reading_head)
       {
-        case tokens::SQUOTE:
+        case tokens::DQUOTE:
           if (in_escape) break;
           // If not in an escape sequence, terminate scanning for the name
         case tokens::NULL_TERMINATOR:
@@ -189,7 +189,7 @@ private:
     const char* token_end = _reading_head;
 
     // Consume \'
-    read_character<tokens::SQUOTE>();
+    read_character<tokens::DQUOTE>();
 
     return std::string(_token_start, token_end - _token_start);
   }
@@ -199,7 +199,7 @@ private:
     NO_ERROR_OR_RETURN_DEFAULT(tensor_data(bytes(), bytes()))
 
     // Consume \'
-    read_character<tokens::SQUOTE>();
+    read_character<tokens::DQUOTE>();
 
     // TODO: Support reading type information for the tensor (and later map/sequence)
     // See value_t definition in tensor_notation.h
@@ -219,7 +219,7 @@ private:
     bytes values_base64 = read_base64();
 
     // Consume \'
-    read_character<tokens::SQUOTE>();
+    read_character<tokens::DQUOTE>();
 
     // Should we do the base64 parse here?
     return std::make_pair(dimensions_base64, values_base64);

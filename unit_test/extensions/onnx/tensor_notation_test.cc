@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(empty_object) {
 
 const auto SimpleVectorNotation = R"(
   {
-    'abc':'BAAAAAAAAAA=;AACAP2ZmBkBmZoZAmpkRwQ=='
+    "abc":"BAAAAAAAAAA=;AACAP2ZmBkBmZoZAmpkRwQ=="
   }
   )";
 
