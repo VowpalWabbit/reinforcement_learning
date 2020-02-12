@@ -162,8 +162,8 @@ void test_loop::ccb_loop(size_t thread_id)
 
     r::utility::data_buffer buffer;
     fb_collection_serializer<decision_ranking_event> serializer(buffer);
-    const std::vector<std::vector<uint32_t>> blank_action_ids;
-    const std::vector<std::vector<float>> blank_pdf;
+    const std::vector<std::vector<uint32_t>> blank_action_ids(response.size());
+    const std::vector<std::vector<float>> blank_pdf(response.size());
     auto decision_event = r::decision_ranking_event::request_decision(event_ids_c, context.c_str(), r::action_flags::DEFAULT, blank_action_ids, blank_pdf, "model", timestamp{});
     serializer.add(decision_event);
     serializer.finalize();
