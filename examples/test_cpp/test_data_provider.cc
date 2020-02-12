@@ -6,16 +6,17 @@
 #include <sstream>
 #include "serialization/json_serializer.h"
 
-test_data_provider::test_data_provider(const std::string& experiment_name, size_t threads, size_t features, size_t actions, bool _is_float_outcome, size_t _reward_period)
+test_data_provider::test_data_provider(const std::string& experiment_name, size_t threads, size_t features, size_t actions, size_t _slots, bool _is_float_outcome, size_t _reward_period)
   : _experiment_name(experiment_name)
   , contexts(threads, std::vector<std::string>(preallocated_count))
   , outcomes(threads, std::vector<std::string>(preallocated_count))
   , is_float_outcome(_is_float_outcome)
   , reward_period(_reward_period)
+  , slots(_slots)
 {
   for (size_t t = 0; t < threads; ++t) {
     for (size_t i = 0; i < preallocated_count; ++i) {
-      contexts[t][i] = create_context_json(create_features(features, t, i), create_action_features(actions, features, i));
+      contexts[t][i] = create_context_json(create_features(features, t, i), create_action_features(actions, features, i), _slots > 0);
       outcomes[t][i] = create_json_outcome(t, i);
     }
   }
@@ -25,6 +26,19 @@ std::string test_data_provider::create_event_id(size_t thread_id, size_t example
   std::ostringstream oss;
   oss << _experiment_name << "-" << thread_id << "-" << example_id;
   return oss.str();
+}
+
+std::vector<std::string> test_data_provider::create_event_ids(size_t thread_id, size_t example_id) const {
+  std::ostringstream oss;
+  oss << _experiment_name << "-" << thread_id << "-" << example_id;
+  std::string base = oss.str();
+  std::vector<std::string> result;
+  for (size_t i = 0; i < slots; ++i) {
+    std::ostringstream id;
+    id << base << "-" << i;
+    result.push_back(id.str());
+  }
+  return result;
 }
 
 std::string test_data_provider::create_action_features(size_t actions, size_t features, size_t example_id) const {
@@ -80,10 +94,37 @@ std::string test_data_provider::create_json_outcome(size_t thread_id, size_t exa
   return oss.str();
 }
 
-std::string test_data_provider::create_context_json(const std::string& cntxt, const std::string& action) const {
+std::string test_data_provider::create_context_json(const std::string& cntxt, const std::string& action, bool ccb) const {
   std::ostringstream oss;
-  oss << "{ " << cntxt << ", " << action << " }";
+  if (!ccb)
+    oss << "{ " << cntxt << ", " << action << " }";
+  else
+    oss << cntxt << ", " << action;
+
   return oss.str();
+}
+
+std::string test_data_provider::create_ccb_context_json(const std::string& cntxt, const std::vector<std::string>& ids) const {
+  std::ostringstream oss;
+  oss << "{ " << cntxt << ", " << create_slots_json(ids) << " }";
+  return oss.str();
+}
+
+std::string test_data_provider::create_slots_json(const std::vector<std::string>& ids) const {
+  std::ostringstream oss;
+  oss << R"("_slots": [ )";
+  for (size_t a = 0; a < ids.size(); ++a) {
+    oss << R"({ )";// "TSlot":{)";
+    oss << R"("_id":")" << ids[a] << R"(")";
+    oss << "}";//}";
+    if (a + 1 < ids.size()) oss << ",";
+  }
+  oss << R"(])";
+  return oss.str();
+}
+
+std::string test_data_provider::get_context(size_t thread_id, size_t example_id, const std::vector<std::string>& event_ids) const {
+  return create_ccb_context_json(contexts[thread_id][example_id % preallocated_count], event_ids);
 }
 
 float test_data_provider::get_outcome(size_t thread_id, size_t example_id) const {

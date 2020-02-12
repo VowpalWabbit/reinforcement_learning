@@ -24,6 +24,7 @@ po::variables_map process_cmd_line(const int argc, char** argv) {
     ("duration,d", po::value<size_t>(), "Duration of experiment (in ms). Alternative to n")
     ("instances,i", po::value<size_t>()->default_value(1), "Number of test loop instances")
     ("reward_period,r", po::value<size_t>()->default_value(0), "Ratio period (0 - no reward, otherwise - every $reward_period interaction is receiving reward)")
+    ("slots,q", po::value<size_t>()->default_value(0), "Number of slots (ccb simulation is running if > 0)")
     ;
 
   po::variables_map vm;
@@ -42,7 +43,8 @@ int run_test_instance(size_t index, const po::variables_map& vm) {
     return -1;
   }
 
-  loop.run();
+  const auto is_ccb = vm["slots"].as<size_t>() > 0;
+  loop.run(is_ccb);
   return 0;
 }
 
