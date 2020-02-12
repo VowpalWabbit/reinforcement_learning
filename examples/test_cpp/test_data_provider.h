@@ -21,8 +21,6 @@ public:
 
   int report_outcome(reinforcement_learning::live_model* rl, size_t thread_id, size_t example_id, reinforcement_learning::api_status* status) const;
 
-  void log(size_t thread_id, size_t example_id, const reinforcement_learning::ranking_response& response, std::ostream& logger) const;
-
 private:
   std::string create_action_features(size_t actions, size_t features, size_t example_id) const;
   std::string create_slot_features(size_t slots, size_t features, size_t slot_decision_id) const;

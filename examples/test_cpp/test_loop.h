@@ -20,7 +20,6 @@ private:
   std::string generate_experiment_name(const std::string& experiment_name_base,
 	  size_t threads, size_t features, size_t actions, size_t index);
 
-  void validity_loop(size_t thread_id);
   void perf_loop(size_t thread_id);
 
 private:
@@ -30,7 +29,6 @@ private:
   const std::string experiment_name;
   const std::string json_config;
   test_data_provider test_inputs;
-  const bool is_perf;
 
   std::vector<std::shared_ptr<std::ofstream>> loggers;
   std::unique_ptr<reinforcement_learning::live_model> rl;

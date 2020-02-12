@@ -20,7 +20,6 @@ test_loop::test_loop(size_t index, const boost::program_options::variables_map& 
   , experiment_name(generate_experiment_name(vm["experiment_name"].as<std::string>(), threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>(), index))
   , json_config(vm["json_config"].as<std::string>())
   , test_inputs(experiment_name, threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>(), vm.count("float_outcome") > 0, vm["reward_period"].as<size_t>())
-  , is_perf(vm.count("perf") > 0)
   , sleep_interval(vm["sleep"].as<size_t>())
 {
   for (size_t i = 0; i < threads; ++i) {
@@ -76,40 +75,11 @@ std::string test_loop::generate_experiment_name(const std::string& experiment_na
 void test_loop::run() {
   std::vector<std::thread> _threads;
   for (size_t i = 0; i < threads; ++i) {
-    _threads.push_back(is_perf ? std::thread(&test_loop::perf_loop, this, i) : std::thread(&test_loop::validity_loop, this, i));
+    _threads.push_back(std::thread(&test_loop::perf_loop, this, i));
   }
   for (size_t i = 0; i < threads; ++i) {
     _threads[i].join();
   }
-}
-
-void test_loop::validity_loop(size_t thread_id)
-{
-  r::ranking_response response;
-  r::api_status status;
-  for (controller->restart(); controller->is_running(); controller->iterate()) {
-    if (thread_id == 0) controller->progress_bar();
-    const auto event_id = test_inputs.create_event_id(thread_id, controller->get_iteration());
-    if (rl->choose_rank(event_id.c_str(), test_inputs.get_context(thread_id, controller->get_iteration()), response, &status) != err::success) {
-      std::cout << status.get_error_msg() << std::endl;
-      continue;
-    }
-
-    if (test_inputs.is_rewarded(thread_id, controller->get_iteration())) {
-      if (test_inputs.report_outcome(rl.get(), thread_id, controller->get_iteration(), &status) != err::success) {
-        std::cout << status.get_error_msg() << std::endl;
-        continue;
-      }
-    }
-
-    test_inputs.log(thread_id, controller->get_iteration(), response, (*loggers[thread_id]));
-
-    if (sleep_interval > 0) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(sleep_interval));
-    }
-  }
-  if (thread_id == 0) controller->progress_bar();
-  std::cout << std::endl;
 }
 
 using namespace reinforcement_learning;
