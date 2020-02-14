@@ -1,0 +1,12 @@
+namespace reinforcement_learning.messages.flatbuff;
+
+table DecisionMode {
+	type:string;                      // name of the learning mode
+	imitation:ImitationMode;          // imitation mode configuration obejct
+	                                  // slot for more learning modes reserved
+}
+
+table ImitationMode{
+}
+
+root_type DecisionMode;

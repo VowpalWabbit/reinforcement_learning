@@ -36,6 +36,8 @@ namespace reinforcement_learning {
 
   int check_null_or_empty(const char* arg1, const char* arg2, api_status* status);
   int check_null_or_empty(const char* arg1, api_status* status);
+  int post_process_rank(ranking_response& response, decision_modes decision_mode);
+  decision_modes to_decision_modes(const char* decision_mode);
 
   void default_error_callback(const api_status& status, void* watchdog_context) {
     auto watchdog = static_cast<utility::watchdog*>(watchdog_context);
@@ -75,6 +77,8 @@ namespace reinforcement_learning {
     if (_watchdog.has_background_error_been_reported()) {
       RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
     }
+
+    RETURN_IF_FAIL(post_process_rank(response, _decision_mode));
 
     return error_code::success;
   }
@@ -203,6 +207,8 @@ namespace reinforcement_learning {
     if (_configuration.get_bool(name::MODEL_BACKGROUND_REFRESH, value::DEFAULT_MODEL_BACKGROUND_REFRESH)) {
       _bg_model_proc.reset(new utility::periodic_background_proc<model_management::model_downloader>(config.get_int(name::MODEL_REFRESH_INTERVAL_MS, 60 * 1000), _watchdog, "Model downloader", &_error_cb));
     }
+
+    _decision_mode = to_decision_modes(_configuration.get(name::DECISION_RANK_MODE, value::DECISION_RANK_MODE));
   }
 
   int live_model_impl::init_trace(api_status* status) {
@@ -417,4 +423,35 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
+  int post_process_rank(ranking_response& response, decision_modes decision_mode) {
+    if (decision_mode == IMITATION_MODE) {
+      std::vector<action_prob> copied_action_prob;
+
+      for (auto it = response.begin(); it != response.end(); ++it) {
+        copied_action_prob.push_back(*it);
+      }
+
+      std::sort(copied_action_prob.begin(), copied_action_prob.end(), [](const action_prob& a, const action_prob& b) {
+        return a.action_id < b.action_id;
+        }
+      );
+
+      response.clear_ranking();
+      response.set_chosen_action_id(copied_action_prob.begin()->action_id);
+      for (auto it = response.begin(); it != response.end(); ++it) {
+        action_prob cur = *it;
+        response.push_back(cur.action_id, cur.probability);
+      }
+    }
+    return error_code::success;
+  }
+
+  decision_modes to_decision_modes(const char* decision_mode) {
+    if (std::strcmp(decision_mode, "IMITATION_MODE") == 0) {
+      return IMITATION_MODE;
+    }
+    else {
+      return DEFAULT_MODE;
+    }
+  }
 }
