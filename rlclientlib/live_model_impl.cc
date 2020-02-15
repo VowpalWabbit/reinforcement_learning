@@ -71,7 +71,7 @@ namespace reinforcement_learning {
       RETURN_IF_FAIL(explore_exploit(event_id, context, response, status));
     }
     response.set_event_id(event_id);
-    RETURN_IF_FAIL(_ranking_logger->log(event_id, context, flags, response, status));
+    RETURN_IF_FAIL(_ranking_logger->log(event_id, context, flags, response, status, _decision_mode));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -438,7 +438,7 @@ namespace reinforcement_learning {
 
       response.clear_ranking();
       response.set_chosen_action_id(copied_action_prob.begin()->action_id);
-      for (auto it = response.begin(); it != response.end(); ++it) {
+      for (auto it = copied_action_prob.begin(); it != copied_action_prob.end(); ++it) {
         action_prob cur = *it;
         response.push_back(cur.action_id, cur.probability);
       }

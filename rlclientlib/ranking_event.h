@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "decision_modes.h"
 #include "ranking_response.h"
 #include "time_helper.h"
 #include "decision_response.h"
@@ -51,21 +52,22 @@ namespace reinforcement_learning {
     const std::string& get_model_id() const;
     bool get_defered_action() const;
     const std::string& get_event_id() const {return get_seed_id();}
+    const decision_modes get_decision_mode() const;
 
   public:
     static ranking_event choose_rank(const char* event_id, const char* context,
-      unsigned int flags, const ranking_response& resp, const timestamp& ts, float pass_prob = 1);
-
+      unsigned int flags, const ranking_response& resp, const timestamp& ts, float pass_prob = 1, decision_modes decision_mode = DEFAULT_MODE);
 
   private:
     ranking_event(const char* event_id, bool deferred_action, float pass_prob, const char* context,
-    const ranking_response& response,const timestamp& ts);
+    const ranking_response& response,const timestamp& ts, decision_modes decision_mode);
 
     std::vector<unsigned char> _context;
     std::vector<uint64_t> _action_ids_vector;
     std::vector<float> _probilities_vector;
     std::string _model_id;
     bool _deferred_action = false;
+    decision_modes _decision_mode;
   };
 
   //serializable decision ranking event

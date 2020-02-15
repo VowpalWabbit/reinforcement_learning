@@ -35,9 +35,28 @@ namespace reinforcement_learning { namespace logger {
       TimeStamp client_ts(	ts.year, ts.month, ts.day, ts.hour,
 							ts.minute, ts.second, ts.sub_second);
 	    const auto meta_id_offset = CreateMetadata(builder,&client_ts);
+
+      flatbuffers::Offset<DecisionMode> decision_mode_offset;
+      switch (evt.get_decision_mode()) {
+      case IMITATION_MODE: {
+        const auto imitation_mode = CreateImitationMode(builder).Union();
+        const auto imitation_mode_name = builder.CreateString("imitation_mode");
+        decision_mode_offset = CreateDecisionMode(builder, imitation_mode_name, Mode_ImitationMode, imitation_mode);
+        break;
+      }
+      case DEFAULT_MODE: {
+        const auto default_mode = CreateDefaultMode(builder).Union();
+        const auto default_mode_name = builder.CreateString("default_mode");
+        decision_mode_offset = CreateDecisionMode(builder, default_mode_name, Mode_DefaultMode, default_mode);
+        break;
+      }
+      default:
+        break;
+      }
+
       ret_val = CreateRankingEvent(	builder, event_id_offset, evt.get_defered_action(), action_ids_vector_offset,
 									context_offset, probabilities_vector_offset, model_id_offset,
-									evt.get_pass_prob(), meta_id_offset);
+									evt.get_pass_prob(), meta_id_offset, decision_mode_offset);
       return error_code::success;
     }
   };

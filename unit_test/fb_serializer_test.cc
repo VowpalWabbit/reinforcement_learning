@@ -4,6 +4,7 @@
 #endif
 
 #include <boost/test/unit_test.hpp>
+#include "decision_modes.h"
 #include "ranking_event.h"
 #include "api_status.h"
 #include "serialization/fb_serializer.h"
@@ -65,10 +66,12 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
   resp.push_back(1, .2f / 3);
   std::string event_id("an_event_id");
   std::string context("some_context");
+  decision_modes mode = DEFAULT_MODE;
+
   const timestamp ts;
   const size_t events_count = 10;
   for (size_t i = 0; i < events_count; ++i) {
-    auto re = ranking_event::choose_rank(event_id.c_str(),context.c_str(),0,resp,ts,0.33f);
+    auto re = ranking_event::choose_rank(event_id.c_str(),context.c_str(),0,resp,ts,0.33f, mode);
     serializer.add(re);
   }
   serializer.finalize();
@@ -90,5 +93,6 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
     BOOST_CHECK_EQUAL_COLLECTIONS(event.probabilities()->begin(), event.probabilities()->end(), expected_prob.begin(), expected_prob.end());
     BOOST_CHECK_EQUAL(event.deferred_action(), false);
     BOOST_CHECK_EQUAL(event.pass_probability(), 0.33f);
+    BOOST_CHECK_EQUAL(event.decision_mode()->mode(), "default_mode");
   }
 }
