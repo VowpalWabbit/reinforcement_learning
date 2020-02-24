@@ -1,9 +1,9 @@
 /**
  * @brief RL Contextual bandits logging API definition.
  *
- * @file cb_logger.h
- * @author Rajan Chari et al
- * @date 2018-07-18
+ * @file rl_logger.h
+ * @author Alexey Taymanov et al
+ * @date 2020-02-24
  */
 #pragma once
 #include "err_constants.h"
@@ -35,7 +35,7 @@ namespace reinforcement_learning {
   public:
     /**
      * @brief Error callback function.
-     * When live_model is constructed, a background error callback and a
+     * When rl_logger is constructed, a background error callback and a
      * context (void*) is registered. If there is an error in the background thread,
      * error callback will get invoked with api_status and the context (void*).
      *
@@ -44,17 +44,17 @@ namespace reinforcement_learning {
     using error_fn = void(*)(const api_status&, void*);
 
     /**
-     * @brief Construct a new live model object.
+     * @brief Construct a new logger object.
      *
      * @param config Name-Value based configuration
      * @param fn Error callback for handling errors in background thread
      * @param err_context Context passed back during Error callback
      * @param t_factory Transport factory.  The default transport factory is initialized with a
      *                  REST based transport that gets data from an Azure storage account
-     * @param m_factory Model factory.  The default model factory hydrates vw models
-     *                    used for local inference.
      * @param sender_factory Sender factory.  The default factory provides two senders, one for
      *                       interaction and the other for observation which logs to Event Hub.
+     * @param time_provider_factory Time provider factory. The default factory provides time provider
+     *                        returning gmt_now from std::chrono::system_clock::now().
      */
     rl_logger(
       const utility::configuration& config,
@@ -65,9 +65,9 @@ namespace reinforcement_learning {
       time_provider_factory_t* time_prov_factory = &time_provider_factory);
 
     /**
-     * @brief Initialize inference library.
+     * @brief Initialize logger library.
      * Initialize the library and start the background threads used for
-     * model managment and sending actions and outcomes to the online trainer
+     * error handling and sending actions and outcomes to the online trainer
      * @param status  Optional field with detailed string description if there is an error
      * @return int Return error code.  This will also be returned in the api_status object
      */
@@ -113,7 +113,7 @@ namespace reinforcement_learning {
     using error_fn_t = void(*)(const api_status&, ErrCntxt*);
 
     /**
-     * @brief Construct a new live model object.
+     * @brief Construct a new logger object.
      *
      * @tparam ErrCntxt Context type used in error callback.
      * @param config Name-Value based configuration
@@ -121,10 +121,10 @@ namespace reinforcement_learning {
      * @param err_context Context passed back during Error callback
      * @param t_factory Transport factory.  The default transport factory is initialized with a
      *                  REST based transport that gets data from an Azure storage account
-     * @param m_factory Model factory.  The default model factory hydrates vw models
-     *                    used for local inference.
      * @param sender_factory Sender factory.  The default factory provides two senders, one for
      *                       interaction and the other for observation which logs to Event Hub.
+     * @param time_provider_factory Time provider factory. The default factory provides time provider
+     *                        returning gmt_now from std::chrono::system_clock::now().
      */
     template<typename ErrCntxt>
     rl_logger(
@@ -136,7 +136,7 @@ namespace reinforcement_learning {
       time_provider_factory_t* time_prov_factory = &time_provider_factory);
 
     /**
-     * @brief Move constructor for live model object.
+     * @brief Move constructor for logger object.
      */
     rl_logger(rl_logger&& other);
 
@@ -151,11 +151,11 @@ namespace reinforcement_learning {
     ~rl_logger();
   private:
     std::unique_ptr<rl_logger_impl> _pimpl;  //! The actual implementation details are forwarded to this object (PIMPL pattern)
-    bool _initialized = false;                //! Guard to ensure that live_model is properly initialized. i.e. init() was called and successfully initialized.
+    bool _initialized = false;                //! Guard to ensure that logger is properly initialized. i.e. init() was called and successfully initialized.
   };
 
   /**
-   * @brief Construct a new live model object.
+   * @brief Construct a new logger object.
    *
    * @tparam ErrCntxt Context type used in error callback.
    * @param config Name-Value based configuration
@@ -163,10 +163,10 @@ namespace reinforcement_learning {
    * @param err_context Context passed back during Error callback
    * @param t_factory Transport factory.  The default transport factory is initialized with a
    *                  REST based transport that gets data from an Azure storage account
-   * @param m_factory Model factory.  The default model factory hydrates vw models
-   *                  used for local inference.
    * @param sender_factory Sender factory.  The default factory provides two senders, one for
    *                       interaction and the other for observations which logs to Event Hub.
+   * @param time_provider_factory Time provider factory. The default factory provides time provider
+   *                        returning gmt_now from std::chrono::system_clock::now().
    */
   template<typename ErrCntxt>
   rl_logger::rl_logger(

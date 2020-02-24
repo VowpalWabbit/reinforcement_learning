@@ -66,6 +66,8 @@ namespace reinforcement_learning {
      *                    used for local inference.
      * @param sender_factory Sender factory.  The default factory provides two senders, one for
      *                       interaction and the other for observation which logs to Event Hub.
+     * @param time_provider_factory Time provider factory. The default factory provides time provider
+     *                        returning gmt_now from std::chrono::system_clock::now(). 
      */
     explicit live_model(
       const utility::configuration& config,
@@ -233,6 +235,8 @@ namespace reinforcement_learning {
      *                    used for local inference.
      * @param sender_factory Sender factory.  The default factory provides two senders, one for
      *                       interaction and the other for observation which logs to Event Hub.
+     * @param time_provider_factory Time provider factory. The default factory provides time provider
+     *                        returning gmt_now from std::chrono::system_clock::now().
      */
     template<typename ErrCntxt>
     explicit live_model(
@@ -277,6 +281,8 @@ namespace reinforcement_learning {
    *                  used for local inference.
    * @param sender_factory Sender factory.  The default factory provides two senders, one for
    *                       interaction and the other for observations which logs to Event Hub.
+   * @param time_provider_factory Time provider factory. The default factory provides time provider
+   *                        returning gmt_now from std::chrono::system_clock::now().
    */
   template<typename ErrCntxt>
   live_model::live_model(
