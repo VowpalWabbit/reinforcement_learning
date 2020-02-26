@@ -157,10 +157,10 @@ namespace Rl.Net
         {
             using (ApiStatus status = new ApiStatus(apiStatusHandle))
             {
-                EventHandler<ApiStatus> trargetEventLocal = this.BackgroundErrorInternal;
-                if (trargetEventLocal != null)
+                EventHandler<ApiStatus> targetEventLocal = this.BackgroundErrorInternal;
+                if (targetEventLocal != null)
                 {
-                    trargetEventLocal.Invoke(this, status);
+                    targetEventLocal.Invoke(this, status);
                 }
                 else
                 {
