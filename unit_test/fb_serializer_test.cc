@@ -66,11 +66,12 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
   resp.push_back(1, .2f / 3);
   std::string event_id("an_event_id");
   std::string context("some_context");
-  decision_modes mode = DEFAULT_MODE;
+  decision_modes mode = ONLINE_MODE;
 
   const timestamp ts;
   const size_t events_count = 10;
   for (size_t i = 0; i < events_count; ++i) {
+    mode = static_cast<decision_modes>(i % 2);
     auto re = ranking_event::choose_rank(event_id.c_str(), context.c_str(), 0, resp, ts, 0.33f, mode);
     serializer.add(re);
   }
@@ -93,8 +94,15 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
     BOOST_CHECK_EQUAL_COLLECTIONS(event.probabilities()->begin(), event.probabilities()->end(), expected_prob.begin(), expected_prob.end());
     BOOST_CHECK_EQUAL(event.deferred_action(), false);
     BOOST_CHECK_EQUAL(event.pass_probability(), 0.33f);
-    BOOST_CHECK_EQUAL(event.decision_mode()->type()->str(), "default_mode");
-    const auto dm = event.decision_mode()->mode_type();
-    BOOST_CHECK_EQUAL(dm, Mode_DefaultMode);
+    if (i % 2 == 0) {
+      BOOST_CHECK_EQUAL(event.decision_mode()->type()->str(), "online_mode");
+      const auto dm = event.decision_mode()->mode_type();
+      BOOST_CHECK_EQUAL(dm, Mode_OnlineMode);
+    }
+    else {
+      BOOST_CHECK_EQUAL(event.decision_mode()->type()->str(), "imitation_mode");
+      const auto dm = event.decision_mode()->mode_type();
+      BOOST_CHECK_EQUAL(dm, Mode_ImitationMode);
+    }
   }
 }

@@ -189,7 +189,7 @@
     <ClInclude Include="generated\OutcomeEvent_generated.h" />
     <ClInclude Include="generated\RankingEvent_generated.h" />
     <ClInclude Include="generated\Metadata_generated.h" />
-	<ClInclude Include="generated\DecisionMode_generated.h" />
+    <ClInclude Include="generated\DecisionMode_generated.h" />
     <ClInclude Include="azure_factories.h" />
     <ClInclude Include="console_tracer.h" />
     <ClInclude Include="logger\endian.h" />

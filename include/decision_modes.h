@@ -9,7 +9,7 @@
 
 namespace reinforcement_learning {
   enum decision_modes {
-    DEFAULT_MODE = 0,
+    ONLINE_MODE = 0,
     IMITATION_MODE = 1,
   };
 }

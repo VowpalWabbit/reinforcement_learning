@@ -56,7 +56,7 @@ namespace reinforcement_learning {
 
   public:
     static ranking_event choose_rank(const char* event_id, const char* context,
-      unsigned int flags, const ranking_response& resp, const timestamp& ts, float pass_prob = 1, decision_modes decision_mode = DEFAULT_MODE);
+      unsigned int flags, const ranking_response& resp, const timestamp& ts, float pass_prob = 1, decision_modes decision_mode = ONLINE_MODE);
 
   private:
     ranking_event(const char* event_id, bool deferred_action, float pass_prob, const char* context,

@@ -208,7 +208,7 @@ namespace reinforcement_learning {
       _bg_model_proc.reset(new utility::periodic_background_proc<model_management::model_downloader>(config.get_int(name::MODEL_REFRESH_INTERVAL_MS, 60 * 1000), _watchdog, "Model downloader", &_error_cb));
     }
 
-    _decision_mode = to_decision_modes(_configuration.get(name::DECISION_RANK_MODE, value::DECISION_RANK_MODE));
+    _decision_mode = to_decision_modes(_configuration.get(name::INTERATION_RANK_MODE, value::DECISION_RANK_MODE));
   }
 
   int live_model_impl::init_trace(api_status* status) {
@@ -451,7 +451,7 @@ namespace reinforcement_learning {
       return IMITATION_MODE;
     }
     else {
-      return DEFAULT_MODE;
+      return ONLINE_MODE;
     }
   }
 }

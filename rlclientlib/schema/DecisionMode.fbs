@@ -1,8 +1,8 @@
 namespace reinforcement_learning.messages.flatbuff;
 
-union Mode { DefaultMode, ImitationMode }
+union Mode { OnlineMode, ImitationMode }
 
-table DefaultMode {
+table OnlineMode {
 }
 
 table ImitationMode {

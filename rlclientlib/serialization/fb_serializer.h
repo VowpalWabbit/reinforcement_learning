@@ -44,10 +44,10 @@ namespace reinforcement_learning { namespace logger {
         decision_mode_offset = CreateDecisionMode(builder, imitation_mode_name, Mode_ImitationMode, imitation_mode);
         break;
       }
-      case DEFAULT_MODE: {
-        const auto default_mode = CreateDefaultMode(builder).Union();
-        const auto default_mode_name = builder.CreateString("default_mode");
-        decision_mode_offset = CreateDecisionMode(builder, default_mode_name, Mode_DefaultMode, default_mode);
+      case ONLINE_MODE: {
+        const auto default_mode = CreateOnlineMode(builder).Union();
+        const auto default_mode_name = builder.CreateString("online_mode");
+        decision_mode_offset = CreateDecisionMode(builder, default_mode_name, Mode_OnlineMode, default_mode);
         break;
       }
       default:

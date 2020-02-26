@@ -23,6 +23,7 @@ namespace reinforcement_learning {  namespace name {
       const char *const  INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB    = "interaction.send.queue.maxcapacity.kb";
       const char *const  INTERACTION_SEND_BATCH_INTERVAL_MS   = "interaction.send.batchintervalms";
       const char *const  INTERACTION_SENDER_IMPLEMENTATION    = "interaction.sender.implementation";
+      const char *const  INTERATION_RANK_MODE = "interaction.rank.mode";
 
       // Observation
       const char *const  OBSERVATION_EH_HOST     = "observation.eventhub.host";
@@ -47,7 +48,6 @@ namespace reinforcement_learning {  namespace name {
       const char *const  DECISION_SEND_QUEUE_MAX_CAPACITY_KB    = "decisions.send.queue.maxcapacity.kb";
       const char *const  DECISION_SEND_BATCH_INTERVAL_MS   = "decisions.send.batchintervalms";
       const char *const  DECISION_SENDER_IMPLEMENTATION    = "decisions.sender.implementation";
-      const char *const  DECISION_RANK_MODE = "decisions.rank.mode";
 
       const char *const  EH_TEST                 = "eventhub.mock";
       const char *const  TRACE_LOG_IMPLEMENTATION = "trace.logger.implementation";
@@ -76,7 +76,7 @@ namespace reinforcement_learning {  namespace value {
       const char *const CONSOLE_TRACE_LOGGER = "CONSOLE_TRACE_LOGGER";
       const char *const NULL_TIME_PROVIDER = "NULL_TIME_PROVIDER";
       const char *const CLOCK_TIME_PROVIDER = "CLOCK_TIME_PROVIDER";
-      const char *const DECISION_RANK_MODE = "DEFAULT";
+      const char *const DECISION_RANK_MODE = "ONLINE";
       const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
       const int DEFAULT_VW_POOL_INIT_SIZE = 4;
 }}
