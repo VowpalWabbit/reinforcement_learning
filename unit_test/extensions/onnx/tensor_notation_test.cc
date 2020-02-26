@@ -6,16 +6,16 @@
 #include <boost/test/unit_test.hpp>
 #include "test_helpers.h"
 
-#include "tensor_notation.h"
+#include "onnx_input.h"
 
 BOOST_AUTO_TEST_CASE(null_pointer) {
   // Arrange
   Ort::MemoryInfo memory_info{nullptr};
-  o::OnnxRtInputContext ic{memory_info};
+  o::onnx_input_builder ic{memory_info};
 
   // Act
   r::api_status status;
-  o::read_tensor_notation(nullptr, &ic, &status);
+  o::read_tensor_notation(nullptr, ic, &status);
   
   // Assert
   require_success(status);
@@ -25,11 +25,11 @@ BOOST_AUTO_TEST_CASE(null_pointer) {
 BOOST_AUTO_TEST_CASE(empty_string) {
   // Arrange
   Ort::MemoryInfo memory_info{nullptr};
-  o::OnnxRtInputContext ic{memory_info};
+  o::onnx_input_builder ic{memory_info};
 
   // Act
   r::api_status status;
-  o::read_tensor_notation("", &ic, &status);
+  o::read_tensor_notation("", ic, &status);
   
   // Assert
   require_success(status);
@@ -39,22 +39,18 @@ BOOST_AUTO_TEST_CASE(empty_string) {
 BOOST_AUTO_TEST_CASE(empty_object) {
   // Arrange
   Ort::MemoryInfo memory_info{nullptr};
-  o::OnnxRtInputContext ic{memory_info};
+  o::onnx_input_builder ic{memory_info};
 
   // Act
   r::api_status status;
-  o::read_tensor_notation("{}", &ic, &status);
+  o::read_tensor_notation("{}", ic, &status);
   
   // Assert
   require_success(status);
   validate_empty(ic);
 }
 
-const auto SimpleVectorNotation = R"(
-  {
-    "abc":"BAAAAAAAAAA=;AACAP2ZmBkBmZoZAmpkRwQ=="
-  }
-  )";
+const auto SimpleVectorNotation = R"({"abc":"BAAAAAAAAAA=;AACAP2ZmBkBmZoZAmpkRwQ=="})";
 
 BOOST_AUTO_TEST_CASE(simple_vector) 
 {
@@ -62,11 +58,11 @@ BOOST_AUTO_TEST_CASE(simple_vector)
   std::vector<int64_t> expected_dimensions({4});
   std::vector<float> expected_values({1.0f, 2.1f, 4.2f, -9.1f});
 
-  o::OnnxRtInputContext ic{TestMemoryInfo};
+  o::onnx_input_builder ic{TestMemoryInfo};
 
   // Act
   r::api_status status;
-  o::read_tensor_notation(SimpleVectorNotation, &ic, &status);
+  o::read_tensor_notation(SimpleVectorNotation, ic, &status);
   
   // Assert
   require_success(status);
@@ -99,11 +95,11 @@ inline void run_tensor_notation_test(Ort::MemoryInfo& memory_info, expectations<
       input_names.push_back(std::get<0>(expectation));
     });
 
-  o::OnnxRtInputContext ic{memory_info};
+  o::onnx_input_builder ic{memory_info};
 
   // Act
   r::api_status status;
-  o::read_tensor_notation(tensor_notation.c_str(), &ic, &status);
+  o::read_tensor_notation(tensor_notation.c_str(), ic, &status);
 
   // Assert
   require_success(status);

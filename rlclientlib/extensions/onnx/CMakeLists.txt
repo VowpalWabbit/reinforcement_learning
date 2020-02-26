@@ -5,7 +5,8 @@ find_package(cpprestsdk REQUIRED)
 SET(ONNX_EXTENSION_SOURCES
   src/onnx_model.cc
   src/onnx_extension.cc
-  src/tensor_notation.cc
+  src/onnx_input.cc
+  src/tensor_parser.cc
 )
   
 SET(ONNX_EXTENSION_PUBLIC_HEADERS
@@ -15,8 +16,8 @@ SET(ONNX_EXTENSION_PUBLIC_HEADERS
   
 SET(ONNX_EXTENSION_HEADERS
   src/onnx_model.h
-  #src/onnxrt_type_mapping.h
-  src/tensor_notation.h
+  src/onnx_input.h
+  src/tensor_parser.h
 )
 
 #source_group("Sources" FILES ${ONNX_EXTENSION_SOURCES})
@@ -36,7 +37,6 @@ target_include_directories( rlclientlib-onnx
                             $<TARGET_PROPERTY:rlclientlib,INTERFACE_INCLUDE_DIRECTORIES>
                             ${CMAKE_CURRENT_SOURCE_DIR}/src
                             ${ONNXRUNTIME_INCLUDE_DIRS}
-                            ${CPPRESTSDK_INCLUDE_DIRS}
                             )
 
 target_link_libraries(rlclientlib-onnx PUBLIC rlclientlib onnxruntime)

@@ -2,7 +2,7 @@
 #include <sstream>
 #include <assert.h>
 
-#include "tensor_notation.h"
+#include "onnx_input.h"
 
 #include "trace_logger.h"
 #include "err_constants.h"
@@ -11,9 +11,6 @@
 #include "api_status.h"
 
 #include "factory_resolver.h"
-
-// for base64 decoding
-#include <cpprest/http_client.h>
 
 namespace reinforcement_learning { namespace onnx {
 
@@ -166,13 +163,10 @@ namespace reinforcement_learning { namespace onnx {
     // based on what version of onnxruntime we are loading. 
     Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
     
-    OnnxRtInputContext input_context(memory_info);
+    onnx_input_builder input_context(memory_info);
     if (_use_unstructured_input)
     {
-      read_tensor_notation(features, &input_context);
-      
-      //TODO: Error checking
-      //RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << "Input could not be parsed.";
+      RETURN_IF_FAIL(read_tensor_notation(features, input_context, status));
     }
     else
     {
@@ -183,6 +177,7 @@ namespace reinforcement_learning { namespace onnx {
     
     Ort::RunOptions run_options{nullptr};
 
+    std::vector<const char*> input_names = input_context.input_names();
     std::vector<Ort::Value> inputs = input_context.inputs();
     if (inputs.size() != input_context.input_count())
     {
@@ -190,7 +185,7 @@ namespace reinforcement_learning { namespace onnx {
       RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << "Could not interpret input values to match expected inputs.";
     }
 
-    auto outputs = local_session->Run(Ort::RunOptions{nullptr}, input_context.input_names(), input_context.inputs().data(), input_context.input_count(), (const char* const*)&_output_name, 1);
+    auto outputs = local_session->Run(Ort::RunOptions{nullptr}, input_names.data(), inputs.data(), input_context.input_count(), (const char* const*)&_output_name, 1);
     assert(outputs.size() > _output_index && outputs[_output_index].IsTensor());
 
     // Re-wrap in Ort::Value to ensure proper destruction (no point in using VW::scope_exit, since we allocate either way)
