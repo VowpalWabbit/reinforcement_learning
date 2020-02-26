@@ -12,12 +12,14 @@
  *
  * @return int Error code
  */
-int main() {
+
+
+int basic_usage_inference_cb(const std::string& config_path){
   //! name, value based config object used to initialise the API
   u::configuration config;
 
   //! Helper method to initialize config from a json file
-  if( load_config_from_json("client.json", config) != err::success ) {
+  if (load_config_from_json("client.json", config) != err::success) {
     std::cout << "Unable to Load file: client.json" << std::endl;
     return -1;
   }
@@ -32,7 +34,7 @@ int main() {
   //! [(1) Instantiate Inference API using config]
 
   //! [(2) Initialize the API]
-  if( rl.init(&status) != err::success ) {
+  if (rl.init(&status) != err::success) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
@@ -42,7 +44,7 @@ int main() {
   // Response class
   r::ranking_response response;
 
-  if( rl.choose_rank(event_id, context, response, &status) != err::success ) {
+  if (rl.choose_rank(event_id, contextCB, response, &status) != err::success) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
@@ -50,7 +52,7 @@ int main() {
 
   //! [(4) Use the response]
   size_t chosen_action;
-  if( response.get_chosen_action_id(chosen_action, &status) != err::success ) {
+  if (response.get_chosen_action_id(chosen_action, &status) != err::success) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
@@ -60,13 +62,17 @@ int main() {
   //! [(5) Report outcome]
   //     Report received outcome (Optional: if this call is not made, default missing outcome is applied)
   //     Missing outcome can be thought of as negative reinforcement
-  if( rl.report_outcome(event_id, outcome, &status) != err::success ) {
+  if (rl.report_outcome(event_id, outcome, &status) != err::success) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
   //! [(5) Report outcome]
 
   return 0;
+}
+
+int main() {
+  return basic_usage_inference_cb("client.json");
 }
 
 // Helper methods
