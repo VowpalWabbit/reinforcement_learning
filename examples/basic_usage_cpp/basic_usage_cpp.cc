@@ -71,6 +71,64 @@ int basic_usage_inference_cb(const std::string& config_path){
   return 0;
 }
 
+
+int basic_usage_inference_ccb(const std::string& config_path) {
+  //! name, value based config object used to initialise the API
+  u::configuration config;
+
+  //! Helper method to initialize config from a json file
+  if (load_config_from_json("client.json", config) != err::success) {
+    std::cout << "Unable to Load file: client.json" << std::endl;
+    return -1;
+  }
+
+  /** api_status is an optional argument used to get detailed
+   *  error description from all API calls
+   */
+  r::api_status status;
+
+  //! [(1) Instantiate Inference API using config]
+  r::live_model rl(config);
+  //! [(1) Instantiate Inference API using config]
+
+  //! [(2) Initialize the API]
+  if (rl.init(&status) != err::success) {
+    std::cout << status.get_error_msg() << std::endl;
+    return -1;
+  }
+  //! [(2) Initialize the API]
+
+  //! [(3) Choose an action]
+  // Response class
+  r::decision_response response;
+
+  if (rl.request_decision(contextCCB, response, &status) != err::success) {
+    std::cout << status.get_error_msg() << std::endl;
+    return -1;
+  }
+  //! [(3) Choose an action]
+
+  //! [(4) Use / evaluate the response]
+  size_t chosen_action;
+ 
+  int i;
+  for (const auto& slot : response) {
+    std::cout << "Chosen action for slot " << i++ << ": " << slot.get_action_id() << std::endl;
+  }
+  //! [(4) Use / evaluate the response]
+
+  //! [(5) Report outcome]
+  //     Report received outcome (Optional: if this call is not made, default missing outcome is applied)
+  //     Missing outcome can be thought of as negative reinforcement
+  if (rl.report_outcome(first_slot_id, outcome, &status) != err::success) {
+    std::cout << status.get_error_msg() << std::endl;
+    return -1;
+  }
+  //! [(5) Report outcome]
+
+  return 0;
+}
+
 int main() {
   return basic_usage_inference_cb("client.json");
 }
