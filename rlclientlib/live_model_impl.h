@@ -1,5 +1,5 @@
 #pragma once
-#include "decision_modes.h"
+#include "decision_mode.h"
 #include "logger/event_logger.h"
 #include "model_mgmt.h"
 #include "model_mgmt/data_callback_fn.h"
@@ -74,7 +74,7 @@ namespace reinforcement_learning
     error_callback_fn _error_cb;
     model_management::data_callback_fn _data_cb;
     utility::watchdog _watchdog;
-    decision_modes _decision_mode;
+    decision_mode _decision_mode;
 
     trace_logger_factory_t* _trace_factory;
     data_transport_factory_t* _t_factory;

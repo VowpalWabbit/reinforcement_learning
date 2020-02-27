@@ -107,7 +107,7 @@
     <ClInclude Include="..\include\container_iterator.h" />
     <ClInclude Include="..\include\future_compat.h" />
     <ClInclude Include="generated\DecisionMode_generated.h" />
-    <ClInclude Include="..\include\decision_modes.h" />
+    <ClInclude Include="..\include\decision_mode.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

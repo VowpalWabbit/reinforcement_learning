@@ -24,7 +24,7 @@ namespace reinforcement_learning {
   }
 
   ranking_event::ranking_event(const char* event_id, bool deferred_action, float pass_prob, const char* context,
-                               const ranking_response& response, const timestamp& ts, decision_modes decision_mode)
+                               const ranking_response& response, const timestamp& ts, decision_mode decision_mode)
     : event(event_id, ts, pass_prob), _model_id(response.get_model_id()),
       _deferred_action(deferred_action){
     for (auto const& r : response) {
@@ -41,10 +41,10 @@ namespace reinforcement_learning {
   const std::vector<float>& ranking_event::get_probabilities() const { return _probilities_vector; }
   const std::string& ranking_event::get_model_id() const { return _model_id; }
   bool ranking_event::get_defered_action() const { return _deferred_action; }
-  const decision_modes ranking_event::get_decision_mode() const { return _decision_mode; }
+  const decision_mode ranking_event::get_decision_mode() const { return _decision_mode; }
 
   ranking_event ranking_event::choose_rank(const char* event_id, const char* context, unsigned int flags,
-                                           const ranking_response& resp, const timestamp& ts, float pass_prob, decision_modes decision_mode) {
+                                           const ranking_response& resp, const timestamp& ts, float pass_prob, decision_mode decision_mode) {
     return ranking_event(event_id, flags & action_flags::DEFERRED, pass_prob, context, resp, ts, decision_mode);
   }
 

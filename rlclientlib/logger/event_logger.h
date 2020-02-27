@@ -7,7 +7,7 @@
 
 #include "configuration.h"
 #include "constants.h"
-#include "decision_modes.h"
+#include "decision_mode.h"
 #include "async_batcher.h"
 #include "eventhub_client.h"
 #include "api_status.h"
@@ -108,7 +108,7 @@ namespace reinforcement_learning { namespace logger {
         perror_cb)
     {}
 
-    int log(const char* event_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status, decision_modes decision_mode = ONLINE_MODE);
+    int log(const char* event_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status, decision_mode decision_mode = ONLINE_MODE);
   };
 
 class ccb_logger : public event_logger<decision_ranking_event> {

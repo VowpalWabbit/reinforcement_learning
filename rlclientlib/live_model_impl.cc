@@ -36,8 +36,8 @@ namespace reinforcement_learning {
 
   int check_null_or_empty(const char* arg1, const char* arg2, api_status* status);
   int check_null_or_empty(const char* arg1, api_status* status);
-  int post_process_rank(ranking_response& response, decision_modes decision_mode);
-  decision_modes to_decision_modes(const char* decision_mode);
+  int post_process_rank(ranking_response& response, decision_mode decision_mode);
+  decision_mode to_decision_modes(const char* decision_mode);
 
   void default_error_callback(const api_status& status, void* watchdog_context) {
     auto watchdog = static_cast<utility::watchdog*>(watchdog_context);
@@ -208,7 +208,7 @@ namespace reinforcement_learning {
       _bg_model_proc.reset(new utility::periodic_background_proc<model_management::model_downloader>(config.get_int(name::MODEL_REFRESH_INTERVAL_MS, 60 * 1000), _watchdog, "Model downloader", &_error_cb));
     }
 
-    _decision_mode = to_decision_modes(_configuration.get(name::INTERATION_RANK_MODE, value::DECISION_RANK_MODE));
+    _decision_mode = to_decision_modes(_configuration.get(name::INTERATION_RANK_MODE, value::INTERACTION_RANK_ONLINE_MODE));
   }
 
   int live_model_impl::init_trace(api_status* status) {
@@ -423,7 +423,7 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int post_process_rank(ranking_response& response, decision_modes decision_mode) {
+  int post_process_rank(ranking_response& response, decision_mode decision_mode) {
     if (decision_mode == IMITATION_MODE) {
       std::vector<action_prob> copied_action_prob;
 
@@ -446,7 +446,7 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  decision_modes to_decision_modes(const char* decision_mode) {
+  decision_mode to_decision_modes(const char* decision_mode) {
     if (std::strcmp(decision_mode, "IMITATION_MODE") == 0) {
       return IMITATION_MODE;
     }
