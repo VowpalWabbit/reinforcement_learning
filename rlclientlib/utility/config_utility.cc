@@ -54,6 +54,90 @@ namespace reinforcement_learning { namespace utility { namespace config {
     }
   }
 
+  const char* error_code_str(int err_code)
+  {
+    switch(err_code){
+      case error_code::success:
+        return "Success";
+      case error_code::invalid_argument:
+        RETURN_ERROR_MSG(invalid_argument);
+      case error_code::background_queue_overflow:
+        RETURN_ERROR_MSG(background_queue_overflow);
+      case error_code::eventhub_http_generic:
+        RETURN_ERROR_MSG(eventhub_http_generic);
+      case error_code::http_bad_status_code:
+        RETURN_ERROR_MSG(http_bad_status_code);
+      case error_code::action_not_found:
+        RETURN_ERROR_MSG(action_not_found);
+      case error_code::background_thread_start:
+        RETURN_ERROR_MSG(background_thread_start);
+      case error_code::not_initialized:
+        RETURN_ERROR_MSG(not_initialized);
+      case error_code::eventhub_generate_SAS_hash:
+        RETURN_ERROR_MSG(eventhub_generate_SAS_hash);
+      case error_code::create_fn_exception:
+        RETURN_ERROR_MSG(create_fn_exception);
+      case error_code::type_not_registered:
+        RETURN_ERROR_MSG(type_not_registered);
+      case error_code::http_uri_not_provided:
+        RETURN_ERROR_MSG(http_uri_not_provided);
+      case error_code::last_modified_not_found:
+        RETURN_ERROR_MSG(last_modified_not_found);
+      case error_code::last_modified_invalid:
+        RETURN_ERROR_MSG(last_modified_invalid);
+      case error_code::bad_content_length:
+        RETURN_ERROR_MSG(bad_content_length);
+      case error_code::exception_during_http_req:
+        RETURN_ERROR_MSG(exception_during_http_req);
+      case error_code::model_export_frequency_not_provided:
+        RETURN_ERROR_MSG(model_export_frequency_not_provided);
+      case error_code::bad_time_interval:
+        RETURN_ERROR_MSG(bad_time_interval);
+      case error_code::data_callback_exception:
+        RETURN_ERROR_MSG(data_callback_exception);
+      case error_code::data_callback_not_set:
+        RETURN_ERROR_MSG(data_callback_not_set);
+      case error_code::json_no_actions_found:
+        RETURN_ERROR_MSG(json_no_actions_found);
+      case error_code::json_parse_error:
+        RETURN_ERROR_MSG(json_parse_error);
+      case error_code::exploration_error:
+        RETURN_ERROR_MSG(exploration_error);
+      case error_code::action_out_of_bounds:
+        RETURN_ERROR_MSG(action_out_of_bounds);
+      case error_code::model_update_error:
+        RETURN_ERROR_MSG(model_update_error);
+      case error_code::model_rank_error:
+        RETURN_ERROR_MSG(model_rank_error);
+      case error_code::pdf_sampling_error:
+        RETURN_ERROR_MSG(pdf_sampling_error);
+      case error_code::eh_connstr_parse_error:
+        RETURN_ERROR_MSG(eh_connstr_parse_error);
+      case error_code::unhandled_background_error_occurred:
+        RETURN_ERROR_MSG(unhandled_background_error_occurred);
+      case error_code::thread_unresponsive_timeout:
+        RETURN_ERROR_MSG(thread_unresponsive_timeout);
+      case error_code::incorrect_buffer_preamble_size:
+        RETURN_ERROR_MSG(incorrect_buffer_preamble_size);
+      case error_code::serialize_unknown_outcome_type:
+        RETURN_ERROR_MSG(serialize_unknown_outcome_type);
+      case error_code::preamble_error:
+        RETURN_ERROR_MSG(preamble_error);
+      case error_code::file_open_error:
+        RETURN_ERROR_MSG(file_open_error);
+      case error_code::json_no_slots_found:
+        RETURN_ERROR_MSG(json_no_slots_found);
+      case error_code::file_read_error:
+        RETURN_ERROR_MSG(file_read_error);
+      case error_code::file_stats_error:
+        RETURN_ERROR_MSG(file_stats_error);
+      case error_code::not_supported:
+        RETURN_ERROR_MSG(not_supported);
+      default:
+        return "Unexpected Error";
+    }
+  }
+  
   int parse_eventhub_conn_str(const std::string& conn_str, std::string& host, std::string& name, std::string& access_key_name, std::string& access_key, i_trace* trace, api_status* status) {
     try {
       const std::regex regex_eh_connstr("Endpoint=sb://([^/]+)[^;]+;SharedAccessKeyName=([^;]+);SharedAccessKey=([^;]+);EntityPath=([^;^\\s]+)");

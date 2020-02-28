@@ -226,3 +226,11 @@ return sb << reinforcement_learning::error_code::code ## _s                     
   }                               \
 } while (0)                       \
 
+/**
+*
+* @brief Error reporting macro to generate error string for the error code
+*/
+#define RETURN_ERROR_MSG(name) do{                      \
+  return reinforcement_learning::error_code::name ## _s;\
+} while(0)                                              \
+
