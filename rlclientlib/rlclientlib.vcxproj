@@ -87,7 +87,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PreBuildEvent>
-      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\DecisionMode.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\DecisionRankingEvent.fbs</Command>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\LearningMode.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\DecisionRankingEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -106,7 +106,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PreBuildEvent>
-      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\DecisionMode.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\DecisionRankingEvent.fbs</Command>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\LearningMode.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\DecisionRankingEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -129,7 +129,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\DecisionMode.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\DecisionRankingEvent.fbs</Command>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\LearningMode.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\DecisionRankingEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -152,7 +152,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\DecisionMode.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\DecisionRankingEvent.fbs</Command>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\LearningMode.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\DecisionRankingEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -189,7 +189,7 @@
     <ClInclude Include="generated\OutcomeEvent_generated.h" />
     <ClInclude Include="generated\RankingEvent_generated.h" />
     <ClInclude Include="generated\Metadata_generated.h" />
-    <ClInclude Include="generated\DecisionMode_generated.h" />
+    <ClInclude Include="generated\LearningMode_generated.h" />
     <ClInclude Include="azure_factories.h" />
     <ClInclude Include="console_tracer.h" />
     <ClInclude Include="logger\endian.h" />
@@ -277,7 +277,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="schema\DecisionMode.fbs" />
+    <None Include="schema\LearningMode.fbs" />
     <None Include="schema\Metadata.fbs" />
     <None Include="schema\OutcomeEvent.fbs" />
     <None Include="schema\RankingEvent.fbs" />

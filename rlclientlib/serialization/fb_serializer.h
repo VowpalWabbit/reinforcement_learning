@@ -36,18 +36,17 @@ namespace reinforcement_learning { namespace logger {
 							ts.minute, ts.second, ts.sub_second);
 	    const auto meta_id_offset = CreateMetadata(builder,&client_ts);
 
-      flatbuffers::Offset<DecisionMode> decision_mode_offset;
+      flatbuffers::Offset<LearningMode> decision_mode_offset;
       switch (evt.get_decision_mode()) {
       case IMITATION_MODE: {
         const auto imitation_mode = CreateImitationMode(builder).Union();
-        const auto imitation_mode_name = builder.CreateString("imitation_mode");
-        decision_mode_offset = CreateDecisionMode(builder, imitation_mode_name, Mode_ImitationMode, imitation_mode);
+        decision_mode_offset = CreateLearningMode(builder, ModeType_ImitationMode, imitation_mode);
         break;
       }
       case ONLINE_MODE: {
         const auto default_mode = CreateOnlineMode(builder).Union();
         const auto default_mode_name = builder.CreateString("online_mode");
-        decision_mode_offset = CreateDecisionMode(builder, default_mode_name, Mode_OnlineMode, default_mode);
+        decision_mode_offset = CreateLearningMode(builder, ModeType_OnlineMode, default_mode);
         break;
       }
       default:

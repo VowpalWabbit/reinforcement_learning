@@ -1,0 +1,17 @@
+namespace reinforcement_learning.messages.flatbuff;
+
+union ModeType { OnlineMode, ImitationMode }
+
+table OnlineMode {
+}
+
+table ImitationMode {
+    action_ids:[uint64];       // action IDs
+	probabilities:[float];     // probabilities
+}
+
+table LearningMode {
+	mode:ModeType;             // mode configuration obejct
+}
+
+root_type LearningMode;

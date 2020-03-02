@@ -106,8 +106,8 @@
     <ClInclude Include="..\include\decision_response.h" />
     <ClInclude Include="..\include\container_iterator.h" />
     <ClInclude Include="..\include\future_compat.h" />
-    <ClInclude Include="generated\DecisionMode_generated.h" />
     <ClInclude Include="..\include\decision_mode.h" />
+    <ClInclude Include="generated\LearningMode_generated.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -115,7 +115,7 @@
     <None Include="schema\RankingEvent.fbs" />
     <None Include="schema\DecisionRankingEvent.fbs" />
     <None Include="schema\Metadata.fbs" />
-    <None Include="schema\DecisionMode.fbs" />
+    <None Include="schema\LearningMode.fbs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
