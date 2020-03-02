@@ -51,6 +51,7 @@ namespace reinforcement_learning { namespace logger {
         break;
       }
       default:
+        // This is to be back-compatible with the config not setting learning mode.
         break;
       }
 

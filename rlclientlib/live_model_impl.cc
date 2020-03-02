@@ -73,12 +73,12 @@ namespace reinforcement_learning {
     response.set_event_id(event_id);
     RETURN_IF_FAIL(_ranking_logger->log(event_id, context, flags, response, status, _decision_mode));
 
+    RETURN_IF_FAIL(post_process_rank(response, _decision_mode));
+
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
       RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
     }
-
-    RETURN_IF_FAIL(post_process_rank(response, _decision_mode));
 
     return error_code::success;
   }
@@ -424,23 +424,20 @@ namespace reinforcement_learning {
   }
 
   int post_process_rank(ranking_response& response, decision_mode decision_mode) {
-    if (decision_mode == IMITATION_MODE) {
-      std::vector<action_prob> copied_action_prob;
-
-      for (auto it = response.begin(); it != response.end(); ++it) {
-        copied_action_prob.push_back(*it);
-      }
-
-      std::sort(copied_action_prob.begin(), copied_action_prob.end(), [](const action_prob& a, const action_prob& b) {
-        return a.action_id < b.action_id;
+    switch (decision_mode) {
+      case IMITATION_MODE:
+      {
+        std::sort(response.begin(), response.end(), [](const action_prob& a, const action_prob& b) {
+          return a.action_id < b.action_id;
         }
-      );
-
-      response.clear_ranking();
-      response.set_chosen_action_id(copied_action_prob.begin()->action_id);
-      for (auto it = copied_action_prob.begin(); it != copied_action_prob.end(); ++it) {
-        action_prob cur = *it;
-        response.push_back(cur.action_id, cur.probability);
+        );
+        response.set_chosen_action_id((*(response.begin())).action_id);
+        break;
+      }
+      default:
+      {
+        // This is to be back-compatible with the config not setting learning mode.
+        break;
       }
     }
     return error_code::success;
