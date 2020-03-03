@@ -37,7 +37,7 @@ namespace reinforcement_learning { namespace logger {
 	    const auto meta_id_offset = CreateMetadata(builder,&client_ts);
 
       flatbuffers::Offset<LearningMode> decision_mode_offset;
-      switch (evt.get_decision_mode()) {
+      switch (evt.get_learning_mode()) {
       case IMITATION_MODE: {
         const auto imitation_mode = CreateImitationMode(builder).Union();
         decision_mode_offset = CreateLearningMode(builder, ModeType_ImitationMode, imitation_mode);

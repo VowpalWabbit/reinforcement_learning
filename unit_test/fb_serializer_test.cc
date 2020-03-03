@@ -4,7 +4,7 @@
 #endif
 
 #include <boost/test/unit_test.hpp>
-#include "decision_mode.h"
+#include "learning_mode.h"
 #include "ranking_event.h"
 #include "api_status.h"
 #include "serialization/fb_serializer.h"
@@ -66,12 +66,12 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
   resp.push_back(1, .2f / 3);
   std::string event_id("an_event_id");
   std::string context("some_context");
-  decision_mode mode = ONLINE_MODE;
+  learning_mode mode = ONLINE_MODE;
 
   const timestamp ts;
   const size_t events_count = 10;
   for (size_t i = 0; i < events_count; ++i) {
-    mode = static_cast<decision_mode>(i % 2);
+    mode = static_cast<learning_mode>(i % 2);
     auto re = ranking_event::choose_rank(event_id.c_str(), context.c_str(), 0, resp, ts, 0.33f, mode);
     serializer.add(re);
   }

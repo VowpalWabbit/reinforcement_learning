@@ -106,8 +106,8 @@
     <ClInclude Include="..\include\decision_response.h" />
     <ClInclude Include="..\include\container_iterator.h" />
     <ClInclude Include="..\include\future_compat.h" />
-    <ClInclude Include="..\include\decision_mode.h" />
     <ClInclude Include="generated\LearningMode_generated.h" />
+    <ClInclude Include="..\include\learning_mode.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

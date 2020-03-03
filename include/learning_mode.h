@@ -8,7 +8,7 @@
 #pragma once
 
 namespace reinforcement_learning {
-  enum decision_mode {
+  enum learning_mode {
     ONLINE_MODE = 0,
     IMITATION_MODE = 1,
   };

@@ -36,8 +36,8 @@ namespace reinforcement_learning {
 
   int check_null_or_empty(const char* arg1, const char* arg2, api_status* status);
   int check_null_or_empty(const char* arg1, api_status* status);
-  int post_process_rank(ranking_response& response, decision_mode decision_mode);
-  decision_mode to_decision_modes(const char* decision_mode);
+  int post_process_rank(ranking_response& response, learning_mode learning_mode);
+  learning_mode to_learning_mode(const char* learning_mode);
 
   void default_error_callback(const api_status& status, void* watchdog_context) {
     auto watchdog = static_cast<utility::watchdog*>(watchdog_context);
@@ -71,9 +71,9 @@ namespace reinforcement_learning {
       RETURN_IF_FAIL(explore_exploit(event_id, context, response, status));
     }
     response.set_event_id(event_id);
-    RETURN_IF_FAIL(_ranking_logger->log(event_id, context, flags, response, status, _decision_mode));
+    RETURN_IF_FAIL(_ranking_logger->log(event_id, context, flags, response, status, _learning_mode));
 
-    RETURN_IF_FAIL(post_process_rank(response, _decision_mode));
+    RETURN_IF_FAIL(post_process_rank(response, _learning_mode));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -208,7 +208,7 @@ namespace reinforcement_learning {
       _bg_model_proc.reset(new utility::periodic_background_proc<model_management::model_downloader>(config.get_int(name::MODEL_REFRESH_INTERVAL_MS, 60 * 1000), _watchdog, "Model downloader", &_error_cb));
     }
 
-    _decision_mode = to_decision_modes(_configuration.get(name::INTERATION_RANK_MODE, value::INTERACTION_RANK_ONLINE_MODE));
+    _learning_mode = to_learning_mode(_configuration.get(name::INTERATION_RANK_MODE, value::INTERACTION_RANK_ONLINE_MODE));
   }
 
   int live_model_impl::init_trace(api_status* status) {
@@ -423,8 +423,8 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int post_process_rank(ranking_response& response, decision_mode decision_mode) {
-    switch (decision_mode) {
+  int post_process_rank(ranking_response& response, learning_mode learning_mode) {
+    switch (learning_mode) {
       case IMITATION_MODE:
       {
         std::sort(response.begin(), response.end(), [](const action_prob& a, const action_prob& b) {
@@ -443,8 +443,8 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  decision_mode to_decision_modes(const char* decision_mode) {
-    if (std::strcmp(decision_mode, "IMITATION_MODE") == 0) {
+  learning_mode to_learning_mode(const char* learning_mode) {
+    if (std::strcmp(learning_mode, "IMITATION_MODE") == 0) {
       return IMITATION_MODE;
     }
     else {
