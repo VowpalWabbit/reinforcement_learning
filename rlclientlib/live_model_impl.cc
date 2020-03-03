@@ -71,9 +71,9 @@ namespace reinforcement_learning {
       RETURN_IF_FAIL(explore_exploit(event_id, context, response, status));
     }
     response.set_event_id(event_id);
-    RETURN_IF_FAIL(_ranking_logger->log(event_id, context, flags, response, status, _learning_mode));
 
     RETURN_IF_FAIL(post_process_rank(response, _learning_mode));
+    RETURN_IF_FAIL(_ranking_logger->log(event_id, context, flags, response, status, _learning_mode));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {

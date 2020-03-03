@@ -6,8 +6,6 @@ table OnlineMode {
 }
 
 table ImitationMode {
-    action_ids:[uint64];       // action IDs
-	probabilities:[float];     // probabilities
 }
 
 table LearningMode {
