@@ -95,12 +95,10 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
     BOOST_CHECK_EQUAL(event.deferred_action(), false);
     BOOST_CHECK_EQUAL(event.pass_probability(), 0.33f);
     if (i % 2 == 0) {
-      const auto dm = event.learning_mode()->mode_type();
-      BOOST_CHECK_EQUAL(dm, ModeType_OnlineMode);
+      BOOST_CHECK_EQUAL(event.learning_mode(), LearningModeType_Online);
     }
     else {
-      const auto dm = event.learning_mode()->mode_type();
-      BOOST_CHECK_EQUAL(dm, ModeType_ImitationMode);
+      BOOST_CHECK_EQUAL(event.learning_mode(), LearningModeType_Imitation);
     }
   }
 }

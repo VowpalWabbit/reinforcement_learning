@@ -36,17 +36,14 @@ namespace reinforcement_learning { namespace logger {
 							ts.minute, ts.second, ts.sub_second);
 	    const auto meta_id_offset = CreateMetadata(builder,&client_ts);
 
-      flatbuffers::Offset<LearningMode> decision_mode_offset;
+      LearningModeType learning_mode_type;
       switch (evt.get_learning_mode()) {
       case IMITATION_MODE: {
-        const auto imitation_mode = CreateImitationMode(builder).Union();
-        decision_mode_offset = CreateLearningMode(builder, ModeType_ImitationMode, imitation_mode);
+        learning_mode_type = LearningModeType_Imitation;
         break;
       }
       case ONLINE_MODE: {
-        const auto default_mode = CreateOnlineMode(builder).Union();
-        const auto default_mode_name = builder.CreateString("online_mode");
-        decision_mode_offset = CreateLearningMode(builder, ModeType_OnlineMode, default_mode);
+        learning_mode_type = LearningModeType_Online;
         break;
       }
       default:
@@ -56,7 +53,7 @@ namespace reinforcement_learning { namespace logger {
 
       ret_val = CreateRankingEvent(	builder, event_id_offset, evt.get_defered_action(), action_ids_vector_offset,
 									context_offset, probabilities_vector_offset, model_id_offset,
-									evt.get_pass_prob(), meta_id_offset, decision_mode_offset);
+									evt.get_pass_prob(), meta_id_offset, learning_mode_type);
       return error_code::success;
     }
   };
