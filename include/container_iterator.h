@@ -26,7 +26,7 @@ namespace reinforcement_learning {
       , _idx(idx) {
       static_assert(std::is_same<TElem, typename TColl::value_type>::value, "TColl must be a collection of TElem");
     }
-    //! Move the iterator to the next element
+    //! Move the iterator to the previous element
     container_iterator& operator--() {
       --_idx;
       return *this;
