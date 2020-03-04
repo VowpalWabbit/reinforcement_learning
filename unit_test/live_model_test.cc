@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_online_mode) {
   u::configuration config;
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::EH_TEST, "true");
-  config.set(r::name::INTERATION_RANK_MODE, "ONLINE_MODE");
+  config.set(r::name::LEARNING_MODE, "ONLINE_MODE");
 
   r::api_status status;
 
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_imitation_mode) {
   u::configuration config;
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::EH_TEST, "true");
-  config.set(r::name::INTERATION_RANK_MODE, "IMITATION_MODE");
+  config.set(r::name::LEARNING_MODE, "IMITATION_MODE");
 
   r::api_status status;
 

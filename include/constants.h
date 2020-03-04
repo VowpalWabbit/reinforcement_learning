@@ -11,6 +11,9 @@ namespace reinforcement_learning {  namespace name {
       const char *const  VW_CMDLINE              = "vw.commandline";
       const char *const  VW_POOL_INIT_SIZE       = "vw.pool.init.size";
       const char *const  INITIAL_EPSILON         = "initial_exploration.epsilon";
+      const char *const  LEARNING_MODE = "rank.learning.mode";
+      const char *const  LEARNING_MODE_ONLINE = "rank.learning.mode.online";
+      const char *const  LEARNING_MODE_IMITATION = "rank.learning.mode.imitation";
 
       // Interaction
       const char *const  INTERACTION_EH_HOST     = "interaction.eventhub.host";
@@ -23,7 +26,6 @@ namespace reinforcement_learning {  namespace name {
       const char *const  INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB    = "interaction.send.queue.maxcapacity.kb";
       const char *const  INTERACTION_SEND_BATCH_INTERVAL_MS   = "interaction.send.batchintervalms";
       const char *const  INTERACTION_SENDER_IMPLEMENTATION    = "interaction.sender.implementation";
-      const char *const  INTERATION_RANK_MODE = "interaction.rank.mode";
 
       // Observation
       const char *const  OBSERVATION_EH_HOST     = "observation.eventhub.host";

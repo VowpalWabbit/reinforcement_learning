@@ -103,7 +103,7 @@ namespace reinforcement_learning { namespace utility { namespace config {
       { "InitialExplorationEpsilon" , name::INITIAL_EPSILON },
       { "ModelRefreshIntervalMs"    , name::MODEL_REFRESH_INTERVAL_MS },
       { "QueueMode"                 , name::QUEUE_MODE }, // expect either DROP or BLOCK, default is DROP
-      { "InteractionMode"           , name::INTERATION_RANK_MODE}
+      { "LearningMode"              , name::LEARNING_MODE}
     };
 
     const std::set<std::string> deprecated = {
