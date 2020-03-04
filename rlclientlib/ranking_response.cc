@@ -64,11 +64,6 @@ namespace reinforcement_learning {
     _ranking.clear();
   }
 
-  void ranking_response::clear_ranking() {
-    _ranking.clear();
-    _chosen_action_id = 0;
-  }
-
   ranking_response::ranking_response(ranking_response&& tmp) noexcept :
   _event_id(std::move(tmp._event_id)),
     _chosen_action_id(tmp._chosen_action_id),

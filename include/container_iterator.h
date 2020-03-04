@@ -54,7 +54,7 @@ namespace reinforcement_learning {
       return _idx < rhs._idx;
     }
     //! Allow distance measurement
-    int64_t operator-(const container_iterator& rhs) const {
+    size_t operator-(const container_iterator& rhs) const {
       return _idx - rhs._idx;
     }
     //! Allow distance measurement
@@ -66,7 +66,7 @@ namespace reinforcement_learning {
       return { _coll, _idx + idx };
     }
     //! Assign the values for the iterator
-    container_iterator operator=(const container_iterator& other) {
+    container_iterator& operator=(const container_iterator& other) {
       _coll = other._coll;
       _idx = other._idx;
       return *this;

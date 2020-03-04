@@ -42,6 +42,7 @@
     <ClCompile Include="time_helper.cc" />
     <ClCompile Include="model_mgmt\file_model_loader.cc" />
     <ClCompile Include="decision_response.cc" />
+    <ClCompile Include="learning_mode.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -106,7 +107,6 @@
     <ClInclude Include="..\include\decision_response.h" />
     <ClInclude Include="..\include\container_iterator.h" />
     <ClInclude Include="..\include\future_compat.h" />
-    <ClInclude Include="..\include\learning_mode.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

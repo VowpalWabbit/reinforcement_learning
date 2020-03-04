@@ -24,16 +24,15 @@ namespace reinforcement_learning {
   }
 
   ranking_event::ranking_event(const char* event_id, bool deferred_action, float pass_prob, const char* context,
-                               const ranking_response& response, const timestamp& ts, learning_mode decision_mode)
+                               const ranking_response& response, const timestamp& ts, learning_mode learning_mode)
     : event(event_id, ts, pass_prob), _model_id(response.get_model_id()),
-      _deferred_action(deferred_action){
+      _deferred_action(deferred_action), _learning_mode(learning_mode){
     for (auto const& r : response) {
       _action_ids_vector.push_back(r.action_id + 1);
       _probilities_vector.push_back(r.probability);
     }
     string context_str(context);
     copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
-    _learning_mode = decision_mode;
   }
 
   const std::vector<unsigned char>& ranking_event::get_context() const { return _context; }
@@ -41,7 +40,7 @@ namespace reinforcement_learning {
   const std::vector<float>& ranking_event::get_probabilities() const { return _probilities_vector; }
   const std::string& ranking_event::get_model_id() const { return _model_id; }
   bool ranking_event::get_defered_action() const { return _deferred_action; }
-  const learning_mode ranking_event::get_learning_mode() const { return _learning_mode; }
+  learning_mode ranking_event::get_learning_mode() const { return _learning_mode; }
 
   ranking_event ranking_event::choose_rank(const char* event_id, const char* context, unsigned int flags,
                                            const ranking_response& resp, const timestamp& ts, float pass_prob, learning_mode learning_mode) {

@@ -52,7 +52,7 @@ namespace reinforcement_learning {
     const std::string& get_model_id() const;
     bool get_defered_action() const;
     const std::string& get_event_id() const {return get_seed_id();}
-    const learning_mode get_learning_mode() const;
+    learning_mode get_learning_mode() const;
 
   public:
     static ranking_event choose_rank(const char* event_id, const char* context,

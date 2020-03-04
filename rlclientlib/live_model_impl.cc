@@ -37,7 +37,6 @@ namespace reinforcement_learning {
   int check_null_or_empty(const char* arg1, const char* arg2, api_status* status);
   int check_null_or_empty(const char* arg1, api_status* status);
   int post_process_rank(ranking_response& response, learning_mode learning_mode);
-  learning_mode to_learning_mode(const char* learning_mode);
 
   void default_error_callback(const api_status& status, void* watchdog_context) {
     auto watchdog = static_cast<utility::watchdog*>(watchdog_context);
@@ -91,6 +90,11 @@ namespace reinforcement_learning {
 
   int live_model_impl::request_decision(const char* context_json, unsigned int flags, decision_response& resp, api_status* status)
   {
+    if (_learning_mode == IMITATION_MODE) {
+      // Imitaion mode is not supported here at this moment
+      return error_code::not_supported;
+    }
+
     resp.clear();
     //clear previous errors if any
     api_status::try_clear(status);
@@ -208,7 +212,7 @@ namespace reinforcement_learning {
       _bg_model_proc.reset(new utility::periodic_background_proc<model_management::model_downloader>(config.get_int(name::MODEL_REFRESH_INTERVAL_MS, 60 * 1000), _watchdog, "Model downloader", &_error_cb));
     }
 
-    _learning_mode = to_learning_mode(_configuration.get(name::LEARNING_MODE, value::LEARNING_MODE_ONLINE));
+    _learning_mode = learning::to_learning_mode(_configuration.get(name::LEARNING_MODE, value::LEARNING_MODE_ONLINE));
   }
 
   int live_model_impl::init_trace(api_status* status) {
@@ -425,7 +429,7 @@ namespace reinforcement_learning {
 
   int post_process_rank(ranking_response& response, learning_mode learning_mode) {
     switch (learning_mode) {
-      case IMITATION_MODE:
+    case IMITATION_MODE:
       {
         std::sort(response.begin(), response.end(), [](const action_prob& a, const action_prob& b) {
           return a.action_id < b.action_id;
@@ -441,17 +445,5 @@ namespace reinforcement_learning {
       }
     }
     return error_code::success;
-  }
-
-  learning_mode to_learning_mode(const char* learning_mode) {
-    if (std::strcmp(learning_mode, value::LEARNING_MODE_IMITATION) == 0) {
-      return IMITATION_MODE;
-    }
-    else if (std::strcmp(learning_mode, value::LEARNING_MODE_ONLINE) == 0) {
-      return ONLINE_MODE;
-    }
-    else {
-      return ONLINE_MODE;
-    }
   }
 }

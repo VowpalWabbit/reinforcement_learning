@@ -140,12 +140,6 @@ namespace reinforcement_learning {
     void clear();
 
     /**
-      * @brief Clear the ranking in the response object so that it can be reused.
-      * The goal is to reuse response without reallocating as much as possible.
-      */
-    void clear_ranking();
-
-    /**
      * @brief Move construct a new ranking response object.
      * The underlying data is taken from the rvalue reference.
      */
