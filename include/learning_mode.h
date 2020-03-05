@@ -10,8 +10,8 @@
 namespace reinforcement_learning {
 
   enum learning_mode {
-    ONLINE_MODE = 0,
-    IMITATION_MODE = 1,
+    ONLINE = 0,
+    IMITATION = 1,
   };
 
   namespace learning {

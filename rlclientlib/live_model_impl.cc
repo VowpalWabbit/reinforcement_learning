@@ -90,7 +90,7 @@ namespace reinforcement_learning {
 
   int live_model_impl::request_decision(const char* context_json, unsigned int flags, decision_response& resp, api_status* status)
   {
-    if (_learning_mode == IMITATION_MODE) {
+    if (_learning_mode == IMITATION) {
       // Imitaion mode is not supported here at this moment
       return error_code::not_supported;
     }
@@ -429,7 +429,7 @@ namespace reinforcement_learning {
 
   int post_process_rank(ranking_response& response, learning_mode learning_mode) {
     switch (learning_mode) {
-    case IMITATION_MODE:
+    case IMITATION:
       {
         std::sort(response.begin(), response.end(), [](const action_prob& a, const action_prob& b) {
           return a.action_id < b.action_id;
