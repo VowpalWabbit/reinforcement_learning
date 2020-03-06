@@ -71,6 +71,58 @@ int basic_usage_inference_cb(const std::string& config_path){
   return 0;
 }
 
+int basic_usage_logging_cb(const std::string& config_path) {
+  //! name, value based config object used to initialise the API
+  u::configuration config;
+
+  //! Helper method to initialize config from a json file
+  if (load_config_from_json("client.json", config) != err::success) {
+    std::cout << "Unable to Load file: client.json" << std::endl;
+    return -1;
+  }
+
+  /** api_status is an optional argument used to get detailed
+   *  error description from all API calls
+   */
+  r::api_status status;
+
+  //! [(1) Instantiate Logging API using config]
+  r::rl_logger rl(config);
+  //! [(1) Instantiate Logging API using config]
+
+  //! [(2) Initialize the API]
+  if (rl.init(&status) != err::success) {
+    std::cout << status.get_error_msg() << std::endl;
+    return -1;
+  }
+  //! [(2) Initialize the API]
+
+  //! [(3) Construct ranking response]
+  // Response class
+  r::ranking_response response("event_id", { {0, 0.1}, {1, 0.9} }, 0, "model");
+  //! [(3) Construct ranking response]
+
+  //! [(4) Log interaction]
+  // Response class
+  if (rl.log(contextCB, response, &status) != err::success) {
+    std::cout << status.get_error_msg() << std::endl;
+    return -1;
+  }
+  //! [(4) Log interaction]
+
+  //! [(5) Report outcome]
+  //     Report received outcome (Optional: if this call is not made, default missing outcome is applied)
+  //     Missing outcome can be thought of as negative reinforcement
+  if (rl.log(event_id, outcome, &status) != err::success) {
+    std::cout << status.get_error_msg() << std::endl;
+    return -1;
+  }
+  //! [(5) Report outcome]
+
+  return 0;
+}
+
+
 
 int basic_usage_inference_ccb(const std::string& config_path) {
   //! name, value based config object used to initialise the API

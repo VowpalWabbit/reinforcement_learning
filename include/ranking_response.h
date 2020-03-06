@@ -171,6 +171,7 @@ namespace reinforcement_learning {
   public:
     using iterator = container_iterator<action_prob, coll_t>;
     using const_iterator = const_container_iterator<action_prob, coll_t>;
+
     //! Returns an iterator pointing to the first element of the (action, probability) collection
     const_iterator begin() const;
     iterator begin();
@@ -178,5 +179,9 @@ namespace reinforcement_learning {
     //! Returns an iterator referring to the past-the-end element of the (action, probability) collection.
     const_iterator end() const;
     iterator end();
+
+
+  public:
+    ranking_response(const char* event_id, const coll_t& pdf, size_t chosen_action, const char* model_id);
   };
 }

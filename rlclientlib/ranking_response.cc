@@ -96,4 +96,11 @@ namespace reinforcement_learning {
   iterator ranking_response::end() {
     return { _ranking, _ranking.size() };
   }
+
+  ranking_response::ranking_response(const char* event_id, const coll_t& pdf, size_t chosen_action, const char* model_id)
+    : _event_id(event_id)
+    , _chosen_action_id(chosen_action)
+    , _model_id(model_id)
+    , _ranking(pdf)
+  {}
 }

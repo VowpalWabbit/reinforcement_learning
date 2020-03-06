@@ -11,6 +11,7 @@
 #include <fstream>
 #include "config_utility.h"
 #include "live_model.h"
+#include "rl_logger.h"
 
 // Namespace manipulation for brevity
 namespace r = reinforcement_learning;
