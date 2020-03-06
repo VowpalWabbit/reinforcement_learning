@@ -62,7 +62,7 @@ namespace reinforcement_learning { namespace joiner {
       }
 
       switch (p.msg_type) {
-      case rlog::message_type::fb_ranking_event_collection:
+      case rlog::message_type::fb_ranking_learning_mode_event_collection:
         print_ranking_event(msg_data.get(), out_strm);
         break;
       case rlog::message_type::fb_outcome_event_collection:

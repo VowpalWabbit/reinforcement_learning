@@ -36,7 +36,6 @@ namespace reinforcement_learning {
       ++_idx;
       return *this;
     }
-
     //! Inequality comparison for the iterator
     bool operator!=(const container_iterator& other) const {
       return _idx != other._idx;
