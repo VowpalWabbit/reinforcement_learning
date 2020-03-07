@@ -23,7 +23,7 @@ namespace reinforcement_learning {
 
   private:
     //! slot_id
-    const std::string slot_id;
+    const std::string _slot_id;
     using coll_t = std::vector<action_prob>;
     coll_t _ranking;
 
@@ -39,6 +39,9 @@ namespace reinforcement_learning {
     iterator end();
 
     size_t size() const;
+
+  public:
+    slot_response(const char* slot_id, const coll_t& ranking);
   };
 
   class decision_response {
@@ -73,5 +76,8 @@ namespace reinforcement_learning {
     decision_response& operator=(decision_response&&) noexcept;
     decision_response(const decision_response&) = delete;
     decision_response& operator =(const decision_response&) = delete;
+
+  public:
+    decision_response(const coll_t& slots, const char* model_id);
   };
 }

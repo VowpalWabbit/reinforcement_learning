@@ -4,12 +4,17 @@
 
 namespace reinforcement_learning
 {
-  slot_response::slot_response(const char* _slot_id)
-    : slot_id(_slot_id) {
+  slot_response::slot_response(const char* slot_id, const slot_response::coll_t& ranking)
+    : _slot_id(slot_id)
+    , _ranking(ranking)
+  {}
+
+  slot_response::slot_response(const char* slot_id)
+    : _slot_id(slot_id) {
   }
 
   const char* slot_response::get_slot_id() const {
-    return slot_id.c_str();
+    return _slot_id.c_str();
   }
 
   uint32_t slot_response::get_action_id() const {
@@ -97,4 +102,9 @@ namespace reinforcement_learning
     std::swap(_decision, other._decision);
     return *this;
   }
+
+  decision_response::decision_response(const decision_response::coll_t& slots, const char* model_id)
+    : _decision(slots)
+    , _model_id(model_id)
+  {}
 } // namespace reinforcement_learning
