@@ -9,25 +9,19 @@
 
 #include "err_constants.h"
 #include "constants.h"
-#include "vw_model/safe_vw.h"
 #include "trace_logger.h"
-#include "explore_internal.h"
-#include "hash.h"
 #include "factory_resolver.h"
 #include "logger/preamble_sender.h"
-#include "sampling.h"
 #include "utility/invariant_helpers.h"
 
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/uuid/random_generator.hpp>
 
 // Some namespace changes for more concise code
-namespace e = exploration;
 using namespace std;
 
 namespace reinforcement_learning {
   // Some namespace changes for more concise code
-  namespace m = model_management;
   namespace u = utility;
   namespace l = logger;
 }

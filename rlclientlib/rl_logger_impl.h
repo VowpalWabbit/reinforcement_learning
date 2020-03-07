@@ -1,8 +1,5 @@
 #pragma once
 #include "logger/event_logger.h"
-#include "model_mgmt.h"
-#include "model_mgmt/data_callback_fn.h"
-#include "model_mgmt/model_downloader.h"
 #include "utility/periodic_background_proc.h"
 #include "factory_resolver.h"
 #include "error_callback_fn.h"
