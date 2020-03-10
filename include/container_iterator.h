@@ -53,8 +53,8 @@ namespace reinforcement_learning {
       return _idx < rhs._idx;
     }
     //! Allow distance measurement
-    size_t operator-(const container_iterator& rhs) const {
-      return _idx - rhs._idx;
+    int64_t operator-(const container_iterator& rhs) const {
+      return static_cast<int64_t>(_idx) - static_cast<int64_t>(rhs._idx);
     }
     //! Allow distance measurement
     container_iterator operator-(const int idx) const {
