@@ -56,6 +56,7 @@ namespace {
   const auto JSON_CONTEXT = R"({"_multi":[{},{}]})";
   const auto JSON_CONTEXT_WITH_SLOTS = R"({"_multi":[{},{}],"_slots":[{}]})";
   const auto JSON_CONTEXT_PDF = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}}],"p":[0.4, 0.6]})";
+  const auto JSON_CONTEXT_LEARNING = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}},{"Action":{"c":3}}],"p":[0.4, 0.1, 0.5]})";
   const float EXPECTED_PDF[2] = { 0.4f, 0.6f };
 
   r::live_model create_mock_live_model(
@@ -129,6 +130,56 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request) {
   ds.choose_rank(event_id, JSON_CONTEXT, response, &status);
   BOOST_CHECK_EQUAL(status.get_error_code(), 0);
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+}
+
+BOOST_AUTO_TEST_CASE(live_model_ranking_request_online_mode) {
+  //create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_ONLINE);
+
+  r::api_status status;
+
+  //create the ds live_model, and initialize it with the config
+  r::live_model ds = create_mock_live_model(config);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  const auto event_id = "event_id";
+  r::ranking_response response;
+  ds.choose_rank(event_id, JSON_CONTEXT_LEARNING, response, &status);
+  BOOST_CHECK_EQUAL(status.get_error_code(), 0);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+}
+
+BOOST_AUTO_TEST_CASE(live_model_ranking_request_imitation_mode) {
+  //create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_IMITATION);
+
+  r::api_status status;
+
+  //create the ds live_model, and initialize it with the config
+  r::live_model ds = create_mock_live_model(config);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  const auto event_id = "event_id";
+
+  r::ranking_response response;
+
+  ds.choose_rank(event_id, JSON_CONTEXT_LEARNING, response, &status);
+  BOOST_CHECK_EQUAL(status.get_error_code(), 0);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+  size_t chosen_action;
+  response.get_chosen_action_id(chosen_action, &status);
+  BOOST_CHECK_EQUAL(chosen_action, 0);
+  int current_expect_action_id = 0;
+  for (auto it = response.begin(); it != response.end(); ++it) {
+    BOOST_CHECK_EQUAL((*it).action_id, current_expect_action_id);
+    current_expect_action_id++;
+  }
 }
 
 BOOST_AUTO_TEST_CASE(live_model_request_decision) {

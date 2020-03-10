@@ -35,9 +35,25 @@ namespace reinforcement_learning { namespace logger {
       TimeStamp client_ts(	ts.year, ts.month, ts.day, ts.hour,
 							ts.minute, ts.second, ts.sub_second);
 	    const auto meta_id_offset = CreateMetadata(builder,&client_ts);
+
+      LearningModeType learning_mode_type;
+      switch (evt.get_learning_mode()) {
+      case IMITATION: {
+        learning_mode_type = LearningModeType_Imitation;
+        break;
+      }
+      case ONLINE: {
+        learning_mode_type = LearningModeType_Online;
+        break;
+      }
+      default:
+        // This is to be back-compatible with the config not setting learning mode.
+        break;
+      }
+
       ret_val = CreateRankingEvent(	builder, event_id_offset, evt.get_defered_action(), action_ids_vector_offset,
 									context_offset, probabilities_vector_offset, model_id_offset,
-									evt.get_pass_prob(), meta_id_offset);
+									evt.get_pass_prob(), meta_id_offset, learning_mode_type);
       return error_code::success;
     }
   };
@@ -180,5 +196,5 @@ namespace reinforcement_learning { namespace logger {
   inline int fb_collection_serializer<decision_ranking_event>::message_id() { return message_type::fb_decision_event_collection; }
 
   template <>
-  inline int fb_collection_serializer<ranking_event>::message_id() { return message_type::fb_ranking_event_collection; }
+  inline int fb_collection_serializer<ranking_event>::message_id() { return message_type::fb_ranking_learning_mode_event_collection; }
 }}

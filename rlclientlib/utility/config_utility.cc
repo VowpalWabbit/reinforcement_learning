@@ -102,7 +102,8 @@ namespace reinforcement_learning { namespace utility { namespace config {
       { "SendBatchIntervalMs"       , name::INTERACTION_SEND_BATCH_INTERVAL_MS },
       { "InitialExplorationEpsilon" , name::INITIAL_EPSILON },
       { "ModelRefreshIntervalMs"    , name::MODEL_REFRESH_INTERVAL_MS },
-      { "QueueMode"                 , name::QUEUE_MODE } // expect either DROP or BLOCK, default is DROP
+      { "QueueMode"                 , name::QUEUE_MODE }, // expect either DROP or BLOCK, default is DROP
+      { "LearningMode"              , name::LEARNING_MODE}
     };
 
     const std::set<std::string> deprecated = {

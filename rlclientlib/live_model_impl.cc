@@ -36,6 +36,7 @@ namespace reinforcement_learning {
 
   int check_null_or_empty(const char* arg1, const char* arg2, api_status* status);
   int check_null_or_empty(const char* arg1, api_status* status);
+  int post_process_rank(ranking_response& response, learning_mode learning_mode);
 
   void default_error_callback(const api_status& status, void* watchdog_context) {
     auto watchdog = static_cast<utility::watchdog*>(watchdog_context);
@@ -69,7 +70,9 @@ namespace reinforcement_learning {
       RETURN_IF_FAIL(explore_exploit(event_id, context, response, status));
     }
     response.set_event_id(event_id);
-    RETURN_IF_FAIL(_ranking_logger->log(event_id, context, flags, response, status));
+
+    RETURN_IF_FAIL(post_process_rank(response, _learning_mode));
+    RETURN_IF_FAIL(_ranking_logger->log(event_id, context, flags, response, status, _learning_mode));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -87,6 +90,11 @@ namespace reinforcement_learning {
 
   int live_model_impl::request_decision(const char* context_json, unsigned int flags, decision_response& resp, api_status* status)
   {
+    if (_learning_mode == IMITATION) {
+      // Imitaion mode is not supported here at this moment
+      return error_code::not_supported;
+    }
+
     resp.clear();
     //clear previous errors if any
     api_status::try_clear(status);
@@ -203,6 +211,8 @@ namespace reinforcement_learning {
     if (_configuration.get_bool(name::MODEL_BACKGROUND_REFRESH, value::DEFAULT_MODEL_BACKGROUND_REFRESH)) {
       _bg_model_proc.reset(new utility::periodic_background_proc<model_management::model_downloader>(config.get_int(name::MODEL_REFRESH_INTERVAL_MS, 60 * 1000), _watchdog, "Model downloader", &_error_cb));
     }
+
+    _learning_mode = learning::to_learning_mode(_configuration.get(name::LEARNING_MODE, value::LEARNING_MODE_ONLINE));
   }
 
   int live_model_impl::init_trace(api_status* status) {
@@ -417,4 +427,23 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
+  int post_process_rank(ranking_response& response, learning_mode learning_mode) {
+    switch (learning_mode) {
+    case IMITATION:
+      {
+        std::sort(response.begin(), response.end(), [](const action_prob& a, const action_prob& b) {
+          return a.action_id < b.action_id;
+        }
+        );
+        response.set_chosen_action_id((*(response.begin())).action_id);
+        break;
+      }
+      default:
+      {
+        // This is to be back-compatible with the config not setting learning mode.
+        break;
+      }
+    }
+    return error_code::success;
+  }
 }

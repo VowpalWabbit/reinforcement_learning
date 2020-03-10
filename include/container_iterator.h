@@ -26,6 +26,11 @@ namespace reinforcement_learning {
       , _idx(idx) {
       static_assert(std::is_same<TElem, typename TColl::value_type>::value, "TColl must be a collection of TElem");
     }
+    //! Move the iterator to the previous element
+    container_iterator& operator--() {
+      --_idx;
+      return *this;
+    }
     //! Move the iterator to the next element
     container_iterator& operator++() {
       ++_idx;
@@ -34,6 +39,10 @@ namespace reinforcement_learning {
     //! Inequality comparison for the iterator
     bool operator!=(const container_iterator& other) const {
       return _idx != other._idx;
+    }
+    //Equality comparison for the iterator
+    bool operator==(const container_iterator& other) const {
+      return _idx == other._idx;
     }
     //! Dereferencing operator to get the TElem
     TElem& operator*() {
@@ -45,11 +54,21 @@ namespace reinforcement_learning {
     }
     //! Allow distance measurement
     int64_t operator-(const container_iterator& rhs) const {
-      return _idx - rhs._idx;
+      return static_cast<int64_t>(_idx) - static_cast<int64_t>(rhs._idx);
+    }
+    //! Allow distance measurement
+    container_iterator operator-(const int idx) const {
+      return { _coll, _idx - idx };
     }
     //! Increment the index
-    container_iterator operator+(const uint32_t idx) const {
+    container_iterator operator+(const int idx) const {
       return { _coll, _idx + idx };
+    }
+    //! Assign the values for the iterator
+    container_iterator& operator=(const container_iterator& other) {
+      _coll = other._coll;
+      _idx = other._idx;
+      return *this;
     }
 
   private:
