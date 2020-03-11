@@ -88,19 +88,28 @@ namespace Rl.Net
         }
     }
 
-    public sealed class RlLogger : NativeObject<RlLogger>
+    public sealed class RlLoggerThreadUnsafe : NativeObject<RlLoggerThreadUnsafe>
     {
         private readonly NativeMethods.managed_background_error_callback_t managedErrorCallback;
         private readonly NativeMethods.managed_trace_callback_t managedTraceCallback;
 
-        private static New<RlLogger> BindConstructorArguments(Configuration config)
+        private static New<RlLoggerThreadUnsafe> BindConstructorArguments(Configuration config)
         {
-            return new New<RlLogger>(() => NativeMethods.CreateRlLogger(config.DangerousGetHandle()));
+            return new New<RlLoggerThreadUnsafe>(() =>
+            {
+                IntPtr result = NativeMethods.CreateRlLogger(config.DangerousGetHandle());
+                
+                GC.KeepAlive(config); // TODO: Is this one necessary, or does it live on the heap inside of the delegate?
+                return result;
+            });
         }
 
-        public RlLogger(Configuration config) : base(BindConstructorArguments(config), new Delete<RlLogger>(NativeMethods.DeleteRlLogger))
+        public RlLoggerThreadUnsafe(Configuration config) : base(BindConstructorArguments(config), new Delete<RlLoggerThreadUnsafe>(NativeMethods.DeleteRlLogger))
         {
             this.managedErrorCallback = new NativeMethods.managed_background_error_callback_t(this.WrapStatusAndRaiseBackgroundError);
+
+            // DangerousGetHandle here is trivially safe, because .Dispose() cannot be called before the object is
+            // constructed.
             NativeMethods.RlLoggerSetCallback(this.DangerousGetHandle(), this.managedErrorCallback);
 
             this.managedTraceCallback = new NativeMethods.managed_trace_callback_t(this.SendTrace);
@@ -191,6 +200,8 @@ namespace Rl.Net
         public bool TryInit(ApiStatus apiStatus = null)
         {
             int result = NativeMethods.RlLoggerInit(this.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
@@ -211,6 +222,8 @@ namespace Rl.Net
         public bool TryLog(string contextJson, RankingResponse response, ApiStatus apiStatus = null)
         {
             int result = LoggerLogCbInteraction(this.DangerousGetHandle(), contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
@@ -233,6 +246,8 @@ namespace Rl.Net
         public bool TryLog(string contextJson, DecisionResponse response, ApiStatus apiStatus = null)
         {
             int result = LoggerLogCbInteraction(this.DangerousGetHandle(), contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
@@ -255,6 +270,8 @@ namespace Rl.Net
         public bool TryLog(string eventId, float outcome, ApiStatus apiStatus = null)
         {
             int result = LoggerLogOutcomeF(this.DangerousGetHandle(), eventId, outcome, apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
@@ -277,6 +294,8 @@ namespace Rl.Net
         public bool TryLog(string eventId, string outcome, ApiStatus apiStatus = null)
         {
             int result = LoggerLogOutcomeJson(this.DangerousGetHandle(), eventId, outcome, apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
@@ -319,6 +338,7 @@ namespace Rl.Net
                 if (this.OnTraceLoggerEventInternal == null)
                 {
                     NativeMethods.LiveModelSetTrace(this.DangerousGetHandle(), this.managedTraceCallback);
+                    GC.KeepAlive(this);
                 }
 
                 this.OnTraceLoggerEventInternal += value;
@@ -330,6 +350,7 @@ namespace Rl.Net
                 if (this.OnTraceLoggerEventInternal == null)
                 {
                     NativeMethods.LiveModelSetTrace(this.DangerousGetHandle(), null);
+                    GC.KeepAlive(this);
                 }
             }
         }

@@ -50,7 +50,7 @@ namespace Rl.Net.Cli
             return liveModel;
         }
 
-        public static RlLogger CreateRlLoggerOrExit(string clientJsonPath)
+        public static RlLoggerThreadUnsafe CreateRlLoggerOrExit(string clientJsonPath)
         {
             if (!File.Exists(clientJsonPath))
             {
@@ -67,7 +67,7 @@ namespace Rl.Net.Cli
                 WriteStatusAndExit(apiStatus);
             }
 
-            RlLogger logger = new RlLogger(config);
+            RlLoggerThreadUnsafe logger = new RlLoggerThreadUnsafe(config);
 
             logger.BackgroundError += LiveModel_BackgroundError;
             logger.TraceLoggerEvent += LiveModel_TraceLogEvent;

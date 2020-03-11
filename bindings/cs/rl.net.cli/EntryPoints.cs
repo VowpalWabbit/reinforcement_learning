@@ -53,7 +53,7 @@ namespace Rl.Net.Cli {
             const string eventId = "event_id";
             const string contextJson = "{\"GUser\":{\"id\":\"a\",\"major\":\"eng\",\"hobby\":\"hiking\"},\"_multi\":[ { \"TAction\":{\"a1\":\"f1\"} },{\"TAction\":{\"a2\":\"f2\"}}]}";
 
-            RlLogger liveModel = Helpers.CreateRlLoggerOrExit(configPath);
+            RlLoggerThreadUnsafe liveModel = Helpers.CreateRlLoggerOrExit(configPath);
 
             ApiStatus apiStatus = new ApiStatus();
 
