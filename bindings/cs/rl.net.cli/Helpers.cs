@@ -20,6 +20,11 @@ namespace Rl.Net.Cli
             WriteErrorAndExit(apiStatus.ErrorMessage);
         }
 
+        public static void WriteStatusAndExit(RLException exception)
+        {
+            WriteErrorAndExit(exception.Message);
+        }
+
         public static LiveModel CreateLiveModelOrExit(string clientJsonPath)
         {
             if (!File.Exists(clientJsonPath))
@@ -50,7 +55,7 @@ namespace Rl.Net.Cli
             return liveModel;
         }
 
-        public static RlLoggerThreadUnsafe CreateRlLoggerOrExit(string clientJsonPath)
+        public static RlLogger CreateRlLoggerOrExit(string clientJsonPath)
         {
             if (!File.Exists(clientJsonPath))
             {
@@ -67,14 +72,18 @@ namespace Rl.Net.Cli
                 WriteStatusAndExit(apiStatus);
             }
 
-            RlLoggerThreadUnsafe logger = new RlLoggerThreadUnsafe(config);
+            var logger = new RlLogger(config);
 
             logger.BackgroundError += LiveModel_BackgroundError;
             logger.TraceLoggerEvent += LiveModel_TraceLogEvent;
 
-            if (!logger.TryInit(apiStatus))
+            try
             {
-                WriteStatusAndExit(apiStatus);
+                logger.Init();
+            }
+            catch (RLException e)
+            {
+                WriteStatusAndExit(e);
             }
 
             return logger;

@@ -214,11 +214,6 @@ namespace Rl.Net
                 }
         }
 
-        public bool Log(string contextJson, RankingResponse response, ApiStatus apiStatus = null)
-        {
-            return this.TryLog(contextJson, response, apiStatus);
-        }
-
         public bool TryLog(string contextJson, RankingResponse response, ApiStatus apiStatus = null)
         {
             int result = LoggerLogCbInteraction(this.DangerousGetHandle(), contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
@@ -236,11 +231,6 @@ namespace Rl.Net
                     throw new RLException(apiStatus);
                 }
             }
-        }
-
-        public bool Log(string contextJson, DecisionResponse response, ApiStatus apiStatus = null)
-        {
-            return this.TryLog(contextJson, response, apiStatus);
         }
 
         public bool TryLog(string contextJson, DecisionResponse response, ApiStatus apiStatus = null)
@@ -262,11 +252,6 @@ namespace Rl.Net
             }
         }
 
-        public bool Log(string eventId, float outcome, ApiStatus apiStatus = null)
-        {
-            return this.TryLog(eventId, outcome, apiStatus);
-        }
-
         public bool TryLog(string eventId, float outcome, ApiStatus apiStatus = null)
         {
             int result = LoggerLogOutcomeF(this.DangerousGetHandle(), eventId, outcome, apiStatus.ToNativeHandleOrNullptrDangerous());
@@ -284,11 +269,6 @@ namespace Rl.Net
                     throw new RLException(apiStatus);
                 }
             }
-        }
-
-        public bool Log(string eventId, string outcome, ApiStatus apiStatus = null)
-        {
-            return this.TryLog(eventId, outcome, apiStatus);
         }
 
         public bool TryLog(string eventId, string outcome, ApiStatus apiStatus = null)
