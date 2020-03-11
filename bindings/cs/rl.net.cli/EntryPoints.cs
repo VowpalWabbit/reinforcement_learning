@@ -53,20 +53,20 @@ namespace Rl.Net.Cli {
             const string eventId = "event_id";
             const string contextJson = "{\"GUser\":{\"id\":\"a\",\"major\":\"eng\",\"hobby\":\"hiking\"},\"_multi\":[ { \"TAction\":{\"a1\":\"f1\"} },{\"TAction\":{\"a2\":\"f2\"}}]}";
 
-            RlLoggerThreadUnsafe liveModel = Helpers.CreateRlLoggerOrExit(configPath);
+            RlLogger rlLogger = Helpers.CreateRlLoggerOrExit(configPath);
 
             ApiStatus apiStatus = new ApiStatus();
 
             RankingResponse rankingResponse = RankingResponse.Create(eventId, "some_model", 1, new[] { 1, 0, 2, 3 }, new[] { 0.2f, 0.2f, 0.3f, 0.3f });
 
-            if (!liveModel.TryLog(contextJson, rankingResponse, apiStatus))
+            try
             {
-                Helpers.WriteStatusAndExit(apiStatus);
+                rlLogger.Log(contextJson, rankingResponse);
+                rlLogger.Log(eventId, outcome);
             }
-
-            if (!liveModel.TryLog(eventId, outcome, apiStatus))
+            catch (RLException e)
             {
-                Helpers.WriteStatusAndExit(apiStatus);
+                Helpers.WriteStatusAndExit(e);
             }
         }
 

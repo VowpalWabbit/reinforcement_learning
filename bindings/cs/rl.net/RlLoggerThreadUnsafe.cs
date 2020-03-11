@@ -20,65 +20,17 @@ namespace Rl.Net
             [DllImport("rl.net.native.dll")]
             public static extern int RlLoggerInit(IntPtr logger, IntPtr apiStatus);
 
-            [DllImport("rl.net.native.dll", EntryPoint = "RlLoggerLogCbInteraction")]
-            private static extern int RlLoggerLogCbInteractionNative(IntPtr logger, IntPtr contextJson, IntPtr rankingResponse, IntPtr apiStatus);
+            [DllImport("rl.net.native.dll")]
+            public static extern int RlLoggerLogCbInteraction(IntPtr logger, IntPtr contextJson, IntPtr rankingResponse, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> RlLoggerLogCbInteractionOverride { get; set; }
+            [DllImport("rl.net.native.dll")]
+            public static extern int RlLoggerLogCcbInteraction(IntPtr logger, IntPtr contextJson, IntPtr decisionResponse, IntPtr apiStatus);
 
-            [DllImport("rl.net.native.dll", EntryPoint = "RlLoggerLogCcbInteraction")]
-            private static extern int RlLoggerLogCcbInteractionNative(IntPtr logger, IntPtr contextJson, IntPtr decisionResponse, IntPtr apiStatus);
+            [DllImport("rl.net.native.dll")]
+            public static extern int RlLoggerLogOutcomeF(IntPtr logger, IntPtr eventId, float outcome, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> RlLoggerLogCcbInteractionOverride { get; set; }
-
-            [DllImport("rl.net.native.dll", EntryPoint = "RlLoggerLogOutcomeF")]
-            private static extern int RlLoggerLogOutcomeFNative(IntPtr logger, IntPtr eventId, float outcome, IntPtr apiStatus);
-
-            internal static Func<IntPtr, IntPtr, float, IntPtr, int> RlLoggerLogOutcomeFOverride { get; set; }
-
-            [DllImport("rl.net.native.dll", EntryPoint = "RlLoggerLogOutcomeJson")]
-            private static extern int RlLoggerLogOutcomeJsonNative(IntPtr logger, IntPtr eventId, IntPtr outcome, IntPtr apiStatus);
-
-            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> RlLoggerLogOutcomeJsonOverride { get; set; }
-
-            public static int RlLoggerLogCbInteraction(IntPtr liveModel, IntPtr contextJson, IntPtr rankingResponse, IntPtr apiStatus)
-            {
-                if (RlLoggerLogCbInteractionOverride != null)
-                {
-                    return RlLoggerLogCbInteractionOverride(liveModel, contextJson, rankingResponse, apiStatus);
-                }
-
-                return RlLoggerLogCbInteractionNative(liveModel, contextJson, rankingResponse, apiStatus);
-            }
-
-            public static int RlLoggerLogCcbInteraction(IntPtr liveModel, IntPtr contextJson, IntPtr decisionResponse, IntPtr apiStatus)
-            {
-                if (RlLoggerLogCcbInteractionOverride != null)
-                {
-                    return RlLoggerLogCcbInteractionOverride(liveModel, contextJson, decisionResponse, apiStatus);
-                }
-
-                return RlLoggerLogCcbInteractionNative(liveModel, contextJson, decisionResponse, apiStatus);
-            }
-
-            public static int RlLoggerLogOutcomeF(IntPtr liveModel, IntPtr eventId, float outcome, IntPtr apiStatus)
-            {
-                if (RlLoggerLogOutcomeFOverride != null)
-                {
-                    return RlLoggerLogOutcomeFOverride(liveModel, eventId, outcome, apiStatus);
-                }
-
-                return RlLoggerLogOutcomeFNative(liveModel, eventId, outcome, apiStatus);
-            }
-
-            public static int RlLoggerLogOutcomeJson(IntPtr liveModel, IntPtr eventId, IntPtr outcome, IntPtr apiStatus)
-            {
-                if (RlLoggerLogOutcomeJsonOverride != null)
-                {
-                    return RlLoggerLogOutcomeJsonOverride(liveModel, eventId, outcome, apiStatus);
-                }
-
-                return RlLoggerLogOutcomeJsonNative(liveModel, eventId, outcome, apiStatus);
-            }
+            [DllImport("rl.net.native.dll")]
+            public static extern int RlLoggerLogOutcomeJson(IntPtr logger, IntPtr eventId, IntPtr outcome, IntPtr apiStatus);
 
             [DllImport("rl.net.native.dll")]
             public static extern void RlLoggerSetCallback(IntPtr logger, [MarshalAs(UnmanagedType.FunctionPtr)] managed_background_error_callback_t callback = null);
