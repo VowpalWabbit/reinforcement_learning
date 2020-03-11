@@ -66,7 +66,7 @@ namespace reinforcement_learning {
 
     RETURN_IF_FAIL(post_process_rank(response, _learning_mode));
 
-    RETURN_IF_FAIL(_logger_impl.report_decision(context, flags, response, status));
+    RETURN_IF_FAIL(_logger_impl.report_decision(context, flags, _learning_mode, response, status));
 
     return error_code::success;
   }

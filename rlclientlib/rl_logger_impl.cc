@@ -35,12 +35,12 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int rl_logger_impl::report_decision(const char* context, unsigned int flags, const ranking_response& response,
+  int rl_logger_impl::report_decision(const char* context, unsigned int flags, learning_mode _learning_mode, const ranking_response& response,
     api_status* status) {
     //clear previous errors if any
     api_status::try_clear(status);
 
-    RETURN_IF_FAIL(_ranking_logger->log(context, flags, response, status));
+    RETURN_IF_FAIL(_ranking_logger->log(context, flags, _learning_mode, response, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog->has_background_error_been_reported()) {

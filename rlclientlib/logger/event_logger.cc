@@ -4,7 +4,7 @@
 #include "time_helper.h"
 namespace reinforcement_learning { namespace logger {
 
-  int interaction_logger::log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode) {
+  int interaction_logger::log(const char* context, unsigned int flags, learning_mode learning_mode, const ranking_response& response, api_status* status) {
     const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
     return append(ranking_event::choose_rank(context, flags, response, now, learning_mode), status);
   }

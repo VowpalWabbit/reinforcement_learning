@@ -1,4 +1,5 @@
 #pragma once
+#include "learning_mode.h"
 #include "logger/event_logger.h"
 #include "utility/periodic_background_proc.h"
 #include "factory_resolver.h"
@@ -25,7 +26,7 @@ namespace reinforcement_learning
 
     int init(api_status* status);
 
-    int report_decision(const char* context, unsigned int flags, const ranking_response& response, api_status* status);
+    int report_decision(const char* context, unsigned int flags, learning_mode _learning_mode, const ranking_response& response, api_status* status);
     int report_decision(const char* context, unsigned int flags, const decision_response& response, api_status* status);
 
     int report_action_taken(const char* event_id, api_status* status);

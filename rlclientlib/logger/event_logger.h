@@ -108,7 +108,7 @@ namespace reinforcement_learning { namespace logger {
         perror_cb)
     {}
 
-    int log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
+    int log(const char* context, unsigned int flags, learning_mode learning_mode, const ranking_response& response, api_status* status);
   };
 
   class ccb_logger : public event_logger<decision_ranking_event> {

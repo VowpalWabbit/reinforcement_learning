@@ -1,4 +1,5 @@
 #include "action_flags.h"
+#include "learning_mode.h"
 #include "rl_logger.h"
 #include "rl_logger_impl.h"
 #include "err_constants.h"
@@ -56,7 +57,7 @@ namespace reinforcement_learning
   int rl_logger::log(const char * context_json, const ranking_response& resp, api_status* status)
   {
     INIT_CHECK();
-    return _pimpl->report_decision(context_json, action_flags::DEFAULT, resp, status);
+    return _pimpl->report_decision(context_json, action_flags::DEFAULT, learning_mode::ONLINE, resp, status);
   }
 
   int rl_logger::log(const char * context_json, const decision_response& resp, api_status* status)
