@@ -42,6 +42,7 @@
     <ClCompile Include="time_helper.cc" />
     <ClCompile Include="model_mgmt\file_model_loader.cc" />
     <ClCompile Include="decision_response.cc" />
+    <ClCompile Include="learning_mode.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />

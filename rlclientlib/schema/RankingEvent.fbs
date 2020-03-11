@@ -3,15 +3,18 @@ include "Metadata.fbs";
 
 namespace reinforcement_learning.messages.flatbuff;
 
+enum LearningModeType : ubyte { Online, Imitation }
+
 table RankingEvent {
-    event_id:string;          // event IDs
+    event_id:string;                 // event IDs
     deferred_action:bool = false;
-    action_ids:[uint64];      // action IDs
-    context:[ubyte];          // context
-    probabilities:[float];    // probabilities
-    model_id:string;          // model ID
-    pass_probability:float;	  // Probability of event surviving throttling operation
-	meta:Metadata;
+    action_ids:[uint64];             // action IDs
+    context:[ubyte];                 // context
+    probabilities:[float];           // probabilities
+    model_id:string;                 // model ID
+    pass_probability:float;          // Probability of event surviving throttling operation
+    meta:Metadata;
+    learning_mode:LearningModeType;  // decision mode used to determine rank behavior
 }
 
 // Collection of Ranking events
