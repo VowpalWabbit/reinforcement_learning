@@ -4,6 +4,7 @@
 #endif
 
 #include <boost/test/unit_test.hpp>
+#include "learning_mode.h"
 #include "ranking_event.h"
 #include "api_status.h"
 #include "serialization/fb_serializer.h"
@@ -17,12 +18,12 @@ BOOST_AUTO_TEST_CASE(fb_serializer_outcome_event) {
   fb_collection_serializer<outcome_event> serializer(db);
   std::string event_id("an_event_id");
   const timestamp ts;
-  auto ro = outcome_event::report_outcome(event_id.c_str(),0.75f,ts,0.54f);
+  auto ro = outcome_event::report_outcome(event_id.c_str(), 0.75f, ts, 0.54f);
   serializer.add(ro);
   std::string outcome_str("{stuff}");
-  ro = outcome_event::report_outcome(event_id.c_str(), outcome_str.c_str(),ts,0.54f);
+  ro = outcome_event::report_outcome(event_id.c_str(), outcome_str.c_str(), ts, 0.54f);
   serializer.add(ro);
-  ro = outcome_event::report_action_taken(event_id.c_str(),ts,0.54f);
+  ro = outcome_event::report_action_taken(event_id.c_str(), ts, 0.54f);
   serializer.add(ro);
   serializer.finalize();
 
@@ -51,7 +52,7 @@ BOOST_AUTO_TEST_CASE(fb_serializer_outcome_event) {
   BOOST_CHECK_EQUAL(event->event_id()->str(), event_id);
   BOOST_CHECK_EQUAL(event->pass_probability(), 0.54f);
   const auto ae = event->the_event_as_ActionTakenEvent();
-  BOOST_CHECK_EQUAL(ae->value(),true);
+  BOOST_CHECK_EQUAL(ae->value(), true);
 }
 
 BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
@@ -61,15 +62,18 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
   std::string model_id("a_model_id");
   const std::string event_id("_an_event_id");
   resp.set_model_id(model_id.c_str());
-  resp.push_back(2, .8f+.2f/3);
+  resp.push_back(2, .8f + .2f / 3);
   resp.push_back(0, .2f / 3);
   resp.push_back(1, .2f / 3);
   resp.set_event_id(event_id.c_str());
   std::string context("some_context");
+  learning_mode mode = ONLINE;
+
   const timestamp ts;
   const size_t events_count = 10;
   for (size_t i = 0; i < events_count; ++i) {
-    auto re = ranking_event::choose_rank(context.c_str(),0,resp,ts,0.33f);
+    mode = static_cast<learning_mode>(i % 2);
+    auto re = ranking_event::choose_rank(context.c_str(), 0, resp, ts, 0.33f, mode);
     serializer.add(re);
   }
   serializer.finalize();
@@ -82,14 +86,20 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
   for (size_t i = 0; i < events_count; ++i) {
     const auto& event = *events[(flatbuffers::uoffset_t)i];
     BOOST_CHECK_EQUAL(event.action_ids()->size(), 3);
-    std::vector<int> expected_ids{3,1,2};
+    std::vector<int> expected_ids{ 3,1,2 };
     BOOST_CHECK_EQUAL_COLLECTIONS(event.action_ids()->begin(), event.action_ids()->end(), expected_ids.begin(), expected_ids.end());
     BOOST_CHECK_EQUAL_COLLECTIONS(event.context()->begin(), event.context()->end(), context.begin(), context.end());
     BOOST_CHECK_EQUAL(event.model_id()->str(), model_id);
     BOOST_CHECK_EQUAL(event.event_id()->str(), event_id);
-    std::vector<float> expected_prob{.8f + .2f / 3, .2f / 3, .2f / 3};
+    std::vector<float> expected_prob{ .8f + .2f / 3, .2f / 3, .2f / 3 };
     BOOST_CHECK_EQUAL_COLLECTIONS(event.probabilities()->begin(), event.probabilities()->end(), expected_prob.begin(), expected_prob.end());
     BOOST_CHECK_EQUAL(event.deferred_action(), false);
     BOOST_CHECK_EQUAL(event.pass_probability(), 0.33f);
+    if (i % 2 == 0) {
+      BOOST_CHECK_EQUAL(event.learning_mode(), LearningModeType_Online);
+    }
+    else {
+      BOOST_CHECK_EQUAL(event.learning_mode(), LearningModeType_Imitation);
+    }
   }
 }

@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(simple_preamble_usage) {
   i_message_sender& sender = f_sender;
   db->set_body_endoffset(db->preamble_size()+db->body_capacity());
   const auto send_msg_sz = db->body_filled_size();
-  const auto send_msg_type = message_type::fb_ranking_event_collection;
+  const auto send_msg_type = message_type::fb_ranking_learning_mode_event_collection;
 
   sender.send(send_msg_type, db);
   preamble pre;

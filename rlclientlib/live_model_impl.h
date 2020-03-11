@@ -1,5 +1,5 @@
 #pragma once
-
+#include "learning_mode.h"
 #include "model_mgmt.h"
 #include "model_mgmt/data_callback_fn.h"
 #include "model_mgmt/model_downloader.h"
@@ -74,6 +74,7 @@ namespace reinforcement_learning
     std::shared_ptr<error_callback_fn> _error_cb;
     model_management::data_callback_fn _data_cb;
     std::shared_ptr<utility::watchdog> _watchdog;
+    learning_mode _learning_mode;
 
     trace_logger_factory_t* _trace_factory;
     data_transport_factory_t* _t_factory;

@@ -35,6 +35,7 @@ namespace reinforcement_learning {
   using vw_ptr = std::shared_ptr<safe_vw>;
   using pooled_vw = utility::pooled_object_guard<safe_vw, safe_vw_factory>;
 
+  int post_process_rank(ranking_response& response, learning_mode learning_mode);
   int live_model_impl::init(api_status* status) {
     RETURN_IF_FAIL(init_trace(status));
     RETURN_IF_FAIL(init_model(status));
@@ -63,6 +64,8 @@ namespace reinforcement_learning {
     }
     response.set_event_id(event_id);
 
+    RETURN_IF_FAIL(post_process_rank(response, _learning_mode));
+
     RETURN_IF_FAIL(_logger_impl.report_decision(context, flags, response, status));
 
     return error_code::success;
@@ -76,6 +79,11 @@ namespace reinforcement_learning {
 
   int live_model_impl::request_decision(const char* context_json, unsigned int flags, decision_response& resp, api_status* status)
   {
+    if (_learning_mode == IMITATION) {
+      // Imitaion mode is not supported here at this moment
+      return error_code::not_supported;
+    }
+
     resp.clear();
     //clear previous errors if any
     api_status::try_clear(status);
@@ -187,6 +195,8 @@ namespace reinforcement_learning {
     if (_configuration.get_bool(name::MODEL_BACKGROUND_REFRESH, value::DEFAULT_MODEL_BACKGROUND_REFRESH)) {
       _bg_model_proc.reset(new utility::periodic_background_proc<model_management::model_downloader>(config.get_int(name::MODEL_REFRESH_INTERVAL_MS, 60 * 1000), *_watchdog, "Model downloader", _error_cb.get()));
     }
+
+    _learning_mode = learning::to_learning_mode(_configuration.get(name::LEARNING_MODE, value::LEARNING_MODE_ONLINE));
   }
 
   int live_model_impl::init_trace(api_status* status) {
@@ -313,5 +323,24 @@ namespace reinforcement_learning {
 	  }
 
     return refresh_model(status);
+  }
+  int post_process_rank(ranking_response& response, learning_mode learning_mode) {
+    switch (learning_mode) {
+    case IMITATION:
+      {
+        std::sort(response.begin(), response.end(), [](const action_prob& a, const action_prob& b) {
+          return a.action_id < b.action_id;
+        }
+        );
+        response.set_chosen_action_id((*(response.begin())).action_id);
+        break;
+      }
+      default:
+      {
+        // This is to be back-compatible with the config not setting learning mode.
+        break;
+      }
+    }
+    return error_code::success;
   }
 }

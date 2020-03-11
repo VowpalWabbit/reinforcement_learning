@@ -19,6 +19,7 @@ set(PROJECT_SOURCES
   rl_logger_impl.cc
   live_model_impl.cc
   live_model.cc
+  learning_mode.cc
   time_helper.cc
   logger/async_batcher.cc
   logger/event_logger.cc
