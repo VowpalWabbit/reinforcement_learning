@@ -6,7 +6,7 @@ namespace reinforcement_learning { namespace logger {
 
   int interaction_logger::log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode) {
     const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
-    return append(ranking_event::choose_rank(context, flags, response, now), status, learning_mode);
+    return append(ranking_event::choose_rank(context, flags, response, now, learning_mode), status);
   }
 
   int ccb_logger::log(const char* context, unsigned int flags, const decision_response& response, api_status* status) {
