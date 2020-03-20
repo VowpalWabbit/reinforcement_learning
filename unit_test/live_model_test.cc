@@ -152,26 +152,6 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_online_mode) {
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
 }
 
-BOOST_AUTO_TEST_CASE(live_model_ranking_request_online_mode_lower_case) {
-  //create a simple ds configuration
-  u::configuration config;
-  cfg::create_from_json(JSON_CFG, config);
-  config.set(r::name::EH_TEST, "true");
-  config.set(r::name::LEARNING_MODE, "imitation");
-
-  r::api_status status;
-
-  //create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(config);
-  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
-
-  const auto event_id = "event_id";
-  r::ranking_response response;
-  ds.choose_rank(event_id, JSON_CONTEXT_LEARNING, response, &status);
-  BOOST_CHECK_EQUAL(status.get_error_code(), 0);
-  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
-}
-
 BOOST_AUTO_TEST_CASE(live_model_ranking_request_imitation_mode) {
   //create a simple ds configuration
   u::configuration config;
