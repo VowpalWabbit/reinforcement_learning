@@ -12,6 +12,7 @@ add_executable(rltest
   factory_test.cc
   fb_serializer_test.cc
   json_context_parse_test.cc
+  learning_mode_test.cc
   live_model_test.cc
   main.cc
   mock_http_client.cc
