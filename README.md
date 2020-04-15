@@ -123,6 +123,23 @@ vcpkg install flatbuffers:x64-windows
 
 You'll need to add the flatbuffers tool directory to your PATH aswell: `<vcpkg_root>\installed\x64-windows\tools\flatbuffers`
 
+## OSX
+
+MacOS dependencies can be managed through homebrew.
+
+```
+brew install cpprestsdk flatbuffers
+```
+
+In other to build using homebrew dependencies, you must invoke cmake this way:
+
+```
+mkdir build
+cd build
+cmake -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1 ..
+```
+
+
 ### Build + Test
 
 Set VcpkgIntegration environment variable to vcpkg.targets file on your machine
