@@ -131,7 +131,7 @@ MacOS dependencies can be managed through homebrew.
 brew install cpprestsdk flatbuffers
 ```
 
-In other to build using homebrew dependencies, you must invoke cmake this way:
+In order to build using homebrew dependencies, you must invoke cmake this way:
 
 ```
 mkdir build
