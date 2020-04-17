@@ -36,6 +36,7 @@ set(PROJECT_SOURCES
   ranking_event.cc
   ranking_response.cc
   sampling.cc
+  slates_response.cc
   trace_logger.cc
   utility/stl_container_adapter.cc
   utility/config_utility.cc
@@ -71,6 +72,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/personalization.h
   ../include/ranking_response.h
   ../include/sender.h
+  ../include/slates_response.h
   ../include/str_util.h
   ../include/trace_logger.h
   ../include/data_buffer.h

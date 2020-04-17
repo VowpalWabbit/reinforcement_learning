@@ -26,6 +26,7 @@ namespace reinforcement_learning {
     void parse_context_with_pdf(const char* context, std::vector<int>& actions, std::vector<float>& scores);
     void rank(const char* context, std::vector<int>& actions, std::vector<float>& scores);
     void rank_decisions(const std::vector<const char*>& event_ids, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores);
+    void rank_decisions(const char *event_id, uint32_t slot_count, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores);
 
     const char* id() const;
 

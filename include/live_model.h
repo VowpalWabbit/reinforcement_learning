@@ -9,6 +9,7 @@
 #include "action_flags.h"
 #include "ranking_response.h"
 #include "decision_response.h"
+#include "slates_response.h"
 #include "err_constants.h"
 #include "factory_resolver.h"
 #include "sender.h"
@@ -167,6 +168,25 @@ namespace reinforcement_learning {
     */
     RL_DEPRECATED("New interface unifying CB with CCB is coming")
     int request_decision(const char * context_json, decision_response& resp, api_status* status = nullptr);
+
+  /**
+    * @brief (DEPRECATED) Choose an action from the given set for each slot, given a list of actions, slots,
+    * action features, slot features and context features. The inference library chooses an action
+    * per slot by sampling the probability distribution produced per slot. The corresponding event_id should be used when reporting the outcome for each slot.
+    * @param event_id  The unique identifier for this interaction.  The same event_id should be used when
+    *                  reporting the outcome for this action.
+    * @param context_json Contains slots, slot_features, slot ids, actions, action features and context features in json format
+    * @param flags Action flags (see action_flags.h)
+    * @param resp Decision response contains the chosen action per slot, probability distribution used for sampling actions and ranked actions.
+    * @param status  Optional field with detailed string description if there is an error
+    * @return int Return error code.  This will also be returned in the api_status object
+    */
+    RL_DEPRECATED("New unified example builder interface is coming")
+    int request_slates_decision(const char * event_id, const char * context_json, unsigned int flags, slates_response& resp, api_status* status = nullptr);
+
+    int request_slates_decision(const char * event_id, const char * context_json, slates_response& resp, api_status* status = nullptr);
+    int request_slates_decision(const char * context_json, unsigned int flags, slates_response& resp, api_status* status = nullptr);
+    int request_slates_decision(const char * context_json, slates_response& resp, api_status* status = nullptr);
 
     /**
     * @brief Report that action was taken.

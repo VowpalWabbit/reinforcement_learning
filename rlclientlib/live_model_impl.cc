@@ -145,6 +145,54 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
+  int live_model_impl::request_slates_decision(const char * context_json, unsigned int flags, slates_response& resp, api_status* status)
+  {
+    return request_slates_decision(boost::uuids::to_string(boost::uuids::random_generator()()).c_str(), context_json, flags, resp, status);
+  }
+
+  int live_model_impl::request_slates_decision(const char * event_id, const char * context_json, unsigned int flags, slates_response& resp, api_status* status)
+  {
+    if (_learning_mode == IMITATION) {
+      // Imitaion mode is not supported here at this moment
+      return error_code::not_supported;
+    }
+
+    resp.clear();
+    //clear previous errors if any
+    api_status::try_clear(status);
+
+    //check arguments
+    RETURN_IF_FAIL(check_null_or_empty(event_id, status));
+    RETURN_IF_FAIL(check_null_or_empty(context_json, status));
+
+    // Ensure multi comes before slots, this is a current limitation of the parser.
+    // XXX is this true for slates?
+    RETURN_IF_FAIL(utility::validate_multi_before_slots(context_json, _trace_logger.get(), status));
+
+    // std::vector<std::vector<uint32_t>> actions_ids;
+    // std::vector<std::vector<float>> actions_pdfs;
+    // std::string model_version;
+
+    size_t num_decisions;
+    RETURN_IF_FAIL(utility::get_slot_count(num_decisions, context_json, _trace_logger.get(), status));
+
+    std::vector<std::vector<uint32_t>> actions_ids;
+    std::vector<std::vector<float>> actions_pdfs;
+    std::string model_version;
+
+    // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
+    RETURN_IF_FAIL(_model->request_slates_decision(event_id, num_decisions, context_json, actions_ids, actions_pdfs, model_version, status));
+
+    RETURN_IF_FAIL(populate_slates_response(actions_ids, actions_pdfs, std::move(std::string(event_id)), std::move(std::string(model_version)), resp, _trace_logger.get(), status));
+    RETURN_IF_FAIL(_slates_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+
+
+    // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
+    if (_watchdog.has_background_error_been_reported()) {
+      RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+    }
+    return error_code::success;
+  }
 
   int live_model_impl::report_action_taken(const char* event_id, api_status* status) {
     // Clear previous errors if any

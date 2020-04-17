@@ -4,6 +4,7 @@
 #include "ranking_response.h"
 #include "time_helper.h"
 #include "decision_response.h"
+#include "slates_response.h"
 
 namespace reinforcement_learning {
   struct timestamp;
