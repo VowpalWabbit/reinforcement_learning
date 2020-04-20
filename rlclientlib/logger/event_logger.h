@@ -129,7 +129,6 @@ class ccb_logger : public event_logger<decision_ranking_event> {
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
   };
 
-
   class observation_logger : public event_logger<outcome_event> {
   public:
     observation_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
