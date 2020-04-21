@@ -102,6 +102,38 @@ namespace reinforcement_learning {
     bool _deferred_action;
   };
 
+
+  //serializable decision ranking event
+  class slates_decision_event : public event {
+  public:
+    slates_decision_event();
+    slates_decision_event(slates_decision_event&& other) = default;
+    slates_decision_event& operator=(slates_decision_event&& other) = default;
+
+    const std::vector<unsigned char>& get_context() const;
+    const std::vector<std::vector<uint32_t>>& get_actions_ids() const;
+    const std::vector<std::vector<float>>& get_probabilities() const;
+    const std::string& get_model_id() const;
+    bool get_defered_action() const;
+    const std::string& get_event_id() const;
+
+  public:
+    static slates_decision_event request_decision(const std::string& event_id, const char* context,
+      unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts, float pass_prob = 1.f);
+
+  private:
+    slates_decision_event(const std::string& event_id, bool deferred_action, float pass_prob, const char* context,
+      const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts);
+
+    std::vector<unsigned char> _context;
+    std::vector<std::vector<uint32_t>> _action_ids_vector;
+    std::vector<std::vector<float>> _probilities_vector;
+    std::string _event_id;
+
+    std::string _model_id;
+    bool _deferred_action;
+  };
+
   //serializable outcome event
   class outcome_event : public event {
   public:

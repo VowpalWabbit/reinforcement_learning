@@ -5,6 +5,7 @@
 #include "generated/OutcomeEvent_generated.h"
 #include "generated/RankingEvent_generated.h"
 #include "generated/DecisionRankingEvent_generated.h"
+#include "generated/SlatesEvent_generated.h"
 #include "logger/message_type.h"
 #include "err_constants.h"
 
@@ -102,6 +103,54 @@ namespace reinforcement_learning { namespace logger {
       const auto meta_id_offset = CreateMetadata(builder, &client_ts);
 
       ret_val = CreateDecisionEvent(builder, context_offset, slots_offset, model_id_offset, evt.get_pass_prob(), evt.get_defered_action(), meta_id_offset);
+      return error_code::success;
+    }
+  };
+
+  template <>
+  struct fb_event_serializer<slates_decision_event> {
+    using fb_event_t = SlatesEvent;
+    using offset_vector_t = typename std::vector<flatbuffers::Offset<fb_event_t>>;
+    using batch_builder_t = SlatesEventBatchBuilder;
+
+    static size_t size_estimate(const slates_decision_event& evt) {
+      size_t estimate = 0;
+      auto action_ids = evt.get_actions_ids();
+      auto probs = evt.get_probabilities();
+
+      for (size_t i = 0; i < action_ids.size(); i++)
+      {
+        estimate += action_ids[i].size() * sizeof(action_ids[0][0]);
+        estimate += probs[i].size() * sizeof(probs[0][0]);
+      }
+
+      estimate += evt.get_context().size() + evt.get_model_id().size() + sizeof(evt.get_defered_action()) + sizeof(evt.get_pass_prob());
+      estimate += evt.get_event_id().size();
+      estimate += sizeof(evt.get_client_time_gmt());
+      return estimate;
+    }
+
+    static int serialize(slates_decision_event& evt, flatbuffers::FlatBufferBuilder& builder,
+                         flatbuffers::Offset<fb_event_t>& ret_val, api_status* status) {
+      const auto event_id_offset = builder.CreateString(evt.get_event_id());
+      const auto context_offset = builder.CreateVector(evt.get_context());
+      const auto model_id_offset = builder.CreateString(evt.get_model_id());
+
+      auto action_ids = evt.get_actions_ids();
+      const auto probabilities = evt.get_probabilities();
+      std::vector<flatbuffers::Offset<SlatesSlotEvent>> slots;
+      for (size_t i = 0; i < action_ids.size(); i++)
+      {
+        slots.push_back(CreateSlatesSlotEvent(builder, builder.CreateVector(action_ids[i]), builder.CreateVector(probabilities[i])));
+      }
+      const auto slots_offset = builder.CreateVector(slots);
+
+      const auto &ts = evt.get_client_time_gmt();
+      TimeStamp client_ts(ts.year, ts.month, ts.day, ts.hour,
+        ts.minute, ts.second, ts.sub_second);
+      const auto meta_id_offset = CreateMetadata(builder, &client_ts);
+
+      ret_val = CreateSlatesEvent(builder, event_id_offset, context_offset, slots_offset, model_id_offset, evt.get_pass_prob(), evt.get_defered_action(), meta_id_offset);
       return error_code::success;
     }
   };

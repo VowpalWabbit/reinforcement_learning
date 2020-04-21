@@ -5,7 +5,8 @@ set(RL_FLAT_BUFFER_FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/Metadata.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/OutcomeEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/RankingEvent.fbs"
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/DecisionRankingEvent.fbs" )
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/DecisionRankingEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/SlatesEvent.fbs" )
 build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgenerator "" "${CMAKE_CURRENT_SOURCE_DIR}/generated" "" "")
 
 set(PROJECT_SOURCES
