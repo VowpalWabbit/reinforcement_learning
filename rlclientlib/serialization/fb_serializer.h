@@ -245,5 +245,8 @@ namespace reinforcement_learning { namespace logger {
   inline int fb_collection_serializer<decision_ranking_event>::message_id() { return message_type::fb_decision_event_collection; }
 
   template <>
+  inline int fb_collection_serializer<slates_decision_event>::message_id() { return message_type::fb_slates_event_collection; }
+
+  template <>
   inline int fb_collection_serializer<ranking_event>::message_id() { return message_type::fb_ranking_learning_mode_event_collection; }
 }}
