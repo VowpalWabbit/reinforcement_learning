@@ -4,21 +4,21 @@
 
 namespace reinforcement_learning
 {
-  anon_slot_response::anon_slot_response(uint32_t _slot_id, uint32_t _action_id, float _probability)
+  slates_slot_response::slates_slot_response(uint32_t _slot_id, uint32_t _action_id, float _probability)
     : slot_id(_slot_id)
     , action_id(_action_id)
     , probability(_probability) {
   }
 
-  uint32_t anon_slot_response::get_slot_id() const {
+  uint32_t slates_slot_response::get_slot_id() const {
     return slot_id;
   }
 
-  uint32_t anon_slot_response::get_action_id() const {
+  uint32_t slates_slot_response::get_action_id() const {
     return action_id;
   }
 
-  float anon_slot_response::get_probability() const {
+  float slates_slot_response::get_probability() const {
     return probability;
   }
 

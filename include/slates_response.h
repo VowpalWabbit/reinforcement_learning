@@ -9,11 +9,11 @@
 namespace reinforcement_learning {
   class api_status;
 
-  struct anon_slot_response {
+  struct slates_slot_response {
   public:
-    ~anon_slot_response() = default;
+    ~slates_slot_response() = default;
 
-    anon_slot_response(uint32_t _slot_id, uint32_t _action_id, float _probability);
+    slates_slot_response(uint32_t _slot_id, uint32_t _action_id, float _probability);
 
     uint32_t get_slot_id() const;
     uint32_t get_action_id() const;
@@ -29,15 +29,15 @@ namespace reinforcement_learning {
 
   class slates_response {
   private:
-    using coll_t = std::vector<anon_slot_response>;
+    using coll_t = std::vector<slates_slot_response>;
 
     std::string _event_id;
     std::string _model_id;
     coll_t _decision;
 
   public:
-    using iterator_t = container_iterator<anon_slot_response, coll_t>;
-    using const_iterator_t = const_container_iterator<anon_slot_response, coll_t>;
+    using iterator_t = container_iterator<slates_slot_response, coll_t>;
+    using const_iterator_t = const_container_iterator<slates_slot_response, coll_t>;
 
     slates_response() = default;
     ~slates_response() = default;
