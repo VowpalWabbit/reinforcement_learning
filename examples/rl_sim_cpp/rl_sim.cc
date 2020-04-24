@@ -195,16 +195,19 @@ int rl_sim::load_config_from_json(  const std::string& file_name,
   std::string config_str;
 
   // Load contents of config file into a string
-  RETURN_IF_FAIL(load_file(file_name, config_str));
+  RETURN_IF_FAIL(load_file(file_name, config_str, status));
 
   // Use library supplied convenience method to parse json and build config object
   return cfg::create_from_json(config_str, config, nullptr, status);
 }
 
-int rl_sim::load_file(const std::string& file_name, std::string& config_str) {
+int rl_sim::load_file(const std::string& file_name, std::string& config_str, r::api_status* status) {
   std::ifstream fs;
   fs.open(file_name);
-  if ( !fs.good() ) return err::invalid_argument;
+  if ( !fs.good() )
+  {
+    RETURN_ERROR_LS(nullptr, status, invalid_argument) << "Cannot open file: " << file_name;
+  }
   std::stringstream buffer;
   buffer << fs.rdbuf();
   config_str = buffer.str();
@@ -218,7 +221,6 @@ void _on_error(const reinforcement_learning::api_status& status, rl_sim* psim) {
 int rl_sim::init_rl() {
   r::api_status status;
   u::configuration config;
-
   // Load configuration from json config file
   const auto config_file = _options["json_config"].as<std::string>();
   if ( load_config_from_json(config_file, config, &status) != err::success ) {

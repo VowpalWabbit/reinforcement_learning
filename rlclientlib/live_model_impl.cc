@@ -345,6 +345,10 @@ namespace reinforcement_learning {
     _decision_logger.reset(new logger::ccb_logger(_configuration, decision_msg_sender, _watchdog, decision_time_provider, &_error_cb));
     RETURN_IF_FAIL(_decision_logger->init(status));
 
+    // Create a logger for interactions that will use msg sender to send interaction messages
+    _slates_logger.reset(new logger::slates_logger(_configuration, decision_msg_sender, _watchdog, decision_time_provider, &_error_cb));
+    RETURN_IF_FAIL(_slates_logger->init(status));
+
     return error_code::success;
   }
 

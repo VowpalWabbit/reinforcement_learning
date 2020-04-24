@@ -82,9 +82,10 @@ public:
      *
      * @param file_name File name
      * @param config_str String to hold the data
+     * @param status api_status object for error feedback
      * @return int Error status
      */
-    int load_file(const std::string& file_name, std::string& config_str);
+    int load_file(const std::string& file_name, std::string& config_str, reinforcement_learning::api_status* status);
 
     /**
      * @brief Initialize Inference API
@@ -143,6 +144,5 @@ public:
     const uint8_t NUM_SLOTS = 3;
     const uint8_t NUM_SLATES_SLOTS = 2;
     bool _run_loop = true;
-    LoopKind _loop_kind; 
+    LoopKind _loop_kind;
 };
-
