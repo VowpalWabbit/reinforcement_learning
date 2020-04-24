@@ -529,6 +529,8 @@ namespace Rl.Net
         public bool TryRefreshModel(ApiStatus apiStatus = null)
         {
             int result = NativeMethods.LiveModelRefreshModel(this.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
