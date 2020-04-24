@@ -418,13 +418,13 @@ namespace Rl.Net
         {
             response = new DecisionResponse();
 
-            GC.KeepAlive(this);
             return this.TryRequestDecision(contextJson, flags, response, apiStatus);
         }
 
         public bool TryRequestDecision(string contextJson, ActionFlags flags, DecisionResponse response, ApiStatus apiStatus)
         {
             int result = LiveModelRequestDecisionWithFlags(this.DangerousGetHandle(), contextJson, (uint)flags, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+            GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
