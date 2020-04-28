@@ -95,7 +95,7 @@ void test_loop::cb_loop(size_t thread_id)
     const auto event_id = test_inputs.create_event_id(0, 0);
     const std::string warmup_id = "_warmup_" + std::string(event_id.c_str());
     if (rl->choose_rank(warmup_id.c_str(), test_inputs.get_context(0, 0), response, &status) != err::success) {
-      std::cout << "Warmup is failed. " << status.get_error_msg() << std::endl;
+      std::cout << "Warmup has failed. " << status.get_error_msg() << std::endl;
       return;
     }
 
