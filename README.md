@@ -123,7 +123,7 @@ vcpkg install flatbuffers:x64-windows
 
 You'll need to add the flatbuffers tool directory to your PATH aswell: `<vcpkg_root>\installed\x64-windows\tools\flatbuffers`
 
-## OSX
+## MacOS
 
 MacOS dependencies can be managed through homebrew.
 
