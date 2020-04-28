@@ -88,8 +88,8 @@ namespace reinforcement_learning
     std::unique_ptr<model_management::i_model> _model{nullptr};
     std::unique_ptr<logger::interaction_logger> _ranking_logger{nullptr};
     std::unique_ptr<logger::observation_logger> _outcome_logger{nullptr};
-    std::unique_ptr<logger::ccb_logger> _decision_logger{};
-    std::unique_ptr<logger::slates_logger> _slates_logger{};
+    std::unique_ptr<logger::ccb_logger> _decision_logger{nullptr};
+    std::unique_ptr<logger::slates_logger> _slates_logger{nullptr};
     std::unique_ptr<model_management::model_downloader> _model_download{nullptr};
     std::unique_ptr<i_trace> _trace_logger{nullptr};
 

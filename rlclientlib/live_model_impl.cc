@@ -345,8 +345,24 @@ namespace reinforcement_learning {
     _decision_logger.reset(new logger::ccb_logger(_configuration, decision_msg_sender, _watchdog, decision_time_provider, &_error_cb));
     RETURN_IF_FAIL(_decision_logger->init(status));
 
-    // Create a logger for interactions that will use msg sender to send interaction messages
-    _slates_logger.reset(new logger::slates_logger(_configuration, decision_msg_sender, _watchdog, decision_time_provider, &_error_cb));
+    // Get the name of raw data (as opposed to message) sender for interactions.
+    const auto slates_sender_impl = _configuration.get(name::DECISION_SENDER_IMPLEMENTATION, value::DECISION_EH_SENDER);
+    i_sender* slates_data_sender;
+
+    // Use the name to create an instance of raw data sender for interactions
+    RETURN_IF_FAIL(_sender_factory->create(&slates_data_sender, slates_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
+    RETURN_IF_FAIL(slates_data_sender->init(status));
+
+    // Create a message sender that will prepend the message with a preamble and send the raw data using the
+    // factory created raw data sender
+    l::i_message_sender* slates_msg_sender = new l::preamble_message_sender(slates_data_sender);
+    RETURN_IF_FAIL(slates_msg_sender->init(status));
+
+    i_time_provider* slates_time_provider;
+    RETURN_IF_FAIL(_time_provider_factory->create(&slates_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
+
+    // // Create a logger for interactions that will use msg sender to send interaction messages
+    _slates_logger.reset(new logger::slates_logger(_configuration, slates_msg_sender, _watchdog, slates_time_provider, &_error_cb));
     RETURN_IF_FAIL(_slates_logger->init(status));
 
     return error_code::success;
