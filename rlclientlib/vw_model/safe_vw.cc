@@ -300,7 +300,9 @@ bool safe_vw::is_compatible(const std::string& args) const {
   //TODO: proper implentation for more than 2 algorithms. Changes inside VW are required
   const bool is_ccb_init = args.find("ccb_explore_adf") != std::string::npos;
   const bool is_ccb = _vw->options->was_supplied("ccb_explore_adf");
-  return is_ccb_init == is_ccb;
+  const bool is_slates_init = args.find("slates") != std::string::npos;
+  const bool is_slates = _vw->options->was_supplied("slates");
+  return is_ccb_init == is_ccb || is_slates_init == is_slates;
 }
 
 safe_vw_factory::safe_vw_factory(const std::string& command_line)
