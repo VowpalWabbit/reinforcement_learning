@@ -398,7 +398,7 @@ BOOST_AUTO_TEST_CASE(live_model_mocks) {
     BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CONTEXT, response), err::success);
     BOOST_CHECK_EQUAL(model.report_outcome(event_id, 1.0), err::success);
 
-    Verify(Method((*mock_sender), init)).Exactly(3);
+    Verify(Method((*mock_sender), init)).Exactly(4);
   }
   BOOST_CHECK_EQUAL(recorded.size(), 2);
 }
@@ -505,7 +505,7 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data) {
 
     Verify(Method((*mock_observation_sender), init)).Exactly(1);
     Verify(Method((*mock_interaction_sender), init)).Exactly(1);
-    Verify(Method((*mock_decision_sender), init)).Exactly(1);
+    Verify(Method((*mock_decision_sender), init)).Exactly(2);
   }
   //std::string recorded_interactions_all;
   //for (size_t i = 0; i < recorded_interactions.size(); ++i) {
