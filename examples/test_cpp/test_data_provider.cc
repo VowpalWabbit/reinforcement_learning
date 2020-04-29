@@ -96,10 +96,10 @@ std::string test_data_provider::create_json_outcome(size_t thread_id, size_t exa
 
 std::string test_data_provider::create_context_json(const std::string& cntxt, const std::string& action, bool ccb) const {
   std::ostringstream oss;
-  if (!ccb)
-    oss << "{ " << cntxt << ", " << action << " }";
-  else
+  if (ccb)
     oss << cntxt << ", " << action;
+  else
+    oss << "{ " << cntxt << ", " << action << " }";
 
   return oss.str();
 }
