@@ -10,7 +10,7 @@ class test_loop {
 public:
   test_loop(size_t index, const boost::program_options::variables_map& vm);
   bool init();
-  void run();
+  void run(bool is_ccb);
 
 private:
   int load_file(const std::string& file_name, std::string& config_str) const;
@@ -18,10 +18,10 @@ private:
     reinforcement_learning::utility::configuration& config,
     reinforcement_learning::api_status* status) const;
   std::string generate_experiment_name(const std::string& experiment_name_base,
-	  size_t threads, size_t features, size_t actions, size_t index);
+	  size_t threads, size_t features, size_t actions, size_t slots, size_t index);
 
-  void validity_loop(size_t thread_id);
-  void perf_loop(size_t thread_id);
+  void cb_loop(size_t thread_id);
+  void ccb_loop(size_t thread_id);
 
 private:
   const size_t threads;
@@ -30,7 +30,6 @@ private:
   const std::string experiment_name;
   const std::string json_config;
   test_data_provider test_inputs;
-  const bool is_perf;
 
   std::vector<std::shared_ptr<std::ofstream>> loggers;
   std::unique_ptr<reinforcement_learning::live_model> rl;
