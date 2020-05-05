@@ -6,16 +6,17 @@
 #include <sstream>
 #include "serialization/json_serializer.h"
 
-test_data_provider::test_data_provider(const std::string& experiment_name, size_t threads, size_t features, size_t actions, bool _is_float_outcome, size_t _reward_period)
+test_data_provider::test_data_provider(const std::string& experiment_name, size_t threads, size_t features, size_t actions, size_t _slots, bool _is_float_outcome, size_t _reward_period)
   : _experiment_name(experiment_name)
   , contexts(threads, std::vector<std::string>(preallocated_count))
   , outcomes(threads, std::vector<std::string>(preallocated_count))
   , is_float_outcome(_is_float_outcome)
   , reward_period(_reward_period)
+  , slots(_slots)
 {
   for (size_t t = 0; t < threads; ++t) {
     for (size_t i = 0; i < preallocated_count; ++i) {
-      contexts[t][i] = create_context_json(create_features(features, t, i), create_action_features(actions, features, i));
+      contexts[t][i] = create_context_json(create_features(features, t, i), create_action_features(actions, features, i), _slots > 0);
       outcomes[t][i] = create_json_outcome(t, i);
     }
   }
@@ -25,6 +26,19 @@ std::string test_data_provider::create_event_id(size_t thread_id, size_t example
   std::ostringstream oss;
   oss << _experiment_name << "-" << thread_id << "-" << example_id;
   return oss.str();
+}
+
+std::vector<std::string> test_data_provider::create_event_ids(size_t thread_id, size_t example_id) const {
+  std::ostringstream oss;
+  oss << _experiment_name << "-" << thread_id << "-" << example_id;
+  std::string base = oss.str();
+  std::vector<std::string> result;
+  for (size_t i = 0; i < slots; ++i) {
+    std::ostringstream id;
+    id << base << "-" << i;
+    result.push_back(id.str());
+  }
+  return result;
 }
 
 std::string test_data_provider::create_action_features(size_t actions, size_t features, size_t example_id) const {
@@ -80,10 +94,37 @@ std::string test_data_provider::create_json_outcome(size_t thread_id, size_t exa
   return oss.str();
 }
 
-std::string test_data_provider::create_context_json(const std::string& cntxt, const std::string& action) const {
+std::string test_data_provider::create_context_json(const std::string& cntxt, const std::string& action, bool ccb) const {
   std::ostringstream oss;
-  oss << "{ " << cntxt << ", " << action << " }";
+  if (ccb)
+    oss << cntxt << ", " << action;
+  else
+    oss << "{ " << cntxt << ", " << action << " }";
+
   return oss.str();
+}
+
+std::string test_data_provider::create_ccb_context_json(const std::string& cntxt, const std::vector<std::string>& ids) const {
+  std::ostringstream oss;
+  oss << "{ " << cntxt << ", " << create_slots_json(ids) << " }";
+  return oss.str();
+}
+
+std::string test_data_provider::create_slots_json(const std::vector<std::string>& ids) const {
+  std::ostringstream oss;
+  oss << R"("_slots": [ )";
+  for (size_t a = 0; a < ids.size(); ++a) {
+    oss << R"({ )";// "TSlot":{)";
+    oss << R"("_id":")" << ids[a] << R"(")";
+    oss << "}";//}";
+    if (a + 1 < ids.size()) oss << ",";
+  }
+  oss << R"(])";
+  return oss.str();
+}
+
+std::string test_data_provider::get_context(size_t thread_id, size_t example_id, const std::vector<std::string>& event_ids) const {
+  return create_ccb_context_json(contexts[thread_id][example_id % preallocated_count], event_ids);
 }
 
 float test_data_provider::get_outcome(size_t thread_id, size_t example_id) const {
@@ -100,44 +141,6 @@ const char* test_data_provider::get_context(size_t thread_id, size_t example_id)
 
 bool test_data_provider::is_rewarded(size_t thread_id, size_t example_id) const {
   return reward_period > 0 && example_id % reward_period == 0;
-}
-
-void test_data_provider::log(size_t thread_id, size_t example_id, const reinforcement_learning::ranking_response& response, std::ostream& logger) const {
-  size_t action_id;
-  const auto event_id = create_event_id(thread_id, example_id);
-  response.get_chosen_action_id(action_id);
-  float prob = 0;
-  for (auto it = response.begin(); it != response.end(); ++it) {
-    if ((*it).action_id == action_id) {
-      prob = (*it).probability;
-    }
-  }
-
-  reinforcement_learning::utility::data_buffer buffer;
-  logger << R"({"_label_cost":)" << -get_outcome(thread_id, example_id) << R"(,"_label_probability":)" << prob << R"(,"_label_Action":)" << (action_id + 1) << R"(,"_labelIndex":)" << action_id << ",";
-
-  reinforcement_learning::timestamp ts;
-
-  if (is_rewarded(thread_id, example_id)) {
-    reinforcement_learning::outcome_event outcome_evt;
-    if (is_float_outcome)
-      outcome_evt = reinforcement_learning::outcome_event::report_outcome(event_id.c_str(), get_outcome(thread_id, example_id), ts);
-    else
-      outcome_evt = reinforcement_learning::outcome_event::report_outcome(event_id.c_str(), get_outcome_json(thread_id, example_id), ts);
-    buffer.reset();
-    reinforcement_learning::logger::json_collection_serializer<reinforcement_learning::outcome_event> jserial(buffer);
-    jserial.add(outcome_evt);
-    jserial.finalize();
-    logger << R"("o":[)" << buffer.body_begin() << "],";
-    buffer.reset();
-  }
-
-  auto ranking_evt = reinforcement_learning::ranking_event::choose_rank(get_context(thread_id, example_id), reinforcement_learning::action_flags::DEFAULT, response, ts);
-  buffer.reset();
-  reinforcement_learning::logger::json_collection_serializer<reinforcement_learning::ranking_event> jserial(buffer);
-  jserial.add(ranking_evt);
-  jserial.finalize();
-  logger << buffer.body_begin() << std::endl;
 }
 
 int test_data_provider::report_outcome(reinforcement_learning::live_model* rl, size_t thread_id, size_t example_id, reinforcement_learning::api_status* status) const {

@@ -3,9 +3,9 @@
 #   define BOOST_TEST_MODULE Main
 #endif
 
+#include <boost/test/unit_test.hpp>
 #include "logger/eventhub_client.h"
 #include "mock_http_client.h"
-#include <boost/test/unit_test.hpp>
 #include "err_constants.h"
 #include "utility/data_buffer_streambuf.h"
 #include "logger/preamble.h"

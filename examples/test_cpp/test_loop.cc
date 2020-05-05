@@ -17,10 +17,9 @@ namespace chrono = std::chrono;
 test_loop::test_loop(size_t index, const boost::program_options::variables_map& vm)
   : threads(vm["threads"].as<size_t>())
   , controller(experiment_controller_factory::create(vm))
-  , experiment_name(generate_experiment_name(vm["experiment_name"].as<std::string>(), threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>(), index))
+  , experiment_name(generate_experiment_name(vm["experiment_name"].as<std::string>(), threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>(), vm["slots"].as<size_t>(), index))
   , json_config(vm["json_config"].as<std::string>())
-  , test_inputs(experiment_name, threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>(), vm.count("float_outcome") > 0, vm["reward_period"].as<size_t>())
-  , is_perf(vm.count("perf") > 0)
+  , test_inputs(experiment_name, threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>(), vm["slots"].as<size_t>(), vm.count("float_outcome") > 0, vm["reward_period"].as<size_t>())
   , sleep_interval(vm["sleep"].as<size_t>())
 {
   for (size_t i = 0; i < threads; ++i) {
@@ -68,54 +67,25 @@ int test_loop::load_file(const std::string& file_name, std::string& config_str) 
   return err::success;
 }
 
-std::string test_loop::generate_experiment_name(const std::string& experiment_name_base, size_t threads, size_t features, size_t actions, size_t index)
+std::string test_loop::generate_experiment_name(const std::string& experiment_name_base, size_t threads, size_t features, size_t actions, size_t slots, size_t index)
 {
-  return experiment_name_base + "-t" + std::to_string(threads) + "-f" + std::to_string(features) + "-a" + std::to_string(actions) + "-i" + std::to_string(index);
+  return experiment_name_base + "-t" + std::to_string(threads) + "-f" + std::to_string(features) + "-a" + std::to_string(actions) + "-s" + std::to_string(slots) + "-i" + std::to_string(index);
 }
 
-void test_loop::run() {
+void test_loop::run(bool is_ccb) {
   std::vector<std::thread> _threads;
   for (size_t i = 0; i < threads; ++i) {
-    _threads.push_back(is_perf ? std::thread(&test_loop::perf_loop, this, i) : std::thread(&test_loop::validity_loop, this, i));
+    _threads.push_back(is_ccb ? std::thread(&test_loop::ccb_loop, this, i) : std::thread(&test_loop::cb_loop, this, i));
   }
   for (size_t i = 0; i < threads; ++i) {
     _threads[i].join();
   }
 }
 
-void test_loop::validity_loop(size_t thread_id)
-{
-  r::ranking_response response;
-  r::api_status status;
-  for (controller->restart(); controller->is_running(); controller->iterate()) {
-    if (thread_id == 0) controller->progress_bar();
-    const auto event_id = test_inputs.create_event_id(thread_id, controller->get_iteration());
-    if (rl->choose_rank(event_id.c_str(), test_inputs.get_context(thread_id, controller->get_iteration()), response, &status) != err::success) {
-      std::cout << status.get_error_msg() << std::endl;
-      continue;
-    }
-
-    if (test_inputs.is_rewarded(thread_id, controller->get_iteration())) {
-      if (test_inputs.report_outcome(rl.get(), thread_id, controller->get_iteration(), &status) != err::success) {
-        std::cout << status.get_error_msg() << std::endl;
-        continue;
-      }
-    }
-
-    test_inputs.log(thread_id, controller->get_iteration(), response, (*loggers[thread_id]));
-
-    if (sleep_interval > 0) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(sleep_interval));
-    }
-  }
-  if (thread_id == 0) controller->progress_bar();
-  std::cout << std::endl;
-}
-
 using namespace reinforcement_learning;
 using namespace reinforcement_learning::logger;
 
-void test_loop::perf_loop(size_t thread_id)
+void test_loop::cb_loop(size_t thread_id)
 {
   r::ranking_response response;
   r::api_status status;
@@ -125,13 +95,13 @@ void test_loop::perf_loop(size_t thread_id)
     const auto event_id = test_inputs.create_event_id(0, 0);
     const std::string warmup_id = "_warmup_" + std::string(event_id.c_str());
     if (rl->choose_rank(warmup_id.c_str(), test_inputs.get_context(0, 0), response, &status) != err::success) {
-      std::cout << "Warmup is failed. " << status.get_error_msg() << std::endl;
+      std::cout << "Warmup has failed. " << status.get_error_msg() << std::endl;
       return;
     }
 
     r::utility::data_buffer buffer;
     fb_collection_serializer<ranking_event> serializer(buffer);
-    auto choose_rank_event = r::ranking_event::choose_rank(test_inputs.get_context(0, 0), r::action_flags::DEFAULT, response, timestamp{});
+    auto choose_rank_event = r::ranking_event::choose_rank(warmup_id.c_str(), test_inputs.get_context(0, 0), r::action_flags::DEFAULT, response, timestamp{});
     serializer.add(choose_rank_event);
     serializer.finalize();
     choose_rank_size = buffer.body_filled_size();
@@ -166,3 +136,67 @@ void test_loop::perf_loop(size_t thread_id)
   (*loggers[thread_id]) << thread_id << ": Choose_rank: " << choose_rank_perf << " microseconds" << std::endl;
 }
 
+std::vector<const char*> to_const_char(const std::vector<std::string>& ids) {
+  std::vector<const char*> result;
+  for (const auto& id : ids) {
+    result.push_back(id.c_str());
+  }
+  return result;
+}
+
+void test_loop::ccb_loop(size_t thread_id)
+{
+  r::decision_response response;
+  r::api_status status;
+  std::cout << "Warmup..." << std::endl;
+  size_t choose_rank_size = 0;
+  {
+    const auto event_ids = test_inputs.create_event_ids(0, 0);
+    const auto event_ids_c = to_const_char(event_ids);
+    const std::string warmup_id = "_warmup_" + std::string(event_ids[0].c_str());
+    const auto context = test_inputs.get_context(0, 0, event_ids);
+    if (rl->request_decision(context.c_str(), response, &status) != err::success) {
+      std::cout << "Warmup is failed. " << status.get_error_msg() << std::endl;
+      return;
+    }
+
+    r::utility::data_buffer buffer;
+    fb_collection_serializer<decision_ranking_event> serializer(buffer);
+    const std::vector<std::vector<uint32_t>> blank_action_ids(response.size());
+    const std::vector<std::vector<float>> blank_pdf(response.size());
+    auto decision_event = r::decision_ranking_event::request_decision(event_ids_c, context.c_str(), r::action_flags::DEFAULT, blank_action_ids, blank_pdf, "model", timestamp{});
+    serializer.add(decision_event);
+    serializer.finalize();
+    choose_rank_size = buffer.body_filled_size();
+    std::cout << "Decision event size: " << choose_rank_size << std::endl;
+  }
+
+  std::cout << "Perf test is started..." << std::endl;
+  std::cout << "Choose_rank..." << std::endl;
+  const auto choose_rank_start = chrono::high_resolution_clock::now();
+  for (controller->restart(); controller->is_running(); controller->iterate()) {
+    if (thread_id == 0) controller->progress_bar();
+    const auto event_ids = test_inputs.create_event_ids(thread_id, controller->get_iteration());
+    const auto event_ids_c = to_const_char(event_ids);
+    const auto context = test_inputs.get_context(thread_id, controller->get_iteration(), event_ids);
+    if (rl->request_decision(context.c_str(), response, &status) != err::success) {
+      std::cout << status.get_error_msg() << std::endl;
+      continue;
+    }
+
+    if (test_inputs.is_rewarded(thread_id, controller->get_iteration())) {
+
+      if (rl->report_outcome(event_ids[0].c_str(), 1, &status) != err::success) {
+        std::cout << status.get_error_msg() << std::endl;
+        continue;
+      }
+    }
+  }
+  if (thread_id == 0) controller->progress_bar();
+  std::cout << std::endl;
+
+  const auto choose_rank_end = chrono::high_resolution_clock::now();
+
+  const auto choose_rank_perf = (chrono::duration_cast<chrono::microseconds>(choose_rank_end - choose_rank_start).count()) / controller->get_iteration();
+  (*loggers[thread_id]) << thread_id << ": Choose_rank: " << choose_rank_perf << " microseconds" << std::endl;
+}
