@@ -88,6 +88,23 @@ API int LiveModelRequestDecisionWithFlags(livemodel_context_t* context, const ch
    return context->livemodel->request_decision(context_json, flags, *resp, status);
 }
 
+API int LiveModelRequestSlatesDecision(livemodel_context_t* context, const char * event_id, const char * context_json, reinforcement_learning::slates_response* resp, reinforcement_learning::api_status* status)
+{
+   if(event_id == nullptr)
+      return context->livemodel->request_slates_decision(context_json, *resp, status);
+    else
+      return context->livemodel->request_slates_decision(event_id, context_json, *resp, status);
+}
+
+API int LiveModelRequestSlatesDecisionWithFlags(livemodel_context_t* context, const char * event_id, const char * context_json, unsigned int flags, reinforcement_learning::slates_response* resp, reinforcement_learning::api_status* status)
+{
+   if(event_id == nullptr)
+      return context->livemodel->request_slates_decision(context_json, flags, *resp, status);
+    else
+      return context->livemodel->request_slates_decision(event_id, context_json, flags, *resp, status);
+}
+
+
 API int LiveModelReportActionTaken(livemodel_context_t* context, const char * event_id, reinforcement_learning::api_status* status)
 {
   return context->livemodel->report_action_taken(event_id, status);
