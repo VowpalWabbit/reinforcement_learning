@@ -79,6 +79,36 @@ namespace Rl.Net
                 return LiveModelRequestDecisionWithFlagsNative(liveModel, contextJson, flags, decisionResponse, apiStatus);
             }
 
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestSlatesDecision")]
+            private static extern int LiveModelRequestSlatesDecisionNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr slatesResponse, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestSlatesDecisionOverride { get; set; }
+
+            public static int LiveModelRequestSlatesDecision(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr slatesResponse, IntPtr apiStatus)
+            {
+                if (LiveModelRequestSlatesDecisionOverride != null)
+                {
+                    return LiveModelRequestSlatesDecisionOverride(liveModel, eventId, contextJson, slatesResponse, apiStatus);
+                }
+
+                return LiveModelRequestSlatesDecisionNative(liveModel, eventId, contextJson, slatesResponse, apiStatus);
+            }
+
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestSlatesDecisionWithFlags")]
+            private static extern int LiveModelRequestSlatesDecisionWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr slatesResponse, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, int> LiveModelRequestSlatesDecisionWithFlagsOverride { get; set; }
+
+            public static int LiveModelRequestSlatesDecisionWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr slatesResponse, IntPtr apiStatus)
+            {
+                if (LiveModelRequestSlatesDecisionWithFlagsOverride != null)
+                {
+                    return LiveModelRequestSlatesDecisionWithFlagsOverride(liveModel, eventId, contextJson, flags, slatesResponse, apiStatus);
+                }
+
+                return LiveModelRequestSlatesDecisionWithFlagsNative(liveModel, eventId, contextJson, flags, slatesResponse, apiStatus);
+            }
+
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelReportActionTaken")]
             private static extern int LiveModelReportActionTakenNative(IntPtr liveModel, IntPtr eventId, IntPtr apiStatus);
 
@@ -237,6 +267,43 @@ namespace Rl.Net
             {
                 return NativeMethods.LiveModelRequestDecisionWithFlags(liveModel, new IntPtr(contextJsonUtf8Bytes), flags, decisionResponse, apiStatus);
             }
+        }
+
+        unsafe private static int LiveModelRequestSlatesDecision(IntPtr liveModel, string eventId, string contextJson, IntPtr slatesResponse, IntPtr apiStatus)
+        {
+            CheckJsonString(contextJson);
+
+            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            {
+                if (eventId == null)
+                {
+                    return NativeMethods.LiveModelRequestSlatesDecision(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, slatesResponse, apiStatus);
+                }
+
+                fixed(byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+                {
+                    return NativeMethods.LiveModelRequestSlatesDecision(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, slatesResponse, apiStatus);
+                }
+            }
+        }
+
+        unsafe private static int LiveModelRequestSlatesDecisionWithFlags(IntPtr liveModel, string eventId, string contextJson, uint flags, IntPtr slatesResponse, IntPtr apiStatus)
+        {
+            CheckJsonString(contextJson);
+
+            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            {
+                if (eventId == null)
+                {
+                    return NativeMethods.LiveModelRequestSlatesDecisionWithFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, flags, slatesResponse, apiStatus);
+                }
+
+                fixed(byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+                {
+                    return NativeMethods.LiveModelRequestSlatesDecisionWithFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, flags, slatesResponse, apiStatus);
+                }
+            }
+
         }
 
         unsafe private static int LiveModelReportActionTaken(IntPtr liveModel, string eventId, IntPtr apiStatus)
@@ -441,6 +508,59 @@ namespace Rl.Net
             return result;
         }
 
+        public bool TryRequestSlatesDecision(string eventId, string contextJson, out SlatesDecision response, ApiStatus apiStatus = null)
+        {
+            response = new SlatesDecision();
+            return this.TryRequestSlatesDecision(eventId, contextJson, response, apiStatus);
+        }
+
+        public bool TryRequestSlatesDecision(string eventId, string contextJson, SlatesDecision response, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelRequestSlatesDecision(this.DangerousGetHandle(), eventId, contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public SlatesDecision RequestSlatesDecision(string eventId, string contextJson)
+        {
+            SlatesDecision result = new SlatesDecision();
+
+            using (ApiStatus apiStatus = new ApiStatus())
+            if (!this.TryRequestSlatesDecision(eventId, contextJson, result, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+
+            return result;
+        }
+
+        public bool TryRequestSlatesDecision(string eventId, string contextJson, ActionFlags flags, out SlatesDecision response, ApiStatus apiStatus)
+        {
+            response = new SlatesDecision();
+
+            GC.KeepAlive(this);
+            return this.TryRequestSlatesDecision(eventId, contextJson, flags, response, apiStatus);
+        }
+
+        public bool TryRequestSlatesDecision(string eventId, string contextJson, ActionFlags flags, SlatesDecision response, ApiStatus apiStatus)
+        {
+            int result = LiveModelRequestSlatesDecisionWithFlags(this.DangerousGetHandle(), eventId, contextJson, (uint)flags, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public SlatesDecision RequestSlatesDecision(string eventId, string contextJson, ActionFlags flags)
+        {
+            SlatesDecision result = new SlatesDecision();
+
+            using (ApiStatus apiStatus = new ApiStatus())
+            if (!this.TryRequestSlatesDecision(eventId, contextJson, flags, result, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+
+            return result;
+        }
 
         [Obsolete("Use TryQueueActionTakenEvent instead.")]
         public bool TryReportActionTaken(string eventId, ApiStatus apiStatus = null) 
