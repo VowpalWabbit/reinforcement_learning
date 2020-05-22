@@ -1,4 +1,3 @@
-#pragma once
 #include "learning_mode.h"
 #include "constants.h"
 #include <cstring>
