@@ -144,8 +144,9 @@ namespace reinforcement_learning {
     // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the example tag.
     for(int i = 0; i < event_ids.size(); i++)
     {
-      push_many(examples[i]->tag, SEED_TAG.c_str(), SEED_TAG.size());
-      push_many(examples[i]->tag, event_ids[i], strlen(event_ids[i]));
+      const size_t slot_example_indx = examples.size() - event_ids.size() + i;
+      push_many(examples[slot_example_indx]->tag, SEED_TAG.c_str(), SEED_TAG.size());
+      push_many(examples[slot_example_indx]->tag, event_ids[i], strlen(event_ids[i]));
     }
 
     // finalize example
