@@ -508,13 +508,13 @@ namespace Rl.Net
             return result;
         }
 
-        public bool TryRequestSlatesDecision(string eventId, string contextJson, out SlatesDecision response, ApiStatus apiStatus = null)
+        public bool TryRequestSlatesDecision(string eventId, string contextJson, out SlatesResponse response, ApiStatus apiStatus = null)
         {
-            response = new SlatesDecision();
+            response = new SlatesResponse();
             return this.TryRequestSlatesDecision(eventId, contextJson, response, apiStatus);
         }
 
-        public bool TryRequestSlatesDecision(string eventId, string contextJson, SlatesDecision response, ApiStatus apiStatus = null)
+        public bool TryRequestSlatesDecision(string eventId, string contextJson, SlatesResponse response, ApiStatus apiStatus = null)
         {
             int result = LiveModelRequestSlatesDecision(this.DangerousGetHandle(), eventId, contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
 
@@ -522,9 +522,9 @@ namespace Rl.Net
             return result == NativeMethods.SuccessStatus;
         }
 
-        public SlatesDecision RequestSlatesDecision(string eventId, string contextJson)
+        public SlatesResponse RequestSlatesDecision(string eventId, string contextJson)
         {
-            SlatesDecision result = new SlatesDecision();
+            SlatesResponse result = new SlatesResponse();
 
             using (ApiStatus apiStatus = new ApiStatus())
             if (!this.TryRequestSlatesDecision(eventId, contextJson, result, apiStatus))
@@ -535,23 +535,23 @@ namespace Rl.Net
             return result;
         }
 
-        public bool TryRequestSlatesDecision(string eventId, string contextJson, ActionFlags flags, out SlatesDecision response, ApiStatus apiStatus)
+        public bool TryRequestSlatesDecision(string eventId, string contextJson, ActionFlags flags, out SlatesResponse response, ApiStatus apiStatus)
         {
-            response = new SlatesDecision();
+            response = new SlatesResponse();
 
             GC.KeepAlive(this);
             return this.TryRequestSlatesDecision(eventId, contextJson, flags, response, apiStatus);
         }
 
-        public bool TryRequestSlatesDecision(string eventId, string contextJson, ActionFlags flags, SlatesDecision response, ApiStatus apiStatus)
+        public bool TryRequestSlatesDecision(string eventId, string contextJson, ActionFlags flags, SlatesResponse response, ApiStatus apiStatus)
         {
             int result = LiveModelRequestSlatesDecisionWithFlags(this.DangerousGetHandle(), eventId, contextJson, (uint)flags, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
             return result == NativeMethods.SuccessStatus;
         }
 
-        public SlatesDecision RequestSlatesDecision(string eventId, string contextJson, ActionFlags flags)
+        public SlatesResponse RequestSlatesDecision(string eventId, string contextJson, ActionFlags flags)
         {
-            SlatesDecision result = new SlatesDecision();
+            SlatesResponse result = new SlatesResponse();
 
             using (ApiStatus apiStatus = new ApiStatus())
             if (!this.TryRequestSlatesDecision(eventId, contextJson, flags, result, apiStatus))
