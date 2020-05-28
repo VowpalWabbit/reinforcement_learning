@@ -41,6 +41,10 @@
     </Compile>
   </ItemGroup>
 
+  <PropertyGroup>
+    <TextTransformPath>$(DevEnvDir)\TextTransform.exe</TextTransformPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Update="InternalsVisibleToTest.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
