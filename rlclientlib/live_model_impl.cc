@@ -74,7 +74,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_ranking_logger->log(event_id, context, flags, response, status, _learning_mode));
     RETURN_IF_FAIL(post_process_rank(response, _learning_mode));
 
-    // Check watchdog for any background errors. Do this at the end of function so that the work isF still done.
+    // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
       RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
     }
@@ -84,7 +84,8 @@ namespace reinforcement_learning {
 
   //here the event_id is auto-generated
   int live_model_impl::choose_rank(const char* context, unsigned int flags, ranking_response& response, api_status* status) {
-    return choose_rank(boost::uuids::to_string(boost::uuids::random_generator()()).c_str(), context, flags, response,
+    const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
+    return choose_rank(uuid.c_str(), context, flags, response,
       status);
   }
 
@@ -147,7 +148,8 @@ namespace reinforcement_learning {
 
   int live_model_impl::request_slates_decision(const char * context_json, unsigned int flags, slates_response& resp, api_status* status)
   {
-    return request_slates_decision(boost::uuids::to_string(boost::uuids::random_generator()()).c_str(), context_json, flags, resp, status);
+    const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
+    return request_slates_decision(uuid.c_str(), context_json, flags, resp, status);
   }
 
   int live_model_impl::request_slates_decision(const char * event_id, const char * context_json, unsigned int flags, slates_response& resp, api_status* status)
@@ -166,12 +168,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(check_null_or_empty(context_json, status));
 
     // Ensure multi comes before slots, this is a current limitation of the parser.
-    // XXX is this true for slates?
     RETURN_IF_FAIL(utility::validate_multi_before_slots(context_json, _trace_logger.get(), status));
-
-    // std::vector<std::vector<uint32_t>> actions_ids;
-    // std::vector<std::vector<float>> actions_pdfs;
-    // std::string model_version;
 
     size_t num_decisions;
     RETURN_IF_FAIL(utility::get_slot_count(num_decisions, context_json, _trace_logger.get(), status));
@@ -185,7 +182,6 @@ namespace reinforcement_learning {
 
     RETURN_IF_FAIL(populate_slates_response(actions_ids, actions_pdfs, std::move(std::string(event_id)), std::move(std::string(model_version)), resp, _trace_logger.get(), status));
     RETURN_IF_FAIL(_slates_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
-
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -346,7 +342,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_decision_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for interactions.
-    const auto slates_sender_impl = _configuration.get(name::DECISION_SENDER_IMPLEMENTATION, value::DECISION_EH_SENDER);
+    const auto* const slates_sender_impl = _configuration.get(name::DECISION_SENDER_IMPLEMENTATION, value::DECISION_EH_SENDER);
     i_sender* slates_data_sender;
 
     // Use the name to create an instance of raw data sender for interactions
