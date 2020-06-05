@@ -184,7 +184,7 @@ namespace reinforcement_learning {
     examples.delete_v();
   }
 
-  void safe_vw::rank_decisions(const char* event_id, uint32_t slot_count, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
+  void safe_vw::rank_slates_decisions(const char* event_id, uint32_t slot_count, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
   {
     auto examples = v_init<example*>();
     examples.push_back(get_or_create_example());

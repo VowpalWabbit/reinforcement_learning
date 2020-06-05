@@ -28,7 +28,7 @@ namespace reinforcement_learning { namespace model_management {
           model_ready = true;
         }
         else {
-          RETURN_ERROR_LS(_trace_logger, status, model_update_error) 
+          RETURN_ERROR_LS(_trace_logger, status, model_update_error)
             << "Received model is incompatible with initial configuration " << _initial_command_line;
         }
       }
@@ -95,7 +95,7 @@ namespace reinforcement_learning { namespace model_management {
       pooled_vw vw(_vw_pool, _vw_pool.get_or_create());
 
       // Get a ranked list of action_ids and corresponding pdf
-      vw->rank_decisions(event_id, slot_count, features, actions_ids, action_pdfs);
+      vw->rank_slates_decisions(event_id, slot_count, features, actions_ids, action_pdfs);
 
       model_version = vw->id();
 

@@ -106,7 +106,7 @@ namespace reinforcement_learning {
   //serializable decision ranking event
   class slates_decision_event : public event {
   public:
-    slates_decision_event();
+    slates_decision_event() = default;
     slates_decision_event(slates_decision_event&& other) = default;
     slates_decision_event& operator=(slates_decision_event&& other) = default;
 
