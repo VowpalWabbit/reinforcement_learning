@@ -11,71 +11,15 @@
 namespace reinforcement_learning {
   static const std::string SEED_TAG = "seed=";
 
-  class in_memory_buf : public io_buf
-  {
-  private:
-    const char* _model_data;
-    const char* _model_data_end;
-    const char* _current;
-
-  public:
-    in_memory_buf(const char* model_data, size_t len)
-      : _model_data(model_data), _model_data_end(model_data + len), _current(model_data)
-    {
-      files.push_back(0);
-    }
-
-    in_memory_buf(const in_memory_buf&) = delete;
-    in_memory_buf& operator=(const in_memory_buf& other) = delete;
-    in_memory_buf(in_memory_buf&& other) = delete;
-
-    virtual int open_file(const char* name, bool stdin_off, int flag = READ)
-    {
-      _current = _model_data;
-      return 0;
-    }
-
-    virtual void reset_file(int f)
-    {
-      _current = _model_data;
-    }
-
-    virtual ssize_t read_file(int f, void* buf, size_t nbytes)
-    {
-      size_t left_over = std::min(nbytes, (size_t)(_model_data_end - _current));
-
-      if (left_over == 0)
-        return 0;
-
-#ifdef WIN32
-      memcpy_s(buf, nbytes, &*_current, left_over);
-#else
-      memcpy(buf, &*_current, left_over);
-#endif
-
-      _current += left_over;
-
-      return left_over;
-    }
-
-    virtual size_t num_files() { return 1; }
-
-    virtual ssize_t write_file(int file, const void* buf, size_t nbytes) { return -1; }
-
-    virtual bool compressed() { return false; }
-
-    virtual bool close_file() { return true; }
-  };
-
-
   safe_vw::safe_vw(const std::shared_ptr<safe_vw>& master) : _master(master)
   {
     _vw = VW::seed_vw_model(_master->_vw, "", nullptr, nullptr);
   }
 
   safe_vw::safe_vw(const char* model_data, size_t len)
-  {
-    in_memory_buf buf(model_data, len);
+  {      
+    io_buf buf;
+    buf.add_file(VW::io::create_buffer_view(model_data, len));
 
     _vw = VW::initialize("--quiet --json", &buf, false, nullptr, nullptr);
   }
@@ -200,8 +144,9 @@ namespace reinforcement_learning {
     // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the example tag.
     for(int i = 0; i < event_ids.size(); i++)
     {
-      push_many(examples[i]->tag, SEED_TAG.c_str(), SEED_TAG.size());
-      push_many(examples[i]->tag, event_ids[i], strlen(event_ids[i]));
+      const size_t slot_example_indx = examples.size() - event_ids.size() + i;
+      push_many(examples[slot_example_indx]->tag, SEED_TAG.c_str(), SEED_TAG.size());
+      push_many(examples[slot_example_indx]->tag, event_ids[i], strlen(event_ids[i]));
     }
 
     // finalize example
