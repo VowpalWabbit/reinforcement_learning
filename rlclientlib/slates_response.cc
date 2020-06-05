@@ -75,17 +75,4 @@ namespace reinforcement_learning
   slates_response::iterator_t slates_response::end() {
     return { _decision, _decision.size() };
   }
-
-  slates_response::slates_response(slates_response&& other) noexcept :
-    _event_id(std::move(other._event_id)),
-    _model_id(std::move(other._model_id)),
-    _decision(std::move(other._decision))
-  {}
-
-  slates_response& slates_response::operator=(slates_response&& other) noexcept {
-    std::swap(_event_id, other._event_id);
-    std::swap(_model_id, other._model_id);
-    std::swap(_decision, other._decision);
-    return *this;
-  }
 } // namespace reinforcement_learning

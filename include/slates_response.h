@@ -47,8 +47,8 @@ namespace reinforcement_learning {
 
     size_t size() const;
 
-    void set_event_id(const char* model_id);
-    void set_event_id(std::string&& model_id);
+    void set_event_id(const char* event_id);
+    void set_event_id(std::string&& event_id);
     const char* get_event_id() const;
 
     void set_model_id(const char* model_id);
@@ -63,7 +63,7 @@ namespace reinforcement_learning {
 
     slates_response(slates_response&&) noexcept;
     slates_response& operator=(slates_response&&) noexcept;
-    slates_response(const slates_response&) = delete;
-    slates_response& operator =(const slates_response&) = delete;
+    slates_response(const slates_response&) = default;
+    slates_response& operator =(const slates_response&) = default;
   };
 }
