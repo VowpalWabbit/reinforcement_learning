@@ -23,8 +23,13 @@ namespace Rl.Net.Cli
         {
             get;
         }
+        string SlatesContext
+        {
+            get;
+        }
 
         TOutcome GetOutcome(long actionIndex, IEnumerable<ActionProbability> actionDistribution);
+        TOutcome GetOutcome(int[] actionIndexes, float[] probabilities);
     }
 
     internal class RunContext
@@ -38,6 +43,11 @@ namespace Rl.Net.Cli
         {
             get;
         } = new ApiStatus();
+
+        public SlatesResponse SlatesContainer
+        {
+            get;
+        } = new SlatesResponse();
     }
 
     internal interface IOutcomeReporter<TOutcome>
@@ -48,10 +58,12 @@ namespace Rl.Net.Cli
     public class RLDriver : IOutcomeReporter<float>, IOutcomeReporter<string>
     {
         private LiveModel liveModel;
+        private bool useSlates;
 
-        public RLDriver(LiveModel liveModel)
+        public RLDriver(LiveModel liveModel, bool useSlates)
         {
             this.liveModel = liveModel;
+            this.useSlates = useSlates;
         }
 
         public TimeSpan StepInterval
@@ -100,22 +112,38 @@ namespace Rl.Net.Cli
         private void Step<TOutcome>(RunContext runContext, IOutcomeReporter<TOutcome> outcomeReporter, IStepContext<TOutcome> step)
         {
             string eventId = step.EventId;
+            TOutcome outcome = default(TOutcome);
 
-            if (!liveModel.TryChooseRank(eventId, step.DecisionContext, runContext.ResponseContainer, runContext.ApiStatusContainer))
-            {
-                this.SafeRaiseError(runContext.ApiStatusContainer);
-            }
+            if(useSlates) {
+                if(!liveModel.TryRequestSlatesDecision(step.EventId, step.SlatesContext, runContext.SlatesContainer, runContext.ApiStatusContainer))
+                {
+                    this.SafeRaiseError(runContext.ApiStatusContainer);
+                }
 
-            long actionIndex = -1;
-            if (!runContext.ResponseContainer.TryGetChosenAction(out actionIndex, runContext.ApiStatusContainer))
+                int[] actions = runContext.SlatesContainer.Select(slot => slot.ActionId).ToArray();
+                outcome = step.GetOutcome(actions, runContext.SlatesContainer.Select(slot => slot.Probability).ToArray());
+                if (outcome == null)
+                {
+                    return;
+                }
+            } else
             {
-                this.SafeRaiseError(runContext.ApiStatusContainer);
-            }
+                if (!liveModel.TryChooseRank(eventId, step.DecisionContext, runContext.ResponseContainer, runContext.ApiStatusContainer))
+                {
+                    this.SafeRaiseError(runContext.ApiStatusContainer);
+                }
 
-            TOutcome outcome = step.GetOutcome(actionIndex, runContext.ResponseContainer.AsEnumerable());
-            if (outcome == null)
-            {
-                return;
+                long actionIndex = -1;
+                if (!runContext.ResponseContainer.TryGetChosenAction(out actionIndex, runContext.ApiStatusContainer))
+                {
+                    this.SafeRaiseError(runContext.ApiStatusContainer);
+                }
+
+                outcome = step.GetOutcome(actionIndex, runContext.ResponseContainer.AsEnumerable());
+                if (outcome == null)
+                {
+                    return;
+                }
             }
 
             if (!outcomeReporter.TryQueueOutcomeEvent(runContext, eventId, outcome))

@@ -30,8 +30,14 @@ namespace Rl.Net.Cli
             }
 
             public string DecisionContext { get; set; }
-            
+            public string SlatesContext { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
             public float GetOutcome(long actionIndex, IEnumerable<ActionProbability> actionDistribution)
+            {
+                return this.Outcome;
+            }
+
+            public float GetOutcome(int[] actionIndexes, float[] probabilities)
             {
                 return this.Outcome;
             }

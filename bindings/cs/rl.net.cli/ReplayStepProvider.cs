@@ -38,12 +38,20 @@ namespace Rl.Net.Cli
             [JsonIgnore]
             public string DecisionContext => this.Context.ToString(Formatting.None);
 
+            public string SlatesContext { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
             public string GetOutcome(long actionIndex, IEnumerable<ActionProbability> actionDistribution)
             {
                 JToken observationValue = this.Observations?.First()?.SelectToken("v");
 
                 return observationValue?.ToString(Formatting.None);
             }
+
+            public string GetOutcome(int[] actionIndexes, float[] probabilities)
+            {
+                JToken observationValue = this.Observations?.First()?.SelectToken("v");
+
+                return observationValue?.ToString(Formatting.None);            }
         }
 
         public ReplayStepProvider(IEnumerable<string> dsJsonHistory)
