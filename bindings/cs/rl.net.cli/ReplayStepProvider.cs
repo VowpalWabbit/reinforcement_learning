@@ -51,7 +51,13 @@ namespace Rl.Net.Cli
             {
                 JToken observationValue = this.Observations?.First()?.SelectToken("v");
 
-                return observationValue?.ToString(Formatting.None);            }
+                return observationValue?.ToString(Formatting.None);
+            }
+
+            public string GetSlatesOutcome(int[] actionIndexes, float[] probabilities)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public ReplayStepProvider(IEnumerable<string> dsJsonHistory)

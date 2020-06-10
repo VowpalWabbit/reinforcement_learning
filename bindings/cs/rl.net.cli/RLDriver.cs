@@ -30,6 +30,7 @@ namespace Rl.Net.Cli
 
         TOutcome GetOutcome(long actionIndex, IEnumerable<ActionProbability> actionDistribution);
         TOutcome GetOutcome(int[] actionIndexes, float[] probabilities);
+        TOutcome GetSlatesOutcome(int[] actionIndexes, float[] probabilities);
     }
 
     internal class RunContext
@@ -115,13 +116,14 @@ namespace Rl.Net.Cli
             TOutcome outcome = default(TOutcome);
 
             if(useSlates) {
-                if(!liveModel.TryRequestSlatesDecision(step.EventId, step.SlatesContext, runContext.SlatesContainer, runContext.ApiStatusContainer))
+                if(!liveModel.TryRequestSlatesDecision(eventId, step.SlatesContext, runContext.SlatesContainer, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
                 }
 
                 int[] actions = runContext.SlatesContainer.Select(slot => slot.ActionId).ToArray();
-                outcome = step.GetOutcome(actions, runContext.SlatesContainer.Select(slot => slot.Probability).ToArray());
+                float[] probs = runContext.SlatesContainer.Select(slot => slot.Probability).ToArray();
+                outcome = step.GetSlatesOutcome(actions, probs);
                 if (outcome == null)
                 {
                     return;

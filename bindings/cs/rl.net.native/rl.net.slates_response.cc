@@ -1,4 +1,4 @@
-#include "rl.net.decision_response.h"
+#include "rl.net.slates_response.h"
 
 class slates_enumerator_adapter
 {

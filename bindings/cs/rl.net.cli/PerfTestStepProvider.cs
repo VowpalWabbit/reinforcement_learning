@@ -41,6 +41,11 @@ namespace Rl.Net.Cli
             {
                 return this.Outcome;
             }
+
+            public float GetSlatesOutcome(int[] actionIndexes, float[] probabilities)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public string Tag { get; set; } = "Id";

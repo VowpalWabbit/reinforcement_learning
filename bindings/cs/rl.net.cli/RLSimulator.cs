@@ -86,7 +86,7 @@ namespace Rl.Net.Cli
                     StatisticsCalculator = stats,
                     EventId = Guid.NewGuid().ToString(),
                     Person = GetRandomPerson(),
-                    SlotCount = this.slots, 
+                    SlotCount = this.slots,
                 };
 
                 yield return step;
@@ -103,9 +103,9 @@ namespace Rl.Net.Cli
 
         internal class SimulatorStep : IStepContext<float>
         {
-            internal static readonly Topic[] ActionSet = new[] { Topic.HerbGarden, Topic.MachineLearning, Topic.Soccer, Topic.SpaceExploration };
+            internal static readonly (Topic topic, int slot_id)[] ActionSet = new[] { (Topic.HerbGarden, 0), (Topic.MachineLearning, 0), (Topic.Soccer, 1), (Topic.SpaceExploration, 1) };
 
-            private static readonly string ActionsJson = string.Join(",", ActionSet.Select(topic => $"{{ \"TAction\": {{ \"topic\": \"{topic}\" }} }}"));
+            private static readonly string ActionsJson = string.Join(",", ActionSet.Select(action => $"{{ \"TAction\": {{ \"topic\": \"{action.topic}\" }}, \"_slot_id\": {action.slot_id} }}"));
             private string SlotsJson => string.Join(",", Enumerable.Range(0, SlotCount).Select(slotId => $"{{ \"slot_id\": \"__{slotId}\" }}"));
 
             public StatisticsCalculator StatisticsCalculator
@@ -152,7 +152,7 @@ namespace Rl.Net.Cli
             }
 
             public string DecisionContext => $"{{ { this.Person.FeaturesJson }, \"_multi\": [{ ActionsJson }] }}";
-            public string SlatesContext => $"{{ { this.Person.FeaturesJson }, \"_slots\": [{SlotsJson}], \"_multi\":[{ActionsJson}] }}";
+            public string SlatesContext => $"{{ { this.Person.FeaturesJson }, \"_multi\":[{ActionsJson}], \"_slots\": [{SlotsJson}] }}";
 
 
             private float? outcomeCache;
@@ -172,13 +172,26 @@ namespace Rl.Net.Cli
             public void Record(StatisticsCalculator statisticsCalculator)
             {
                 statisticsCalculator.Record(this.Person, this.DecisionCache.Value, this.outcomeCache.Value);
-
                 Console.WriteLine($" {statisticsCalculator.TotalActions}, ctxt, {this.Person.Id}, action, {this.DecisionCache.Value}, outcome, {this.outcomeCache.Value}, dist, {this.ActionDistributionString}, {statisticsCalculator.GetStats(this.Person, this.DecisionCache.Value)}");
             }
 
             public float GetOutcome(int[] actionIndexes, float[] probabilities)
             {
                 throw new NotImplementedException();
+            }
+
+            public float GetSlatesOutcome(int[] actionIndexes, float[] probabilities)
+            {
+                if (!this.outcomeCache.HasValue)
+                {
+                    this.DecisionCache = (Topic)0;
+                    this.actionDistributionCache = new List<ActionProbability>();
+                    this.outcomeCache = actionIndexes
+                        .Zip(probabilities, (int action, float prob) => this.Person.GenerateOutcome(ActionSet[action].topic))
+                        .Aggregate((float)0, (acc, x) => acc + x);
+                }
+
+                return this.outcomeCache.Value;
             }
         }
     }
