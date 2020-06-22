@@ -247,7 +247,7 @@ bool safe_vw::is_compatible(const std::string& args) const {
   const bool is_ccb = _vw->options->was_supplied("ccb_explore_adf");
   const bool is_slates_init = args.find("slates") != std::string::npos;
   const bool is_slates = _vw->options->was_supplied("slates");
-  return is_ccb_init == is_ccb || is_slates_init == is_slates;
+  return is_ccb_init == is_ccb && is_slates_init == is_slates;
 }
 
 safe_vw_factory::safe_vw_factory(const std::string& command_line)
