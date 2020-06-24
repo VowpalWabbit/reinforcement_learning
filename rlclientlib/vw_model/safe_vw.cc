@@ -241,13 +241,72 @@ const char* safe_vw::id() const {
   return _vw->id.c_str();
 }
 
+enum class model_type_t
+{
+  UNKNOWN,
+  CB,
+  CCB,
+  SLATES
+};
+
+model_type_t get_model_type(const std::string& args)
+{
+  // slates == slates
+  if (args.find("slates") != std::string::npos)
+  {
+    return model_type_t::SLATES;
+  }
+
+  // ccb = ccb && !slates
+  if (args.find("ccb_explore_adf") != std::string::npos)
+  {
+    return model_type_t::CCB;
+  }
+
+  // cb = !slates && !ccb && cb
+  if (args.find("cb_explore_adf") != std::string::npos)
+  {
+    return model_type_t::CB;
+  }
+
+  return model_type_t::UNKNOWN;
+}
+
+// TODO make this const when was_supplied becomes const.
+model_type_t get_model_type(VW::config::options_i* args)
+{
+    // slates == slates
+  if (args->was_supplied("slates"))
+  {
+    return model_type_t::SLATES;
+  }
+
+  // ccb = ccb && !slates
+  if (args->was_supplied("ccb_explore_adf"))
+  {
+    return model_type_t::CCB;
+  }
+
+  // cb = !slates && !ccb && cb
+  if (args->was_supplied("cb_explore_adf"))
+  {
+    return model_type_t::CB;
+  }
+
+  return model_type_t::UNKNOWN;
+}
+
 bool safe_vw::is_compatible(const std::string& args) const {
-  //TODO: proper implentation for more than 2 algorithms. Changes inside VW are required
-  const bool is_ccb_init = args.find("ccb_explore_adf") != std::string::npos;
-  const bool is_ccb = _vw->options->was_supplied("ccb_explore_adf");
-  const bool is_slates_init = args.find("slates") != std::string::npos;
-  const bool is_slates = _vw->options->was_supplied("slates");
-  return is_ccb_init == is_ccb && is_slates_init == is_slates;
+  const auto local_model_type = get_model_type(_vw->options);
+  const auto inbound_model_type = get_model_type(args);
+
+  // This really is an error but errors cant be reported here...
+  if(local_model_type == model_type_t::UNKNOWN || inbound_model_type ==  model_type_t::UNKNOWN)
+  {
+    return false;
+  }
+
+  return local_model_type == inbound_model_type;
 }
 
 safe_vw_factory::safe_vw_factory(const std::string& command_line)
