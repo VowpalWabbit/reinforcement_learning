@@ -90,8 +90,8 @@ namespace reinforcement_learning {
 
   int live_model_impl::request_decision(const char* context_json, unsigned int flags, decision_response& resp, api_status* status)
   {
-    if (_learning_mode == IMITATION) {
-      // Imitaion mode is not supported here at this moment
+    if (_learning_mode == APPRENTICE) {
+      // Apprentice mode is not supported here at this moment
       return error_code::not_supported;
     }
 
@@ -429,8 +429,10 @@ namespace reinforcement_learning {
 
   int post_process_rank(ranking_response& response, learning_mode learning_mode) {
     switch (learning_mode) {
-    case IMITATION:
+    case APPRENTICE:
+    case LOGGINGONLY:
       {
+        // In Apprentice or LoggingOnly mode, we keep the order of actions from input
 #ifdef __clang__
         std::vector<action_prob> tmp;
         std::copy(response.begin(), response.end(), std::back_inserter(tmp));

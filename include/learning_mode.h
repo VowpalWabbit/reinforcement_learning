@@ -1,7 +1,7 @@
 /**
-* @brief decision_modes definition.
+* @brief learning_mode definition.
 *
-* @file decision_modes.h
+* @file learning_mode.h
 * @author Chenxi Zhao
 * @date 2020-02-13
 */
@@ -11,7 +11,8 @@ namespace reinforcement_learning {
 
   enum learning_mode {
     ONLINE = 0,
-    IMITATION = 1,
+    APPRENTICE = 1,
+    LOGGINGONLY = 2,
   };
 
   namespace learning {
