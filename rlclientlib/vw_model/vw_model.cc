@@ -28,7 +28,7 @@ namespace reinforcement_learning { namespace model_management {
           model_ready = true;
         }
         else {
-          RETURN_ERROR_LS(_trace_logger, status, model_update_error) 
+          RETURN_ERROR_LS(_trace_logger, status, model_update_error)
             << "Received model is incompatible with initial configuration " << _initial_command_line;
         }
       }
@@ -87,5 +87,27 @@ namespace reinforcement_learning { namespace model_management {
       RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << "Unknown error";
     }
   }
+
+
+  int vw_model::request_slates_decision(const char *event_id, uint32_t slot_count, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
+  {
+    try {
+      pooled_vw vw(_vw_pool, _vw_pool.get_or_create());
+
+      // Get a ranked list of action_ids and corresponding pdf
+      vw->rank_slates_decisions(event_id, slot_count, features, actions_ids, action_pdfs);
+
+      model_version = vw->id();
+
+      return error_code::success;
+    }
+    catch ( const std::exception& e) {
+      RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << e.what();
+    }
+    catch ( ... ) {
+      RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << "Unknown error";
+    }
+  }
+
 
 }}

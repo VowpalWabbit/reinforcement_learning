@@ -84,7 +84,8 @@ namespace reinforcement_learning {
 
   //here the event_id is auto-generated
   int live_model_impl::choose_rank(const char* context, unsigned int flags, ranking_response& response, api_status* status) {
-    return choose_rank(boost::uuids::to_string(boost::uuids::random_generator()()).c_str(), context, flags, response,
+    const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
+    return choose_rank(uuid.c_str(), context, flags, response,
       status);
   }
 
@@ -134,7 +135,7 @@ namespace reinforcement_learning {
 
     // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
     RETURN_IF_FAIL(_model->request_decision(event_ids, context_json, actions_ids, actions_pdfs, model_version, status));
-    RETURN_IF_FAIL(populate_response(actions_ids, actions_pdfs, event_ids, std::move(std::string(model_version)), resp, _trace_logger.get(), status));
+    RETURN_IF_FAIL(populate_response(actions_ids, actions_pdfs, event_ids, std::string(model_version), resp, _trace_logger.get(), status));
     RETURN_IF_FAIL(_decision_logger->log_decisions(event_ids, context_json, flags, actions_ids, actions_pdfs, model_version, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
@@ -145,6 +146,49 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
+  int live_model_impl::request_slates_decision(const char * context_json, unsigned int flags, slates_response& resp, api_status* status)
+  {
+    const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
+    return request_slates_decision(uuid.c_str(), context_json, flags, resp, status);
+  }
+
+  int live_model_impl::request_slates_decision(const char * event_id, const char * context_json, unsigned int flags, slates_response& resp, api_status* status)
+  {
+    if (_learning_mode == IMITATION) {
+      // Imitaion mode is not supported here at this moment
+      return error_code::not_supported;
+    }
+
+    resp.clear();
+    //clear previous errors if any
+    api_status::try_clear(status);
+
+    //check arguments
+    RETURN_IF_FAIL(check_null_or_empty(event_id, status));
+    RETURN_IF_FAIL(check_null_or_empty(context_json, status));
+
+    // Ensure multi comes before slots, this is a current limitation of the parser.
+    RETURN_IF_FAIL(utility::validate_multi_before_slots(context_json, _trace_logger.get(), status));
+
+    size_t num_decisions;
+    RETURN_IF_FAIL(utility::get_slot_count(num_decisions, context_json, _trace_logger.get(), status));
+
+    std::vector<std::vector<uint32_t>> actions_ids;
+    std::vector<std::vector<float>> actions_pdfs;
+    std::string model_version;
+
+    // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
+    RETURN_IF_FAIL(_model->request_slates_decision(event_id, num_decisions, context_json, actions_ids, actions_pdfs, model_version, status));
+
+    RETURN_IF_FAIL(populate_slates_response(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), resp, _trace_logger.get(), status));
+    RETURN_IF_FAIL(_slates_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+
+    // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
+    if (_watchdog.has_background_error_been_reported()) {
+      RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+    }
+    return error_code::success;
+  }
 
   int live_model_impl::report_action_taken(const char* event_id, api_status* status) {
     // Clear previous errors if any
@@ -296,6 +340,26 @@ namespace reinforcement_learning {
     // Create a logger for interactions that will use msg sender to send interaction messages
     _decision_logger.reset(new logger::ccb_logger(_configuration, decision_msg_sender, _watchdog, decision_time_provider, &_error_cb));
     RETURN_IF_FAIL(_decision_logger->init(status));
+
+    // Get the name of raw data (as opposed to message) sender for interactions.
+    const auto* const slates_sender_impl = _configuration.get(name::DECISION_SENDER_IMPLEMENTATION, value::DECISION_EH_SENDER);
+    i_sender* slates_data_sender;
+
+    // Use the name to create an instance of raw data sender for interactions
+    RETURN_IF_FAIL(_sender_factory->create(&slates_data_sender, slates_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
+    RETURN_IF_FAIL(slates_data_sender->init(status));
+
+    // Create a message sender that will prepend the message with a preamble and send the raw data using the
+    // factory created raw data sender
+    l::i_message_sender* slates_msg_sender = new l::preamble_message_sender(slates_data_sender);
+    RETURN_IF_FAIL(slates_msg_sender->init(status));
+
+    i_time_provider* slates_time_provider;
+    RETURN_IF_FAIL(_time_provider_factory->create(&slates_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
+
+    // // Create a logger for interactions that will use msg sender to send interaction messages
+    _slates_logger.reset(new logger::slates_logger(_configuration, slates_msg_sender, _watchdog, slates_time_provider, &_error_cb));
+    RETURN_IF_FAIL(_slates_logger->init(status));
 
     return error_code::success;
   }

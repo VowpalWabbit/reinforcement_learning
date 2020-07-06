@@ -1,0 +1,26 @@
+// EventHubInteraction Schema used by FlatBuffer
+include "Metadata.fbs";
+
+namespace reinforcement_learning.messages.flatbuff;
+
+table SlatesSlotEvent {
+    action_ids:[uint32];     // ranked action ids
+    probabilities:[float];   // probabilities
+}
+
+table SlatesEvent {
+    event_id:string;               // event ID
+    context:[ubyte];               // context
+    slots:[SlatesSlotEvent];        // actions and probabilities
+    model_id:string;               // model ID
+    pass_probability:float;        // Probability of event surviving throttling operation
+    deferred_action:bool = false;  // delayed activation flag
+    meta:Metadata;
+}
+
+// Collection of slate events
+table SlatesEventBatch {
+    events:[SlatesEvent];
+}
+
+root_type SlatesEventBatch;

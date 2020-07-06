@@ -33,7 +33,9 @@ po::variables_map process_cmd_line(const int argc, char** argv) {
     ("log_timestamp,t", po::value<bool>()->
       default_value(true), "Apply timestamp to all logged message")
     ("ccb", po::value<bool>()->
-      default_value(false), "Run in ccb mode");
+      default_value(false), "Run in ccb mode")
+    ("slates", po::value<bool>()->
+      default_value(false), "Run in slates mode");
 
   po::variables_map vm;
   store(parse_command_line(argc, argv, desc), vm);

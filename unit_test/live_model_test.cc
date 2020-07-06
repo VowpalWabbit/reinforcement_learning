@@ -1,3 +1,4 @@
+#include "slates_response.h"
 #define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
 #   define BOOST_TEST_MODULE Main
@@ -398,7 +399,7 @@ BOOST_AUTO_TEST_CASE(live_model_mocks) {
     BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CONTEXT, response), err::success);
     BOOST_CHECK_EQUAL(model.report_outcome(event_id, 1.0), err::success);
 
-    Verify(Method((*mock_sender), init)).Exactly(3);
+    Verify(Method((*mock_sender), init)).Exactly(4);
   }
   BOOST_CHECK_EQUAL(recorded.size(), 2);
 }
@@ -505,7 +506,7 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data) {
 
     Verify(Method((*mock_observation_sender), init)).Exactly(1);
     Verify(Method((*mock_interaction_sender), init)).Exactly(1);
-    Verify(Method((*mock_decision_sender), init)).Exactly(1);
+    Verify(Method((*mock_decision_sender), init)).Exactly(2);
   }
   //std::string recorded_interactions_all;
   //for (size_t i = 0; i < recorded_interactions.size(); ++i) {
@@ -577,7 +578,7 @@ BOOST_AUTO_TEST_CASE(populate_response_different_size_test) {
     BOOST_CHECK_EQUAL(populate_response(action_ids, pdfs, event_ids, std::move(model_id), resp, nullptr, &status), err::invalid_argument);
 }
 
-const auto JSON_CCB_CONTEXT = "{\"GUser\":{\"id\":\"a\",\"major\":\"eng\",\"hobby\":\"hiking\"},\"_multi\":[ { \"TAction\":{\"a1\":\"f1\"} },{\"TAction\":{\"a2\":\"f2\"}}],\"_slots\":[{\"Slot\":{\"a1\":\"f1\"}},{\"Slot\":{\"a1\":\"f1\"}}]}";
+const auto JSON_CCB_CONTEXT = R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[ { "TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}}],"_slots":[{"Slot":{"a1":"f1"}},{"Slot":{"a1":"f1"}}]})";
 
 BOOST_AUTO_TEST_CASE(ccb_explore_only_mode) {
   u::configuration config;
@@ -613,4 +614,44 @@ BOOST_AUTO_TEST_CASE(ccb_explore_only_mode) {
   BOOST_CHECK_EQUAL(rank_resp1.get_action_id(), 1);
   BOOST_CHECK_CLOSE(rank_resp1.get_probability(), 1.f, FLOAT_TOL);
   ++it;
+}
+
+const auto JSON_SLATES_CONTEXT = R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"},"_slot_id":0},{"TAction":{"a2":"f2"},"_slot_id":0},{"TAction":{"a3":"f3"},"_slot_id":1},{"TAction":{"a4":"f4"},"_slot_id":1},{"TAction":{"a5":"f5"},"_slot_id":1}],"_slots":[{"Slot":{"a1":"f1"}},{"Slot":{"a2":"f2"}}]})";
+
+BOOST_AUTO_TEST_CASE(slates_explore_only_mode) {
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
+  config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
+  config.set(r::name::INTERACTION_FILE_NAME,"interaction.txt");
+  config.set(r::name::OBSERVATION_FILE_NAME,"observation.txt");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--slates --ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
+
+  r::api_status status;
+  r::live_model model(config);
+  BOOST_CHECK_EQUAL(model.init(&status), err::success);
+
+  r::slates_response response;
+  BOOST_CHECK_EQUAL(model.request_slates_decision(JSON_SLATES_CONTEXT, response), err::success);
+
+  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.size(), 2);
+
+  auto it = response.begin();
+  size_t action_id = 0;
+  auto& slot_response = *it;
+  BOOST_CHECK_EQUAL(slot_response.get_slot_id(), 0);
+  BOOST_CHECK_EQUAL(slot_response.get_action_id(), 0);
+  BOOST_CHECK_CLOSE(slot_response.get_probability(), 1.f, FLOAT_TOL);
+  ++it;
+
+  auto& slot_response1 = *it;
+  BOOST_CHECK_EQUAL(slot_response1.get_slot_id(), 1);
+  BOOST_CHECK_EQUAL(slot_response1.get_action_id(), 0);
+  BOOST_CHECK_CLOSE(slot_response1.get_probability(), 1.f, FLOAT_TOL);
+  ++it;
+
+  BOOST_CHECK(it == response.end());
 }

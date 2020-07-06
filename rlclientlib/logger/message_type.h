@@ -24,5 +24,7 @@ namespace reinforcement_learning { namespace logger {
     static const_int fb_decision_event_collection = 8;
     static const_int fb_ranking_learning_mode_event_collection = 9;
     static const_int fb_interaction_learning_mode_event = 10;
+    static const_int fb_slates_event = 11;
+    static const_int fb_slates_event_collection = 12;
   };
 }}
