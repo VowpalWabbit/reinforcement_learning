@@ -154,8 +154,8 @@ namespace reinforcement_learning {
 
   int live_model_impl::request_slates_decision(const char * event_id, const char * context_json, unsigned int flags, slates_response& resp, api_status* status)
   {
-    if (_learning_mode == IMITATION) {
-      // Imitaion mode is not supported here at this moment
+    if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY) {
+      // Apprentice mode and LoggingOnly mode are not supported here at this moment
       return error_code::not_supported;
     }
 
