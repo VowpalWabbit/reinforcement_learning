@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
   const timestamp ts;
   const size_t events_count = 10;
   for (size_t i = 0; i < events_count; ++i) {
-    mode = static_cast<learning_mode>(i % 2);
+    mode = static_cast<learning_mode>(i % 3);
     auto re = ranking_event::choose_rank(event_id.c_str(), context.c_str(), 0, resp, ts, 0.33f, mode);
     serializer.add(re);
   }
@@ -94,11 +94,14 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
     BOOST_CHECK_EQUAL_COLLECTIONS(event.probabilities()->begin(), event.probabilities()->end(), expected_prob.begin(), expected_prob.end());
     BOOST_CHECK_EQUAL(event.deferred_action(), false);
     BOOST_CHECK_EQUAL(event.pass_probability(), 0.33f);
-    if (i % 2 == 0) {
+    if (i % 3 == 0) {
       BOOST_CHECK_EQUAL(event.learning_mode(), LearningModeType_Online);
     }
+    else if (i % 3 == 1) {
+      BOOST_CHECK_EQUAL(event.learning_mode(), LearningModeType_Apprentice);
+    }
     else {
-      BOOST_CHECK_EQUAL(event.learning_mode(), LearningModeType_Imitation);
+      BOOST_CHECK_EQUAL(event.learning_mode(), LearningModeType_LoggingOnly);
     }
   }
 }
