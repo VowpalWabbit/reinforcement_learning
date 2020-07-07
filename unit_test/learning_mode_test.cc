@@ -7,16 +7,28 @@
 #include "learning_mode.h"
 #include "constants.h"
 
-BOOST_AUTO_TEST_CASE(learning_mode_lower_case) {
-  const char* imitation = "imitation";
-  auto mode = reinforcement_learning::learning::to_learning_mode(imitation);
-  BOOST_CHECK_EQUAL(mode, reinforcement_learning::IMITATION);
+BOOST_AUTO_TEST_CASE(learning_mode_apprentice_lower_case) {
+  const char* apprentice = "apprentice";
+  auto mode = reinforcement_learning::learning::to_learning_mode(apprentice);
+  BOOST_CHECK_EQUAL(mode, reinforcement_learning::APPRENTICE);
 }
 
-BOOST_AUTO_TEST_CASE(learning_mode_imitation) {
-  const char* imitation = reinforcement_learning::value::LEARNING_MODE_IMITATION;
-  auto mode = reinforcement_learning::learning::to_learning_mode(imitation);
-  BOOST_CHECK_EQUAL(mode, reinforcement_learning::IMITATION);
+BOOST_AUTO_TEST_CASE(learning_mode_apprentice) {
+  const char* apprentice = reinforcement_learning::value::LEARNING_MODE_APPRENTICE;
+  auto mode = reinforcement_learning::learning::to_learning_mode(apprentice);
+  BOOST_CHECK_EQUAL(mode, reinforcement_learning::APPRENTICE);
+}
+
+BOOST_AUTO_TEST_CASE(learning_mode_loggingonly_lower_case) {
+    const char* logging_only = "loggingonly";
+    auto mode = reinforcement_learning::learning::to_learning_mode(logging_only);
+    BOOST_CHECK_EQUAL(mode, reinforcement_learning::LOGGINGONLY);
+}
+
+BOOST_AUTO_TEST_CASE(learning_mode_loggingonly) {
+    const char* logging_only = reinforcement_learning::value::LEARNING_MODE_LOGGINGONLY;
+    auto mode = reinforcement_learning::learning::to_learning_mode(logging_only);
+    BOOST_CHECK_EQUAL(mode, reinforcement_learning::LOGGINGONLY);
 }
 
 BOOST_AUTO_TEST_CASE(learning_mode_online) {
@@ -26,7 +38,7 @@ BOOST_AUTO_TEST_CASE(learning_mode_online) {
 }
 
 BOOST_AUTO_TEST_CASE(learning_mode_other) {
-  const char* imitation = "other";
-  auto mode = reinforcement_learning::learning::to_learning_mode(imitation);
+  const char* apprentice = "other";
+  auto mode = reinforcement_learning::learning::to_learning_mode(apprentice);
   BOOST_CHECK_EQUAL(mode, reinforcement_learning::ONLINE);
 }
