@@ -74,9 +74,18 @@ std::unique_ptr<fakeit::Mock<m::i_model>> get_mock_model() {
     return r::error_code::success;
   };
 
+  
+  const std::function<int(const char*, uint32_t, const char*, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string&, r::api_status*)> request_slates_decision_fn =
+      [](const char*, uint32_t, const char*, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string& model_version, r::api_status*) {
+      model_version = "model_id";
+      return r::error_code::success;
+  };
+
   When(Method((*mock), update)).AlwaysReturn(r::error_code::success);
   When(Method((*mock), choose_rank)).AlwaysDo(choose_rank_fn);
   When(Method((*mock), request_decision)).AlwaysDo(request_decision_fn);
+  When(Method((*mock), request_slates_decision)).AlwaysDo(request_slates_decision_fn);
+
   Fake(Dtor((*mock)));
 
   return mock;

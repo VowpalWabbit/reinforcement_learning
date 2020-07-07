@@ -38,6 +38,28 @@ int populate_response(const std::vector<std::vector<uint32_t>>& action_ids, cons
   return error_code::success;
 }
 
+int populate_slates_response(const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, std::string&& event_id, std::string&& model_id, slates_response& response, i_trace* trace_logger, api_status* status) {
+  if(action_ids.size() != pdfs.size())
+  {
+    RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids and pdfs must be the same size";
+  }
+
+  response.set_event_id(std::move(event_id));
+  response.set_model_id(std::move(model_id));
+
+  for(size_t i = 0; i < action_ids.size(); i++)
+  {
+    if(action_ids[i].size() != pdfs[i].size())
+    {
+      RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids[i] and pdfs[i] must be the same size";
+    }
+
+    response.push_back(action_ids[i][0], pdfs[i][0]);
+  }
+
+  return error_code::success;
+}
+
 int sample_and_populate_response(uint64_t rnd_seed, std::vector<int>& action_ids, std::vector<float>& pdf, std::string&& model_id, ranking_response& response, i_trace* trace_logger, api_status* status) {
     try {
       // Pick a slot using the pdf. NOTE: sample_after_normalizing() can change the pdf

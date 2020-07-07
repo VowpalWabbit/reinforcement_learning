@@ -82,9 +82,10 @@ public:
      *
      * @param file_name File name
      * @param config_str String to hold the data
+     * @param status api_status object for error feedback
      * @return int Error status
      */
-    int load_file(const std::string& file_name, std::string& config_str);
+    int load_file(const std::string& file_name, std::string& config_str, reinforcement_learning::api_status* status);
 
     /**
      * @brief Initialize Inference API
@@ -111,6 +112,7 @@ public:
 
     int cb_loop();
     int ccb_loop();
+    int slates_loop();
 
     /**
      * @brief Get the action features as a json string
@@ -119,15 +121,28 @@ public:
      */
     std::string get_action_features();
 
+    /**
+     * @brief Get slates action features as a json string
+     *
+     * @return std::string
+     */
+    std::string get_slates_action_features();
+
     static std::string get_slot_features(const std::vector<std::string>& ids);
 
   private:
+    enum LoopKind {
+      CB,
+      CCB,
+      Slates
+    };
+
     boost::program_options::variables_map _options;
     std::unique_ptr<reinforcement_learning::live_model> _rl;
     std::vector<person> _people;
     std::vector<std::string> _topics;
     const uint8_t NUM_SLOTS = 3;
+    const uint8_t NUM_SLATES_SLOTS = 2;
     bool _run_loop = true;
-    const bool ccb_mode = false;
+    LoopKind _loop_kind;
 };
-

@@ -5,7 +5,8 @@ set(RL_FLAT_BUFFER_FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/Metadata.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/OutcomeEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/RankingEvent.fbs"
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/DecisionRankingEvent.fbs" )
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/DecisionRankingEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/SlatesEvent.fbs" )
 build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgenerator "" "${CMAKE_CURRENT_SOURCE_DIR}/generated" "" "")
 
 set(PROJECT_SOURCES
@@ -36,6 +37,7 @@ set(PROJECT_SOURCES
   ranking_event.cc
   ranking_response.cc
   sampling.cc
+  slates_response.cc
   trace_logger.cc
   utility/stl_container_adapter.cc
   utility/config_utility.cc
@@ -71,6 +73,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/personalization.h
   ../include/ranking_response.h
   ../include/sender.h
+  ../include/slates_response.h
   ../include/str_util.h
   ../include/trace_logger.h
   ../include/data_buffer.h

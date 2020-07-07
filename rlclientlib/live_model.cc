@@ -90,6 +90,30 @@ namespace reinforcement_learning
     INIT_CHECK();
     return request_decision(context_json, action_flags::DEFAULT, resp, status);
   }
+
+  int live_model::request_slates_decision(const char * event_id, const char * context_json, unsigned int flags, slates_response& resp, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->request_slates_decision(event_id, context_json, flags, resp, status);
+  }
+
+  int live_model::request_slates_decision(const char * event_id, const char * context_json, slates_response& resp, api_status* status)
+  {
+    return request_slates_decision(event_id, context_json, action_flags::DEFAULT, resp, status);
+  }
+
+  int live_model::request_slates_decision(const char * context_json, unsigned int flags, slates_response& resp, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->request_slates_decision(context_json, flags, resp, status);
+  }
+
+  int live_model::request_slates_decision(const char * context_json, slates_response& resp, api_status* status)
+  {
+    return request_slates_decision(context_json, action_flags::DEFAULT, resp, status);
+  }
+
+
   //not implemented yet
   int live_model::report_action_taken(const char* event_id, api_status* status) {
     INIT_CHECK();

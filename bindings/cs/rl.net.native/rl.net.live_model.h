@@ -35,6 +35,10 @@ extern "C" {
     API int LiveModelRequestDecision(livemodel_context_t* livemodel, const char * context_json, reinforcement_learning::decision_response* resp, reinforcement_learning::api_status* status = nullptr);
     API int LiveModelRequestDecisionWithFlags(livemodel_context_t* livemodel, const char * context_json, unsigned int flags, reinforcement_learning::decision_response* resp, reinforcement_learning::api_status* status = nullptr);
     
+    API int LiveModelRequestSlatesDecision(livemodel_context_t* context, const char * event_id, const char * context_json, reinforcement_learning::slates_response* resp, reinforcement_learning::api_status* status = nullptr);
+    
+    API int LiveModelRequestSlatesDecisionWithFlags(livemodel_context_t* context, const char * event_id, const char * context_json, unsigned int flags, reinforcement_learning::slates_response* resp, reinforcement_learning::api_status* status = nullptr);
+
     API int LiveModelReportActionTaken(livemodel_context_t* livemodel, const char * event_id, reinforcement_learning::api_status* status = nullptr);
     API int LiveModelReportOutcomeF(livemodel_context_t* livemodel, const char * event_id, float outcome, reinforcement_learning::api_status* status = nullptr);
     API int LiveModelReportOutcomeJson(livemodel_context_t* livemodel, const char * event_id, const char * outcomeJson, reinforcement_learning::api_status* status = nullptr);
