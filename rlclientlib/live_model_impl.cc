@@ -91,8 +91,8 @@ namespace reinforcement_learning {
 
   int live_model_impl::request_decision(const char* context_json, unsigned int flags, decision_response& resp, api_status* status)
   {
-    if (_learning_mode == APPRENTICE) {
-      // Apprentice mode is not supported here at this moment
+    if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY) {
+      // Apprentice mode and LoggingOnly mode are not supported here at this moment
       return error_code::not_supported;
     }
 
