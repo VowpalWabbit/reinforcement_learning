@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(learning_mode_online) {
 }
 
 BOOST_AUTO_TEST_CASE(learning_mode_other) {
-  const char* apprentice = "other";
-  auto mode = reinforcement_learning::learning::to_learning_mode(apprentice);
+  const char* other = "other";
+  auto mode = reinforcement_learning::learning::to_learning_mode(other);
   BOOST_CHECK_EQUAL(mode, reinforcement_learning::ONLINE);
 }
