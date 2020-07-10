@@ -39,12 +39,16 @@ namespace reinforcement_learning { namespace logger {
 
       LearningModeType learning_mode_type;
       switch (evt.get_learning_mode()) {
-      case IMITATION: {
-        learning_mode_type = LearningModeType_Imitation;
+      case APPRENTICE: {
+        learning_mode_type = LearningModeType_Apprentice;
         break;
       }
       case ONLINE: {
         learning_mode_type = LearningModeType_Online;
+        break;
+      }
+      case LOGGINGONLY: {
+        learning_mode_type = LearningModeType_LoggingOnly;
         break;
       }
       default:

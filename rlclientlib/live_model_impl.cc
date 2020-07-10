@@ -36,7 +36,7 @@ namespace reinforcement_learning {
 
   int check_null_or_empty(const char* arg1, const char* arg2, api_status* status);
   int check_null_or_empty(const char* arg1, api_status* status);
-  int post_process_rank(ranking_response& response, learning_mode learning_mode);
+  int reset_action_order(ranking_response& response);
 
   void default_error_callback(const api_status& status, void* watchdog_context) {
     auto watchdog = static_cast<utility::watchdog*>(watchdog_context);
@@ -71,8 +71,19 @@ namespace reinforcement_learning {
     }
     response.set_event_id(event_id);
 
+    if (_learning_mode == LOGGINGONLY)
+    {
+      // Reset the ranked action order before logging
+      RETURN_IF_FAIL(reset_action_order(response));
+    }
+
     RETURN_IF_FAIL(_ranking_logger->log(event_id, context, flags, response, status, _learning_mode));
-    RETURN_IF_FAIL(post_process_rank(response, _learning_mode));
+
+    if (_learning_mode == APPRENTICE)
+    {
+      // Reset the ranked action order after logging
+      RETURN_IF_FAIL(reset_action_order(response));
+    }
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -91,8 +102,8 @@ namespace reinforcement_learning {
 
   int live_model_impl::request_decision(const char* context_json, unsigned int flags, decision_response& resp, api_status* status)
   {
-    if (_learning_mode == IMITATION) {
-      // Imitaion mode is not supported here at this moment
+    if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY) {
+      // Apprentice mode and LoggingOnly mode are not supported here at this moment
       return error_code::not_supported;
     }
 
@@ -126,7 +137,7 @@ namespace reinforcement_learning {
 
     for (int i = 0; i < event_ids.size(); i++)
     {
-      if(event_ids[i] == nullptr)
+      if (event_ids[i] == nullptr)
       {
         event_ids_str[i] = boost::uuids::to_string(boost::uuids::random_generator()()) + std::to_string(_seed_shift);
         event_ids[i] = event_ids_str[i].c_str();
@@ -154,8 +165,8 @@ namespace reinforcement_learning {
 
   int live_model_impl::request_slates_decision(const char * event_id, const char * context_json, unsigned int flags, slates_response& resp, api_status* status)
   {
-    if (_learning_mode == IMITATION) {
-      // Imitaion mode is not supported here at this moment
+    if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY) {
+      // Apprentice mode and LoggingOnly mode are not supported here at this moment
       return error_code::not_supported;
     }
 
@@ -219,7 +230,7 @@ namespace reinforcement_learning {
     model_management::model_data md;
     RETURN_IF_FAIL(_transport->get_data(md, status));
 
-	  bool model_ready = false;
+    bool model_ready = false;
     RETURN_IF_FAIL(_model->update(md, model_ready, status));
 
     _model_ready = model_ready;
@@ -238,14 +249,14 @@ namespace reinforcement_learning {
     time_provider_factory_t* time_provider_factory
   )
     : _configuration(config),
-      _error_cb(fn, err_context),
-      _data_cb(_handle_model_update, this),
-      _watchdog(&_error_cb),
-      _trace_factory(trace_factory),
-      _t_factory{t_factory},
-      _m_factory{m_factory},
-      _sender_factory{sender_factory},
-      _time_provider_factory{time_provider_factory}
+    _error_cb(fn, err_context),
+    _data_cb(_handle_model_update, this),
+    _watchdog(&_error_cb),
+    _trace_factory(trace_factory),
+    _t_factory{ t_factory },
+    _m_factory{ m_factory },
+    _sender_factory{ sender_factory },
+    _time_provider_factory{ time_provider_factory }
   {
     // If there is no user supplied error callback, supply a default one that does nothing but report unhandled background errors.
     if (fn == nullptr) {
@@ -262,7 +273,7 @@ namespace reinforcement_learning {
   int live_model_impl::init_trace(api_status* status) {
     const auto trace_impl = _configuration.get(name::TRACE_LOG_IMPLEMENTATION, value::NULL_TRACE_LOGGER);
     i_trace* plogger;
-    RETURN_IF_FAIL(_trace_factory->create(&plogger, trace_impl,_configuration, nullptr, status));
+    RETURN_IF_FAIL(_trace_factory->create(&plogger, trace_impl, _configuration, nullptr, status));
     _trace_logger.reset(plogger);
     TRACE_INFO(_trace_logger, "API Tracing initialized");
     _watchdog.set_trace_log(_trace_logger.get());
@@ -318,7 +329,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_time_provider_factory->create(&observation_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // Create a logger for interactions that will use msg sender to send interaction messages
-    _outcome_logger.reset(new logger::observation_logger(_configuration, outcome_msg_sender, _watchdog, observation_time_provider,&_error_cb));
+    _outcome_logger.reset(new logger::observation_logger(_configuration, outcome_msg_sender, _watchdog, observation_time_provider, &_error_cb));
     RETURN_IF_FAIL(_outcome_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for interactions.
@@ -432,7 +443,7 @@ namespace reinforcement_learning {
     // Swap values in first position with values in chosen index
     scode = e::swap_chosen(begin(response), end(response), chosen_index);
 
-    if ( S_EXPLORATION_OK != scode ) {
+    if (S_EXPLORATION_OK != scode) {
       RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration (Swap) error code: " << scode;
     }
 
@@ -463,11 +474,11 @@ namespace reinforcement_learning {
     // This class manages lifetime of transport
     this->_transport.reset(ptransport);
 
-	  if (_bg_model_proc) {
+    if (_bg_model_proc) {
       // Initialize background process and start downloading models
-	    this->_model_download.reset(new m::model_downloader(ptransport, &_data_cb, _trace_logger.get()));
-	    return _bg_model_proc->init(_model_download.get(), status);
-	  }
+      this->_model_download.reset(new m::model_downloader(ptransport, &_data_cb, _trace_logger.get()));
+      return _bg_model_proc->init(_model_download.get(), status);
+    }
 
     return refresh_model(status);
   }
@@ -491,33 +502,23 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int post_process_rank(ranking_response& response, learning_mode learning_mode) {
-    switch (learning_mode) {
-    case IMITATION:
-      {
+  int reset_action_order(ranking_response& response) {
 #ifdef __clang__
-        std::vector<action_prob> tmp;
-        std::copy(response.begin(), response.end(), std::back_inserter(tmp));
-        std::sort(tmp.begin(), tmp.end(), [](const action_prob& a, const action_prob& b) {
-          return a.action_id < b.action_id;
-        }
-        );
-        std::copy(tmp.begin(), tmp.end(), response.begin());
-#else
-        std::sort(response.begin(), response.end(), [](const action_prob& a, const action_prob& b) {
-          return a.action_id < b.action_id;
-        }
-        );
-#endif
-        response.set_chosen_action_id((*(response.begin())).action_id);
-        break;
-      }
-      default:
-      {
-        // This is to be back-compatible with the config not setting learning mode.
-        break;
-      }
+    std::vector<action_prob> tmp;
+    std::copy(response.begin(), response.end(), std::back_inserter(tmp));
+    std::sort(tmp.begin(), tmp.end(), [](const action_prob& a, const action_prob& b) {
+      return a.action_id < b.action_id;
     }
+    );
+    std::copy(tmp.begin(), tmp.end(), response.begin());
+#else
+    std::sort(response.begin(), response.end(), [](const action_prob& a, const action_prob& b) {
+      return a.action_id < b.action_id;
+    }
+    );
+#endif
+    response.set_chosen_action_id((*(response.begin())).action_id);
+
     return error_code::success;
   }
 }

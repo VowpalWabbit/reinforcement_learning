@@ -153,12 +153,43 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_online_mode) {
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
 }
 
-BOOST_AUTO_TEST_CASE(live_model_ranking_request_imitation_mode) {
+BOOST_AUTO_TEST_CASE(live_model_ranking_request_apprentice_mode) {
   //create a simple ds configuration
   u::configuration config;
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::EH_TEST, "true");
-  config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_IMITATION);
+  config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_APPRENTICE);
+
+  r::api_status status;
+
+  //create the ds live_model, and initialize it with the config
+  r::live_model ds = create_mock_live_model(config);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  const auto event_id = "event_id";
+
+  r::ranking_response response;
+
+  ds.choose_rank(event_id, JSON_CONTEXT_LEARNING, response, &status);
+  BOOST_CHECK_EQUAL(status.get_error_code(), 0);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+  size_t chosen_action;
+  response.get_chosen_action_id(chosen_action, &status);
+  BOOST_CHECK_EQUAL(chosen_action, 0);
+  int current_expect_action_id = 0;
+  for (auto it = response.begin(); it != response.end(); ++it) {
+    BOOST_CHECK_EQUAL((*it).action_id, current_expect_action_id);
+    current_expect_action_id++;
+  }
+}
+
+
+BOOST_AUTO_TEST_CASE(live_model_ranking_request_loggingonly_mode) {
+  //create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_LOGGINGONLY);
 
   r::api_status status;
 

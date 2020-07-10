@@ -3,7 +3,7 @@ include "Metadata.fbs";
 
 namespace reinforcement_learning.messages.flatbuff;
 
-enum LearningModeType : ubyte { Online, Imitation }
+enum LearningModeType : ubyte { Online, Apprentice, LoggingOnly }
 
 table RankingEvent {
     event_id:string;                 // event IDs

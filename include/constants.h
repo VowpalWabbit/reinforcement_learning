@@ -77,7 +77,8 @@ namespace reinforcement_learning {  namespace value {
       const char *const NULL_TIME_PROVIDER = "NULL_TIME_PROVIDER";
       const char *const CLOCK_TIME_PROVIDER = "CLOCK_TIME_PROVIDER";
       const char *const LEARNING_MODE_ONLINE = "ONLINE";
-      const char *const LEARNING_MODE_IMITATION = "IMITATION";
+      const char *const LEARNING_MODE_APPRENTICE = "APPRENTICE";
+      const char *const LEARNING_MODE_LOGGINGONLY = "LOGGINGONLY";
       const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
       const int DEFAULT_VW_POOL_INIT_SIZE = 4;
 }}
