@@ -2,10 +2,10 @@
 #include <vector>
 #include <flatbuffers/flatbuffers.h>
 #include "logger/flatbuffer_allocator.h"
-#include "generated/OutcomeEvent_generated.h"
-#include "generated/RankingEvent_generated.h"
-#include "generated/DecisionRankingEvent_generated.h"
-#include "generated/SlatesEvent_generated.h"
+#include "generated/v1/OutcomeEvent_generated.h"
+#include "generated/v1/RankingEvent_generated.h"
+#include "generated/v1/DecisionRankingEvent_generated.h"
+#include "generated/v1/SlatesEvent_generated.h"
 #include "logger/message_type.h"
 #include "err_constants.h"
 
