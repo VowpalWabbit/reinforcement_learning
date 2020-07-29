@@ -1,6 +1,6 @@
 #pragma once
 #include "learning_mode.h"
-#include "logger/event_logger.h"
+#include "logger/logger_facade.h"
 #include "model_mgmt.h"
 #include "model_mgmt/data_callback_fn.h"
 #include "model_mgmt/model_downloader.h"
@@ -86,10 +86,10 @@ namespace reinforcement_learning
 
     std::unique_ptr<model_management::i_data_transport> _transport{nullptr};
     std::unique_ptr<model_management::i_model> _model{nullptr};
-    std::unique_ptr<logger::interaction_logger> _ranking_logger{nullptr};
-    std::unique_ptr<logger::observation_logger> _outcome_logger{nullptr};
-    std::unique_ptr<logger::ccb_logger> _decision_logger{nullptr};
-    std::unique_ptr<logger::slates_logger> _slates_logger{nullptr};
+    std::unique_ptr<logger::cb_logger_facade> _ranking_logger{nullptr};
+    std::unique_ptr<logger::outcome_logger_facade> _outcome_logger{nullptr};
+    std::unique_ptr<logger::ccb_logger_facade> _decision_logger{nullptr};
+    std::unique_ptr<logger::slates_logger_facade> _slates_logger{nullptr};
     std::unique_ptr<model_management::model_downloader> _model_download{nullptr};
     std::unique_ptr<i_trace> _trace_logger{nullptr};
 

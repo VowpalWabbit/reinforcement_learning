@@ -59,6 +59,7 @@ namespace reinforcement_learning
     };
 
     class slates_logger_facade {
+    public:
       slates_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
 
       slates_logger_facade(const slates_logger_facade& other) = delete;
