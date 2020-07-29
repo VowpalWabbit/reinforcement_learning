@@ -44,7 +44,7 @@
     <ClCompile Include="decision_response.cc" />
     <ClCompile Include="learning_mode.cc" />
     <ClCompile Include="slates_response.cc" />
-    <ClCompile Include="logger\logger.cc" />
+    <ClCompile Include="logger\logger_facade.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -110,7 +110,8 @@
     <ClInclude Include="..\include\container_iterator.h" />
     <ClInclude Include="..\include\future_compat.h" />
     <ClInclude Include="..\include\slates_response.h" />
-    <ClInclude Include="logger\logger.h" />
+    <ClInclude Include="..\include\errors_data.h" />
+    <ClInclude Include="logger\logger_facade.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

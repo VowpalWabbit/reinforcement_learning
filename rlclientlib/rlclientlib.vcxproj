@@ -166,6 +166,7 @@
     <ClInclude Include="..\include\api_status.h" />
     <ClInclude Include="..\include\configuration.h" />
     <ClInclude Include="..\include\container_iterator.h" />
+    <ClInclude Include="..\include\errors_data.h" />
     <ClInclude Include="..\include\future_compat.h" />
     <ClInclude Include="..\include\live_model.h" />
     <ClInclude Include="..\include\sender.h" />
@@ -183,7 +184,7 @@
     <ClInclude Include="..\include\trace_logger.h" />
     <ClInclude Include="..\include\data_buffer.h" />
     <ClInclude Include="logger\file\file_logger.h" />
-    <ClInclude Include="logger\logger.h" />
+    <ClInclude Include="logger\logger_facade.h" />
     <ClInclude Include="model_mgmt\file_model_loader.h" />
     <ClInclude Include="time_helper.h" />
     <ClInclude Include="utility\data_buffer_streambuf.h" />
@@ -230,7 +231,7 @@
   <ItemGroup>
     <ClCompile Include="learning_mode.cc" />
     <ClCompile Include="logger\file\file_logger.cc" />
-    <ClCompile Include="logger\logger.cc" />
+    <ClCompile Include="logger\logger_facade.cc" />
     <ClCompile Include="model_mgmt\data_callback_fn.cc" />
     <ClCompile Include="model_mgmt\empty_data_transport.cc" />
     <ClCompile Include="model_mgmt\file_model_loader.cc" />

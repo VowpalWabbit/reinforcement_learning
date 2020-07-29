@@ -24,7 +24,7 @@ set(PROJECT_SOURCES
   logger/event_logger.cc
   logger/eventhub_client.cc
   logger/flatbuffer_allocator.cc
-  logger/logger.cc
+  logger/logger_facade.cc
   logger/preamble.cc
   logger/preamble_sender.cc
   logger/endian.cc
@@ -88,7 +88,7 @@ set(PROJECT_PRIVATE_HEADERS
   logger/async_batcher.h
   logger/event_logger.h
   logger/eventhub_client.h
-  logger/logger.h
+  logger/logger_facade.h
   model_mgmt/data_callback_fn.h
   model_mgmt/empty_data_transport.h
   model_mgmt/model_downloader.h
