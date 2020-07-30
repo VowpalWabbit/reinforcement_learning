@@ -79,16 +79,16 @@ namespace reinforcement_learning
       const std::unique_ptr<slates_logger> v1;
     };
 
-    class outcome_logger_facade {
+    class observation_logger_facade {
     public:
-      outcome_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
+      observation_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
 
-      outcome_logger_facade(const outcome_logger_facade& other) = delete;
-      outcome_logger_facade& operator=(const outcome_logger_facade& other) = delete;
-      outcome_logger_facade(outcome_logger_facade&& other) = delete;
-      outcome_logger_facade& operator=(outcome_logger_facade&& other) = delete;
+      observation_logger_facade(const observation_logger_facade& other) = delete;
+      observation_logger_facade& operator=(const observation_logger_facade& other) = delete;
+      observation_logger_facade(observation_logger_facade&& other) = delete;
+      observation_logger_facade& operator=(observation_logger_facade&& other) = delete;
 
-      ~outcome_logger_facade() = default;
+      ~observation_logger_facade() = default;
 
       int init(api_status* status);
 
