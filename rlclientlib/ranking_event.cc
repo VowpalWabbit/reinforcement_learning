@@ -125,4 +125,25 @@ namespace reinforcement_learning {
   const std::string& outcome_event::get_outcome() const { return _outcome; }
   float outcome_event::get_numeric_outcome() const { return _float_outcome; }
   bool outcome_event::get_action_taken() const { return _action_taken; }
+
+  generic_event::generic_event(const char* _id, const timestamp& ts, float pass_prob)
+    : _id(_id), _pass_prob(pass_prob), _client_time_gmt(ts) {}
+
+  bool generic_event::try_drop(float pass_prob, int drop_pass) {
+    _pass_prob *= pass_prob;
+    return prg(drop_pass) > pass_prob;
+  }
+
+  const std::string& generic_event::get_id() const { return _id; }
+
+  float generic_event::get_pass_prob() const { return _pass_prob; }
+
+  timestamp generic_event::get_client_time_gmt() const { return _client_time_gmt; }
+
+  float generic_event::prg(int drop_pass) const {
+    const auto seed_str = _id + std::to_string(drop_pass);
+    const auto seed = uniform_hash(seed_str.c_str(), seed_str.length(), 0);
+    return exploration::uniform_random_merand48(seed);
+  }
+
 }

@@ -170,4 +170,31 @@ namespace reinforcement_learning {
     bool _action_taken = false;
     unsigned int _outcome_type = 0;
   };
+
+  class generic_event {
+  public:
+    generic_event() = default;
+    generic_event(const char* id, const timestamp& ts, float pass_prob = 1.f);
+
+    generic_event(const generic_event&) = default;
+    generic_event& operator=(const generic_event&) = default;
+
+    generic_event(generic_event&&) = default;
+    generic_event& operator=(generic_event&&) = default;
+    ~generic_event() = default;
+
+    float get_pass_prob() const;
+    timestamp get_client_time_gmt() const;
+    bool try_drop(float pass_prob, int drop_pass);
+
+    const std::string& get_id() const;
+
+  protected:
+    float prg(int drop_pass) const;
+
+  protected:
+    std::string _id;
+    float _pass_prob = 1.0;
+    timestamp _client_time_gmt;
+  };
 }
