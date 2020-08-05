@@ -43,6 +43,8 @@
     <ClCompile Include="model_mgmt\file_model_loader.cc" />
     <ClCompile Include="decision_response.cc" />
     <ClCompile Include="learning_mode.cc" />
+    <ClCompile Include="slates_response.cc" />
+    <ClCompile Include="logger\logger_facade.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -107,13 +109,17 @@
     <ClInclude Include="..\include\decision_response.h" />
     <ClInclude Include="..\include\container_iterator.h" />
     <ClInclude Include="..\include\future_compat.h" />
+    <ClInclude Include="..\include\slates_response.h" />
+    <ClInclude Include="..\include\errors_data.h" />
+    <ClInclude Include="logger\logger_facade.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="schema\OutcomeEvent.fbs" />
-    <None Include="schema\RankingEvent.fbs" />
-    <None Include="schema\DecisionRankingEvent.fbs" />
-    <None Include="schema\Metadata.fbs" />
+    <None Include="schema\v1\Metadata.fbs" />
+    <None Include="schema\v1\OutcomeEvent.fbs" />
+    <None Include="schema\v1\RankingEvent.fbs" />
+    <None Include="schema\v1\DecisionRankingEvent.fbs" />
+    <None Include="schema\v1\SlatesEvent.fbs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

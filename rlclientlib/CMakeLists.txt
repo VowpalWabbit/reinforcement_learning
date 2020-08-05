@@ -2,12 +2,12 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(FlatBuffers REQUIRED)
 
 set(RL_FLAT_BUFFER_FILES
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/Metadata.fbs"
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/OutcomeEvent.fbs"
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/RankingEvent.fbs"
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/DecisionRankingEvent.fbs"
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/SlatesEvent.fbs" )
-build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgenerator "" "${CMAKE_CURRENT_SOURCE_DIR}/generated" "" "")
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/Metadata.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/OutcomeEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/RankingEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/DecisionRankingEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/SlatesEvent.fbs" )
+build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgenerator "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v1/" "" "")
 
 set(PROJECT_SOURCES
   api_status.cc
@@ -24,6 +24,7 @@ set(PROJECT_SOURCES
   logger/event_logger.cc
   logger/eventhub_client.cc
   logger/flatbuffer_allocator.cc
+  logger/logger_facade.cc
   logger/preamble.cc
   logger/preamble_sender.cc
   logger/endian.cc
@@ -87,6 +88,7 @@ set(PROJECT_PRIVATE_HEADERS
   logger/async_batcher.h
   logger/event_logger.h
   logger/eventhub_client.h
+  logger/logger_facade.h
   model_mgmt/data_callback_fn.h
   model_mgmt/empty_data_transport.h
   model_mgmt/model_downloader.h

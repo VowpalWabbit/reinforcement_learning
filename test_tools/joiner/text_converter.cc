@@ -7,8 +7,8 @@
 #include <sstream>
 #include "../../rlclientlib/logger/preamble.h"
 #include "../../rlclientlib/logger/message_type.h"
-#include "../../rlclientlib/generated/RankingEvent_generated.h"
-#include "../../rlclientlib/generated/OutcomeEvent_generated.h"
+#include "../../rlclientlib/generated/v1/RankingEvent_generated.h"
+#include "../../rlclientlib/generated/v1/OutcomeEvent_generated.h"
 // namespace aliases
 namespace rlog = reinforcement_learning::logger;
 namespace flat = reinforcement_learning::messages::flatbuff;

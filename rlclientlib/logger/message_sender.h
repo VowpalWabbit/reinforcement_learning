@@ -6,6 +6,10 @@ namespace reinforcement_learning {
   
   class api_status;
 
+  namespace utility {
+    class data_buffer;
+  }
+
   namespace logger {
     class i_message_sender {
     public:

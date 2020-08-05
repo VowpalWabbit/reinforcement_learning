@@ -308,7 +308,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_time_provider_factory->create(&interaction_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // Create a logger for interactions that will use msg sender to send interaction messages
-    _ranking_logger.reset(new logger::interaction_logger(_configuration, ranking_msg_sender, _watchdog, interaction_time_provider, &_error_cb));
+    _ranking_logger.reset(new logger::cb_logger_facade(_configuration, ranking_msg_sender, _watchdog, interaction_time_provider, &_error_cb));
     RETURN_IF_FAIL(_ranking_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for observations.
@@ -329,7 +329,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_time_provider_factory->create(&observation_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // Create a logger for interactions that will use msg sender to send interaction messages
-    _outcome_logger.reset(new logger::observation_logger(_configuration, outcome_msg_sender, _watchdog, observation_time_provider, &_error_cb));
+    _outcome_logger.reset(new logger::observation_logger_facade(_configuration, outcome_msg_sender, _watchdog, observation_time_provider, &_error_cb));
     RETURN_IF_FAIL(_outcome_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for interactions.
@@ -349,7 +349,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_time_provider_factory->create(&decision_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // Create a logger for interactions that will use msg sender to send interaction messages
-    _decision_logger.reset(new logger::ccb_logger(_configuration, decision_msg_sender, _watchdog, decision_time_provider, &_error_cb));
+    _decision_logger.reset(new logger::ccb_logger_facade(_configuration, decision_msg_sender, _watchdog, decision_time_provider, &_error_cb));
     RETURN_IF_FAIL(_decision_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for interactions.
@@ -369,7 +369,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_time_provider_factory->create(&slates_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // // Create a logger for interactions that will use msg sender to send interaction messages
-    _slates_logger.reset(new logger::slates_logger(_configuration, slates_msg_sender, _watchdog, slates_time_provider, &_error_cb));
+    _slates_logger.reset(new logger::slates_logger_facade(_configuration, slates_msg_sender, _watchdog, slates_time_provider, &_error_cb));
     RETURN_IF_FAIL(_slates_logger->init(status));
 
     return error_code::success;

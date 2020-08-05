@@ -87,7 +87,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PreBuildEvent>
-      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\SlatesEvent.fbs</Command>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -106,7 +106,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PreBuildEvent>
-      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\SlatesEvent.fbs</Command>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -129,7 +129,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\SlatesEvent.fbs</Command>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -152,7 +152,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PreBuildEvent>
-      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\ --cpp $(SolutionDir)rlclientlib\schema\Metadata.fbs $(SolutionDir)rlclientlib\schema\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\SlatesEvent.fbs</Command>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -166,6 +166,7 @@
     <ClInclude Include="..\include\api_status.h" />
     <ClInclude Include="..\include\configuration.h" />
     <ClInclude Include="..\include\container_iterator.h" />
+    <ClInclude Include="..\include\errors_data.h" />
     <ClInclude Include="..\include\future_compat.h" />
     <ClInclude Include="..\include\live_model.h" />
     <ClInclude Include="..\include\sender.h" />
@@ -183,6 +184,7 @@
     <ClInclude Include="..\include\trace_logger.h" />
     <ClInclude Include="..\include\data_buffer.h" />
     <ClInclude Include="logger\file\file_logger.h" />
+    <ClInclude Include="logger\logger_facade.h" />
     <ClInclude Include="model_mgmt\file_model_loader.h" />
     <ClInclude Include="time_helper.h" />
     <ClInclude Include="utility\data_buffer_streambuf.h" />
@@ -229,6 +231,7 @@
   <ItemGroup>
     <ClCompile Include="learning_mode.cc" />
     <ClCompile Include="logger\file\file_logger.cc" />
+    <ClCompile Include="logger\logger_facade.cc" />
     <ClCompile Include="model_mgmt\data_callback_fn.cc" />
     <ClCompile Include="model_mgmt\empty_data_transport.cc" />
     <ClCompile Include="model_mgmt\file_model_loader.cc" />
@@ -278,11 +281,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="schema\Metadata.fbs" />
-    <None Include="schema\OutcomeEvent.fbs" />
-    <None Include="schema\RankingEvent.fbs" />
-    <None Include="schema\DecisionRankingEvent.fbs" />
-    <None Include="schema\SlatesEvent.fbs" />
+    <None Include="schema\v1\Metadata.fbs" />
+    <None Include="schema\v1\OutcomeEvent.fbs" />
+    <None Include="schema\v1\RankingEvent.fbs" />
+    <None Include="schema\v1\DecisionRankingEvent.fbs" />
+    <None Include="schema\v1\SlatesEvent.fbs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
