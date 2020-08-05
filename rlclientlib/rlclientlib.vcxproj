@@ -90,6 +90,9 @@
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeSingle.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CcbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\SlatesEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -107,6 +110,9 @@
     </Link>
     <PreBuildEvent>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeSingle.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CcbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\SlatesEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -132,6 +138,9 @@
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeSingle.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CcbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\SlatesEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
@@ -153,6 +162,9 @@
     </Link>
     <PreBuildEvent>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeSingle.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CcbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\SlatesEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -286,6 +298,12 @@
     <None Include="schema\v1\RankingEvent.fbs" />
     <None Include="schema\v1\DecisionRankingEvent.fbs" />
     <None Include="schema\v1\SlatesEvent.fbs" />
+    <None Include="schema\v2\Metadata.fbs" />
+    <None Include="schema\v2\OutcomeSingle.fbs" />
+    <None Include="schema\v2\CbEvent.fbs" />
+    <None Include="schema\v2\CcbEvent.fbs" />
+    <None Include="schema\v2\SlatesEvent.fbs" />
+    <None Include="schema\v2\Event.fbs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,13 +1,23 @@
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(FlatBuffers REQUIRED)
 
-set(RL_FLAT_BUFFER_FILES
+set(RL_FLAT_BUFFER_FILES_V1
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/Metadata.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/OutcomeEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/RankingEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/DecisionRankingEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/SlatesEvent.fbs" )
-build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgenerator "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v1/" "" "")
+
+set(RL_FLAT_BUFFER_FILES_V2
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Metadata.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/OutcomeSingle.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CbEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CcbEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/SlatesEvent.fbs" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Event.fbs" )
+
+build_flatbuffers("${RL_FLAT_BUFFER_FILES_V1}" "" fbgenerator_v1 "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v1/" "" "")
+build_flatbuffers("${RL_FLAT_BUFFER_FILES_V2}" "" fbgenerator_v2 "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v2/" "" "")
 
 set(PROJECT_SOURCES
   api_status.cc
@@ -117,7 +127,7 @@ source_group("Public headers" FILES ${PROJECT_PUBLIC_HEADERS})
 source_group("Private headers" FILES ${PROJECT_PRIVATE_HEADERS})
 
 add_library(rlclientlib ${PROJECT_SOURCES} ${PROJECT_PUBLIC_HEADERS} ${PROJECT_PRIVATE_HEADERS})
-add_dependencies(rlclientlib fbgenerator)
+add_dependencies(rlclientlib fbgenerator_v1 fbgenerator_v2)
 set_target_properties(rlclientlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories( rlclientlib
                             PUBLIC

@@ -1,0 +1,16 @@
+﻿// EventHubInteraction Schema used by FlatBuffer
+include "Metadata.fbs";
+
+namespace reinforcement_learning.messages.flatbuff.v2;
+
+table Event {
+    meta:Metadata;
+    payload:[ubyte];                 // payload
+}
+
+// Collection of Ranking events
+table EventBatch {
+    events:[Event];
+}
+
+root_type EventBatch;
