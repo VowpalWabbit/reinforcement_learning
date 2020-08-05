@@ -120,6 +120,12 @@
     <None Include="schema\v1\RankingEvent.fbs" />
     <None Include="schema\v1\DecisionRankingEvent.fbs" />
     <None Include="schema\v1\SlatesEvent.fbs" />
+    <None Include="schema\v2\Metadata.fbs" />
+    <None Include="schema\v2\OutcomeSingle.fbs" />
+    <None Include="schema\v2\CbEvent.fbs" />
+    <None Include="schema\v2\CcbEvent.fbs" />
+    <None Include="schema\v2\SlatesEvent.fbs" />
+    <None Include="schema\v2\Event.fbs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
