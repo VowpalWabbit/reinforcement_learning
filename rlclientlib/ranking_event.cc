@@ -126,8 +126,12 @@ namespace reinforcement_learning {
   float outcome_event::get_numeric_outcome() const { return _float_outcome; }
   bool outcome_event::get_action_taken() const { return _action_taken; }
 
-  generic_event::generic_event(const char* _id, const timestamp& ts, float pass_prob)
-    : _id(_id), _pass_prob(pass_prob), _client_time_gmt(ts) {}
+  generic_event::generic_event(const char* _id, const timestamp& ts, payload_type type, const std::vector<unsigned char>& payload, float pass_prob)
+    : _id(_id)
+    , _client_time_gmt(ts)
+    , _payload_type(type)
+    , _payload(payload)
+    , _pass_prob(pass_prob) {}
 
   bool generic_event::try_drop(float pass_prob, int drop_pass) {
     _pass_prob *= pass_prob;
@@ -144,6 +148,14 @@ namespace reinforcement_learning {
     const auto seed_str = _id + std::to_string(drop_pass);
     const auto seed = uniform_hash(seed_str.c_str(), seed_str.length(), 0);
     return exploration::uniform_random_merand48(seed);
+  }
+
+  payload_type generic_event::get_payload_type() const {
+    return _payload_type;
+  }
+
+  const std::vector<unsigned char>& generic_event::get_payload() const {
+    return _payload;
   }
 
 }

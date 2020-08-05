@@ -171,10 +171,17 @@ namespace reinforcement_learning {
     unsigned int _outcome_type = 0;
   };
 
+  enum payload_type {
+    CB = 1,
+    CCB = 2,
+    SLATES = 3,
+    OUTCOME_SINGLE = 4
+  };
+
   class generic_event {
   public:
     generic_event() = default;
-    generic_event(const char* id, const timestamp& ts, float pass_prob = 1.f);
+    generic_event(const char* id, const timestamp& ts, payload_type type, const std::vector<unsigned char>& payload, float pass_prob = 1.f);
 
     generic_event(const generic_event&) = default;
     generic_event& operator=(const generic_event&) = default;
@@ -189,12 +196,18 @@ namespace reinforcement_learning {
 
     const std::string& get_id() const;
 
+    payload_type get_payload_type() const;
+
+    const std::vector<unsigned char>& get_payload() const;
+
   protected:
     float prg(int drop_pass) const;
 
   protected:
     std::string _id;
-    float _pass_prob = 1.0;
     timestamp _client_time_gmt;
+    payload_type _payload_type;
+    std::vector<unsigned char> _payload;
+    float _pass_prob = 1.0;
   };
 }
