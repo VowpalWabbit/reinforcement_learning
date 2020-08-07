@@ -191,6 +191,6 @@ class slates_logger : public event_logger<slates_decision_event> {
         perror_cb)
     {}
 
-    int log(const char* event_id, const std::vector<unsigned char>& payload, payload_type type, api_status* status);
+    int log(const char* event_id, std::vector<unsigned char>&& payload, payload_type type, api_status* status);
   };
 }}

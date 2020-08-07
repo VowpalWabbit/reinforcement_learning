@@ -181,7 +181,7 @@ namespace reinforcement_learning {
   class generic_event {
   public:
     generic_event() = default;
-    generic_event(const char* id, const timestamp& ts, payload_type type, const std::vector<unsigned char>& payload, float pass_prob = 1.f);
+    generic_event(const char* id, const timestamp& ts, payload_type type, std::vector<unsigned char>&& payload, float pass_prob = 1.f);
 
     generic_event(const generic_event&) = default;
     generic_event& operator=(const generic_event&) = default;
