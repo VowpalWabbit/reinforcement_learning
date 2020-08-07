@@ -194,6 +194,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClInclude Include="logger\file\file_logger.h" />
     <ClInclude Include="logger\logger_facade.h" />
     <ClInclude Include="model_mgmt\file_model_loader.h" />
+    <ClInclude Include="serialization\payload_serializer.h" />
     <ClInclude Include="time_helper.h" />
     <ClInclude Include="utility\data_buffer_streambuf.h" />
     <ClInclude Include="generated\OutcomeEvent_generated.h" />

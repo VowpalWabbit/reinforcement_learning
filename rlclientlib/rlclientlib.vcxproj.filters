@@ -112,6 +112,7 @@
     <ClInclude Include="..\include\slates_response.h" />
     <ClInclude Include="..\include\errors_data.h" />
     <ClInclude Include="logger\logger_facade.h" />
+    <ClInclude Include="serialization\payload_serializer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
