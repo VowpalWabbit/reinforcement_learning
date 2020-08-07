@@ -138,7 +138,7 @@ namespace reinforcement_learning {
     return prg(drop_pass) > pass_prob;
   }
 
-  const std::string& generic_event::get_id() const { return _id; }
+  const char* generic_event::get_id() const { return _id.c_str(); }
 
   float generic_event::get_pass_prob() const { return _pass_prob; }
 

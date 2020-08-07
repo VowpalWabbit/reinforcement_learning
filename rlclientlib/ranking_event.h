@@ -194,7 +194,7 @@ namespace reinforcement_learning {
     timestamp get_client_time_gmt() const;
     bool try_drop(float pass_prob, int drop_pass);
 
-    const std::string& get_id() const;
+    const char* get_id() const;
 
     payload_type get_payload_type() const;
 

@@ -37,4 +37,5 @@ ERROR_CODE_DEFINITION(34, file_read_error, "Unable to read from file.")
 ERROR_CODE_DEFINITION(36, file_stats_error, "Unable to read file statistics e.g. modified date time.")
 ERROR_CODE_DEFINITION(37, not_supported, "Not supported")
 ERROR_CODE_DEFINITION(38, protocol_not_supported, "Protocol version is not supported")
+ERROR_CODE_DEFINITION(38, unsupported_payload_type, "Unsupported payload type")
 //! [Error Definitions]
