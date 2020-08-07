@@ -11,12 +11,22 @@ namespace reinforcement_learning {
 
     cb_logger_facade::cb_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
     : version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
-    , v1(version == 1 ? new interaction_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr) {
+    , v1(version == 1 ? new interaction_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
+    , v2(version == 2 ? new generic_event_logger(
+      sender,
+      c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
+      c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
+      c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
+      c.get(name::QUEUE_MODE, "DROP"),
+      watchdog,
+      time_provider,
+      perror_cb) : nullptr) {
     }
 
     int cb_logger_facade::init(api_status* status) {
       switch (version) {
         case 1: return v1->init(status);
+        case 2: return v2->init(status);
         default: return protocol_not_supported(status);
       }
     }
@@ -30,12 +40,22 @@ namespace reinforcement_learning {
 
     ccb_logger_facade::ccb_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
     : version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
-    , v1(version == 1 ? new ccb_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr) {
+    , v1(version == 1 ? new ccb_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
+    , v2(version == 2 ? new generic_event_logger(
+      sender,
+      c.get_int(name::DECISION_SEND_HIGH_WATER_MARK, 198 * 1024),
+      c.get_int(name::DECISION_SEND_BATCH_INTERVAL_MS, 1000),
+      c.get_int(name::DECISION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
+      c.get(name::QUEUE_MODE, "DROP"),
+      watchdog,
+      time_provider,
+      perror_cb) : nullptr) {
     }
 
     int ccb_logger_facade::init(api_status* status) {
       switch (version) {
         case 1: return v1->init(status);
+        case 2: return v2->init(status);
         default: return protocol_not_supported(status);
       }
     }
@@ -50,12 +70,22 @@ namespace reinforcement_learning {
 
     slates_logger_facade::slates_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
     : version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
-    , v1(version == 1 ? new slates_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr) {
+    , v1(version == 1 ? new slates_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
+    , v2(version == 2 ? new generic_event_logger(
+      sender,
+      c.get_int(name::DECISION_SEND_HIGH_WATER_MARK, 198 * 1024),
+      c.get_int(name::DECISION_SEND_BATCH_INTERVAL_MS, 1000),
+      c.get_int(name::DECISION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
+      c.get(name::QUEUE_MODE, "DROP"),
+      watchdog,
+      time_provider,
+      perror_cb) : nullptr) {
     }
 
     int slates_logger_facade::init(api_status* status) {
       switch (version) {
         case 1: return v1->init(status);
+        case 2: return v2->init(status);
         default: return protocol_not_supported(status);
       }
     }
@@ -70,12 +100,22 @@ namespace reinforcement_learning {
 
     observation_logger_facade::observation_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
     : version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
-    , v1(version == 1 ? new observation_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr) {
+    , v1(version == 1 ? new observation_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
+    , v2(version == 2 ? new generic_event_logger(
+      sender,
+      c.get_int(name::OBSERVATION_SEND_HIGH_WATER_MARK, 198 * 1024),
+      c.get_int(name::OBSERVATION_SEND_BATCH_INTERVAL_MS, 1000),
+      c.get_int(name::OBSERVATION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
+      c.get(name::QUEUE_MODE, "DROP"),
+      watchdog,
+      time_provider,
+      perror_cb) : nullptr) {
     }
 
     int observation_logger_facade::init(api_status* status) {
       switch (version) {
         case 1: return v1->init(status);
+        case 2: return v2->init(status);
         default: return protocol_not_supported(status);
       }
     }

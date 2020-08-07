@@ -35,6 +35,7 @@ namespace reinforcement_learning
     private:
       const int version;
       const std::unique_ptr<interaction_logger> v1;
+      const std::unique_ptr<generic_event_logger> v2;
     };
 
     class ccb_logger_facade {
@@ -56,6 +57,7 @@ namespace reinforcement_learning
     private:
       const int version;
       const std::unique_ptr<ccb_logger> v1;
+      const std::unique_ptr<generic_event_logger> v2;
     };
 
     class slates_logger_facade {
@@ -77,6 +79,7 @@ namespace reinforcement_learning
     private:
       const int version;
       const std::unique_ptr<slates_logger> v1;
+      const std::unique_ptr<generic_event_logger> v2;
     };
 
     class observation_logger_facade {
@@ -101,6 +104,7 @@ namespace reinforcement_learning
     private:
       const int version;
       const std::unique_ptr<observation_logger> v1;
+      const std::unique_ptr<generic_event_logger> v2;
     };
   }
 }
