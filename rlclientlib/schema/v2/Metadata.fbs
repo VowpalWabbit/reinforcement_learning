@@ -13,9 +13,9 @@ struct TimeStamp {
 }
 
 table Metadata {
-  id:string;
-	client_time_utc:TimeStamp;      
-	app_id:string;
-  payload_type:PayloadType;
-  pass_probability:float;          // Probability of event surviving throttling operation
+    id:string;
+    client_time_utc:TimeStamp;      
+    app_id:string;
+    payload_type:PayloadType;
+    pass_probability:float;          // Probability of event surviving throttling operation
 }
