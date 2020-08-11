@@ -12,7 +12,9 @@ jobs:
   Build:
     runs-on: macos-10.15
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
       - name: Restore dependencies
         shell: bash
         run: .scripts/macos/restore.sh
