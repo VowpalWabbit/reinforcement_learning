@@ -15,7 +15,10 @@ jobs:
       - uses: actions/checkout@v1
       - name: Restore dependencies
         shell: bash
-        run: .scripts/macos/build.sh
+        run: .scripts/macos/restore.sh
       - name: Build
+        shell: bash
+        run: .scripts/macos/build.sh
+      - name: Test
         shell: bash
         run: .scripts/macos/test.sh
