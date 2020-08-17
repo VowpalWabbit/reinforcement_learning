@@ -248,6 +248,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClCompile Include="model_mgmt\model_mgmt.cc" />
     <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="logger\eventhub_client.cc" />
+    <ClCompile Include="serialization\payload_serializer.cc" />
     <ClCompile Include="time_helper.cc" />
     <ClCompile Include="utility\config_utility.cc" />
     <ClCompile Include="utility\stl_container_adapter.cc" />

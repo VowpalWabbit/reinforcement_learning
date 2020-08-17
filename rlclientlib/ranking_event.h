@@ -6,6 +6,8 @@
 #include "decision_response.h"
 #include "slates_response.h"
 
+#include <flatbuffers/flatbuffers.h>
+
 namespace reinforcement_learning {
   struct timestamp;
   namespace utility { class data_buffer; }
@@ -180,8 +182,11 @@ namespace reinforcement_learning {
 
   class generic_event {
   public:
+    using payload_buffer_t = flatbuffers::DetachedBuffer;
+
+  public:
     generic_event() = default;
-    generic_event(const char* id, const timestamp& ts, payload_type type, std::vector<unsigned char>&& payload, float pass_prob = 1.f);
+    generic_event(const char* id, const timestamp& ts, payload_type type, payload_buffer_t&& payload, float pass_prob = 1.f);
 
     generic_event(const generic_event&) = default;
     generic_event& operator=(const generic_event&) = default;
@@ -198,7 +203,7 @@ namespace reinforcement_learning {
 
     payload_type get_payload_type() const;
 
-    const std::vector<unsigned char>& get_payload() const;
+    const payload_buffer_t& get_payload() const;
 
   protected:
     float prg(int drop_pass) const;
@@ -207,7 +212,7 @@ namespace reinforcement_learning {
     std::string _id;
     timestamp _client_time_gmt;
     payload_type _payload_type;
-    std::vector<unsigned char> _payload;
+    payload_buffer_t _payload;
     float _pass_prob = 1.0;
   };
 }

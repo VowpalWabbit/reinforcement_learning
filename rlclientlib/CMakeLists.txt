@@ -48,6 +48,7 @@ set(PROJECT_SOURCES
   ranking_event.cc
   ranking_response.cc
   sampling.cc
+  serialization/payload_serializer.cc
   slates_response.cc
   trace_logger.cc
   utility/stl_container_adapter.cc

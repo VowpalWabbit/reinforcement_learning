@@ -289,8 +289,8 @@ namespace reinforcement_learning { namespace logger {
       v2::PayloadType payloadType;
       RETURN_IF_FAIL(ToFBPayloadType(evt.get_payload_type(), payloadType, status));
       const auto meta_offset = v2::CreateMetadataDirect(builder, evt.get_id(), &client_ts, nullptr, payloadType, evt.get_pass_prob());
-      const auto payload_offset = builder.CreateVector(evt.get_payload());
-
+      const auto& buffer = evt.get_payload();
+      const auto payload_offset = builder.CreateVector(buffer.data(), buffer.size());
       ret_val = v2::CreateEvent(builder, meta_offset, payload_offset);
       return error_code::success;
     }

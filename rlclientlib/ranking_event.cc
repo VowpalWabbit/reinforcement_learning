@@ -126,7 +126,7 @@ namespace reinforcement_learning {
   float outcome_event::get_numeric_outcome() const { return _float_outcome; }
   bool outcome_event::get_action_taken() const { return _action_taken; }
 
-  generic_event::generic_event(const char* _id, const timestamp& ts, payload_type type, std::vector<unsigned char>&& payload, float pass_prob)
+  generic_event::generic_event(const char* _id, const timestamp& ts, payload_type type, flatbuffers::DetachedBuffer&& payload, float pass_prob)
     : _id(_id)
     , _client_time_gmt(ts)
     , _payload_type(type)
@@ -154,7 +154,7 @@ namespace reinforcement_learning {
     return _payload_type;
   }
 
-  const std::vector<unsigned char>& generic_event::get_payload() const {
+  const flatbuffers::DetachedBuffer& generic_event::get_payload() const {
     return _payload;
   }
 

@@ -45,6 +45,7 @@
     <ClCompile Include="learning_mode.cc" />
     <ClCompile Include="slates_response.cc" />
     <ClCompile Include="logger\logger_facade.cc" />
+    <ClCompile Include="serialization\payload_serializer.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
