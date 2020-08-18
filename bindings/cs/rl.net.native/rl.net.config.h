@@ -10,8 +10,8 @@ extern "C" {
 
     API int LoadConfigurationFromJson(const int json_length, const char* json_value, reinforcement_learning::utility::configuration* config, reinforcement_learning::api_status* status = nullptr);
     
-    API void ConfigurationSet(reinforcement_learning::utility::configuration* instance, const char* name, const char* value);
-    API const char* ConfigurationGet(reinforcement_learning::utility::configuration* instance, const char* name, const char* defVal);
+    API void ConfigurationSet(reinforcement_learning::utility::configuration* config, const char* name, const char* value);
+    API const char* ConfigurationGet(reinforcement_learning::utility::configuration* config, const char* name, const char* defVal);
 
     //Enumerate?
 }

@@ -5,6 +5,7 @@
 #include "rl.net.live_model.h"
 #include "trace_logger.h"
 
+#include <iostream>
 
 static void pipe_background_error_callback(const reinforcement_learning::api_status& status, livemodel_context_t* context)
 {
@@ -15,7 +16,7 @@ static void pipe_background_error_callback(const reinforcement_learning::api_sta
     }
 }
 
-API livemodel_context_t* CreateLiveModel(reinforcement_learning::utility::configuration* config)
+API livemodel_context_t* CreateLiveModel(reinforcement_learning::utility::configuration* config, factory_context_t* factory_context)
 {
     livemodel_context_t* context = new livemodel_context_t;
     context->background_error_callback = nullptr;
@@ -32,15 +33,34 @@ API livemodel_context_t* CreateLiveModel(reinforcement_learning::utility::config
       return reinforcement_learning::error_code::success;
     };
 
-    context->trace_logger_factory = new reinforcement_learning::trace_logger_factory_t();;
+    
+    // TODO: Unify this factory projection and the sender_factory projection in FactoryContext.
+    reinforcement_learning::trace_logger_factory_t* trace_logger_factory = 
+      new reinforcement_learning::trace_logger_factory_t(*factory_context->trace_logger_factory);
 
     // Register the type in factor to use trace logger creatation function.
-    context->trace_logger_factory->register_type(rl_net_native::constants::BINDING_TRACE_LOGGER, binding_tracer_create);
+    trace_logger_factory->register_type(rl_net_native::constants::BINDING_TRACE_LOGGER, binding_tracer_create);
+
+    // This is a clone of cleanup_trace_logger_factory
+    std::swap(trace_logger_factory, factory_context->trace_logger_factory);
+    if (trace_logger_factory != nullptr &&
+      trace_logger_factory != &reinforcement_learning::trace_logger_factory)
+    {
+      delete trace_logger_factory;
+    }
 
     // Set TRACE_LOG_IMPLEMENTATION configuration to use trace logger.
     config->set(reinforcement_learning::name::TRACE_LOG_IMPLEMENTATION, rl_net_native::constants::BINDING_TRACE_LOGGER);
 
-    context->livemodel = new reinforcement_learning::live_model(*config, pipe_background_error_callback, context, context->trace_logger_factory);
+    context->livemodel = new reinforcement_learning::live_model(
+        *config, 
+        pipe_background_error_callback, 
+        context, 
+        factory_context->trace_logger_factory,
+        factory_context->data_transport_factory,
+        factory_context->model_factory,
+        factory_context->sender_factory,
+        factory_context->time_provider_factory);
 
     return context;
 }

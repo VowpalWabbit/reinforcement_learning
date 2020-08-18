@@ -1,12 +1,14 @@
 #pragma once
 
 #include "rl.net.native.h"
+#include "rl.net.factory_context.h"
+#include "constants.h"
 
 namespace rl_net_native {
     namespace constants {
         const char *const BINDING_TRACE_LOGGER = "BINDING_TRACE_LOGGER";
     }
-    typedef void(*background_error_callback_t)(const reinforcement_learning::api_status&);
+    
     typedef void(*trace_logger_callback_t)(int log_level, const char* msg);
 }
 
@@ -24,8 +26,8 @@ typedef struct livemodel_context {
 // Global exports
 extern "C" {
     // NOTE: THIS IS NOT POLYMORPHISM SAFE!
-    API livemodel_context_t* CreateLiveModel(reinforcement_learning::utility::configuration* config);
-    API void DeleteLiveModel(livemodel_context_t* livemodel);
+    API livemodel_context_t* CreateLiveModel(reinforcement_learning::utility::configuration* config, factory_context_t* factory_context);
+    API void DeleteLiveModel(livemodel_context_t* context);
 
     API int LiveModelInit(livemodel_context_t* livemodel, reinforcement_learning::api_status* status = nullptr);
     

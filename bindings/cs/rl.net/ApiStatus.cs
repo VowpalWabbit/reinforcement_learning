@@ -3,6 +3,7 @@ using System.Threading;
 using System.Runtime.InteropServices;
 
 using Rl.Net.Native;
+using System.Text;
 
 namespace Rl.Net {
     public sealed class ApiStatus : NativeObject<ApiStatus>
@@ -18,6 +19,12 @@ namespace Rl.Net {
 
         [DllImport("rl.net.native.dll")]
         private static extern int GetApiStatusErrorCode(IntPtr status);
+
+        [DllImport("rl.net.native.dll")]
+        private static extern void UpdateApiStatusSafe(IntPtr status, int error_code, IntPtr message);
+        
+        [DllImport("rl.net.native.dll")] 
+        private static extern void ClearApiStatusSafe(IntPtr status);
 
         public ApiStatus() : base(new New<ApiStatus>(CreateApiStatus), new Delete<ApiStatus>(DeleteApiStatus))
         {
@@ -51,6 +58,59 @@ namespace Rl.Net {
                 GC.KeepAlive(this);
                 return result;
             }
+        }
+
+        internal static void Update(ApiStatus status, int errorCode, string message)
+        {
+            unsafe 
+            { 
+                fixed (byte* messageBytes = NativeMethods.StringEncoding.GetBytes(message))
+                {
+                    IntPtr messagePtr = new IntPtr(messageBytes);
+                    UpdateApiStatusSafe(status.ToNativeHandleOrNullptrDangerous(), errorCode, messagePtr);
+
+                    GC.KeepAlive(status);
+                }
+            }
+        }
+    }
+
+    public sealed class ApiStatusBuilder
+    {
+        private int errorCode;
+        private StringBuilder messageBuilder;
+
+        public ApiStatusBuilder(int errorCode)
+        {
+            this.errorCode = errorCode;
+            this.messageBuilder = new StringBuilder(NativeMethods.MarshalMessageForErrorCode(errorCode));
+        }
+
+        public ApiStatusBuilder Append(string message)
+        {
+            this.messageBuilder.Append(message);
+
+            return this;
+        }
+
+        public ApiStatusBuilder AppendLine(string message)
+        {
+            this.messageBuilder.AppendLine(message);
+
+            return this;
+        }
+
+        public int UpdateApiStatus(ApiStatus target)
+        {
+            ApiStatus.Update(target, this.errorCode, this.messageBuilder.ToString());
+            return this.errorCode;
+        }
+
+        public ApiStatus ToApiStatus()
+        {
+            ApiStatus result = new ApiStatus();
+            ApiStatus.Update(result, this.errorCode, this.messageBuilder.ToString());
+            return result;
         }
     }
 }

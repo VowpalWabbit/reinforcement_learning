@@ -1,11 +1,15 @@
 add_library(rl.net.native SHARED
   rl.net.api_status.cc
+  rl.net.buffer.cc
   rl.net.config.cc
   rl.net.live_model.cc
+  rl.net.native.cc
   rl.net.ranking_response.cc
   rl.net.decision_response.cc
   rl.net.slates_response.cc
+  rl.net.factory_context.cc
   binding_tracer.cc
+  binding_sender.cc
 )
 
 if(MSVC)

@@ -11,7 +11,7 @@ namespace Rl.Net
         internal static partial class NativeMethods
         {
             [DllImport("rl.net.native.dll")]
-            public static extern IntPtr CreateLiveModel(IntPtr config);
+            public static extern IntPtr CreateLiveModel(IntPtr config, IntPtr factoryContext);
 
             [DllImport("rl.net.native.dll")]
             public static extern void DeleteLiveModel(IntPtr liveModel);
@@ -174,18 +174,25 @@ namespace Rl.Net
         private readonly NativeMethods.managed_background_error_callback_t managedErrorCallback;
         private readonly NativeMethods.managed_trace_callback_t managedTraceCallback;
         
-        private static New<LiveModel> BindConstructorArguments(Configuration config)
-        {
+        private static New<LiveModel> BindConstructorArguments(Configuration config, FactoryContext factoryContext)
+        {           
             return new New<LiveModel>(() => 
             {
-                IntPtr result = NativeMethods.CreateLiveModel(config.DangerousGetHandle());
+                factoryContext = factoryContext ?? new FactoryContext();
+                IntPtr result = NativeMethods.CreateLiveModel(config.DangerousGetHandle(), factoryContext.DangerousGetHandle());
 
                 GC.KeepAlive(config); // TODO: Is this one necessary, or does it live on the heap inside of the delegate?
+                GC.KeepAlive(factoryContext);
+
                 return result;
             });
+
         }
+
+        public LiveModel(Configuration config) : this(config, null)
+        {}
         
-        public LiveModel(Configuration config) : base(BindConstructorArguments(config), new Delete<LiveModel>(NativeMethods.DeleteLiveModel))
+        public LiveModel(Configuration config, FactoryContext factoryContext) : base(BindConstructorArguments(config, factoryContext), new Delete<LiveModel>(NativeMethods.DeleteLiveModel))
         {
             this.managedErrorCallback = new NativeMethods.managed_background_error_callback_t(this.WrapStatusAndRaiseBackgroundError);
 

@@ -19,3 +19,13 @@ API int GetApiStatusErrorCode(reinforcement_learning::api_status* status)
 {
     return status->get_error_code();
 }
+
+API void UpdateApiStatusSafe(reinforcement_learning::api_status* status, int error_code, const char* message)
+{
+    reinforcement_learning::api_status::try_update(status, error_code, message);
+}
+
+API void ClearApiStatusSafe(reinforcement_learning::api_status* status)
+{
+    reinforcement_learning::api_status::try_clear(status);
+}
