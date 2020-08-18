@@ -13,5 +13,9 @@ table ActionTakenEvent {
 	value:bool = false;
 }
 
-union OutcomeSingleEvent { StringEvent, NumericEvent, ActionTakenEvent }
+union OutcomeSingleEventBody { StringEvent, NumericEvent, ActionTakenEvent }
+
+table OutcomeSingleEvent {
+  body:OutcomeSingleEventBody;
+}
 

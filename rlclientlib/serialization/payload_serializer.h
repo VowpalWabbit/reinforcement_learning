@@ -21,7 +21,9 @@
 
 namespace reinforcement_learning {
   namespace logger {
-    messages::flatbuff::v2::LearningModeType GetLearningMode(learning_mode mode);
+    using namespace messages::flatbuff;
+
+    v2::LearningModeType GetLearningMode(learning_mode mode);
 
     template<payload_type pt>
     struct payload_serializer {
@@ -41,8 +43,8 @@ namespace reinforcement_learning {
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-        auto fb = messages::flatbuff::v2::CreateCbEventDirect(fbb, flags | action_flags::DEFERRED, &action_ids, &_context, &probabilities, response.get_model_id(), GetLearningMode(learning_mode));
-        fbb.FinishSizePrefixed(fb);
+        auto fb = v2::CreateCbEventDirect(fbb, flags | action_flags::DEFERRED, &action_ids, &_context, &probabilities, response.get_model_id(), GetLearningMode(learning_mode));
+        fbb.Finish(fb);
         return std::move(fbb.Release());
       }
     };
@@ -50,6 +52,7 @@ namespace reinforcement_learning {
     struct ccb_serializer : payload_serializer<payload_type::CCB> {
       static generic_event::payload_buffer_t&& event(const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version) {
+        flatbuffers::FlatBufferBuilder fbb;
         generic_event::payload_buffer_t buf;
         return std::move(buf);
       }
@@ -58,6 +61,7 @@ namespace reinforcement_learning {
     struct slates_serializer : payload_serializer<payload_type::SLATES> {
       static generic_event::payload_buffer_t&& event(const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version) {
+        flatbuffers::FlatBufferBuilder fbb;
         generic_event::payload_buffer_t buf;
         return std::move(buf);
       }
@@ -65,18 +69,27 @@ namespace reinforcement_learning {
 
     struct outcome_single_serializer : payload_serializer<payload_type::OUTCOME_SINGLE> {
       static generic_event::payload_buffer_t&& event(float outcome) {
-        generic_event::payload_buffer_t buf;
-        return std::move(buf);
+        flatbuffers::FlatBufferBuilder fbb;
+        const auto evt = v2::CreateNumericEvent(fbb, outcome).Union();
+        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_NumericEvent, evt);
+        fbb.Finish(fb);
+        return std::move(fbb.Release());
       }
 
       static generic_event::payload_buffer_t&& event(const char* outcome) {
-        generic_event::payload_buffer_t buf;
-        return std::move(buf);
+        flatbuffers::FlatBufferBuilder fbb;
+        const auto evt = v2::CreateStringEventDirect(fbb, outcome).Union();
+        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_StringEvent, evt);
+        fbb.Finish(fb);
+        return std::move(fbb.Release());
       }
 
       static generic_event::payload_buffer_t&& report_action_taken() {
-        generic_event::payload_buffer_t buf;
-        return std::move(buf);
+        flatbuffers::FlatBufferBuilder fbb;
+        const auto evt = v2::CreateActionTakenEvent(fbb, true).Union();
+        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_ActionTakenEvent, evt);
+        fbb.Finish(fb);
+        return std::move(fbb.Release());
       }
     };
   }
