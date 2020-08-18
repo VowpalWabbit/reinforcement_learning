@@ -65,6 +65,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/container_iterator.h
   ../include/decision_response.h
   ../include/err_constants.h
+  ../include/error_callback_fn.h
   ../include/errors_data.h
   ../include/factory_resolver.h
   ../include/future_compat.h
@@ -83,7 +84,6 @@ set(PROJECT_PUBLIC_HEADERS
 set(PROJECT_PRIVATE_HEADERS
   azure_factories.h
   console_tracer.h
-  error_callback_fn.h
   live_model_impl.h
   logger/async_batcher.h
   logger/event_logger.h

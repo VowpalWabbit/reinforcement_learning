@@ -11,7 +11,7 @@
 #include "async_batcher.h"
 #include "eventhub_client.h"
 #include "api_status.h"
-#include "../error_callback_fn.h"
+#include "error_callback_fn.h"
 #include "utility/watchdog.h"
 #include "ranking_response.h"
 #include "ranking_event.h"
