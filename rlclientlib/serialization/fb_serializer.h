@@ -177,11 +177,11 @@ namespace reinforcement_learning { namespace logger {
     static int serialize(outcome_event& evt, flatbuffers::FlatBufferBuilder& builder,
                          flatbuffers::Offset<fb_event_t>& retval, api_status* status) {
       const auto event_id = builder.CreateString(evt.get_event_id());
-	  const auto &ts = evt.get_client_time_gmt();
-	  TimeStamp client_ts(ts.year, ts.month, ts.day, ts.hour,
+	    const auto &ts = evt.get_client_time_gmt();
+	    TimeStamp client_ts(ts.year, ts.month, ts.day, ts.hour,
 		  ts.minute, ts.second, ts.sub_second);
-	  const auto meta_id_offset = CreateMetadata(builder, &client_ts);
-	  switch (evt.get_outcome_type()) {
+	    const auto meta_id_offset = CreateMetadata(builder, &client_ts);
+	    switch (evt.get_outcome_type()) {
         case outcome_event::outcome_type_string: {
           const auto outcome_str = builder.CreateString(evt.get_outcome());
           const auto str_event = CreateStringEvent(builder, outcome_str).Union();
