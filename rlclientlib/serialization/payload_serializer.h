@@ -53,8 +53,19 @@ namespace reinforcement_learning {
       static generic_event::payload_buffer_t&& event(const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version) {
         flatbuffers::FlatBufferBuilder fbb;
-        generic_event::payload_buffer_t buf;
-        return std::move(buf);
+        std::vector<flatbuffers::Offset<v2::SlotEvent>> slots;
+        for (size_t i = 0; i < action_ids.size(); i++)
+        {
+          slots.push_back(v2::CreateSlotEventDirect(fbb, &action_ids[i], &pdfs[i]));
+        }
+
+        std::vector<unsigned char> _context;
+        std::string context_str(context);
+        copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
+
+        auto fb = v2::CreateCcbEventDirect(fbb, &_context, &slots, model_version.c_str(), flags | action_flags::DEFERRED);
+        fbb.Finish(fb);
+        return std::move(fbb.Release());
       }
     };
 
