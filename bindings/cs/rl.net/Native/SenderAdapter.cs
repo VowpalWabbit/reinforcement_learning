@@ -136,7 +136,10 @@ namespace Rl.Net.Native {
             {
                 // TODO: Raise Background Error - but it is unclear how, since we no longer have a LiveModel context...
                 Debug.Fail("Getting wrong object in SenderAdapter's InvokeRelease.");
-            }            
+
+                // A failure here is a potential memory leak, but should not impact correctness, so may not be a
+                // good idea to just throw arbitrarily here.
+            }
         }
     }
 }

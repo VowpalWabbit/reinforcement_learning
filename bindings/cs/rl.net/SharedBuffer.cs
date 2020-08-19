@@ -28,11 +28,6 @@ namespace Rl.Net {
             });
         }
 
-        // TODO: Enable creation of arbitrary shared buffers?
-        // public SharedBuffer() : base(new New<SharedBuffer>(CreateBufferWithSharedPointer), new Delete<SharedBuffer>(ReleaseBufferSharedPointer))
-        // {
-        // }
-
         internal SharedBuffer(IntPtr sharedBufferHandle) : base(sharedBufferHandle, ownsHandle:false)
         { }
 

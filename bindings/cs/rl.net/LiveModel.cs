@@ -181,7 +181,10 @@ namespace Rl.Net
                 factoryContext = factoryContext ?? new FactoryContext();
                 IntPtr result = NativeMethods.CreateLiveModel(config.DangerousGetHandle(), factoryContext.DangerousGetHandle());
 
-                GC.KeepAlive(config); // TODO: Is this one necessary, or does it live on the heap inside of the delegate?
+                // These references do not live on the heap in this delegate, and could disappear during the invocation
+                // of CreateLiveModel. Thus, we need to ensure GC knows not to release them until after that call
+                // returns.
+                GC.KeepAlive(config);
                 GC.KeepAlive(factoryContext);
 
                 return result;

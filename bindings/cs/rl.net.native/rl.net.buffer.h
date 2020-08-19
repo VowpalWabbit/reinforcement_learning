@@ -12,7 +12,6 @@ namespace rl_net_native
 
 extern "C" 
 {
-  // API const buffer* CreateBufferWithSharedPointer();
   API void ReleaseBufferSharedPointer(const rl_net_native::buffer* buffer);
 
   API const rl_net_native::buffer* CloneBufferSharedPointer(const rl_net_native::buffer* original);
