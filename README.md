@@ -76,7 +76,7 @@ Call Stack (most recent call first):
 
 This can be fixed by invoking CMake similar to the following:
 ```bash
-cmake -DOPENSSL_ROOT_DIR=/usr/local/Cellar/openssl/1.0.2r -DOPENSSL_LIBRARIES=/usr/local/Cellar/openssl/1.0.2r/lib ..
+cmake -DOPENSSL_ROOT_DIR=`brew --prefix openssl` -DOPENSSL_LIBRARIES=`brew --prefix openssl`/lib ..
 ```
 
 
@@ -128,7 +128,7 @@ You'll need to add the flatbuffers tool directory to your PATH aswell: `<vcpkg_r
 MacOS dependencies can be managed through homebrew.
 
 ```
-brew install cpprestsdk flatbuffers
+brew install cpprestsdk flatbuffers openssl
 ```
 
 In order to build using homebrew dependencies, you must invoke cmake this way:
@@ -136,7 +136,7 @@ In order to build using homebrew dependencies, you must invoke cmake this way:
 ```
 mkdir build
 cd build
-cmake -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1 ..
+cmake -DOPENSSL_ROOT_DIR=`brew --prefix openssl` -DOPENSSL_LIBRARIES=`brew --prefix openssl`/lib ..
 ```
 
 
