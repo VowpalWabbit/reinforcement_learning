@@ -257,7 +257,7 @@ namespace reinforcement_learning { namespace logger {
       return evt.get_payload().size();
     }
 
-    static int ToFBPayloadType(payload_type type, v2::PayloadType& result, api_status* status) {
+    static int to_fb_payload_type(payload_type type, v2::PayloadType& result, api_status* status) {
       switch (type) {
       case CB:
         result = v2::PayloadType_CB;
@@ -287,7 +287,7 @@ namespace reinforcement_learning { namespace logger {
       v2::TimeStamp client_ts(ts.year, ts.month, ts.day, ts.hour,
         ts.minute, ts.second, ts.sub_second);
       v2::PayloadType payloadType;
-      RETURN_IF_FAIL(ToFBPayloadType(evt.get_payload_type(), payloadType, status));
+      RETURN_IF_FAIL(to_fb_payload_type(evt.get_payload_type(), payloadType, status));
       const auto meta_offset = v2::CreateMetadataDirect(builder, evt.get_id(), &client_ts, nullptr, payloadType, evt.get_pass_prob());
       const auto& buffer = evt.get_payload();
       const auto payload_offset = builder.CreateVector(buffer.data(), buffer.size());

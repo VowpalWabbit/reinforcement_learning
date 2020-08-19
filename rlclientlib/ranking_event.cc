@@ -154,7 +154,7 @@ namespace reinforcement_learning {
     return _payload_type;
   }
 
-  const flatbuffers::DetachedBuffer& generic_event::get_payload() const {
+  const generic_event::payload_buffer_t& generic_event::get_payload() const {
     return _payload;
   }
 
