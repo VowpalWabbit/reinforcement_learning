@@ -92,16 +92,32 @@ namespace reinforcement_learning {
     struct outcome_single_serializer : payload_serializer<payload_type::OUTCOME_SINGLE> {
       static generic_event::payload_buffer_t event(float outcome) {
         flatbuffers::FlatBufferBuilder fbb;
-        const auto evt = v2::CreateNumericEvent(fbb, outcome).Union();
-        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_NumericEvent, evt);
+        const auto evt = v2::CreateNumericEventSingle(fbb, outcome).Union();
+        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_NumericEventSingle, evt);
         fbb.Finish(fb);
         return fbb.Release();
       }
 
       static generic_event::payload_buffer_t event(const char* outcome) {
         flatbuffers::FlatBufferBuilder fbb;
-        const auto evt = v2::CreateStringEventDirect(fbb, outcome).Union();
-        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_StringEvent, evt);
+        const auto evt = v2::CreateStringEventSingleDirect(fbb, outcome).Union();
+        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_StringEventSingle, evt);
+        fbb.Finish(fb);
+        return fbb.Release();
+      }
+
+      static generic_event::payload_buffer_t event(int index, float outcome) {
+        flatbuffers::FlatBufferBuilder fbb;
+        const auto evt = v2::CreateNumericEventIndexed(fbb, outcome, index).Union();
+        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_NumericEventIndexed, evt);
+        fbb.Finish(fb);
+        return fbb.Release();
+      }
+
+      static generic_event::payload_buffer_t event(int index, const char* outcome) {
+        flatbuffers::FlatBufferBuilder fbb;
+        const auto evt = v2::CreateStringEventIndexedDirect(fbb, outcome, index).Union();
+        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_StringEventIndexed, evt);
         fbb.Finish(fb);
         return fbb.Release();
       }

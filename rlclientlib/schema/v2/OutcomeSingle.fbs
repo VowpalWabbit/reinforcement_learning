@@ -1,19 +1,29 @@
 ﻿// EventHubInteraction Schema used by FlatBuffer
 namespace reinforcement_learning.messages.flatbuff.v2;
 
-table StringEvent {
-    value:string;
+table StringEventSingle {
+  value:string;
 }
 
-table NumericEvent {
-    value:float;
+table NumericEventSingle {
+  value:float;
+}
+
+table StringEventIndexed {
+  value:string;
+  index:int;
+}
+
+table NumericEventIndexed {
+  value:float;
+  index:int;
 }
 
 table ActionTakenEvent {
 	value:bool = false;
 }
 
-union OutcomeSingleEventBody { StringEvent, NumericEvent, ActionTakenEvent }
+union OutcomeSingleEventBody { StringEventSingle, NumericEventSingle, StringEventIndexed, NumericEventIndexed, ActionTakenEvent }
 
 table OutcomeSingleEvent {
   body:OutcomeSingleEventBody;
