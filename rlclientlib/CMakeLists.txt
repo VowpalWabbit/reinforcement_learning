@@ -1,5 +1,5 @@
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-find_package(FlatBuffers REQUIRED)
+find_package(flatbuffers REQUIRED)
 
 set(RL_FLAT_BUFFER_FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/Metadata.fbs"
