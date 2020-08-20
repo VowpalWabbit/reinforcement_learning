@@ -13,7 +13,8 @@ set(RL_FLAT_BUFFER_FILES_V2
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/OutcomeSingle.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CbEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CcbEvent.fbs"
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/SlatesEvent.fbs" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/SlatesEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiStepEvent.fbs"  
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Event.fbs" )
 
 build_flatbuffers("${RL_FLAT_BUFFER_FILES_V1}" "" fbgenerator_v1 "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v1/" "" "")

@@ -1,0 +1,14 @@
+// EventHubInteraction Schema used by FlatBuffer
+namespace reinforcement_learning.messages.flatbuff.v2;
+
+table MultiStepEvent {
+    event_id:string;
+    previous_id:string;
+
+    action_ids:[uint64];             // action IDs
+    context:[ubyte];                 // context
+    probabilities:[float];           // probabilities
+    model_id:string;                 // model ID
+}
+
+root_type MultiStepEvent;
