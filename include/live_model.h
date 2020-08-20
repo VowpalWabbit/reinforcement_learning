@@ -15,6 +15,8 @@
 #include "sender.h"
 #include "future_compat.h"
 
+#include "multistep.h"
+
 #include <memory>
 
 namespace reinforcement_learning {
@@ -279,6 +281,9 @@ namespace reinforcement_learning {
     live_model& operator=(live_model&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
 
     ~live_model();
+
+    //multistep
+    int request_episodic_decision(const char* event_id, const char* context_json, ranking_response& resp, episode_state& episode, api_status* status = nullptr);
   private:
     std::unique_ptr<live_model_impl> _pimpl;  //! The actual implementation details are forwarded to this object (PIMPL pattern)
     bool _initialized = false;                //! Guard to ensure that live_model is properly initialized. i.e. init() was called and successfully initialized.

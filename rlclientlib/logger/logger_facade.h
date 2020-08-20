@@ -32,7 +32,8 @@ namespace reinforcement_learning
       int init(api_status* status);
 
       int log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
-    
+
+      int log(const char* episode_id, const char* previous_id, const char* context, const ranking_response& response, api_status* status);
     private:
       const int version;
       const std::unique_ptr<interaction_logger> v1;

@@ -39,6 +39,13 @@ namespace reinforcement_learning {
       }
     }
 
+    int cb_logger_facade::log(const char* episode_id, const char* previous_id, const char* context, const ranking_response& response, api_status* status) {
+      switch (version) {
+        case 2: return v2->log(episode_id, serializer.event(response.get_event_id(), previous_id, context, response), payload_type::MULTISTEP, status);
+        default: return protocol_not_supported(status);
+      }
+    }
+
     ccb_logger_facade::ccb_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
     : version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
     , v1(version == 1 ? new ccb_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)

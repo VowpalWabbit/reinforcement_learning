@@ -46,6 +46,7 @@ set(PROJECT_SOURCES
   model_mgmt/model_mgmt.cc
   model_mgmt/restapi_data_transport.cc
   model_mgmt/file_model_loader.cc
+  multistep.cc
   ranking_event.cc
   ranking_response.cc
   sampling.cc
@@ -82,6 +83,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/future_compat.h
   ../include/live_model.h
   ../include/model_mgmt.h
+  ../include/multistep.h
   ../include/object_factory.h
   ../include/personalization.h
   ../include/ranking_response.h

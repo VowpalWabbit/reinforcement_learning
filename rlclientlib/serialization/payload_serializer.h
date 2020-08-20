@@ -18,6 +18,7 @@
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/CcbEvent_generated.h"
 #include "generated/v2/SlatesEvent_generated.h"
+#include "generated/v2/MultiStepEvent_generated.h"
 
 namespace reinforcement_learning {
   namespace logger {
@@ -44,6 +45,23 @@ namespace reinforcement_learning {
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
         auto fb = v2::CreateCbEventDirect(fbb, flags | action_flags::DEFERRED, &action_ids, &_context, &probabilities, response.get_model_id(), GetLearningMode(learning_mode));
+        fbb.Finish(fb);
+        return fbb.Release();
+      }
+
+      static generic_event::payload_buffer_t event(const char* event_id, const char* previous_id, const char* context, const ranking_response& response) {
+        flatbuffers::FlatBufferBuilder fbb;
+        std::vector<uint64_t> action_ids;
+        std::vector<float> probabilities;
+        for (auto const& r : response) {
+          action_ids.push_back(r.action_id + 1);
+          probabilities.push_back(r.probability);
+        }
+        std::vector<unsigned char> _context;
+        std::string context_str(context);
+        copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
+
+        auto fb = v2::CreateMultiStepEventDirect(fbb, event_id, previous_id, &action_ids, &_context, &probabilities, response.get_model_id());
         fbb.Finish(fb);
         return fbb.Release();
       }

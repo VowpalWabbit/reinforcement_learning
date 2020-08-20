@@ -483,6 +483,14 @@ namespace reinforcement_learning {
     return refresh_model(status);
   }
 
+  int live_model_impl::request_episodic_decision(const char* event_id, const char* context_json, ranking_response& resp, episode_state& episode, api_status* status) {
+    //mock logic - just doing cb call based on context. some logic with episode.get_history() should be implemented
+    RETURN_IF_FAIL(choose_rank(event_id, context_json, action_flags::DEFAULT, resp, status));
+    RETURN_IF_FAIL(episode.update(context_json, resp, status));
+    return error_code::success;
+  }
+
+
   //helper: check if at least one of the arguments is null or empty
   int check_null_or_empty(const char* arg1, const char* arg2, api_status* status) {
     if (!arg1 || !arg2 || strlen(arg1) == 0 || strlen(arg2) == 0) {

@@ -46,6 +46,7 @@
     <ClCompile Include="slates_response.cc" />
     <ClCompile Include="logger\logger_facade.cc" />
     <ClCompile Include="serialization\payload_serializer.cc" />
+    <ClCompile Include="multistep.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -114,6 +115,7 @@
     <ClInclude Include="..\include\errors_data.h" />
     <ClInclude Include="logger\logger_facade.h" />
     <ClInclude Include="serialization\payload_serializer.h" />
+    <ClInclude Include="..\include\multistep.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -128,6 +130,7 @@
     <None Include="schema\v2\CcbEvent.fbs" />
     <None Include="schema\v2\SlatesEvent.fbs" />
     <None Include="schema\v2\Event.fbs" />
+    <None Include="schema\v2\MultiStepEvent.fbs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

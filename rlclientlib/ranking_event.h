@@ -177,7 +177,8 @@ namespace reinforcement_learning {
     CB = 1,
     CCB = 2,
     SLATES = 3,
-    OUTCOME_SINGLE = 4
+    OUTCOME_SINGLE = 4,
+    MULTISTEP = 5
   };
 
   class generic_event {
