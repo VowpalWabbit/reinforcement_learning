@@ -31,7 +31,7 @@ namespace reinforcement_learning
 
       int init(api_status* status);
 
-      int log(const char* event_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
+      int log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
     
     private:
       const int version;

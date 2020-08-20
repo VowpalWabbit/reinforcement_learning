@@ -31,10 +31,10 @@ namespace reinforcement_learning {
       }
     }
 
-    int cb_logger_facade::log(const char* event_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode) {
+    int cb_logger_facade::log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode) {
       switch (version) {
-        case 1: return v1->log(event_id, context, flags, response, status, learning_mode);
-        case 2: return v2->log(event_id, serializer.event(context, flags, learning_mode, response), serializer.type, status);
+        case 1: return v1->log(response.get_event_id(), context, flags, response, status, learning_mode);
+        case 2: return v2->log(response.get_event_id(), serializer.event(context, flags, learning_mode, response), serializer.type, status);
         default: return protocol_not_supported(status);
       }
     }
