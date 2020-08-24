@@ -19,11 +19,16 @@ table NumericEventIndexed {
   index:int;
 }
 
+table NumericEventMulti {
+  value:float;
+  id:string;
+}
+
 table ActionTakenEvent {
 	value:bool = false;
 }
 
-union OutcomeSingleEventBody { StringEventSingle, NumericEventSingle, StringEventIndexed, NumericEventIndexed, ActionTakenEvent }
+union OutcomeSingleEventBody { StringEventSingle, NumericEventSingle, StringEventIndexed, NumericEventIndexed, NumericEventMulti, ActionTakenEvent }
 
 table OutcomeSingleEvent {
   body:OutcomeSingleEventBody;

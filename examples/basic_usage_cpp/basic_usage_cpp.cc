@@ -12,12 +12,12 @@
  *
  * @return int Error code
  */
-int main() {
+int cb_basic_usage() {
   //! name, value based config object used to initialise the API
   u::configuration config;
 
   //! Helper method to initialize config from a json file
-  if( load_config_from_json("client.json", config) != err::success ) {
+  if (load_config_from_json("client.json", config) != err::success) {
     std::cout << "Unable to Load file: client.json" << std::endl;
     return -1;
   }
@@ -32,7 +32,7 @@ int main() {
   //! [(1) Instantiate Inference API using config]
 
   //! [(2) Initialize the API]
-  if( rl.init(&status) != err::success ) {
+  if (rl.init(&status) != err::success) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
@@ -42,7 +42,7 @@ int main() {
   // Response class
   r::ranking_response response;
 
-  if( rl.choose_rank(event_id, context, response, &status) != err::success ) {
+  if (rl.choose_rank(event_id, context, response, &status) != err::success) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
@@ -50,7 +50,7 @@ int main() {
 
   //! [(4) Use the response]
   size_t chosen_action;
-  if( response.get_chosen_action_id(chosen_action, &status) != err::success ) {
+  if (response.get_chosen_action_id(chosen_action, &status) != err::success) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
@@ -60,13 +60,66 @@ int main() {
   //! [(5) Report outcome]
   //     Report received outcome (Optional: if this call is not made, default missing outcome is applied)
   //     Missing outcome can be thought of as negative reinforcement
-  if( rl.report_outcome(event_id, outcome, &status) != err::success ) {
+  if (rl.report_outcome(event_id, outcome, &status) != err::success) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
   //! [(5) Report outcome]
 
   return 0;
+}
+
+int multistep_basic_usage() {
+  //! name, value based config object used to initialise the API
+  u::configuration config;
+
+  //! Helper method to initialize config from a json file
+  if (load_config_from_json("client.json", config) != err::success) {
+    std::cout << "Unable to Load file: client.json" << std::endl;
+    return -1;
+  }
+
+  r::api_status status;
+
+  r::live_model rl(config);
+
+  if (rl.init(&status) != err::success) {
+    std::cout << status.get_error_msg() << std::endl;
+    return -1;
+  }
+
+  r::episode_state episode("my_episode_id");
+
+  r::ranking_response response1;
+  const std::string context1 = R"({"c": {"F": 1.0, "_multi": [{"AF": 2.0}, {"AF": 3.0}] })";
+
+  if (rl.request_episodic_decision("event1", nullptr, context1.c_str(), response1, episode, &status) != err::success) {
+    std::cout << status.get_error_msg() << std::endl;
+    return -1;
+  }
+
+  const std::string context2 = R"({"c": {"F": 4.0, "_multi": [{"AF": 2.0}, {"AF": 3.0}] })";
+  r::ranking_response response2;
+  if (rl.request_episodic_decision("event2", "event1", context2.c_str(), response2, episode, &status) != err::success) {
+    std::cout << status.get_error_msg() << std::endl;
+    return -1;
+  }
+
+  if (rl.report_outcome(episode.get_episode_id(), "event1", 1.0f, &status)) {
+    std::cout << status.get_error_msg() << std::endl;
+    return -1;
+  }
+
+  if (rl.report_outcome(episode.get_episode_id(), "event2", 1.0f, &status)) {
+    std::cout << status.get_error_msg() << std::endl;
+    return -1;
+  }
+
+  return 0;
+}
+
+int main() {
+  return cb_basic_usage();
 }
 
 // Helper methods

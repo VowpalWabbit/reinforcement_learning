@@ -483,13 +483,17 @@ namespace reinforcement_learning {
     return refresh_model(status);
   }
 
-  int live_model_impl::request_episodic_decision(const char* event_id, const char* context_json, ranking_response& resp, episode_state& episode, api_status* status) {
+  int live_model_impl::request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, ranking_response& resp, episode_state& episode, api_status* status) {
     //mock logic - just doing cb call based on context. some logic with episode.get_history() should be implemented
     RETURN_IF_FAIL(choose_rank(event_id, context_json, action_flags::DEFAULT, resp, status));
     RETURN_IF_FAIL(episode.update(context_json, resp, status));
+    RETURN_IF_FAIL(_ranking_logger->log(episode.get_episode_id(), previous_id, context_json, resp, status));
     return error_code::success;
   }
 
+  int live_model_impl::report_outcome(const char* episode_id, const char* event_id, float outcome, api_status* status) {
+    return _outcome_logger->log(episode_id, event_id, outcome, status);
+  }
 
   //helper: check if at least one of the arguments is null or empty
   int check_null_or_empty(const char* arg1, const char* arg2, api_status* status) {

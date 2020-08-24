@@ -283,7 +283,8 @@ namespace reinforcement_learning {
     ~live_model();
 
     //multistep
-    int request_episodic_decision(const char* event_id, const char* context_json, ranking_response& resp, episode_state& episode, api_status* status = nullptr);
+    int request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, ranking_response& resp, episode_state& episode, api_status* status = nullptr);
+    int report_outcome(const char* episode_id, const char* event_id, float outcome, api_status* status = nullptr);
   private:
     std::unique_ptr<live_model_impl> _pimpl;  //! The actual implementation details are forwarded to this object (PIMPL pattern)
     bool _initialized = false;                //! Guard to ensure that live_model is properly initialized. i.e. init() was called and successfully initialized.

@@ -174,5 +174,12 @@ namespace reinforcement_learning {
         default: return protocol_not_supported(status);
       }
     }
+
+    int observation_logger_facade::log(const char* episode_id, const char* event_id, float outcome, api_status* status) {
+      switch (version) {
+        case 2: return v2->log(episode_id, serializer.event(event_id, outcome), serializer.type, status);
+        default: return protocol_not_supported(status);
+      }
+    }
   }
 }

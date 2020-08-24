@@ -10,6 +10,9 @@ namespace reinforcement_learning {
     return error_code::success;//empty for now;
   }
 
+  episode_state::episode_state(const char* _episode_id)
+  : episode_id(_episode_id) {}
+
   const char* episode_state::get_episode_id() const {
     return episode_id.c_str();
   }
