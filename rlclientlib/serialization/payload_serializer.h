@@ -44,7 +44,7 @@ namespace reinforcement_learning {
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-        auto fb = v2::CreateCbEventDirect(fbb, flags | action_flags::DEFERRED, &action_ids, &_context, &probabilities, response.get_model_id(), GetLearningMode(learning_mode));
+        auto fb = v2::CreateCbEventDirect(fbb, flags & action_flags::DEFERRED, &action_ids, &_context, &probabilities, response.get_model_id(), GetLearningMode(learning_mode));
         fbb.Finish(fb);
         return fbb.Release();
       }
