@@ -24,7 +24,7 @@ namespace reinforcement_learning {
   namespace logger {
     using namespace messages::flatbuff;
 
-    v2::LearningModeType GetLearningMode(learning_mode mode);
+    int get_learning_mode(learning_mode mode_in, v2::LearningModeType& mode_out, api_status* status);
 
     template<generic_event::payload_type_t pt>
     struct payload_serializer {
@@ -32,7 +32,7 @@ namespace reinforcement_learning {
     };
 
     struct cb_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CB> {
-      static generic_event::payload_buffer_t event(const char* context, unsigned int flags, learning_mode learning_mode, const ranking_response& response) {
+      static generic_event::payload_buffer_t event(const char* context, unsigned int flags, v2::LearningModeType learning_mode, const ranking_response& response) {
         flatbuffers::FlatBufferBuilder fbb;
         std::vector<uint64_t> action_ids;
         std::vector<float> probabilities;
@@ -44,7 +44,7 @@ namespace reinforcement_learning {
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-        auto fb = v2::CreateCbEventDirect(fbb, flags & action_flags::DEFERRED, &action_ids, &_context, &probabilities, response.get_model_id(), GetLearningMode(learning_mode));
+        auto fb = v2::CreateCbEventDirect(fbb, flags & action_flags::DEFERRED, &action_ids, &_context, &probabilities, response.get_model_id(), learning_mode);
         fbb.Finish(fb);
         return fbb.Release();
       }
