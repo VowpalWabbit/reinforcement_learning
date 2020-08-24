@@ -45,6 +45,7 @@ set(PROJECT_SOURCES
   model_mgmt/model_mgmt.cc
   model_mgmt/restapi_data_transport.cc
   model_mgmt/file_model_loader.cc
+  generic_event.cc
   ranking_event.cc
   ranking_response.cc
   sampling.cc
@@ -106,6 +107,7 @@ set(PROJECT_PRIVATE_HEADERS
   model_mgmt/restapi_data_transport.h
   model_mgmt/file_model_loader.h
   moving_queue.h
+  generic_event.h
   ranking_event.h
   sampling.h
   serialization/fb_serializer.h

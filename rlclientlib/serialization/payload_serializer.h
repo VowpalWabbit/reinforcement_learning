@@ -8,6 +8,7 @@
 
 #include "action_flags.h"
 #include "ranking_event.h"
+#include "generic_event.h"
 #include "data_buffer.h"
 #include "logger/message_type.h"
 #include "api_status.h"

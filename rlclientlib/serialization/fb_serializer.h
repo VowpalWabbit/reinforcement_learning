@@ -9,6 +9,7 @@
 
 #include "generated/v2/Event_generated.h"
 
+#include "generic_event.h"
 #include "ranking_event.h"
 
 #include "logger/message_type.h"

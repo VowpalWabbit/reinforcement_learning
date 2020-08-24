@@ -191,6 +191,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClInclude Include="..\include\str_util.h" />
     <ClInclude Include="..\include\trace_logger.h" />
     <ClInclude Include="..\include\data_buffer.h" />
+    <ClInclude Include="generic_event.h" />
     <ClInclude Include="logger\file\file_logger.h" />
     <ClInclude Include="logger\logger_facade.h" />
     <ClInclude Include="model_mgmt\file_model_loader.h" />
@@ -238,6 +239,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClInclude Include="ranking_event.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="generic_event.cc" />
     <ClCompile Include="learning_mode.cc" />
     <ClCompile Include="logger\file\file_logger.cc" />
     <ClCompile Include="logger\logger_facade.cc" />
