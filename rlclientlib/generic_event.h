@@ -1,23 +1,18 @@
 #pragma once
 #include <string>
 #include "time_helper.h"
+#include "generated/v2/Event_generated.h"
 #include <flatbuffers/flatbuffers.h>
 
 namespace reinforcement_learning {
-  enum payload_type {
-    CB = 1,
-    CCB = 2,
-    SLATES = 3,
-    OUTCOME_SINGLE = 4
-  };
-
   class generic_event {
   public:
     using payload_buffer_t = flatbuffers::DetachedBuffer;
+    using payload_type_t = messages::flatbuff::v2::PayloadType;
 
   public:
     generic_event() = default;
-    generic_event(const char* id, const timestamp& ts, payload_type type, payload_buffer_t&& payload, float pass_prob = 1.f);
+    generic_event(const char* id, const timestamp& ts, payload_type_t type, payload_buffer_t&& payload, float pass_prob = 1.f);
 
     generic_event(const generic_event&) = default;
     generic_event& operator=(const generic_event&) = default;
@@ -32,7 +27,7 @@ namespace reinforcement_learning {
 
     const char* get_id() const;
 
-    payload_type get_payload_type() const;
+    payload_type_t get_payload_type() const;
 
     const payload_buffer_t& get_payload() const;
 
@@ -42,7 +37,7 @@ namespace reinforcement_learning {
   protected:
     std::string _id;
     timestamp _client_time_gmt;
-    payload_type _payload_type;
+    payload_type_t _payload_type;
     payload_buffer_t _payload;
     float _pass_prob = 1.0;
   };

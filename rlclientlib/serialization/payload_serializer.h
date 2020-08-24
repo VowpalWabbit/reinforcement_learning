@@ -26,12 +26,12 @@ namespace reinforcement_learning {
 
     v2::LearningModeType GetLearningMode(learning_mode mode);
 
-    template<payload_type pt>
+    template<generic_event::payload_type_t pt>
     struct payload_serializer {
-      const payload_type type = pt;
+      const generic_event::payload_type_t type = pt;
     };
 
-    struct cb_serializer : payload_serializer<payload_type::CB> {
+    struct cb_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CB> {
       static generic_event::payload_buffer_t event(const char* context, unsigned int flags, learning_mode learning_mode, const ranking_response& response) {
         flatbuffers::FlatBufferBuilder fbb;
         std::vector<uint64_t> action_ids;
@@ -50,7 +50,7 @@ namespace reinforcement_learning {
       }
     };
 
-    struct ccb_serializer : payload_serializer<payload_type::CCB> {
+    struct ccb_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CCB> {
       static generic_event::payload_buffer_t event(const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version) {
         flatbuffers::FlatBufferBuilder fbb;
@@ -70,7 +70,7 @@ namespace reinforcement_learning {
       }
     };
 
-    struct slates_serializer : payload_serializer<payload_type::SLATES> {
+    struct slates_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_Slates> {
       static generic_event::payload_buffer_t event(const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version) {
         flatbuffers::FlatBufferBuilder fbb;
@@ -90,7 +90,7 @@ namespace reinforcement_learning {
       }
     };
 
-    struct outcome_single_serializer : payload_serializer<payload_type::OUTCOME_SINGLE> {
+    struct outcome_single_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_OutcomeSingle> {
       static generic_event::payload_buffer_t numeric_event(float outcome) {
         flatbuffers::FlatBufferBuilder fbb;
         const auto evt = v2::CreateNumericEventSingle(fbb, outcome).Union();

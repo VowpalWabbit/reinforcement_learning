@@ -5,7 +5,7 @@
 
 using namespace std;
 namespace reinforcement_learning {
-  generic_event::generic_event(const char* _id, const timestamp& ts, payload_type type, flatbuffers::DetachedBuffer&& payload, float pass_prob)
+  generic_event::generic_event(const char* _id, const timestamp& ts, payload_type_t type, flatbuffers::DetachedBuffer&& payload, float pass_prob)
     : _id(_id)
     , _client_time_gmt(ts)
     , _payload_type(type)
@@ -29,7 +29,7 @@ namespace reinforcement_learning {
     return exploration::uniform_random_merand48(seed);
   }
 
-  payload_type generic_event::get_payload_type() const {
+  generic_event::payload_type_t generic_event::get_payload_type() const {
     return _payload_type;
   }
 
