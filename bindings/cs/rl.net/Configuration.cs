@@ -7,6 +7,8 @@ using System.Text;
 
 namespace Rl.Net {
 
+    using SenderFactory = Func<IReadOnlyConfiguration, ErrorCallback, ISender>;
+
     namespace Native
     {
         // The publics in this class are just a verbose, but jittably-efficient way of enabling overriding a native invocation
@@ -66,11 +68,21 @@ namespace Rl.Net {
         }
     }
 
-    public sealed class Configuration: NativeObject<Configuration>
+    public interface IReadOnlyConfiguration
     {
+        string this[string key] { get; }
+    }
+
+    public sealed class Configuration: NativeObject<Configuration>, IReadOnlyConfiguration
+    {
+        
+
         public Configuration() : base(new New<Configuration>(NativeMethods.CreateConfig), new Delete<Configuration>(NativeMethods.DeleteConfig))
         {
         }
+
+        internal Configuration(IntPtr configuration): base(configuration, ownsHandle: false)
+        {}
 
         unsafe internal static void ConfigurationSet(IntPtr config, string name, string value)
         {
@@ -170,6 +182,7 @@ namespace Rl.Net {
             set
             {
                 ConfigurationSet(this.DangerousGetHandle(), key, value ?? string.Empty);
+                if (key == "")
 
                 GC.KeepAlive(this);
             }

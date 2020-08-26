@@ -13,4 +13,7 @@ extern "C" {
     // right now.
     API const char* GetApiStatusErrorMessage(reinforcement_learning::api_status* status);
     API int GetApiStatusErrorCode(reinforcement_learning::api_status* status);
+
+    API void UpdateApiStatusSafe(reinforcement_learning::api_status* status, int error_code, const char* message);
+    API void ClearApiStatusSafe(reinforcement_learning::api_status* status);
 }

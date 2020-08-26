@@ -15,6 +15,7 @@
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>basic_usage_cpp</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
+    <TreatWarningAsError>true</TreatWarningAsError>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -59,6 +60,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ControlFlowGuard>Guard</ControlFlowGuard>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -78,6 +80,7 @@
       <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ControlFlowGuard>Guard</ControlFlowGuard>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -88,22 +91,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="binding_sender.cc" />
     <ClCompile Include="binding_tracer.cc" />
-    <ClCompile Include="rl.net.config.cc" />
     <ClCompile Include="rl.net.api_status.cc" />
-    <ClCompile Include="rl.net.live_model.cc" />
-    <ClCompile Include="rl.net.ranking_response.cc" />
+    <ClCompile Include="rl.net.buffer.cc" />
+    <ClCompile Include="rl.net.config.cc" />
     <ClCompile Include="rl.net.decision_response.cc" />
+    <ClCompile Include="rl.net.factory_context.cc" />
+    <ClCompile Include="rl.net.live_model.cc" />
+    <ClCompile Include="rl.net.native.cc" />
+    <ClCompile Include="rl.net.ranking_response.cc" />
     <ClCompile Include="rl.net.slates_response.cc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="binding_sender.h" />
     <ClInclude Include="binding_tracer.h" />
-    <ClInclude Include="rl.net.native.h" />
-    <ClInclude Include="rl.net.config.h" />
     <ClInclude Include="rl.net.api_status.h" />
-    <ClInclude Include="rl.net.live_model.h" />
-    <ClInclude Include="rl.net.ranking_response.h" />
+    <ClInclude Include="rl.net.buffer.h" />
+    <ClInclude Include="rl.net.config.h" />
     <ClInclude Include="rl.net.decision_response.h" />
+    <ClInclude Include="rl.net.factory_context.h" />
+    <ClInclude Include="rl.net.live_model.h" />
+    <ClInclude Include="rl.net.native.h" />
+    <ClInclude Include="rl.net.ranking_response.h" />
     <ClInclude Include="rl.net.slates_response.h" />
   </ItemGroup>
   <ItemGroup>
