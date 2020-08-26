@@ -20,9 +20,11 @@ namespace Rl.Net {
         {
         }
 
+        private GCHandleLifetime registeredSenderCreateHandle;
+
         internal void SetSenderFactory<TSender>(Func<IReadOnlyConfiguration, ErrorCallback, TSender> createSender) where TSender : ISender
         {
-            sender_create_fn create_fn = 
+            sender_create_fn create_fn =
                 (IntPtr configuration, error_fn error_callback, IntPtr error_context) =>
                 {
                     ErrorCallback errorCallback = new ErrorCallback(error_callback, error_context);
@@ -38,7 +40,13 @@ namespace Rl.Net {
                     return GCHandle.ToIntPtr(adapterHandle);
                 };
 
+            GCHandleLifetime localCreateHandle = new GCHandleLifetime(create_fn, GCHandleType.Normal);
+
             SetFactoryContextBindingSenderFactory(this.DangerousGetHandle(), create_fn, SenderAdapter.VTable);
+
+            Interlocked.Exchange(ref this.registeredSenderCreateHandle, localCreateHandle);
+
+            // GCHandleLifetime cleans itself up, and does not need to be explicitly .Dispose()d.
         }
     }
 }
