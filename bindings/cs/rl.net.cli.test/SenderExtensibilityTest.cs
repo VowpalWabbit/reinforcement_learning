@@ -321,10 +321,13 @@ namespace Rl.Net.Cli.Test
         [TestMethod]
         public void Test_CustomSender_SendSuccess()
         {
+            ManualResetEventSlim senderCalledWaiter = new ManualResetEventSlim(initialState: false);
+
             bool sendCalled = false;
             void SenderSend(SharedBuffer buffer, ApiStatus status)
             {
                 sendCalled = true;
+                senderCalledWaiter.Set();
             }
 
             FactoryContext factoryContext = CreateFactoryContext(sendAction: SenderSend);
@@ -333,22 +336,26 @@ namespace Rl.Net.Cli.Test
             liveModel.Init();
             RankingResponse response = liveModel.ChooseRank(EventId, ContextJsonWithPdf);
 
-            Thread.Sleep(20); // make sure this interval is > 10ms
+            senderCalledWaiter.Wait(TimeSpan.FromSeconds(1));
 
             Assert.IsTrue(sendCalled);
         }
 
-        private void Run_TestCustomSender_SendFailure(Action<SharedBuffer, ApiStatus> senderSend, string expectedString, bool expectPrefix = false)
+        private void Run_TestCustomSender_SendFailure(FactoryContext factoryContext, string expectedString, bool expectPrefix = false)
         {
+            ManualResetEventSlim backgroundMessageWaiter = new ManualResetEventSlim(initialState: false);
+
+            int backgroundErrorCount = 0;
             int backgroundErrorCode = 0;
             string backgroundErrorMessage = null;
             void OnBackgroundError(object sender, ApiStatus args)
             {
+                Assert.AreEqual(0, backgroundErrorCount++, "Do not duplicate background errors.");
                 backgroundErrorCode = args.ErrorCode;
                 backgroundErrorMessage = args.ErrorMessage;
-            }
 
-            FactoryContext factoryContext = CreateFactoryContext(sendAction: senderSend);
+                backgroundMessageWaiter.Set();
+            }
 
             LiveModel liveModel = CreateLiveModel(factoryContext);
             liveModel.BackgroundError += OnBackgroundError;
@@ -360,9 +367,9 @@ namespace Rl.Net.Cli.Test
             Assert.IsTrue(liveModel.TryChooseRank(EventId, ContextJsonWithPdf, out response, apiStatus));
             Assert.AreEqual(NativeMethods.SuccessStatus, apiStatus.ErrorCode, "Errors from ISender.Send should be background errors.");
 
-            Thread.Sleep(20);
+            backgroundMessageWaiter.Wait(TimeSpan.FromSeconds(1));
 
-            Assert.AreEqual(NativeMethods.OpaqueBindingError, backgroundErrorCode);
+            Assert.AreEqual(NativeMethods.OpaqueBindingError, backgroundErrorCode, "Error from ISender did not get raised.");
 
             if (!expectPrefix)
             {
@@ -372,6 +379,13 @@ namespace Rl.Net.Cli.Test
             {
                 Assert.IsTrue(backgroundErrorMessage.StartsWith(OpaqueErrorMessage));
             }
+        }
+
+        private void Run_TestCustomSender_SendFailure(Action<SharedBuffer, ApiStatus> senderSend, string expectedString, bool expectPrefix = false)
+        {
+            FactoryContext factoryContext = CreateFactoryContext(sendAction: senderSend);
+
+            Run_TestCustomSender_SendFailure(factoryContext, expectedString, expectPrefix);
         }
 
         [TestMethod]
@@ -421,10 +435,13 @@ namespace Rl.Net.Cli.Test
         [TestMethod]
         public void Test_AsyncSender_SendSuccess()
         {
+            ManualResetEventSlim senderCalledWaiter = new ManualResetEventSlim(initialState: false);
+
             bool sendCalled = false;
             Task AsyncSenderSend(SharedBuffer buffer, BackgroundErrorCallback raiseBackgroundError)
             {
                 sendCalled = true;
+                senderCalledWaiter.Set();
 
                 return Task.CompletedTask;
             }
@@ -435,46 +452,16 @@ namespace Rl.Net.Cli.Test
             liveModel.Init();
             RankingResponse response = liveModel.ChooseRank(EventId, ContextJsonWithPdf);
 
-            Thread.Sleep(20); // make sure this interval is > 10ms
+            senderCalledWaiter.Wait(TimeSpan.FromSeconds(1));
+
             Assert.IsTrue(sendCalled);
         }
 
         private void Run_TestAsyncSender_SendFailure(Func<SharedBuffer, BackgroundErrorCallback, Task> asyncSenderSend, string expectedString, bool expectPrefix = false)
         {
-            int backgroundErrorCount = 0;
-            int backgroundErrorCode = 0;
-            string backgroundErrorMessage = null;
-            void OnBackgroundError(object sender, ApiStatus args)
-            {
-                Assert.AreEqual(0, backgroundErrorCount++);
-                backgroundErrorCode = args.ErrorCode;
-                backgroundErrorMessage = args.ErrorMessage;
-            }
-
             FactoryContext factoryContext = CreateFactoryContext(asyncSendFunc: asyncSenderSend);
 
-            LiveModel liveModel = CreateLiveModel(factoryContext);
-            liveModel.BackgroundError += OnBackgroundError;
-
-            liveModel.Init();
-
-            ApiStatus apiStatus = new ApiStatus();
-            RankingResponse response;
-            Assert.IsTrue(liveModel.TryChooseRank(EventId, ContextJsonWithPdf, out response, apiStatus));
-            Assert.AreEqual(NativeMethods.SuccessStatus, apiStatus.ErrorCode, "Errors from ISender.Send should be background errors.");
-
-            Task.Delay(50).GetAwaiter().GetResult();
-
-            Assert.AreEqual(NativeMethods.OpaqueBindingError, backgroundErrorCode, "Error from ISender did not get raised.");
-
-            if (!expectPrefix)
-            {
-                Assert.AreEqual(OpaqueErrorMessage, backgroundErrorMessage);
-            }
-            else
-            {
-                Assert.IsTrue(backgroundErrorMessage.StartsWith(OpaqueErrorMessage));
-            }
+            Run_TestCustomSender_SendFailure(factoryContext, expectedString, expectPrefix);
         }
     
         [TestMethod]
