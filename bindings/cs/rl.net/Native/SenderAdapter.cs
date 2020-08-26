@@ -35,10 +35,8 @@ namespace Rl.Net.Native {
             this.senderImplementation = senderImplementation;
         }
 
-        public static sender_vtable VTable
-        {
-            get;
-        } = CreateAdapterVTable();
+        // This needs to be backed by a real field, so that the delegates stick around for invocation from native code.
+        public static readonly sender_vtable VTable = CreateAdapterVTable();
 
         private static sender_vtable CreateAdapterVTable()
         {
