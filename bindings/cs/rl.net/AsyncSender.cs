@@ -5,6 +5,11 @@ using Rl.Net.Native;
 
 namespace Rl.Net
 {
+    /// <summary>
+    /// This is a helper class to make it easy to implement a Fire-and-Forget asynchronous ISender using C# async/await.
+    /// It operates the same way that the EventHub-based native i_sender does: Calls into send() queue a background task
+    /// and return right away.
+    /// </summary>
     public abstract class AsyncSender : ISender
     {
         private ErrorCallback errorCallback;
@@ -20,10 +25,11 @@ namespace Rl.Net
 
         public void Send(SharedBuffer buffer, ApiStatus status)
         {
-            // Create a cloned handle so that we have an our own copy of the shared pointer to the buffer 
+            // Create a cloned handle so that we have our own copy of the shared pointer to the buffer 
             SharedBuffer ownedHandle = new SharedBuffer(buffer);
             GC.KeepAlive(buffer);
 
+            // Fire off the send task, and return
             Task backgroundTask = SendAsyncAndUnwrapExceptions(ownedHandle);
         }
 

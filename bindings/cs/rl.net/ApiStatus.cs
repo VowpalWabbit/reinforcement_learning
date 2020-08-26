@@ -67,6 +67,10 @@ namespace Rl.Net {
                 fixed (byte* messageBytes = NativeMethods.StringEncoding.GetBytes(message))
                 {
                     IntPtr messagePtr = new IntPtr(messageBytes);
+
+                    // Under the hood, api_status will take a copy of the incoming string, so it only needs
+                    // to live until after UpdateApiStatusSafe returns. After that it is safe to let the
+                    // buffer be unpinned and collected.
                     UpdateApiStatusSafe(status.ToNativeHandleOrNullptrDangerous(), errorCode, messagePtr);
 
                     GC.KeepAlive(status);

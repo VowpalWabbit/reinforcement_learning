@@ -14,11 +14,11 @@ namespace rl_net_native {
   using buffer = std::shared_ptr<reinforcement_learning::utility::data_buffer>;
   using error_context = reinforcement_learning::error_callback_fn;
   
-  typedef void(*error_fn)(error_context* error_context, reinforcement_learning::api_status* api_status);
-  typedef void*(*sender_create_fn)(const reinforcement_learning::utility::configuration* configuration, error_fn error_callback, reinforcement_learning::error_callback_fn* error_ctx);
-  typedef int(*sender_init_fn)(void* managed_handle, reinforcement_learning::api_status* status);
-  typedef int(*sender_send_fn)(void* managed_handle, const buffer* buffer, reinforcement_learning::api_status* status);
-  typedef void(*sender_release_fn)(void* managed_handle);
+  using error_fn = void (*)(error_context* error_context, reinforcement_learning::api_status* api_status);
+  using sender_create_fn = void*(*)(const reinforcement_learning::utility::configuration* configuration, error_fn error_callback, reinforcement_learning::error_callback_fn* error_ctx);
+  using sender_init_fn = int(*)(void* managed_handle, reinforcement_learning::api_status* status);
+  using sender_send_fn = int(*)(void* managed_handle, const buffer* buffer, reinforcement_learning::api_status* status);
+  using sender_release_fn = void(*)(void* managed_handle);
 
   typedef struct sender_vtable
   {

@@ -6,47 +6,33 @@ namespace Rl.Net.Cli.Test
 {
     public sealed class CleanupContainer : IDisposable
     {
-        private Stack<IDisposable> cleanupStack = new Stack<IDisposable>();
+        private Stack<Action> cleanupStack = new Stack<Action>();
 
         public void Dispose()
         {
-            Stack<IDisposable> localCleanupStack = Interlocked.Exchange(ref cleanupStack, new Stack<IDisposable>());
-            while (localCleanupStack.TryPop(out IDisposable cleanupDisposable))
+            Stack<Action> localCleanupStack = Interlocked.Exchange(ref cleanupStack, new Stack<Action>());
+            while (localCleanupStack.TryPop(out Action action))
             {
-                if (cleanupDisposable != null)
+                try
                 {
-                    cleanupDisposable.Dispose();
+                    action?.Invoke();
                 }
-            }
-        }
-
-        private sealed class ActionDisposable : IDisposable
-        {
-            private Action disposeAction;
-
-            public ActionDisposable(Action action)
-            {
-                this.disposeAction = action;
-            }
-
-            public void Dispose()
-            {
-                Action localAction = Interlocked.Exchange(ref this.disposeAction, null);
-                if (localAction != null)
+                catch
                 {
-                    localAction();
+                    // Suppress errors on TestCleanup. If we want to detect state errors on
+                    // cleanup, it should be an explicit part of a test.
                 }
             }
         }
 
         public void Add(IDisposable disposable)
         {
-            this.cleanupStack.Push(disposable);
+            this.cleanupStack.Push(disposable.Dispose);
         }
 
         public void Add(Action action)
         {
-            this.cleanupStack.Push(new ActionDisposable(action));
+            this.cleanupStack.Push(action);
         }
     }
 }
