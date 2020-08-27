@@ -6,8 +6,6 @@
 #include "decision_response.h"
 #include "slates_response.h"
 
-#include <flatbuffers/flatbuffers.h>
-
 namespace reinforcement_learning {
   struct timestamp;
   namespace utility { class data_buffer; }

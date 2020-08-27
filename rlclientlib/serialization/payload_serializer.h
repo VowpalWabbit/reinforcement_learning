@@ -123,7 +123,7 @@ namespace reinforcement_learning {
         return fbb.Release();
       }
 
-      static generic_event::payload_buffer_t&& report_action_taken() {
+      static generic_event::payload_buffer_t report_action_taken() {
         flatbuffers::FlatBufferBuilder fbb;
         const auto evt = v2::CreateActionTakenEvent(fbb, true).Union();
         auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_ActionTakenEvent, evt);
