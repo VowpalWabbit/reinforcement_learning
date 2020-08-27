@@ -11,6 +11,7 @@
     <StartupObject />
     <AssemblyName>Rl.Net.Cli</AssemblyName>
     <RootNamespace>Rl.Net.Cli</RootNamespace>
+    <HighEntropyVA>true</HighEntropyVA>
   </PropertyGroup>
 
   <Import Project="$(PackagingIntegration)" Condition="Exists('$(PackagingIntegration)')" />

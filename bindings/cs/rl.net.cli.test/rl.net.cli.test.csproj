@@ -10,6 +10,7 @@
     <AssemblyName>Rl.Net.Cli.Test</AssemblyName>
     <RootNamespace>Rl.Net.Cli.Test</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <HighEntropyVA>true</HighEntropyVA>
   </PropertyGroup>
 
   <Import Project="$(PackagingIntegration)" Condition="Exists('$(PackagingIntegration)')" />
