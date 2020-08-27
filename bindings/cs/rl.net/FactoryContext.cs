@@ -22,7 +22,7 @@ namespace Rl.Net {
 
         private GCHandleLifetime registeredSenderCreateHandle;
 
-        internal void SetSenderFactory<TSender>(Func<IReadOnlyConfiguration, ErrorCallback, TSender> createSender) where TSender : ISender
+        public void SetSenderFactory<TSender>(Func<IReadOnlyConfiguration, ErrorCallback, TSender> createSender) where TSender : ISender
         {
             sender_create_fn create_fn =
                 (IntPtr configuration, error_fn error_callback, IntPtr error_context) =>
