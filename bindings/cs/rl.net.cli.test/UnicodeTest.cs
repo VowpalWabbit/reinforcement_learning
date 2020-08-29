@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,46 +7,12 @@ using System.Threading.Tasks;
 
 using Rl.Net.Native;
 using System.Runtime.InteropServices;
-using System.IO;
 
 namespace Rl.Net.Cli.Test
 {
-    internal sealed class TempFileDisposable : IDisposable
-    {
-        public TempFileDisposable()
-        {
-            this.Path = System.IO.Path.GetTempFileName();
-        }
-
-        public string Path
-        {
-            get;
-            private set;
-        }
-
-        public void Dispose()
-        {
-            try
-            {
-                if (File.Exists(this.Path))
-                {
-                    File.Delete(this.Path);
-                }
-
-                if (Directory.Exists(this.Path))
-                {
-                    Directory.Delete(this.Path, recursive: true);
-                }
-            }
-            catch
-            {
-                // TestCleanup is best-efforts
-            }
-        }
-    }
 
     [TestClass]
-    public class UnicodeTest
+    public class UnicodeTest : TestBase
     {
         const string PseudoLocLoremIpsum = "£ôřè₥ ïƥƨú₥ δôℓôř ƨïƭ á₥èƭ, çôñƨèçƭèƭúř áδïƥïƨçïñϱ èℓïƭ, ƨèδ δô èïúƨ₥ôδ ƭè₥ƥôř ïñçïδïδúñƭ úƭ ℓáβôřè èƭ δôℓôřè ₥áϱñá áℓï9úá. Ûƭ èñï₥ áδ ₥ïñï₥ Ʋèñïá₥, 9úïƨ ñôƨƭřúδ èжèřçïƭáƭïôñ úℓℓá₥çô ℓáβôřïƨ ñïƨï úƭ áℓï9úïƥ èж èá çô₥₥ôδô çôñƨè9úáƭ. Ðúïƨ áúƭè ïřúřè δôℓôř ïñ řèƥřèλèñδèřïƭ ïñ Ʋôℓúƥƭáƭè Ʋèℓïƭ èƨƨè çïℓℓú₥ δôℓôřè èú ƒúϱïáƭ ñúℓℓá ƥářïáƭúř. Éжçèƥƭèúř ƨïñƭ ôççáèçáƭ çúƥïδáƭáƭ ñôñ ƥřôïδèñƭ, ƨúñƭ ïñ çúℓƥá 9úï ôƒƒïçïá δèƨèřúñƭ ₥ôℓℓïƭ áñï₥ ïδ èƨƭ ℓáβôřú₥. ℓôřè₥ ïƥƨú₥ δôℓôř ƨïƭ á₥èƭ, çôñƨèçƭèƭúř áδïƥïƨçïñϱ èℓïƭ. Núñç èϱèƭ úřñá ℓáôřèèƭ, áççú₥ƨáñ ƒèℓïƨ áƭ, δáƥïβúƨ èℓïƭ. Ìñ úƭ ƭè₥ƥúƨ ₥áúřïƨ";
         const string PseudoLocJson =
@@ -120,19 +86,21 @@ namespace Rl.Net.Cli.Test
             }
         }
 
-        private List<IDisposable> TestCleanup = new List<IDisposable>();
-
-        [TestCleanup]
-        public void CleanupTest()
+        [TestInitialize]
+        public void SetupTest()
         {
-            NativeMethods.ConfigurationGetOverride = null;
-            NativeMethods.ConfigurationSetOverride = null;
-            NativeMethods.LiveModelChooseRankOverride = null;
-            NativeMethods.LiveModelChooseRankWithFlagsOverride = null;
-            NativeMethods.LiveModelReportActionTakenOverride = null;
-            NativeMethods.LiveModelReportOutcomeFOverride = null;
-            NativeMethods.LiveModelReportOutcomeJsonOverride = null;
-            NativeMethods.LoadConfigurationFromJsonOverride = null;
+            void CleanupPInvokeOverrides()
+            {
+                NativeMethods.ConfigurationGetOverride = null;
+                NativeMethods.ConfigurationSetOverride = null;
+                NativeMethods.LiveModelChooseRankOverride = null;
+                NativeMethods.LiveModelChooseRankWithFlagsOverride = null;
+                NativeMethods.LiveModelReportActionTakenOverride = null;
+                NativeMethods.LiveModelReportOutcomeFOverride = null;
+                NativeMethods.LiveModelReportOutcomeJsonOverride = null;
+                NativeMethods.LoadConfigurationFromJsonOverride = null;
+            }
+            this.TestCleanup.Add(CleanupPInvokeOverrides);
         }
 
         [TestMethod]

@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <OutputPath>$(SolutionDir)$(Platform)\$(Configuration)</OutputPath>
     <IsPackable>false</IsPackable>
     <Platforms>x64</Platforms>
@@ -10,6 +10,7 @@
     <AssemblyName>Rl.Net.Cli.Test</AssemblyName>
     <RootNamespace>Rl.Net.Cli.Test</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <HighEntropyVA>true</HighEntropyVA>
   </PropertyGroup>
 
   <Import Project="$(PackagingIntegration)" Condition="Exists('$(PackagingIntegration)')" />

@@ -16,3 +16,12 @@
     #define API
     #pragma warning Unknown dynamic link import/export semantics.
 #endif
+
+namespace rl_net_native
+{
+    typedef void(*background_error_callback_t)(const reinforcement_learning::api_status&);
+}
+
+extern "C" {
+    API const char* LookupMessageForErrorCode(int code);
+}

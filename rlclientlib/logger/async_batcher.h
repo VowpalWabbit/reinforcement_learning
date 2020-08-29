@@ -2,7 +2,7 @@
 
 #include "event_queue.h"
 #include "api_status.h"
-#include "../error_callback_fn.h"
+#include "error_callback_fn.h"
 #include "err_constants.h"
 #include "data_buffer.h"
 #include "utility/periodic_background_proc.h"
