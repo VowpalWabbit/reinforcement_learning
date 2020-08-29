@@ -64,7 +64,7 @@ namespace reinforcement_learning {
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-        auto fb = v2::CreateCcbEventDirect(fbb, &_context, &slots, model_version.c_str(), flags | action_flags::DEFERRED);
+        auto fb = v2::CreateCcbEventDirect(fbb, &_context, &slots, model_version.c_str(), flags & action_flags::DEFERRED);
         fbb.Finish(fb);
         return fbb.Release();
       }
@@ -84,7 +84,7 @@ namespace reinforcement_learning {
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-        auto fb = v2::CreateSlatesEventDirect(fbb, &_context, &slots, model_version.c_str(), flags | action_flags::DEFERRED);
+        auto fb = v2::CreateSlatesEventDirect(fbb, &_context, &slots, model_version.c_str(), flags & action_flags::DEFERRED);
         fbb.Finish(fb);
         return fbb.Release();
       }
