@@ -1,6 +1,7 @@
 
 # If compiling on windows add the stdafx file
 add_executable(rltest
+  api_status_test.cc
   async_batcher_test.cc
   configuration_test.cc
   data_buffer_test.cc

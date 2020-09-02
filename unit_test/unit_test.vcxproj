@@ -163,6 +163,7 @@
     <ClInclude Include="mock_util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="api_status_test.cc" />
     <ClCompile Include="async_batcher_test.cc" />
     <ClCompile Include="configuration_test.cc" />
     <ClCompile Include="data_buffer_test.cc" />

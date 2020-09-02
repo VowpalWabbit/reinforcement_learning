@@ -29,6 +29,9 @@
     <ClCompile Include="main.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="api_status_test.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="async_batcher_test.cc">
       <Filter>Source Files</Filter>
     </ClCompile>

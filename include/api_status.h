@@ -9,9 +9,18 @@
 
 #include <string>
 #include <sstream>
+#include <vector>
 #include "err_constants.h"
 
 namespace reinforcement_learning {
+
+  struct stack_frame_info {
+    std::string file_name;
+    std::string function_name;
+    size_t line_number;
+  };
+  inline std::string to_string(const std::vector<stack_frame_info>& call_stack);
+
   class i_trace;
   /**
    * @brief Report status of all API calls
@@ -36,6 +45,8 @@ namespace reinforcement_learning {
        */
       const char* get_error_msg() const;
 
+      const std::vector<stack_frame_info>& get_call_stack() const;
+
       /**
        * @brief Helper method for returning error object
        * Checks to see if api_status is not null before setting the error code and error message
@@ -44,6 +55,9 @@ namespace reinforcement_learning {
        * @param new_msg Error description to set if status object is not null
        */
       static void try_update(api_status* status, int new_code, const char* new_msg);
+
+      static void try_push_stack_frame(api_status* status, const std::string& file_name, const std::string& function_name, size_t line_number);
+      static void try_push_stack_frame(api_status* status,const stack_frame_info& frame);
 
       /**
        * @brief Helper method to clear the error object
@@ -55,6 +69,7 @@ namespace reinforcement_learning {
     private:
       int _error_code;          //! Error code
       std::string _error_msg;   //! Error description
+      std::vector<stack_frame_info> _call_stack;
   };
 
   /**
@@ -69,6 +84,7 @@ namespace reinforcement_learning {
      * @param code Error code
      */
     status_builder(i_trace* trace, api_status* status, int code);
+    status_builder(i_trace* trace, api_status* status, int code, const std::string& file_name, const std::string& function_name, size_t line_number);
     ~status_builder();
 
     //! return the status when cast to an int
@@ -81,12 +97,16 @@ namespace reinforcement_learning {
     //! String stream used to serialize detailed error message
     std::ostringstream _os;
 
+
     status_builder(const status_builder&&) = delete;
     status_builder(const status_builder&) = delete;
     status_builder& operator=(const status_builder&) = delete;
     status_builder& operator=(status_builder&&) = delete;
 
   private:
+    bool _stack_frame_provided = false;
+    stack_frame_info _stack_frame;
+
     //! Trace logger
     i_trace* _trace;
     //! Is logging needed
@@ -181,6 +201,7 @@ namespace reinforcement_learning {
   }
 
   /**
+   * FIXME: Does not support reporting a stack. Should be phased out?
    * @brief variadic template report_error that takes a list of parameters
    *
    * @tparam First Type of first parameter in parameter list
@@ -202,21 +223,23 @@ namespace reinforcement_learning {
  */
 #define RETURN_ERROR_ARG(trace, status, code, ... ) do {                                                  \
   if(status != nullptr) {                                                                                 \
-    reinforcement_learning::status_builder sb(trace, status, reinforcement_learning::error_code::code);   \
+    reinforcement_learning::status_builder sb(trace, status, reinforcement_learning::error_code::code, __FILE__, __func__, __LINE__);   \
     sb << reinforcement_learning::error_code::code ## _s;                                         \
     return report_error(sb, __VA_ARGS__ );                                                        \
   }                                                                                               \
   return reinforcement_learning::error_code::code;                                                \
-} while(0);                                                                                       \
+} while(0);
 
 /**
  * @brief Error reporting macro used with left shift operator
  */
-#define RETURN_ERROR_LS(trace, status, code)                                                          \
-reinforcement_learning::status_builder sb(trace, status, reinforcement_learning::error_code::code);   \
-return sb << reinforcement_learning::error_code::code ## _s                                           \
+#define RETURN_ERROR_LS(trace, status, code)                                   \
+  reinforcement_learning::status_builder sb(                                   \
+      trace, status, reinforcement_learning::error_code::code, __FILE__,       \
+      __func__, __LINE__);                                                     \
+  return sb << reinforcement_learning::error_code::code##_s
 
- /**
+/**
  * @brief Error reporting macro to test and return on error
  */
 #define RETURN_IF_FAIL(x) do {    \
@@ -224,5 +247,19 @@ return sb << reinforcement_learning::error_code::code ## _s                     
   if (retval__LINE__ != 0) {      \
     return retval__LINE__;        \
   }                               \
-} while (0)                       \
+} while (0)
 
+#define STATUS_PUSH_STACK_FRAME(status)                                        \
+  do {                                                                         \
+    reinforcement_learning::api_status::try_push_stack_frame(                  \
+        status, __FILE__, __func__, __LINE__);                                 \
+  } while (0)
+
+#define RETURN_IF_FAIL_WITH_STACK(x, status)                                   \
+  do {                                                                         \
+    int retval__LINE__ = (x);                                                  \
+    if (retval__LINE__ != 0) {                                                 \
+      STATUS_PUSH_STACK_FRAME(status);                                         \
+      return retval__LINE__;                                                   \
+    }                                                                          \
+  } while (0)
