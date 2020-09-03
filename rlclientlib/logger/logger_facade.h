@@ -34,11 +34,11 @@ namespace reinforcement_learning
       int log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
     
     private:
-      const int version;
-      const std::unique_ptr<interaction_logger> v1;
-      const std::unique_ptr<generic_event_logger> v2;
+      const int _version;
+      const std::unique_ptr<interaction_logger> _v1;
+      const std::unique_ptr<generic_event_logger> _v2;
 
-      const cb_serializer serializer;
+      const cb_serializer _serializer;
     };
 
     class ccb_logger_facade {
@@ -61,11 +61,11 @@ namespace reinforcement_learning
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
 
     private:
-      const int version;
-      const std::unique_ptr<ccb_logger> v1;
-      const std::unique_ptr<generic_event_logger> v2;
+      const int _version;
+      const std::unique_ptr<ccb_logger> _v1;
+      const std::unique_ptr<generic_event_logger> _v2;
 
-      const ccb_serializer serializer;
+      const ccb_serializer _serializer;
     };
 
     class slates_logger_facade {
@@ -85,11 +85,11 @@ namespace reinforcement_learning
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
 
     private:
-      const int version;
-      const std::unique_ptr<slates_logger> v1;
-      const std::unique_ptr<generic_event_logger> v2;
+      const int _version;
+      const std::unique_ptr<slates_logger> _v1;
+      const std::unique_ptr<generic_event_logger> _v2;
 
-      const slates_serializer serializer;
+      const slates_serializer _serializer;
     };
 
     class observation_logger_facade {
@@ -114,11 +114,11 @@ namespace reinforcement_learning
       int report_action_taken(const char* event_id, api_status* status);
 
     private:
-      const int version;
-      const std::unique_ptr<observation_logger> v1;
-      const std::unique_ptr<generic_event_logger> v2;
+      const int _version;
+      const std::unique_ptr<observation_logger> _v1;
+      const std::unique_ptr<generic_event_logger> _v2;
 
-      const outcome_single_serializer serializer;
+      const outcome_single_serializer _serializer;
     };
   }
 }
