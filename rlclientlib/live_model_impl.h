@@ -25,7 +25,7 @@ namespace reinforcement_learning
 
     int init(api_status* status);
 
-    int choose_rank(const char* event_id, const char* context, unsigned int flags, ranking_response& response, api_status* status);
+    error_code_no_discard choose_rank(const char* event_id, const char* context, unsigned int flags, ranking_response& response, api_status* status);
     //here the event_id is auto-generated
     int choose_rank(const char* context, unsigned int flags, ranking_response& response, api_status* status);
     int request_decision(const char* context_json, unsigned int flags, decision_response& resp, api_status* status);

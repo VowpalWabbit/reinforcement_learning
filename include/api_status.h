@@ -10,6 +10,15 @@
 #include <string>
 #include <sstream>
 #include "err_constants.h"
+#include "future_compat.h"
+
+struct RL_ATTR(nodiscard) error_code_no_discard
+{
+  error_code_no_discard(int value) : _value(value) {}
+  operator int() const { return _value; }
+  int value() const { return _value; }
+  int _value;
+};
 
 namespace reinforcement_learning {
   class i_trace;
@@ -73,6 +82,9 @@ namespace reinforcement_learning {
 
     //! return the status when cast to an int
     operator int() const;
+    operator error_code_no_discard() const {
+      return _code;
+    }
 
     //! Error code
     int _code;

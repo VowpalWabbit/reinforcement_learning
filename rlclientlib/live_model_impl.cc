@@ -54,7 +54,7 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int live_model_impl::choose_rank(const char* event_id, const char* context, unsigned int flags, ranking_response& response,
+  error_code_no_discard live_model_impl::choose_rank(const char* event_id, const char* context, unsigned int flags, ranking_response& response,
     api_status* status) {
     response.clear();
     //clear previous errors if any
