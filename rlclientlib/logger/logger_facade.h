@@ -37,7 +37,6 @@ namespace reinforcement_learning
       const int _version;
       const std::unique_ptr<interaction_logger> _v1;
       const std::unique_ptr<generic_event_logger> _v2;
-
       const cb_serializer _serializer;
     };
 
@@ -64,7 +63,6 @@ namespace reinforcement_learning
       const int _version;
       const std::unique_ptr<ccb_logger> _v1;
       const std::unique_ptr<generic_event_logger> _v2;
-
       const ccb_serializer _serializer;
     };
 
@@ -88,7 +86,6 @@ namespace reinforcement_learning
       const int _version;
       const std::unique_ptr<slates_logger> _v1;
       const std::unique_ptr<generic_event_logger> _v2;
-
       const slates_serializer _serializer;
     };
 
@@ -117,7 +114,6 @@ namespace reinforcement_learning
       const int _version;
       const std::unique_ptr<observation_logger> _v1;
       const std::unique_ptr<generic_event_logger> _v2;
-
       const outcome_single_serializer _serializer;
     };
   }
