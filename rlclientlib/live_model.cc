@@ -5,9 +5,7 @@
 
 #define INIT_CHECK() do {                                       \
   if(!_initialized) {                                           \
-    api_status::try_update(status, error_code::not_initialized, \
-                "Library not initialized. Call init() first."); \
-    return error_code::not_initialized;                         \
+    RETURN_ERROR_ARG(nullptr, status, not_initialized, "Library not initialized. Call init() first."); \
   }                                                             \
 } while(0);                                                     \
 

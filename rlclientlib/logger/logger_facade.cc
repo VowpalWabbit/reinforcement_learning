@@ -4,9 +4,7 @@
 namespace reinforcement_learning {
   namespace logger {
     int protocol_not_supported(api_status* status) {
-      api_status::try_update(status, error_code::protocol_not_supported,
-        "Current protocol version is not supported");
-      return error_code::protocol_not_supported;
+      RETURN_ERROR_ARG(nullptr, status, protocol_not_supported, "Current protocol version is not supported");
     }
 
     cb_logger_facade::cb_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
