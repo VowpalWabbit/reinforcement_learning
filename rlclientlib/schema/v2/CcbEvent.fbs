@@ -1,0 +1,15 @@
+namespace reinforcement_learning.messages.flatbuff.v2;
+
+table SlotEvent {
+    action_ids:[uint32];   // ranked action ids
+    probabilities:[float]; // probabilities
+}
+
+table CcbEvent {
+    context:[ubyte];                // context json
+    slots:[SlotEvent];              // the collection of individual slots
+    model_id:string;                // model id
+    deferred_action:bool = false;   // delayed activation flag
+}
+
+root_type CcbEvent;

@@ -13,6 +13,7 @@
 
 #include "event_logger.h"
 
+#include "serialization/payload_serializer.h"
 
 namespace reinforcement_learning
 {
@@ -30,11 +31,13 @@ namespace reinforcement_learning
 
       int init(api_status* status);
 
-      int log(const char* event_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
+      int log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
     
     private:
-      const int version;
-      const std::unique_ptr<interaction_logger> v1;
+      const int _version;
+      const std::unique_ptr<interaction_logger> _v1;
+      const std::unique_ptr<generic_event_logger> _v2;
+      const cb_serializer _serializer;
     };
 
     class ccb_logger_facade {
@@ -53,9 +56,14 @@ namespace reinforcement_learning
       int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
 
+      int log_decisions(const char* event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+        const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
+
     private:
-      const int version;
-      const std::unique_ptr<ccb_logger> v1;
+      const int _version;
+      const std::unique_ptr<ccb_logger> _v1;
+      const std::unique_ptr<generic_event_logger> _v2;
+      const ccb_serializer _serializer;
     };
 
     class slates_logger_facade {
@@ -75,8 +83,10 @@ namespace reinforcement_learning
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
 
     private:
-      const int version;
-      const std::unique_ptr<slates_logger> v1;
+      const int _version;
+      const std::unique_ptr<slates_logger> _v1;
+      const std::unique_ptr<generic_event_logger> _v2;
+      const slates_serializer _serializer;
     };
 
     class observation_logger_facade {
@@ -93,14 +103,18 @@ namespace reinforcement_learning
       int init(api_status* status);
 
       int log(const char* event_id, float outcome, api_status* status);
-
       int log(const char* event_id, const char* outcome, api_status* status);
+
+      int log(const char* event_id, int index, float outcome, api_status* status);
+      int log(const char* event_id, int index, const char* outcome, api_status* status);
 
       int report_action_taken(const char* event_id, api_status* status);
 
     private:
-      const int version;
-      const std::unique_ptr<observation_logger> v1;
+      const int _version;
+      const std::unique_ptr<observation_logger> _v1;
+      const std::unique_ptr<generic_event_logger> _v2;
+      const outcome_single_serializer _serializer;
     };
   }
 }
