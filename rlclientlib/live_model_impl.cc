@@ -77,7 +77,7 @@ namespace reinforcement_learning {
       RETURN_IF_FAIL(reset_action_order(response));
     }
 
-    RETURN_IF_FAIL(_ranking_logger->log(event_id, context, flags, response, status, _learning_mode));
+    RETURN_IF_FAIL(_ranking_logger->log(context, flags, response, status, _learning_mode));
 
     if (_learning_mode == APPRENTICE)
     {

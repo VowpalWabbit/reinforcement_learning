@@ -19,6 +19,7 @@ add_executable(rltest
   mock_util.cc
   model_mgmt_test.cc
   object_pool_test.cc
+  payload_serializer_test.cc
   ranking_response_test.cc
   safe_vw_test.cc
   sleeper_test.cc

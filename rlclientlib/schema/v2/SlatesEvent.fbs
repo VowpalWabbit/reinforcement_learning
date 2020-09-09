@@ -1,0 +1,16 @@
+// EventHubInteraction Schema used by FlatBuffer
+namespace reinforcement_learning.messages.flatbuff.v2;
+
+table SlatesSlotEvent {
+    action_ids:[uint32];     // ranked action ids
+    probabilities:[float];   // probabilities
+}
+
+table SlatesEvent {
+    context:[ubyte];               // context
+    slots:[SlatesSlotEvent];        // actions and probabilities
+    model_id:string;               // model ID
+    deferred_action:bool = false;  // delayed activation flag
+}
+
+root_type SlatesEvent;

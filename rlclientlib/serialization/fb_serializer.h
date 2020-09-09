@@ -6,6 +6,12 @@
 #include "generated/v1/RankingEvent_generated.h"
 #include "generated/v1/DecisionRankingEvent_generated.h"
 #include "generated/v1/SlatesEvent_generated.h"
+
+#include "generated/v2/Event_generated.h"
+
+#include "generic_event.h"
+#include "ranking_event.h"
+
 #include "logger/message_type.h"
 #include "err_constants.h"
 
@@ -172,11 +178,11 @@ namespace reinforcement_learning { namespace logger {
     static int serialize(outcome_event& evt, flatbuffers::FlatBufferBuilder& builder,
                          flatbuffers::Offset<fb_event_t>& retval, api_status* status) {
       const auto event_id = builder.CreateString(evt.get_event_id());
-	  const auto &ts = evt.get_client_time_gmt();
-	  TimeStamp client_ts(ts.year, ts.month, ts.day, ts.hour,
+	    const auto &ts = evt.get_client_time_gmt();
+	    TimeStamp client_ts(ts.year, ts.month, ts.day, ts.hour,
 		  ts.minute, ts.second, ts.sub_second);
-	  const auto meta_id_offset = CreateMetadata(builder, &client_ts);
-	  switch (evt.get_outcome_type()) {
+	    const auto meta_id_offset = CreateMetadata(builder, &client_ts);
+	    switch (evt.get_outcome_type()) {
         case outcome_event::outcome_type_string: {
           const auto outcome_str = builder.CreateString(evt.get_outcome());
           const auto str_event = CreateStringEvent(builder, outcome_str).Union();
@@ -242,6 +248,33 @@ namespace reinforcement_learning { namespace logger {
   };
 
   template <>
+  struct fb_event_serializer<generic_event> {
+    using fb_event_t = v2::Event;
+    using offset_vector_t = typename std::vector<flatbuffers::Offset<fb_event_t>>;
+    using batch_builder_t = v2::EventBatchBuilder;
+
+    static size_t size_estimate(const generic_event& evt) {
+      return evt.get_payload().size();
+    }
+
+    static int serialize(generic_event& evt, flatbuffers::FlatBufferBuilder& builder,
+      flatbuffers::Offset<fb_event_t>& ret_val, api_status* status) {
+
+      const auto id_offset = builder.CreateString(evt.get_id());
+
+      const auto& ts = evt.get_client_time_gmt();
+      v2::TimeStamp client_ts(ts.year, ts.month, ts.day, ts.hour,
+        ts.minute, ts.second, ts.sub_second);
+      const auto meta_offset = v2::CreateMetadataDirect(builder, evt.get_id(), &client_ts, nullptr, evt.get_payload_type(), evt.get_pass_prob());
+      const auto& buffer = evt.get_payload();
+      const auto payload_offset = builder.CreateVector(buffer.data(), buffer.size());
+      ret_val = v2::CreateEvent(builder, meta_offset, payload_offset);
+      return error_code::success;
+    }
+  };
+
+
+  template <>
   inline int fb_collection_serializer<outcome_event>::message_id() { return message_type::fb_outcome_event_collection; }
 
   template <>
@@ -252,4 +285,8 @@ namespace reinforcement_learning { namespace logger {
 
   template <>
   inline int fb_collection_serializer<ranking_event>::message_id() { return message_type::fb_ranking_learning_mode_event_collection; }
+
+  template <>
+  inline int fb_collection_serializer<generic_event>::message_id() { return message_type::fb_generic_event_collection; }
+
 }}

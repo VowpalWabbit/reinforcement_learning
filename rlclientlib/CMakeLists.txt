@@ -1,13 +1,23 @@
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(flatbuffers REQUIRED)
 
-set(RL_FLAT_BUFFER_FILES
+set(RL_FLAT_BUFFER_FILES_V1
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/Metadata.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/OutcomeEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/RankingEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/DecisionRankingEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/SlatesEvent.fbs" )
-build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgenerator "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v1/" "" "")
+
+set(RL_FLAT_BUFFER_FILES_V2
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Metadata.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/OutcomeSingle.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CbEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CcbEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/SlatesEvent.fbs" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Event.fbs" )
+
+build_flatbuffers("${RL_FLAT_BUFFER_FILES_V1}" "" fbgenerator_v1 "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v1/" "" "")
+build_flatbuffers("${RL_FLAT_BUFFER_FILES_V2}" "" fbgenerator_v2 "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v2/" "" "")
 
 set(PROJECT_SOURCES
   api_status.cc
@@ -35,9 +45,11 @@ set(PROJECT_SOURCES
   model_mgmt/model_mgmt.cc
   model_mgmt/restapi_data_transport.cc
   model_mgmt/file_model_loader.cc
+  generic_event.cc
   ranking_event.cc
   ranking_response.cc
   sampling.cc
+  serialization/payload_serializer.cc
   slates_response.cc
   trace_logger.cc
   utility/stl_container_adapter.cc
@@ -95,6 +107,7 @@ set(PROJECT_PRIVATE_HEADERS
   model_mgmt/restapi_data_transport.h
   model_mgmt/file_model_loader.h
   moving_queue.h
+  generic_event.h
   ranking_event.h
   sampling.h
   serialization/fb_serializer.h
@@ -117,7 +130,7 @@ source_group("Public headers" FILES ${PROJECT_PUBLIC_HEADERS})
 source_group("Private headers" FILES ${PROJECT_PRIVATE_HEADERS})
 
 add_library(rlclientlib ${PROJECT_SOURCES} ${PROJECT_PUBLIC_HEADERS} ${PROJECT_PRIVATE_HEADERS})
-add_dependencies(rlclientlib fbgenerator)
+add_dependencies(rlclientlib fbgenerator_v1 fbgenerator_v2)
 set_target_properties(rlclientlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories( rlclientlib
                             PUBLIC

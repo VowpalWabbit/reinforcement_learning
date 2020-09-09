@@ -25,7 +25,6 @@ namespace reinforcement_learning {
   public:
     event_queue(size_t max_capacity) 
       : _max_capacity(max_capacity) {
-      static_assert(std::is_base_of<event, T>::value, "T must be a descendant of event");
     }
 
     bool pop(T* item)

@@ -38,4 +38,5 @@ ERROR_CODE_DEFINITION(36, file_stats_error, "Unable to read file statistics e.g.
 ERROR_CODE_DEFINITION(37, not_supported, "Not supported")
 ERROR_CODE_DEFINITION(38, protocol_not_supported, "Protocol version is not supported")
 ERROR_CODE_DEFINITION(39, external_error, "Opaque error in external code. ")
+ERROR_CODE_DEFINITION(40, unsupported_learning_mode, "Unsupported learning mode")
 //! [Error Definitions]

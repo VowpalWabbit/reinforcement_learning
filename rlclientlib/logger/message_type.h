@@ -26,5 +26,6 @@ namespace reinforcement_learning { namespace logger {
     static const_int fb_interaction_learning_mode_event = 10;
     static const_int fb_slates_event = 11;
     static const_int fb_slates_event_collection = 12;
+    static const_int fb_generic_event_collection = 13;
   };
 }}

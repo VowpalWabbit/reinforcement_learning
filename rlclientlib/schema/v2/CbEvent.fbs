@@ -1,0 +1,15 @@
+﻿// EventHubInteraction Schema used by FlatBuffer
+namespace reinforcement_learning.messages.flatbuff.v2;
+
+enum LearningModeType : ubyte { Online, Apprentice, LoggingOnly }
+
+table CbEvent {
+    deferred_action:bool = false;
+    action_ids:[uint64];             // action IDs
+    context:[ubyte];                 // context
+    probabilities:[float];           // probabilities
+    model_id:string;                 // model ID
+    learning_mode:LearningModeType;  // decision mode used to determine rank behavior
+}
+
+root_type CbEvent;
