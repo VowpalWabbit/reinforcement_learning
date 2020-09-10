@@ -203,8 +203,7 @@ namespace reinforcement_learning { namespace logger {
           break;
         }
         default: {
-          return report_error(status, error_code::serialize_unknown_outcome_type,
-                              error_code::serialize_unknown_outcome_type_s);
+          RETURN_ERROR(nullptr, status, serialize_unknown_outcome_type);
         }
       }
       return error_code::success;

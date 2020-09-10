@@ -25,8 +25,7 @@ namespace reinforcement_learning {
   int restapi_data_transport_create(m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status) {
     const auto uri = config.get(name::MODEL_BLOB_URI, nullptr);
     if (uri == nullptr) {
-      api_status::try_update(status, error_code::http_uri_not_provided, error_code::http_uri_not_provided_s);
-      return error_code::http_uri_not_provided;
+      RETURN_ERROR(trace_logger, status, http_uri_not_provided);
     }
     auto pret = new m::restapi_data_transport(new http_client(uri, config), trace_logger);
     const auto scode = pret->check(status);
