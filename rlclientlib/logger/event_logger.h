@@ -192,5 +192,8 @@ class slates_logger : public event_logger<slates_decision_event> {
     {}
 
     int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, api_status* status);
-  };
+
+    private:
+      const char* compression_mode;
+    };
 }}
