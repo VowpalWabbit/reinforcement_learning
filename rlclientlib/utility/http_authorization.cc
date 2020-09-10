@@ -82,10 +82,8 @@ namespace reinforcement_learning {
     // https://www.openssl.org/docs/man1.0.2/crypto/hmac.html
     if (!HMAC(EVP_sha256(), shared_access_key.c_str(), (int)shared_access_key.length(),
       (const unsigned char*)data.c_str(), (int)data.length(), &digest[0], &digest_len)) {
-      api_status::try_update(status, error_code::eventhub_generate_SAS_hash,
-        "Failed to generate SAS hash");
       TRACE_ERROR(trace, "Failed to generate SAS hash");
-      return error_code::eventhub_generate_SAS_hash;
+      RETURN_ERROR_ARG(trace, status, eventhub_generate_SAS_hash, "Failed to generate SAS hash");
     }
     digest.resize(digest_len);
 
