@@ -170,30 +170,40 @@ class slates_logger : public event_logger<slates_decision_event> {
     int report_action_taken(const char* event_id, api_status* status);
   };
 
-  class generic_event_logger : public event_logger<generic_event> {
+  enum compression_mode_enum
+  {
+    NO_COMPRESSION,
+    ZSTD
+  };
+  compression_mode_enum to_compression_mode_enum(const char *compression_mode);
+
+  class generic_event_logger : public event_logger<generic_event>
+  {
   public:
-    generic_event_logger(i_message_sender* sender,
-      int send_high_watermark,
-      int send_batch_interval_ms,
-      int send_queue_max_capacity,
-      const char* queue_mode,
-      utility::watchdog& watchdog,
-      i_time_provider* time_provider,
-      error_callback_fn* perror_cb = nullptr)
-      : event_logger(
-        sender,
-        send_high_watermark,
-        send_batch_interval_ms,
-        send_queue_max_capacity,
-        queue_mode,
-        watchdog,
-        time_provider,
-        perror_cb)
+    generic_event_logger(i_message_sender *sender,
+                         int send_high_watermark,
+                         int send_batch_interval_ms,
+                         int send_queue_max_capacity,
+                         const char *queue_mode,
+                         const char *compression_mode,
+                         utility::watchdog &watchdog,
+                         i_time_provider *time_provider,
+                         error_callback_fn *perror_cb = nullptr)
+        : event_logger(
+              sender,
+              send_high_watermark,
+              send_batch_interval_ms,
+              send_queue_max_capacity,
+              queue_mode,
+              watchdog,
+              time_provider,
+              perror_cb),
+          _compression_mode(to_compression_mode_enum(compression_mode))
     {}
 
     int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, api_status* status);
 
     private:
-      const char* compression_mode;
-    };
+      const compression_mode_enum _compression_mode;
+  };
 }}

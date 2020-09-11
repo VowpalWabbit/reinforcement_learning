@@ -3,6 +3,17 @@
 #include "err_constants.h"
 #include "time_helper.h"
 namespace reinforcement_learning { namespace logger {
+  compression_mode_enum to_compression_mode_enum(const char *compression_mode)
+  {
+    if (std::strcmp(compression_mode, value::NO_COMPRESSION) == 0)
+    {
+      return NO_COMPRESSION;
+    }
+    else
+    {
+      return ZSTD;
+    }
+  }
 
   int interaction_logger::log(const char* event_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode) {
     const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
