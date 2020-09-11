@@ -7,11 +7,11 @@ namespace reinforcement_learning { namespace logger {
   {
     if (std::strcmp(compression_mode, value::NO_COMPRESSION) == 0)
     {
-      return NO_COMPRESSION;
+      return compression_mode_enum::NO_COMPRESSION;
     }
     else
     {
-      return ZSTD;
+      return compression_mode_enum::ZSTD;
     }
   }
 
