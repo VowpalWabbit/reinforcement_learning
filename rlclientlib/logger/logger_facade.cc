@@ -20,7 +20,7 @@ namespace reinforcement_learning {
       c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
       c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
       c.get(name::QUEUE_MODE, "DROP"),
-      c.get(name::INTERACTION_COMPRESSION_MODE, value::NO_COMPRESSION),
+      c.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY),
       watchdog,
       time_provider,
       perror_cb) : nullptr) {
@@ -53,7 +53,7 @@ namespace reinforcement_learning {
       c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
       c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
       c.get(name::QUEUE_MODE, "DROP"),
-      c.get(name::INTERACTION_COMPRESSION_MODE, value::NO_COMPRESSION),
+      c.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY),
       watchdog,
       time_provider,
       perror_cb) : nullptr) {}
@@ -103,7 +103,7 @@ namespace reinforcement_learning {
       c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
       c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
       c.get(name::QUEUE_MODE, "DROP"),
-      c.get(name::INTERACTION_COMPRESSION_MODE, value::NO_COMPRESSION),
+      c.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY),
       watchdog,
       time_provider,
       perror_cb) : nullptr) {
@@ -155,7 +155,7 @@ namespace reinforcement_learning {
       c.get_int(name::OBSERVATION_SEND_BATCH_INTERVAL_MS, 1000),
       c.get_int(name::OBSERVATION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
       c.get(name::QUEUE_MODE, "DROP"),
-      c.get(name::INTERACTION_COMPRESSION_MODE, value::NO_COMPRESSION),
+      c.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY),
       watchdog,
       time_provider,
       perror_cb) : nullptr) {

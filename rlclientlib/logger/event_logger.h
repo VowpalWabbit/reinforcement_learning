@@ -170,12 +170,12 @@ class slates_logger : public event_logger<slates_decision_event> {
     int report_action_taken(const char* event_id, api_status* status);
   };
 
-  enum class compression_mode_enum
+  enum class content_encoding_enum
   {
-    NO_COMPRESSION,
-    ZSTD
+    IDENTITY,
+    ZSTD_AND_DEDUP
   };
-  compression_mode_enum to_compression_mode_enum(const char *compression_mode);
+  content_encoding_enum to_content_encoding_enum(const char *content_encoding);
 
   class generic_event_logger : public event_logger<generic_event> {
   public:
@@ -184,7 +184,7 @@ class slates_logger : public event_logger<slates_decision_event> {
       int send_batch_interval_ms,
       int send_queue_max_capacity,
       const char* queue_mode,
-      const char* compression_mode,
+      const char* content_encoding,
       utility::watchdog& watchdog,
       i_time_provider* time_provider,
       error_callback_fn* perror_cb = nullptr)
@@ -197,12 +197,12 @@ class slates_logger : public event_logger<slates_decision_event> {
         watchdog,
         time_provider,
         perror_cb)
-      , _compression_mode(to_compression_mode_enum(compression_mode))
+      , _content_encoding(to_content_encoding_enum(content_encoding))
     {}
 
     int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, api_status* status);
 
     private:
-      const compression_mode_enum _compression_mode;
+      const content_encoding_enum _content_encoding;
   };
 }}
