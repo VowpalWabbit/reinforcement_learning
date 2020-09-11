@@ -68,8 +68,8 @@ namespace reinforcement_learning {  namespace value {
       const char *const LEARNING_MODE_ONLINE = "ONLINE";
       const char *const LEARNING_MODE_APPRENTICE = "APPRENTICE";
       const char *const LEARNING_MODE_LOGGINGONLY = "LOGGINGONLY";
-      const char *const CONTENT_ENCODING_IDENTITY = "CONTENT_ENCODING_IDENTITY";
-      const char *const CONTENT_ENCODING_ZSTD_AND_DEDUP = "CONTENT_ENCODING_ZSTD_AND_DEDUP";
+      const char *const CONTENT_ENCODING_IDENTITY = "IDENTITY";
+      const char *const CONTENT_ENCODING_ZSTD_AND_DEDUP = "ZSTD_AND_DEDUP";
 
       const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
       const int DEFAULT_VW_POOL_INIT_SIZE = 4;

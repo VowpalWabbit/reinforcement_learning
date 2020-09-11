@@ -2,6 +2,8 @@
 
 #include "event_queue.h"
 #include "api_status.h"
+#include "constants.h"
+#include "content_encoding.h"
 #include "error_callback_fn.h"
 #include "err_constants.h"
 #include "data_buffer.h"
@@ -52,7 +54,8 @@ namespace reinforcement_learning { namespace logger {
                   size_t send_high_water_mark = (1024 * 1024 * 4),
                   size_t batch_timeout_ms = 1000,
                   size_t queue_max_capacity = (16 * 1024 * 1024),
-                  queue_mode_enum queue_mode = DROP);
+                  queue_mode_enum queue_mode = DROP,
+                  content_encoding_enum content_encoding = content_encoding_enum::IDENTITY);
     ~async_batcher();
 
   private:
@@ -68,6 +71,7 @@ namespace reinforcement_learning { namespace logger {
     std::condition_variable _cv;
     std::mutex _m;
     utility::object_pool<utility::data_buffer> _buffer_pool;
+    content_encoding_enum _content_encoding;
   };
 
   template<typename TEvent, template<typename> class TSerializer>
@@ -112,7 +116,7 @@ namespace reinforcement_learning { namespace logger {
                                                       api_status* status)
   {
     TEvent evt;
-    TSerializer<TEvent> collection_serializer(*buffer.get());
+    TSerializer<TEvent> collection_serializer(*buffer.get(), _content_encoding); 
 
     while (remaining > 0 && collection_serializer.size() < _send_high_water_mark) {
       if (_queue.pop(&evt)) {
@@ -157,9 +161,14 @@ namespace reinforcement_learning { namespace logger {
 
   template<typename TEvent, template<typename> class TSerializer>
   async_batcher<TEvent, TSerializer>::async_batcher(
-    i_message_sender* sender, utility::watchdog& watchdog, 
-	  error_callback_fn* perror_cb, const size_t send_high_water_mark,
-    const size_t batch_timeout_ms, const size_t queue_max_capacity, queue_mode_enum queue_mode)
+    i_message_sender* sender,
+    utility::watchdog& watchdog,
+	  error_callback_fn* perror_cb, 
+    const size_t send_high_water_mark,
+    const size_t batch_timeout_ms,
+    const size_t queue_max_capacity,
+    queue_mode_enum queue_mode,
+    content_encoding_enum content_encoding)
     : _sender(sender)
     , _queue(queue_max_capacity)
     , _send_high_water_mark(send_high_water_mark)
@@ -167,6 +176,7 @@ namespace reinforcement_learning { namespace logger {
     , _periodic_background_proc(static_cast<int>(batch_timeout_ms), watchdog, "Async batcher thread", perror_cb)
     , _pass_prob(0.5)
     , _queue_mode(queue_mode)
+    , _content_encoding(content_encoding)
   {}
 
   template<typename TEvent, template<typename> class TSerializer>

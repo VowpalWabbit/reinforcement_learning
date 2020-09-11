@@ -7,6 +7,7 @@
 
 #include "configuration.h"
 #include "constants.h"
+#include "content_encoding.h"
 #include "learning_mode.h"
 #include "async_batcher.h"
 #include "api_status.h"
@@ -18,6 +19,7 @@
 #include "serialization/fb_serializer.h"
 #include "message_sender.h"
 #include "time_helper.h"
+
 namespace reinforcement_learning { namespace logger {
   // This class wraps logging event to event_hub in a generic way that live_model can consume.
   template<typename TEvent>
@@ -29,6 +31,7 @@ namespace reinforcement_learning { namespace logger {
       int send_batch_interval_ms,
       int send_queue_max_capacity,
       const char* queue_mode,
+      const char* content_encoding,
       utility::watchdog& watchdog,
       i_time_provider* time_provider,
       error_callback_fn* perror_cb = nullptr);
@@ -54,6 +57,7 @@ namespace reinforcement_learning { namespace logger {
     int send_batch_interval_ms,
     int send_queue_max_capacity,
     const char* queue_mode,
+    const char* content_encoding,
     utility::watchdog& watchdog,
     i_time_provider* time_provider,
     error_callback_fn* perror_cb
@@ -65,7 +69,8 @@ namespace reinforcement_learning { namespace logger {
       send_high_watermark,
       send_batch_interval_ms,
       send_queue_max_capacity,
-      to_queue_mode_enum(queue_mode)),
+      to_queue_mode_enum(queue_mode),
+      to_content_encoding_enum(content_encoding)),
       _time_provider(time_provider)
   {}
 
@@ -102,6 +107,7 @@ namespace reinforcement_learning { namespace logger {
         c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
         c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
         c.get(name::QUEUE_MODE, "DROP"),
+        c.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY),
         watchdog,
         time_provider,
         perror_cb)
@@ -119,6 +125,7 @@ class ccb_logger : public event_logger<decision_ranking_event> {
         c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
         c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
         c.get(name::QUEUE_MODE, "DROP"),
+        c.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY),
         watchdog,
         time_provider,
         perror_cb)
@@ -137,6 +144,7 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
         c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
         c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
         c.get(name::QUEUE_MODE, "DROP"),
+        c.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY),
         watchdog,
         time_provider,
         perror_cb)
@@ -155,6 +163,7 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
         c.get_int(name::OBSERVATION_SEND_BATCH_INTERVAL_MS, 1000),
         c.get_int(name::OBSERVATION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
         c.get(name::QUEUE_MODE, "DROP"),
+        c.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY),
         watchdog,
         time_provider,
         perror_cb)
@@ -168,13 +177,6 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
 
     int report_action_taken(const char* event_id, api_status* status);
   };
-
-  enum class content_encoding_enum
-  {
-    IDENTITY,
-    ZSTD_AND_DEDUP
-  };
-  content_encoding_enum to_content_encoding_enum(const char *content_encoding);
 
   class generic_event_logger : public event_logger<generic_event> {
   public:
@@ -193,15 +195,12 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
         send_batch_interval_ms,
         send_queue_max_capacity,
         queue_mode,
+        content_encoding,
         watchdog,
         time_provider,
         perror_cb)
-      , _content_encoding(to_content_encoding_enum(content_encoding))
     {}
 
     int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, api_status* status);
-
-    private:
-      const content_encoding_enum _content_encoding;
   };
 }}

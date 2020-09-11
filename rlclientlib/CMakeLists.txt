@@ -23,6 +23,7 @@ set(PROJECT_SOURCES
   constants.cc
   api_status.cc
   console_tracer.cc
+  content_encoding.cc
   continuous_action_response.cc
   decision_response.cc
   dedup.cc

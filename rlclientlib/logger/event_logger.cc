@@ -3,18 +3,6 @@
 #include "err_constants.h"
 #include "time_helper.h"
 namespace reinforcement_learning { namespace logger {
-  content_encoding_enum to_content_encoding_enum(const char* content_encoding)
-  {
-    if (std::strcmp(content_encoding, value::CONTENT_ENCODING_ZSTD_AND_DEDUP) == 0)
-    {
-      return content_encoding_enum::ZSTD_AND_DEDUP;
-    }
-    else
-    {
-      return content_encoding_enum::IDENTITY;
-    }
-  }
-
   int interaction_logger::log(const char* event_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode) {
     const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
     return append(ranking_event::choose_rank(event_id, context, flags, response, now, 1.0f, learning_mode), status);
