@@ -12,7 +12,16 @@
  *
  * @return int Error code
  */
+
 int main() {
+  return basic_usage_cb();
+}
+
+int basic_usage_cb() {
+  char const * const  event_id = "event_id";
+  char const * const context = R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[ { "TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}}]})";
+  float outcome  = 1.0f;
+
   //! name, value based config object used to initialise the API
   u::configuration config;
 
@@ -68,6 +77,7 @@ int main() {
 
   return 0;
 }
+
 
 // Helper methods
 
