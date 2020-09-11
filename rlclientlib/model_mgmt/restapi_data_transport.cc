@@ -130,10 +130,4 @@ namespace reinforcement_learning { namespace model_management {
 
     return request_task.get();
   }
-
-  int restapi_data_transport::check(api_status* status) {
-    ::utility::datetime last_modified;
-    ::utility::size64_t datasz;
-    return get_data_info(last_modified, datasz, status);
-  }
 }}

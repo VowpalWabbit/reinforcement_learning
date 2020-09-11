@@ -27,13 +27,9 @@ namespace reinforcement_learning {
     if (uri == nullptr) {
       RETURN_ERROR(trace_logger, status, http_uri_not_provided);
     }
-    auto pret = new m::restapi_data_transport(new http_client(uri, config), trace_logger);
-    const auto scode = pret->check(status);
-    if (scode != error_code::success) {
-      delete pret;
-      return scode;
-    }
-    *retval = pret;
+    i_http_client* client;
+    RETURN_IF_FAIL(create_http_client(uri, config, &client, status));
+    *retval = new m::restapi_data_transport(client, trace_logger);
     return error_code::success;
   }
 
@@ -48,9 +44,10 @@ namespace reinforcement_learning {
     const auto eh_host = cfg.get(name::OBSERVATION_EH_HOST, "localhost:8080");
     const auto eh_name = cfg.get(name::OBSERVATION_EH_NAME, "observation");
     const auto eh_url = build_eh_url(eh_host, eh_name);
-
+    i_http_client* client;
+    RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
     *retval = new eventhub_client(
-      new http_client(eh_url.c_str(), cfg),
+      client,
       eh_host,
       cfg.get(name::OBSERVATION_EH_KEY_NAME, ""),
       cfg.get(name::OBSERVATION_EH_KEY, ""),
@@ -66,9 +63,10 @@ namespace reinforcement_learning {
     const auto eh_host = cfg.get(name::INTERACTION_EH_HOST, "localhost:8080");
     const auto eh_name = cfg.get(name::INTERACTION_EH_NAME, "interaction");
     const auto eh_url = build_eh_url(eh_host, eh_name);
-
+    i_http_client* client;
+    RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
     *retval = new eventhub_client(
-      new http_client(eh_url.c_str(), cfg),
+      client,
       cfg.get(name::INTERACTION_EH_HOST, "localhost:8080"),
       cfg.get(name::INTERACTION_EH_KEY_NAME, ""),
       cfg.get(name::INTERACTION_EH_KEY, ""),
@@ -84,9 +82,10 @@ namespace reinforcement_learning {
     const auto eh_host = cfg.get(name::INTERACTION_EH_HOST, "localhost:8080");
     const auto eh_name = cfg.get(name::INTERACTION_EH_NAME, "interaction");
     const auto eh_url = build_eh_url(eh_host, eh_name);
-
+    i_http_client* client;
+    RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
     *retval = new eventhub_client(
-      new http_client(eh_url.c_str(), cfg),
+      client,
       cfg.get(name::INTERACTION_EH_HOST, "localhost:8080"),
       cfg.get(name::INTERACTION_EH_KEY_NAME, ""),
       cfg.get(name::INTERACTION_EH_KEY, ""),

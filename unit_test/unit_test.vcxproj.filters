@@ -116,6 +116,12 @@
     <ClCompile Include="learning_mode_test.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="payload_serializer_test.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="http_client_test.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
