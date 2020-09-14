@@ -3,15 +3,15 @@
 #include "err_constants.h"
 #include "time_helper.h"
 namespace reinforcement_learning { namespace logger {
-  content_encoding_enum to_content_encoding_enum(const char *content_encoding)
+  content_encoding_enum to_content_encoding_enum(const char* content_encoding)
   {
-    if (std::strcmp(content_encoding, value::CONTENT_ENCODING_IDENTITY) == 0)
+    if (std::strcmp(content_encoding, value::CONTENT_ENCODING_ZSTD_AND_DEDUP) == 0)
     {
-      return content_encoding_enum::IDENTITY;
+      return content_encoding_enum::ZSTD_AND_DEDUP;
     }
     else
     {
-      return content_encoding_enum::ZSTD_AND_DEDUP;
+      return content_encoding_enum::IDENTITY;
     }
   }
 
