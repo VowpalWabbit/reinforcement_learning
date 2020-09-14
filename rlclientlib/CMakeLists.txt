@@ -1,6 +1,8 @@
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(flatbuffers REQUIRED)
 
+option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" OFF)
+
 set(RL_FLAT_BUFFER_FILES_V1
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/Metadata.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/OutcomeEvent.fbs"
@@ -21,7 +23,6 @@ build_flatbuffers("${RL_FLAT_BUFFER_FILES_V2}" "" fbgenerator_v2 "" "${CMAKE_CUR
 
 set(PROJECT_SOURCES
   api_status.cc
-  azure_factories.cc
   console_tracer.cc
   decision_response.cc
   error_callback_fn.cc
@@ -32,7 +33,6 @@ set(PROJECT_SOURCES
   time_helper.cc
   logger/async_batcher.cc
   logger/event_logger.cc
-  logger/eventhub_client.cc
   logger/flatbuffer_allocator.cc
   logger/logger_facade.cc
   logger/preamble.cc
@@ -43,7 +43,6 @@ set(PROJECT_SOURCES
   model_mgmt/empty_data_transport.cc
   model_mgmt/model_downloader.cc
   model_mgmt/model_mgmt.cc
-  model_mgmt/restapi_data_transport.cc
   model_mgmt/file_model_loader.cc
   generic_event.cc
   ranking_event.cc
@@ -59,7 +58,6 @@ set(PROJECT_SOURCES
   utility/data_buffer.cc
   utility/data_buffer_streambuf.cc
   utility/http_authorization.cc
-  utility/http_client.cc
   utility/http_helper.cc
   utility/str_util.cc
   utility/watchdog.cc
@@ -67,6 +65,15 @@ set(PROJECT_SOURCES
   vw_model/safe_vw.cc
   vw_model/vw_model.cc
 )
+
+if(vw_USE_AZURE_FACTORIES)
+  list(APPEND PROJECT_SOURCES
+    azure_factories.cc
+    model_mgmt/restapi_data_transport.cc
+    utility/http_client.cc
+    logger/eventhub_client.cc
+  )
+endif()
 
 set(PROJECT_PUBLIC_HEADERS
   ../include/action_flags.h
@@ -94,17 +101,14 @@ set(PROJECT_PUBLIC_HEADERS
 )
 
 set(PROJECT_PRIVATE_HEADERS
-  azure_factories.h
   console_tracer.h
   live_model_impl.h
   logger/async_batcher.h
   logger/event_logger.h
-  logger/eventhub_client.h
   logger/logger_facade.h
   model_mgmt/data_callback_fn.h
   model_mgmt/empty_data_transport.h
   model_mgmt/model_downloader.h
-  model_mgmt/restapi_data_transport.h
   model_mgmt/file_model_loader.h
   moving_queue.h
   generic_event.h
@@ -114,7 +118,6 @@ set(PROJECT_PRIVATE_HEADERS
   serialization/json_serializer.h
   utility/context_helper.h
   utility/http_authorization.h
-  utility/http_client.h
   utility/http_helper.h
   utility/interruptable_sleeper.h
   utility/object_pool.h
@@ -125,12 +128,26 @@ set(PROJECT_PRIVATE_HEADERS
   vw_model/vw_model.h
 )
 
+if(vw_USE_AZURE_FACTORIES)
+  list(APPEND PROJECT_PRIVATE_HEADERS
+    azure_factories.h
+    utility/http_client.h
+    model_mgmt/restapi_data_transport.h
+    logger/eventhub_client.h
+  )
+endif()
+
 source_group("Sources" FILES ${PROJECT_SOURCES})
 source_group("Public headers" FILES ${PROJECT_PUBLIC_HEADERS})
 source_group("Private headers" FILES ${PROJECT_PRIVATE_HEADERS})
 
 add_library(rlclientlib ${PROJECT_SOURCES} ${PROJECT_PUBLIC_HEADERS} ${PROJECT_PRIVATE_HEADERS})
 add_dependencies(rlclientlib fbgenerator_v1 fbgenerator_v2)
+
+if(vw_USE_AZURE_FACTORIES)
+  target_compile_definitions(rlclientlib PRIVATE USE_AZURE_FACTORIES)
+endif()
+
 set_target_properties(rlclientlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories( rlclientlib
                             PUBLIC

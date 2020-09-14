@@ -120,7 +120,9 @@ namespace reinforcement_learning {
   }
 
   void factory_initializer::register_default_factories() {
+#ifdef USE_AZURE_FACTORIES
     register_azure_factories();
+#endif
 
     data_transport_factory.register_type(value::NO_MODEL_DATA, empty_data_transport_create);
     data_transport_factory.register_type(value::FILE_MODEL_DATA, file_model_loader_create);
