@@ -1,32 +1,20 @@
 ﻿// EventHubInteraction Schema used by FlatBuffer
 namespace reinforcement_learning.messages.flatbuff.v2;
 
-table StringEventSingle {
-  value:string;
+//must be a table because flatbuffs don't allow a float in unions :facepalm:
+table NumericOutcome {
+  value: float;
 }
 
-table NumericEventSingle {
-  value:float;
+union OutcomeValue {
+  numeric: NumericOutcome,
+  literal: string
 }
-
-table StringEventIndexed {
-  value:string;
-  index:int;
-}
-
-table NumericEventIndexed {
-  value:float;
-  index:int;
-}
-
-table ActionTakenEvent {
-	value:bool = false;
-}
-
-union OutcomeSingleEventBody { StringEventSingle, NumericEventSingle, StringEventIndexed, NumericEventIndexed, ActionTakenEvent }
 
 table OutcomeSingleEvent {
-  body:OutcomeSingleEventBody;
+  value: OutcomeValue;
+  action_taken: bool = false;
+  index: int = -1;
 }
 
 root_type OutcomeSingleEvent;
