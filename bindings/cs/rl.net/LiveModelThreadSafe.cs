@@ -7,7 +7,6 @@ namespace Rl.Net
 {
     public sealed class LiveModelThreadSafe
     {
-        private int disposedValue = 0;
         private LiveModel liveModel;
         
         public LiveModelThreadSafe(Configuration config)

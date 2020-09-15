@@ -19,9 +19,25 @@
 #ifdef HAS_STD14
 #define RL_STD14_CONSTEXPR constexpr
 #define RL_DEPRECATED(message) [[deprecated(message)]]
+#if defined(__clang__)
+#define RL_IGNORE_DEPRECATED_USAGE_START   \
+        _Pragma("clang diagnostic push")      \
+        _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
+#define RL_IGNORE_DEPRECATED_USAGE_END _Pragma("GCC diagnostic pop")
+#elif defined(__GNUC__) || defined(__GNUG__)
+#define RL_IGNORE_DEPRECATED_USAGE_START   \
+    _Pragma("GCC diagnostic push")        \
+    _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+#define RL_IGNORE_DEPRECATED_USAGE_END _Pragma("GCC diagnostic pop")
+#elif defined(_MSC_VER)
+#define RL_IGNORE_DEPRECATED_USAGE_START __pragma(warning (disable : 4996))
+#define RL_IGNORE_DEPRECATED_USAGE_END __pragma(warning (default : 4996))
+#endif
 #else
 #define RL_STD14_CONSTEXPR
 #define RL_DEPRECATED(message)
+#define RL_IGNORE_DEPRECATED_USAGE_START
+#define RL_IGNORE_DEPRECATED_USAGE_END
 #endif
 
 #else

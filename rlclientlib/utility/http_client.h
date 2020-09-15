@@ -1,5 +1,6 @@
 #pragma once
 #include <cpprest/http_client.h>
+#include "api_status.h"
 #include "configuration.h"
 
 namespace reinforcement_learning {
@@ -18,22 +19,5 @@ namespace reinforcement_learning {
     virtual const std::string& get_url() const = 0;
   };
 
-  class http_client : public i_http_client {
-  public:
-    http_client(const char* url, const utility::configuration& cfg);
-
-    http_client(http_client&& other) = delete;
-    http_client& operator=(http_client&& other) = delete;
-    http_client(const http_client&) = delete;
-    http_client& operator=(const http_client&) = delete;
-
-    virtual response_t request(method_t method) override;
-    virtual response_t request(request_t method) override;
-
-    virtual const std::string& get_url() const override;
-
-  private:
-    const std::string _url;
-    web::http::client::http_client _impl;
-  };
+  int create_http_client(const char* url, const utility::configuration& cfg, i_http_client** client, api_status* status = nullptr);
 }

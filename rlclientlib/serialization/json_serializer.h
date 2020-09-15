@@ -45,7 +45,7 @@ namespace reinforcement_learning { namespace logger {
 
       //add model id
       buffer << R"(],"VWState":{"m":")" << evt.get_model_id() << R"("})";
-           
+
       if (evt.get_pass_prob() < 1) {
         buffer << R"(,"pdrop":)" << (1 - evt.get_pass_prob());
       }
@@ -72,7 +72,7 @@ namespace reinforcement_learning { namespace logger {
           buffer << R"({"EventId":")" << evt.get_event_id() << R"(","ActionTaken":true})";
           break;
         default: {
-          return report_error(status, error_code::serialize_unknown_outcome_type, error_code::serialize_unknown_outcome_type_s);
+          RETURN_ERROR(nullptr, status, serialize_unknown_outcome_type);
         }
       }
       return error_code::success;

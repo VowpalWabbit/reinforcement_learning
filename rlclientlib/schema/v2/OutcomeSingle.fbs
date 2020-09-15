@@ -34,3 +34,4 @@ table OutcomeSingleEvent {
   body:OutcomeSingleEventBody;
 }
 
+root_type OutcomeSingleEvent;

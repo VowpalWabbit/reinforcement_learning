@@ -34,8 +34,8 @@ namespace reinforcement_learning {
   using vw_ptr = std::shared_ptr<safe_vw>;
   using pooled_vw = utility::pooled_object_guard<safe_vw, safe_vw_factory>;
 
-  int check_null_or_empty(const char* arg1, const char* arg2, api_status* status);
-  int check_null_or_empty(const char* arg1, api_status* status);
+  int check_null_or_empty(const char* arg1, const char* arg2, i_trace* trace, api_status* status);
+  int check_null_or_empty(const char* arg1, i_trace* trace, api_status* status);
   int reset_action_order(ranking_response& response);
 
   void default_error_callback(const api_status& status, void* watchdog_context) {
@@ -61,7 +61,7 @@ namespace reinforcement_learning {
     api_status::try_clear(status);
 
     //check arguments
-    RETURN_IF_FAIL(check_null_or_empty(event_id, context, status));
+    RETURN_IF_FAIL(check_null_or_empty(event_id, context, _trace_logger.get(), status));
     if (!_model_ready) {
       RETURN_IF_FAIL(explore_only(event_id, context, response, status));
       response.set_model_id("N/A");
@@ -112,7 +112,7 @@ namespace reinforcement_learning {
     api_status::try_clear(status);
 
     //check arguments
-    RETURN_IF_FAIL(check_null_or_empty(context_json, status));
+    RETURN_IF_FAIL(check_null_or_empty(context_json, _trace_logger.get(), status));
 
     // Ensure multi comes before slots, this is a current limitation of the parser.
     RETURN_IF_FAIL(utility::validate_multi_before_slots(context_json, _trace_logger.get(), status));
@@ -175,8 +175,8 @@ namespace reinforcement_learning {
     api_status::try_clear(status);
 
     //check arguments
-    RETURN_IF_FAIL(check_null_or_empty(event_id, status));
-    RETURN_IF_FAIL(check_null_or_empty(context_json, status));
+    RETURN_IF_FAIL(check_null_or_empty(event_id, _trace_logger.get(), status));
+    RETURN_IF_FAIL(check_null_or_empty(context_json, _trace_logger.get(), status));
 
     // Ensure multi comes before slots, this is a current limitation of the parser.
     RETURN_IF_FAIL(utility::validate_multi_before_slots(context_json, _trace_logger.get(), status));
@@ -210,13 +210,13 @@ namespace reinforcement_learning {
 
   int live_model_impl::report_outcome(const char* event_id, const char* outcome, api_status* status) {
     // Check arguments
-    RETURN_IF_FAIL(check_null_or_empty(event_id, outcome, status));
+    RETURN_IF_FAIL(check_null_or_empty(event_id, outcome, _trace_logger.get(), status));
     return report_outcome_internal(event_id, outcome, status);
   }
 
   int live_model_impl::report_outcome(const char* event_id, float outcome, api_status* status) {
     // Check arguments
-    RETURN_IF_FAIL(check_null_or_empty(event_id, status));
+    RETURN_IF_FAIL(check_null_or_empty(event_id, _trace_logger.get(), status));
     return report_outcome_internal(event_id, outcome, status);
   }
 
@@ -496,20 +496,16 @@ namespace reinforcement_learning {
   }
 
   //helper: check if at least one of the arguments is null or empty
-  int check_null_or_empty(const char* arg1, const char* arg2, api_status* status) {
+  int check_null_or_empty(const char* arg1, const char* arg2, i_trace* trace, api_status* status) {
     if (!arg1 || !arg2 || strlen(arg1) == 0 || strlen(arg2) == 0) {
-      api_status::try_update(status, error_code::invalid_argument,
-        "one of the arguments passed to the ds is null or empty");
-      return error_code::invalid_argument;
+      RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty");
     }
     return error_code::success;
   }
 
-  int check_null_or_empty(const char* arg1, api_status* status) {
+  int check_null_or_empty(const char* arg1,  i_trace* trace, api_status* status) {
     if (!arg1 || strlen(arg1) == 0) {
-      api_status::try_update(status, error_code::invalid_argument,
-        "one of the arguments passed to the ds is null or empty");
-      return error_code::invalid_argument;
+      RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty");
     }
     return error_code::success;
   }

@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <OutputPath>$(SolutionDir)$(Platform)\$(Configuration)</OutputPath>
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
@@ -11,37 +11,22 @@
     <StartupObject />
     <AssemblyName>Rl.Net.Cli</AssemblyName>
     <RootNamespace>Rl.Net.Cli</RootNamespace>
+    <HighEntropyVA>true</HighEntropyVA>
   </PropertyGroup>
 
   <Import Project="$(PackagingIntegration)" Condition="Exists('$(PackagingIntegration)')" />
 
   <ItemGroup>
     <ProjectReference Include="..\rl.net\rl.net.csproj" />
+
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="CommandLineParser" Version="2.8.0" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <TextTransformPath>$(DevEnvDir)\TextTransform.exe</TextTransformPath>
-  </PropertyGroup>
+  <Import Project="..\common\codegen\TextTemplate.targets" />
 
   <ItemGroup>
-    <PackageReference Include="Clarius.TransformOnBuild" Version="1.22.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="CommandLineParser" Version="2.4.3" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="InternalsVisibleToTest.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>InternalsVisibleToTest.cs</LastGenOutput>
-    </None>
-    <Compile Include="InternalsVisibleToTest.cs" Exclude="@(Compile)">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>InternalsVisibleToTest.tt</DependentUpon>
-    </Compile>
+    <TextTemplate Include="..\common\codegen\InternalsVisibleToTest.tt"></TextTemplate>
   </ItemGroup>
 
   <Target Name="OutputVars" BeforeTargets="Build">

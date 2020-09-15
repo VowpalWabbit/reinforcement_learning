@@ -9,6 +9,7 @@
 
 #include "generated/v2/Event_generated.h"
 
+#include "generic_event.h"
 #include "ranking_event.h"
 
 #include "logger/message_type.h"
@@ -202,8 +203,7 @@ namespace reinforcement_learning { namespace logger {
           break;
         }
         default: {
-          return report_error(status, error_code::serialize_unknown_outcome_type,
-                              error_code::serialize_unknown_outcome_type_s);
+          RETURN_ERROR(nullptr, status, serialize_unknown_outcome_type);
         }
       }
       return error_code::success;
@@ -257,27 +257,6 @@ namespace reinforcement_learning { namespace logger {
       return evt.get_payload().size();
     }
 
-    static int to_fb_payload_type(payload_type type, v2::PayloadType& result, api_status* status) {
-      switch (type) {
-      case CB:
-        result = v2::PayloadType_CB;
-        break;
-      case CCB:
-        result = v2::PayloadType_CCB;
-        break;
-      case SLATES:
-        result = v2::PayloadType_Slates;
-        break;
-      case OUTCOME_SINGLE:
-        result = v2::PayloadType_OutcomeSingle;
-        break;
-      default:
-        return report_error(status, error_code::unsupported_payload_type,
-          error_code::unsupported_payload_type_s);
-      }
-      return error_code::success;
-    }
-
     static int serialize(generic_event& evt, flatbuffers::FlatBufferBuilder& builder,
       flatbuffers::Offset<fb_event_t>& ret_val, api_status* status) {
 
@@ -286,16 +265,13 @@ namespace reinforcement_learning { namespace logger {
       const auto& ts = evt.get_client_time_gmt();
       v2::TimeStamp client_ts(ts.year, ts.month, ts.day, ts.hour,
         ts.minute, ts.second, ts.sub_second);
-      v2::PayloadType payloadType;
-      RETURN_IF_FAIL(to_fb_payload_type(evt.get_payload_type(), payloadType, status));
-      const auto meta_offset = v2::CreateMetadataDirect(builder, evt.get_id(), &client_ts, nullptr, payloadType, evt.get_pass_prob());
+      const auto meta_offset = v2::CreateMetadataDirect(builder, evt.get_id(), &client_ts, nullptr, evt.get_payload_type(), evt.get_pass_prob());
       const auto& buffer = evt.get_payload();
       const auto payload_offset = builder.CreateVector(buffer.data(), buffer.size());
       ret_val = v2::CreateEvent(builder, meta_offset, payload_offset);
       return error_code::success;
     }
   };
-
 
   template <>
   inline int fb_collection_serializer<outcome_event>::message_id() { return message_type::fb_outcome_event_collection; }

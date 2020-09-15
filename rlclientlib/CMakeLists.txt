@@ -1,5 +1,5 @@
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-find_package(FlatBuffers REQUIRED)
+find_package(flatbuffers REQUIRED)
 
 set(RL_FLAT_BUFFER_FILES_V1
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/Metadata.fbs"
@@ -47,6 +47,7 @@ set(PROJECT_SOURCES
   model_mgmt/restapi_data_transport.cc
   model_mgmt/file_model_loader.cc
   multistep.cc
+  generic_event.cc
   ranking_event.cc
   ranking_response.cc
   sampling.cc
@@ -78,6 +79,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/container_iterator.h
   ../include/decision_response.h
   ../include/err_constants.h
+  ../include/error_callback_fn.h
   ../include/errors_data.h
   ../include/factory_resolver.h
   ../include/future_compat.h
@@ -97,7 +99,6 @@ set(PROJECT_PUBLIC_HEADERS
 set(PROJECT_PRIVATE_HEADERS
   azure_factories.h
   console_tracer.h
-  error_callback_fn.h
   live_model_impl.h
   logger/async_batcher.h
   logger/event_logger.h
@@ -109,6 +110,7 @@ set(PROJECT_PRIVATE_HEADERS
   model_mgmt/restapi_data_transport.h
   model_mgmt/file_model_loader.h
   moving_queue.h
+  generic_event.h
   ranking_event.h
   sampling.h
   serialization/fb_serializer.h

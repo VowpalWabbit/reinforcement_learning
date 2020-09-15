@@ -172,6 +172,7 @@
     <ClCompile Include="factory_test.cc" />
     <ClCompile Include="fb_serializer_test.cc" />
     <ClCompile Include="file_logger_test.cc" />
+    <ClCompile Include="http_client_test.cc" />
     <ClCompile Include="json_context_parse_test.cc" />
     <ClCompile Include="json_serializer_test.cc" />
     <ClCompile Include="learning_mode_test.cc" />
@@ -184,6 +185,7 @@
     <ClCompile Include="event_queue_test.cc" />
     <ClCompile Include="moving_queue_test.cc" />
     <ClCompile Include="object_pool_test.cc" />
+    <ClCompile Include="payload_serializer_test.cc" />
     <ClCompile Include="preamble_test.cc" />
     <ClCompile Include="ranking_response_test.cc" />
     <ClCompile Include="safe_vw_test.cc" />

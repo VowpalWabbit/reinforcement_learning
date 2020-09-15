@@ -11,6 +11,7 @@ add_executable(rltest
   explore_test.cc
   factory_test.cc
   fb_serializer_test.cc
+  http_client_test.cc
   json_context_parse_test.cc
   learning_mode_test.cc
   live_model_test.cc
@@ -19,6 +20,7 @@ add_executable(rltest
   mock_util.cc
   model_mgmt_test.cc
   object_pool_test.cc
+  payload_serializer_test.cc
   ranking_response_test.cc
   safe_vw_test.cc
   sleeper_test.cc

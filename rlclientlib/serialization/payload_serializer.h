@@ -8,6 +8,7 @@
 
 #include "action_flags.h"
 #include "ranking_event.h"
+#include "generic_event.h"
 #include "data_buffer.h"
 #include "logger/message_type.h"
 #include "api_status.h"
@@ -24,11 +25,11 @@ namespace reinforcement_learning {
   namespace logger {
     using namespace messages::flatbuff;
 
-    v2::LearningModeType GetLearningMode(learning_mode mode);
+    int get_learning_mode(learning_mode mode_in, v2::LearningModeType& mode_out, api_status* status);
 
-    template<payload_type pt>
+    template<generic_event::payload_type_t pt>
     struct payload_serializer {
-      const payload_type type = pt;
+      const generic_event::payload_type_t type = pt;
     };
 
     struct cb_serializer : payload_serializer<payload_type::CB> {
@@ -67,7 +68,7 @@ namespace reinforcement_learning {
       }
     };
 
-    struct ccb_serializer : payload_serializer<payload_type::CCB> {
+    struct ccb_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CCB> {
       static generic_event::payload_buffer_t event(const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version) {
         flatbuffers::FlatBufferBuilder fbb;
@@ -81,13 +82,13 @@ namespace reinforcement_learning {
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-        auto fb = v2::CreateCcbEventDirect(fbb, &_context, &slots, model_version.c_str(), flags | action_flags::DEFERRED);
+        auto fb = v2::CreateCcbEventDirect(fbb, &_context, &slots, model_version.c_str(), flags & action_flags::DEFERRED);
         fbb.Finish(fb);
         return fbb.Release();
       }
     };
 
-    struct slates_serializer : payload_serializer<payload_type::SLATES> {
+    struct slates_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_Slates> {
       static generic_event::payload_buffer_t event(const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version) {
         flatbuffers::FlatBufferBuilder fbb;
@@ -101,14 +102,14 @@ namespace reinforcement_learning {
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-        auto fb = v2::CreateSlatesEventDirect(fbb, &_context, &slots, model_version.c_str(), flags | action_flags::DEFERRED);
+        auto fb = v2::CreateSlatesEventDirect(fbb, &_context, &slots, model_version.c_str(), flags & action_flags::DEFERRED);
         fbb.Finish(fb);
         return fbb.Release();
       }
     };
 
-    struct outcome_single_serializer : payload_serializer<payload_type::OUTCOME_SINGLE> {
-      static generic_event::payload_buffer_t event(float outcome) {
+    struct outcome_single_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_OutcomeSingle> {
+      static generic_event::payload_buffer_t numeric_event(float outcome) {
         flatbuffers::FlatBufferBuilder fbb;
         const auto evt = v2::CreateNumericEventSingle(fbb, outcome).Union();
         auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_NumericEventSingle, evt);
@@ -116,7 +117,7 @@ namespace reinforcement_learning {
         return fbb.Release();
       }
 
-      static generic_event::payload_buffer_t event(const char* outcome) {
+      static generic_event::payload_buffer_t string_event(const char* outcome) {
         flatbuffers::FlatBufferBuilder fbb;
         const auto evt = v2::CreateStringEventSingleDirect(fbb, outcome).Union();
         auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_StringEventSingle, evt);
@@ -124,7 +125,7 @@ namespace reinforcement_learning {
         return fbb.Release();
       }
 
-      static generic_event::payload_buffer_t event(int index, float outcome) {
+      static generic_event::payload_buffer_t numeric_event(int index, float outcome) {
         flatbuffers::FlatBufferBuilder fbb;
         const auto evt = v2::CreateNumericEventIndexed(fbb, outcome, index).Union();
         auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_NumericEventIndexed, evt);
@@ -132,7 +133,7 @@ namespace reinforcement_learning {
         return fbb.Release();
       }
 
-      static generic_event::payload_buffer_t event(int index, const char* outcome) {
+      static generic_event::payload_buffer_t string_event(int index, const char* outcome) {
         flatbuffers::FlatBufferBuilder fbb;
         const auto evt = v2::CreateStringEventIndexedDirect(fbb, outcome, index).Union();
         auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_StringEventIndexed, evt);
@@ -140,15 +141,7 @@ namespace reinforcement_learning {
         return fbb.Release();
       }
 
-      static generic_event::payload_buffer_t event(const char* event_id, float outcome) {
-        flatbuffers::FlatBufferBuilder fbb;
-        const auto evt = v2::CreateNumericEventMultiDirect(fbb, outcome, event_id).Union();
-        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_StringEventIndexed, evt);
-        fbb.Finish(fb);
-        return fbb.Release();
-      }
-
-      static generic_event::payload_buffer_t&& report_action_taken() {
+      static generic_event::payload_buffer_t report_action_taken() {
         flatbuffers::FlatBufferBuilder fbb;
         const auto evt = v2::CreateActionTakenEvent(fbb, true).Union();
         auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_ActionTakenEvent, evt);
