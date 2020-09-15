@@ -32,8 +32,8 @@ namespace reinforcement_learning {
       const generic_event::payload_type_t type = pt;
     };
 
-    struct cb_serializer : payload_serializer<payload_type::CB> {
-      static generic_event::payload_buffer_t event(const char* context, unsigned int flags, learning_mode learning_mode, const ranking_response& response) {
+    struct cb_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CB> {
+      static generic_event::payload_buffer_t event(const char* context, unsigned int flags, v2::LearningModeType learning_mode, const ranking_response& response) {
         flatbuffers::FlatBufferBuilder fbb;
         std::vector<uint64_t> action_ids;
         std::vector<float> probabilities;
@@ -45,7 +45,7 @@ namespace reinforcement_learning {
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-        auto fb = v2::CreateCbEventDirect(fbb, flags | action_flags::DEFERRED, &action_ids, &_context, &probabilities, response.get_model_id(), GetLearningMode(learning_mode));
+        auto fb = v2::CreateCbEventDirect(fbb, flags & action_flags::DEFERRED, &action_ids, &_context, &probabilities, response.get_model_id(), learning_mode);
         fbb.Finish(fb);
         return fbb.Release();
       }
@@ -136,6 +136,14 @@ namespace reinforcement_learning {
       static generic_event::payload_buffer_t string_event(int index, const char* outcome) {
         flatbuffers::FlatBufferBuilder fbb;
         const auto evt = v2::CreateStringEventIndexedDirect(fbb, outcome, index).Union();
+        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_StringEventIndexed, evt);
+        fbb.Finish(fb);
+        return fbb.Release();
+      }
+
+      static generic_event::payload_buffer_t numeric_event(const char* event_id, float outcome) {
+        flatbuffers::FlatBufferBuilder fbb;
+        const auto evt = v2::CreateNumericEventMultiDirect(fbb, outcome, event_id).Union();
         auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_StringEventIndexed, evt);
         fbb.Finish(fb);
         return fbb.Release();

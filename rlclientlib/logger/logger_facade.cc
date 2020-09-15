@@ -36,10 +36,12 @@ namespace reinforcement_learning {
           v2::LearningModeType lmt;
           RETURN_IF_FAIL(get_learning_mode(learning_mode, lmt, status));
           return _v2->log(response.get_event_id(), _serializer.event(context, flags, lmt, response), _serializer.type, status);
+      }
+    }
 
     int cb_logger_facade::log(const char* episode_id, const char* previous_id, const char* context, const ranking_response& response, api_status* status) {
-      switch (version) {
-        case 2: return v2->log(episode_id, serializer.event(response.get_event_id(), previous_id, context, response), payload_type::MULTISTEP, status);
+      switch (_version) {
+        case 2: return _v2->log(episode_id, _serializer.event(response.get_event_id(), previous_id, context, response), generic_event::payload_type_t::PayloadType_MultiStep, status);
         default: return protocol_not_supported(status);
       }
     }
@@ -78,14 +80,6 @@ namespace reinforcement_learning {
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
       switch (_version) {
         case 2: return _v2->log(event_id, _serializer.event(context, flags, action_ids, pdfs, model_version), _serializer.type, status);
-        default: return protocol_not_supported(status);
-      }
-    }
-
-    int ccb_logger_facade::log_decisions(const char* event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
-      const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
-      switch (version) {
-        case 2: return v2->log(event_id, serializer.event(context, flags, action_ids, pdfs, model_version), serializer.type, status);
         default: return protocol_not_supported(status);
       }
     }
@@ -182,8 +176,8 @@ namespace reinforcement_learning {
     }
 
     int observation_logger_facade::log(const char* episode_id, const char* event_id, float outcome, api_status* status) {
-      switch (version) {
-        case 2: return v2->log(episode_id, serializer.event(event_id, outcome), serializer.type, status);
+      switch (_version) {
+        case 2: return _v2->log(episode_id, _serializer.numeric_event(event_id, outcome), _serializer.type, status);
         default: return protocol_not_supported(status);
       }
     }
