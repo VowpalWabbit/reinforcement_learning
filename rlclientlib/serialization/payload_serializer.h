@@ -50,7 +50,7 @@ namespace reinforcement_learning {
         return fbb.Release();
       }
 
-      static generic_event::payload_buffer_t event(const char* event_id, const char* previous_id, const char* context, const ranking_response& response) {
+      static generic_event::payload_buffer_t event(const char* previous_id, const char* context, const ranking_response& response) {
         flatbuffers::FlatBufferBuilder fbb;
         std::vector<uint64_t> action_ids;
         std::vector<float> probabilities;
@@ -62,7 +62,7 @@ namespace reinforcement_learning {
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-        auto fb = v2::CreateMultiStepEventDirect(fbb, event_id, previous_id, &action_ids, &_context, &probabilities, response.get_model_id());
+        auto fb = v2::CreateMultiStepEventDirect(fbb, response.get_event_id(), previous_id, &action_ids, &_context, &probabilities, response.get_model_id());
         fbb.Finish(fb);
         return fbb.Release();
       }

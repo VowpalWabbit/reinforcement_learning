@@ -41,7 +41,7 @@ namespace reinforcement_learning {
 
     int cb_logger_facade::log(const char* episode_id, const char* previous_id, const char* context, const ranking_response& response, api_status* status) {
       switch (_version) {
-        case 2: return _v2->log(episode_id, _serializer.event(response.get_event_id(), previous_id, context, response), generic_event::payload_type_t::PayloadType_MultiStep, status);
+        case 2: return _v2->log(episode_id, _serializer.event(previous_id, context, response), generic_event::payload_type_t::PayloadType_MultiStep, status);
         default: return protocol_not_supported(status);
       }
     }
