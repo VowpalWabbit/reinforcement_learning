@@ -114,7 +114,7 @@ namespace reinforcement_learning
       const int _version;
       const std::unique_ptr<observation_logger> _v1;
       const std::unique_ptr<generic_event_logger> _v2;
-      const outcome_single_serializer _serializer;
+      const outcome_serializer _serializer;
     };
   }
 }

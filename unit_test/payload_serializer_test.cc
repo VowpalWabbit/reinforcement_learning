@@ -7,10 +7,9 @@
 #include "ranking_response.h"
 #include "serialization/payload_serializer.h"
 
-#include "generated/v2/OutcomeSingle_generated.h"
+#include "generated/v2/OutcomeEvent_generated.h"
 #include "generated/v2/CbEvent_generated.h"
-#include "generated/v2/CcbEvent_generated.h"
-#include "generated/v2/SlatesEvent_generated.h"
+#include "generated/v2/MultiSlotEvent_generated.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -50,14 +49,14 @@ BOOST_AUTO_TEST_CASE(cb_payload_serializer_test) {
 }
 
 BOOST_AUTO_TEST_CASE(ccb_payload_serializer_test) {
-  ccb_serializer serializer;
+  multi_slot_serializer serializer;
 
   vector<vector<uint32_t>> actions{ { 2, 1, 0 }, { 1, 0 }};
   vector<vector<float>> probs{ { 0.5, 0.3, 0.2 }, { 0.8, 0.2 }};
 
   const auto buffer = serializer.event("my_context", action_flags::DEFERRED, actions, probs, "model_id");
 
-  const auto event = v2::GetCcbEvent(buffer.data());
+  const auto event = v2::GetMultiSlotEvent(buffer.data());
 
   std::string context;
   copy(event->context()->begin(), event->context()->end(), std::back_inserter(context));
@@ -81,13 +80,13 @@ BOOST_AUTO_TEST_CASE(ccb_payload_serializer_test) {
 }
 
 BOOST_AUTO_TEST_CASE(slates_payload_serializer_test){
-  slates_serializer serializer;
+  multi_slot_serializer serializer;
 
   vector<vector<uint32_t>> actions{ { 2, 1, 0 }, { 1, 0 }};
   vector<vector<float>> probs{ { 0.5, 0.3, 0.2 }, { 0.8, 0.2 }};
   const auto buffer = serializer.event("my_context", action_flags::DEFAULT, actions, probs, "model_id");
 
-  const auto event = v2::GetCcbEvent(buffer.data());
+  const auto event = v2::GetMultiSlotEvent(buffer.data());
 
   std::string context;
   copy(event->context()->begin(), event->context()->end(), std::back_inserter(context));
@@ -111,53 +110,81 @@ BOOST_AUTO_TEST_CASE(slates_payload_serializer_test){
 }
 
 BOOST_AUTO_TEST_CASE(outcome_string_single_payload_serializer_test) {
-  outcome_single_serializer serializer;
+  outcome_serializer serializer;
 
   const auto buffer = serializer.string_event("my_outcome");
 
-  const auto event = v2::GetOutcomeSingleEvent(buffer.data());
-  BOOST_CHECK_EQUAL(v2::OutcomeSingleEventBody_StringEventSingle, event->body_type());
-  BOOST_CHECK_EQUAL("my_outcome", event->body_as_StringEventSingle()->value()->c_str());
+  const auto event = v2::GetOutcomeEvent(buffer.data());
+  BOOST_CHECK_EQUAL(v2::OutcomeValue_literal, event->value_type());
+  BOOST_CHECK_EQUAL(v2::IndexValue_NONE, event->index_type());
+  BOOST_CHECK_EQUAL(false, event->action_taken());
+
+  BOOST_CHECK_EQUAL("my_outcome", event->value_as_literal()->c_str());
 }
 
 BOOST_AUTO_TEST_CASE(outcome_float_single_payload_serializer_test) {
-  outcome_single_serializer serializer;
+  outcome_serializer serializer;
 
   const auto buffer = serializer.numeric_event(1.5);
 
-  const auto event = v2::GetOutcomeSingleEvent(buffer.data());
-  BOOST_CHECK_EQUAL(v2::OutcomeSingleEventBody_NumericEventSingle, event->body_type());
-  BOOST_CHECK_CLOSE(1.5, event->body_as_NumericEventSingle()->value(), tolerance);
+  const auto event = v2::GetOutcomeEvent(buffer.data());
+  BOOST_CHECK_EQUAL(v2::OutcomeValue_numeric, event->value_type());
+  BOOST_CHECK_EQUAL(v2::IndexValue_NONE, event->index_type());
+  BOOST_CHECK_EQUAL(false, event->action_taken());
+
+  BOOST_CHECK_CLOSE(1.5, event->value_as_numeric()->value(), tolerance);
 }
 
 BOOST_AUTO_TEST_CASE(outcome_string_indexed_payload_serializer_test) {
-  outcome_single_serializer serializer;
+  outcome_serializer serializer;
 
   const auto buffer = serializer.string_event(2, "my_outcome");
 
-  const auto event = v2::GetOutcomeSingleEvent(buffer.data());
-  BOOST_CHECK_EQUAL(v2::OutcomeSingleEventBody_StringEventIndexed, event->body_type());
-  BOOST_CHECK_EQUAL("my_outcome", event->body_as_StringEventIndexed()->value()->c_str());
-  BOOST_CHECK_EQUAL(2, event->body_as_StringEventIndexed()->index());
+  const auto event = v2::GetOutcomeEvent(buffer.data());
+  BOOST_CHECK_EQUAL(v2::OutcomeValue_literal, event->value_type());
+  BOOST_CHECK_EQUAL(v2::IndexValue_numeric, event->index_type());
+  BOOST_CHECK_EQUAL(false, event->action_taken());
+
+  BOOST_CHECK_EQUAL("my_outcome", event->value_as_literal()->c_str());
+  BOOST_CHECK_EQUAL(2, event->index_as_numeric()->index());
 }
 
 BOOST_AUTO_TEST_CASE(outcome_float_indexed_payload_serializer_test) {
-  outcome_single_serializer serializer;
+  outcome_serializer serializer;
 
   const auto buffer = serializer.numeric_event(2, 1.5);
 
-  const auto event = v2::GetOutcomeSingleEvent(buffer.data());
-  BOOST_CHECK_EQUAL(v2::OutcomeSingleEventBody_NumericEventIndexed, event->body_type());
-  BOOST_CHECK_CLOSE(1.5, event->body_as_NumericEventIndexed()->value(), tolerance);
-  BOOST_CHECK_EQUAL(2, event->body_as_NumericEventIndexed()->index());
+  const auto event = v2::GetOutcomeEvent(buffer.data());
+  BOOST_CHECK_EQUAL(v2::OutcomeValue_numeric, event->value_type());
+  BOOST_CHECK_EQUAL(v2::IndexValue_numeric, event->index_type());
+  BOOST_CHECK_EQUAL(false, event->action_taken());
+
+  BOOST_CHECK_CLOSE(1.5, event->value_as_numeric()->value(), tolerance);
+  BOOST_CHECK_EQUAL(2, event->index_as_numeric()->index());
+}
+
+
+BOOST_AUTO_TEST_CASE(outcome_float_string_indexed_payload_serializer_test) {
+  outcome_serializer serializer;
+
+  const auto buffer = serializer.numeric_event("index", 1.5);
+
+  const auto event = v2::GetOutcomeEvent(buffer.data());
+  BOOST_CHECK_EQUAL(v2::OutcomeValue_numeric, event->value_type());
+  BOOST_CHECK_EQUAL(v2::IndexValue_literal, event->index_type());
+  BOOST_CHECK_EQUAL(false, event->action_taken());
+
+  BOOST_CHECK_CLOSE(1.5, event->value_as_numeric()->value(), tolerance);
+  BOOST_CHECK_EQUAL("index", event->index_as_literal()->c_str());
 }
 
 BOOST_AUTO_TEST_CASE(outcome_action_taken_payload_serializer_test) {
-  outcome_single_serializer serializer;
+  outcome_serializer serializer;
 
   const auto buffer = serializer.report_action_taken();
 
-  const auto event = v2::GetOutcomeSingleEvent(buffer.data());
-  BOOST_CHECK_EQUAL(v2::OutcomeSingleEventBody_ActionTakenEvent, event->body_type());
-  BOOST_CHECK_EQUAL(true, event->body_as_ActionTakenEvent()->value());
+  const auto event = v2::GetOutcomeEvent(buffer.data());
+  BOOST_CHECK_EQUAL(v2::OutcomeValue_NONE, event->value_type());
+  BOOST_CHECK_EQUAL(v2::IndexValue_NONE, event->index_type());
+  BOOST_CHECK_EQUAL(true, event->action_taken());
 }

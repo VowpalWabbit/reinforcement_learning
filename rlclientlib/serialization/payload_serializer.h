@@ -15,7 +15,7 @@
 #include "utility/data_buffer_streambuf.h"
 #include "learning_mode.h"
 
-#include "generated/v2/OutcomeSingle_generated.h"
+#include "generated/v2/OutcomeEvent_generated.h"
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/MultiSlotEvent_generated.h"
 
@@ -69,11 +69,11 @@ namespace reinforcement_learning {
       }
     };
 
-    struct outcome_single_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_OutcomeSingle> {
+    struct outcome_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_OutcomeSingle> {
       static generic_event::payload_buffer_t numeric_event(float outcome) {
         flatbuffers::FlatBufferBuilder fbb;
         const auto evt = v2::CreateNumericOutcome(fbb, outcome).Union();
-        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeValue_numeric, evt);
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_numeric, evt);
         fbb.Finish(fb);
         return fbb.Release();
       }
@@ -81,7 +81,7 @@ namespace reinforcement_learning {
       static generic_event::payload_buffer_t string_event(const char* outcome) {
         flatbuffers::FlatBufferBuilder fbb;
         const auto evt = fbb.CreateString(outcome).Union();
-        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeValue_literal, evt);
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_literal, evt);
         fbb.Finish(fb);
         return fbb.Release();
       }
@@ -89,7 +89,17 @@ namespace reinforcement_learning {
       static generic_event::payload_buffer_t numeric_event(int index, float outcome) {
         flatbuffers::FlatBufferBuilder fbb;
         const auto evt = v2::CreateNumericOutcome(fbb, outcome).Union();
-        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeValue_numeric, evt, false, index);
+        const auto idx = v2::CreateNumericIndex(fbb, index).Union();
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_numeric, evt, v2::IndexValue_numeric, idx);
+        fbb.Finish(fb);
+        return fbb.Release();
+      }
+
+      static generic_event::payload_buffer_t numeric_event(const char* index, float outcome) {
+        flatbuffers::FlatBufferBuilder fbb;
+        const auto evt = v2::CreateNumericOutcome(fbb, outcome).Union();
+        const auto idx = fbb.CreateString(index).Union();
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_numeric, evt, v2::IndexValue_literal, idx);
         fbb.Finish(fb);
         return fbb.Release();
       }
@@ -97,14 +107,24 @@ namespace reinforcement_learning {
       static generic_event::payload_buffer_t string_event(int index, const char* outcome) {
         flatbuffers::FlatBufferBuilder fbb;
         const auto evt = fbb.CreateString(outcome).Union();
-        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeValue_literal, evt, false, index);
+        const auto idx = v2::CreateNumericIndex(fbb, index).Union();
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_literal, evt, v2::IndexValue_numeric, idx);
+        fbb.Finish(fb);
+        return fbb.Release();
+      }
+
+      static generic_event::payload_buffer_t string_event(const char* index, const char* outcome) {
+        flatbuffers::FlatBufferBuilder fbb;
+        const auto evt = fbb.CreateString(outcome).Union();
+        const auto idx = fbb.CreateString(index).Union();
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_literal, evt, v2::IndexValue_literal, idx);
         fbb.Finish(fb);
         return fbb.Release();
       }
 
       static generic_event::payload_buffer_t report_action_taken() {
         flatbuffers::FlatBufferBuilder fbb;
-        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeValue_NONE, 0, true);
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_NONE, 0, v2::IndexValue_NONE, 0, true);
         fbb.Finish(fb);
         return fbb.Release();
       }

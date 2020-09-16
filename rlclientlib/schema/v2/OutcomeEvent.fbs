@@ -11,10 +11,19 @@ union OutcomeValue {
   literal: string
 }
 
-table OutcomeSingleEvent {
-  value: OutcomeValue;
-  action_taken: bool = false;
-  index: int = -1;
+table NumericIndex {
+  index: int;
 }
 
-root_type OutcomeSingleEvent;
+union IndexValue {
+  numeric: NumericIndex,
+  literal: string
+}
+
+table OutcomeEvent {
+  value: OutcomeValue;
+  index: IndexValue;
+  action_taken: bool = false;
+}
+
+root_type OutcomeEvent;
