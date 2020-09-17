@@ -19,6 +19,8 @@ namespace cfg = u::config;
 namespace err = r::error_code;
 
 int basic_usage_cb();
+int basic_usage_ccb();
+int basic_usage_slates();
 
 int load_file(const std::string& file_name, std::string& file_data);
 int load_config_from_json(const std::string& file_name, u::configuration& cc);
