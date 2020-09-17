@@ -1,0 +1,34 @@
+/*! \page compression Payload compression
+
+RLlib has a way to efficiently compress specific payloads.
+
+In some cases it's desireable to trade client-side CPU for a reduced payload size if the backend messaging system is a bottleneck.
+We support the following compresion mechanisms:
+
+- Per-decision compression using zstandard (https://zstd.net).
+- Per-batch dictionary-based action deduplication for CB, CCB and Slates problems using the DSJSON input format.
+
+When both enabled, it's possible to get upwards 20x compression ratio for specific workloads.
+
+
+Zstandard compression
+---------------------
+
+We use zstandard as it was empirically found to provide the best tradeoff between compression ratio and CPU time.
+RLlib uses the default compression level 1.
+
+Dictionary-based action deduplication
+------------------------------------
+
+In some workloads, there's a small set of actions used across all decisions. In those cases, this schema will explit this source
+of redundancy and produce significantly smaller payloads. Case should be taken as it will cause a minor size expansion in the case
+that no action is ever seen more than once - quite possible in ADF settings where features are computed at runtime.
+
+
+To enable it set the following configuration key:
+
+~~~~~
+    cfg::configuration cc;
+    cc.set("XXXXX", "YYYYY");
+~~~~~
+*/
