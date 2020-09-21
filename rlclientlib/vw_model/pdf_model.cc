@@ -55,4 +55,15 @@ namespace reinforcement_learning { namespace model_management {
   {
     return error_code::not_supported;
   }
+
+  int pdf_model::choose_rank_ms(
+    uint64_t rnd_seed,
+    const char* features,
+    const episode_history& history,
+    std::vector<int>& action_ids,
+    std::vector<float>& action_pdf,
+    std::string& model_version,
+    api_status* status) {
+    return error_code::not_supported;
+  }
 }}
