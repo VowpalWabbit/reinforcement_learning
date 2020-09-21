@@ -91,14 +91,14 @@ int multistep_basic_usage() {
   r::episode_state episode("my_episode_id");
 
   r::ranking_response response1;
-  const std::string context1 = R"({"c": {"F": 1.0, "_multi": [{"AF": 2.0}, {"AF": 3.0}] })";
+  const std::string context1 = R"({"F": 1.0, "_multi": [{"AF": 2.0}, {"AF": 3.0}]})";
 
   if (rl.request_episodic_decision("event1", nullptr, context1.c_str(), response1, episode, &status) != err::success) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
 
-  const std::string context2 = R"({"c": {"F": 4.0, "_multi": [{"AF": 2.0}, {"AF": 3.0}] })";
+  const std::string context2 = R"({"F": 4.0, "_multi": [{"AF": 2.0}, {"AF": 3.0}]})";
   r::ranking_response response2;
   if (rl.request_episodic_decision("event2", "event1", context2.c_str(), response2, episode, &status) != err::success) {
     std::cout << status.get_error_msg() << std::endl;
@@ -119,7 +119,8 @@ int multistep_basic_usage() {
 }
 
 int main() {
-  return cb_basic_usage();
+  return multistep_basic_usage();
+  //return cb_basic_usage();
 }
 
 // Helper methods
