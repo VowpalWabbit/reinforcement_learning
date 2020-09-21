@@ -63,7 +63,7 @@ namespace reinforcement_learning
       const int _version;
       const std::unique_ptr<ccb_logger> _v1;
       const std::unique_ptr<generic_event_logger> _v2;
-      const multi_slot_serializer _serializer;
+      const ccb_serializer _serializer;
     };
 
     class slates_logger_facade {
@@ -86,7 +86,7 @@ namespace reinforcement_learning
       const int _version;
       const std::unique_ptr<slates_logger> _v1;
       const std::unique_ptr<generic_event_logger> _v2;
-      const multi_slot_serializer _serializer;
+      const slates_serializer _serializer;
     };
 
     class observation_logger_facade {

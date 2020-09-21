@@ -49,7 +49,8 @@ namespace reinforcement_learning {
       }
     };
 
-    struct multi_slot_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_MultiSlot> {
+    template<generic_event::payload_type_t pt>
+    struct multi_slot_serializer : payload_serializer<pt> {
       static generic_event::payload_buffer_t event(const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version) {
         flatbuffers::FlatBufferBuilder fbb;
@@ -69,7 +70,13 @@ namespace reinforcement_learning {
       }
     };
 
-    struct outcome_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_OutcomeSingle> {
+    struct ccb_serializer : multi_slot_serializer<generic_event::payload_type_t::PayloadType_CCB> {
+    };
+
+    struct slates_serializer : multi_slot_serializer<generic_event::payload_type_t::PayloadType_Slates> {
+    };
+
+    struct outcome_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_Outcome> {
       static generic_event::payload_buffer_t numeric_event(float outcome) {
         flatbuffers::FlatBufferBuilder fbb;
         const auto evt = v2::CreateNumericOutcome(fbb, outcome).Union();

@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(cb_payload_serializer_test) {
 }
 
 BOOST_AUTO_TEST_CASE(ccb_payload_serializer_test) {
-  multi_slot_serializer serializer;
+  ccb_serializer serializer;
 
   vector<vector<uint32_t>> actions{ { 2, 1, 0 }, { 1, 0 }};
   vector<vector<float>> probs{ { 0.5, 0.3, 0.2 }, { 0.8, 0.2 }};
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(ccb_payload_serializer_test) {
 }
 
 BOOST_AUTO_TEST_CASE(slates_payload_serializer_test){
-  multi_slot_serializer serializer;
+  slates_serializer serializer;
 
   vector<vector<uint32_t>> actions{ { 2, 1, 0 }, { 1, 0 }};
   vector<vector<float>> probs{ { 0.5, 0.3, 0.2 }, { 0.8, 0.2 }};
