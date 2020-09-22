@@ -88,31 +88,58 @@ int multistep_basic_usage() {
     return -1;
   }
 
-  r::episode_state episode("my_episode_id");
+  r::episode_state episode1("my_episode_id_1");
+  r::episode_state episode2("my_episode_id_2");
 
   r::ranking_response response1;
-  const std::string context1 = R"({"F": 1.0, "_multi": [{"AF": 2.0}, {"AF": 3.0}]})";
+  {
+    const std::string context1 = R"({"F1": 1.0, "_multi": [{"AF1": 2.0}, {"AF1": 3.0}]})";
 
-  if (rl.request_episodic_decision("event1", nullptr, context1.c_str(), response1, episode, &status) != err::success) {
-    std::cout << status.get_error_msg() << std::endl;
-    return -1;
+    if (rl.request_episodic_decision("event1", nullptr, context1.c_str(), response1, episode1, &status) != err::success) {
+      std::cout << status.get_error_msg() << std::endl;
+      return -1;
+    }
   }
 
-  const std::string context2 = R"({"F": 4.0, "_multi": [{"AF": 2.0}, {"AF": 3.0}]})";
-  r::ranking_response response2;
-  if (rl.request_episodic_decision("event2", "event1", context2.c_str(), response2, episode, &status) != err::success) {
-    std::cout << status.get_error_msg() << std::endl;
-    return -1;
+  {
+    const std::string context1 = R"({"F2": 1.0, "_multi": [{"AF2": 2.0}, {"AF2": 3.0}]})";
+
+    if (rl.request_episodic_decision("event1", nullptr, context1.c_str(), response1, episode2, &status) != err::success) {
+      std::cout << status.get_error_msg() << std::endl;
+      return -1;
+    }
   }
 
-  if (rl.report_outcome(episode.get_episode_id(), "event1", 1.0f, &status)) {
-    std::cout << status.get_error_msg() << std::endl;
-    return -1;
+  {
+    const std::string context2 = R"({"F1": 4.0, "_multi": [{"AF1": 2.0}, {"AF1": 3.0}]})";
+    r::ranking_response response2;
+    if (rl.request_episodic_decision("event2", "event1", context2.c_str(), response2, episode1, &status) != err::success) {
+      std::cout << status.get_error_msg() << std::endl;
+      return -1;
+    }
   }
 
-  if (rl.report_outcome(episode.get_episode_id(), "event2", 1.0f, &status)) {
-    std::cout << status.get_error_msg() << std::endl;
-    return -1;
+  {
+    const std::string context2 = R"({"F2": 4.0, "_multi": [{"AF2": 2.0}, {"AF2": 3.0}]})";
+    r::ranking_response response2;
+    if (rl.request_episodic_decision("event2", "event1", context2.c_str(), response2, episode2, &status) != err::success) {
+      std::cout << status.get_error_msg() << std::endl;
+      return -1;
+    }
+  }
+
+  {
+    if (rl.report_outcome(episode1.get_episode_id(), "event1", 1.0f, &status)) {
+      std::cout << status.get_error_msg() << std::endl;
+      return -1;
+    }
+  }
+
+  {
+    if (rl.report_outcome(episode2.get_episode_id(), "event2", 1.0f, &status)) {
+      std::cout << status.get_error_msg() << std::endl;
+      return -1;
+    }
   }
 
   return 0;
