@@ -498,7 +498,6 @@ namespace reinforcement_learning {
 
     RETURN_IF_FAIL(_model->choose_rank_ms(seed, context_json, episode.get_history(), action_ids, action_pdf, model_version, status));
     RETURN_IF_FAIL(sample_and_populate_response(seed, action_ids, action_pdf, std::move(model_version), resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(explore_exploit(event_id, context_json, resp, status));
 
     resp.set_event_id(event_id);
 
