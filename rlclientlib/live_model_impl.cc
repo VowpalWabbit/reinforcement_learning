@@ -490,21 +490,16 @@ namespace reinforcement_learning {
 
     //check arguments
     RETURN_IF_FAIL(check_null_or_empty(event_id, context_json, _trace_logger.get(), status));
-    if (!_model_ready) {
-      RETURN_IF_FAIL(explore_only(event_id, context_json, resp, status));
-      resp.set_model_id("N/A");
-    }
-    else {
-      const uint64_t seed = uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
+    const uint64_t seed = uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
 
-      std::vector<int> action_ids;
-      std::vector<float> action_pdf;
-      std::string model_version;
+    std::vector<int> action_ids;
+    std::vector<float> action_pdf;
+    std::string model_version;
 
-      RETURN_IF_FAIL(_model->choose_rank_ms(seed, context_json, episode.get_history(), action_ids, action_pdf, model_version, status));
-      RETURN_IF_FAIL(sample_and_populate_response(seed, action_ids, action_pdf, std::move(model_version), resp, _trace_logger.get(), status));
-      RETURN_IF_FAIL(explore_exploit(event_id, context_json, resp, status));
-    }
+    RETURN_IF_FAIL(_model->choose_rank_ms(seed, context_json, episode.get_history(), action_ids, action_pdf, model_version, status));
+    RETURN_IF_FAIL(sample_and_populate_response(seed, action_ids, action_pdf, std::move(model_version), resp, _trace_logger.get(), status));
+    RETURN_IF_FAIL(explore_exploit(event_id, context_json, resp, status));
+
     resp.set_event_id(event_id);
 
     RETURN_IF_FAIL(episode.update(context_json, resp, status));
