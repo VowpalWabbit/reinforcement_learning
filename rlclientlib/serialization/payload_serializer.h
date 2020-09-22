@@ -144,7 +144,7 @@ namespace reinforcement_learning {
       static generic_event::payload_buffer_t numeric_event(const char* event_id, float outcome) {
         flatbuffers::FlatBufferBuilder fbb;
         const auto evt = v2::CreateNumericEventMultiDirect(fbb, outcome, event_id).Union();
-        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_StringEventIndexed, evt);
+        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_NumericEventMulti, evt);
         fbb.Finish(fb);
         return fbb.Release();
       }
