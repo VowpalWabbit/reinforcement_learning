@@ -2,6 +2,7 @@
 
 #include "factory_resolver.h"
 #include "sender.h"
+#include "model_mgmt.h"
 
 #include <memory>
 
@@ -22,7 +23,7 @@ std::unique_ptr<fakeit::Mock<reinforcement_learning::i_sender>> get_mock_sender(
 
 std::unique_ptr<fakeit::Mock<reinforcement_learning::model_management::i_data_transport>> get_mock_data_transport();
 std::unique_ptr<fakeit::Mock<reinforcement_learning::model_management::i_data_transport>> get_mock_failing_data_transport();
-std::unique_ptr<fakeit::Mock<reinforcement_learning::model_management::i_model>> get_mock_model();
+std::unique_ptr<fakeit::Mock<reinforcement_learning::model_management::i_model>> get_mock_model(reinforcement_learning::model_management::model_type_t = reinforcement_learning::model_management::model_type_t::UNKNOWN);
 
 std::unique_ptr<reinforcement_learning::sender_factory_t> get_mock_sender_factory(fakeit::Mock<reinforcement_learning::i_sender>* mock_observation_sender,
   fakeit::Mock<reinforcement_learning::i_sender>* mock_interaction_sender, fakeit::Mock<reinforcement_learning::i_sender>* mock_decision_sender);

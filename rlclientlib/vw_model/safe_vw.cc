@@ -7,6 +7,7 @@
 #include "v_array.h"
 
 #include <iostream>
+namespace mm = reinforcement_learning::model_management;
 
 namespace reinforcement_learning {
   static const std::string SEED_TAG = "seed=";
@@ -241,59 +242,51 @@ const char* safe_vw::id() const {
   return _vw->id.c_str();
 }
 
-enum class model_type_t
-{
-  UNKNOWN,
-  CB,
-  CCB,
-  SLATES
-};
-
-model_type_t get_model_type(const std::string& args)
+mm::model_type_t safe_vw::get_model_type(const std::string& args)
 {
   // slates == slates
   if (args.find("slates") != std::string::npos)
   {
-    return model_type_t::SLATES;
+    return mm::model_type_t::SLATES;
   }
 
   // ccb = ccb && !slates
   if (args.find("ccb_explore_adf") != std::string::npos)
   {
-    return model_type_t::CCB;
+    return mm::model_type_t::CCB;
   }
 
   // cb = !slates && !ccb && cb
   if (args.find("cb_explore_adf") != std::string::npos)
   {
-    return model_type_t::CB;
+    return mm::model_type_t::CB;
   }
 
-  return model_type_t::UNKNOWN;
+  return mm::model_type_t::UNKNOWN;
 }
 
 // TODO make this const when was_supplied becomes const.
-model_type_t get_model_type(VW::config::options_i* args)
+mm::model_type_t safe_vw::get_model_type(const VW::config::options_i* args)
 {
     // slates == slates
   if (args->was_supplied("slates"))
   {
-    return model_type_t::SLATES;
+    return mm::model_type_t::SLATES;
   }
 
   // ccb = ccb && !slates
   if (args->was_supplied("ccb_explore_adf"))
   {
-    return model_type_t::CCB;
+    return mm::model_type_t::CCB;
   }
 
   // cb = !slates && !ccb && cb
   if (args->was_supplied("cb_explore_adf"))
   {
-    return model_type_t::CB;
+    return mm::model_type_t::CB;
   }
 
-  return model_type_t::UNKNOWN;
+  return mm::model_type_t::UNKNOWN;
 }
 
 bool safe_vw::is_compatible(const std::string& args) const {
@@ -301,7 +294,7 @@ bool safe_vw::is_compatible(const std::string& args) const {
   const auto inbound_model_type = get_model_type(args);
 
   // This really is an error but errors cant be reported here...
-  if(local_model_type == model_type_t::UNKNOWN || inbound_model_type ==  model_type_t::UNKNOWN)
+  if(local_model_type == mm::model_type_t::UNKNOWN || inbound_model_type ==  mm::model_type_t::UNKNOWN)
   {
     return false;
   }
