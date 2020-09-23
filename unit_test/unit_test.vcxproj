@@ -172,6 +172,7 @@
     <ClCompile Include="factory_test.cc" />
     <ClCompile Include="fb_serializer_test.cc" />
     <ClCompile Include="file_logger_test.cc" />
+    <ClCompile Include="http_client_test.cc" />
     <ClCompile Include="json_context_parse_test.cc" />
     <ClCompile Include="json_serializer_test.cc" />
     <ClCompile Include="learning_mode_test.cc" />

@@ -198,6 +198,18 @@ namespace reinforcement_learning {
 }
 
 /**
+ * @brief Error reporting macro for just returning an error code.
+ */
+#define RETURN_ERROR(trace, status, code, ... ) do {                                                  \
+  if(status != nullptr) {                                                                                 \
+    reinforcement_learning::status_builder sb(trace, status, reinforcement_learning::error_code::code);   \
+    sb << reinforcement_learning::error_code::code ## _s;                                         \
+    return report_error(sb);                                                        \
+  }                                                                                               \
+  return reinforcement_learning::error_code::code;                                                \
+} while(0);
+
+/**
  * @brief Error reporting macro that takes a list of parameters
  */
 #define RETURN_ERROR_ARG(trace, status, code, ... ) do {                                                  \
