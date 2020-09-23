@@ -37,9 +37,9 @@ namespace reinforcement_learning { namespace utility {
         RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << GetParseErrorFunc(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";
       }
 
-      const Value::ConstMemberIterator itr = obj.FindMember(slots);
+      const Value::ConstMemberIterator& itr = obj.FindMember(slots);
       if (itr != obj.MemberEnd() && itr->value.IsArray()) {
-        const auto arr = itr->value.GetArray();
+        const auto& arr = itr->value.GetArray();
         for (int i = 0; i < arr.Size(); ++i) {
           const auto& current = arr[i];
           const auto itr = current.FindMember(event_id);
