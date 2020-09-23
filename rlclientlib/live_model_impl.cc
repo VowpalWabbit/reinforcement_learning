@@ -220,6 +220,30 @@ namespace reinforcement_learning {
     return report_outcome_internal(event_id, outcome, status);
   }
 
+ int live_model_impl::report_outcome(const char* event_id, const char* outcome, int idx, api_status* status) {
+    // Check arguments
+    RETURN_IF_FAIL(check_null_or_empty(event_id, outcome, _trace_logger.get(), status));
+    return report_outcome_internal(event_id, outcome, idx, status);
+  }
+
+  int live_model_impl::report_outcome(const char* event_id, float outcome, int idx, api_status* status) {
+    // Check arguments
+    RETURN_IF_FAIL(check_null_or_empty(event_id, _trace_logger.get(), status));
+    return report_outcome_internal(event_id, outcome, idx, status);
+  }
+
+ int live_model_impl::report_outcome(const char* event_id, const char* outcome, const char* idx, api_status* status) {
+    // Check arguments
+    RETURN_IF_FAIL(check_null_or_empty(event_id, outcome, _trace_logger.get(), status));
+    return report_outcome_internal(event_id, outcome, idx, status);
+  }
+
+  int live_model_impl::report_outcome(const char* event_id, float outcome, const char* idx, api_status* status) {
+    // Check arguments
+    RETURN_IF_FAIL(check_null_or_empty(event_id, _trace_logger.get(), status));
+    return report_outcome_internal(event_id, outcome, idx, status);
+  }
+
   int live_model_impl::refresh_model(api_status* status) {
 
     if (_bg_model_proc) {
