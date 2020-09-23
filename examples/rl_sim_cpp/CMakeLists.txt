@@ -1,6 +1,7 @@
 add_executable(rl_sim_cpp.out
   main.cc
   person.cc
+  robot.cc
   rl_sim.cc
   simulation_stats.cc
 )

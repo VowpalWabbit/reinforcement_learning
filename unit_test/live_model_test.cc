@@ -58,6 +58,7 @@ namespace {
   const auto JSON_CONTEXT_WITH_SLOTS = R"({"_multi":[{},{}],"_slots":[{}]})";
   const auto JSON_CONTEXT_PDF = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}}],"p":[0.4, 0.6]})";
   const auto JSON_CONTEXT_LEARNING = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}},{"Action":{"c":3}}],"p":[0.4, 0.1, 0.5]})";
+  const auto JSON_CONTEXT_CONTINUOUS_ACTIONS = R"({"GUser":{"18-25":1,"4":1,"C":1,"0":1,"1":1,"2":1,"15":1,"M":1}})";
   const float EXPECTED_PDF[2] = { 0.4f, 0.6f };
 
   r::live_model create_mock_live_model(
@@ -212,6 +213,27 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_loggingonly_mode) {
     BOOST_CHECK_EQUAL((*it).action_id, current_expect_action_id);
     current_expect_action_id++;
   }
+}
+
+BOOST_AUTO_TEST_CASE(live_model_request_continuous_action)
+{
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--cats 4 --min_value=185 --max_value=23959 --bandwidth 1 --coin --loss_option 1 --json --quiet --epsilon 0.1 --id N/A");
+  // only added for version 2
+  config.set(r::name::PROTOCOL_VERSION, "2");
+
+  r::api_status status;
+
+  r::live_model ds = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  r::continuous_action_response response;
+
+  BOOST_CHECK_EQUAL(ds.request_continuous_action(JSON_CONTEXT_CONTINUOUS_ACTIONS, response, &status), err::success);
+  BOOST_CHECK_CLOSE(response.get_chosen_action(), 185.123, FLOAT_TOL);
+  BOOST_CHECK_CLOSE(response.get_chosen_action_pdf_value(), 6.09909948e-05, FLOAT_TOL);
 }
 
 BOOST_AUTO_TEST_CASE(live_model_request_decision) {
@@ -430,7 +452,7 @@ BOOST_AUTO_TEST_CASE(live_model_mocks) {
     BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CONTEXT, response), err::success);
     BOOST_CHECK_EQUAL(model.report_outcome(event_id, 1.0), err::success);
 
-    Verify(Method((*mock_sender), init)).Exactly(4);
+    Verify(Method((*mock_sender), init)).Exactly(5);
   }
   BOOST_CHECK_EQUAL(recorded.size(), 2);
 }
@@ -537,7 +559,7 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data) {
 
     Verify(Method((*mock_observation_sender), init)).Exactly(1);
     Verify(Method((*mock_interaction_sender), init)).Exactly(1);
-    Verify(Method((*mock_decision_sender), init)).Exactly(2);
+    Verify(Method((*mock_decision_sender), init)).Exactly(3);
   }
   //std::string recorded_interactions_all;
   //for (size_t i = 0; i < recorded_interactions.size(); ++i) {

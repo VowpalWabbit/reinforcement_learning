@@ -100,6 +100,36 @@ namespace reinforcement_learning {
       status);
   }
 
+  int live_model_impl::request_continuous_action(const char* event_id, const char* context, unsigned int flags, continuous_action_response& response, api_status* status)
+  {
+    response.clear();
+    //clear previous errors if any
+    api_status::try_clear(status);
+
+    RETURN_IF_FAIL(check_null_or_empty(event_id, context, _trace_logger.get(), status));
+    
+    float action;
+    float pdf_value;
+    std::string model_version;
+
+    RETURN_IF_FAIL(_model->choose_continuous_action(context, action, pdf_value, model_version, status));
+    RETURN_IF_FAIL(populate_response(action, pdf_value, std::string(event_id), std::string(model_version), response, _trace_logger.get(), status));
+    RETURN_IF_FAIL(_continuous_action_logger->log_continuous_action(context, flags, response, status));
+    
+    if (_watchdog.has_background_error_been_reported())
+    {
+      RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+    }
+
+    return error_code::success;
+  }
+    
+  int live_model_impl::request_continuous_action(const char* context, unsigned int flags, continuous_action_response& response, api_status* status)
+  {
+    const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
+    return request_continuous_action(uuid.c_str(), context, flags, response, status);
+  }
+
   int live_model_impl::request_decision(const char* context_json, unsigned int flags, decision_response& resp, api_status* status)
   {
     if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY) {
@@ -371,6 +401,26 @@ namespace reinforcement_learning {
     // // Create a logger for interactions that will use msg sender to send interaction messages
     _slates_logger.reset(new logger::slates_logger_facade(_configuration, slates_msg_sender, _watchdog, slates_time_provider, &_error_cb));
     RETURN_IF_FAIL(_slates_logger->init(status));
+
+    // Get the name of raw data (as opposed to message) sender for interactions.
+    const auto* const continuous_actions_sender_impl = _configuration.get(name::DECISION_SENDER_IMPLEMENTATION, value::DECISION_EH_SENDER);
+    i_sender* continuous_actions_data_sender;
+
+    // Use the name to create an instance of raw data sender for interactions
+    RETURN_IF_FAIL(_sender_factory->create(&continuous_actions_data_sender, continuous_actions_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
+    RETURN_IF_FAIL(continuous_actions_data_sender->init(status));
+
+    // Create a message sender that will prepend the message with a preamble and send the raw data using the
+    // factory created raw data sender
+    l::i_message_sender* continuous_actions_msg_sender = new l::preamble_message_sender(continuous_actions_data_sender);
+    RETURN_IF_FAIL(continuous_actions_msg_sender->init(status));
+
+    i_time_provider* continuous_actions_time_provider;
+    RETURN_IF_FAIL(_time_provider_factory->create(&continuous_actions_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
+
+    // Create a logger for interactions that will use msg sender to send interaction messages
+    _continuous_action_logger.reset(new logger::ca_logger_facade(_configuration, continuous_actions_msg_sender, _watchdog, continuous_actions_time_provider, &_error_cb));
+    RETURN_IF_FAIL(_continuous_action_logger->init(status));
 
     return error_code::success;
   }

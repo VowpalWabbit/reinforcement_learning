@@ -9,6 +9,7 @@
 
 #include "generated/v2/OutcomeSingle_generated.h"
 #include "generated/v2/CbEvent_generated.h"
+#include "generated/v2/CaEvent_generated.h"
 #include "generated/v2/CcbEvent_generated.h"
 #include "generated/v2/SlatesEvent_generated.h"
 
@@ -47,6 +48,30 @@ BOOST_AUTO_TEST_CASE(cb_payload_serializer_test) {
   BOOST_CHECK_CLOSE(0.8, probabilities[1], tolerance);
 
   BOOST_CHECK_EQUAL(true, event->deferred_action());
+}
+
+BOOST_AUTO_TEST_CASE(ca_payload_serializer_test)
+{
+  ca_serializer serializer;
+  float action = 158.1;
+  float pdf_value = 6.09909948e-05;
+  continuous_action_response response;
+  response.set_chosen_action(action);
+  response.set_chosen_action_pdf_value(pdf_value);
+  response.set_model_id("model_id");
+
+  const auto buffer = serializer.event("my_context", action_flags::DEFERRED, response);
+
+  const auto event = v2::GetCaEvent(buffer.data());
+
+  std::string context;
+  copy(event->context()->begin(), event->context()->end(), std::back_inserter(context));
+  
+  BOOST_CHECK_EQUAL(context.c_str(), "my_context");
+  BOOST_CHECK_EQUAL(event->model_id()->c_str(), "model_id");
+  BOOST_CHECK_EQUAL(event->action(), action);
+  BOOST_CHECK_EQUAL(event->pdf_value(), pdf_value);
+  BOOST_CHECK_EQUAL(event->deferred_action(), true);
 }
 
 BOOST_AUTO_TEST_CASE(ccb_payload_serializer_test) {

@@ -28,6 +28,9 @@ namespace reinforcement_learning
     int choose_rank(const char* event_id, const char* context, unsigned int flags, ranking_response& response, api_status* status);
     //here the event_id is auto-generated
     int choose_rank(const char* context, unsigned int flags, ranking_response& response, api_status* status);
+    int request_continuous_action(const char* event_id, const char* context, unsigned int flags, continuous_action_response& response, api_status* status);
+    //here the event_id is auto-generated
+    int request_continuous_action(const char* context, unsigned int flags, continuous_action_response& response, api_status* status);
     int request_decision(const char* context_json, unsigned int flags, decision_response& resp, api_status* status);
     int request_slates_decision(const char* event_id, const char* context_json, unsigned int flags, slates_response& resp, api_status* status = nullptr);
     int request_slates_decision(const char* context_json, unsigned int flags, slates_response& resp, api_status* status = nullptr);
@@ -87,6 +90,7 @@ namespace reinforcement_learning
     std::unique_ptr<model_management::i_data_transport> _transport{nullptr};
     std::unique_ptr<model_management::i_model> _model{nullptr};
     std::unique_ptr<logger::cb_logger_facade> _ranking_logger{nullptr};
+    std::unique_ptr<logger::ca_logger_facade> _continuous_action_logger{nullptr};
     std::unique_ptr<logger::observation_logger_facade> _outcome_logger{nullptr};
     std::unique_ptr<logger::ccb_logger_facade> _decision_logger{nullptr};
     std::unique_ptr<logger::slates_logger_facade> _slates_logger{nullptr};

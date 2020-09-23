@@ -132,6 +132,32 @@ namespace reinforcement_learning {
     examples.delete_v();
   }
 
+  void safe_vw::choose_continuous_action(const char* context, float& action, float& pdf_value)
+  {
+    auto examples = v_init<example*>();
+    examples.push_back(get_or_create_example());
+
+    std::vector<char> line_vec(context, context + strlen(context) + 1);
+
+    VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
+    
+    // finalize example
+    VW::setup_examples(*_vw, examples);
+
+    _vw->predict(*examples[0]);
+
+    action = examples[0]->pred.pdf_value.action;
+    pdf_value = examples[0]->pred.pdf_value.pdf_value;
+
+    for (auto&& ex : examples) {
+      ex->l.cb_cont.costs.delete_v();
+      _example_pool.emplace_back(ex);
+    }
+
+    // cleanup
+    examples.delete_v();
+  }
+
   void safe_vw::rank_decisions(const std::vector<const char*>& event_ids, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
   {
     auto examples = v_init<example*>();
@@ -245,6 +271,7 @@ enum class model_type_t
 {
   UNKNOWN,
   CB,
+  CA,
   CCB,
   SLATES
 };
@@ -269,6 +296,11 @@ model_type_t get_model_type(const std::string& args)
     return model_type_t::CB;
   }
 
+  if (args.find("cats") != std::string::npos)
+  {
+    return model_type_t::CA;
+  }
+
   return model_type_t::UNKNOWN;
 }
 
@@ -291,6 +323,11 @@ model_type_t get_model_type(VW::config::options_i* args)
   if (args->was_supplied("cb_explore_adf"))
   {
     return model_type_t::CB;
+  }
+
+  if (args->was_supplied("cats"))
+  {
+    return model_type_t::CA;
   }
 
   return model_type_t::UNKNOWN;

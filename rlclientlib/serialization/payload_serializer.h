@@ -9,6 +9,7 @@
 #include "action_flags.h"
 #include "ranking_event.h"
 #include "generic_event.h"
+#include "continuous_action_response.h"
 #include "data_buffer.h"
 #include "logger/message_type.h"
 #include "api_status.h"
@@ -17,6 +18,7 @@
 
 #include "generated/v2/OutcomeSingle_generated.h"
 #include "generated/v2/CbEvent_generated.h"
+#include "generated/v2/CaEvent_generated.h"
 #include "generated/v2/CcbEvent_generated.h"
 #include "generated/v2/SlatesEvent_generated.h"
 
@@ -45,6 +47,20 @@ namespace reinforcement_learning {
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
         auto fb = v2::CreateCbEventDirect(fbb, flags & action_flags::DEFERRED, &action_ids, &_context, &probabilities, response.get_model_id(), learning_mode);
+        fbb.Finish(fb);
+        return fbb.Release();
+      }
+    };
+
+    struct ca_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CA> {
+      static generic_event::payload_buffer_t event(const char* context, unsigned int flags, const continuous_action_response& response) {
+        flatbuffers::FlatBufferBuilder fbb;
+
+        std::vector<unsigned char> _context;
+        std::string context_str(context);
+        copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
+
+        auto fb = v2::CreateCaEventDirect(fbb, flags & action_flags::DEFERRED, response.get_chosen_action(), &_context, response.get_chosen_action_pdf_value(), response.get_model_id());
         fbb.Finish(fb);
         return fbb.Release();
       }

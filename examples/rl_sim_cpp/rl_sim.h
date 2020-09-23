@@ -9,6 +9,7 @@
 #include <boost/program_options.hpp>
 #include "person.h"
 #include "live_model.h"
+#include "robot.h"
 
 /**
  * @brief Reinforcement Learning Simulator
@@ -47,6 +48,7 @@ public:
      * @param action Action json
      * @return std::string Constructed context json
      */
+    std::string create_context_json(const std::string& cntxt);
     std::string create_context_json(const std::string& cntxt, const std::string& action);
     std::string create_context_json(const std::string& cntxt, const std::string& action, const std::string& slots);
 
@@ -63,6 +65,13 @@ public:
      * @return person&
      */
     person& pick_a_random_person();
+
+    /**
+     * @brief Pick a robotic joint from the list of joints.  Use uniform random.
+     *
+     * @return joint&
+     */
+    joint& pick_a_random_joint();
 
     /**
      * @brief Load Inference API configuration from json string.
@@ -103,6 +112,14 @@ public:
     bool init_sim_world();
 
     /**
+     * @brief Initialize robot joints for continuous action space
+     *
+     * @return true If there is no error during init
+     * @return false On init error
+     */
+    bool init_continuous_sim_world();
+
+    /**
      * @brief Initialize the simulator
      *
      * @return true on success
@@ -111,6 +128,7 @@ public:
     bool init();
 
     int cb_loop();
+    int ca_loop();
     int ccb_loop();
     int slates_loop();
 
@@ -133,6 +151,7 @@ public:
   private:
     enum LoopKind {
       CB,
+      CA,
       CCB,
       Slates
     };
@@ -141,6 +160,10 @@ public:
     std::unique_ptr<reinforcement_learning::live_model> _rl;
     std::vector<person> _people;
     std::vector<std::string> _topics;
+    std::vector<joint> _robot_joints;
+    std::vector<float> _friction;
+    float _min_friction;
+    float _max_friction;
     const uint8_t NUM_SLOTS = 3;
     const uint8_t NUM_SLATES_SLOTS = 2;
     bool _run_loop = true;

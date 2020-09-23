@@ -12,6 +12,7 @@ set(RL_FLAT_BUFFER_FILES_V2
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Metadata.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/OutcomeSingle.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CbEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CaEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CcbEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/SlatesEvent.fbs" 
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Event.fbs" )
@@ -23,6 +24,7 @@ set(PROJECT_SOURCES
   api_status.cc
   azure_factories.cc
   console_tracer.cc
+  continuous_action_response.cc
   decision_response.cc
   error_callback_fn.cc
   factory_resolver.cc
@@ -75,6 +77,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/configuration.h
   ../include/constants.h
   ../include/container_iterator.h
+  ../include/continuous_action_response.h
   ../include/decision_response.h
   ../include/err_constants.h
   ../include/error_callback_fn.h

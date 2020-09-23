@@ -10,6 +10,7 @@
 #include "ranking_response.h"
 #include "decision_response.h"
 #include "slates_response.h"
+#include "continuous_action_response.h"
 #include "err_constants.h"
 #include "factory_resolver.h"
 #include "sender.h"
@@ -139,6 +140,25 @@ namespace reinforcement_learning {
     * @return int Return error code.  This will also be returned in the api_status object
     */
     int choose_rank(const char * context_json, unsigned int flags, ranking_response& resp, api_status* status = nullptr); //event_id is auto-generated
+
+  /**
+    * @brief (DEPRECATED) Choose an action from a continuous range, given a list of context features
+    * The inference library chooses an action by sampling the probability density function produced per continuous action range.
+    * The corresponding event_id should be used when reporting the outcome for the continuous action.
+    * @param event_id  The unique identifier for this interaction.  The same event_id should be used when
+    *                  reporting the outcome for this action.
+    * @param context_json Contains context features in json format
+    * @param flags Action flags (see action_flags.h)
+    * @param response Continuous action response contains the chosen action and the probability density value of the chosen action location from the continuous range.
+    * @param status  Optional field with detailed string description if there is an error
+    * @return int Return error code.  This will also be returned in the api_status object
+    */
+    RL_DEPRECATED("New unified example builder interface is coming")
+    int request_continuous_action(const char * event_id, const char * context_json, unsigned int flags, continuous_action_response& response, api_status* status = nullptr);
+
+    int request_continuous_action(const char * event_id, const char * context_json, continuous_action_response& response, api_status* status = nullptr);
+    int request_continuous_action(const char * context_json, unsigned int flags, continuous_action_response& response, api_status* status = nullptr);
+    int request_continuous_action(const char * context_json, continuous_action_response& response, api_status* status = nullptr);
 
     /**
     * @brief (DEPRECATED) Choose an action from the given set for each slot, given a list of actions, slots,

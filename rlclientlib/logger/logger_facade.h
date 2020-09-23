@@ -40,6 +40,27 @@ namespace reinforcement_learning
       const cb_serializer _serializer;
     };
 
+  class ca_logger_facade {
+    public:
+      ca_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
+      
+      ca_logger_facade(const ca_logger_facade& other) = delete;
+      ca_logger_facade& operator=(const ca_logger_facade& other) = delete;
+      ca_logger_facade(ca_logger_facade&& other) = delete;
+      ca_logger_facade& operator=(ca_logger_facade&& other) = delete;
+
+      ~ca_logger_facade() = default;
+
+      int init(api_status* status);
+
+      int log_continuous_action(const char* context, unsigned int flags, const continuous_action_response& response, api_status* status);
+    
+    private:
+      const int _version;
+      const std::unique_ptr<generic_event_logger> _v2;
+      const ca_serializer _serializer;
+    };
+
     class ccb_logger_facade {
     public:
       ccb_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);

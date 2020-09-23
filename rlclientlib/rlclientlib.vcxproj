@@ -89,7 +89,7 @@
     <PreBuildEvent>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs
-$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeSingle.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CcbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\SlatesEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs</Command>
+$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeSingle.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CaEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CcbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\SlatesEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -110,7 +110,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <PreBuildEvent>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs
-$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeSingle.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CcbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\SlatesEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs</Command>
+$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeSingle.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CaEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CcbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\SlatesEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -135,7 +135,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <PreBuildEvent>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs
-$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeSingle.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CcbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\SlatesEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs</Command>
+$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeSingle.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CaEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CcbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\SlatesEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -160,7 +160,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <PreBuildEvent>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs
-$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeSingle.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CcbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\SlatesEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs</Command>
+$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeSingle.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CaEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CcbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\SlatesEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -174,6 +174,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClInclude Include="..\include\api_status.h" />
     <ClInclude Include="..\include\configuration.h" />
     <ClInclude Include="..\include\container_iterator.h" />
+    <ClInclude Include="..\include\continuous_action_response.h" />
     <ClInclude Include="..\include\errors_data.h" />
     <ClInclude Include="..\include\future_compat.h" />
     <ClInclude Include="..\include\live_model.h" />
@@ -271,6 +272,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClCompile Include="ranking_event.cc" />
     <ClCompile Include="ranking_response.cc" />
     <ClCompile Include="decision_response.cc" />
+    <ClCompile Include="continuous_action_response.cc" />
     <ClCompile Include="logger\async_batcher.cc" />
     <ClCompile Include="azure_factories.cc" />
     <ClCompile Include="console_tracer.cc" />
@@ -301,6 +303,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <None Include="schema\v2\Metadata.fbs" />
     <None Include="schema\v2\OutcomeSingle.fbs" />
     <None Include="schema\v2\CbEvent.fbs" />
+    <None Include="schema\v2\CaEvent.fbs" />
     <None Include="schema\v2\CcbEvent.fbs" />
     <None Include="schema\v2\SlatesEvent.fbs" />
     <None Include="schema\v2\Event.fbs" />
