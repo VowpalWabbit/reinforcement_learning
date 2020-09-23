@@ -16,11 +16,10 @@
 #include "utility/data_buffer_streambuf.h"
 #include "learning_mode.h"
 
-#include "generated/v2/OutcomeSingle_generated.h"
+#include "generated/v2/OutcomeEvent_generated.h"
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/CaEvent_generated.h"
-#include "generated/v2/CcbEvent_generated.h"
-#include "generated/v2/SlatesEvent_generated.h"
+#include "generated/v2/MultiSlotEvent_generated.h"
 
 namespace reinforcement_learning {
   namespace logger {
@@ -66,7 +65,8 @@ namespace reinforcement_learning {
       }
     };
 
-    struct ccb_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CCB> {
+    template<generic_event::payload_type_t pt>
+    struct multi_slot_serializer : payload_serializer<pt> {
       static generic_event::payload_buffer_t event(const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version) {
         flatbuffers::FlatBufferBuilder fbb;
@@ -80,69 +80,74 @@ namespace reinforcement_learning {
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-        auto fb = v2::CreateCcbEventDirect(fbb, &_context, &slots, model_version.c_str(), flags & action_flags::DEFERRED);
+        auto fb = v2::CreateMultiSlotEventDirect(fbb, &_context, &slots, model_version.c_str(), flags & action_flags::DEFERRED);
         fbb.Finish(fb);
         return fbb.Release();
       }
     };
 
-    struct slates_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_Slates> {
-      static generic_event::payload_buffer_t event(const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
-        const std::vector<std::vector<float>>& pdfs, const std::string& model_version) {
-        flatbuffers::FlatBufferBuilder fbb;
-        std::vector<flatbuffers::Offset<v2::SlatesSlotEvent>> slots;
-        for (size_t i = 0; i < action_ids.size(); i++)
-        {
-          slots.push_back(v2::CreateSlatesSlotEventDirect(fbb, &action_ids[i], &pdfs[i]));
-        }
-
-        std::vector<unsigned char> _context;
-        std::string context_str(context);
-        copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
-
-        auto fb = v2::CreateSlatesEventDirect(fbb, &_context, &slots, model_version.c_str(), flags & action_flags::DEFERRED);
-        fbb.Finish(fb);
-        return fbb.Release();
-      }
+    struct ccb_serializer : multi_slot_serializer<generic_event::payload_type_t::PayloadType_CCB> {
     };
 
-    struct outcome_single_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_OutcomeSingle> {
+    struct slates_serializer : multi_slot_serializer<generic_event::payload_type_t::PayloadType_Slates> {
+    };
+
+    struct outcome_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_Outcome> {
       static generic_event::payload_buffer_t numeric_event(float outcome) {
         flatbuffers::FlatBufferBuilder fbb;
-        const auto evt = v2::CreateNumericEventSingle(fbb, outcome).Union();
-        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_NumericEventSingle, evt);
+        const auto evt = v2::CreateNumericOutcome(fbb, outcome).Union();
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_numeric, evt);
         fbb.Finish(fb);
         return fbb.Release();
       }
 
       static generic_event::payload_buffer_t string_event(const char* outcome) {
         flatbuffers::FlatBufferBuilder fbb;
-        const auto evt = v2::CreateStringEventSingleDirect(fbb, outcome).Union();
-        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_StringEventSingle, evt);
+        const auto evt = fbb.CreateString(outcome).Union();
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_literal, evt);
         fbb.Finish(fb);
         return fbb.Release();
       }
 
       static generic_event::payload_buffer_t numeric_event(int index, float outcome) {
         flatbuffers::FlatBufferBuilder fbb;
-        const auto evt = v2::CreateNumericEventIndexed(fbb, outcome, index).Union();
-        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_NumericEventIndexed, evt);
+        const auto evt = v2::CreateNumericOutcome(fbb, outcome).Union();
+        const auto idx = v2::CreateNumericIndex(fbb, index).Union();
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_numeric, evt, v2::IndexValue_numeric, idx);
+        fbb.Finish(fb);
+        return fbb.Release();
+      }
+
+      static generic_event::payload_buffer_t numeric_event(const char* index, float outcome) {
+        flatbuffers::FlatBufferBuilder fbb;
+        const auto evt = v2::CreateNumericOutcome(fbb, outcome).Union();
+        const auto idx = fbb.CreateString(index).Union();
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_numeric, evt, v2::IndexValue_literal, idx);
         fbb.Finish(fb);
         return fbb.Release();
       }
 
       static generic_event::payload_buffer_t string_event(int index, const char* outcome) {
         flatbuffers::FlatBufferBuilder fbb;
-        const auto evt = v2::CreateStringEventIndexedDirect(fbb, outcome, index).Union();
-        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_StringEventIndexed, evt);
+        const auto evt = fbb.CreateString(outcome).Union();
+        const auto idx = v2::CreateNumericIndex(fbb, index).Union();
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_literal, evt, v2::IndexValue_numeric, idx);
+        fbb.Finish(fb);
+        return fbb.Release();
+      }
+
+      static generic_event::payload_buffer_t string_event(const char* index, const char* outcome) {
+        flatbuffers::FlatBufferBuilder fbb;
+        const auto evt = fbb.CreateString(outcome).Union();
+        const auto idx = fbb.CreateString(index).Union();
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_literal, evt, v2::IndexValue_literal, idx);
         fbb.Finish(fb);
         return fbb.Release();
       }
 
       static generic_event::payload_buffer_t report_action_taken() {
         flatbuffers::FlatBufferBuilder fbb;
-        const auto evt = v2::CreateActionTakenEvent(fbb, true).Union();
-        auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_ActionTakenEvent, evt);
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_NONE, 0, v2::IndexValue_NONE, 0, true);
         fbb.Finish(fb);
         return fbb.Release();
       }
