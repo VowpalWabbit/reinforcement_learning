@@ -30,7 +30,7 @@ int rl_sim::loop() {
 
 int rl_sim::cb_loop() {
   r::ranking_response response;
-  simulation_stats stats;
+  simulation_stats<size_t> stats;
 
   while ( _run_loop ) {
     auto& p = pick_a_random_person();
@@ -75,8 +75,7 @@ int rl_sim::cb_loop() {
 
 int rl_sim::ca_loop(){
   r::continuous_action_response response;
-  simulation_stats stats;
-
+  simulation_stats<float> stats;
   while (_run_loop){
     auto& joint = pick_a_random_joint();
     const auto context_features = joint.get_features();
@@ -96,6 +95,11 @@ int rl_sim::ca_loop(){
       std::cout << status.get_error_msg() << std::endl;
     }
 
+    stats.record(joint.id(), chosen_action, outcome);
+
+    std::cout << " " << stats.count() << " - ctxt: " << joint.id() << ", action: " << chosen_action << ", outcome: " << outcome
+      << ", dist: " << response.get_chosen_action_pdf_value() << ", " << stats.get_stats(joint.id(), chosen_action) << std::endl;
+
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
   }
   return 0;
@@ -103,7 +107,7 @@ int rl_sim::ca_loop(){
 
 int rl_sim::ccb_loop() {
   r::decision_response decision;
-  simulation_stats stats;
+  simulation_stats<size_t> stats;
 
   while ( _run_loop ) {
     auto& p = pick_a_random_person();
@@ -166,7 +170,7 @@ std::string get_slates_slot_features(size_t slot_count) {
 
 int rl_sim::slates_loop() {
   r::slates_response decision;
-  simulation_stats stats;
+  simulation_stats<size_t> stats;
 
   while ( _run_loop ) {
     auto& p = pick_a_random_person();
@@ -264,6 +268,7 @@ int rl_sim::init_rl() {
 
   if(_options["log_to_file"].as<bool>()) {
     config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
+    config.set(r::name::DECISION_SENDER_IMPLEMENTATION, r::value::DECISION_FILE_SENDER);
     config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
   }
 
@@ -281,7 +286,7 @@ int rl_sim::init_rl() {
   config.set(r::name::TRACE_LOG_IMPLEMENTATION, r::value::CONSOLE_TRACE_LOGGER);
 
   // Initialize the API
-  _rl = std::unique_ptr<r::live_model>(new r::live_model(config,_on_error,this));
+  _rl = std::unique_ptr<r::live_model>(new r::live_model(config, _on_error, this));
   if ( _rl->init(&status) != err::success ) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
@@ -328,10 +333,6 @@ bool rl_sim::init_sim_world() {
 
 bool rl_sim::init_continuous_sim_world() {
   // initialize continuous actions robot joints
-  // TODO these are not currently used, should be given to model?
-  // OR used to verify something?
-  _max_friction = 140.;
-  _min_friction = 0.;
   
   _friction = {25.4, 41.2, 66.5, 81.9, 104.4};
   

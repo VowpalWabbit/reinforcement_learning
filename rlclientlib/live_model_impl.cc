@@ -403,7 +403,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_slates_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for interactions.
-    const auto* const continuous_actions_sender_impl = _configuration.get(name::DECISION_SENDER_IMPLEMENTATION, value::DECISION_EH_SENDER);
+    const auto* const continuous_actions_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);
     i_sender* continuous_actions_data_sender;
 
     // Use the name to create an instance of raw data sender for interactions

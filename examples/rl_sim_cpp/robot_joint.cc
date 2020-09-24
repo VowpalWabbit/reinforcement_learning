@@ -1,4 +1,4 @@
-#include "robot.h"
+#include "robot_joint.h"
 #include <utility>
 #include <sstream>
 
@@ -19,6 +19,25 @@ std::string joint::get_features()
 
 float joint::get_outcome(float observed_friction)
 {
-    // TODO get from friction given range
-    return 1.0;
+    int const draw_uniform = rand() % 10000;
+    float const norm_draw_val = static_cast<float>(draw_uniform) / 100000.0f;
+    float click_prob = 0.;
+
+    // figure out which bucket from our pre-set frictions the observed_friction
+    // falls into to and get it's probability
+    for (auto fp : _outcome_probability)
+    {
+        if (observed_friction >= fp.first)
+        {
+            click_prob = fp.second;
+        }
+    }
+    if ( norm_draw_val <= click_prob )
+        return 1.0f;
+    else
+        return 0.0f;
+}
+
+std::string joint::id() const {
+  return _id;
 }

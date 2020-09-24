@@ -9,7 +9,8 @@
 #include <boost/program_options.hpp>
 #include "person.h"
 #include "live_model.h"
-#include "robot.h"
+#include "model_mgmt.h"
+#include "robot_joint.h"
 
 /**
  * @brief Reinforcement Learning Simulator
@@ -162,8 +163,6 @@ public:
     std::vector<std::string> _topics;
     std::vector<joint> _robot_joints;
     std::vector<float> _friction;
-    float _min_friction;
-    float _max_friction;
     const uint8_t NUM_SLOTS = 3;
     const uint8_t NUM_SLATES_SLOTS = 2;
     bool _run_loop = true;
