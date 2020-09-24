@@ -26,6 +26,7 @@ add_executable(rltest
   sleeper_test.cc
   status_builder_test.cc
   str_util_test.cc
+  trace_logger_test.cc
   unit_test.vcxproj.filters
   watchdog_test.cc
 )
