@@ -13,6 +13,7 @@ namespace reinforcement_learning {  namespace name {
       const char *const  INITIAL_EPSILON         = "initial_exploration.epsilon";
       const char *const  LEARNING_MODE           = "rank.learning.mode";
       const char* const  PROTOCOL_VERSION             = "protocol.version";
+      const char* const  CONTINUOUS_ACTIONS_ENABLED     = "continuous.actions.enabled";
 
       // Interaction
       const char *const  INTERACTION_EH_HOST     = "interaction.eventhub.host";
@@ -86,5 +87,6 @@ namespace reinforcement_learning {  namespace value {
       const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
       const int DEFAULT_VW_POOL_INIT_SIZE = 4;
       const int DEFAULT_PROTOCOL_VERSION = 1;
+      const bool DEFAULT_CONTINUOUS_ACTIONS_ENABLED = false;
 }}
 

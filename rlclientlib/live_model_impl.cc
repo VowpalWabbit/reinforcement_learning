@@ -102,6 +102,12 @@ namespace reinforcement_learning {
 
   int live_model_impl::request_continuous_action(const char* event_id, const char* context, unsigned int flags, continuous_action_response& response, api_status* status)
   {
+    if (!_configuration.get_bool(name::CONTINUOUS_ACTIONS_ENABLED, value::DEFAULT_CONTINUOUS_ACTIONS_ENABLED))
+    {
+      api_status::try_update(status, error_code::not_supported, "continuous actions are not enabled");
+      return error_code::not_supported;
+    }
+
     response.clear();
     //clear previous errors if any
     api_status::try_clear(status);
@@ -126,6 +132,12 @@ namespace reinforcement_learning {
     
   int live_model_impl::request_continuous_action(const char* context, unsigned int flags, continuous_action_response& response, api_status* status)
   {
+    if (!_configuration.get_bool(name::CONTINUOUS_ACTIONS_ENABLED, value::DEFAULT_CONTINUOUS_ACTIONS_ENABLED))
+    {
+      api_status::try_update(status, error_code::not_supported, "continuous actions are not enabled");
+      return error_code::not_supported;
+    }
+
     const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
     return request_continuous_action(uuid.c_str(), context, flags, response, status);
   }

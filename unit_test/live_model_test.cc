@@ -223,6 +223,7 @@ BOOST_AUTO_TEST_CASE(live_model_request_continuous_action)
   config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--cats 4 --min_value=185 --max_value=23959 --bandwidth 1 --coin --loss_option 1 --json --quiet --epsilon 0.1 --id N/A");
   // only added for version 2
   config.set(r::name::PROTOCOL_VERSION, "2");
+  config.set(r::name::CONTINUOUS_ACTIONS_ENABLED, "true");
 
   r::api_status status;
 

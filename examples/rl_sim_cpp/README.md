@@ -45,7 +45,8 @@ Continuous Actions mode
 1. In `client.json` file, add in:
 ```
 "model.vw.initial_command_line": "--cats <num_actions> --min_value <min_value> --max_value <max_value> --bandwidth <bandwidth>",
-"protocol.version": 2
+"protocol.version": 2,
+"continuous.actions.enabled": true
 ```
 
 2. From root directory, run 

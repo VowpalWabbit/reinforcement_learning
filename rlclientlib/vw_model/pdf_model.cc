@@ -46,7 +46,6 @@ namespace reinforcement_learning { namespace model_management {
 
   int pdf_model::choose_continuous_action(const char* features, float& action, float& pdf_value, std::string& model_version, api_status* status)
   {
-    //TODO examine if we will need this
     return error_code::not_supported;
   }
 
