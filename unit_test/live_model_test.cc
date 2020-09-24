@@ -667,5 +667,4 @@ BOOST_AUTO_TEST_CASE(slates_explore_only_mode) {
   ++it;
 
   BOOST_CHECK(it == response.end());
-}());
 }
