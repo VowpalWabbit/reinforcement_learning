@@ -109,7 +109,7 @@ namespace reinforcement_learning { namespace model_management {
     }
   }
 
-  model_type_t vw_model::model_type()
+  model_type_t vw_model::model_type() const
   {
     return safe_vw::get_model_type(_initial_command_line);
   }

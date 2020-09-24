@@ -56,7 +56,7 @@ namespace reinforcement_learning { namespace model_management {
     return error_code::not_supported;
   }
 
-  model_type_t pdf_model::model_type()
+  model_type_t pdf_model::model_type() const
   {
     return model_type_t::CB;
   }
