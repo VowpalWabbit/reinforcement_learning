@@ -115,7 +115,6 @@ int basic_usage_ca() {
   // Response class
   r::continuous_action_response response;
 
-  // TODO rename to choose
   if( rl.request_continuous_action(event_id, context, response, &status) != err::success ) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
@@ -124,7 +123,6 @@ int basic_usage_ca() {
 
   //! [(4) Use the response]
   float chosen_action = response.get_chosen_action();
-  // TODO do we need pdf value in the response?
 
   std::cout << "Chosen continuous action is: " << chosen_action << std::endl;
   //! [(4) Use the response]

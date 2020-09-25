@@ -9,7 +9,6 @@
 #include <boost/program_options.hpp>
 #include "person.h"
 #include "live_model.h"
-#include "model_mgmt.h"
 #include "robot_joint.h"
 
 /**
