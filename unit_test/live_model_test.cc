@@ -559,8 +559,8 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data) {
     }
 
     Verify(Method((*mock_observation_sender), init)).Exactly(1);
-    Verify(Method((*mock_interaction_sender), init)).Exactly(1);
-    Verify(Method((*mock_decision_sender), init)).Exactly(3);
+    Verify(Method((*mock_interaction_sender), init)).Exactly(2);
+    Verify(Method((*mock_decision_sender), init)).Exactly(2);
   }
   //std::string recorded_interactions_all;
   //for (size_t i = 0; i < recorded_interactions.size(); ++i) {
