@@ -34,6 +34,9 @@ namespace reinforcement_learning {
 
     bool is_compatible(const std::string& args) const;
 
+    static model_management::model_type_t get_model_type(const std::string& args);
+    static model_management::model_type_t get_model_type(const VW::config::options_i* args);
+
     friend class safe_vw_factory;
   };
 
