@@ -345,6 +345,66 @@ BOOST_AUTO_TEST_CASE(live_model_outcome) {
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
 }
 
+BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v1) {
+  //create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+
+  //create a ds live_model, and initialize with configuration
+  r::live_model ds = create_mock_live_model(config);
+
+  //check api_status content when errors are returned
+  r::api_status status;
+
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_code(), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  // report outcome
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", 10, 1.5f, &status), err::protocol_not_supported);
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", "valid_secondary", 1.5f, &status), err::protocol_not_supported);
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", 10, "valid_outcome", &status), err::protocol_not_supported);
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", "valid_secondary", "valid_outcome", &status), err::protocol_not_supported);
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", "", 1.5f, &status), err::invalid_argument); //we fail the input check before we check for protocol versin
+}
+
+
+BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v2) {
+  //create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::PROTOCOL_VERSION, "2");
+
+  //create a ds live_model, and initialize with configuration
+  r::live_model ds = create_mock_live_model(config);
+
+  //check api_status content when errors are returned
+  r::api_status status;
+
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_code(), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  // report outcome
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", 10, 1.5f, &status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", "valid_secondary", 1.5f, &status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", 10, "valid_outcome", &status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", "valid_secondary", "valid_outcome", &status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  // check expected returned codes
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", "", 1.5f), err::invalid_argument);
+}
+
 namespace r = reinforcement_learning;
 
 class wrong_class {};

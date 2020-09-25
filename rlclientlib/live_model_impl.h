@@ -36,10 +36,11 @@ namespace reinforcement_learning
 
     int report_outcome(const char* event_id, const char* outcome_data, api_status* status);
     int report_outcome(const char* event_id, float reward, api_status* status);
-    int report_outcome(const char* event_id, float outcome, int idx, api_status* status= nullptr);
-    int report_outcome(const char* event_id, float outcome, const char *idx, api_status* status= nullptr);
-    int report_outcome(const char* event_id, const char* outcome, int idx, api_status* status= nullptr);
-    int report_outcome(const char* event_id, const char* outcome, const char *idx, api_status* status= nullptr);
+
+    int report_outcome(const char* primary_id, int secondary_id, float outcome, api_status* status= nullptr);
+    int report_outcome(const char* primary_id, const char *secondary_id, float outcome, api_status* status= nullptr);
+    int report_outcome(const char* primary_id, int secondary_id, const char* outcome, api_status* status= nullptr);
+    int report_outcome(const char* primary_id, const char *secondary_id, const char* outcome, api_status* status= nullptr);
 
     int refresh_model(api_status* status);
 
@@ -71,7 +72,7 @@ namespace reinforcement_learning
     template<typename D>
     int report_outcome_internal(const char* event_id, D outcome, api_status* status);
     template<typename D, typename I>
-    int report_outcome_internal(const char* event_id, D outcome, I index, api_status* status);
+    int report_outcome_internal(const char* primary_id, I secondary_id, D outcome, api_status* status);
 
   private:
     // Internal implementation state
@@ -119,12 +120,12 @@ namespace reinforcement_learning
   }
 
   template <typename D, typename I>
-  int live_model_impl::report_outcome_internal(const char* event_id, D outcome, I index, api_status* status) {
+  int live_model_impl::report_outcome_internal(const char* primary_id, I secondary_id, D outcome, api_status* status) {
     // Clear previous errors if any
     api_status::try_clear(status);
 
     // Send the outcome event to the backend
-    RETURN_IF_FAIL(_outcome_logger->log(event_id, index, outcome, status));
+    RETURN_IF_FAIL(_outcome_logger->log(primary_id, secondary_id, outcome, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {

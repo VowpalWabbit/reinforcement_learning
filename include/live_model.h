@@ -221,52 +221,60 @@ namespace reinforcement_learning {
     int report_outcome(const char* event_id, float outcome, api_status* status= nullptr);
 
     /**
-     * @brief Report partial outcome of a decision based on an index.
+     * @brief Report outcome of a decision based on a pair of primary and secondary indentifiers.
+     * This identifier pair is problem specific.
+     * For CCB, the primary is the event id and the secondary is the index of the slot.
      *
-     * @param event_id  The unique event_id used when choosing an action should be presented here.  This is so that
+     * @param primary_id  The unique primary_id used when choosing an action should be presented here.  This is so that
      *                  the action taken can be matched with feedback received.
+     * @param secondary_id Index of the partial outcome.
      * @param outcome Outcome as float.
-     * @param index Index of the partial outcome.
      * @param status  Optional field with detailed string description if there is an error
      * @return int Return error code.  This will also be returned in the api_status object
      */
-    int report_outcome(const char* event_id, float outcome, int index, api_status* status= nullptr);
+    int report_outcome(const char* primary_id, int secondary_id, float outcome, api_status* status= nullptr);
 
     /**
-     * @brief Report partial outcome of a decision based on an index.
+     * @brief Report outcome of a decision based on a pair of primary and secondary indentifiers.
+     * This identifier pair is problem specific.
+     * For CCB, the primary is the event id and the secondary is the index of the slot.
      *
-     * @param event_id  The unique event_id used when choosing an action should be presented here.  This is so that
+     * @param primary_id  The unique primary_id used when choosing an action should be presented here.  This is so that
      *                  the action taken can be matched with feedback received.
+     * @param secondary_id Index of the partial outcome.
      * @param outcome Outcome as float.
-     * @param index Index of the partial outcome.
      * @param status  Optional field with detailed string description if there is an error
      * @return int Return error code.  This will also be returned in the api_status object
      */
-    int report_outcome(const char* event_id, float outcome, const char *index, api_status* status= nullptr);
+    int report_outcome(const char* primary_id, const char *secondary_id, float outcome, api_status* status= nullptr);
 
     /**
-     * @brief Report partial outcome of a decision based on an index.
+     * @brief Report outcome of a decision based on a pair of primary and secondary indentifiers.
+     * This identifier pair is problem specific.
+     * For CCB, the primary is the event id and the secondary is the index of the slot.
      *
-     * @param event_id  The unique event_id used when choosing an action should be presented here.  This is so that
+     * @param primary_id  The unique primary_id used when choosing an action should be presented here.  This is so that
      *                  the action taken can be matched with feedback received.
+     * @param secondary_id Index of the partial outcome.
      * @param outcome Outcome as float.
-     * @param index Index of the partial outcome.
      * @param status  Optional field with detailed string description if there is an error
      * @return int Return error code.  This will also be returned in the api_status object
      */
-    int report_outcome(const char* event_id, const char* outcome, int index, api_status* status= nullptr);
+    int report_outcome(const char* event_id, int secondary_id, const char* outcome, api_status* status= nullptr);
 
     /**
-     * @brief Report partial outcome of a decision based on an index.
+     * @brief Report outcome of a decision based on a pair of primary and secondary indentifiers.
+     * This identifier pair is problem specific.
+     * For CCB, the primary is the event id and the secondary is the index of the slot.
      *
-     * @param event_id  The unique event_id used when choosing an action should be presented here.  This is so that
+     * @param primary_id  The unique primary_id used when choosing an action should be presented here.  This is so that
      *                  the action taken can be matched with feedback received.
+     * @param secondary_id Index of the partial outcome.
      * @param outcome Outcome as float.
-     * @param index Index of the partial outcome.
      * @param status  Optional field with detailed string description if there is an error
      * @return int Return error code.  This will also be returned in the api_status object
      */
-    int report_outcome(const char* event_id, const char* outcome, const char *index, api_status* status= nullptr);
+    int report_outcome(const char* primary_id, const char *secondary_id, const char* outcome, api_status* status= nullptr);
 
     /*
      * @brief Refreshes the model if it has background refresh disabled.
