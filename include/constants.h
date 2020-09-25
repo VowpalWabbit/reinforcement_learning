@@ -39,24 +39,11 @@ namespace reinforcement_learning {  namespace name {
       const char *const  OBSERVATION_SEND_BATCH_INTERVAL_MS   = "observation.send.batchintervalms";
       const char *const  OBSERVATION_SENDER_IMPLEMENTATION    = "observation.sender.implementation";
 
-      // Decisions
-      const char *const  DECISION_EH_HOST     = "decisions.eventhub.host";
-      const char *const  DECISION_EH_NAME     = "decisions.eventhub.name";
-      const char *const  DECISION_EH_KEY_NAME = "decisions.eventhub.keyname";
-      const char *const  DECISION_EH_KEY      = "decisions.eventhub.key";
-      const char *const  DECISION_EH_TASKS_LIMIT = "decisions.eventhub.tasks_limit";
-      const char *const  DECISION_EH_MAX_HTTP_RETRIES = "decisions.eventhub.max_http_retries";
-      const char *const  DECISION_SEND_HIGH_WATER_MARK     = "decisions.send.highwatermark";
-      const char *const  DECISION_SEND_QUEUE_MAX_CAPACITY_KB    = "decisions.send.queue.maxcapacity.kb";
-      const char *const  DECISION_SEND_BATCH_INTERVAL_MS   = "decisions.send.batchintervalms";
-      const char *const  DECISION_SENDER_IMPLEMENTATION    = "decisions.sender.implementation";
-
       const char *const  EH_TEST                 = "eventhub.mock";
       const char *const  TRACE_LOG_IMPLEMENTATION = "trace.logger.implementation";
       const char *const  QUEUE_MODE = "queue.mode";
       const char *const  INTERACTION_FILE_NAME = "interaction.file.name";
       const char *const  OBSERVATION_FILE_NAME = "observation.file.name";
-      const char *const  DECISION_FILE_NAME = "decision.file.name";
       const char *const  TIME_PROVIDER_IMPLEMENTATION = "time_provider.implementation";
       const char *const  HTTP_CLIENT_DISABLE_CERT_VALIDATION  = "http.certvalidation.disable";
       const char *const  HTTP_CLIENT_TIMEOUT                  = "http.timeout"; // Timeout is in seconds, default is 30.
@@ -72,10 +59,8 @@ namespace reinforcement_learning {  namespace value {
       const char *const PASSTHROUGH_PDF_MODEL = "PASSTHROUGH_PDF";
       const char *const OBSERVATION_EH_SENDER = "OBSERVATION_EH_SENDER";
       const char *const INTERACTION_EH_SENDER = "INTERACTION_EH_SENDER";
-      const char *const DECISION_EH_SENDER = "DECISION_EH_SENDER";
       const char *const OBSERVATION_FILE_SENDER = "OBSERVATION_FILE_SENDER";
       const char *const INTERACTION_FILE_SENDER = "INTERACTION_FILE_SENDER";
-      const char *const DECISION_FILE_SENDER = "DECISION_FILE_SENDER";
       const char *const NULL_TRACE_LOGGER = "NULL_TRACE_LOGGER";
       const char *const CONSOLE_TRACE_LOGGER = "CONSOLE_TRACE_LOGGER";
       const char *const NULL_TIME_PROVIDER = "NULL_TIME_PROVIDER";

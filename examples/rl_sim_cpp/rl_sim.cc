@@ -268,7 +268,6 @@ int rl_sim::init_rl() {
 
   if(_options["log_to_file"].as<bool>()) {
     config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
-    config.set(r::name::DECISION_SENDER_IMPLEMENTATION, r::value::DECISION_FILE_SENDER);
     config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
   }
 

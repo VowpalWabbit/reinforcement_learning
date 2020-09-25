@@ -71,7 +71,7 @@ namespace {
       static auto mock_data_transport = get_mock_data_transport();
       static auto mock_model = get_mock_model();
 
-      static auto default_sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get(), mock_sender.get());
+      static auto default_sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
       static auto default_data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
       static auto default_model_factory = get_mock_model_factory(mock_model.get());
 
@@ -391,7 +391,7 @@ BOOST_AUTO_TEST_CASE(typesafe_err_callback) {
   auto mock_data_transport = get_mock_data_transport();
   auto mock_model = get_mock_model();
 
-  auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get(), mock_sender.get());
+  auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
   auto model_factory = get_mock_model_factory(mock_model.get());
 
@@ -434,7 +434,7 @@ BOOST_AUTO_TEST_CASE(live_model_mocks) {
   auto mock_data_transport = get_mock_data_transport();
   auto mock_model = get_mock_model();
 
-  auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get(), mock_sender.get());
+  auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
   auto model_factory = get_mock_model_factory(mock_model.get());
 
@@ -508,12 +508,10 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data) {
   std::vector<buffer_t> recorded_interactions;
   auto mock_interaction_sender = get_mock_sender(recorded_interactions);
 
-  auto mock_decision_sender = get_mock_sender(r::error_code::success);
-
   auto mock_data_transport = get_mock_data_transport();
   auto mock_model = get_mock_model();
 
-  auto logger_factory = get_mock_sender_factory(mock_observation_sender.get(), mock_interaction_sender.get(), mock_decision_sender.get());
+  auto logger_factory = get_mock_sender_factory(mock_observation_sender.get(), mock_interaction_sender.get());
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
   auto model_factory = get_mock_model_factory(mock_model.get());
 
@@ -559,27 +557,11 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data) {
     }
 
     Verify(Method((*mock_observation_sender), init)).Exactly(1);
-    Verify(Method((*mock_interaction_sender), init)).Exactly(2);
-    Verify(Method((*mock_decision_sender), init)).Exactly(2);
+    Verify(Method((*mock_interaction_sender), init)).Exactly(4);
   }
-  //std::string recorded_interactions_all;
-  //for (size_t i = 0; i < recorded_interactions.size(); ++i) {
-  //  recorded_interactions_all += recorded_interactions[i];
-  //  if (i + 1 < recorded_interactions.size()) {
-  //    recorded_interactions_all += '\n';
-  //  }
-  //}
-
-  //std::string recorded_observations_all;
-  //for (size_t i = 0; i < recorded_observations.size(); ++i) {
-  //  recorded_observations_all += recorded_observations[i];
-  //  if (i + 1 < recorded_observations.size()) {
-  //    recorded_observations_all += '\n';
-  //  }
-  //}
-
-  //BOOST_CHECK_EQUAL(recorded_interactions_all, expected_interactions);
-  //BOOST_CHECK_EQUAL(recorded_observations_all, expected_observations);
+  // TODO deserialize and check contents with expected
+  BOOST_CHECK_GE(recorded_interactions.size(), 1);
+  BOOST_CHECK_GE(recorded_observations.size(), 1);
 }
 
 BOOST_AUTO_TEST_CASE(populate_response_same_size_test) {

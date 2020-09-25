@@ -149,13 +149,6 @@ namespace reinforcement_learning {
         file_name,
         cb, trace_logger, status);
     });
-    sender_factory.register_type(value::DECISION_FILE_SENDER,
-      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status) {
-      const char* file_name = c.get(name::DECISION_FILE_NAME, "decision.fb.data");
-      return file_sender_create(retval, c,
-        file_name,
-        cb, trace_logger, status);
-    });
   }
 
   int null_tracer_create(i_trace** retval, const u::configuration& cfg, i_trace* trace_logger, api_status* status) {
