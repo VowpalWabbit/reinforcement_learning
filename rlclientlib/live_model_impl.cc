@@ -501,7 +501,7 @@ namespace reinforcement_learning {
 
     resp.set_event_id(event_id);
 
-    RETURN_IF_FAIL(episode.update(context_json, resp, status));
+    RETURN_IF_FAIL(episode.update(previous_id, context_json, resp, status));
     RETURN_IF_FAIL(_ranking_logger->log(episode.get_episode_id(), previous_id, context_json, resp, status));
     return error_code::success;
   }

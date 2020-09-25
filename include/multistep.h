@@ -39,15 +39,13 @@ namespace reinforcement_learning {
     episode_state& operator=(episode_state&& other) = default;
 
     const char* get_episode_id() const;
-    const char* get_last_event_id() const;
     const episode_history& get_history() const;
 
-    int update(const char* context, const ranking_response& response, api_status* error = nullptr);
+    int update(const char* previous_event_id, const char* context, const ranking_response& response, api_status* error = nullptr);
 
   private:
-    const std::string episode_id;
-    std::string last_event_id;
-    episode_history history;
+    std::string _episode_id;
+    episode_history _history;
   };
 
 }
