@@ -96,15 +96,13 @@ std::unique_ptr<fakeit::Mock<m::i_model>> get_mock_model(m::model_type_t model_t
   return mock;
 }
 
-std::unique_ptr<r::sender_factory_t> get_mock_sender_factory(fakeit::Mock<r::i_sender>* mock_observation_sender, fakeit::Mock<r::i_sender>* mock_interaction_sender, fakeit::Mock<r::i_sender>* mock_decision_sender) {
+std::unique_ptr<r::sender_factory_t> get_mock_sender_factory(fakeit::Mock<r::i_sender>* mock_observation_sender, fakeit::Mock<r::i_sender>* mock_interaction_sender) {
   auto factory = std::unique_ptr<r::sender_factory_t>(
     new r::sender_factory_t());
   factory->register_type(r::value::OBSERVATION_EH_SENDER,
     [mock_observation_sender](r::i_sender** retval, const u::configuration&, r::error_callback_fn* error_callback, r::i_trace*, r::api_status*) { *retval = &mock_observation_sender->get(); return r::error_code::success; });
   factory->register_type(r::value::INTERACTION_EH_SENDER,
     [mock_interaction_sender](r::i_sender** retval, const u::configuration&, r::error_callback_fn* error_callback, r::i_trace*, r::api_status*) { *retval = &mock_interaction_sender->get(); return r::error_code::success; });
-  factory->register_type(r::value::DECISION_EH_SENDER,
-    [mock_decision_sender](r::i_sender** retval, const u::configuration&, r::error_callback_fn* error_callback, r::i_trace*, r::api_status*) { *retval = &mock_decision_sender->get(); return r::error_code::success; });
   return factory;
 }
 

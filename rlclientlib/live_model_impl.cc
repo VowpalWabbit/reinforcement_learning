@@ -220,6 +220,30 @@ namespace reinforcement_learning {
     return report_outcome_internal(event_id, outcome, status);
   }
 
+ int live_model_impl::report_outcome(const char* event_id, const char* outcome, int idx, api_status* status) {
+    // Check arguments
+    RETURN_IF_FAIL(check_null_or_empty(event_id, outcome, _trace_logger.get(), status));
+    return report_outcome_internal(event_id, outcome, idx, status);
+  }
+
+  int live_model_impl::report_outcome(const char* event_id, float outcome, int idx, api_status* status) {
+    // Check arguments
+    RETURN_IF_FAIL(check_null_or_empty(event_id, _trace_logger.get(), status));
+    return report_outcome_internal(event_id, outcome, idx, status);
+  }
+
+ int live_model_impl::report_outcome(const char* event_id, const char* outcome, const char* idx, api_status* status) {
+    // Check arguments
+    RETURN_IF_FAIL(check_null_or_empty(event_id, outcome, _trace_logger.get(), status));
+    return report_outcome_internal(event_id, outcome, idx, status);
+  }
+
+  int live_model_impl::report_outcome(const char* event_id, float outcome, const char* idx, api_status* status) {
+    // Check arguments
+    RETURN_IF_FAIL(check_null_or_empty(event_id, _trace_logger.get(), status));
+    return report_outcome_internal(event_id, outcome, idx, status);
+  }
+
   int live_model_impl::refresh_model(api_status* status) {
 
     if (_bg_model_proc) {
@@ -290,7 +314,7 @@ namespace reinforcement_learning {
 
   int live_model_impl::init_loggers(api_status* status) {
     // Get the name of raw data (as opposed to message) sender for interactions.
-    const auto ranking_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);
+    const auto* const ranking_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);
     i_sender* ranking_data_sender;
 
     // Use the name to create an instance of raw data sender for interactions
@@ -303,16 +327,16 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(ranking_msg_sender->init(status));
 
     // Get time provider factory and implementation
-    const auto time_provider_impl = _configuration.get(name::TIME_PROVIDER_IMPLEMENTATION, value::NULL_TIME_PROVIDER);
-    i_time_provider* interaction_time_provider;
-    RETURN_IF_FAIL(_time_provider_factory->create(&interaction_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
+    const auto* const time_provider_impl = _configuration.get(name::TIME_PROVIDER_IMPLEMENTATION, value::NULL_TIME_PROVIDER);
+    i_time_provider* ranking_time_provider;
+    RETURN_IF_FAIL(_time_provider_factory->create(&ranking_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // Create a logger for interactions that will use msg sender to send interaction messages
-    _ranking_logger.reset(new logger::cb_logger_facade(_configuration, ranking_msg_sender, _watchdog, interaction_time_provider, &_error_cb));
+    _ranking_logger.reset(new logger::cb_logger_facade(_configuration, ranking_msg_sender, _watchdog, ranking_time_provider, &_error_cb));
     RETURN_IF_FAIL(_ranking_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for observations.
-    const auto outcome_sender_impl = _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::OBSERVATION_EH_SENDER);
+    const auto* const outcome_sender_impl = _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::OBSERVATION_EH_SENDER);
     i_sender* outcome_sender;
 
     // Use the name to create an instance of raw data sender for observations
@@ -333,7 +357,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_outcome_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for interactions.
-    const auto decision_sender_impl = _configuration.get(name::DECISION_SENDER_IMPLEMENTATION, value::DECISION_EH_SENDER);
+    const auto* const decision_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);
     i_sender* decision_data_sender;
 
     // Use the name to create an instance of raw data sender for interactions
@@ -353,7 +377,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_decision_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for interactions.
-    const auto* const slates_sender_impl = _configuration.get(name::DECISION_SENDER_IMPLEMENTATION, value::DECISION_EH_SENDER);
+    const auto* const slates_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);
     i_sender* slates_data_sender;
 
     // Use the name to create an instance of raw data sender for interactions
