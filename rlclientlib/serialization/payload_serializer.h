@@ -49,23 +49,6 @@ namespace reinforcement_learning {
         fbb.Finish(fb);
         return fbb.Release();
       }
-
-      static generic_event::payload_buffer_t event(const char* previous_id, const char* context, const ranking_response& response) {
-        flatbuffers::FlatBufferBuilder fbb;
-        std::vector<uint64_t> action_ids;
-        std::vector<float> probabilities;
-        for (auto const& r : response) {
-          action_ids.push_back(r.action_id + 1);
-          probabilities.push_back(r.probability);
-        }
-        std::vector<unsigned char> _context;
-        std::string context_str(context);
-        copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
-
-        auto fb = v2::CreateMultiStepEventDirect(fbb, response.get_event_id(), previous_id, &action_ids, &_context, &probabilities, response.get_model_id());
-        fbb.Finish(fb);
-        return fbb.Release();
-      }
     };
 
     struct ccb_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CCB> {
@@ -153,6 +136,25 @@ namespace reinforcement_learning {
         flatbuffers::FlatBufferBuilder fbb;
         const auto evt = v2::CreateActionTakenEvent(fbb, true).Union();
         auto fb = v2::CreateOutcomeSingleEvent(fbb, v2::OutcomeSingleEventBody_ActionTakenEvent, evt);
+        fbb.Finish(fb);
+        return fbb.Release();
+      }
+    };
+
+    struct multistep_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_MultiStep> {
+      static generic_event::payload_buffer_t event(const char* previous_id, const char* context, const ranking_response& response) {
+        flatbuffers::FlatBufferBuilder fbb;
+        std::vector<uint64_t> action_ids;
+        std::vector<float> probabilities;
+        for (auto const& r : response) {
+          action_ids.push_back(r.action_id + 1);
+          probabilities.push_back(r.probability);
+        }
+        std::vector<unsigned char> _context;
+        std::string context_str(context);
+        copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
+
+        auto fb = v2::CreateMultiStepEventDirect(fbb, response.get_event_id(), previous_id, &action_ids, &_context, &probabilities, response.get_model_id());
         fbb.Finish(fb);
         return fbb.Release();
       }

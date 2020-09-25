@@ -35,13 +35,13 @@ namespace reinforcement_learning {
         case 2:
           v2::LearningModeType lmt;
           RETURN_IF_FAIL(get_learning_mode(learning_mode, lmt, status));
-          return _v2->log(response.get_event_id(), _serializer.event(context, flags, lmt, response), _serializer.type, status);
+          return _v2->log(response.get_event_id(), _cb_serializer.event(context, flags, lmt, response), _cb_serializer.type, status);
       }
     }
 
     int cb_logger_facade::log(const char* episode_id, const char* previous_id, const char* context, const ranking_response& response, api_status* status) {
       switch (_version) {
-        case 2: return _v2->log(episode_id, _serializer.event(previous_id, context, response), generic_event::payload_type_t::PayloadType_MultiStep, status);
+        case 2: return _v2->log(episode_id, _multistep_serializer.event(previous_id, context, response), _multistep_serializer.type, status);
         default: return protocol_not_supported(status);
       }
     }

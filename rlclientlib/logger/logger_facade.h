@@ -38,7 +38,8 @@ namespace reinforcement_learning
       const int _version;
       const std::unique_ptr<interaction_logger> _v1;
       const std::unique_ptr<generic_event_logger> _v2;
-      const cb_serializer _serializer;
+      const cb_serializer _cb_serializer;
+      const multistep_serializer _multistep_serializer;
     };
 
     class ccb_logger_facade {
