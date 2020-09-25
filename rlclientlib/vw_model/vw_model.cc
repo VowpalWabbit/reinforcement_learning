@@ -109,7 +109,7 @@ namespace reinforcement_learning { namespace model_management {
   }
 
 
-  int vw_model::request_slates_decision(const char *event_id, uint32_t slot_count, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
+  int vw_model::request_multi_slot_decision(const char *event_id, uint32_t slot_count, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
     try {
       pooled_vw vw(_vw_pool, _vw_pool.get_or_create());
@@ -127,6 +127,11 @@ namespace reinforcement_learning { namespace model_management {
     catch ( ... ) {
       RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << "Unknown error";
     }
+  }
+
+  model_type_t vw_model::model_type() const
+  {
+    return safe_vw::get_model_type(_initial_command_line);
   }
 
 

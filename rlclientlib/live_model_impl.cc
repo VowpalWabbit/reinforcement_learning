@@ -231,7 +231,7 @@ namespace reinforcement_learning {
     std::string model_version;
 
     // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
-    RETURN_IF_FAIL(_model->request_slates_decision(event_id, num_decisions, context_json, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(_model->request_multi_slot_decision(event_id, num_decisions, context_json, actions_ids, actions_pdfs, model_version, status));
 
     RETURN_IF_FAIL(populate_slates_response(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), resp, _trace_logger.get(), status));
     RETURN_IF_FAIL(_slates_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
