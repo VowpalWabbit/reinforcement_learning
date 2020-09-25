@@ -64,9 +64,9 @@ namespace reinforcement_learning { namespace model_management {
     enum class model_type_t {
       UNKNOWN,
       CB,
-      CA,
       CCB,
       SLATES,
+      CA
     };
 
     //! The i_model interfaces provides the resolution from the raw model_data to a consumable object.

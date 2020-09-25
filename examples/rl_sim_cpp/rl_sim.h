@@ -151,9 +151,9 @@ public:
   private:
     enum LoopKind {
       CB,
-      CA,
       CCB,
-      Slates
+      Slates,
+      CA
     };
 
     boost::program_options::variables_map _options;
