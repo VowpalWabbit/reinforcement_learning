@@ -6,7 +6,7 @@ namespace reinforcement_learning {
     return body.c_str();
   }
 
-  int episode_history::update(const char* context, const ranking_response& response, api_status* status) {
+  int episode_history::update(const char* previous_event_id, const char* context, const ranking_response& response, api_status* status) {
     return error_code::success;//empty for now;
   }
 
@@ -22,7 +22,7 @@ namespace reinforcement_learning {
   }
 
   int episode_state::update(const char* previous_event_id, const char* context, const ranking_response& response, api_status* status) {
-    _history.update(context, response);
+    _history.update(previous_event_id, context, response);
     return error_code::success;
   }
 }

@@ -22,7 +22,7 @@ namespace reinforcement_learning {
     episode_history& operator=(episode_history&& other) = default;
 
     const char* get() const;
-    int update(const char* context, const ranking_response& response, api_status* error = nullptr);
+    int update(const char* previous_event_id, const char* context, const ranking_response& response, api_status* error = nullptr);
 
   private:
     std::string body;
