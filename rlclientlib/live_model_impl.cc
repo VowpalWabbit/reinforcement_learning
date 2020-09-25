@@ -192,7 +192,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_model->request_multi_slot_decision(event_id, num_decisions, context_json, actions_ids, actions_pdfs, model_version, status));
 
     RETURN_IF_FAIL(populate_slates_response(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_slates_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(_slates_logger->log_decision(_model->model_type(), event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -395,7 +395,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_time_provider_factory->create(&slates_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // // Create a logger for interactions that will use msg sender to send interaction messages
-    _slates_logger.reset(new logger::slates_logger_facade(_configuration, slates_msg_sender, _watchdog, slates_time_provider, &_error_cb));
+    _slates_logger.reset(new logger::multi_slot_logger_facade(_configuration, slates_msg_sender, _watchdog, slates_time_provider, &_error_cb));
     RETURN_IF_FAIL(_slates_logger->init(status));
 
     return error_code::success;
