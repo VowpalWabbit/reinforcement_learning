@@ -262,6 +262,32 @@ namespace reinforcement_learning {
     return report_outcome_internal(event_id, outcome, status);
   }
 
+ int live_model_impl::report_outcome(const char* primary_id, int secondary_id, const char* outcome, api_status* status) {
+    // Check arguments
+    RETURN_IF_FAIL(check_null_or_empty(primary_id, outcome, _trace_logger.get(), status));
+    return report_outcome_internal(primary_id, secondary_id, outcome, status);
+  }
+
+  int live_model_impl::report_outcome(const char* primary_id, int secondary_id, float outcome, api_status* status) {
+    // Check arguments
+    RETURN_IF_FAIL(check_null_or_empty(primary_id, _trace_logger.get(), status));
+    return report_outcome_internal(primary_id, secondary_id, outcome, status);
+  }
+
+ int live_model_impl::report_outcome(const char* primary_id, const char* secondary_id, const char* outcome, api_status* status) {
+    // Check arguments
+    RETURN_IF_FAIL(check_null_or_empty(primary_id, outcome, _trace_logger.get(), status));
+    RETURN_IF_FAIL(check_null_or_empty(secondary_id, _trace_logger.get(), status));
+    return report_outcome_internal(primary_id, secondary_id, outcome, status);
+  }
+
+  int live_model_impl::report_outcome(const char* primary_id, const char* secondary_id, float outcome, api_status* status) {
+    // Check arguments
+    RETURN_IF_FAIL(check_null_or_empty(primary_id, _trace_logger.get(), status));
+    RETURN_IF_FAIL(check_null_or_empty(secondary_id, _trace_logger.get(), status));
+    return report_outcome_internal(primary_id, secondary_id, outcome, status);
+  }
+
   int live_model_impl::refresh_model(api_status* status) {
 
     if (_bg_model_proc) {

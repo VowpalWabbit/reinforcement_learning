@@ -176,16 +176,31 @@ namespace reinforcement_learning {
       }
     }
 
-    int observation_logger_facade::log(const char* event_id, int index, float outcome, api_status* status) {
+
+    int observation_logger_facade::log(const char* primary_id, int secondary_id, float outcome, api_status* status) {
       switch (_version) {
-        case 2: return _v2->log(event_id, _serializer.numeric_event(index, outcome), _serializer.type, status);
+        case 2: return _v2->log(primary_id, _serializer.numeric_event(secondary_id, outcome), _serializer.type, status);
         default: return protocol_not_supported(status);
       }
     }
 
-    int observation_logger_facade::log(const char* event_id, int index, const char* outcome, api_status* status) {
+    int observation_logger_facade::log(const char* primary_id, int secondary_id, const char* outcome, api_status* status) {
       switch (_version) {
-        case 2: return _v2->log(event_id, _serializer.string_event(index, outcome), _serializer.type, status);
+        case 2: return _v2->log(primary_id, _serializer.string_event(secondary_id, outcome), _serializer.type, status);
+        default: return protocol_not_supported(status);
+      }
+    }
+
+    int observation_logger_facade::log(const char* primary_id, const char* secondary_id, float outcome, api_status* status) {
+      switch (_version) {
+        case 2: return _v2->log(primary_id, _serializer.numeric_event(secondary_id, outcome), _serializer.type, status);
+        default: return protocol_not_supported(status);
+      }
+    }
+
+    int observation_logger_facade::log(const char* primary_id, const char* secondary_id, const char* outcome, api_status* status) {
+      switch (_version) {
+        case 2: return _v2->log(primary_id, _serializer.string_event(secondary_id, outcome), _serializer.type, status);
         default: return protocol_not_supported(status);
       }
     }

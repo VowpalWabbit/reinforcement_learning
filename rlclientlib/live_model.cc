@@ -154,6 +154,30 @@ namespace reinforcement_learning
     return _pimpl->report_outcome(event_id, outcome, status);
   }
 
+  int live_model::report_outcome(const char* primary_id, int secondary_id, const char* outcome, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);
+  }
+
+  int live_model::report_outcome(const char* primary_id, int secondary_id, float outcome, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);
+  }
+
+  int live_model::report_outcome(const char* primary_id, const char* secondary_id, const char* outcome, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);
+  }
+
+  int live_model::report_outcome(const char* primary_id, const char* secondary_id, float outcome, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);
+  }
+
   int live_model::refresh_model(api_status* status)
   {
     INIT_CHECK();
