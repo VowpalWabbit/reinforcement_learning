@@ -19,7 +19,7 @@ namespace reinforcement_learning { namespace model_management {
     int choose_continuous_action(const char* features, float& action, float& pdf_value, std::string& model_version, api_status* status = nullptr) override;
     int request_decision(const std::vector<const char*>& event_ids, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status = nullptr) override;
     int request_multi_slot_decision(const char *event_id, uint32_t slot_count, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status = nullptr) override;
-    model_type_t model_type() const;
+    model_type_t model_type() const override;
   private:
     std::unique_ptr<safe_vw> _vw;
     i_trace* _trace_logger;
