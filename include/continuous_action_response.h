@@ -13,6 +13,8 @@ namespace reinforcement_learning {
     continuous_action_response() = default;
     ~continuous_action_response() = default;
 
+    continuous_action_response(char const* event_id);
+
     float get_chosen_action() const;
     void set_chosen_action(float action);
 

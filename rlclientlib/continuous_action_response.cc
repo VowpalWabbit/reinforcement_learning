@@ -4,6 +4,9 @@
 
 namespace reinforcement_learning {
 
+  continuous_action_response::continuous_action_response(char const* event_id)
+    : _event_id(event_id), _chosen_action(0), _chosen_action_pdf_value(0) {}
+
   float continuous_action_response::get_chosen_action() const
   {
     return _chosen_action;
