@@ -9,9 +9,9 @@
 #include <chrono>
 #include <cstring>
 
-using namespace rapidjson;
-
 namespace reinforcement_learning { namespace utility {
+  namespace rj = rapidjson;
+
   const auto multi = "_multi";
   const auto slots = "_slots";
   const auto event_id = "_id";
@@ -30,14 +30,14 @@ namespace reinforcement_learning { namespace utility {
    */
   int get_event_ids(const char* context, std::map<size_t, std::string>& event_ids, i_trace* trace, api_status* status) {
     try {
-      Document obj;
+      rj::Document obj;
       obj.Parse(context);
 
       if (obj.HasParseError()) {
-        RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << GetParseErrorFunc(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";
+        RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << rj::GetParseErrorFunc(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";
       }
 
-      const Value::ConstMemberIterator& itr = obj.FindMember(slots);
+      const rj::Value::ConstMemberIterator& itr = obj.FindMember(slots);
       if (itr != obj.MemberEnd() && itr->value.IsArray()) {
         const auto& arr = itr->value.GetArray();
         for (int i = 0; i < arr.Size(); ++i) {
@@ -76,16 +76,16 @@ namespace reinforcement_learning { namespace utility {
   int get_array_count(const char *context, const char *array_key, i_trace *trace, api_status *status, std::string& parse_error) {
     auto count = 0;
     try {
-      Document obj;
+      rj::Document obj;
       obj.Parse(context);
 
       if (obj.HasParseError()) {
         std::ostringstream ss;
-        ss << "JSON parse error: " << GetParseErrorFunc(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";
+        ss << "JSON parse error: " << rj::GetParseErrorFunc(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";
         parse_error = ss.str();
       }
       else {
-        const Value::ConstMemberIterator itr = obj.FindMember(array_key);
+        const rj::Value::ConstMemberIterator itr = obj.FindMember(array_key);
         if (itr != obj.MemberEnd() && itr->value.IsArray()) {
           const auto arr = itr->value.GetArray();
           count = arr.Size();
