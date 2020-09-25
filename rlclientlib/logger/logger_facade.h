@@ -107,6 +107,8 @@ namespace reinforcement_learning
 
       int log(const char* event_id, int index, float outcome, api_status* status);
       int log(const char* event_id, int index, const char* outcome, api_status* status);
+      int log(const char* event_id, const char* index, float outcome, api_status* status);
+      int log(const char* event_id, const char* index, const char* outcome, api_status* status);
 
       int report_action_taken(const char* event_id, api_status* status);
 

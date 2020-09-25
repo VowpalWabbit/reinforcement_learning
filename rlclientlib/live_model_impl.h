@@ -36,7 +36,10 @@ namespace reinforcement_learning
 
     int report_outcome(const char* event_id, const char* outcome_data, api_status* status);
     int report_outcome(const char* event_id, float reward, api_status* status);
-
+    int report_outcome(const char* event_id, float outcome, int idx, api_status* status= nullptr);
+    int report_outcome(const char* event_id, float outcome, const char *idx, api_status* status= nullptr);
+    int report_outcome(const char* event_id, const char* outcome, int idx, api_status* status= nullptr);
+    int report_outcome(const char* event_id, const char* outcome, const char *idx, api_status* status= nullptr);
 
     int refresh_model(api_status* status);
 
@@ -67,6 +70,8 @@ namespace reinforcement_learning
     int explore_exploit(const char* event_id, const char* context, ranking_response& response, api_status* status) const;
     template<typename D>
     int report_outcome_internal(const char* event_id, D outcome, api_status* status);
+    template<typename D, typename I>
+    int report_outcome_internal(const char* event_id, D outcome, I index, api_status* status);
 
   private:
     // Internal implementation state
@@ -104,6 +109,22 @@ namespace reinforcement_learning
 
     // Send the outcome event to the backend
     RETURN_IF_FAIL(_outcome_logger->log(event_id, outcome, status));
+
+    // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
+    if (_watchdog.has_background_error_been_reported()) {
+      RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+    }
+
+    return error_code::success;
+  }
+
+  template <typename D, typename I>
+  int live_model_impl::report_outcome_internal(const char* event_id, D outcome, I index, api_status* status) {
+    // Clear previous errors if any
+    api_status::try_clear(status);
+
+    // Send the outcome event to the backend
+    RETURN_IF_FAIL(_outcome_logger->log(event_id, index, outcome, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
