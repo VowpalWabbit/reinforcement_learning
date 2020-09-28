@@ -118,12 +118,12 @@ namespace reinforcement_learning { namespace logger {
   };
 
   template <>
-  struct fb_event_serializer<slates_decision_event> {
+  struct fb_event_serializer<multi_slot_decision_event> {
     using fb_event_t = SlatesEvent;
     using offset_vector_t = typename std::vector<flatbuffers::Offset<fb_event_t>>;
     using batch_builder_t = SlatesEventBatchBuilder;
 
-    static size_t size_estimate(const slates_decision_event& evt) {
+    static size_t size_estimate(const multi_slot_decision_event& evt) {
       size_t estimate = 0;
       auto action_ids = evt.get_actions_ids();
       auto probs = evt.get_probabilities();
@@ -140,7 +140,7 @@ namespace reinforcement_learning { namespace logger {
       return estimate;
     }
 
-    static int serialize(slates_decision_event& evt, flatbuffers::FlatBufferBuilder& builder,
+    static int serialize(multi_slot_decision_event& evt, flatbuffers::FlatBufferBuilder& builder,
                          flatbuffers::Offset<fb_event_t>& ret_val, api_status* status) {
       const auto event_id_offset = builder.CreateString(evt.get_event_id());
       const auto context_offset = builder.CreateVector(evt.get_context());
@@ -281,7 +281,7 @@ namespace reinforcement_learning { namespace logger {
   inline int fb_collection_serializer<decision_ranking_event>::message_id() { return message_type::fb_decision_event_collection; }
 
   template <>
-  inline int fb_collection_serializer<slates_decision_event>::message_id() { return message_type::fb_slates_event_collection; }
+  inline int fb_collection_serializer<multi_slot_decision_event>::message_id() { return message_type::fb_slates_event_collection; }
 
   template <>
   inline int fb_collection_serializer<ranking_event>::message_id() { return message_type::fb_ranking_learning_mode_event_collection; }

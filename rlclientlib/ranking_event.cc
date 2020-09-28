@@ -75,7 +75,7 @@ namespace reinforcement_learning {
     return decision_ranking_event(event_ids, flags & action_flags::DEFERRED, pass_prob, context, action_ids, pdfs, model_version, ts);
   }
 
-  slates_decision_event::slates_decision_event(const std::string& event_id, bool deferred_action, float pass_prob, const char* context, const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts)
+  multi_slot_decision_event::multi_slot_decision_event(const std::string& event_id, bool deferred_action, float pass_prob, const char* context, const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts)
   : event(event_id.c_str(), ts, pass_prob),
   _event_id(event_id),
   _deferred_action(deferred_action),
@@ -87,15 +87,15 @@ namespace reinforcement_learning {
     copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
   }
 
-  const std::vector<unsigned char>& slates_decision_event::get_context() const  { return _context; }
-  const std::vector<std::vector<uint32_t>>& slates_decision_event::get_actions_ids() const { return _action_ids_vector; }
-  const std::vector<std::vector<float>>& slates_decision_event::get_probabilities() const { return _probilities_vector; }
-  const std::string& slates_decision_event::get_model_id() const { return _model_id; }
-  bool slates_decision_event::get_defered_action() const { return _deferred_action; }
-  const std::string& slates_decision_event::get_event_id() const { return _event_id; }
+  const std::vector<unsigned char>& multi_slot_decision_event::get_context() const  { return _context; }
+  const std::vector<std::vector<uint32_t>>& multi_slot_decision_event::get_actions_ids() const { return _action_ids_vector; }
+  const std::vector<std::vector<float>>& multi_slot_decision_event::get_probabilities() const { return _probilities_vector; }
+  const std::string& multi_slot_decision_event::get_model_id() const { return _model_id; }
+  bool multi_slot_decision_event::get_defered_action() const { return _deferred_action; }
+  const std::string& multi_slot_decision_event::get_event_id() const { return _event_id; }
 
-  slates_decision_event slates_decision_event::request_decision(const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts, float pass_prob) {
-    return slates_decision_event(event_id, (flags & action_flags::DEFERRED) != 0u, pass_prob, context, action_ids, pdfs, model_version, ts);
+  multi_slot_decision_event multi_slot_decision_event::request_decision(const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts, float pass_prob) {
+    return multi_slot_decision_event(event_id, (flags & action_flags::DEFERRED) != 0u, pass_prob, context, action_ids, pdfs, model_version, ts);
   }
 
   outcome_event::outcome_event(const char* event_id, float pass_prob, const char* outcome, bool action_taken, const timestamp& ts)

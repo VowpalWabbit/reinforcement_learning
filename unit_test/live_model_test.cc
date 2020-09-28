@@ -1,4 +1,4 @@
-#include "slates_response.h"
+#include "multi_slot_response.h"
 #define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
 #   define BOOST_TEST_MODULE Main
@@ -753,8 +753,8 @@ BOOST_AUTO_TEST_CASE(slates_explore_only_mode) {
   r::live_model model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
-  r::slates_response response;
-  BOOST_CHECK_EQUAL(model.request_slates_decision(JSON_SLATES_CONTEXT, response), err::success);
+  r::multi_slot_response response;
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(JSON_SLATES_CONTEXT, response), err::success);
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -789,18 +789,18 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2) {
   r::live_model ds = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
-  r::slates_response slates_response;
+  r::multi_slot_response slates_response;
   r::decision_response ccb_response;
 
   //slates API doesn't work for ccb under v1 protocol
-  BOOST_CHECK_EQUAL(ds.request_slates_decision("event_id", JSON_CONTEXT_WITH_SLOTS, slates_response, &status), err::protocol_not_supported);
+  BOOST_CHECK_EQUAL(ds.request_multi_slot_decision("event_id", JSON_CONTEXT_WITH_SLOTS, slates_response, &status), err::protocol_not_supported);
 
   config.set(r::name::PROTOCOL_VERSION, "2");
   r::live_model ds2 = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds2.init(&status), err::success);
 
   //slates API work for ccb with v2
-  BOOST_CHECK_EQUAL(ds2.request_slates_decision("event_id", JSON_CONTEXT_WITH_SLOTS, slates_response, &status), err::success);
+  BOOST_CHECK_EQUAL(ds2.request_multi_slot_decision("event_id", JSON_CONTEXT_WITH_SLOTS, slates_response, &status), err::success);
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
 
   //old ccb api doesn't work under v2
