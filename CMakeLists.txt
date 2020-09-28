@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 option(BUILD_PYTHON "Build the Python bindings" ON)
 
-option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" OFF)
+option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" ON)
 
 # TODO Compile cpprest into its own separate lib so that it doesn't have to be consumed
 if (vw_USE_AZURE_FACTORIES)
