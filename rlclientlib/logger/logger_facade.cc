@@ -101,7 +101,7 @@ namespace reinforcement_learning {
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
       switch (_version) {
         case 1: {
-          if (model_type != model_type::SLATES)
+          if (model_type != reinforcement_learning::model_management::model_type_t::SLATES)
             RETURN_ERROR_ARG(nullptr, status, invalid_argument, "multi_slot logger under v1 protocol can only log slates.");
           return _v1->log_decision(event_id, context, flags, action_ids, pdfs, model_version, status);
         }
