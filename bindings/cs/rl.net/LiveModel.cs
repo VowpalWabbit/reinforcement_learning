@@ -64,7 +64,7 @@ namespace Rl.Net
                 return LiveModelRequestContinuousActionNative(liveModel, eventId, contextJson, continuousActionResponse, apiStatus);
             }
 
-            [DllImport("rl.net.native.dll"), EntryPoint = "LiveModelRequestContinuousActionWithFlags"]
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestContinuousActionWithFlags")]
             private static extern int LiveModelRequestContinuousActionWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, int> LiveModelRequestContinuousActionWithFlagsOverride { get; set; }
@@ -76,7 +76,7 @@ namespace Rl.Net
                     return LiveModelRequestContinuousActionWithFlagsOverride(liveModel, eventId, contextJson, flags, continuousActionResponse, apiStatus);
                 }
 
-                return LiveModelRequestContinuousActionWithFlagsNative(liveModel, eventId, contextJson, flags, rankingResponse, apiStatus);
+                return LiveModelRequestContinuousActionWithFlagsNative(liveModel, eventId, contextJson, flags, continuousActionResponse, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestDecision")]
@@ -311,7 +311,7 @@ namespace Rl.Net
             }
         }
 
-        unsafe private static int LiveModelRequestContinuousActionkWithFlags(IntPtr liveModel, string eventId, string contextJson, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus)
+        unsafe private static int LiveModelRequestContinuousActionWithFlags(IntPtr liveModel, string eventId, string contextJson, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus)
         {
             CheckJsonString(contextJson);
 
@@ -540,8 +540,8 @@ namespace Rl.Net
 
         public bool TryRequestContinuousAction(string eventId, string contextJson, out ContinuousActionResponse response, ApiStatus apiStatus = null)
         {
-            response = new continuousActionResponse();
-            return this.TryRequestContinuousAction(eventId, contextJsonUtf8Bytes, response, apiStatus);
+            response = new ContinuousActionResponse();
+            return this.TryRequestContinuousAction(eventId, contextJson, response, apiStatus);
         }
 
         public bool TryRequestContinuousAction(string eventId, string contextJson, ContinuousActionResponse response, ApiStatus apiStatus = null)
@@ -552,7 +552,7 @@ namespace Rl.Net
             return result == NativeMethods.SuccessStatus;
         }
 
-        public RankingResponse RequestContinuousAction(string eventId, string contextJson)
+        public ContinuousActionResponse RequestContinuousAction(string eventId, string contextJson)
         {
             ContinuousActionResponse result = new ContinuousActionResponse();
 
@@ -567,7 +567,7 @@ namespace Rl.Net
 
         public bool TryRequestContinuousAction(string eventId, string contextJson, ActionFlags flags, out ContinuousActionResponse response, ApiStatus apiStatus = null)
         {
-            response = new RankingResponse();
+            response = new ContinuousActionResponse();
             return this.TryRequestContinuousAction(eventId, contextJson, flags, response, apiStatus);
         }
 

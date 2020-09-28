@@ -98,14 +98,14 @@ API int LiveModelChooseRankWithFlags(livemodel_context_t* context, const char* e
   return context->livemodel->choose_rank(event_id, context_json, flags, *resp, status);
 }
 
-API int LiveModelRequestContinuousAction(livemodel_context_t* livemodel, const char * event_id, const char * context_json, reinforcement_learning::continuous_action_response* resp, reinforcement_learning::api_status* status)
+API int LiveModelRequestContinuousAction(livemodel_context_t* context, const char * event_id, const char * context_json, reinforcement_learning::continuous_action_response* resp, reinforcement_learning::api_status* status)
 {
   RL_IGNORE_DEPRECATED_USAGE_START
   return context->livemodel->request_continuous_action(event_id, context_json, *resp, status);
   RL_IGNORE_DEPRECATED_USAGE_END
 }
 
-API int LiveModelRequestContinuousActionWithFlags(livemodel_context_t* livemodel, const char * event_id, const char * context_json, unsigned int flags, reinforcement_learning::continuous_action_response* resp, reinforcement_learning::api_status* status)
+API int LiveModelRequestContinuousActionWithFlags(livemodel_context_t* context, const char * event_id, const char * context_json, unsigned int flags, reinforcement_learning::continuous_action_response* resp, reinforcement_learning::api_status* status)
 {
   RL_IGNORE_DEPRECATED_USAGE_START
   return context->livemodel->request_continuous_action(context_json, flags, *resp, status);

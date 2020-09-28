@@ -376,7 +376,7 @@ namespace Rl.Net.Cli.Test
         private void Run_LiveModelRequestContinuousAction_Test(LiveModel liveModel, string contextJson)
         {
             NativeMethods.LiveModelRequestContinuousActionOverride =
-                (IntPtr liveModelPtr, IntPtr contextJsonPtr, IntPtr continuousActionResponse, IntPtr ApiStatus) =>
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, IntPtr continuousActionResponse, IntPtr ApiStatus) =>
                 {
                     string contextJsonMarshalledBack = NativeMethods.StringMarshallingFunc(contextJsonPtr);
                     Assert.AreEqual(contextJson, contextJsonMarshalledBack, "Marshalling contextJson does not work properly in LiveModelRequestContinuousAction");
@@ -390,7 +390,7 @@ namespace Rl.Net.Cli.Test
         [TestMethod]
         public void Test_LiveModel_RequestContinuousAction()
         {
-            LiveModel loveModel = this.ConfigureLiveModel();
+            LiveModel liveModel = this.ConfigureLiveModel();
 
             Run_LiveModelRequestContinuousAction_Test(liveModel, PseudoLocContextJsonWithPdf);
         }
