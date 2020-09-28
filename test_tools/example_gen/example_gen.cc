@@ -8,7 +8,8 @@
 
 #include <iostream>
 #include <fstream>
-#include "config_utility.h"
+ #include <cstring>
+ #include "config_utility.h"
 #include "live_model.h"
 #include "constants.h"
 
