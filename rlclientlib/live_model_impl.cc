@@ -170,6 +170,10 @@ namespace reinforcement_learning {
       return error_code::not_supported;
     }
 
+    if(_protocol_version == 1 && _model->model_type() != model_management::model_type_t::SLATES) {
+      RETURN_ERROR_ARG(_trace_logger.get(), status, protocol_not_supported, "Only Slates models are supported under legacy v1 protocol");
+    }
+
     resp.clear();
     //clear previous errors if any
     api_status::try_clear(status);
@@ -294,6 +298,7 @@ namespace reinforcement_learning {
     }
 
     _learning_mode = learning::to_learning_mode(_configuration.get(name::LEARNING_MODE, value::LEARNING_MODE_ONLINE));
+    _protocol_version = _configuration.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION);
   }
 
   int live_model_impl::init_trace(api_status* status) {

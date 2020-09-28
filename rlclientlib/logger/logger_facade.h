@@ -57,14 +57,9 @@ namespace reinforcement_learning
       int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
 
-      int log_decisions(const char* event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
-        const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
-
     private:
       const int _version;
       const std::unique_ptr<ccb_logger> _v1;
-      const std::unique_ptr<generic_event_logger> _v2;
-      const ccb_serializer _serializer;
     };
 
     class multi_slot_logger_facade {

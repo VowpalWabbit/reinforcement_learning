@@ -83,6 +83,7 @@ namespace reinforcement_learning
     model_management::data_callback_fn _data_cb;
     utility::watchdog _watchdog;
     learning_mode _learning_mode;
+    int _protocol_version;
 
     trace_logger_factory_t* _trace_factory;
     data_transport_factory_t* _t_factory;
