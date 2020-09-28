@@ -1,8 +1,6 @@
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(flatbuffers REQUIRED)
 
-option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" OFF)
-
 set(RL_FLAT_BUFFER_FILES_V1
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/Metadata.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/OutcomeEvent.fbs"
@@ -57,8 +55,6 @@ set(PROJECT_SOURCES
   utility/context_helper.cc
   utility/data_buffer.cc
   utility/data_buffer_streambuf.cc
-  utility/http_authorization.cc
-  utility/http_helper.cc
   utility/str_util.cc
   utility/watchdog.cc
   vw_model/pdf_model.cc
@@ -69,9 +65,11 @@ set(PROJECT_SOURCES
 if(vw_USE_AZURE_FACTORIES)
   list(APPEND PROJECT_SOURCES
     azure_factories.cc
+    logger/eventhub_client.cc
     model_mgmt/restapi_data_transport.cc
     utility/http_client.cc
-    logger/eventhub_client.cc
+    utility/http_helper.cc
+    utility/http_authorization.cc
   )
 endif()
 
@@ -117,8 +115,6 @@ set(PROJECT_PRIVATE_HEADERS
   serialization/fb_serializer.h
   serialization/json_serializer.h
   utility/context_helper.h
-  utility/http_authorization.h
-  utility/http_helper.h
   utility/interruptable_sleeper.h
   utility/object_pool.h
   utility/periodic_background_proc.h
@@ -131,9 +127,11 @@ set(PROJECT_PRIVATE_HEADERS
 if(vw_USE_AZURE_FACTORIES)
   list(APPEND PROJECT_PRIVATE_HEADERS
     azure_factories.h
-    utility/http_client.h
-    model_mgmt/restapi_data_transport.h
     logger/eventhub_client.h
+    model_mgmt/restapi_data_transport.h
+    utility/http_client.h
+    utility/http_helper.h
+    utility/http_authorization.h
   )
 endif()
 
@@ -157,7 +155,12 @@ target_include_directories( rlclientlib
                             ${FLATBUFFERS_INCLUDE_DIRS}
                             ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date
                             )
-target_link_libraries(rlclientlib PUBLIC Boost::system vw OpenSSL::SSL OpenSSL::Crypto cpprestsdk::cpprest PRIVATE RapidJSON)
+target_link_libraries(rlclientlib PUBLIC Boost::system vw OpenSSL::SSL OpenSSL::Crypto PRIVATE RapidJSON)
+
+if (vw_USE_AZURE_FACTORIES)
+  target_link_libraries(rlclientlib PUBLIC cpprestsdk::cpprest)
+endif()
+
 # Consuming Boost uuid requires BCrypt, normally this is automatically linked but vcpkg turns this feature off.
 if(WIN32)
   target_link_libraries(rlclientlib PUBLIC bcrypt)

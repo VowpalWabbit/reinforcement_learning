@@ -1,22 +1,17 @@
-
-# If compiling on windows add the stdafx file
-add_executable(rltest
+set(TEST_SOURCES
   async_batcher_test.cc
   configuration_test.cc
   data_buffer_test.cc
   data_callback_test.cc
   err_callback_test.cc
   event_queue_test.cc
-  eventhub_client_test.cc
   explore_test.cc
   factory_test.cc
   fb_serializer_test.cc
-  http_client_test.cc
   json_context_parse_test.cc
   learning_mode_test.cc
   live_model_test.cc
   main.cc
-  mock_http_client.cc
   mock_util.cc
   model_mgmt_test.cc
   object_pool_test.cc
@@ -29,6 +24,17 @@ add_executable(rltest
   unit_test.vcxproj.filters
   watchdog_test.cc
 )
+
+if (vw_USE_AZURE_FACTORIES)
+  list(APPEND TEST_SOURCES
+    eventhub_client_test.cc
+    mock_http_client.cc
+    http_client_test.cc
+  )
+endif()
+
+# If compiling on windows add the stdafx file
+add_executable(rltest ${TEST_SOURCES})
 
 # Add the include directories from rlclientlib target for testing
 target_include_directories(rltest PRIVATE $<TARGET_PROPERTY:rlclientlib,INCLUDE_DIRECTORIES>)

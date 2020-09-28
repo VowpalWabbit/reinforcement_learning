@@ -1,5 +1,4 @@
 #pragma once
-#include "restapi_data_transport.h"
 #include "data_callback_fn.h"
 namespace reinforcement_learning {
   class error_callback_fn;

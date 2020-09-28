@@ -5,8 +5,13 @@ set(CMAKE_CXX_STANDARD 11)
 
 option(BUILD_PYTHON "Build the Python bindings" OFF)
 
+option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" OFF)
+
 # TODO Compile cpprest into its own separate lib so that it doesn't have to be consumed
-find_package(cpprestsdk REQUIRED)
+if (vw_USE_AZURE_FACTORIES)
+    find_package(cpprestsdk REQUIRED)
+endif()
+
 find_package(OpenSSL REQUIRED)
 find_package(Boost COMPONENTS unit_test_framework system program_options thread REQUIRED)
 
