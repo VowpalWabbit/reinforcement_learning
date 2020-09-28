@@ -9,7 +9,6 @@
     <AssemblyName>Rl.Net</AssemblyName>
     <RootNamespace>Rl.Net</RootNamespace>
     <HighEntropyVA>true</HighEntropyVA>
-    <IntermediateOutputPath>$(SolutionDir)out\int\$(Configuration)\x64\$(ProjectName)\</IntermediateOutputPath>
   </PropertyGroup>
 
   <Import Project="$(PackagingIntegration)" Condition="Exists('$(PackagingIntegration)')" />
@@ -34,11 +33,6 @@
   <ItemGroup>
     <PackageReference Include="System.Memory" Version="4.5.4" />
   </ItemGroup>
-
-  <Target Name="DisplayMessages">
-        <Message Text="Project File Name = $(MSBuildProjectFile)" />
-        <Message Text="Project Extension = $(MSBuildProjectExtension)" />
-    </Target>
 
   <Import Project="..\common\codegen\TextTemplate.targets" />
 
