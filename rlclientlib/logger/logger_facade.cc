@@ -45,9 +45,9 @@ namespace reinforcement_learning {
     , _v1(_version == 1 ? new ccb_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
     , _v2(_version == 2 ? new generic_event_logger(
       sender,
-      c.get_int(name::DECISION_SEND_HIGH_WATER_MARK, 198 * 1024),
-      c.get_int(name::DECISION_SEND_BATCH_INTERVAL_MS, 1000),
-      c.get_int(name::DECISION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
+      c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
+      c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
+      c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
       c.get(name::QUEUE_MODE, "DROP"),
       watchdog,
       time_provider,
@@ -83,9 +83,9 @@ namespace reinforcement_learning {
     , _v1(_version == 1 ? new slates_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
     , _v2(_version == 2 ? new generic_event_logger(
       sender,
-      c.get_int(name::DECISION_SEND_HIGH_WATER_MARK, 198 * 1024),
-      c.get_int(name::DECISION_SEND_BATCH_INTERVAL_MS, 1000),
-      c.get_int(name::DECISION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
+      c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
+      c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
+      c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
       c.get(name::QUEUE_MODE, "DROP"),
       watchdog,
       time_provider,
@@ -147,16 +147,31 @@ namespace reinforcement_learning {
       }
     }
 
-    int observation_logger_facade::log(const char* event_id, int index, float outcome, api_status* status) {
+
+    int observation_logger_facade::log(const char* primary_id, int secondary_id, float outcome, api_status* status) {
       switch (_version) {
-        case 2: return _v2->log(event_id, _serializer.numeric_event(index, outcome), _serializer.type, status);
+        case 2: return _v2->log(primary_id, _serializer.numeric_event(secondary_id, outcome), _serializer.type, status);
         default: return protocol_not_supported(status);
       }
     }
 
-    int observation_logger_facade::log(const char* event_id, int index, const char* outcome, api_status* status) {
+    int observation_logger_facade::log(const char* primary_id, int secondary_id, const char* outcome, api_status* status) {
       switch (_version) {
-        case 2: return _v2->log(event_id, _serializer.string_event(index, outcome), _serializer.type, status);
+        case 2: return _v2->log(primary_id, _serializer.string_event(secondary_id, outcome), _serializer.type, status);
+        default: return protocol_not_supported(status);
+      }
+    }
+
+    int observation_logger_facade::log(const char* primary_id, const char* secondary_id, float outcome, api_status* status) {
+      switch (_version) {
+        case 2: return _v2->log(primary_id, _serializer.numeric_event(secondary_id, outcome), _serializer.type, status);
+        default: return protocol_not_supported(status);
+      }
+    }
+
+    int observation_logger_facade::log(const char* primary_id, const char* secondary_id, const char* outcome, api_status* status) {
+      switch (_version) {
+        case 2: return _v2->log(primary_id, _serializer.string_event(secondary_id, outcome), _serializer.type, status);
         default: return protocol_not_supported(status);
       }
     }

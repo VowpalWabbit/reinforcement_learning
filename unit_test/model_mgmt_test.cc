@@ -192,3 +192,29 @@ int dummy_data_tranport_create( m::i_data_transport** retval,
 void register_local_file_factory() {
   r::data_transport_factory.register_type(DUMMY_DATA_TRANSPORT, dummy_data_tranport_create);
 }
+
+
+BOOST_AUTO_TEST_CASE(vw_model_type)
+{
+  register_local_file_factory();
+
+  u::configuration model_cc;
+  m::i_model* vw;
+
+  model_cc.set(r::name::VW_CMDLINE, "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
+  BOOST_CHECK_EQUAL(r::error_code::success, r::model_factory.create(&vw, r::value::VW, model_cc));
+  BOOST_CHECK_EQUAL((int)m::model_type_t::CB, (int)vw->model_type());
+  delete vw;
+
+  model_cc.set(r::name::VW_CMDLINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
+  model_cc.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
+  BOOST_CHECK_EQUAL(r::error_code::success, r::model_factory.create(&vw, r::value::VW, model_cc));
+  BOOST_CHECK_EQUAL((int)m::model_type_t::CCB, (int)vw->model_type());
+  delete vw;
+
+  model_cc.set(r::name::VW_CMDLINE, "--slates --ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
+  model_cc.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--slates --ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
+  BOOST_CHECK_EQUAL(r::error_code::success, r::model_factory.create(&vw, r::value::VW, model_cc));
+  BOOST_CHECK_EQUAL((int)m::model_type_t::SLATES, (int)vw->model_type());
+  delete vw;
+}

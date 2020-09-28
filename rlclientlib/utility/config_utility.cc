@@ -11,9 +11,9 @@
 #include "str_util.h"
 #include "trace_logger.h"
 
-using namespace rapidjson;
-
 namespace reinforcement_learning { namespace utility { namespace config {
+  namespace rj = rapidjson;
+
   std::string load_config_json() {
     //TODO: Load appid configuration from Azure storage
     //TODO: error handling.  (return code or exception)
@@ -109,11 +109,11 @@ namespace reinforcement_learning { namespace utility { namespace config {
      "QueueMaxSize"
     };
 
-    Document obj;
+    rj::Document obj;
     try {
-      obj.Parse<kParseNumbersAsStringsFlag | kParseDefaultFlags>(config_json.c_str());
+      obj.Parse<rj::kParseNumbersAsStringsFlag | rj::kParseDefaultFlags>(config_json.c_str());
       if (obj.HasParseError()) {
-        RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << GetParseErrorFunc(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";
+        RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << rj::GetParseErrorFunc(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";
       }
     }
     catch (const std::exception& e) {

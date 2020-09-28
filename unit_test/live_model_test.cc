@@ -70,7 +70,7 @@ namespace {
       static auto mock_data_transport = get_mock_data_transport();
       static auto mock_model = get_mock_model();
 
-      static auto default_sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get(), mock_sender.get());
+      static auto default_sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
       static auto default_data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
       static auto default_model_factory = get_mock_model_factory(mock_model.get());
 
@@ -345,6 +345,66 @@ BOOST_AUTO_TEST_CASE(live_model_outcome) {
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
 }
 
+BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v1) {
+  //create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+
+  //create a ds live_model, and initialize with configuration
+  r::live_model ds = create_mock_live_model(config);
+
+  //check api_status content when errors are returned
+  r::api_status status;
+
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_code(), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  // report outcome
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", 10, 1.5f, &status), err::protocol_not_supported);
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", "valid_secondary", 1.5f, &status), err::protocol_not_supported);
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", 10, "valid_outcome", &status), err::protocol_not_supported);
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", "valid_secondary", "valid_outcome", &status), err::protocol_not_supported);
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", "", 1.5f, &status), err::invalid_argument); //we fail the input check before we check for protocol versin
+}
+
+
+BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v2) {
+  //create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::PROTOCOL_VERSION, "2");
+
+  //create a ds live_model, and initialize with configuration
+  r::live_model ds = create_mock_live_model(config);
+
+  //check api_status content when errors are returned
+  r::api_status status;
+
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_code(), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  // report outcome
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", 10, 1.5f, &status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", "valid_secondary", 1.5f, &status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", 10, "valid_outcome", &status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", "valid_secondary", "valid_outcome", &status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  // check expected returned codes
+  BOOST_CHECK_EQUAL(ds.report_outcome("event_id", "", 1.5f), err::invalid_argument);
+}
+
 namespace r = reinforcement_learning;
 
 class wrong_class {};
@@ -368,7 +428,7 @@ BOOST_AUTO_TEST_CASE(typesafe_err_callback) {
   auto mock_data_transport = get_mock_data_transport();
   auto mock_model = get_mock_model();
 
-  auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get(), mock_sender.get());
+  auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
   auto model_factory = get_mock_model_factory(mock_model.get());
 
@@ -411,7 +471,7 @@ BOOST_AUTO_TEST_CASE(live_model_mocks) {
   auto mock_data_transport = get_mock_data_transport();
   auto mock_model = get_mock_model();
 
-  auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get(), mock_sender.get());
+  auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
   auto model_factory = get_mock_model_factory(mock_model.get());
 
@@ -485,12 +545,10 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data) {
   std::vector<buffer_t> recorded_interactions;
   auto mock_interaction_sender = get_mock_sender(recorded_interactions);
 
-  auto mock_decision_sender = get_mock_sender(r::error_code::success);
-
   auto mock_data_transport = get_mock_data_transport();
   auto mock_model = get_mock_model();
 
-  auto logger_factory = get_mock_sender_factory(mock_observation_sender.get(), mock_interaction_sender.get(), mock_decision_sender.get());
+  auto logger_factory = get_mock_sender_factory(mock_observation_sender.get(), mock_interaction_sender.get());
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
   auto model_factory = get_mock_model_factory(mock_model.get());
 
@@ -536,27 +594,11 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data) {
     }
 
     Verify(Method((*mock_observation_sender), init)).Exactly(1);
-    Verify(Method((*mock_interaction_sender), init)).Exactly(1);
-    Verify(Method((*mock_decision_sender), init)).Exactly(2);
+    Verify(Method((*mock_interaction_sender), init)).Exactly(3);
   }
-  //std::string recorded_interactions_all;
-  //for (size_t i = 0; i < recorded_interactions.size(); ++i) {
-  //  recorded_interactions_all += recorded_interactions[i];
-  //  if (i + 1 < recorded_interactions.size()) {
-  //    recorded_interactions_all += '\n';
-  //  }
-  //}
-
-  //std::string recorded_observations_all;
-  //for (size_t i = 0; i < recorded_observations.size(); ++i) {
-  //  recorded_observations_all += recorded_observations[i];
-  //  if (i + 1 < recorded_observations.size()) {
-  //    recorded_observations_all += '\n';
-  //  }
-  //}
-
-  //BOOST_CHECK_EQUAL(recorded_interactions_all, expected_interactions);
-  //BOOST_CHECK_EQUAL(recorded_observations_all, expected_observations);
+  // TODO deserialize and check contents with expected
+  BOOST_CHECK_GE(recorded_interactions.size(), 1);
+  BOOST_CHECK_GE(recorded_observations.size(), 1);
 }
 
 BOOST_AUTO_TEST_CASE(populate_response_same_size_test) {

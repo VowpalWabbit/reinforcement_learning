@@ -107,6 +107,8 @@ namespace reinforcement_learning
 
       int log(const char* event_id, int index, float outcome, api_status* status);
       int log(const char* event_id, int index, const char* outcome, api_status* status);
+      int log(const char* event_id, const char* index, float outcome, api_status* status);
+      int log(const char* event_id, const char* index, const char* outcome, api_status* status);
 
       int report_action_taken(const char* event_id, api_status* status);
 
@@ -114,7 +116,7 @@ namespace reinforcement_learning
       const int _version;
       const std::unique_ptr<observation_logger> _v1;
       const std::unique_ptr<generic_event_logger> _v2;
-      const outcome_single_serializer _serializer;
+      const outcome_serializer _serializer;
     };
   }
 }

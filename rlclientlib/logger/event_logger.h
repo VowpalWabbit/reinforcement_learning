@@ -115,9 +115,9 @@ class ccb_logger : public event_logger<decision_ranking_event> {
     ccb_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
       : event_logger(
         sender,
-        c.get_int(name::DECISION_SEND_HIGH_WATER_MARK, 198 * 1024),
-        c.get_int(name::DECISION_SEND_BATCH_INTERVAL_MS, 1000),
-        c.get_int(name::DECISION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
+        c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
+        c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
+        c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
         c.get(name::QUEUE_MODE, "DROP"),
         watchdog,
         time_provider,
@@ -133,9 +133,9 @@ class slates_logger : public event_logger<slates_decision_event> {
     slates_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
       : event_logger(
         sender,
-        c.get_int(name::DECISION_SEND_HIGH_WATER_MARK, 198 * 1024),
-        c.get_int(name::DECISION_SEND_BATCH_INTERVAL_MS, 1000),
-        c.get_int(name::DECISION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
+        c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
+        c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
+        c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
         c.get(name::QUEUE_MODE, "DROP"),
         watchdog,
         time_provider,
