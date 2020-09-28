@@ -90,8 +90,8 @@ namespace reinforcement_learning {
       //XXX out params must be always initialized. This is an ok default
       payload_type = generic_event::payload_type_t::PayloadType_Slates;
       switch(model_type) {
-        case model_type::CCB: payload_type = generic_event::payload_type_t::PayloadType_CCB; break;
-        case model_type::SLATES: payload_type = generic_event::payload_type_t::PayloadType_Slates; break;
+        case reinforcement_learning::model_management::model_type_t::CCB: payload_type = generic_event::payload_type_t::PayloadType_CCB; break;
+        case reinforcement_learning::model_management::model_type_t::SLATES: payload_type = generic_event::payload_type_t::PayloadType_Slates; break;
         default: RETURN_ERROR_ARG(nullptr, status, invalid_argument, "Invalid model_type, only Slates and CCB are supported with multi_slot decisions");
       }
       return error_code::success;
