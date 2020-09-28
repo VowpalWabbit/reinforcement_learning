@@ -74,7 +74,7 @@ namespace Rl.Net.Cli
             };
 
             Console.WriteLine(stepProvider.DataSize);
-            RLDriver rlDriver = new RLDriver(liveModel, useSlates: false)
+            RLDriver rlDriver = new RLDriver(liveModel, loopKind: LoopKind.CB)
             {
                 StepInterval = TimeSpan.FromMilliseconds(this.SleepIntervalMs)
             };

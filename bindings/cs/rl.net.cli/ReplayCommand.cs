@@ -20,7 +20,7 @@ namespace Rl.Net.Cli
         public override void Run()
         {
             LiveModel liveModel = Helpers.CreateLiveModelOrExit(this.ConfigPath);
-            RLDriver rlDriver = new RLDriver(liveModel, useSlates: this.UseSlates);
+            RLDriver rlDriver = new RLDriver(liveModel, loopKind: this.UseSlates ? LoopKind.Slates : LoopKind.CB);
             rlDriver.StepInterval = TimeSpan.FromMilliseconds(this.SleepIntervalMs);
 
             using (TextReader textReader = File.OpenText(this.LogPath))
