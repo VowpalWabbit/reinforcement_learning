@@ -49,6 +49,36 @@ namespace Rl.Net
                 return LiveModelChooseRankWithFlagsNative(liveModel, eventId, contextJson, flags, rankingResponse, apiStatus);
             }
 
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestContinuousAction")]
+            private static extern int LiveModelRequestContinuousActionNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr continuousActionResponse, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestContinuousActionOverride { get; set; }
+
+            public static int LiveModelRequestContinuousAction(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr continuousActionResponse, IntPtr apiStatus)
+            {
+                if (LiveModelRequestContinuousActionOverride != null)
+                {
+                    return LiveModelRequestContinuousActionOverride(liveModel, eventId, contextJson, continuousActionResponse, apiStatus);
+                }
+                
+                return LiveModelRequestContinuousActionNative(liveModel, eventId, contextJson, continuousActionResponse, apiStatus);
+            }
+
+            [DllImport("rl.net.native.dll"), EntryPoint = "LiveModelRequestContinuousActionWithFlags"]
+            private static extern int LiveModelRequestContinuousActionWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, int> LiveModelRequestContinuousActionWithFlagsOverride { get; set; }
+
+            public static int LiveModelRequestContinuousActionWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus)
+            {
+                if (LiveModelRequestContinuousActionWithFlagsOverride != null)
+                {
+                    return LiveModelRequestContinuousActionWithFlagsOverride(liveModel, eventId, contextJson, flags, continuousActionResponse, apiStatus);
+                }
+
+                return LiveModelRequestContinuousActionWithFlagsNative(liveModel, eventId, contextJson, flags, rankingResponse, apiStatus);
+            }
+
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestDecision")]
             private static extern int LiveModelRequestDecisionNative(IntPtr liveModel, IntPtr contextJson, IntPtr decisionResponse, IntPtr apiStatus);
 
@@ -259,6 +289,50 @@ namespace Rl.Net
             }
         }
 
+        unsafe private static int LiveModelRequestContinuousAction(IntPtr liveModel, string eventId, string contextJson, IntPtr continuousActionResponse, IntPtr apiStatus)
+        {
+            CheckJsonString(contextJson);
+
+            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            {
+                IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
+
+                // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
+                // eventId and use supplied eventId at the rl.net.native layer.
+                if (eventId == null)
+                {
+                    return NativeMethods.LiveModelRequestContinuousAction(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, continuousActionResponse, apiStatus);
+                }
+
+                fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+                {
+                    return NativeMethods.LiveModelRequestContinuousAction(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, continuousActionResponse, apiStatus);
+                }
+            }
+        }
+
+        unsafe private static int LiveModelRequestContinuousActionkWithFlags(IntPtr liveModel, string eventId, string contextJson, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus)
+        {
+            CheckJsonString(contextJson);
+
+            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            {
+                IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
+
+                // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
+                // eventId and use supplied eventId at the rl.net.native layer.
+                if (eventId == null)
+                {
+                    return NativeMethods.LiveModelRequestContinuousActionWithFlags(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, flags, continuousActionResponse, apiStatus);
+                }
+
+                fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+                {
+                    return NativeMethods.LiveModelRequestContinuousActionWithFlags(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, flags, continuousActionResponse, apiStatus);
+                }
+            }
+        }
+
         unsafe private static int LiveModelRequestDecision(IntPtr liveModel, string contextJson, IntPtr decisionResponse, IntPtr apiStatus)
         {
             CheckJsonString(contextJson);
@@ -457,6 +531,60 @@ namespace Rl.Net
 
             using (ApiStatus apiStatus = new ApiStatus())
             if (!this.TryChooseRank(eventId, contextJson, flags, result, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+
+            return result;
+        }
+
+        public bool TryRequestContinuousAction(string eventId, string contextJson, out ContinuousActionResponse response, ApiStatus apiStatus = null)
+        {
+            response = new continuousActionResponse();
+            return this.TryRequestContinuousAction(eventId, contextJsonUtf8Bytes, response, apiStatus);
+        }
+
+        public bool TryRequestContinuousAction(string eventId, string contextJson, ContinuousActionResponse response, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelRequestContinuousAction(this.DangerousGetHandle(), eventId, contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public RankingResponse RequestContinuousAction(string eventId, string contextJson)
+        {
+            ContinuousActionResponse result = new ContinuousActionResponse();
+
+            using (ApiStatus apiStatus = new ApiStatus())
+            if (!this.TryRequestContinuousAction(eventId, contextJson, result, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+
+            return result;
+        }
+
+        public bool TryRequestContinuousAction(string eventId, string contextJson, ActionFlags flags, out ContinuousActionResponse response, ApiStatus apiStatus = null)
+        {
+            response = new RankingResponse();
+            return this.TryRequestContinuousAction(eventId, contextJson, flags, response, apiStatus);
+        }
+
+        public bool TryRequestContinuousAction(string eventId, string contextJson, ActionFlags flags, ContinuousActionResponse response, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelRequestContinuousActionWithFlags(this.DangerousGetHandle(), eventId, contextJson, (uint)flags, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public ContinuousActionResponse RequestContinuousAction(string eventId, string contextJson, ActionFlags flags)
+        {
+            ContinuousActionResponse result = new ContinuousActionResponse();
+
+            using (ApiStatus apiStatus = new ApiStatus())
+            if (!this.TryRequestContinuousAction(eventId, contextJson, flags, result, apiStatus))
             {
                 throw new RLException(apiStatus);
             }
