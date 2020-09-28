@@ -286,7 +286,8 @@ namespace reinforcement_learning {
     _t_factory{ t_factory },
     _m_factory{ m_factory },
     _sender_factory{ sender_factory },
-    _time_provider_factory{ time_provider_factory }
+    _time_provider_factory{ time_provider_factory },
+    _protocol_version(_configuration.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
   {
     // If there is no user supplied error callback, supply a default one that does nothing but report unhandled background errors.
     if (fn == nullptr) {
@@ -298,7 +299,6 @@ namespace reinforcement_learning {
     }
 
     _learning_mode = learning::to_learning_mode(_configuration.get(name::LEARNING_MODE, value::LEARNING_MODE_ONLINE));
-    _protocol_version = _configuration.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION);
   }
 
   int live_model_impl::init_trace(api_status* status) {
