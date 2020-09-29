@@ -728,3 +728,35 @@ BOOST_AUTO_TEST_CASE(slates_explore_only_mode) {
 
   BOOST_CHECK(it == response.end());
 }
+
+BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2) {
+  //create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
+
+  r::api_status status;
+
+  // Create the ds live_model, and initialize it with the config
+  r::live_model ds = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  r::slates_response slates_response;
+  r::decision_response ccb_response;
+
+  //slates API doesn't work for ccb under v1 protocol
+  BOOST_CHECK_EQUAL(ds.request_slates_decision("event_id", JSON_CONTEXT_WITH_SLOTS, slates_response, &status), err::protocol_not_supported);
+
+  config.set(r::name::PROTOCOL_VERSION, "2");
+  r::live_model ds2 = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  BOOST_CHECK_EQUAL(ds2.init(&status), err::success);
+
+  //slates API work for ccb with v2
+  BOOST_CHECK_EQUAL(ds2.request_slates_decision("event_id", JSON_CONTEXT_WITH_SLOTS, slates_response, &status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  //old ccb api doesn't work under v2
+  BOOST_CHECK_EQUAL(ds2.request_decision(JSON_CONTEXT_WITH_SLOTS, ccb_response, &status), err::protocol_not_supported);
+
+}
