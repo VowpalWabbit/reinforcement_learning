@@ -86,6 +86,7 @@ namespace reinforcement_learning
     model_management::data_callback_fn _data_cb;
     utility::watchdog _watchdog;
     learning_mode _learning_mode;
+    const int _protocol_version;
 
     trace_logger_factory_t* _trace_factory;
     data_transport_factory_t* _t_factory;
@@ -99,7 +100,7 @@ namespace reinforcement_learning
     std::unique_ptr<logger::ca_logger_facade> _continuous_action_logger{nullptr};
     std::unique_ptr<logger::observation_logger_facade> _outcome_logger{nullptr};
     std::unique_ptr<logger::ccb_logger_facade> _decision_logger{nullptr};
-    std::unique_ptr<logger::slates_logger_facade> _slates_logger{nullptr};
+    std::unique_ptr<logger::multi_slot_logger_facade> _slates_logger{nullptr};
     std::unique_ptr<model_management::model_downloader> _model_download{nullptr};
     std::unique_ptr<i_trace> _trace_logger{nullptr};
 
