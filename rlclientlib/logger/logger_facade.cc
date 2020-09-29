@@ -40,6 +40,7 @@ namespace reinforcement_learning {
           switch (_model_type) {
           case model_type_t::CB: return _v1_cb->init(status);
           case model_type_t::CCB: return _v1_ccb->init(status);
+          case model_type_t::SLATES: return _v1_multislot->init(status);
           default: return protocol_not_supported(status);
           }
         case 2: return _v2->init(status);
@@ -61,11 +62,7 @@ namespace reinforcement_learning {
     int interaction_logger_facade::log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
       switch (_version) {
-      case 1: 
-        switch (_model_type) {
-        case model_type_t::CCB: return _v1_ccb->log_decisions(event_ids, context, flags, action_ids, pdfs, model_version, status);
-        default: return protocol_not_supported(status);
-        }
+      case 1: return _v1_ccb->log_decisions(event_ids, context, flags, action_ids, pdfs, model_version, status);
       default: return protocol_not_supported(status);
       }
     }
@@ -75,8 +72,8 @@ namespace reinforcement_learning {
       //XXX out params must be always initialized. This is an ok default
       payload_type = generic_event::payload_type_t::PayloadType_Slates;
       switch (model_type) {
-      case reinforcement_learning::model_management::model_type_t::CCB: payload_type = generic_event::payload_type_t::PayloadType_CCB; break;
-      case reinforcement_learning::model_management::model_type_t::SLATES: payload_type = generic_event::payload_type_t::PayloadType_Slates; break;
+      case model_type_t::CCB: payload_type = generic_event::payload_type_t::PayloadType_CCB; break;
+      case model_type_t::SLATES: payload_type = generic_event::payload_type_t::PayloadType_Slates; break;
       default: RETURN_ERROR_ARG(nullptr, status, invalid_argument, "Invalid model_type, only Slates and CCB are supported with multi_slot decisions");
       }
       return error_code::success;
@@ -87,9 +84,10 @@ namespace reinforcement_learning {
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
       switch (_version) {
       case 1: {
-        if (_model_type != reinforcement_learning::model_management::model_type_t::SLATES)
-          RETURN_ERROR_ARG(nullptr, status, invalid_argument, "multi_slot logger under v1 protocol can only log slates.");
-        return _v1_multislot->log_decision(event_id, context, flags, action_ids, pdfs, model_version, status);
+        switch (_model_type) {
+        case model_type_t::SLATES: _v1_multislot->log_decision(event_id, context, flags, action_ids, pdfs, model_version, status);
+        default: RETURN_ERROR_ARG(nullptr, status, invalid_argument, "multi_slot logger under v1 protocol can only log slates.");
+        }
       }
       case 2: {
         generic_event::payload_type_t payload_type;
