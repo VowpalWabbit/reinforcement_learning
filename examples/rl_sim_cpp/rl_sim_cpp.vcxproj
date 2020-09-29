@@ -87,6 +87,7 @@
   <ItemGroup>
     <ClInclude Include="error_context.h" />
     <ClInclude Include="person.h" />
+    <ClInclude Include="robot_joint.h" />
     <ClInclude Include="rl_sim.h" />
     <ClInclude Include="rl_sim_cpp.h" />
     <ClInclude Include="simulation_stats.h" />
@@ -94,9 +95,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="person.cc" />
+    <ClCompile Include="robot_joint.cc" />
     <ClCompile Include="rl_sim.cc" />
     <ClCompile Include="main.cc" />
-    <ClCompile Include="simulation_stats.cc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\rlclientlib\rlclientlib.vcxproj">

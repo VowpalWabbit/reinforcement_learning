@@ -19,6 +19,7 @@ int rl_sim::loop() {
 
   switch(_loop_kind) {
     case CB: return cb_loop();
+    case CA: return ca_loop();
     case CCB: return ccb_loop();
     case Slates: return slates_loop();
     default:
@@ -29,7 +30,7 @@ int rl_sim::loop() {
 
 int rl_sim::cb_loop() {
   r::ranking_response response;
-  simulation_stats stats;
+  simulation_stats<size_t> stats;
 
   while ( _run_loop ) {
     auto& p = pick_a_random_person();
@@ -72,9 +73,41 @@ int rl_sim::cb_loop() {
   return 0;
 }
 
+int rl_sim::ca_loop(){
+  r::continuous_action_response response;
+  simulation_stats<float> stats;
+  while (_run_loop){
+    auto& joint = pick_a_random_joint();
+    const auto context_features = joint.get_features();
+    const auto context_json = create_context_json(context_features);
+    const auto req_id = create_event_id();
+    r::api_status status;
+
+    if (_rl->request_continuous_action(req_id.c_str(), context_json.c_str(), response, &status) != err::success)
+    {
+      std::cout << status.get_error_msg() << std::endl;
+      continue;
+    }
+    const auto chosen_action = response.get_chosen_action();
+    const auto outcome = joint.get_outcome(chosen_action);
+    if (_rl->report_outcome(req_id.c_str(), outcome, &status) != err::success  && outcome > 0.00001f )
+    {
+      std::cout << status.get_error_msg() << std::endl;
+    }
+
+    stats.record(joint.id(), chosen_action, outcome);
+
+    std::cout << " " << stats.count() << " - ctxt: " << joint.id() << ", action: " << chosen_action << ", outcome: " << outcome
+      << ", dist: " << response.get_chosen_action_pdf_value() << ", " << stats.get_stats(joint.id(), chosen_action) << std::endl;
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+  }
+  return 0;
+}
+
 int rl_sim::ccb_loop() {
   r::decision_response decision;
-  simulation_stats stats;
+  simulation_stats<size_t> stats;
 
   while ( _run_loop ) {
     auto& p = pick_a_random_person();
@@ -137,7 +170,7 @@ std::string get_slates_slot_features(size_t slot_count) {
 
 int rl_sim::slates_loop() {
   r::slates_response decision;
-  simulation_stats stats;
+  simulation_stats<size_t> stats;
 
   while ( _run_loop ) {
     auto& p = pick_a_random_person();
@@ -187,6 +220,11 @@ int rl_sim::slates_loop() {
 
 person& rl_sim::pick_a_random_person() {
   return _people[rand() % _people.size()];
+}
+
+joint& rl_sim::pick_a_random_joint()
+{
+  return _robot_joints[rand() % _robot_joints.size()];
 }
 
 int rl_sim::load_config_from_json(  const std::string& file_name,
@@ -247,7 +285,7 @@ int rl_sim::init_rl() {
   config.set(r::name::TRACE_LOG_IMPLEMENTATION, r::value::CONSOLE_TRACE_LOGGER);
 
   // Initialize the API
-  _rl = std::unique_ptr<r::live_model>(new r::live_model(config,_on_error,this));
+  _rl = std::unique_ptr<r::live_model>(new r::live_model(config, _on_error, this));
   if ( _rl->init(&status) != err::success ) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
@@ -292,9 +330,46 @@ bool rl_sim::init_sim_world() {
   return true;
 }
 
+bool rl_sim::init_continuous_sim_world() {
+  // initialize continuous actions robot joints
+  
+  _friction = {25.4, 41.2, 66.5, 81.9, 104.4};
+  
+  // temperature (C) range: 20.f to 45.f
+  // angular velocity range: 0.f to 200.f
+  // load range: -60.f to 60.f
+
+  // first joint j1
+  joint::friction_prob fb = 
+  {
+    { _friction[0], 0.08f },
+    { _friction[1], 0.03f },
+    { _friction[2], 0.05f },
+    { _friction[3], 0.03f },
+    { _friction[4], 0.25f }
+  };
+
+  _robot_joints.emplace_back("j1", 20.3, 102.4, -10.2, fb);
+
+  // second joint j2
+  fb = 
+  {
+    { _friction[0],0.08f },
+    { _friction[1],0.30f },
+    { _friction[2],0.02f },
+    { _friction[3],0.02f },
+    { _friction[4],0.10f }
+  };
+
+  _robot_joints.emplace_back("j2", 40.6, 30.8, 98.5, fb);
+
+  return true;
+}
+
 bool rl_sim::init() {
   if ( init_rl() != err::success ) return false;
   if ( !init_sim_world() ) return false;
+  if ( !init_continuous_sim_world() ) return false;
   return true;
 }
 
@@ -342,6 +417,12 @@ void rl_sim::on_error(const reinforcement_learning::api_status& status) {
   _run_loop = false;
 }
 
+std::string rl_sim::create_context_json(const std::string& cntxt) {
+  std::ostringstream oss;
+  oss << "{ " << cntxt << " }";
+  return oss.str();
+}
+
 std::string rl_sim::create_context_json(const std::string& cntxt, const std::string& action) {
   std::ostringstream oss;
   oss << "{ " << cntxt << ", " << action << " }";
@@ -364,6 +445,8 @@ rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm
     _loop_kind = CCB;
   else if(_options["slates"].as<bool>())
     _loop_kind = Slates;
+  else if(_options["ca"].as<bool>())
+    _loop_kind = CA;
 }
 
 std::string get_dist_str(const reinforcement_learning::ranking_response& response) {

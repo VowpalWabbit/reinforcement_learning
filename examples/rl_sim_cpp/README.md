@@ -39,6 +39,20 @@ From root directory, run
 ./build/examples/rl_sim_cpp/rl_sim_cpp.out -j examples/rl_sim_cpp/client.json
 ```
 
+#### CA mode
+Continuous Actions mode
+
+1. In `client.json` file, add in:
+```
+"model.vw.initial_command_line": "--cats <num_actions> --min_value <min_value> --max_value <max_value> --bandwidth <bandwidth>",
+"protocol.version": 2
+```
+
+2. From root directory, run 
+```
+./build/examples/rl_sim_cpp/rl_sim_cpp.out -j examples/rl_sim_cpp/client.json --ca true
+```
+
 #### CCB mode
 1. In `client.json` file, add in 
 ```

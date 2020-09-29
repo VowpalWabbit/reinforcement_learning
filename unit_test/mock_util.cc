@@ -68,6 +68,12 @@ std::unique_ptr<fakeit::Mock<m::i_model>> get_mock_model(m::model_type_t model_t
     return r::error_code::success;
   };
 
+  const std::function<int(const char*, float&, float&, std::string&, r::api_status*)> choose_continuous_action_fn =
+    [](const char*, float&, float&, std::string& model_version, r::api_status*) {
+    model_version = "model_id";
+    return r::error_code::success;
+  };
+
   const std::function<int(const std::vector<const char*>& event_ids, const char*, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string&, r::api_status*)> request_decision_fn =
     [](const std::vector<const char*>& event_ids, const char*, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string& model_version, r::api_status*) {
     model_version = "model_id";
@@ -87,6 +93,7 @@ std::unique_ptr<fakeit::Mock<m::i_model>> get_mock_model(m::model_type_t model_t
 
   When(Method((*mock), update)).AlwaysReturn(r::error_code::success);
   When(Method((*mock), choose_rank)).AlwaysDo(choose_rank_fn);
+  When(Method((*mock), choose_continuous_action)).AlwaysDo(choose_continuous_action_fn);
   When(Method((*mock), request_decision)).AlwaysDo(request_decision_fn);
   When(Method((*mock), request_multi_slot_decision)).AlwaysDo(request_multi_slot_decision_fn);
   When(Method((*mock), model_type)).AlwaysDo(get_model_type);
