@@ -73,18 +73,6 @@ namespace reinforcement_learning {
 
     ccb_logger_facade::ccb_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
     : _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
-    , _v2(_version == 2 ? new generic_event_logger(
-      sender,
-      c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
-      c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
-      c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
-      c.get(name::QUEUE_MODE, "DROP"),
-      watchdog,
-      time_provider,
-      perror_cb) : nullptr) {}
-
-    ccb_logger_facade::ccb_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
-    : _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
     , _v1(_version == 1 ? new ccb_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr) {
     }
 
