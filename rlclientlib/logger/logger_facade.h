@@ -21,7 +21,9 @@ namespace reinforcement_learning
   namespace logger {
     class interaction_logger_facade {
     public:
-      interaction_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
+      interaction_logger_facade(reinforcement_learning::model_management::model_type_t model_type,
+        const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog,
+        i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
       
       interaction_logger_facade(const interaction_logger_facade& other) = delete;
       interaction_logger_facade& operator=(const interaction_logger_facade& other) = delete;
@@ -35,6 +37,7 @@ namespace reinforcement_learning
       int log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
     
     private:
+      const reinforcement_learning::model_management::model_type_t _model_type;
       const int _version;
       const std::unique_ptr<interaction_logger> _v1_cb;
       const std::unique_ptr<generic_event_logger> _v2;

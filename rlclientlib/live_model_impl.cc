@@ -369,7 +369,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_time_provider_factory->create(&ranking_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // Create a logger for interactions that will use msg sender to send interaction messages
-    _ranking_logger.reset(new logger::interaction_logger_facade(_configuration, ranking_msg_sender, _watchdog, ranking_time_provider, &_error_cb));
+    _ranking_logger.reset(new logger::interaction_logger_facade(_model->model_type(), _configuration, ranking_msg_sender, _watchdog, ranking_time_provider, &_error_cb));
     RETURN_IF_FAIL(_ranking_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for observations.

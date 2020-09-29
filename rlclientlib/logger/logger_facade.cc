@@ -4,15 +4,22 @@
 namespace err = reinforcement_learning::error_code;
 
 namespace reinforcement_learning {
-  using model_type = reinforcement_learning::model_management::model_type_t;
+  using model_type_t = reinforcement_learning::model_management::model_type_t;
 
   namespace logger {
     int protocol_not_supported(api_status* status) {
       RETURN_ERROR_ARG(nullptr, status, protocol_not_supported, "Current protocol version is not supported");
     }
 
-    interaction_logger_facade::interaction_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
-    : _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
+    interaction_logger_facade::interaction_logger_facade(
+      model_type_t model_type,
+      const utility::configuration& c,
+      i_message_sender* sender,
+      utility::watchdog& watchdog,
+      i_time_provider* time_provider,
+      error_callback_fn* perror_cb)
+    : _model_type(model_type)
+    , _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
     , _v1_cb(_version == 1 ? new interaction_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
     , _v2(_version == 2 ? new generic_event_logger(
       sender,
@@ -114,7 +121,7 @@ namespace reinforcement_learning {
       }
     }
 
-    int multi_slot_model_type_to_payload_type(model_type model_type, generic_event::payload_type_t& payload_type, api_status* status)
+    int multi_slot_model_type_to_payload_type(model_type_t model_type, generic_event::payload_type_t& payload_type, api_status* status)
     {
       //XXX out params must be always initialized. This is an ok default
       payload_type = generic_event::payload_type_t::PayloadType_Slates;
@@ -126,7 +133,7 @@ namespace reinforcement_learning {
       return error_code::success;
     }
 
-    int multi_slot_logger_facade::log_decision(model_type model_type, const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+    int multi_slot_logger_facade::log_decision(model_type_t model_type, const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
       switch (_version) {
         case 1: {
