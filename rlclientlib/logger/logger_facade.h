@@ -41,15 +41,22 @@ namespace reinforcement_learning
       int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
 
+      //Multislot (Slates v1/v2 + CCB v2)
+      int log_decision(const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+        const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
+
     private:
       const reinforcement_learning::model_management::model_type_t _model_type;
       const int _version;
 
       const std::unique_ptr<interaction_logger> _v1_cb;
       const std::unique_ptr<ccb_logger> _v1_ccb;
+      const std::unique_ptr<slates_logger> _v1_multislot;
 
       const std::unique_ptr<generic_event_logger> _v2;
-      const cb_serializer _serializer;
+
+      const cb_serializer _serializer_cb;
+      const slates_serializer _serializer_multislot;
     };
 
   class ca_logger_facade {
@@ -71,29 +78,6 @@ namespace reinforcement_learning
       const int _version;
       const std::unique_ptr<generic_event_logger> _v2;
       const ca_serializer _serializer;
-    };
-
-    class multi_slot_logger_facade {
-    public:
-      multi_slot_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
-
-      multi_slot_logger_facade(const multi_slot_logger_facade& other) = delete;
-      multi_slot_logger_facade& operator=(const multi_slot_logger_facade& other) = delete;
-      multi_slot_logger_facade(multi_slot_logger_facade&& other) = delete;
-      multi_slot_logger_facade& operator=(multi_slot_logger_facade&& other) = delete;
-
-      ~multi_slot_logger_facade() = default;
-
-      int init(api_status* status);
-
-      int log_decision(reinforcement_learning::model_management::model_type_t model_type, const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
-        const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
-
-    private:
-      const int _version;
-      const std::unique_ptr<slates_logger> _v1;
-      const std::unique_ptr<generic_event_logger> _v2;
-      const slates_serializer _serializer;
     };
 
     class observation_logger_facade {

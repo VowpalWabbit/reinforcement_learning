@@ -99,7 +99,6 @@ namespace reinforcement_learning
     std::unique_ptr<logger::interaction_logger_facade> _ranking_logger{nullptr};
     std::unique_ptr<logger::ca_logger_facade> _continuous_action_logger{nullptr};
     std::unique_ptr<logger::observation_logger_facade> _outcome_logger{nullptr};
-    std::unique_ptr<logger::multi_slot_logger_facade> _slates_logger{nullptr};
     std::unique_ptr<model_management::model_downloader> _model_download{nullptr};
     std::unique_ptr<i_trace> _trace_logger{nullptr};
 
