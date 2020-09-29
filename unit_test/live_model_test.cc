@@ -347,6 +347,46 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
   }
 }
 
+// Same with live_model_ranking_request_pdf_passthrough but using "_p"
+BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough_underscore_p) {
+  // Create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::MODEL_IMPLEMENTATION, r::value::PASSTHROUGH_PDF_MODEL);
+
+  // Background refresh introduces a timing issue where the model might not have updated properly before the choose_rank() call.
+  config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
+
+  r::api_status status;
+
+  // Create the ds live_model, and initialize it with the config
+  r::live_model model = create_mock_live_model(config, &r::data_transport_factory, &r::model_factory, nullptr);
+
+  BOOST_CHECK_EQUAL(model.init(&status), err::success);
+  const auto event_id = "event_id";
+
+  r::ranking_response response;
+
+  // Request ranking
+  constexpr auto JSON_PDF = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}}],"_p":[0.4, 0.6]})";
+  BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_PDF, response), err::success);
+
+  size_t num_actions = response.size();
+  BOOST_CHECK_EQUAL(num_actions, 2);
+
+  // Check that our PDF is what we expected
+  r::ranking_response::iterator it = response.begin();
+  const float* expected_probability = EXPECTED_PDF;
+
+  for (uint32_t i = 0; i < num_actions; i++)
+  {
+    auto action_probability = *(it + i);
+    BOOST_CHECK_EQUAL(action_probability.probability, EXPECTED_PDF[action_probability.action_id]);
+  }
+}
+
 BOOST_AUTO_TEST_CASE(live_model_outcome) {
   //create a simple ds configuration
   u::configuration config;
