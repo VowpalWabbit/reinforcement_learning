@@ -108,3 +108,27 @@ BOOST_AUTO_TEST_CASE(configuration_parse_malformed_eventhub_connection_string_ex
   BOOST_CHECK_EQUAL(util::config::create_from_json(json3, config), err::eh_connstr_parse_error);
   BOOST_CHECK_EQUAL(util::config::create_from_json(json4, config), err::eh_connstr_parse_error);
 }
+
+BOOST_AUTO_TEST_CASE(configuration_parse_invalid_json_object_element_expect_error) {
+  util::configuration config;
+
+  const auto json = R"({
+    "ObjectKey": {
+      "Ignore": "This"
+    }
+  })";
+
+  BOOST_CHECK_EQUAL(util::config::create_from_json(json, config), err::json_parse_error);
+}
+
+BOOST_AUTO_TEST_CASE(configuration_parse_invalid_json_array_element_expect_error) {
+  util::configuration config;
+
+  const auto json = R"({
+    "ArrayKey": [
+      "IgnoreThis"
+    ]
+  })";
+
+  BOOST_CHECK_EQUAL(util::config::create_from_json(json, config), err::json_parse_error);
+}
