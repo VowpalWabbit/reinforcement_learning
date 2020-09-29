@@ -200,6 +200,10 @@ namespace reinforcement_learning {
       return error_code::not_supported;
     }
 
+    if(_protocol_version == 1 && _model->model_type() != model_management::model_type_t::SLATES) {
+      RETURN_ERROR_ARG(_trace_logger.get(), status, protocol_not_supported, "Only Slates models are supported under legacy v1 protocol");
+    }
+
     resp.clear();
     //clear previous errors if any
     api_status::try_clear(status);
@@ -222,7 +226,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_model->request_multi_slot_decision(event_id, num_decisions, context_json, actions_ids, actions_pdfs, model_version, status));
 
     RETURN_IF_FAIL(populate_slates_response(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_slates_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(_slates_logger->log_decision(_model->model_type(), event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -312,7 +316,8 @@ namespace reinforcement_learning {
     _t_factory{ t_factory },
     _m_factory{ m_factory },
     _sender_factory{ sender_factory },
-    _time_provider_factory{ time_provider_factory }
+    _time_provider_factory{ time_provider_factory },
+    _protocol_version(_configuration.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
   {
     // If there is no user supplied error callback, supply a default one that does nothing but report unhandled background errors.
     if (fn == nullptr) {
@@ -425,7 +430,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_time_provider_factory->create(&slates_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // // Create a logger for interactions that will use msg sender to send interaction messages
-    _slates_logger.reset(new logger::slates_logger_facade(_configuration, slates_msg_sender, _watchdog, slates_time_provider, &_error_cb));
+    _slates_logger.reset(new logger::multi_slot_logger_facade(_configuration, slates_msg_sender, _watchdog, slates_time_provider, &_error_cb));
     RETURN_IF_FAIL(_slates_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for interactions.
