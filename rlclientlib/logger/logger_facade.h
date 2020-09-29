@@ -19,16 +19,16 @@
 namespace reinforcement_learning
 {
   namespace logger {
-    class cb_logger_facade {
+    class interaction_logger_facade {
     public:
-      cb_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
+      interaction_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
       
-      cb_logger_facade(const cb_logger_facade& other) = delete;
-      cb_logger_facade& operator=(const cb_logger_facade& other) = delete;
-      cb_logger_facade(cb_logger_facade&& other) = delete;
-      cb_logger_facade& operator=(cb_logger_facade&& other) = delete;
+      interaction_logger_facade(const interaction_logger_facade& other) = delete;
+      interaction_logger_facade& operator=(const interaction_logger_facade& other) = delete;
+      interaction_logger_facade(interaction_logger_facade&& other) = delete;
+      interaction_logger_facade& operator=(interaction_logger_facade&& other) = delete;
 
-      ~cb_logger_facade() = default;
+      ~interaction_logger_facade() = default;
 
       int init(api_status* status);
 
@@ -36,7 +36,7 @@ namespace reinforcement_learning
     
     private:
       const int _version;
-      const std::unique_ptr<interaction_logger> _v1;
+      const std::unique_ptr<interaction_logger> _v1_cb;
       const std::unique_ptr<generic_event_logger> _v2;
       const cb_serializer _serializer;
     };
