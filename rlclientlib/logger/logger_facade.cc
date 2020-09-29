@@ -20,9 +20,9 @@ namespace reinforcement_learning {
       error_callback_fn* perror_cb)
     : _model_type(model_type)
     , _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
-    , _v1_cb(_version == 1 ? new interaction_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
-    , _v1_ccb(_version == 1 ? new ccb_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
-    , _v1_multislot(_version == 1 ? new slates_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
+    , _v1_cb(_version == 1 && _model_type == model_type_t::CB ? new interaction_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
+    , _v1_ccb(_version == 1 && _model_type == model_type_t::CCB ? new ccb_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
+    , _v1_multislot(_version == 1 && _model_type == model_type_t::SLATES ? new slates_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
     , _v2(_version == 2 ? new generic_event_logger(
       sender,
       c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
