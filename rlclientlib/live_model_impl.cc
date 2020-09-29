@@ -114,7 +114,7 @@ namespace reinforcement_learning {
 
     RETURN_IF_FAIL(_model->choose_continuous_action(context, action, pdf_value, model_version, status));
     RETURN_IF_FAIL(populate_response(action, pdf_value, std::string(event_id), std::string(model_version), response, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_continuous_action_logger->log_continuous_action(context, flags, response, status));
+    RETURN_IF_FAIL(_ranking_logger->log_continuous_action(context, flags, response, status));
     
     if (_watchdog.has_background_error_been_reported())
     {
@@ -392,26 +392,6 @@ namespace reinforcement_learning {
     // Create a logger for interactions that will use msg sender to send interaction messages
     _outcome_logger.reset(new logger::observation_logger_facade(_configuration, outcome_msg_sender, _watchdog, observation_time_provider, &_error_cb));
     RETURN_IF_FAIL(_outcome_logger->init(status));
-
-    // Get the name of raw data (as opposed to message) sender for interactions.
-    const auto* const continuous_actions_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);
-    i_sender* continuous_actions_data_sender;
-
-    // Use the name to create an instance of raw data sender for interactions
-    RETURN_IF_FAIL(_sender_factory->create(&continuous_actions_data_sender, continuous_actions_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
-    RETURN_IF_FAIL(continuous_actions_data_sender->init(status));
-
-    // Create a message sender that will prepend the message with a preamble and send the raw data using the
-    // factory created raw data sender
-    l::i_message_sender* continuous_actions_msg_sender = new l::preamble_message_sender(continuous_actions_data_sender);
-    RETURN_IF_FAIL(continuous_actions_msg_sender->init(status));
-
-    i_time_provider* continuous_actions_time_provider;
-    RETURN_IF_FAIL(_time_provider_factory->create(&continuous_actions_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
-
-    // Create a logger for interactions that will use msg sender to send interaction messages
-    _continuous_action_logger.reset(new logger::ca_logger_facade(_configuration, continuous_actions_msg_sender, _watchdog, continuous_actions_time_provider, &_error_cb));
-    RETURN_IF_FAIL(_continuous_action_logger->init(status));
 
     return error_code::success;
   }

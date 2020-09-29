@@ -100,30 +100,10 @@ namespace reinforcement_learning {
       }
     }
 
-  ca_logger_facade::ca_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
-    : _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
-    , _v2(_version == 2 ? new generic_event_logger(
-      sender,
-      c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
-      c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
-      c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
-      c.get(name::QUEUE_MODE, "DROP"),
-      watchdog,
-      time_provider,
-      perror_cb) : nullptr) {}
-
-    int ca_logger_facade::init(api_status* status) {
+    int interaction_logger_facade::log_continuous_action(const char* context, unsigned int flags, const continuous_action_response& response, api_status* status) {
       switch (_version) {
-        case 1: return err::success;
-        case 2: return _v2->init(status);
-        default: return protocol_not_supported(status);
-      }
-    }
-
-    int ca_logger_facade::log_continuous_action(const char* context, unsigned int flags, const continuous_action_response& response, api_status* status) {
-      switch (_version) {
-        case 2: return _v2->log(response.get_event_id(), _serializer.event(context, flags, response), _serializer.type, status);
-        default: return protocol_not_supported(status);
+      case 2: return _v2->log(response.get_event_id(), _serializer_ca.event(context, flags, response), _serializer_ca.type, status);
+      default: return protocol_not_supported(status);
       }
     }
 
