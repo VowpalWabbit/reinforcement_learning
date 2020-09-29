@@ -21,6 +21,7 @@ namespace reinforcement_learning {
     : _model_type(model_type)
     , _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
     , _v1_cb(_version == 1 ? new interaction_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
+    , _v1_ccb(_version == 1 ? new ccb_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
     , _v2(_version == 2 ? new generic_event_logger(
       sender,
       c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
@@ -34,7 +35,12 @@ namespace reinforcement_learning {
 
     int interaction_logger_facade::init(api_status* status) {
       switch (_version) {
-        case 1: return _v1_cb->init(status);
+        case 1: 
+          switch (_model_type) {
+          case model_type_t::CB: return _v1_cb->init(status);
+          case model_type_t::CCB: return _v1_ccb->init(status);
+          default: return protocol_not_supported(status);
+          }
         case 2: return _v2->init(status);
         default: return protocol_not_supported(status);
       }
@@ -48,6 +54,18 @@ namespace reinforcement_learning {
           RETURN_IF_FAIL(get_learning_mode(learning_mode, lmt, status));
           return _v2->log(response.get_event_id(), _serializer.event(context, flags, lmt, response), _serializer.type, status);
         default: return protocol_not_supported(status);
+      }
+    }
+
+    int interaction_logger_facade::log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+      const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
+      switch (_version) {
+      case 1: 
+        switch (_model_type) {
+        case model_type_t::CCB: return _v1_ccb->log_decisions(event_ids, context, flags, action_ids, pdfs, model_version, status);
+        default: return protocol_not_supported(status);
+        }
+      default: return protocol_not_supported(status);
       }
     }
 
@@ -74,27 +92,6 @@ namespace reinforcement_learning {
     int ca_logger_facade::log_continuous_action(const char* context, unsigned int flags, const continuous_action_response& response, api_status* status) {
       switch (_version) {
         case 2: return _v2->log(response.get_event_id(), _serializer.event(context, flags, response), _serializer.type, status);
-        default: return protocol_not_supported(status);
-      }
-    }
-
-    ccb_logger_facade::ccb_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
-    : _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
-    , _v1(_version == 1 ? new ccb_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr) {
-    }
-
-    int ccb_logger_facade::init(api_status* status) {
-      switch (_version) {
-        case 1: return _v1->init(status);
-        case 2: return error_code::success;
-        default: return protocol_not_supported(status);
-      }
-    }
-
-    int ccb_logger_facade::log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
-      const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
-      switch (_version) {
-        case 1: return _v1->log_decisions(event_ids, context, flags, action_ids, pdfs, model_version, status);
         default: return protocol_not_supported(status);
       }
     }

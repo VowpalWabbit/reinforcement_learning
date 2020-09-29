@@ -34,12 +34,20 @@ namespace reinforcement_learning
 
       int init(api_status* status);
 
+      //CB v1/v2
       int log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
-    
+ 
+      //CCB v1
+      int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+        const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
+
     private:
       const reinforcement_learning::model_management::model_type_t _model_type;
       const int _version;
+
       const std::unique_ptr<interaction_logger> _v1_cb;
+      const std::unique_ptr<ccb_logger> _v1_ccb;
+
       const std::unique_ptr<generic_event_logger> _v2;
       const cb_serializer _serializer;
     };
@@ -63,27 +71,6 @@ namespace reinforcement_learning
       const int _version;
       const std::unique_ptr<generic_event_logger> _v2;
       const ca_serializer _serializer;
-    };
-
-    class ccb_logger_facade {
-    public:
-      ccb_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
-
-      ccb_logger_facade(const ccb_logger_facade& other) = delete;
-      ccb_logger_facade& operator=(const ccb_logger_facade& other) = delete;
-      ccb_logger_facade(ccb_logger_facade&& other) = delete;
-      ccb_logger_facade& operator=(ccb_logger_facade&& other) = delete;
-
-      ~ccb_logger_facade() = default;
-
-      int init(api_status* status);
-
-      int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
-        const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
-
-    private:
-      const int _version;
-      const std::unique_ptr<ccb_logger> _v1;
     };
 
     class multi_slot_logger_facade {

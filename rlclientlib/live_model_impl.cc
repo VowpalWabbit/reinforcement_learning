@@ -177,7 +177,7 @@ namespace reinforcement_learning {
     // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
     RETURN_IF_FAIL(_model->request_decision(event_ids, context_json, actions_ids, actions_pdfs, model_version, status));
     RETURN_IF_FAIL(populate_response(actions_ids, actions_pdfs, event_ids, std::string(model_version), resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_decision_logger->log_decisions(event_ids, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(_ranking_logger->log_decisions(event_ids, context_json, flags, actions_ids, actions_pdfs, model_version, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -408,10 +408,6 @@ namespace reinforcement_learning {
 
     i_time_provider* decision_time_provider;
     RETURN_IF_FAIL(_time_provider_factory->create(&decision_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
-
-    // Create a logger for interactions that will use msg sender to send interaction messages
-    _decision_logger.reset(new logger::ccb_logger_facade(_configuration, decision_msg_sender, _watchdog, decision_time_provider, &_error_cb));
-    RETURN_IF_FAIL(_decision_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for interactions.
     const auto* const slates_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);
