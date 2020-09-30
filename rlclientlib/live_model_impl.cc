@@ -200,10 +200,6 @@ namespace reinforcement_learning {
       return error_code::not_supported;
     }
 
-    if(_protocol_version == 1 && _model->model_type() != model_management::model_type_t::SLATES) {
-      RETURN_ERROR_ARG(_trace_logger.get(), status, protocol_not_supported, "Only Slates models are supported under legacy v1 protocol");
-    }
-
     resp.clear();
     //clear previous errors if any
     api_status::try_clear(status);
