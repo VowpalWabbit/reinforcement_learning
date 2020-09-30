@@ -101,9 +101,9 @@ namespace reinforcement_learning
 
     private:
       const int _version;
-      const std::unique_ptr<slates_logger> _v1;
+      const std::unique_ptr<multi_slot_logger> _v1;
       const std::unique_ptr<generic_event_logger> _v2;
-      const slates_serializer _serializer;
+      const multi_slot_serializer _serializer;
     };
 
     class observation_logger_facade {

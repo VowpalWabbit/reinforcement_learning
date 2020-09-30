@@ -12,7 +12,7 @@ using namespace std;
 
 std::string get_dist_str(const reinforcement_learning::ranking_response& response);
 std::string get_dist_str(const reinforcement_learning::slot_response& response);
-std::string get_dist_str(const reinforcement_learning::slates_slot_response& response);
+std::string get_dist_str(const reinforcement_learning::slot_entry& response);
 
 int rl_sim::loop() {
   if ( !init() ) return -1;
@@ -169,7 +169,7 @@ std::string get_slates_slot_features(size_t slot_count) {
 }
 
 int rl_sim::slates_loop() {
-  r::slates_response decision;
+  r::multi_slot_response decision;
   simulation_stats<size_t> stats;
 
   while ( _run_loop ) {
@@ -184,7 +184,7 @@ int rl_sim::slates_loop() {
     r::api_status status;
 
     // Choose an action
-    if ( _rl->request_slates_decision(event_id.c_str(), context_json.c_str(), decision, &status) != err::success ) {
+    if ( _rl->request_multi_slot_decision(event_id.c_str(), context_json.c_str(), decision, &status) != err::success ) {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
@@ -472,7 +472,7 @@ std::string get_dist_str(const reinforcement_learning::slot_response& response) 
   return ret;
 }
 
-std::string get_dist_str(const reinforcement_learning::slates_slot_response& response) {
+std::string get_dist_str(const reinforcement_learning::slot_entry& response) {
   std::string ret;
   ret += "(";
   ret += "[" + to_string(response.get_slot_id()) + ",";
