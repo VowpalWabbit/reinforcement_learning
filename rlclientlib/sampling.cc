@@ -47,7 +47,7 @@ int populate_response(const std::vector<std::vector<uint32_t>>& action_ids, cons
   return error_code::success;
 }
 
-int populate_slates_response(const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, std::string&& event_id, std::string&& model_id, slates_response& response, i_trace* trace_logger, api_status* status) {
+int populate_multi_slot_response(const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, std::string&& event_id, std::string&& model_id, multi_slot_response& response, i_trace* trace_logger, api_status* status) {
   if(action_ids.size() != pdfs.size())
   {
     RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids and pdfs must be the same size";

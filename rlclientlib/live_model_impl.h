@@ -32,8 +32,8 @@ namespace reinforcement_learning
     //here the event_id is auto-generated
     int request_continuous_action(const char* context, unsigned int flags, continuous_action_response& response, api_status* status);
     int request_decision(const char* context_json, unsigned int flags, decision_response& resp, api_status* status);
-    int request_slates_decision(const char* event_id, const char* context_json, unsigned int flags, slates_response& resp, api_status* status = nullptr);
-    int request_slates_decision(const char* context_json, unsigned int flags, slates_response& resp, api_status* status = nullptr);
+    int request_multi_slot_decision(const char* event_id, const char* context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
+    int request_multi_slot_decision(const char* context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
 
     int report_action_taken(const char* event_id, api_status* status);
 
@@ -100,7 +100,7 @@ namespace reinforcement_learning
     std::unique_ptr<logger::ca_logger_facade> _continuous_action_logger{nullptr};
     std::unique_ptr<logger::observation_logger_facade> _outcome_logger{nullptr};
     std::unique_ptr<logger::ccb_logger_facade> _decision_logger{nullptr};
-    std::unique_ptr<logger::multi_slot_logger_facade> _slates_logger{nullptr};
+    std::unique_ptr<logger::multi_slot_logger_facade> _multi_slot_logger{nullptr};
     std::unique_ptr<model_management::model_downloader> _model_download{nullptr};
     std::unique_ptr<i_trace> _trace_logger{nullptr};
 
