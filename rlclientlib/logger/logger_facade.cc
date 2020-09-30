@@ -22,7 +22,7 @@ namespace reinforcement_learning {
     , _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
     , _v1_cb(_version == 1 && _model_type == model_type_t::CB ? new interaction_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
     , _v1_ccb(_version == 1 && _model_type == model_type_t::CCB ? new ccb_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
-    , _v1_multislot(_version == 1 && _model_type == model_type_t::SLATES ? new slates_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
+    , _v1_multislot(_version == 1 && _model_type == model_type_t::SLATES ? new multi_slot_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
     , _v2(_version == 2 ? new generic_event_logger(
       sender,
       c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
@@ -61,7 +61,6 @@ namespace reinforcement_learning {
     }
 
     int interaction_logger_facade::log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
-      c.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY),
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
       switch (_version) {
       case 1: return _v1_ccb->log_decisions(event_ids, context, flags, action_ids, pdfs, model_version, status);

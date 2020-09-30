@@ -59,7 +59,7 @@ namespace reinforcement_learning
       const std::unique_ptr<generic_event_logger> _v2;
 
       const cb_serializer _serializer_cb;
-      const slates_serializer _serializer_multislot;
+      const multi_slot_serializer _serializer_multislot;
       const ca_serializer _serializer_ca;
     };
 
