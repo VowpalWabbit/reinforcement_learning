@@ -9,7 +9,7 @@ set(rl_net_native_SOURCES
   rl.net.live_model.cc
   rl.net.native.cc
   rl.net.ranking_response.cc
-  rl.net.slates_response.cc
+  rl.net.multi_slot_response.cc
 )
 
 set(rl_net_native_HEADERS
@@ -23,7 +23,7 @@ set(rl_net_native_HEADERS
   rl.net.live_model.h
   rl.net.native.h
   rl.net.ranking_response.h
-  rl.net.slates_response.h
+  rl.net.multi_slot_response.h
 )
 
 source_group("Sources" FILES ${rl_net_native_SOURCES})

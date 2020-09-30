@@ -54,7 +54,7 @@ namespace reinforcement_learning
 
       const std::unique_ptr<interaction_logger> _v1_cb;
       const std::unique_ptr<ccb_logger> _v1_ccb;
-      const std::unique_ptr<slates_logger> _v1_multislot;
+      const std::unique_ptr<multi_slot_logger> _v1_multislot;
 
       const std::unique_ptr<generic_event_logger> _v2;
 

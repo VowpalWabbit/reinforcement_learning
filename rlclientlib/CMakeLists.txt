@@ -51,7 +51,7 @@ set(PROJECT_SOURCES
   ranking_response.cc
   sampling.cc
   serialization/payload_serializer.cc
-  slates_response.cc
+  multi_slot_response.cc
   trace_logger.cc
   utility/stl_container_adapter.cc
   utility/config_utility.cc
@@ -89,7 +89,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/personalization.h
   ../include/ranking_response.h
   ../include/sender.h
-  ../include/slates_response.h
+  ../include/multi_slot_response.h
   ../include/str_util.h
   ../include/trace_logger.h
   ../include/data_buffer.h

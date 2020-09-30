@@ -9,11 +9,14 @@
 namespace reinforcement_learning {
   class api_status;
 
-  struct slates_slot_response {
+  /**
+   * @brief Holds triples (slot_id, action_id, probability) that tells which action was choosen for the given slot.
+   */
+  struct slot_entry {
   public:
-    ~slates_slot_response() = default;
+    ~slot_entry() = default;
 
-    slates_slot_response(uint32_t _slot_id, uint32_t _action_id, float _probability);
+    slot_entry(uint32_t _slot_id, uint32_t _action_id, float _probability);
 
     uint32_t get_slot_id() const;
     uint32_t get_action_id() const;
@@ -27,20 +30,23 @@ namespace reinforcement_learning {
     float probability;
   };
 
-  class slates_response {
+  /**
+   * @brief request_multi_slot_decision returns the per-slot action choice using multi_slot_response.
+   */
+  class multi_slot_response {
   private:
-    using coll_t = std::vector<slates_slot_response>;
+    using coll_t = std::vector<slot_entry>;
 
     std::string _event_id;
     std::string _model_id;
     coll_t _decision;
 
   public:
-    using iterator_t = container_iterator<slates_slot_response, coll_t>;
-    using const_iterator_t = const_container_iterator<slates_slot_response, coll_t>;
+    using iterator_t = container_iterator<slot_entry, coll_t>;
+    using const_iterator_t = const_container_iterator<slot_entry, coll_t>;
 
-    slates_response() = default;
-    ~slates_response() = default;
+    multi_slot_response() = default;
+    ~multi_slot_response() = default;
 
     // push_back calls must be done in slot order
     void push_back(uint32_t action_id, float prob);
@@ -61,9 +67,9 @@ namespace reinforcement_learning {
     const_iterator_t end() const;
     iterator_t end();
 
-    slates_response(slates_response&&) noexcept;
-    slates_response& operator=(slates_response&&) noexcept;
-    slates_response(const slates_response&) = default;
-    slates_response& operator =(const slates_response&) = default;
+    multi_slot_response(multi_slot_response&&) noexcept;
+    multi_slot_response& operator=(multi_slot_response&&) noexcept;
+    multi_slot_response(const multi_slot_response&) = default;
+    multi_slot_response& operator =(const multi_slot_response&) = default;
   };
 }

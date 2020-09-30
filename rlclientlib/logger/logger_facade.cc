@@ -29,6 +29,7 @@ namespace reinforcement_learning {
       c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
       c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
       c.get(name::QUEUE_MODE, "DROP"),
+      c.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY),
       watchdog,
       time_provider,
       perror_cb) : nullptr) {
@@ -60,6 +61,7 @@ namespace reinforcement_learning {
     }
 
     int interaction_logger_facade::log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+      c.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY),
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
       switch (_version) {
       case 1: return _v1_ccb->log_decisions(event_ids, context, flags, action_ids, pdfs, model_version, status);
@@ -68,6 +70,7 @@ namespace reinforcement_learning {
     }
 
     int multi_slot_model_type_to_payload_type(model_type_t model_type, generic_event::payload_type_t& payload_type, api_status* status)
+
     {
       //XXX out params must be always initialized. This is an ok default
       payload_type = generic_event::payload_type_t::PayloadType_Slates;
@@ -114,6 +117,7 @@ namespace reinforcement_learning {
       c.get_int(name::OBSERVATION_SEND_BATCH_INTERVAL_MS, 1000),
       c.get_int(name::OBSERVATION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
       c.get(name::QUEUE_MODE, "DROP"),
+      c.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY),
       watchdog,
       time_provider,
       perror_cb) : nullptr) {
