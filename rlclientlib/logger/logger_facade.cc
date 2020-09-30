@@ -96,7 +96,7 @@ namespace reinforcement_learning {
 
     multi_slot_logger_facade::multi_slot_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
     : _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
-    , _v1(_version == 1 ? new slates_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
+    , _v1(_version == 1 ? new multi_slot_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
     , _v2(_version == 2 ? new generic_event_logger(
       sender,
       c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),

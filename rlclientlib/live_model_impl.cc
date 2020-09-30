@@ -187,13 +187,13 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int live_model_impl::request_slates_decision(const char * context_json, unsigned int flags, slates_response& resp, api_status* status)
+  int live_model_impl::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
   {
     const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
-    return request_slates_decision(uuid.c_str(), context_json, flags, resp, status);
+    return request_multi_slot_decision(uuid.c_str(), context_json, flags, resp, status);
   }
 
-  int live_model_impl::request_slates_decision(const char * event_id, const char * context_json, unsigned int flags, slates_response& resp, api_status* status)
+  int live_model_impl::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
   {
     if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY) {
       // Apprentice mode and LoggingOnly mode are not supported here at this moment
@@ -225,8 +225,8 @@ namespace reinforcement_learning {
     // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
     RETURN_IF_FAIL(_model->request_multi_slot_decision(event_id, num_decisions, context_json, actions_ids, actions_pdfs, model_version, status));
 
-    RETURN_IF_FAIL(populate_slates_response(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_slates_logger->log_decision(_model->model_type(), event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(populate_multi_slot_response(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), resp, _trace_logger.get(), status));
+    RETURN_IF_FAIL(_multi_slot_logger->log_decision(_model->model_type(), event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -414,24 +414,24 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_decision_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for interactions.
-    const auto* const slates_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);
-    i_sender* slates_data_sender;
+    const auto* const multi_slot_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);
+    i_sender* multi_slot_data_sender;
 
     // Use the name to create an instance of raw data sender for interactions
-    RETURN_IF_FAIL(_sender_factory->create(&slates_data_sender, slates_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
-    RETURN_IF_FAIL(slates_data_sender->init(status));
+    RETURN_IF_FAIL(_sender_factory->create(&multi_slot_data_sender, multi_slot_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
+    RETURN_IF_FAIL(multi_slot_data_sender->init(status));
 
     // Create a message sender that will prepend the message with a preamble and send the raw data using the
     // factory created raw data sender
-    l::i_message_sender* slates_msg_sender = new l::preamble_message_sender(slates_data_sender);
-    RETURN_IF_FAIL(slates_msg_sender->init(status));
+    l::i_message_sender* multi_slot_msg_sender = new l::preamble_message_sender(multi_slot_data_sender);
+    RETURN_IF_FAIL(multi_slot_msg_sender->init(status));
 
-    i_time_provider* slates_time_provider;
-    RETURN_IF_FAIL(_time_provider_factory->create(&slates_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
+    i_time_provider* multi_slot_time_provider;
+    RETURN_IF_FAIL(_time_provider_factory->create(&multi_slot_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // // Create a logger for interactions that will use msg sender to send interaction messages
-    _slates_logger.reset(new logger::multi_slot_logger_facade(_configuration, slates_msg_sender, _watchdog, slates_time_provider, &_error_cb));
-    RETURN_IF_FAIL(_slates_logger->init(status));
+    _multi_slot_logger.reset(new logger::multi_slot_logger_facade(_configuration, multi_slot_msg_sender, _watchdog, multi_slot_time_provider, &_error_cb));
+    RETURN_IF_FAIL(_multi_slot_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for interactions.
     const auto* const continuous_actions_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);

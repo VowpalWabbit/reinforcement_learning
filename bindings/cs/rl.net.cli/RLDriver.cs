@@ -45,10 +45,10 @@ namespace Rl.Net.Cli
             get;
         } = new ApiStatus();
 
-        public SlatesResponse SlatesContainer
+        public MultiSlotResponse SlatesContainer
         {
             get;
-        } = new SlatesResponse();
+        } = new MultiSlotResponse();
     }
 
     internal interface IOutcomeReporter<TOutcome>
@@ -116,7 +116,7 @@ namespace Rl.Net.Cli
             TOutcome outcome = default(TOutcome);
 
             if(useSlates) {
-                if(!liveModel.TryRequestSlatesDecision(eventId, step.SlatesContext, runContext.SlatesContainer, runContext.ApiStatusContainer))
+                if(!liveModel.TryRequestMultiSlotDecision(eventId, step.SlatesContext, runContext.SlatesContainer, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
                 }

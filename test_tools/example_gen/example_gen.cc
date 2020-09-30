@@ -95,14 +95,14 @@ int run_config(int action) {
       break;
     }
     case CCB_ACTION: {// "ccb",
-      r::slates_response response;
-      if(rl.request_slates_decision("event_id", JSON_CCB_CONTEXT, 0, response, &status) != err::success)
+      r::multi_slot_response response;
+      if(rl.request_multi_slot_decision("event_id", JSON_CCB_CONTEXT, 0, response, &status) != err::success)
           std::cout << status.get_error_msg() << std::endl;
       break;
     };
     case SLATES_ACTION: {// "slates",
-      r::slates_response response;
-      if(rl.request_slates_decision("event_id", JSON_SLATES_CONTEXT, response, &status) != err::success)
+      r::multi_slot_response response;
+      if(rl.request_multi_slot_decision("event_id", JSON_SLATES_CONTEXT, response, &status) != err::success)
           std::cout << status.get_error_msg() << std::endl;
       break;
     };

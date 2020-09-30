@@ -73,39 +73,8 @@ BOOST_AUTO_TEST_CASE(ca_payload_serializer_test)
   BOOST_CHECK_EQUAL(event->deferred_action(), true);
 }
 
-BOOST_AUTO_TEST_CASE(ccb_payload_serializer_test) {
-  ccb_serializer serializer;
-
-  vector<vector<uint32_t>> actions{ { 2, 1, 0 }, { 1, 0 }};
-  vector<vector<float>> probs{ { 0.5, 0.3, 0.2 }, { 0.8, 0.2 }};
-
-  const auto buffer = serializer.event("my_context", action_flags::DEFERRED, actions, probs, "model_id");
-
-  const auto event = v2::GetMultiSlotEvent(buffer.data());
-
-  std::string context;
-  copy(event->context()->begin(), event->context()->end(), std::back_inserter(context));
-  BOOST_CHECK_EQUAL("my_context", context.c_str());
-
-  BOOST_CHECK_EQUAL("model_id", event->model_id()->c_str());
-
-  const auto& slots = *event->slots();
-  for (size_t i = 0; i < slots.size(); ++i) {
-    BOOST_CHECK_EQUAL(actions[i].size(), slots[i]->action_ids()->size());
-    BOOST_CHECK_EQUAL(probs[i].size(), slots[i]->probabilities()->size());
-    for (size_t j = 0; j < actions[i].size(); ++j) {
-      BOOST_CHECK_EQUAL(actions[i][j], (*slots[i]->action_ids())[j]);
-    }
-    for (size_t j = 0; j < probs[i].size(); ++j) {
-      BOOST_CHECK_CLOSE(probs[i][j], (*slots[i]->probabilities())[j], tolerance);
-    }
-  }
-
-  BOOST_CHECK_EQUAL(true, event->deferred_action());
-}
-
-BOOST_AUTO_TEST_CASE(slates_payload_serializer_test){
-  slates_serializer serializer;
+BOOST_AUTO_TEST_CASE(multi_slot_payload_serializer_test){
+  multi_slot_serializer serializer;
 
   vector<vector<uint32_t>> actions{ { 2, 1, 0 }, { 1, 0 }};
   vector<vector<float>> probs{ { 0.5, 0.3, 0.2 }, { 0.8, 0.2 }};

@@ -129,9 +129,9 @@ class ccb_logger : public event_logger<decision_ranking_event> {
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
   };
 
-class slates_logger : public event_logger<slates_decision_event> {
+class multi_slot_logger : public event_logger<multi_slot_decision_event> {
   public:
-    slates_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
+    multi_slot_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
       : event_logger(
         sender,
         c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
