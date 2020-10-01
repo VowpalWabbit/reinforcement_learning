@@ -4,6 +4,7 @@ set(rl_net_native_SOURCES
   rl.net.api_status.cc
   rl.net.buffer.cc
   rl.net.config.cc
+  rl.net.continuous_action_response.cc
   rl.net.decision_response.cc
   rl.net.factory_context.cc
   rl.net.live_model.cc
@@ -18,6 +19,7 @@ set(rl_net_native_HEADERS
   rl.net.api_status.h
   rl.net.buffer.h
   rl.net.config.h
+  rl.net.continuous_action_response.h
   rl.net.decision_response.h
   rl.net.factory_context.h
   rl.net.live_model.h
