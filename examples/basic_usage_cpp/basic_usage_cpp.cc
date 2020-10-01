@@ -93,7 +93,7 @@ int multistep_basic_usage() {
 
   r::ranking_response response1;
   {
-    const std::string context1 = R"({"F1": 1.0, "_multi": [{"AF1": 2.0}, {"AF1": 3.0}]})";
+    const std::string context1 = R"({"shared":{"F1": 1.0}, "_multi": [{"AF1": 2.0}, {"AF1": 3.0}]})";
 
     if (rl.request_episodic_decision("event1", nullptr, context1.c_str(), response1, episode1, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;
@@ -102,7 +102,7 @@ int multistep_basic_usage() {
   }
 
   {
-    const std::string context1 = R"({"F2": 1.0, "_multi": [{"AF2": 2.0}, {"AF2": 3.0}]})";
+    const std::string context1 = R"({"shared":{"F2": 1.0}, "_multi": [{"AF2": 2.0}, {"AF2": 3.0}]})";
 
     if (rl.request_episodic_decision("event1", nullptr, context1.c_str(), response1, episode2, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;
@@ -111,7 +111,7 @@ int multistep_basic_usage() {
   }
 
   {
-    const std::string context2 = R"({"F1": 4.0, "_multi": [{"AF1": 2.0}, {"AF1": 3.0}]})";
+    const std::string context2 = R"({"shared":{"F1": 4.0}, "_multi": [{"AF1": 2.0}, {"AF1": 3.0}]})";
     r::ranking_response response2;
     if (rl.request_episodic_decision("event2", "event1", context2.c_str(), response2, episode1, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;
@@ -120,7 +120,7 @@ int multistep_basic_usage() {
   }
 
   {
-    const std::string context2 = R"({"F2": 4.0, "_multi": [{"AF2": 2.0}, {"AF2": 3.0}]})";
+    const std::string context2 = R"({"shared":{"F2": 4.0}, "_multi": [{"AF2": 2.0}, {"AF2": 3.0}]})";
     r::ranking_response response2;
     if (rl.request_episodic_decision("event2", "event1", context2.c_str(), response2, episode2, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;

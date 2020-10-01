@@ -496,13 +496,18 @@ namespace reinforcement_learning {
     std::vector<float> action_pdf;
     std::string model_version;
 
-    RETURN_IF_FAIL(_model->choose_rank_ms(seed, context_json, episode.get_history(), action_ids, action_pdf, model_version, status));
+    //todo:fix
+    const auto history = episode.get_history(previous_id);
+    const int depth = history != nullptr ? history->get_depth() : 0;
+    const std::string context_patched = R"({"episode":{"depth":)" + std::to_string(depth) + "}," + std::string(context_json + 1);
+
+    RETURN_IF_FAIL(_model->choose_rank_ms(seed, context_patched.c_str(), history, action_ids, action_pdf, model_version, status));
     RETURN_IF_FAIL(sample_and_populate_response(seed, action_ids, action_pdf, std::move(model_version), resp, _trace_logger.get(), status));
 
     resp.set_event_id(event_id);
 
     RETURN_IF_FAIL(episode.update(previous_id, context_json, resp, status));
-    RETURN_IF_FAIL(_ranking_logger->log(episode.get_episode_id(), previous_id, context_json, resp, status));
+    RETURN_IF_FAIL(_ranking_logger->log(episode.get_episode_id(), previous_id, context_patched.c_str(), resp, status));
     return error_code::success;
   }
 

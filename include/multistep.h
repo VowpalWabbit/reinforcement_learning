@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <map>
 
 #include "ranking_response.h"
 
@@ -14,6 +15,7 @@ namespace reinforcement_learning {
   class episode_history {
   public:
     episode_history() = default;
+    episode_history(const episode_history* previous);
 
     episode_history(const episode_history& other) = default;
     episode_history& operator=(const episode_history& other) = default;
@@ -21,11 +23,12 @@ namespace reinforcement_learning {
     episode_history(episode_history&& other) = default;
     episode_history& operator=(episode_history&& other) = default;
 
-    const char* get() const;
-    int update(const char* previous_event_id, const char* context, const ranking_response& response, api_status* error = nullptr);
+    int get_depth() const;
 
   private:
-    std::string body;
+    const episode_history* const _previous {nullptr};
+
+    int _depth{ 0 };
   };
 
   class episode_state {
@@ -39,13 +42,14 @@ namespace reinforcement_learning {
     episode_state& operator=(episode_state&& other) = default;
 
     const char* get_episode_id() const;
-    const episode_history& get_history() const;
+    const episode_history* get_history(const char* previous_event_id) const;
 
     int update(const char* previous_event_id, const char* context, const ranking_response& response, api_status* error = nullptr);
 
   private:
-    std::string _episode_id;
-    episode_history _history;
+    const std::string _episode_id;
+
+    std::map<std::string, std::unique_ptr<episode_history>> _history;
   };
 
 }
