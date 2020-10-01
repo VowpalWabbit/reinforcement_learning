@@ -2,3 +2,7 @@
 	path = ext_libs/vowpal_wabbit
 	url = https://github.com/VowpalWabbit/vowpal_wabbit.git
 	branch = master
+[submodule "ext_libs/zstd"]
+	path = ext_libs/zstd
+	url = https://github.com/facebook/zstd.git
+	branch = master
