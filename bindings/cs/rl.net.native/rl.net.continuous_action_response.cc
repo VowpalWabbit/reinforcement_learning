@@ -20,12 +20,12 @@ API const char* GetContinuousActionModelId(reinforcement_learning::continuous_ac
     return response->get_model_id();
 }
 
-API float GetContinuousChosenAction(reinforcement_learning::continuous_action_response* response)
+API float GetContinuousActionChosenAction(reinforcement_learning::continuous_action_response* response)
 {
     return response->get_chosen_action();
 }
 
-API float GetContinuousChosenActionPdfValue(reinforcement_learning::continuous_action_response* response)
+API float GetContinuousActionChosenActionDensity(reinforcement_learning::continuous_action_response* response)
 {
     return response->get_chosen_action_pdf_value();
 }
