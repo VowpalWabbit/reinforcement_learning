@@ -87,8 +87,8 @@ namespace reinforcement_learning {
       switch (_version) {
       case 1: {
         switch (_model_type) {
-        case model_type_t::SLATES: _v1_multislot->log_decision(event_id, context, flags, action_ids, pdfs, model_version, status);
-        default: RETURN_ERROR_ARG(nullptr, status, invalid_argument, "multi_slot logger under v1 protocol can only log slates.");
+        case model_type_t::SLATES: return _v1_multislot->log_decision(event_id, context, flags, action_ids, pdfs, model_version, status);
+        default: RETURN_ERROR_ARG(nullptr, status, protocol_not_supported, "multi_slot logger under v1 protocol can only log slates.");
         }
       }
       case 2: {
