@@ -35,7 +35,7 @@ namespace Rl.Net.Cli {
         }
 
         public string GetSummary(TAction action)
-        {        
+        {
             int wins = this.ActionCounts[action][0];
             int total = this.ActionCounts[action][1];
 
