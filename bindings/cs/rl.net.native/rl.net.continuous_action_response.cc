@@ -25,7 +25,7 @@ API float GetContinuousActionChosenAction(reinforcement_learning::continuous_act
     return response->get_chosen_action();
 }
 
-API float GetContinuousActionChosenActionDensity(reinforcement_learning::continuous_action_response* response)
+API float GetContinuousActionChosenActionPdfValue(reinforcement_learning::continuous_action_response* response)
 {
     return response->get_chosen_action_pdf_value();
 }
