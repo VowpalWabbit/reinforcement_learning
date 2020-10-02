@@ -1,15 +1,8 @@
-/**
- * @brief Simple RL Inference API sample implementation
- *
- * @file basic_usage_cpp.cc
- * @author Rajan Chari et al
- * @date 2018-07-15
- */
-
 #include <iostream>
 #include <fstream>
- #include <cstring>
- #include "config_utility.h"
+#include <cstring>
+
+#include "config_utility.h"
 #include "live_model.h"
 #include "constants.h"
 
@@ -119,23 +112,23 @@ int run_config(int action) {
       break;
 
     case F_I_REWARD: // "float-int",
-      if( rl.report_outcome("event_id", 1.5, 10, &status) != err::success ) 
+      if( rl.report_outcome("event_id", 10, 1.5, &status) != err::success )
           std::cout << status.get_error_msg() << std::endl;
       break;
     case F_S_REWARD: // "float-string"
-      if( rl.report_outcome("event_id", 1.5, "index_id", &status) != err::success ) 
+      if( rl.report_outcome("event_id", "index_id", 1.5, &status) != err::success )
           std::cout << status.get_error_msg() << std::endl;
       break;
     case S_REWARD: // "string-reward",
-        if( rl.report_outcome("event_id", "reward-str", &status) != err::success ) 
+        if( rl.report_outcome("event_id", "reward-str", &status) != err::success )
           std::cout << status.get_error_msg() << std::endl;
       break;
-    case S_I_REWARD: // "string-int",
-        if( rl.report_outcome("event_id", "reward-str", 10, &status) != err::success ) 
+    case S_I_REWARD: // "string-int-reward",
+        if( rl.report_outcome("event_id", 10, "reward-str", &status) != err::success )
           std::cout << status.get_error_msg() << std::endl;
       break;
-    case S_S_REWARD: // "string-string",
-        if( rl.report_outcome("event_id", "reward-str", "index_id", &status) != err::success ) 
+    case S_S_REWARD: // "string-string-reward",
+        if( rl.report_outcome("event_id", "index_id", "reward-str", &status) != err::success )
           std::cout << status.get_error_msg() << std::endl;
       break;
     case ACTION_TAKEN:
