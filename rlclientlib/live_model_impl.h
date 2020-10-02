@@ -97,7 +97,7 @@ namespace reinforcement_learning
     std::unique_ptr<model_management::i_data_transport> _transport{nullptr};
     std::unique_ptr<model_management::i_model> _model{nullptr};
 
-    std::unique_ptr<logger::interaction_logger_facade> _ranking_logger{nullptr};
+    std::unique_ptr<logger::interaction_logger_facade> _interaction_logger{nullptr};
     std::unique_ptr<logger::observation_logger_facade> _outcome_logger{nullptr};
 
     std::unique_ptr<model_management::model_downloader> _model_download{nullptr};

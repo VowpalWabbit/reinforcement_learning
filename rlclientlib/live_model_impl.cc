@@ -77,7 +77,7 @@ namespace reinforcement_learning {
       RETURN_IF_FAIL(reset_action_order(response));
     }
 
-    RETURN_IF_FAIL(_ranking_logger->log(context, flags, response, status, _learning_mode));
+    RETURN_IF_FAIL(_interaction_logger->log(context, flags, response, status, _learning_mode));
 
     if (_learning_mode == APPRENTICE)
     {
@@ -114,7 +114,7 @@ namespace reinforcement_learning {
 
     RETURN_IF_FAIL(_model->choose_continuous_action(context, action, pdf_value, model_version, status));
     RETURN_IF_FAIL(populate_response(action, pdf_value, std::string(event_id), std::string(model_version), response, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_ranking_logger->log_continuous_action(context, flags, response, status));
+    RETURN_IF_FAIL(_interaction_logger->log_continuous_action(context, flags, response, status));
     
     if (_watchdog.has_background_error_been_reported())
     {
@@ -177,7 +177,7 @@ namespace reinforcement_learning {
     // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
     RETURN_IF_FAIL(_model->request_decision(event_ids, context_json, actions_ids, actions_pdfs, model_version, status));
     RETURN_IF_FAIL(populate_response(actions_ids, actions_pdfs, event_ids, std::string(model_version), resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_ranking_logger->log_decisions(event_ids, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(_interaction_logger->log_decisions(event_ids, context_json, flags, actions_ids, actions_pdfs, model_version, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -222,7 +222,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_model->request_multi_slot_decision(event_id, num_decisions, context_json, actions_ids, actions_pdfs, model_version, status));
 
     RETURN_IF_FAIL(populate_multi_slot_response(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_ranking_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -365,8 +365,8 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_time_provider_factory->create(&ranking_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // Create a logger for interactions that will use msg sender to send interaction messages
-    _ranking_logger.reset(new logger::interaction_logger_facade(_model->model_type(), _configuration, ranking_msg_sender, _watchdog, ranking_time_provider, &_error_cb));
-    RETURN_IF_FAIL(_ranking_logger->init(status));
+    _interaction_logger.reset(new logger::interaction_logger_facade(_model->model_type(), _configuration, ranking_msg_sender, _watchdog, ranking_time_provider, &_error_cb));
+    RETURN_IF_FAIL(_interaction_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for observations.
     const auto* const outcome_sender_impl = _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::OBSERVATION_EH_SENDER);
