@@ -12,6 +12,7 @@
 #include "time_helper.h"
 
 #include "event_logger.h"
+#include "model_mgmt.h"
 
 #include "serialization/payload_serializer.h"
 
@@ -77,37 +78,32 @@ namespace reinforcement_learning
       int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
 
-      int log_decisions(const char* event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
-        const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
-
     private:
       const int _version;
       const std::unique_ptr<ccb_logger> _v1;
-      const std::unique_ptr<generic_event_logger> _v2;
-      const ccb_serializer _serializer;
     };
 
-    class slates_logger_facade {
+    class multi_slot_logger_facade {
     public:
-      slates_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
+      multi_slot_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
 
-      slates_logger_facade(const slates_logger_facade& other) = delete;
-      slates_logger_facade& operator=(const slates_logger_facade& other) = delete;
-      slates_logger_facade(slates_logger_facade&& other) = delete;
-      slates_logger_facade& operator=(slates_logger_facade&& other) = delete;
+      multi_slot_logger_facade(const multi_slot_logger_facade& other) = delete;
+      multi_slot_logger_facade& operator=(const multi_slot_logger_facade& other) = delete;
+      multi_slot_logger_facade(multi_slot_logger_facade&& other) = delete;
+      multi_slot_logger_facade& operator=(multi_slot_logger_facade&& other) = delete;
 
-      ~slates_logger_facade() = default;
+      ~multi_slot_logger_facade() = default;
 
       int init(api_status* status);
 
-      int log_decision(const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+      int log_decision(reinforcement_learning::model_management::model_type_t model_type, const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
 
     private:
       const int _version;
-      const std::unique_ptr<slates_logger> _v1;
+      const std::unique_ptr<multi_slot_logger> _v1;
       const std::unique_ptr<generic_event_logger> _v2;
-      const slates_serializer _serializer;
+      const multi_slot_serializer _serializer;
     };
 
     class observation_logger_facade {

@@ -14,6 +14,6 @@ extern "C" {
     API const char* GetContinuousActionEventId(reinforcement_learning::continuous_action_response* response);
     API const char* GetContinuousActionModelId(reinforcement_learning::continuous_action_response* response);
 
-    API float GetContinuousChosenAction(reinforcement_learning::continuous_action_response* response);
-    API float GetContinuousChosenActionPdfValue(reinforcement_learning::continuous_action_response* response);
+    API float GetContinuousActionChosenAction(reinforcement_learning::continuous_action_response* response);
+    API float GetContinuousActionChosenActionDensity(reinforcement_learning::continuous_action_response* response);
 }

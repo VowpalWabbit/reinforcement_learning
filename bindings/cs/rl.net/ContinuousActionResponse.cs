@@ -49,10 +49,10 @@ namespace Rl.Net {
             }
 
             [DllImport("rl.net.native.dll")]
-            public static extern float GetContinuousChosenAction(IntPtr response);
+            public static extern float GetContinuousActionChosenAction(IntPtr response);
 
             [DllImport("rl.net.native.dll")]
-            public static extern float GetContinuousChosenActionPdfValue(IntPtr response);
+            public static extern float GetContinuousActionChosenActionDensity(IntPtr response);
         }
     }
 
@@ -90,18 +90,18 @@ namespace Rl.Net {
         {
             get
             {
-                float result = NativeMethods.GetContinuousChosenAction(this.DangerousGetHandle());
+                float result = NativeMethods.GetContinuousActionChosenAction(this.DangerousGetHandle());
 
                 GC.KeepAlive(this);
                 return result;
             }
         }
 
-        public float ChosenActionPdfValue
+        public float ChosenActionDensity
         {
             get
             {
-                float result = NativeMethods.GetContinuousChosenActionPdfValue(this.DangerousGetHandle());
+                float result = NativeMethods.GetContinuousActionChosenActionDensity(this.DangerousGetHandle());
 
                 GC.KeepAlive(this);
                 return result;

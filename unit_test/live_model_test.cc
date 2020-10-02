@@ -1,4 +1,4 @@
-#include "slates_response.h"
+#include "multi_slot_response.h"
 #define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
 #   define BOOST_TEST_MODULE Main
@@ -337,6 +337,46 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
   BOOST_CHECK_EQUAL(num_actions, 2);
 
   // check that our PDF is what we expected
+  r::ranking_response::iterator it = response.begin();
+  const float* expected_probability = EXPECTED_PDF;
+
+  for (uint32_t i = 0; i < num_actions; i++)
+  {
+    auto action_probability = *(it + i);
+    BOOST_CHECK_EQUAL(action_probability.probability, EXPECTED_PDF[action_probability.action_id]);
+  }
+}
+
+// Same with live_model_ranking_request_pdf_passthrough but using "_p"
+BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough_underscore_p) {
+  // Create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::MODEL_IMPLEMENTATION, r::value::PASSTHROUGH_PDF_MODEL);
+
+  // Background refresh introduces a timing issue where the model might not have updated properly before the choose_rank() call.
+  config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
+
+  r::api_status status;
+
+  // Create the ds live_model, and initialize it with the config
+  r::live_model model = create_mock_live_model(config, &r::data_transport_factory, &r::model_factory, nullptr);
+
+  BOOST_CHECK_EQUAL(model.init(&status), err::success);
+  const auto event_id = "event_id";
+
+  r::ranking_response response;
+
+  // Request ranking
+  constexpr auto JSON_PDF = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}}],"_p":[0.4, 0.6]})";
+  BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_PDF, response), err::success);
+
+  size_t num_actions = response.size();
+  BOOST_CHECK_EQUAL(num_actions, 2);
+
+  // Check that our PDF is what we expected
   r::ranking_response::iterator it = response.begin();
   const float* expected_probability = EXPECTED_PDF;
 
@@ -753,8 +793,8 @@ BOOST_AUTO_TEST_CASE(slates_explore_only_mode) {
   r::live_model model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
-  r::slates_response response;
-  BOOST_CHECK_EQUAL(model.request_slates_decision(JSON_SLATES_CONTEXT, response), err::success);
+  r::multi_slot_response response;
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(JSON_SLATES_CONTEXT, response), err::success);
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -774,4 +814,36 @@ BOOST_AUTO_TEST_CASE(slates_explore_only_mode) {
   ++it;
 
   BOOST_CHECK(it == response.end());
+}
+
+BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2) {
+  //create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
+
+  r::api_status status;
+
+  // Create the ds live_model, and initialize it with the config
+  r::live_model ds = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  r::multi_slot_response slates_response;
+  r::decision_response ccb_response;
+
+  //slates API doesn't work for ccb under v1 protocol
+  BOOST_CHECK_EQUAL(ds.request_multi_slot_decision("event_id", JSON_CONTEXT_WITH_SLOTS, slates_response, &status), err::protocol_not_supported);
+
+  config.set(r::name::PROTOCOL_VERSION, "2");
+  r::live_model ds2 = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  BOOST_CHECK_EQUAL(ds2.init(&status), err::success);
+
+  //slates API work for ccb with v2
+  BOOST_CHECK_EQUAL(ds2.request_multi_slot_decision("event_id", JSON_CONTEXT_WITH_SLOTS, slates_response, &status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  //old ccb api doesn't work under v2
+  BOOST_CHECK_EQUAL(ds2.request_decision(JSON_CONTEXT_WITH_SLOTS, ccb_response, &status), err::protocol_not_supported);
+
 }

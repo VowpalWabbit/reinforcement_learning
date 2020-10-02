@@ -14,8 +14,8 @@ namespace reinforcement_learning {
     generic_event() = default;
     generic_event(const char* id, const timestamp& ts, payload_type_t type, payload_buffer_t&& payload, float pass_prob = 1.f);
 
-    generic_event(const generic_event&) = default;
-    generic_event& operator=(const generic_event&) = default;
+    generic_event(const generic_event&) = delete;
+    generic_event& operator=(const generic_event&) = delete;
 
     generic_event(generic_event&&) = default;
     generic_event& operator=(generic_event&&) = default;

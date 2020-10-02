@@ -219,9 +219,9 @@ int basic_usage_slates() {
 
   //! [(3) Choose an action]
   // Response class
-  r::slates_response response;
+  r::multi_slot_response response;
 
-  if (rl.request_slates_decision("event_id", context, response, &status) != err::success) {
+  if (rl.request_multi_slot_decision("event_id", context, response, &status) != err::success) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
