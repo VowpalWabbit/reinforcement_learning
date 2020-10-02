@@ -12,14 +12,11 @@ namespace Rl.Net.Cli
         [Option(longName: "steps", HelpText = "Amount of steps", Required = false, Default = SimulatorStepProvider.InfinitySteps)]
         public int Steps { get; set; }
 
-        [Option(longName:"slates", HelpText = "Use slates for decisions", Required = false, Default = false)]
-        public bool UseSlates { get; set; }
-
         public override void Run()
         {
             LiveModel liveModel = Helpers.CreateLiveModelOrExit(this.ConfigPath);
 
-            RLSimulator rlSim = new RLSimulator(liveModel, useSlates: this.UseSlates);
+            RLSimulator rlSim = new RLSimulator(liveModel, loopKind: this.GetLoopKind());
             rlSim.StepInterval = TimeSpan.FromMilliseconds(this.SleepIntervalMs);
             rlSim.OnError += (sender, apiStatus) => Helpers.WriteStatusAndExit(apiStatus);
             rlSim.Run(this.Steps);

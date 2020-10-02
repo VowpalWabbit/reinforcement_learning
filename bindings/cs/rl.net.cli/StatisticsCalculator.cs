@@ -4,13 +4,13 @@ using System.IO;
 using Rl.Net;
 
 namespace Rl.Net.Cli {
-    internal class PersonStats
+    internal class ItemStats<TAction>
     {
-        public int[,] ActionCounts
+        public Dictionary<TAction, int[]> ActionCounts
         {
             get;
             private set;
-        } = new int[SimulatorStepProvider.SimulatorStep.ActionSet.Length, 2];
+        } = new Dictionary<TAction, int[]>();
 
         public int TotalActions
         {
@@ -18,29 +18,34 @@ namespace Rl.Net.Cli {
             private set;
         } = 0;
 
-        public void IncrementAction(Topic action, float outcome)
+        public void IncrementAction(TAction action, float outcome)
         {
-            if (outcome > 0.00001f)
+            if (!this.ActionCounts.ContainsKey(action))
             {
-                this.ActionCounts[(int)action, 0]++;
+                this.ActionCounts.Add(action, new int[2]);
             }
 
-            this.ActionCounts[(int)action, 1]++;
+            if (outcome > 0.00001f)
+            {
+                this.ActionCounts[action][0]++;
+            }
+
+            this.ActionCounts[action][1]++;
             this.TotalActions++;
         }
 
-        public string GetSummary(Topic action)
+        public string GetSummary(TAction action)
         {
-            int wins = this.ActionCounts[(int)action, 0];
-            int total = this.ActionCounts[(int)action, 1];
+            int wins = this.ActionCounts[action][0];
+            int total = this.ActionCounts[action][1];
 
-            return $"{action}: Out of {total} plays, {wins} wins. Person saw {this.TotalActions} decisions.";
+            return $"{action}: Out of {total} plays, {wins} wins. Item saw {this.TotalActions} decisions.";
         }
     }
 
-    internal class StatisticsCalculator
+    internal class StatisticsCalculator<TItem, TAction>
     {
-        private Dictionary<Person, PersonStats> personToStatsMap;
+        private Dictionary<TItem, ItemStats<TAction>> itemToStatsMap;
 
         public int TotalActions
         {
@@ -50,29 +55,29 @@ namespace Rl.Net.Cli {
 
         public StatisticsCalculator()
         {
-            this.personToStatsMap = new Dictionary<Person, PersonStats>();
+            this.itemToStatsMap = new Dictionary<TItem, ItemStats<TAction>>();
         }
 
-        private PersonStats EnsurePersonStats(Person person)
+        private ItemStats<TAction> EnsureItemStats(TItem item)
         {
-            PersonStats result;
-            if (!this.personToStatsMap.TryGetValue(person, out result))
+            ItemStats<TAction> result;
+            if (!this.itemToStatsMap.TryGetValue(item, out result))
             {
-                this.personToStatsMap[person] = result = new PersonStats();
+                this.itemToStatsMap[item] = result = new ItemStats<TAction>();
             }
 
             return result;
         }
 
-        public void Record(Person person, Topic chosenAction, float outcome)
+        public void Record(TItem item, TAction chosenAction, float outcome)
         {
-            this.EnsurePersonStats(person).IncrementAction(chosenAction, outcome);
+            this.EnsureItemStats(item).IncrementAction(chosenAction, outcome);
         }
 
 
-        public string GetStats(Person person, Topic chosenAction)
+        public string GetStats(TItem item, TAction chosenAction)
         {
-            return this.EnsurePersonStats(person).GetSummary(chosenAction);
+            return this.EnsureItemStats(item).GetSummary(chosenAction);
         }
     }
 }

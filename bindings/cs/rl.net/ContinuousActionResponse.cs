@@ -52,7 +52,7 @@ namespace Rl.Net {
             public static extern float GetContinuousActionChosenAction(IntPtr response);
 
             [DllImport("rl.net.native.dll")]
-            public static extern float GetContinuousActionChosenActionDensity(IntPtr response);
+            public static extern float GetContinuousActionChosenActionPdfValue(IntPtr response);
         }
     }
 
@@ -97,11 +97,11 @@ namespace Rl.Net {
             }
         }
 
-        public float ChosenActionDensity
+        public float ChosenActionPdfValue
         {
             get
             {
-                float result = NativeMethods.GetContinuousActionChosenActionDensity(this.DangerousGetHandle());
+                float result = NativeMethods.GetContinuousActionChosenActionPdfValue(this.DangerousGetHandle());
 
                 GC.KeepAlive(this);
                 return result;
