@@ -65,11 +65,12 @@ namespace {
     const u::configuration& config,
     r::data_transport_factory_t* data_transport_factory = nullptr,
     r::model_factory_t* model_factory = nullptr,
-    r::sender_factory_t* sender_factory = nullptr) {
+    r::sender_factory_t* sender_factory = nullptr,
+    r::model_management::model_type_t model_type = r::model_management::model_type_t::UNKNOWN) {
 
       static auto mock_sender = get_mock_sender(r::error_code::success);
       static auto mock_data_transport = get_mock_data_transport();
-      static auto mock_model = get_mock_model();
+      static auto mock_model = get_mock_model(model_type);
 
       static auto default_sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
       static auto default_data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
@@ -103,7 +104,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request) {
   r::api_status status;
 
   //create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(config);
+  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto event_id = "event_id";
@@ -144,7 +145,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_online_mode) {
   r::api_status status;
 
   //create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(config);
+  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto event_id = "event_id";
@@ -164,7 +165,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_apprentice_mode) {
   r::api_status status;
 
   //create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(config);
+  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto event_id = "event_id";
@@ -195,7 +196,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_loggingonly_mode) {
   r::api_status status;
 
   //create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(config);
+  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto event_id = "event_id";
@@ -513,7 +514,7 @@ BOOST_AUTO_TEST_CASE(typesafe_err_callback) {
   //start a http server that will receive events sent from the eventhub_client
   auto mock_sender = get_mock_sender(r::error_code::http_bad_status_code);
   auto mock_data_transport = get_mock_data_transport();
-  auto mock_model = get_mock_model();
+  auto mock_model = get_mock_model(r::model_management::model_type_t::CB);
 
   auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
@@ -556,7 +557,7 @@ BOOST_AUTO_TEST_CASE(live_model_mocks) {
   std::vector<buffer_t> recorded;
   auto mock_sender = get_mock_sender(recorded);
   auto mock_data_transport = get_mock_data_transport();
-  auto mock_model = get_mock_model();
+  auto mock_model = get_mock_model(r::model_management::model_type_t::CB);
 
   auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
@@ -577,7 +578,7 @@ BOOST_AUTO_TEST_CASE(live_model_mocks) {
     BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CONTEXT, response), err::success);
     BOOST_CHECK_EQUAL(model.report_outcome(event_id, 1.0), err::success);
 
-    Verify(Method((*mock_sender), init)).Exactly(5);
+    Verify(Method((*mock_sender), init)).Exactly(2);
   }
   BOOST_CHECK_EQUAL(recorded.size(), 2);
 }
@@ -633,7 +634,7 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data) {
   auto mock_interaction_sender = get_mock_sender(recorded_interactions);
 
   auto mock_data_transport = get_mock_data_transport();
-  auto mock_model = get_mock_model();
+  auto mock_model = get_mock_model(r::model_management::model_type_t::CB);
 
   auto logger_factory = get_mock_sender_factory(mock_observation_sender.get(), mock_interaction_sender.get());
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
@@ -681,7 +682,7 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data) {
     }
 
     Verify(Method((*mock_observation_sender), init)).Exactly(1);
-    Verify(Method((*mock_interaction_sender), init)).Exactly(4);
+    Verify(Method((*mock_interaction_sender), init)).Exactly(1);
   }
   // TODO deserialize and check contents with expected
   BOOST_CHECK_GE(recorded_interactions.size(), 1);
@@ -826,7 +827,7 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2) {
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::live_model ds = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr, r::model_management::model_type_t::CCB);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response slates_response;

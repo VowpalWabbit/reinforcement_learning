@@ -8,6 +8,14 @@ using System.Threading.Tasks;
 
 namespace Rl.Net.Cli
 {
+    public enum LoopKind : long
+    {
+        CB,
+        CCB,
+        Slates,
+        CA
+    }
+
     public interface IDriverStepProvider<out TOutcome> : IEnumerable<IStepContext<TOutcome>>
     {
     }
@@ -28,9 +36,15 @@ namespace Rl.Net.Cli
             get;
         }
 
+        string ContinuousActionContext
+        {
+            get;
+        }
+
         TOutcome GetOutcome(long actionIndex, IEnumerable<ActionProbability> actionDistribution);
         TOutcome GetOutcome(int[] actionIndexes, float[] probabilities);
         TOutcome GetSlatesOutcome(int[] actionIndexes, float[] probabilities);
+        TOutcome GetContinuousActionOutcome(float action, float pdfValue);
     }
 
     internal class RunContext
@@ -49,6 +63,11 @@ namespace Rl.Net.Cli
         {
             get;
         } = new MultiSlotResponse();
+
+        public ContinuousActionResponse ContinuousActionContainer
+        {
+            get;
+        } = new ContinuousActionResponse();
     }
 
     internal interface IOutcomeReporter<TOutcome>
@@ -59,12 +78,12 @@ namespace Rl.Net.Cli
     public class RLDriver : IOutcomeReporter<float>, IOutcomeReporter<string>
     {
         private LiveModel liveModel;
-        private bool useSlates;
+        private LoopKind loopKind;
 
-        public RLDriver(LiveModel liveModel, bool useSlates)
+        public RLDriver(LiveModel liveModel, LoopKind loopKind = LoopKind.CB)
         {
             this.liveModel = liveModel;
-            this.useSlates = useSlates;
+            this.loopKind = loopKind;
         }
 
         public TimeSpan StepInterval
@@ -115,7 +134,7 @@ namespace Rl.Net.Cli
             string eventId = step.EventId;
             TOutcome outcome = default(TOutcome);
 
-            if(useSlates) {
+            if(loopKind == LoopKind.Slates) {
                 if(!liveModel.TryRequestMultiSlotDecision(eventId, step.SlatesContext, runContext.SlatesContainer, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
@@ -128,7 +147,20 @@ namespace Rl.Net.Cli
                 {
                     return;
                 }
-            } else
+            } else if (loopKind == LoopKind.CA) {
+                if (!liveModel.TryRequestContinuousAction(eventId, step.ContinuousActionContext, runContext.ContinuousActionContainer, runContext.ApiStatusContainer))
+                {
+                    this.SafeRaiseError(runContext.ApiStatusContainer);
+                }
+                float action = runContext.ContinuousActionContainer.ChosenAction;
+                float pdfValue = runContext.ContinuousActionContainer.ChosenActionPdfValue;
+                outcome = step.GetContinuousActionOutcome(action, pdfValue);
+                if (outcome == null)
+                {
+                    return;
+                }
+            }
+            else
             {
                 if (!liveModel.TryChooseRank(eventId, step.DecisionContext, runContext.ResponseContainer, runContext.ApiStatusContainer))
                 {

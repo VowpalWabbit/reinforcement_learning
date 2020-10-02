@@ -14,13 +14,10 @@ namespace Rl.Net.Cli
         [Option(longName: "sleep", HelpText = "sleep interval in milliseconds", Required = false, Default = 100)]
         public int SleepIntervalMs { get; set; }
 
-        [Option(longName:"slates", HelpText = "use slates", Required = false, Default = false)]
-        public bool UseSlates { get; set; }
-
         public override void Run()
         {
             LiveModel liveModel = Helpers.CreateLiveModelOrExit(this.ConfigPath);
-            RLDriver rlDriver = new RLDriver(liveModel, useSlates: this.UseSlates);
+            RLDriver rlDriver = new RLDriver(liveModel, loopKind: this.GetLoopKind());
             rlDriver.StepInterval = TimeSpan.FromMilliseconds(this.SleepIntervalMs);
 
             using (TextReader textReader = File.OpenText(this.LogPath))
