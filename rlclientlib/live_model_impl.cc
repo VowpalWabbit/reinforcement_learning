@@ -77,7 +77,7 @@ namespace reinforcement_learning {
       RETURN_IF_FAIL(reset_action_order(response));
     }
 
-    RETURN_IF_FAIL(_ranking_logger->log(context, flags, response, status, _learning_mode));
+    RETURN_IF_FAIL(_interaction_logger->log(context, flags, response, status, _learning_mode));
 
     if (_learning_mode == APPRENTICE)
     {
@@ -114,7 +114,7 @@ namespace reinforcement_learning {
 
     RETURN_IF_FAIL(_model->choose_continuous_action(context, action, pdf_value, model_version, status));
     RETURN_IF_FAIL(populate_response(action, pdf_value, std::string(event_id), std::string(model_version), response, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_continuous_action_logger->log_continuous_action(context, flags, response, status));
+    RETURN_IF_FAIL(_interaction_logger->log_continuous_action(context, flags, response, status));
     
     if (_watchdog.has_background_error_been_reported())
     {
@@ -177,7 +177,7 @@ namespace reinforcement_learning {
     // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
     RETURN_IF_FAIL(_model->request_decision(event_ids, context_json, actions_ids, actions_pdfs, model_version, status));
     RETURN_IF_FAIL(populate_response(actions_ids, actions_pdfs, event_ids, std::string(model_version), resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_decision_logger->log_decisions(event_ids, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(_interaction_logger->log_decisions(event_ids, context_json, flags, actions_ids, actions_pdfs, model_version, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -198,10 +198,6 @@ namespace reinforcement_learning {
     if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY) {
       // Apprentice mode and LoggingOnly mode are not supported here at this moment
       return error_code::not_supported;
-    }
-
-    if(_protocol_version == 1 && _model->model_type() != model_management::model_type_t::SLATES) {
-      RETURN_ERROR_ARG(_trace_logger.get(), status, protocol_not_supported, "Only Slates models are supported under legacy v1 protocol");
     }
 
     resp.clear();
@@ -226,7 +222,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_model->request_multi_slot_decision(event_id, num_decisions, context_json, actions_ids, actions_pdfs, model_version, status));
 
     RETURN_IF_FAIL(populate_multi_slot_response(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_multi_slot_logger->log_decision(_model->model_type(), event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -369,8 +365,8 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_time_provider_factory->create(&ranking_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // Create a logger for interactions that will use msg sender to send interaction messages
-    _ranking_logger.reset(new logger::cb_logger_facade(_configuration, ranking_msg_sender, _watchdog, ranking_time_provider, &_error_cb));
-    RETURN_IF_FAIL(_ranking_logger->init(status));
+    _interaction_logger.reset(new logger::interaction_logger_facade(_model->model_type(), _configuration, ranking_msg_sender, _watchdog, ranking_time_provider, &_error_cb));
+    RETURN_IF_FAIL(_interaction_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for observations.
     const auto* const outcome_sender_impl = _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::OBSERVATION_EH_SENDER);
@@ -392,66 +388,6 @@ namespace reinforcement_learning {
     // Create a logger for interactions that will use msg sender to send interaction messages
     _outcome_logger.reset(new logger::observation_logger_facade(_configuration, outcome_msg_sender, _watchdog, observation_time_provider, &_error_cb));
     RETURN_IF_FAIL(_outcome_logger->init(status));
-
-    // Get the name of raw data (as opposed to message) sender for interactions.
-    const auto* const decision_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);
-    i_sender* decision_data_sender;
-
-    // Use the name to create an instance of raw data sender for interactions
-    RETURN_IF_FAIL(_sender_factory->create(&decision_data_sender, decision_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
-    RETURN_IF_FAIL(decision_data_sender->init(status));
-
-    // Create a message sender that will prepend the message with a preamble and send the raw data using the
-    // factory created raw data sender
-    l::i_message_sender* decision_msg_sender = new l::preamble_message_sender(decision_data_sender);
-    RETURN_IF_FAIL(decision_msg_sender->init(status));
-
-    i_time_provider* decision_time_provider;
-    RETURN_IF_FAIL(_time_provider_factory->create(&decision_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
-
-    // Create a logger for interactions that will use msg sender to send interaction messages
-    _decision_logger.reset(new logger::ccb_logger_facade(_configuration, decision_msg_sender, _watchdog, decision_time_provider, &_error_cb));
-    RETURN_IF_FAIL(_decision_logger->init(status));
-
-    // Get the name of raw data (as opposed to message) sender for interactions.
-    const auto* const multi_slot_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);
-    i_sender* multi_slot_data_sender;
-
-    // Use the name to create an instance of raw data sender for interactions
-    RETURN_IF_FAIL(_sender_factory->create(&multi_slot_data_sender, multi_slot_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
-    RETURN_IF_FAIL(multi_slot_data_sender->init(status));
-
-    // Create a message sender that will prepend the message with a preamble and send the raw data using the
-    // factory created raw data sender
-    l::i_message_sender* multi_slot_msg_sender = new l::preamble_message_sender(multi_slot_data_sender);
-    RETURN_IF_FAIL(multi_slot_msg_sender->init(status));
-
-    i_time_provider* multi_slot_time_provider;
-    RETURN_IF_FAIL(_time_provider_factory->create(&multi_slot_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
-
-    // // Create a logger for interactions that will use msg sender to send interaction messages
-    _multi_slot_logger.reset(new logger::multi_slot_logger_facade(_configuration, multi_slot_msg_sender, _watchdog, multi_slot_time_provider, &_error_cb));
-    RETURN_IF_FAIL(_multi_slot_logger->init(status));
-
-    // Get the name of raw data (as opposed to message) sender for interactions.
-    const auto* const continuous_actions_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);
-    i_sender* continuous_actions_data_sender;
-
-    // Use the name to create an instance of raw data sender for interactions
-    RETURN_IF_FAIL(_sender_factory->create(&continuous_actions_data_sender, continuous_actions_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
-    RETURN_IF_FAIL(continuous_actions_data_sender->init(status));
-
-    // Create a message sender that will prepend the message with a preamble and send the raw data using the
-    // factory created raw data sender
-    l::i_message_sender* continuous_actions_msg_sender = new l::preamble_message_sender(continuous_actions_data_sender);
-    RETURN_IF_FAIL(continuous_actions_msg_sender->init(status));
-
-    i_time_provider* continuous_actions_time_provider;
-    RETURN_IF_FAIL(_time_provider_factory->create(&continuous_actions_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
-
-    // Create a logger for interactions that will use msg sender to send interaction messages
-    _continuous_action_logger.reset(new logger::ca_logger_facade(_configuration, continuous_actions_msg_sender, _watchdog, continuous_actions_time_provider, &_error_cb));
-    RETURN_IF_FAIL(_continuous_action_logger->init(status));
 
     return error_code::success;
   }
