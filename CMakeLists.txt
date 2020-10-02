@@ -4,6 +4,7 @@ project(reinforcement_learning)
 set(CMAKE_CXX_STANDARD 11)
 
 option(BUILD_PYTHON "Build the Python bindings" OFF)
+option(USE_ZSTD "Whether to enable usage of zstandard compression" ON)
 
 # TODO Compile cpprest into its own separate lib so that it doesn't have to be consumed
 find_package(cpprestsdk REQUIRED)
