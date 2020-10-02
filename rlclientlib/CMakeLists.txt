@@ -134,6 +134,13 @@ source_group("Private headers" FILES ${PROJECT_PRIVATE_HEADERS})
 add_library(rlclientlib ${PROJECT_SOURCES} ${PROJECT_PUBLIC_HEADERS} ${PROJECT_PRIVATE_HEADERS})
 add_dependencies(rlclientlib fbgenerator_v1 fbgenerator_v2)
 set_target_properties(rlclientlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+if(USE_ZSTD)
+  target_compile_definitions(rlclientlib PRIVATE USE_ZSTD)
+  target_link_libraries(rlclientlib PRIVATE libzstd_static)
+  target_include_directories(rlclientlib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/zstd/lib/)
+endif()
+
 target_include_directories( rlclientlib
                             PUBLIC
                             ${CMAKE_CURRENT_SOURCE_DIR}/../include
