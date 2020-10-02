@@ -19,91 +19,48 @@
 namespace reinforcement_learning
 {
   namespace logger {
-    class cb_logger_facade {
+    class interaction_logger_facade {
     public:
-      cb_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
+      interaction_logger_facade(reinforcement_learning::model_management::model_type_t model_type,
+        const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog,
+        i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
       
-      cb_logger_facade(const cb_logger_facade& other) = delete;
-      cb_logger_facade& operator=(const cb_logger_facade& other) = delete;
-      cb_logger_facade(cb_logger_facade&& other) = delete;
-      cb_logger_facade& operator=(cb_logger_facade&& other) = delete;
+      interaction_logger_facade(const interaction_logger_facade& other) = delete;
+      interaction_logger_facade& operator=(const interaction_logger_facade& other) = delete;
+      interaction_logger_facade(interaction_logger_facade&& other) = delete;
+      interaction_logger_facade& operator=(interaction_logger_facade&& other) = delete;
 
-      ~cb_logger_facade() = default;
+      ~interaction_logger_facade() = default;
 
       int init(api_status* status);
 
+      //CB v1/v2
       int log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
-    
-    private:
-      const int _version;
-      const std::unique_ptr<interaction_logger> _v1;
-      const std::unique_ptr<generic_event_logger> _v2;
-      const cb_serializer _serializer;
-    };
-
-  class ca_logger_facade {
-    public:
-      ca_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
-      
-      ca_logger_facade(const ca_logger_facade& other) = delete;
-      ca_logger_facade& operator=(const ca_logger_facade& other) = delete;
-      ca_logger_facade(ca_logger_facade&& other) = delete;
-      ca_logger_facade& operator=(ca_logger_facade&& other) = delete;
-
-      ~ca_logger_facade() = default;
-
-      int init(api_status* status);
-
-      int log_continuous_action(const char* context, unsigned int flags, const continuous_action_response& response, api_status* status);
-    
-    private:
-      const int _version;
-      const std::unique_ptr<generic_event_logger> _v2;
-      const ca_serializer _serializer;
-    };
-
-    class ccb_logger_facade {
-    public:
-      ccb_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
-
-      ccb_logger_facade(const ccb_logger_facade& other) = delete;
-      ccb_logger_facade& operator=(const ccb_logger_facade& other) = delete;
-      ccb_logger_facade(ccb_logger_facade&& other) = delete;
-      ccb_logger_facade& operator=(ccb_logger_facade&& other) = delete;
-
-      ~ccb_logger_facade() = default;
-
-      int init(api_status* status);
-
+ 
+      //CCB v1
       int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
 
-    private:
-      const int _version;
-      const std::unique_ptr<ccb_logger> _v1;
-    };
-
-    class multi_slot_logger_facade {
-    public:
-      multi_slot_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
-
-      multi_slot_logger_facade(const multi_slot_logger_facade& other) = delete;
-      multi_slot_logger_facade& operator=(const multi_slot_logger_facade& other) = delete;
-      multi_slot_logger_facade(multi_slot_logger_facade&& other) = delete;
-      multi_slot_logger_facade& operator=(multi_slot_logger_facade&& other) = delete;
-
-      ~multi_slot_logger_facade() = default;
-
-      int init(api_status* status);
-
-      int log_decision(reinforcement_learning::model_management::model_type_t model_type, const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+      //Multislot (Slates v1/v2 + CCB v2)
+      int log_decision(const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
 
+      //Continuous
+      int log_continuous_action(const char* context, unsigned int flags, const continuous_action_response& response, api_status* status);
+
     private:
+      const reinforcement_learning::model_management::model_type_t _model_type;
       const int _version;
-      const std::unique_ptr<multi_slot_logger> _v1;
+
+      const std::unique_ptr<interaction_logger> _v1_cb;
+      const std::unique_ptr<ccb_logger> _v1_ccb;
+      const std::unique_ptr<multi_slot_logger> _v1_multislot;
+
       const std::unique_ptr<generic_event_logger> _v2;
-      const multi_slot_serializer _serializer;
+
+      const cb_serializer _serializer_cb;
+      const multi_slot_serializer _serializer_multislot;
+      const ca_serializer _serializer_ca;
     };
 
     class observation_logger_facade {
