@@ -58,7 +58,7 @@ API reinforcement_learning::multi_slot_response* CreateMultiSlotResponse()
     return new reinforcement_learning::multi_slot_response();
 };
 
-API void DeleteMultSlotResponse(reinforcement_learning::multi_slot_response* multi_slot)
+API void DeleteMultiSlotResponse(reinforcement_learning::multi_slot_response* multi_slot)
 {
     delete multi_slot;
 }
@@ -73,7 +73,7 @@ API const char* GetMultiSlotModelId(reinforcement_learning::multi_slot_response*
     return multi_slot->get_model_id();
 }
 
-API const char* GetMultSlotEventId(reinforcement_learning::multi_slot_response* multi_slot)
+API const char* GetMultiSlotEventId(reinforcement_learning::multi_slot_response* multi_slot)
 {
     return multi_slot->get_event_id();
 }
@@ -83,17 +83,17 @@ API multi_slot_enumerator_adapter* CreateMultiSlotEnumeratorAdapter(reinforcemen
     return new multi_slot_enumerator_adapter(multi_slot);
 }
 
-API void DeleteMultSlotEnumeratorAdapter(multi_slot_enumerator_adapter* adapter)
+API void DeleteMultiSlotEnumeratorAdapter(multi_slot_enumerator_adapter* adapter)
 {
     delete adapter;
 }
 
-API int MultSlotEnumeratorInit(multi_slot_enumerator_adapter* adapter)
+API int MultiSlotEnumeratorInit(multi_slot_enumerator_adapter* adapter)
 {
     return adapter->check_current();
 }
 
-API int MultSlotEnumeratorMoveNext(multi_slot_enumerator_adapter* adapter)
+API int MultiSlotEnumeratorMoveNext(multi_slot_enumerator_adapter* adapter)
 {
     return adapter->move_next();
 }
