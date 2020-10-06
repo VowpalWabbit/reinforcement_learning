@@ -5,6 +5,7 @@
 #include <rapidjson/prettywriter.h>
 #include <object_factory.h>
 #include "err_constants.h"
+#include "utility/context_helper.h"
 
 #include <chrono>
 #include <cstring>
@@ -176,5 +177,85 @@ namespace reinforcement_learning { namespace utility {
     }
 
     return reinforcement_learning::error_code::success;
+  }
+
+  struct MessageHandler : public rj::BaseReaderHandler<rj::UTF8<>, MessageHandler> {
+    rj::InsituStringStream &_is;
+    ContextInfo &_info;
+    int _level;
+    int _array_level;
+    bool _is_multi;
+    bool _is_slots;
+    size_t _item_start;
+
+    MessageHandler(rj::InsituStringStream &is, ContextInfo &info) : 
+      _is(is),
+      _info(info),
+      _level(0),
+      _array_level(0),
+      _is_multi(false),
+      _item_start(0)
+       { }
+
+    bool Key(const char* str, size_t length, bool copy)
+    {
+      if(_level == 1 && _array_level == 0) {
+        _is_multi = !strcmp(str, "_multi");
+        _is_slots = !strcmp(str, "_slots");
+      }
+      return true;
+    }
+
+    bool StartObject()
+    {
+      if((_is_multi | _is_slots) && _level == 1 && _array_level == 1)
+        _item_start = _is.Tell() - 1;
+
+      ++_level;
+      return true;
+    }
+
+    bool EndObject(rj::SizeType memberCount)
+    {
+      --_level;
+
+      if((_is_multi | _is_slots) && _level == 1 && _array_level == 1) {
+        size_t item_end = _is.Tell() - 1;
+        if(_is_multi)
+          _info.actions.push_back(std::make_pair(_item_start, item_end));
+        if(_is_slots)
+          _info.slots.push_back(std::make_pair(_item_start, item_end));
+      }
+      return true;
+    }
+
+    bool StartArray()
+    {
+      ++_array_level;
+      return true;
+    }
+
+    bool EndArray(rj::SizeType elementCount)
+    {
+      --_array_level;
+      return true;
+    }
+  };
+
+  int get_context_info(const char *context, ContextInfo &info, i_trace* trace, api_status* status)
+  {
+    std::string copy(context);
+    info.actions.clear();
+    info.slots.clear();
+
+    rj::InsituStringStream iss((char*)copy.c_str());
+    MessageHandler mh(iss, info);
+
+    rj::Reader reader;
+    auto res = reader.Parse<rj::kParseInsituFlag>(iss, mh);
+    if(res.IsError()) {
+        RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << rj::GetParseErrorFunc(res.Code()) << " (" << res.Offset() << ")";
+    }
+    return error_code::success;
   }
 }}
