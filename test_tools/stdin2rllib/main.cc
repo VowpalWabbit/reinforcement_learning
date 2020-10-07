@@ -161,7 +161,7 @@ void parse_and_send_ca_event(json::value obj, r::live_model& rl, r::api_status& 
 	json::value v = obj.at(context);
 	std::string c = to_utf8string(v.serialize());
 
-	//send ranking
+	//request continuous action
 	std::cout << "request_continuous_action " << event_id << std::endl;
 	r::continuous_action_response response;
 	if (!debug && rl.request_continuous_action(event_id.c_str(), c.c_str(), response, &status) != err::success) {
