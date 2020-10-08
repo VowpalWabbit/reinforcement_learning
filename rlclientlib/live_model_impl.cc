@@ -299,7 +299,6 @@ namespace reinforcement_learning {
   int live_model_impl::init_trace(api_status* status) {
     const auto trace_impl = _configuration.get(name::TRACE_LOG_IMPLEMENTATION, value::NULL_TRACE_LOGGER);
     i_trace* plogger;
-    std::cout << "trace factory" << std::endl;
     RETURN_IF_FAIL(_trace_factory->create(&plogger, trace_impl, _configuration, nullptr, status));
     _trace_logger.reset(plogger);
     TRACE_INFO(_trace_logger, "API Tracing initialized");
@@ -310,7 +309,6 @@ namespace reinforcement_learning {
   int live_model_impl::init_model(api_status* status) {
     const auto model_impl = _configuration.get(name::MODEL_IMPLEMENTATION, value::VW);
     m::i_model* pmodel;
-    std::cout << "model factory: " << model_impl << std::endl;
     RETURN_IF_FAIL(_m_factory->create(&pmodel, model_impl, _configuration, _trace_logger.get(), status));
     _model.reset(pmodel);
     return error_code::success;
@@ -322,7 +320,6 @@ namespace reinforcement_learning {
     i_sender* ranking_data_sender;
 
     // Use the name to create an instance of raw data sender for interactions
-    std::cout << "sender factory" << std::endl;
     RETURN_IF_FAIL(_sender_factory->create(&ranking_data_sender, ranking_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
     RETURN_IF_FAIL(ranking_data_sender->init(status));
 
@@ -334,7 +331,6 @@ namespace reinforcement_learning {
     // Get time provider factory and implementation
     const auto* const time_provider_impl = _configuration.get(name::TIME_PROVIDER_IMPLEMENTATION, value::NULL_TIME_PROVIDER);
     i_time_provider* ranking_time_provider;
-    std::cout << "time provider factory" << std::endl;
     RETURN_IF_FAIL(_time_provider_factory->create(&ranking_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // Create a logger for interactions that will use msg sender to send interaction messages
@@ -346,7 +342,6 @@ namespace reinforcement_learning {
     i_sender* outcome_sender;
 
     // Use the name to create an instance of raw data sender for observations
-    std::cout << "sender factory 2" << std::endl;
     RETURN_IF_FAIL(_sender_factory->create(&outcome_sender, outcome_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
     RETURN_IF_FAIL(outcome_sender->init(status));
 
@@ -357,7 +352,6 @@ namespace reinforcement_learning {
 
     // Get time provider implementation
     i_time_provider* observation_time_provider;
-    std::cout << "time provider factory 2" << std::endl;
     RETURN_IF_FAIL(_time_provider_factory->create(&observation_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // Create a logger for interactions that will use msg sender to send interaction messages
@@ -369,7 +363,6 @@ namespace reinforcement_learning {
     i_sender* decision_data_sender;
 
     // Use the name to create an instance of raw data sender for interactions
-    std::cout << "sender factory 3" << std::endl;
     RETURN_IF_FAIL(_sender_factory->create(&decision_data_sender, decision_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
     RETURN_IF_FAIL(decision_data_sender->init(status));
 
@@ -379,7 +372,6 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(decision_msg_sender->init(status));
 
     i_time_provider* decision_time_provider;
-    std::cout << "time provider factory 3" << std::endl;
     RETURN_IF_FAIL(_time_provider_factory->create(&decision_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // Create a logger for interactions that will use msg sender to send interaction messages
@@ -391,7 +383,6 @@ namespace reinforcement_learning {
     i_sender* slates_data_sender;
 
     // Use the name to create an instance of raw data sender for interactions
-    std::cout << "sender factory 4" << std::endl;
     RETURN_IF_FAIL(_sender_factory->create(&slates_data_sender, slates_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
     RETURN_IF_FAIL(slates_data_sender->init(status));
 
@@ -401,7 +392,6 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(slates_msg_sender->init(status));
 
     i_time_provider* slates_time_provider;
-    std::cout << "time provider factory 4" << std::endl;
     RETURN_IF_FAIL(_time_provider_factory->create(&slates_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // // Create a logger for interactions that will use msg sender to send interaction messages
