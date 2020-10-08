@@ -144,15 +144,19 @@ namespace reinforcement_learning {
     //check arguments
     RETURN_IF_FAIL(check_null_or_empty(context_json, _trace_logger.get(), status));
 
+    utility::ContextInfo context_info;
+    RETURN_IF_FAIL(utility::get_context_info(context_json, context_info, _trace_logger.get(), status));
+
     // Ensure multi comes before slots, this is a current limitation of the parser.
-    RETURN_IF_FAIL(utility::validate_multi_before_slots(context_json, _trace_logger.get(), status));
+    if(context_info.slots.size() < 1 || context_info.actions.size() < 1 || context_info.slots[0].first < context_info.actions[0].first) {
+      RETURN_ERROR_LS(_trace_logger.get(), status, json_parse_error) << "There must be both a _multi field and _slots, and _multi must come first.";
+    }
 
     std::vector<std::vector<uint32_t>> actions_ids;
     std::vector<std::vector<float>> actions_pdfs;
     std::string model_version;
 
-    size_t num_decisions;
-    RETURN_IF_FAIL(utility::get_slot_count(num_decisions, context_json, _trace_logger.get(), status));
+    size_t num_decisions = context_info.slots.size();
 
     std::vector<std::string> event_ids_str(num_decisions);
     std::vector<const char*> event_ids(num_decisions, nullptr);
@@ -208,11 +212,15 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(check_null_or_empty(event_id, _trace_logger.get(), status));
     RETURN_IF_FAIL(check_null_or_empty(context_json, _trace_logger.get(), status));
 
-    // Ensure multi comes before slots, this is a current limitation of the parser.
-    RETURN_IF_FAIL(utility::validate_multi_before_slots(context_json, _trace_logger.get(), status));
+    utility::ContextInfo context_info;
+    RETURN_IF_FAIL(utility::get_context_info(context_json, context_info, _trace_logger.get(), status));
 
-    size_t num_decisions;
-    RETURN_IF_FAIL(utility::get_slot_count(num_decisions, context_json, _trace_logger.get(), status));
+    // Ensure multi comes before slots, this is a current limitation of the parser.
+    if(context_info.slots.size() < 1 || context_info.actions.size() < 1 || context_info.slots[0].first < context_info.actions[0].first) {
+      RETURN_ERROR_LS(_trace_logger.get(), status, json_parse_error) << "There must be both a _multi field and _slots, and _multi must come first.";
+    }
+
+    size_t num_decisions = context_info.slots.size();
 
     std::vector<std::vector<uint32_t>> actions_ids;
     std::vector<std::vector<float>> actions_pdfs;
@@ -417,8 +425,13 @@ namespace reinforcement_learning {
     api_status* status) const {
 
     // Generate egreedy pdf
-    size_t action_count = 0;
-    RETURN_IF_FAIL(utility::get_action_count(action_count, context, _trace_logger.get(), status));
+    utility::ContextInfo context_info;
+    RETURN_IF_FAIL(utility::get_context_info(context, context_info, _trace_logger.get(), status));
+
+    size_t action_count = context_info.actions.size();
+    if(action_count < 1) {
+        RETURN_ERROR_LS(_trace_logger.get(), status, json_no_actions_found) << "Context must have at least one action";
+    }
 
     vector<float> pdf(action_count);
     // Generate a pdf with epsilon distributed between all action.
