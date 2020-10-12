@@ -20,7 +20,7 @@
 #include "utility/watchdog.h"
 
 #ifdef USE_AZURE_FACTORIES
-#include "restapi_data_transport.h"
+#   include "model_mgmt/restapi_data_transport.h"
 #endif
 
 namespace r = reinforcement_learning;
