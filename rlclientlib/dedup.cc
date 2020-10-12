@@ -61,7 +61,8 @@ namespace reinforcement_learning
     {
       auto hash = add_action(&payload[p.first], p.second);
       action_ids.push_back(hash);
-      std::stringstream replacement("{\"__aid\":");
+      std::stringstream replacement;
+      replacement << "{\"__aid\":";
       replacement << hash << "}";
       edited_payload.replace(p.first - edit_offset, p.second, replacement.str());
 
