@@ -25,6 +25,7 @@ set(PROJECT_SOURCES
   console_tracer.cc
   continuous_action_response.cc
   decision_response.cc
+  dedup.cc
   error_callback_fn.cc
   factory_resolver.cc
   live_model_impl.cc
@@ -98,6 +99,7 @@ set(PROJECT_PUBLIC_HEADERS
 set(PROJECT_PRIVATE_HEADERS
   azure_factories.h
   console_tracer.h
+  dedup.h
   live_model_impl.h
   logger/async_batcher.h
   logger/event_logger.h
