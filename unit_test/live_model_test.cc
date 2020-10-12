@@ -1,4 +1,4 @@
-#include "slates_response.h"
+#include "multi_slot_response.h"
 #define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
 #   define BOOST_TEST_MODULE Main
@@ -58,17 +58,19 @@ namespace {
   const auto JSON_CONTEXT_WITH_SLOTS = R"({"_multi":[{},{}],"_slots":[{}]})";
   const auto JSON_CONTEXT_PDF = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}}],"p":[0.4, 0.6]})";
   const auto JSON_CONTEXT_LEARNING = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}},{"Action":{"c":3}}],"p":[0.4, 0.1, 0.5]})";
+  const auto JSON_CONTEXT_CONTINUOUS_ACTIONS = R"({"Temperature":{"18-25":1,"4":1,"C":1,"0":1,"1":1,"2":1,"15":1,"M":1}})";
   const float EXPECTED_PDF[2] = { 0.4f, 0.6f };
 
   r::live_model create_mock_live_model(
     const u::configuration& config,
     r::data_transport_factory_t* data_transport_factory = nullptr,
     r::model_factory_t* model_factory = nullptr,
-    r::sender_factory_t* sender_factory = nullptr) {
+    r::sender_factory_t* sender_factory = nullptr,
+    r::model_management::model_type_t model_type = r::model_management::model_type_t::UNKNOWN) {
 
       static auto mock_sender = get_mock_sender(r::error_code::success);
       static auto mock_data_transport = get_mock_data_transport();
-      static auto mock_model = get_mock_model();
+      static auto mock_model = get_mock_model(model_type);
 
       static auto default_sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
       static auto default_data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
@@ -102,7 +104,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request) {
   r::api_status status;
 
   //create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(config);
+  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto event_id = "event_id";
@@ -143,7 +145,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_online_mode) {
   r::api_status status;
 
   //create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(config);
+  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto event_id = "event_id";
@@ -163,7 +165,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_apprentice_mode) {
   r::api_status status;
 
   //create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(config);
+  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto event_id = "event_id";
@@ -194,7 +196,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_loggingonly_mode) {
   r::api_status status;
 
   //create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(config);
+  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto event_id = "event_id";
@@ -212,6 +214,52 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_loggingonly_mode) {
     BOOST_CHECK_EQUAL((*it).action_id, current_expect_action_id);
     current_expect_action_id++;
   }
+}
+
+BOOST_AUTO_TEST_CASE(live_model_request_continuous_action)
+{
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--cats 4 --min_value=185 --max_value=23959 --bandwidth 1 --coin --loss_option 1 --json --quiet --epsilon 0.1 --id N/A");
+  // only added for version 2
+  config.set(r::name::PROTOCOL_VERSION, "2");
+
+  r::api_status status;
+
+  r::live_model ds = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  r::continuous_action_response response;
+
+  BOOST_CHECK_EQUAL(ds.request_continuous_action(JSON_CONTEXT_CONTINUOUS_ACTIONS, response, &status), err::success);
+  BOOST_CHECK_CLOSE(response.get_chosen_action(), 185.123, FLOAT_TOL);
+  BOOST_CHECK_CLOSE(response.get_chosen_action_pdf_value(), 6.09909948e-05, FLOAT_TOL);
+
+  BOOST_CHECK_EQUAL(status.get_error_code(), 0);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+}
+
+BOOST_AUTO_TEST_CASE(live_model_request_continuous_action_invalid_ctx)
+{
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--cats 4 --min_value=185 --max_value=23959 --bandwidth 1 --coin --loss_option 1 --json --quiet --epsilon 0.1 --id N/A");
+  // only added for version 2
+  config.set(r::name::PROTOCOL_VERSION, "2");
+
+  r::api_status status;
+
+  r::live_model ds = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  r::continuous_action_response response;
+
+  const auto invalid_context = "";
+  BOOST_CHECK_EQUAL(ds.request_continuous_action(invalid_context, response, &status), err::invalid_argument); // invalid context
+  BOOST_CHECK_EQUAL(status.get_error_code(), err::invalid_argument);
 }
 
 BOOST_AUTO_TEST_CASE(live_model_request_decision) {
@@ -290,6 +338,46 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough) {
   BOOST_CHECK_EQUAL(num_actions, 2);
 
   // check that our PDF is what we expected
+  r::ranking_response::iterator it = response.begin();
+  const float* expected_probability = EXPECTED_PDF;
+
+  for (uint32_t i = 0; i < num_actions; i++)
+  {
+    auto action_probability = *(it + i);
+    BOOST_CHECK_EQUAL(action_probability.probability, EXPECTED_PDF[action_probability.action_id]);
+  }
+}
+
+// Same with live_model_ranking_request_pdf_passthrough but using "_p"
+BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough_underscore_p) {
+  // Create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::MODEL_IMPLEMENTATION, r::value::PASSTHROUGH_PDF_MODEL);
+
+  // Background refresh introduces a timing issue where the model might not have updated properly before the choose_rank() call.
+  config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
+
+  r::api_status status;
+
+  // Create the ds live_model, and initialize it with the config
+  r::live_model model = create_mock_live_model(config, &r::data_transport_factory, &r::model_factory, nullptr);
+
+  BOOST_CHECK_EQUAL(model.init(&status), err::success);
+  const auto event_id = "event_id";
+
+  r::ranking_response response;
+
+  // Request ranking
+  constexpr auto JSON_PDF = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}}],"_p":[0.4, 0.6]})";
+  BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_PDF, response), err::success);
+
+  size_t num_actions = response.size();
+  BOOST_CHECK_EQUAL(num_actions, 2);
+
+  // Check that our PDF is what we expected
   r::ranking_response::iterator it = response.begin();
   const float* expected_probability = EXPECTED_PDF;
 
@@ -426,7 +514,7 @@ BOOST_AUTO_TEST_CASE(typesafe_err_callback) {
   //start a http server that will receive events sent from the eventhub_client
   auto mock_sender = get_mock_sender(r::error_code::http_bad_status_code);
   auto mock_data_transport = get_mock_data_transport();
-  auto mock_model = get_mock_model();
+  auto mock_model = get_mock_model(r::model_management::model_type_t::CB);
 
   auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
@@ -469,7 +557,7 @@ BOOST_AUTO_TEST_CASE(live_model_mocks) {
   std::vector<buffer_t> recorded;
   auto mock_sender = get_mock_sender(recorded);
   auto mock_data_transport = get_mock_data_transport();
-  auto mock_model = get_mock_model();
+  auto mock_model = get_mock_model(r::model_management::model_type_t::CB);
 
   auto sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
@@ -490,7 +578,7 @@ BOOST_AUTO_TEST_CASE(live_model_mocks) {
     BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CONTEXT, response), err::success);
     BOOST_CHECK_EQUAL(model.report_outcome(event_id, 1.0), err::success);
 
-    Verify(Method((*mock_sender), init)).Exactly(4);
+    Verify(Method((*mock_sender), init)).Exactly(2);
   }
   BOOST_CHECK_EQUAL(recorded.size(), 2);
 }
@@ -546,7 +634,7 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data) {
   auto mock_interaction_sender = get_mock_sender(recorded_interactions);
 
   auto mock_data_transport = get_mock_data_transport();
-  auto mock_model = get_mock_model();
+  auto mock_model = get_mock_model(r::model_management::model_type_t::CB);
 
   auto logger_factory = get_mock_sender_factory(mock_observation_sender.get(), mock_interaction_sender.get());
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
@@ -594,7 +682,7 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data) {
     }
 
     Verify(Method((*mock_observation_sender), init)).Exactly(1);
-    Verify(Method((*mock_interaction_sender), init)).Exactly(3);
+    Verify(Method((*mock_interaction_sender), init)).Exactly(1);
   }
   // TODO deserialize and check contents with expected
   BOOST_CHECK_GE(recorded_interactions.size(), 1);
@@ -706,8 +794,8 @@ BOOST_AUTO_TEST_CASE(slates_explore_only_mode) {
   r::live_model model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
-  r::slates_response response;
-  BOOST_CHECK_EQUAL(model.request_slates_decision(JSON_SLATES_CONTEXT, response), err::success);
+  r::multi_slot_response response;
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(JSON_SLATES_CONTEXT, response), err::success);
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -727,4 +815,36 @@ BOOST_AUTO_TEST_CASE(slates_explore_only_mode) {
   ++it;
 
   BOOST_CHECK(it == response.end());
+}
+
+BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2) {
+  //create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
+
+  r::api_status status;
+
+  // Create the ds live_model, and initialize it with the config
+  r::live_model ds = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr, r::model_management::model_type_t::CCB);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  r::multi_slot_response slates_response;
+  r::decision_response ccb_response;
+
+  //slates API doesn't work for ccb under v1 protocol
+  BOOST_CHECK_EQUAL(ds.request_multi_slot_decision("event_id", JSON_CONTEXT_WITH_SLOTS, slates_response, &status), err::protocol_not_supported);
+
+  config.set(r::name::PROTOCOL_VERSION, "2");
+  r::live_model ds2 = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  BOOST_CHECK_EQUAL(ds2.init(&status), err::success);
+
+  //slates API work for ccb with v2
+  BOOST_CHECK_EQUAL(ds2.request_multi_slot_decision("event_id", JSON_CONTEXT_WITH_SLOTS, slates_response, &status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  //old ccb api doesn't work under v2
+  BOOST_CHECK_EQUAL(ds2.request_decision(JSON_CONTEXT_WITH_SLOTS, ccb_response, &status), err::protocol_not_supported);
+
 }

@@ -68,6 +68,26 @@ namespace reinforcement_learning { namespace model_management {
     }
   }
 
+  int vw_model::choose_continuous_action(const char* features, float& action, float& pdf_value, std::string& model_version, api_status* status)
+  {
+    try
+    {
+      pooled_vw vw(_vw_pool, _vw_pool.get_or_create());
+
+      vw->choose_continuous_action(features, action, pdf_value);
+
+      model_version = vw->id();
+
+      return error_code::success;
+    }
+    catch ( const std::exception& e) {
+      RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << e.what();
+    }
+    catch ( ... ) {
+      RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << "Unknown error";
+    }
+  }
+
   int vw_model::request_decision(const std::vector<const char*>& event_ids, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
     try {
@@ -95,7 +115,7 @@ namespace reinforcement_learning { namespace model_management {
       pooled_vw vw(_vw_pool, _vw_pool.get_or_create());
 
       // Get a ranked list of action_ids and corresponding pdf
-      vw->rank_slates_decisions(event_id, slot_count, features, actions_ids, action_pdfs);
+      vw->rank_multi_slot_decisions(event_id, slot_count, features, actions_ids, action_pdfs);
 
       model_version = vw->id();
 

@@ -9,6 +9,7 @@
 #include "action_flags.h"
 #include "ranking_event.h"
 #include "generic_event.h"
+#include "continuous_action_response.h"
 #include "data_buffer.h"
 #include "logger/message_type.h"
 #include "api_status.h"
@@ -17,6 +18,7 @@
 
 #include "generated/v2/OutcomeEvent_generated.h"
 #include "generated/v2/CbEvent_generated.h"
+#include "generated/v2/CaEvent_generated.h"
 #include "generated/v2/MultiSlotEvent_generated.h"
 
 namespace reinforcement_learning {
@@ -49,8 +51,21 @@ namespace reinforcement_learning {
       }
     };
 
-    template<generic_event::payload_type_t pt>
-    struct multi_slot_serializer : payload_serializer<pt> {
+    struct ca_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CA> {
+      static generic_event::payload_buffer_t event(const char* context, unsigned int flags, const continuous_action_response& response) {
+        flatbuffers::FlatBufferBuilder fbb;
+
+        std::vector<unsigned char> _context;
+        std::string context_str(context);
+        copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
+
+        auto fb = v2::CreateCaEventDirect(fbb, flags & action_flags::DEFERRED, response.get_chosen_action(), &_context, response.get_chosen_action_pdf_value(), response.get_model_id());
+        fbb.Finish(fb);
+        return fbb.Release();
+      }
+    };
+
+    struct multi_slot_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_Slates> {
       static generic_event::payload_buffer_t event(const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version) {
         flatbuffers::FlatBufferBuilder fbb;
@@ -68,12 +83,6 @@ namespace reinforcement_learning {
         fbb.Finish(fb);
         return fbb.Release();
       }
-    };
-
-    struct ccb_serializer : multi_slot_serializer<generic_event::payload_type_t::PayloadType_CCB> {
-    };
-
-    struct slates_serializer : multi_slot_serializer<generic_event::payload_type_t::PayloadType_Slates> {
     };
 
     struct outcome_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_Outcome> {

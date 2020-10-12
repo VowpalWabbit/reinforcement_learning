@@ -40,6 +40,8 @@ namespace Rl.Net.Cli
 
             public string SlatesContext { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
+            public string ContinuousActionContext { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
             public string GetOutcome(long actionIndex, IEnumerable<ActionProbability> actionDistribution)
             {
                 JToken observationValue = this.Observations?.First()?.SelectToken("v");
@@ -55,6 +57,11 @@ namespace Rl.Net.Cli
             }
 
             public string GetSlatesOutcome(int[] actionIndexes, float[] probabilities)
+            {
+                throw new NotImplementedException();
+            }
+
+            public string GetContinuousActionOutcome(float action, float pdfValue)
             {
                 throw new NotImplementedException();
             }

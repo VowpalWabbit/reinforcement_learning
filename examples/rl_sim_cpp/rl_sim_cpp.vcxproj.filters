@@ -24,6 +24,9 @@
     <ClInclude Include="person.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="robot_joint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="rl_sim_cpp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -41,10 +44,10 @@
     <ClCompile Include="person.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="rl_sim.cc">
+    <ClCompile Include="robot_joint.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="simulation_stats.cc">
+    <ClCompile Include="rl_sim.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

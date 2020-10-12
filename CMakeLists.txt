@@ -4,6 +4,7 @@ project(reinforcement_learning)
 set(CMAKE_CXX_STANDARD 11)
 
 option(BUILD_PYTHON "Build the Python bindings" OFF)
+option(USE_ZSTD "Whether to enable usage of zstandard compression" ON)
 
 option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" ON)
 
@@ -37,6 +38,7 @@ add_subdirectory(rlclientlib)
 add_subdirectory(examples)
 add_subdirectory(test_tools/joiner)
 add_subdirectory(test_tools/sender_test)
+add_subdirectory(test_tools/example_gen)
 
 # enable_testing should be run after ext_libs so that the vw unit tests arent turned on.
 enable_testing()

@@ -42,8 +42,9 @@
     <ClCompile Include="time_helper.cc" />
     <ClCompile Include="model_mgmt\file_model_loader.cc" />
     <ClCompile Include="decision_response.cc" />
+    <ClCompile Include="continuous_action_response.cc" />
     <ClCompile Include="learning_mode.cc" />
-    <ClCompile Include="slates_response.cc" />
+    <ClCompile Include="multi_slot_response.cc" />
     <ClCompile Include="logger\logger_facade.cc" />
     <ClCompile Include="serialization\payload_serializer.cc" />
     <ClCompile Include="generic_event.cc" />
@@ -110,8 +111,9 @@
     <ClInclude Include="model_mgmt\file_model_loader.h" />
     <ClInclude Include="..\include\decision_response.h" />
     <ClInclude Include="..\include\container_iterator.h" />
+    <ClInclude Include="..\include\continuous_action_response.h" />
     <ClInclude Include="..\include\future_compat.h" />
-    <ClInclude Include="..\include\slates_response.h" />
+    <ClInclude Include="..\include\multi_slot_response.h" />
     <ClInclude Include="..\include\errors_data.h" />
     <ClInclude Include="logger\logger_facade.h" />
     <ClInclude Include="serialization\payload_serializer.h" />
@@ -127,6 +129,7 @@
     <None Include="schema\v2\Metadata.fbs" />
     <None Include="schema\v2\OutcomeEvent.fbs" />
     <None Include="schema\v2\CbEvent.fbs" />
+    <None Include="schema\v2\CaEvent.fbs" />
     <None Include="schema\v2\MultiSlotEvent.fbs" />
     <None Include="schema\v2\Event.fbs" />
   </ItemGroup>

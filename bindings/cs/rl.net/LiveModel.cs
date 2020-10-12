@@ -49,6 +49,36 @@ namespace Rl.Net
                 return LiveModelChooseRankWithFlagsNative(liveModel, eventId, contextJson, flags, rankingResponse, apiStatus);
             }
 
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestContinuousAction")]
+            private static extern int LiveModelRequestContinuousActionNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr continuousActionResponse, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestContinuousActionOverride { get; set; }
+
+            public static int LiveModelRequestContinuousAction(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr continuousActionResponse, IntPtr apiStatus)
+            {
+                if (LiveModelRequestContinuousActionOverride != null)
+                {
+                    return LiveModelRequestContinuousActionOverride(liveModel, eventId, contextJson, continuousActionResponse, apiStatus);
+                }
+                
+                return LiveModelRequestContinuousActionNative(liveModel, eventId, contextJson, continuousActionResponse, apiStatus);
+            }
+
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestContinuousActionWithFlags")]
+            private static extern int LiveModelRequestContinuousActionWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, int> LiveModelRequestContinuousActionWithFlagsOverride { get; set; }
+
+            public static int LiveModelRequestContinuousActionWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus)
+            {
+                if (LiveModelRequestContinuousActionWithFlagsOverride != null)
+                {
+                    return LiveModelRequestContinuousActionWithFlagsOverride(liveModel, eventId, contextJson, flags, continuousActionResponse, apiStatus);
+                }
+
+                return LiveModelRequestContinuousActionWithFlagsNative(liveModel, eventId, contextJson, flags, continuousActionResponse, apiStatus);
+            }
+
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestDecision")]
             private static extern int LiveModelRequestDecisionNative(IntPtr liveModel, IntPtr contextJson, IntPtr decisionResponse, IntPtr apiStatus);
 
@@ -79,34 +109,34 @@ namespace Rl.Net
                 return LiveModelRequestDecisionWithFlagsNative(liveModel, contextJson, flags, decisionResponse, apiStatus);
             }
 
-            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestSlatesDecision")]
-            private static extern int LiveModelRequestSlatesDecisionNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr slatesResponse, IntPtr apiStatus);
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestMultiSlotDecision")]
+            private static extern int LiveModelRequestMultiSlotDecisionNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr multiSlotResponse, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestSlatesDecisionOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionOverride { get; set; }
 
-            public static int LiveModelRequestSlatesDecision(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr slatesResponse, IntPtr apiStatus)
+            public static int LiveModelRequestMultiSlotDecision(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr multiSlotResponse, IntPtr apiStatus)
             {
-                if (LiveModelRequestSlatesDecisionOverride != null)
+                if (LiveModelRequestMultiSlotDecisionOverride != null)
                 {
-                    return LiveModelRequestSlatesDecisionOverride(liveModel, eventId, contextJson, slatesResponse, apiStatus);
+                    return LiveModelRequestMultiSlotDecisionOverride(liveModel, eventId, contextJson, multiSlotResponse, apiStatus);
                 }
 
-                return LiveModelRequestSlatesDecisionNative(liveModel, eventId, contextJson, slatesResponse, apiStatus);
+                return LiveModelRequestMultiSlotDecisionNative(liveModel, eventId, contextJson, multiSlotResponse, apiStatus);
             }
 
-            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestSlatesDecisionWithFlags")]
-            private static extern int LiveModelRequestSlatesDecisionWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr slatesResponse, IntPtr apiStatus);
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestMultiSlotDecisionWithFlags")]
+            private static extern int LiveModelRequestMultiSlotDecisionWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr multiSlotResponse, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, int> LiveModelRequestSlatesDecisionWithFlagsOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionWithFlagsOverride { get; set; }
 
-            public static int LiveModelRequestSlatesDecisionWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr slatesResponse, IntPtr apiStatus)
+            public static int LiveModelRequestMultiSlotDecisionWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr multiSlotResponse, IntPtr apiStatus)
             {
-                if (LiveModelRequestSlatesDecisionWithFlagsOverride != null)
+                if (LiveModelRequestMultiSlotDecisionWithFlagsOverride != null)
                 {
-                    return LiveModelRequestSlatesDecisionWithFlagsOverride(liveModel, eventId, contextJson, flags, slatesResponse, apiStatus);
+                    return LiveModelRequestMultiSlotDecisionWithFlagsOverride(liveModel, eventId, contextJson, flags, multiSlotResponse, apiStatus);
                 }
 
-                return LiveModelRequestSlatesDecisionWithFlagsNative(liveModel, eventId, contextJson, flags, slatesResponse, apiStatus);
+                return LiveModelRequestMultiSlotDecisionWithFlagsNative(liveModel, eventId, contextJson, flags, multiSlotResponse, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelReportActionTaken")]
@@ -259,6 +289,50 @@ namespace Rl.Net
             }
         }
 
+        unsafe private static int LiveModelRequestContinuousAction(IntPtr liveModel, string eventId, string contextJson, IntPtr continuousActionResponse, IntPtr apiStatus)
+        {
+            CheckJsonString(contextJson);
+
+            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            {
+                IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
+
+                // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
+                // eventId and use supplied eventId at the rl.net.native layer.
+                if (eventId == null)
+                {
+                    return NativeMethods.LiveModelRequestContinuousAction(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, continuousActionResponse, apiStatus);
+                }
+
+                fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+                {
+                    return NativeMethods.LiveModelRequestContinuousAction(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, continuousActionResponse, apiStatus);
+                }
+            }
+        }
+
+        unsafe private static int LiveModelRequestContinuousActionWithFlags(IntPtr liveModel, string eventId, string contextJson, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus)
+        {
+            CheckJsonString(contextJson);
+
+            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            {
+                IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
+
+                // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
+                // eventId and use supplied eventId at the rl.net.native layer.
+                if (eventId == null)
+                {
+                    return NativeMethods.LiveModelRequestContinuousActionWithFlags(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, flags, continuousActionResponse, apiStatus);
+                }
+
+                fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+                {
+                    return NativeMethods.LiveModelRequestContinuousActionWithFlags(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, flags, continuousActionResponse, apiStatus);
+                }
+            }
+        }
+
         unsafe private static int LiveModelRequestDecision(IntPtr liveModel, string contextJson, IntPtr decisionResponse, IntPtr apiStatus)
         {
             CheckJsonString(contextJson);
@@ -279,7 +353,7 @@ namespace Rl.Net
             }
         }
 
-        unsafe private static int LiveModelRequestSlatesDecision(IntPtr liveModel, string eventId, string contextJson, IntPtr slatesResponse, IntPtr apiStatus)
+        unsafe private static int LiveModelRequestMultiSlotDecision(IntPtr liveModel, string eventId, string contextJson, IntPtr multiSlotResponse, IntPtr apiStatus)
         {
             CheckJsonString(contextJson);
 
@@ -287,17 +361,17 @@ namespace Rl.Net
             {
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestSlatesDecision(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, slatesResponse, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecision(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, multiSlotResponse, apiStatus);
                 }
 
                 fixed(byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestSlatesDecision(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, slatesResponse, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecision(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, multiSlotResponse, apiStatus);
                 }
             }
         }
 
-        unsafe private static int LiveModelRequestSlatesDecisionWithFlags(IntPtr liveModel, string eventId, string contextJson, uint flags, IntPtr slatesResponse, IntPtr apiStatus)
+        unsafe private static int LiveModelRequestMultiSlotDecisionWithFlags(IntPtr liveModel, string eventId, string contextJson, uint flags, IntPtr multiSlotResponse, IntPtr apiStatus)
         {
             CheckJsonString(contextJson);
 
@@ -305,12 +379,12 @@ namespace Rl.Net
             {
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestSlatesDecisionWithFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, flags, slatesResponse, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, flags, multiSlotResponse, apiStatus);
                 }
 
                 fixed(byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestSlatesDecisionWithFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, flags, slatesResponse, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, flags, multiSlotResponse, apiStatus);
                 }
             }
 
@@ -464,6 +538,60 @@ namespace Rl.Net
             return result;
         }
 
+        public bool TryRequestContinuousAction(string eventId, string contextJson, out ContinuousActionResponse response, ApiStatus apiStatus = null)
+        {
+            response = new ContinuousActionResponse();
+            return this.TryRequestContinuousAction(eventId, contextJson, response, apiStatus);
+        }
+
+        public bool TryRequestContinuousAction(string eventId, string contextJson, ContinuousActionResponse response, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelRequestContinuousAction(this.DangerousGetHandle(), eventId, contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public ContinuousActionResponse RequestContinuousAction(string eventId, string contextJson)
+        {
+            ContinuousActionResponse result = new ContinuousActionResponse();
+
+            using (ApiStatus apiStatus = new ApiStatus())
+            if (!this.TryRequestContinuousAction(eventId, contextJson, result, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+
+            return result;
+        }
+
+        public bool TryRequestContinuousAction(string eventId, string contextJson, ActionFlags flags, out ContinuousActionResponse response, ApiStatus apiStatus = null)
+        {
+            response = new ContinuousActionResponse();
+            return this.TryRequestContinuousAction(eventId, contextJson, flags, response, apiStatus);
+        }
+
+        public bool TryRequestContinuousAction(string eventId, string contextJson, ActionFlags flags, ContinuousActionResponse response, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelRequestContinuousActionWithFlags(this.DangerousGetHandle(), eventId, contextJson, (uint)flags, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public ContinuousActionResponse RequestContinuousAction(string eventId, string contextJson, ActionFlags flags)
+        {
+            ContinuousActionResponse result = new ContinuousActionResponse();
+
+            using (ApiStatus apiStatus = new ApiStatus())
+            if (!this.TryRequestContinuousAction(eventId, contextJson, flags, result, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
+
+            return result;
+        }
+
         public bool TryRequestDecision(string contextJson, out DecisionResponse response, ApiStatus apiStatus = null)
         {
             response = new DecisionResponse();
@@ -518,26 +646,26 @@ namespace Rl.Net
             return result;
         }
 
-        public bool TryRequestSlatesDecision(string eventId, string contextJson, out SlatesResponse response, ApiStatus apiStatus = null)
+        public bool TryRequestMultiSlotDecision(string eventId, string contextJson, out MultiSlotResponse response, ApiStatus apiStatus = null)
         {
-            response = new SlatesResponse();
-            return this.TryRequestSlatesDecision(eventId, contextJson, response, apiStatus);
+            response = new MultiSlotResponse();
+            return this.TryRequestMultiSlotDecision(eventId, contextJson, response, apiStatus);
         }
 
-        public bool TryRequestSlatesDecision(string eventId, string contextJson, SlatesResponse response, ApiStatus apiStatus = null)
+        public bool TryRequestMultiSlotDecision(string eventId, string contextJson, MultiSlotResponse response, ApiStatus apiStatus = null)
         {
-            int result = LiveModelRequestSlatesDecision(this.DangerousGetHandle(), eventId, contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+            int result = LiveModelRequestMultiSlotDecision(this.DangerousGetHandle(), eventId, contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
 
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
-        public SlatesResponse RequestSlatesDecision(string eventId, string contextJson)
+        public MultiSlotResponse RequestMultiSlotDecision(string eventId, string contextJson)
         {
-            SlatesResponse result = new SlatesResponse();
+            MultiSlotResponse result = new MultiSlotResponse();
 
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryRequestSlatesDecision(eventId, contextJson, result, apiStatus))
+            if (!this.TryRequestMultiSlotDecision(eventId, contextJson, result, apiStatus))
             {
                 throw new RLException(apiStatus);
             }
@@ -545,26 +673,26 @@ namespace Rl.Net
             return result;
         }
 
-        public bool TryRequestSlatesDecision(string eventId, string contextJson, ActionFlags flags, out SlatesResponse response, ApiStatus apiStatus)
+        public bool TryRequestMultiSlotDecision(string eventId, string contextJson, ActionFlags flags, out MultiSlotResponse response, ApiStatus apiStatus)
         {
-            response = new SlatesResponse();
+            response = new MultiSlotResponse();
 
             GC.KeepAlive(this);
-            return this.TryRequestSlatesDecision(eventId, contextJson, flags, response, apiStatus);
+            return this.TryRequestMultiSlotDecision(eventId, contextJson, flags, response, apiStatus);
         }
 
-        public bool TryRequestSlatesDecision(string eventId, string contextJson, ActionFlags flags, SlatesResponse response, ApiStatus apiStatus)
+        public bool TryRequestMultiSlotDecision(string eventId, string contextJson, ActionFlags flags, MultiSlotResponse response, ApiStatus apiStatus)
         {
-            int result = LiveModelRequestSlatesDecisionWithFlags(this.DangerousGetHandle(), eventId, contextJson, (uint)flags, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+            int result = LiveModelRequestMultiSlotDecisionWithFlags(this.DangerousGetHandle(), eventId, contextJson, (uint)flags, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
             return result == NativeMethods.SuccessStatus;
         }
 
-        public SlatesResponse RequestSlatesDecision(string eventId, string contextJson, ActionFlags flags)
+        public MultiSlotResponse RequestMultiSlotDecision(string eventId, string contextJson, ActionFlags flags)
         {
-            SlatesResponse result = new SlatesResponse();
+            MultiSlotResponse result = new MultiSlotResponse();
 
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryRequestSlatesDecision(eventId, contextJson, flags, result, apiStatus))
+            if (!this.TryRequestMultiSlotDecision(eventId, contextJson, flags, result, apiStatus))
             {
                 throw new RLException(apiStatus);
             }

@@ -4,12 +4,13 @@ set(rl_net_native_SOURCES
   rl.net.api_status.cc
   rl.net.buffer.cc
   rl.net.config.cc
+  rl.net.continuous_action_response.cc
   rl.net.decision_response.cc
   rl.net.factory_context.cc
   rl.net.live_model.cc
   rl.net.native.cc
   rl.net.ranking_response.cc
-  rl.net.slates_response.cc
+  rl.net.multi_slot_response.cc
 )
 
 set(rl_net_native_HEADERS
@@ -18,12 +19,13 @@ set(rl_net_native_HEADERS
   rl.net.api_status.h
   rl.net.buffer.h
   rl.net.config.h
+  rl.net.continuous_action_response.h
   rl.net.decision_response.h
   rl.net.factory_context.h
   rl.net.live_model.h
   rl.net.native.h
   rl.net.ranking_response.h
-  rl.net.slates_response.h
+  rl.net.multi_slot_response.h
 )
 
 source_group("Sources" FILES ${rl_net_native_SOURCES})

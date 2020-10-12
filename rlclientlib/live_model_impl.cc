@@ -77,7 +77,7 @@ namespace reinforcement_learning {
       RETURN_IF_FAIL(reset_action_order(response));
     }
 
-    RETURN_IF_FAIL(_ranking_logger->log(context, flags, response, status, _learning_mode));
+    RETURN_IF_FAIL(_interaction_logger->log(context, flags, response, status, _learning_mode));
 
     if (_learning_mode == APPRENTICE)
     {
@@ -100,6 +100,36 @@ namespace reinforcement_learning {
       status);
   }
 
+  int live_model_impl::request_continuous_action(const char* event_id, const char* context, unsigned int flags, continuous_action_response& response, api_status* status)
+  {
+    response.clear();
+    //clear previous errors if any
+    api_status::try_clear(status);
+
+    RETURN_IF_FAIL(check_null_or_empty(event_id, context, _trace_logger.get(), status));
+    
+    float action;
+    float pdf_value;
+    std::string model_version;
+
+    RETURN_IF_FAIL(_model->choose_continuous_action(context, action, pdf_value, model_version, status));
+    RETURN_IF_FAIL(populate_response(action, pdf_value, std::string(event_id), std::string(model_version), response, _trace_logger.get(), status));
+    RETURN_IF_FAIL(_interaction_logger->log_continuous_action(context, flags, response, status));
+    
+    if (_watchdog.has_background_error_been_reported())
+    {
+      RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+    }
+
+    return error_code::success;
+  }
+    
+  int live_model_impl::request_continuous_action(const char* context, unsigned int flags, continuous_action_response& response, api_status* status)
+  {
+    const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
+    return request_continuous_action(uuid.c_str(), context, flags, response, status);
+  }
+
   int live_model_impl::request_decision(const char* context_json, unsigned int flags, decision_response& resp, api_status* status)
   {
     if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY) {
@@ -114,15 +144,19 @@ namespace reinforcement_learning {
     //check arguments
     RETURN_IF_FAIL(check_null_or_empty(context_json, _trace_logger.get(), status));
 
+    utility::ContextInfo context_info;
+    RETURN_IF_FAIL(utility::get_context_info(context_json, context_info, _trace_logger.get(), status));
+
     // Ensure multi comes before slots, this is a current limitation of the parser.
-    RETURN_IF_FAIL(utility::validate_multi_before_slots(context_json, _trace_logger.get(), status));
+    if(context_info.slots.size() < 1 || context_info.actions.size() < 1 || context_info.slots[0].first < context_info.actions[0].first) {
+      RETURN_ERROR_LS(_trace_logger.get(), status, json_parse_error) << "There must be both a _multi field and _slots, and _multi must come first.";
+    }
 
     std::vector<std::vector<uint32_t>> actions_ids;
     std::vector<std::vector<float>> actions_pdfs;
     std::string model_version;
 
-    size_t num_decisions;
-    RETURN_IF_FAIL(utility::get_slot_count(num_decisions, context_json, _trace_logger.get(), status));
+    size_t num_decisions = context_info.slots.size();
 
     std::vector<std::string> event_ids_str(num_decisions);
     std::vector<const char*> event_ids(num_decisions, nullptr);
@@ -147,7 +181,7 @@ namespace reinforcement_learning {
     // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
     RETURN_IF_FAIL(_model->request_decision(event_ids, context_json, actions_ids, actions_pdfs, model_version, status));
     RETURN_IF_FAIL(populate_response(actions_ids, actions_pdfs, event_ids, std::string(model_version), resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_decision_logger->log_decisions(event_ids, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(_interaction_logger->log_decisions(event_ids, context_json, flags, actions_ids, actions_pdfs, model_version, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -157,13 +191,13 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int live_model_impl::request_slates_decision(const char * context_json, unsigned int flags, slates_response& resp, api_status* status)
+  int live_model_impl::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
   {
     const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
-    return request_slates_decision(uuid.c_str(), context_json, flags, resp, status);
+    return request_multi_slot_decision(uuid.c_str(), context_json, flags, resp, status);
   }
 
-  int live_model_impl::request_slates_decision(const char * event_id, const char * context_json, unsigned int flags, slates_response& resp, api_status* status)
+  int live_model_impl::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
   {
     if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY) {
       // Apprentice mode and LoggingOnly mode are not supported here at this moment
@@ -178,11 +212,15 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(check_null_or_empty(event_id, _trace_logger.get(), status));
     RETURN_IF_FAIL(check_null_or_empty(context_json, _trace_logger.get(), status));
 
-    // Ensure multi comes before slots, this is a current limitation of the parser.
-    RETURN_IF_FAIL(utility::validate_multi_before_slots(context_json, _trace_logger.get(), status));
+    utility::ContextInfo context_info;
+    RETURN_IF_FAIL(utility::get_context_info(context_json, context_info, _trace_logger.get(), status));
 
-    size_t num_decisions;
-    RETURN_IF_FAIL(utility::get_slot_count(num_decisions, context_json, _trace_logger.get(), status));
+    // Ensure multi comes before slots, this is a current limitation of the parser.
+    if(context_info.slots.size() < 1 || context_info.actions.size() < 1 || context_info.slots[0].first < context_info.actions[0].first) {
+      RETURN_ERROR_LS(_trace_logger.get(), status, json_parse_error) << "There must be both a _multi field and _slots, and _multi must come first.";
+    }
+
+    size_t num_decisions = context_info.slots.size();
 
     std::vector<std::vector<uint32_t>> actions_ids;
     std::vector<std::vector<float>> actions_pdfs;
@@ -191,8 +229,8 @@ namespace reinforcement_learning {
     // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
     RETURN_IF_FAIL(_model->request_multi_slot_decision(event_id, num_decisions, context_json, actions_ids, actions_pdfs, model_version, status));
 
-    RETURN_IF_FAIL(populate_slates_response(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_slates_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(populate_multi_slot_response(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), resp, _trace_logger.get(), status));
+    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -282,7 +320,8 @@ namespace reinforcement_learning {
     _t_factory{ t_factory },
     _m_factory{ m_factory },
     _sender_factory{ sender_factory },
-    _time_provider_factory{ time_provider_factory }
+    _time_provider_factory{ time_provider_factory },
+    _protocol_version(_configuration.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
   {
     // If there is no user supplied error callback, supply a default one that does nothing but report unhandled background errors.
     if (fn == nullptr) {
@@ -334,8 +373,8 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_time_provider_factory->create(&ranking_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // Create a logger for interactions that will use msg sender to send interaction messages
-    _ranking_logger.reset(new logger::cb_logger_facade(_configuration, ranking_msg_sender, _watchdog, ranking_time_provider, &_error_cb));
-    RETURN_IF_FAIL(_ranking_logger->init(status));
+    _interaction_logger.reset(new logger::interaction_logger_facade(_model->model_type(), _configuration, ranking_msg_sender, _watchdog, ranking_time_provider, &_error_cb));
+    RETURN_IF_FAIL(_interaction_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for observations.
     const auto* const outcome_sender_impl = _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::OBSERVATION_EH_SENDER);
@@ -357,46 +396,6 @@ namespace reinforcement_learning {
     // Create a logger for interactions that will use msg sender to send interaction messages
     _outcome_logger.reset(new logger::observation_logger_facade(_configuration, outcome_msg_sender, _watchdog, observation_time_provider, &_error_cb));
     RETURN_IF_FAIL(_outcome_logger->init(status));
-
-    // Get the name of raw data (as opposed to message) sender for interactions.
-    const auto* const decision_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);
-    i_sender* decision_data_sender;
-
-    // Use the name to create an instance of raw data sender for interactions
-    RETURN_IF_FAIL(_sender_factory->create(&decision_data_sender, decision_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
-    RETURN_IF_FAIL(decision_data_sender->init(status));
-
-    // Create a message sender that will prepend the message with a preamble and send the raw data using the
-    // factory created raw data sender
-    l::i_message_sender* decision_msg_sender = new l::preamble_message_sender(decision_data_sender);
-    RETURN_IF_FAIL(decision_msg_sender->init(status));
-
-    i_time_provider* decision_time_provider;
-    RETURN_IF_FAIL(_time_provider_factory->create(&decision_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
-
-    // Create a logger for interactions that will use msg sender to send interaction messages
-    _decision_logger.reset(new logger::ccb_logger_facade(_configuration, decision_msg_sender, _watchdog, decision_time_provider, &_error_cb));
-    RETURN_IF_FAIL(_decision_logger->init(status));
-
-    // Get the name of raw data (as opposed to message) sender for interactions.
-    const auto* const slates_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);
-    i_sender* slates_data_sender;
-
-    // Use the name to create an instance of raw data sender for interactions
-    RETURN_IF_FAIL(_sender_factory->create(&slates_data_sender, slates_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
-    RETURN_IF_FAIL(slates_data_sender->init(status));
-
-    // Create a message sender that will prepend the message with a preamble and send the raw data using the
-    // factory created raw data sender
-    l::i_message_sender* slates_msg_sender = new l::preamble_message_sender(slates_data_sender);
-    RETURN_IF_FAIL(slates_msg_sender->init(status));
-
-    i_time_provider* slates_time_provider;
-    RETURN_IF_FAIL(_time_provider_factory->create(&slates_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
-
-    // // Create a logger for interactions that will use msg sender to send interaction messages
-    _slates_logger.reset(new logger::slates_logger_facade(_configuration, slates_msg_sender, _watchdog, slates_time_provider, &_error_cb));
-    RETURN_IF_FAIL(_slates_logger->init(status));
 
     return error_code::success;
   }
@@ -426,8 +425,13 @@ namespace reinforcement_learning {
     api_status* status) const {
 
     // Generate egreedy pdf
-    size_t action_count = 0;
-    RETURN_IF_FAIL(utility::get_action_count(action_count, context, _trace_logger.get(), status));
+    utility::ContextInfo context_info;
+    RETURN_IF_FAIL(utility::get_context_info(context, context_info, _trace_logger.get(), status));
+
+    size_t action_count = context_info.actions.size();
+    if(action_count < 1) {
+        RETURN_ERROR_LS(_trace_logger.get(), status, json_no_actions_found) << "Context must have at least one action";
+    }
 
     vector<float> pdf(action_count);
     // Generate a pdf with epsilon distributed between all action.

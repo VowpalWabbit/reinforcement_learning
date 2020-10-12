@@ -28,9 +28,12 @@ namespace reinforcement_learning
     int choose_rank(const char* event_id, const char* context, unsigned int flags, ranking_response& response, api_status* status);
     //here the event_id is auto-generated
     int choose_rank(const char* context, unsigned int flags, ranking_response& response, api_status* status);
+    int request_continuous_action(const char* event_id, const char* context, unsigned int flags, continuous_action_response& response, api_status* status);
+    //here the event_id is auto-generated
+    int request_continuous_action(const char* context, unsigned int flags, continuous_action_response& response, api_status* status);
     int request_decision(const char* context_json, unsigned int flags, decision_response& resp, api_status* status);
-    int request_slates_decision(const char* event_id, const char* context_json, unsigned int flags, slates_response& resp, api_status* status = nullptr);
-    int request_slates_decision(const char* context_json, unsigned int flags, slates_response& resp, api_status* status = nullptr);
+    int request_multi_slot_decision(const char* event_id, const char* context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
+    int request_multi_slot_decision(const char* context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
 
     int report_action_taken(const char* event_id, api_status* status);
 
@@ -83,6 +86,7 @@ namespace reinforcement_learning
     model_management::data_callback_fn _data_cb;
     utility::watchdog _watchdog;
     learning_mode _learning_mode;
+    const int _protocol_version;
 
     trace_logger_factory_t* _trace_factory;
     data_transport_factory_t* _t_factory;
@@ -92,10 +96,10 @@ namespace reinforcement_learning
 
     std::unique_ptr<model_management::i_data_transport> _transport{nullptr};
     std::unique_ptr<model_management::i_model> _model{nullptr};
-    std::unique_ptr<logger::cb_logger_facade> _ranking_logger{nullptr};
+
+    std::unique_ptr<logger::interaction_logger_facade> _interaction_logger{nullptr};
     std::unique_ptr<logger::observation_logger_facade> _outcome_logger{nullptr};
-    std::unique_ptr<logger::ccb_logger_facade> _decision_logger{nullptr};
-    std::unique_ptr<logger::slates_logger_facade> _slates_logger{nullptr};
+
     std::unique_ptr<model_management::model_downloader> _model_download{nullptr};
     std::unique_ptr<i_trace> _trace_logger{nullptr};
 

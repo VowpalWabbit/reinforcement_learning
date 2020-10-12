@@ -19,6 +19,7 @@ namespace cfg = u::config;
 namespace err = r::error_code;
 
 int basic_usage_cb();
+int basic_usage_ca();
 int basic_usage_ccb();
 int basic_usage_slates();
 

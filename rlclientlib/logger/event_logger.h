@@ -128,9 +128,9 @@ class ccb_logger : public event_logger<decision_ranking_event> {
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
   };
 
-class slates_logger : public event_logger<slates_decision_event> {
+class multi_slot_logger : public event_logger<multi_slot_decision_event> {
   public:
-    slates_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
+    multi_slot_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
       : event_logger(
         sender,
         c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
@@ -169,6 +169,13 @@ class slates_logger : public event_logger<slates_decision_event> {
     int report_action_taken(const char* event_id, api_status* status);
   };
 
+  enum class content_encoding_enum
+  {
+    IDENTITY,
+    ZSTD_AND_DEDUP
+  };
+  content_encoding_enum to_content_encoding_enum(const char *content_encoding);
+
   class generic_event_logger : public event_logger<generic_event> {
   public:
     generic_event_logger(i_message_sender* sender,
@@ -176,6 +183,7 @@ class slates_logger : public event_logger<slates_decision_event> {
       int send_batch_interval_ms,
       int send_queue_max_capacity,
       const char* queue_mode,
+      const char* content_encoding,
       utility::watchdog& watchdog,
       i_time_provider* time_provider,
       error_callback_fn* perror_cb = nullptr)
@@ -188,8 +196,12 @@ class slates_logger : public event_logger<slates_decision_event> {
         watchdog,
         time_provider,
         perror_cb)
+      , _content_encoding(to_content_encoding_enum(content_encoding))
     {}
 
     int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, api_status* status);
+
+    private:
+      const content_encoding_enum _content_encoding;
   };
 }}

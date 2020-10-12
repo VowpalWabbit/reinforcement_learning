@@ -12,6 +12,7 @@ set(RL_FLAT_BUFFER_FILES_V2
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Metadata.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/OutcomeEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CbEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CaEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiSlotEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Event.fbs" )
 
@@ -21,6 +22,7 @@ build_flatbuffers("${RL_FLAT_BUFFER_FILES_V2}" "" fbgenerator_v2 "" "${CMAKE_CUR
 set(PROJECT_SOURCES
   api_status.cc
   console_tracer.cc
+  continuous_action_response.cc
   decision_response.cc
   error_callback_fn.cc
   factory_resolver.cc
@@ -46,7 +48,7 @@ set(PROJECT_SOURCES
   ranking_response.cc
   sampling.cc
   serialization/payload_serializer.cc
-  slates_response.cc
+  multi_slot_response.cc
   trace_logger.cc
   utility/stl_container_adapter.cc
   utility/config_utility.cc
@@ -79,6 +81,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/configuration.h
   ../include/constants.h
   ../include/container_iterator.h
+  ../include/continuous_action_response.h
   ../include/decision_response.h
   ../include/err_constants.h
   ../include/error_callback_fn.h
@@ -91,7 +94,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/personalization.h
   ../include/ranking_response.h
   ../include/sender.h
-  ../include/slates_response.h
+  ../include/multi_slot_response.h
   ../include/str_util.h
   ../include/trace_logger.h
   ../include/data_buffer.h
@@ -146,6 +149,13 @@ if(vw_USE_AZURE_FACTORIES)
 endif()
 
 set_target_properties(rlclientlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+if(USE_ZSTD)
+  target_compile_definitions(rlclientlib PRIVATE USE_ZSTD)
+  target_link_libraries(rlclientlib PRIVATE libzstd_static)
+  target_include_directories(rlclientlib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/zstd/lib/)
+endif()
+
 target_include_directories( rlclientlib
                             PUBLIC
                             ${CMAKE_CURRENT_SOURCE_DIR}/../include

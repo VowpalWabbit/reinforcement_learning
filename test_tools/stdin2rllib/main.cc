@@ -21,6 +21,7 @@ int load_config_from_json(const std::string& file_name, u::configuration& cc);
 //helper to parse the json line
 void parse_and_send(std::string&, r::live_model&, r::api_status&, bool);
 void parse_and_send_outcome(rj::Document&, r::live_model&, r::api_status&, bool);
+void parse_and_send_ca_event(rj::Document&, r::live_model&, r::api_status&, bool);
 void parse_and_send_cb_event(rj::Document&, r::live_model&, r::api_status&, bool);
 void parse_and_send_ccb_event(rj::Document&, r::live_model&, r::api_status&, bool);
 
@@ -100,9 +101,13 @@ void parse_and_send(std::string& line, r::live_model& rl, r::api_status& status,
 
 		bool is_dangling = obj.HasMember("RewardValue");
 		bool is_ccb = obj.HasMember("_outcomes");
+		bool is_ca = obj.HasMember("_label_ca");
 
 		if (is_dangling) {
 			parse_and_send_outcome(obj, rl, status, debug);
+		}
+		else if (is_ca) {
+			parse_and_send_ca_event(obj, rl, status, debug);
 		}
 		else if (!is_ccb) {
 			parse_and_send_cb_event(obj, rl, status, debug);
@@ -133,6 +138,50 @@ void parse_and_send_outcome(rj::Document& obj, r::live_model& rl, r::api_status&
 	if (!debug && rl.report_outcome(event_id.c_str(), outcome, &status) != err::success) {
 		std::cout << status.get_error_msg() << std::endl;
 		return;
+	}
+}
+
+void parse_and_send_ca_event(rj::Document& obj, r::live_model& rl, r::api_status& status, bool debug) {
+	//parse event id
+	auto evt_id = "EventId";
+	bool has_event_id = obj.HasMember(evt_id);
+	if (!has_event_id) {
+		std::cout << "missing 'EventId' field" << std::endl;
+		return;
+	}
+	std::string event_id = obj[evt_id].GetString();
+
+	//parse the joined event
+	auto context = "c";
+	bool has_context = obj.HasMember(context);
+	if (!has_context) {
+		std::cout << "missing 'context' field" << std::endl;
+		return;
+	}
+	//extract context string
+	std::string c = obj[context].GetString();
+
+	//request continuous action
+	std::cout << "request_continuous_action " << event_id << std::endl;
+	r::continuous_action_response response;
+	if (!debug && rl.request_continuous_action(event_id.c_str(), c.c_str(), response, &status) != err::success) {
+		std::cout << status.get_error_msg() << std::endl;
+		return;
+	}
+
+	//send outcome if cost exists and is non-zero
+	auto label_ca = "_label_ca";
+	auto cost = "cost";
+	bool has_label = obj.HasMember(label_ca);
+	if (!has_label) return;
+
+	float reward = -(obj[label_ca][cost].GetDouble());
+	if (reward != 0.0) {
+		std::cout << "report_outcome " << event_id << " " << reward << std::endl;
+		if (!debug && rl.report_outcome(event_id.c_str(), reward, &status) != err::success) {
+			std::cout << status.get_error_msg() << std::endl;
+			return;
+		}
 	}
 }
 
