@@ -19,13 +19,13 @@ namespace reinforcement_learning
     return uniform_hash(start, size, 0);
   }
 
-  dedup_dict::action_id_t dedup_dict::add_action(const char *start, size_t size)
+  dedup_dict::action_id_t dedup_dict::add_action(const char *start, size_t length)
   {
-    action_id_t hash = hash_content(start, size);
+    action_id_t hash = hash_content(start, length);
     auto it = _entries.find(hash);
     if (it == _entries.end())
     {
-      _entries.insert({ hash, dict_entry(start, size) });
+      _entries.insert({ hash, dict_entry(start, length) });
     }
     else
     {
@@ -34,9 +34,9 @@ namespace reinforcement_learning
     return hash;
   }
 
-  bool dedup_dict::remove_action(action_id_t hash)
+  bool dedup_dict::remove_action(action_id_t aid)
   {
-    auto it = _entries.find(hash);
+    auto it = _entries.find(aid);
     if (it == _entries.end())
       return false;
 
@@ -45,6 +45,14 @@ namespace reinforcement_learning
       _entries.erase(it);
 
     return true;
+  }
+
+  string_view dedup_dict::get_action(action_id_t aid)
+  {
+    auto it = _entries.find(aid);
+    if (it == _entries.end())
+      return string_view();
+    return string_view(it->second._content.data(), it->second._length);
   }
 
   int dedup_dict::transform_payload(const char* payload, std::string& edited_payload, action_list_t& action_ids, api_status* status)

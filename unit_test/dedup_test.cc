@@ -15,6 +15,36 @@ BOOST_AUTO_TEST_CASE(dedup_remove_unknown_action)
   BOOST_CHECK_EQUAL(false, dict.remove_action(1));
 }
 
+BOOST_AUTO_TEST_CASE(dedup_add_remove_action)
+{
+  r::dedup_dict dict;
+  auto id = dict.add_action("abc", 3);
+  auto id2 = dict.add_action("abc", 3);
+
+  BOOST_CHECK_EQUAL(id, id2);
+
+  BOOST_CHECK_EQUAL(true, dict.remove_action(id));
+  BOOST_CHECK_EQUAL(true, dict.remove_action(id));
+  BOOST_CHECK_EQUAL(false, dict.remove_action(id));
+}
+
+BOOST_AUTO_TEST_CASE(dedup_add_empty_action)
+{
+  r::dedup_dict dict;
+  auto id = dict.add_action("", 0);
+  BOOST_CHECK_EQUAL(true, dict.remove_action(id));
+}
+
+BOOST_AUTO_TEST_CASE(dedup_add_get_action)
+{
+  r::dedup_dict dict;
+  auto id = dict.add_action("{abc}", 5);
+  auto str = dict.get_action(id);
+
+  BOOST_CHECK_EQUAL(5, str.size());
+  BOOST_CHECK_EQUAL("{abc}", str.to_string());
+}
+
 BOOST_AUTO_TEST_CASE(dedup_bad_json)
 {
   r::dedup_dict dict;
@@ -61,5 +91,4 @@ BOOST_AUTO_TEST_CASE(dedup_simple_json)
   BOOST_CHECK_EQUAL(true, dict.remove_action(178626470));
   BOOST_CHECK_EQUAL(false, dict.remove_action(989852256));
   BOOST_CHECK_EQUAL(false, dict.remove_action(178626470));
-
 }
