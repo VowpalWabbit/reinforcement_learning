@@ -113,6 +113,7 @@ set(PROJECT_PRIVATE_HEADERS
   moving_queue.h
   generic_event.h
   ranking_event.h
+  rl_string_view.h
   sampling.h
   serialization/fb_serializer.h
   serialization/json_serializer.h
