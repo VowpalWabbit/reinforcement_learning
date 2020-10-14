@@ -355,7 +355,7 @@ namespace reinforcement_learning {
 
   int live_model_impl::init_loggers(api_status* status) {
     // Get the name of raw data (as opposed to message) sender for interactions.
-    const auto* const ranking_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::INTERACTION_EH_SENDER);
+    const auto* const ranking_sender_impl = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::DEFAULT_INTERACTION_SENDER);
     i_sender* ranking_data_sender;
 
     // Use the name to create an instance of raw data sender for interactions
@@ -368,7 +368,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(ranking_msg_sender->init(status));
 
     // Get time provider factory and implementation
-    const auto* const time_provider_impl = _configuration.get(name::TIME_PROVIDER_IMPLEMENTATION, value::NULL_TIME_PROVIDER);
+    const auto* const time_provider_impl = _configuration.get(name::TIME_PROVIDER_IMPLEMENTATION, value::DEFAULT_TIME_PROVIDER);
     i_time_provider* ranking_time_provider;
     RETURN_IF_FAIL(_time_provider_factory->create(&ranking_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
@@ -377,7 +377,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_interaction_logger->init(status));
 
     // Get the name of raw data (as opposed to message) sender for observations.
-    const auto* const outcome_sender_impl = _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::OBSERVATION_EH_SENDER);
+    const auto* const outcome_sender_impl = _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::DEFAULT_OBSERVATION_SENDER);
     i_sender* outcome_sender;
 
     // Use the name to create an instance of raw data sender for observations
@@ -498,7 +498,7 @@ namespace reinforcement_learning {
 
   int live_model_impl::init_model_mgmt(api_status* status) {
     // Initialize transport for the model using transport factory
-    const auto tranport_impl = _configuration.get(name::MODEL_SRC, value::AZURE_STORAGE_BLOB);
+    const auto tranport_impl = _configuration.get(name::MODEL_SRC, value::DEFAULT_DATA_TRANSPORT);
     m::i_data_transport* ptransport;
     RETURN_IF_FAIL(_t_factory->create(&ptransport, tranport_impl, _configuration, status));
     // This class manages lifetime of transport

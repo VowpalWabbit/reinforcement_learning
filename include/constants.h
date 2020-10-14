@@ -74,5 +74,16 @@ namespace reinforcement_learning {  namespace value {
       const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
       const int DEFAULT_VW_POOL_INIT_SIZE = 4;
       const int DEFAULT_PROTOCOL_VERSION = 1;
+#ifdef USE_AZURE_FACTORIES
+      const char *const DEFAULT_OBSERVATION_SENDER = OBSERVATION_EH_SENDER;
+      const char *const DEFAULT_INTERACTION_SENDER = INTERACTION_EH_SENDER;
+      const char *const DEFAULT_DATA_TRANSPORT = AZURE_STORAGE_BLOB;
+      const char *const DEFAULT_TIME_PROVIDER = NULL_TIME_PROVIDER;
+#else
+      const char *const DEFAULT_OBSERVATION_SENDER = OBSERVATION_FILE_SENDER;
+      const char *const DEFAULT_INTERACTION_SENDER = INTERACTION_FILE_SENDER;
+      const char *const DEFAULT_DATA_TRANSPORT = NO_MODEL_DATA;
+      const char *const DEFAULT_TIME_PROVIDER = CLOCK_TIME_PROVIDER;
+#endif
 }}
 
