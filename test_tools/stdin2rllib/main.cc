@@ -227,7 +227,7 @@ void parse_and_send_cb_event(const rj::Document& obj, r::live_model& rl, r::api_
 	bool has_cost = obj.HasMember(cost);
 	if (!has_cost) return;
 
-	float reward = -(obj[cost].GetFloat());
+	float reward = -(obj[cost].GetDouble());
 	if (reward != 0.0) {
 		std::cout << "report_outcome " << event_id << " " << reward << std::endl;
 		if (!debug && rl.report_outcome(event_id.c_str(), reward, &status) != err::success) {
