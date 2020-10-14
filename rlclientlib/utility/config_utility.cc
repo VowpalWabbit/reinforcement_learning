@@ -2,6 +2,7 @@
 #include <set>
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
+#include <rapidjson/error/en.h>
 #include <regex>
 #include "config_utility.h"
 #include "configuration.h"
@@ -113,7 +114,7 @@ namespace reinforcement_learning { namespace utility { namespace config {
     try {
       obj.Parse<rj::kParseNumbersAsStringsFlag | rj::kParseDefaultFlags>(config_json.c_str());
       if (obj.HasParseError()) {
-        RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << rj::GetParseErrorFunc(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";
+        RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << rj::GetParseError_En(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";
       }
     }
     catch (const std::exception& e) {

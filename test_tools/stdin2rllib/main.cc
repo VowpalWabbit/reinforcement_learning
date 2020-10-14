@@ -4,6 +4,7 @@
 #include <locale>
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
+#include <rapidjson/error/en.h>
 #include "config_utility.h"
 #include "live_model.h"
 
@@ -20,10 +21,10 @@ int load_config_from_json(const std::string& file_name, u::configuration& cc);
 
 //helper to parse the json line
 void parse_and_send(std::string&, r::live_model&, r::api_status&, bool);
-void parse_and_send_outcome(rj::Document&, r::live_model&, r::api_status&, bool);
-void parse_and_send_ca_event(rj::Document&, r::live_model&, r::api_status&, bool);
-void parse_and_send_cb_event(rj::Document&, r::live_model&, r::api_status&, bool);
-void parse_and_send_ccb_event(rj::Document&, r::live_model&, r::api_status&, bool);
+void parse_and_send_outcome(const rj::Document&, r::live_model&, r::api_status&, bool);
+void parse_and_send_ca_event(const rj::Document&, r::live_model&, r::api_status&, bool);
+void parse_and_send_cb_event(const rj::Document&, r::live_model&, r::api_status&, bool);
+void parse_and_send_ccb_event(const rj::Document&, r::live_model&, r::api_status&, bool);
 
 //the cmd line tool expects 2 arguments:
 // * argv[1] is the path to rlclient config json file
@@ -95,7 +96,7 @@ void parse_and_send(std::string& line, r::live_model& rl, r::api_status& status,
 		obj.Parse(line.c_str());
 
 		if (obj.HasParseError()) {
-			std::cout << "JSON parse error: " << rj::GetParseErrorFunc(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")" << std::endl;
+			std::cout << "JSON parse error: " << rj::GetParseError_En(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")" << std::endl;
 			return;
 		}
 
@@ -122,7 +123,7 @@ void parse_and_send(std::string& line, r::live_model& rl, r::api_status& status,
 	}
 }
 
-void parse_and_send_outcome(rj::Document& obj, r::live_model& rl, r::api_status& status, bool debug) {
+void parse_and_send_outcome(const rj::Document& obj, r::live_model& rl, r::api_status& status, bool debug) {
 	//parse event id
 	auto evt_id = "EventId";
 	bool has_event_id = obj.HasMember(evt_id);
@@ -141,7 +142,7 @@ void parse_and_send_outcome(rj::Document& obj, r::live_model& rl, r::api_status&
 	}
 }
 
-void parse_and_send_ca_event(rj::Document& obj, r::live_model& rl, r::api_status& status, bool debug) {
+void parse_and_send_ca_event(const rj::Document& obj, r::live_model& rl, r::api_status& status, bool debug) {
 	//parse event id
 	auto evt_id = "EventId";
 	bool has_event_id = obj.HasMember(evt_id);
@@ -159,7 +160,11 @@ void parse_and_send_ca_event(rj::Document& obj, r::live_model& rl, r::api_status
 		return;
 	}
 	//extract context string
-	std::string c = obj[context].GetString();
+	auto& context_obj = obj[context];
+	rj::StringBuffer sb;
+	rj::Writer<rj::StringBuffer> writer(sb);
+	context_obj.Accept(writer);
+	std::string c = sb.GetString();
 
 	//request continuous action
 	std::cout << "request_continuous_action " << event_id << std::endl;
@@ -185,7 +190,7 @@ void parse_and_send_ca_event(rj::Document& obj, r::live_model& rl, r::api_status
 	}
 }
 
-void parse_and_send_cb_event(rj::Document& obj, r::live_model& rl, r::api_status& status, bool debug) {
+void parse_and_send_cb_event(const rj::Document& obj, r::live_model& rl, r::api_status& status, bool debug) {
 	//parse event id
 	auto evt_id = "EventId";
 	bool has_event_id = obj.HasMember(evt_id);
@@ -203,7 +208,11 @@ void parse_and_send_cb_event(rj::Document& obj, r::live_model& rl, r::api_status
 		return;
 	}
 	//extract context string
-	std::string c = obj[context].GetString();
+	auto& context_obj = obj[context];
+	rj::StringBuffer sb;
+	rj::Writer<rj::StringBuffer> writer(sb);
+	context_obj.Accept(writer);
+	std::string c = sb.GetString();
 
 	//send ranking
 	std::cout << "choose_rank " << event_id << std::endl;
@@ -228,7 +237,7 @@ void parse_and_send_cb_event(rj::Document& obj, r::live_model& rl, r::api_status
 	}
 }
 
-void parse_and_send_ccb_event(rj::Document& obj, r::live_model& rl, r::api_status& status, bool debug) {
+void parse_and_send_ccb_event(const rj::Document& obj, r::live_model& rl, r::api_status& status, bool debug) {
 	//extract context
 	auto context = "c";
 	if (!obj.HasMember(context)) {
@@ -239,7 +248,11 @@ void parse_and_send_ccb_event(rj::Document& obj, r::live_model& rl, r::api_statu
 	//send decisions
 	std::cout << "request_decision " << std::endl;
 	//extract context
-	std::string c = obj[context].GetString();
+	auto& context_obj = obj[context];
+	rj::StringBuffer sb;
+	rj::Writer<rj::StringBuffer> writer(sb);
+	context_obj.Accept(writer);
+	std::string c = sb.GetString();
 	r::decision_response response;
 	if (!debug && rl.request_decision(c.c_str(), response, &status) != err::success) {
 		std::cout << status.get_error_msg() << std::endl;
