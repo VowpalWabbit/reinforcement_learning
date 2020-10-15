@@ -21,6 +21,7 @@
 
 #ifdef USE_AZURE_FACTORIES
 #   include "model_mgmt/restapi_data_transport.h"
+#   include "mock_http_client.h"
 #endif
 
 namespace r = reinforcement_learning;
