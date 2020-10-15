@@ -106,9 +106,9 @@ std::unique_ptr<fakeit::Mock<m::i_model>> get_mock_model(m::model_type_t model_t
 std::unique_ptr<r::sender_factory_t> get_mock_sender_factory(fakeit::Mock<r::i_sender>* mock_observation_sender, fakeit::Mock<r::i_sender>* mock_interaction_sender) {
   auto factory = std::unique_ptr<r::sender_factory_t>(
     new r::sender_factory_t());
-  factory->register_type(r::value::OBSERVATION_EH_SENDER,
+  factory->register_type(r::value::DEFAULT_OBSERVATION_SENDER,
     [mock_observation_sender](r::i_sender** retval, const u::configuration&, r::error_callback_fn* error_callback, r::i_trace*, r::api_status*) { *retval = &mock_observation_sender->get(); return r::error_code::success; });
-  factory->register_type(r::value::INTERACTION_EH_SENDER,
+  factory->register_type(r::value::DEFAULT_INTERACTION_SENDER,
     [mock_interaction_sender](r::i_sender** retval, const u::configuration&, r::error_callback_fn* error_callback, r::i_trace*, r::api_status*) { *retval = &mock_interaction_sender->get(); return r::error_code::success; });
   return factory;
 }
@@ -116,7 +116,7 @@ std::unique_ptr<r::sender_factory_t> get_mock_sender_factory(fakeit::Mock<r::i_s
 std::unique_ptr<r::data_transport_factory_t> get_mock_data_transport_factory(fakeit::Mock<m::i_data_transport>* mock_data_transport) {
   auto factory = std::unique_ptr<r::data_transport_factory_t>(
     new r::data_transport_factory_t());
-  factory->register_type(r::value::AZURE_STORAGE_BLOB,
+  factory->register_type(r::value::DEFAULT_DATA_TRANSPORT,
     [mock_data_transport](m::i_data_transport** retval, const u::configuration&, r::i_trace* trace, r::api_status*) { *retval = &mock_data_transport->get(); return r::error_code::success; });
   return factory;
 }

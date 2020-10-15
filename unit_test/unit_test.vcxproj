@@ -81,6 +81,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(SkipAzureFactories)'!='true'">
+    <ClCompile>
+      <PreprocessorDefinitions>USE_AZURE_FACTORIES;$(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
@@ -159,7 +164,6 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="mock_http_client.h" />
     <ClInclude Include="mock_util.h" />
   </ItemGroup>
   <ItemGroup>
@@ -213,7 +217,6 @@
     <Import Project="$(SolutionDir)packages\boost_unit_test_framework-vc141.1.70.0.0\build\boost_unit_test_framework-vc141.targets" Condition="Exists('$(SolutionDir)packages\boost_unit_test_framework-vc141.1.70.0.0\build\boost_unit_test_framework-vc141.targets')" />
   </ImportGroup>
   <PropertyGroup>
-    <PreprocessorDefinitions Condition="'$(SkipAzureFactories)' != 'true'">USE_AZURE_FACTORIES;$(PreprocessorDefinitions)</PreprocessorDefinitions>
   </PropertyGroup>
   <Import Project="$(VcpkgIntegration)" Condition="Exists('$(VcpkgIntegration)')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

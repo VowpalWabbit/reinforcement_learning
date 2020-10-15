@@ -150,7 +150,7 @@ void parse_and_send_ca_event(const rj::Document& obj, r::live_model& rl, r::api_
 		std::cout << "missing 'EventId' field" << std::endl;
 		return;
 	}
-	std::string event_id = obj[evt_id].GetString();
+	auto event_id = obj[evt_id].GetString();
 
 	//parse the joined event
 	auto context = "c";
@@ -164,12 +164,12 @@ void parse_and_send_ca_event(const rj::Document& obj, r::live_model& rl, r::api_
 	rj::StringBuffer sb;
 	rj::Writer<rj::StringBuffer> writer(sb);
 	context_obj.Accept(writer);
-	std::string c = sb.GetString();
+	auto c = sb.GetString();
 
 	//request continuous action
 	std::cout << "request_continuous_action " << event_id << std::endl;
 	r::continuous_action_response response;
-	if (!debug && rl.request_continuous_action(event_id.c_str(), c.c_str(), response, &status) != err::success) {
+	if (!debug && rl.request_continuous_action(event_id, c, response, &status) != err::success) {
 		std::cout << status.get_error_msg() << std::endl;
 		return;
 	}
@@ -183,7 +183,7 @@ void parse_and_send_ca_event(const rj::Document& obj, r::live_model& rl, r::api_
 	float reward = -(obj[label_ca][cost].GetDouble());
 	if (reward != 0.0) {
 		std::cout << "report_outcome " << event_id << " " << reward << std::endl;
-		if (!debug && rl.report_outcome(event_id.c_str(), reward, &status) != err::success) {
+		if (!debug && rl.report_outcome(event_id, reward, &status) != err::success) {
 			std::cout << status.get_error_msg() << std::endl;
 			return;
 		}
@@ -198,7 +198,7 @@ void parse_and_send_cb_event(const rj::Document& obj, r::live_model& rl, r::api_
 		std::cout << "missing 'EventId' field" << std::endl;
 		return;
 	}
-	std::string event_id = obj[evt_id].GetString();
+	auto event_id = obj[evt_id].GetString();
 
 	//parse the joined event
 	auto context = "c";
@@ -212,12 +212,12 @@ void parse_and_send_cb_event(const rj::Document& obj, r::live_model& rl, r::api_
 	rj::StringBuffer sb;
 	rj::Writer<rj::StringBuffer> writer(sb);
 	context_obj.Accept(writer);
-	std::string c = sb.GetString();
+	auto c = sb.GetString();
 
 	//send ranking
 	std::cout << "choose_rank " << event_id << std::endl;
 	r::ranking_response response;
-	if (!debug && rl.choose_rank(event_id.c_str(), c.c_str(), response, &status) != err::success) {
+	if (!debug && rl.choose_rank(event_id, c, response, &status) != err::success) {
 		std::cout << status.get_error_msg() << std::endl;
 		return;
 	}
@@ -230,7 +230,7 @@ void parse_and_send_cb_event(const rj::Document& obj, r::live_model& rl, r::api_
 	float reward = -(obj[cost].GetDouble());
 	if (reward != 0.0) {
 		std::cout << "report_outcome " << event_id << " " << reward << std::endl;
-		if (!debug && rl.report_outcome(event_id.c_str(), reward, &status) != err::success) {
+		if (!debug && rl.report_outcome(event_id, reward, &status) != err::success) {
 			std::cout << status.get_error_msg() << std::endl;
 			return;
 		}
@@ -252,9 +252,10 @@ void parse_and_send_ccb_event(const rj::Document& obj, r::live_model& rl, r::api
 	rj::StringBuffer sb;
 	rj::Writer<rj::StringBuffer> writer(sb);
 	context_obj.Accept(writer);
-	std::string c = sb.GetString();
+	auto c = sb.GetString();
+
 	r::decision_response response;
-	if (!debug && rl.request_decision(c.c_str(), response, &status) != err::success) {
+	if (!debug && rl.request_decision(c, response, &status) != err::success) {
 		std::cout << status.get_error_msg() << std::endl;
 		return;
 	}
