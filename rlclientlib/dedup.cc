@@ -47,7 +47,7 @@ namespace reinforcement_learning
     return true;
   }
 
-  string_view dedup_dict::get_action(action_id_t aid)
+  string_view dedup_dict::get_action(action_id_t aid) const
   {
     auto it = _entries.find(aid);
     if (it == _entries.end())
@@ -55,7 +55,7 @@ namespace reinforcement_learning
     return string_view(it->second._content.data(), it->second._length);
   }
 
-  int dedup_dict::transform_payload(const char* payload, std::string& edited_payload, action_list_t& action_ids, api_status* status)
+  int dedup_dict::transform_payload_and_add_actions(const char* payload, std::string& edited_payload, action_list_t& action_ids, api_status* status)
   {
     utility::ContextInfo context_info;
     RETURN_IF_FAIL(utility::get_context_info(payload, context_info, nullptr, status));

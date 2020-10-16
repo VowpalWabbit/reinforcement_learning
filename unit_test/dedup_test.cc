@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(dedup_bad_json)
   std::string p_out;
   r::dedup_dict::action_list_t a_out;
 
-  BOOST_CHECK_EQUAL(err::json_parse_error, dict.transform_payload(payload, p_out, a_out, nullptr));
+  BOOST_CHECK_EQUAL(err::json_parse_error, dict.transform_payload_and_add_actions(payload, p_out, a_out, nullptr));
 }
 
 BOOST_AUTO_TEST_CASE(dedup_simple_json)
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(dedup_simple_json)
   std::string p_out;
   r::dedup_dict::action_list_t a_out;
 
-  BOOST_CHECK_EQUAL(err::success, dict.transform_payload(payload.c_str(), p_out, a_out, nullptr));
+  BOOST_CHECK_EQUAL(err::success, dict.transform_payload_and_add_actions(payload.c_str(), p_out, a_out, nullptr));
   BOOST_CHECK_EQUAL(2, a_out.size());
   BOOST_CHECK_EQUAL(989852256, a_out[0]);
   BOOST_CHECK_EQUAL(178626470, a_out[1]);

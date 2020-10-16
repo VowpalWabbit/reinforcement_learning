@@ -25,9 +25,9 @@ public:
     //! Returns the action id of the action described by [start, start+size[
     action_id_t add_action(const char* start, size_t length);
     //! Return a string_view of the action content, or an empty view if not found
-    string_view get_action(action_id_t aid);
+    string_view get_action(action_id_t aid) const;
 
-    int transform_payload(const char* payload, std::string& edited_payload, action_list_t& action_ids, api_status* status);
+    int transform_payload_and_add_actions(const char* payload, std::string& edited_payload, action_list_t& action_ids, api_status* status);
 private:
     struct dict_entry {
         size_t _count;
