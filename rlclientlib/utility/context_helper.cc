@@ -104,7 +104,7 @@ namespace reinforcement_learning { namespace utility {
       --_level;
 
       if((_is_multi | _is_slots) && _level == 1 && _array_level == 1) {
-        size_t item_end = _is.Tell() - 1;
+        size_t item_end = _is.Tell() - _item_start;
         if(_is_multi)
           _info.actions.push_back(std::make_pair(_item_start, item_end));
         if(_is_slots)

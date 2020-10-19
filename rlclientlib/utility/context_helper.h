@@ -11,7 +11,7 @@ namespace reinforcement_learning {
 
     //! This struct collects all sort of relevant data we need about a context json.
     struct ContextInfo {
-      //! Each pair is the start and end offsets of a JSON object. IE the offsets to '{' and '}'
+      //! Each pair is the start offset and length of a JSON object. IE, the range covers '{' to '}'
       typedef std::vector<std::pair<size_t, size_t>> index_vector_t;
 
       //! The index to each element in the _multi array

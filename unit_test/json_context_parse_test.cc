@@ -153,12 +153,12 @@ BOOST_AUTO_TEST_CASE(slots_before_multi) {
 
 std::string get_action_str(const std::string &context, rlutil::ContextInfo& info, int idx)
 {
-  return context.substr(info.actions[idx].first, info.actions[idx].second - info.actions[idx].first + 1);
+  return context.substr(info.actions[idx].first, info.actions[idx].second);
 }
 
 std::string get_slot_str(const std::string &context, rlutil::ContextInfo& info, int idx)
 {
-  return context.substr(info.slots[idx].first, info.slots[idx].second - info.slots[idx].first + 1);
+  return context.substr(info.slots[idx].first, info.slots[idx].second);
 }
 
 BOOST_AUTO_TEST_CASE(get_context_info_test) {
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE(get_context_info_test) {
   BOOST_CHECK_EQUAL(3, info.actions.size());
   BOOST_CHECK_EQUAL(4, info.slots.size());
   BOOST_CHECK_EQUAL('{', context[info.actions[0].first]);
-  BOOST_CHECK_EQUAL('}', context[info.actions[0].second]);
+  BOOST_CHECK_EQUAL('}', context[info.actions[0].first + info.actions[0].second - 1]);
 
   BOOST_CHECK_EQUAL("{\"_text\":\"elections maine\", \"Source\":\"TV\"}", get_action_str(context, info, 0));
   BOOST_CHECK_EQUAL("{\"Source\":\"www\", \"topic\":4, \"_label\":\"2:3:.3\"}", get_action_str(context, info, 1));
