@@ -74,5 +74,10 @@ namespace reinforcement_learning {  namespace value {
       const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
       const int DEFAULT_VW_POOL_INIT_SIZE = 4;
       const int DEFAULT_PROTOCOL_VERSION = 1;
+
+      const char *get_default_observation_sender();
+      const char *get_default_interaction_sender();
+      const char *get_default_data_transport();
+      const char *get_default_time_provider();
 }}
 

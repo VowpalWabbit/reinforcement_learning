@@ -3,6 +3,7 @@
 #include <memory>
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
+#include <rapidjson/error/en.h>
 #include <object_factory.h>
 #include "err_constants.h"
 #include "utility/context_helper.h"
@@ -35,7 +36,7 @@ namespace reinforcement_learning { namespace utility {
       obj.Parse(context);
 
       if (obj.HasParseError()) {
-        RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << rj::GetParseErrorFunc(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";
+        RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << rj::GetParseError_En(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";
       }
 
       const rj::Value::ConstMemberIterator& itr = obj.FindMember(slots);
@@ -137,7 +138,9 @@ namespace reinforcement_learning { namespace utility {
     rj::Reader reader;
     auto res = reader.Parse<rj::kParseInsituFlag>(iss, mh);
     if(res.IsError()) {
-        RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << rj::GetParseErrorFunc(res.Code()) << " (" << res.Offset() << ")";
+      std::ostringstream os;
+      os << "JSON parse error: " << rj::GetParseError_En(res.Code()) << " (" << res.Offset() << ")";
+      RETURN_ERROR_LS(trace, status, json_parse_error) << os.str();
     }
     return error_code::success;
   }

@@ -15,11 +15,14 @@
 #include "utility/periodic_background_proc.h"
 #include "model_mgmt/model_downloader.h"
 #include "model_mgmt/data_callback_fn.h"
-#include "model_mgmt/restapi_data_transport.h"
-#include "mock_http_client.h"
 #include "config_utility.h"
 #include "configuration.h"
 #include "utility/watchdog.h"
+
+#ifdef USE_AZURE_FACTORIES
+#   include "model_mgmt/restapi_data_transport.h"
+#   include "mock_http_client.h"
+#endif
 
 namespace r = reinforcement_learning;
 namespace m = reinforcement_learning::model_management;
@@ -73,6 +76,7 @@ void dummy_data_fn(const m::model_data& data, int* ctxt) {
 }
 
 #ifdef _WIN32 //_WIN32 (http_server http protocol issues in linux)
+#ifdef USE_AZURE_FACTORIES
 BOOST_AUTO_TEST_CASE(background_mock_azure_get) {
   //create a simple ds configuration
   u::configuration cc;
@@ -131,6 +135,7 @@ BOOST_AUTO_TEST_CASE(mock_azure_storage_model_data)
   scode = data_transport->get_data(md, &status);
   BOOST_CHECK_EQUAL(md.refresh_count(), 2);
 }
+#endif // USE_AZURE_FACTORIES
 #endif //_WIN32 (http_server http protocol issues in linux)
 
 void register_local_file_factory();

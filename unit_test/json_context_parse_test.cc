@@ -4,7 +4,6 @@
 #endif
 
 #include <boost/test/unit_test.hpp>
-#include <cpprest/json.h>
 #include "err_constants.h"
 #include "utility/context_helper.h"
 

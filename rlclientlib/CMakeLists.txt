@@ -20,8 +20,8 @@ build_flatbuffers("${RL_FLAT_BUFFER_FILES_V1}" "" fbgenerator_v1 "" "${CMAKE_CUR
 build_flatbuffers("${RL_FLAT_BUFFER_FILES_V2}" "" fbgenerator_v2 "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v2/" "" "")
 
 set(PROJECT_SOURCES
+  constants.cc
   api_status.cc
-  azure_factories.cc
   console_tracer.cc
   continuous_action_response.cc
   decision_response.cc
@@ -34,7 +34,6 @@ set(PROJECT_SOURCES
   time_helper.cc
   logger/async_batcher.cc
   logger/event_logger.cc
-  logger/eventhub_client.cc
   logger/flatbuffer_allocator.cc
   logger/logger_facade.cc
   logger/preamble.cc
@@ -45,7 +44,6 @@ set(PROJECT_SOURCES
   model_mgmt/empty_data_transport.cc
   model_mgmt/model_downloader.cc
   model_mgmt/model_mgmt.cc
-  model_mgmt/restapi_data_transport.cc
   model_mgmt/file_model_loader.cc
   generic_event.cc
   ranking_event.cc
@@ -60,15 +58,23 @@ set(PROJECT_SOURCES
   utility/context_helper.cc
   utility/data_buffer.cc
   utility/data_buffer_streambuf.cc
-  utility/http_authorization.cc
-  utility/http_client.cc
-  utility/http_helper.cc
   utility/str_util.cc
   utility/watchdog.cc
   vw_model/pdf_model.cc
   vw_model/safe_vw.cc
   vw_model/vw_model.cc
 )
+
+if(vw_USE_AZURE_FACTORIES)
+  list(APPEND PROJECT_SOURCES
+    azure_factories.cc
+    logger/eventhub_client.cc
+    model_mgmt/restapi_data_transport.cc
+    utility/http_client.cc
+    utility/http_helper.cc
+    utility/http_authorization.cc
+  )
+endif()
 
 set(PROJECT_PUBLIC_HEADERS
   ../include/action_flags.h
@@ -97,18 +103,15 @@ set(PROJECT_PUBLIC_HEADERS
 )
 
 set(PROJECT_PRIVATE_HEADERS
-  azure_factories.h
   console_tracer.h
   dedup.h
   live_model_impl.h
   logger/async_batcher.h
   logger/event_logger.h
-  logger/eventhub_client.h
   logger/logger_facade.h
   model_mgmt/data_callback_fn.h
   model_mgmt/empty_data_transport.h
   model_mgmt/model_downloader.h
-  model_mgmt/restapi_data_transport.h
   model_mgmt/file_model_loader.h
   moving_queue.h
   generic_event.h
@@ -118,9 +121,6 @@ set(PROJECT_PRIVATE_HEADERS
   serialization/fb_serializer.h
   serialization/json_serializer.h
   utility/context_helper.h
-  utility/http_authorization.h
-  utility/http_client.h
-  utility/http_helper.h
   utility/interruptable_sleeper.h
   utility/object_pool.h
   utility/periodic_background_proc.h
@@ -130,12 +130,28 @@ set(PROJECT_PRIVATE_HEADERS
   vw_model/vw_model.h
 )
 
+if(vw_USE_AZURE_FACTORIES)
+  list(APPEND PROJECT_PRIVATE_HEADERS
+    azure_factories.h
+    logger/eventhub_client.h
+    model_mgmt/restapi_data_transport.h
+    utility/http_client.h
+    utility/http_helper.h
+    utility/http_authorization.h
+  )
+endif()
+
 source_group("Sources" FILES ${PROJECT_SOURCES})
 source_group("Public headers" FILES ${PROJECT_PUBLIC_HEADERS})
 source_group("Private headers" FILES ${PROJECT_PRIVATE_HEADERS})
 
 add_library(rlclientlib ${PROJECT_SOURCES} ${PROJECT_PUBLIC_HEADERS} ${PROJECT_PRIVATE_HEADERS})
 add_dependencies(rlclientlib fbgenerator_v1 fbgenerator_v2)
+
+if(vw_USE_AZURE_FACTORIES)
+  target_compile_definitions(rlclientlib PRIVATE USE_AZURE_FACTORIES)
+endif()
+
 set_target_properties(rlclientlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 if(USE_ZSTD)
@@ -152,7 +168,12 @@ target_include_directories( rlclientlib
                             ${FLATBUFFERS_INCLUDE_DIRS}
                             ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date
                             )
-target_link_libraries(rlclientlib PUBLIC Boost::system vw OpenSSL::SSL OpenSSL::Crypto cpprestsdk::cpprest PRIVATE RapidJSON)
+target_link_libraries(rlclientlib PUBLIC Boost::system vw OpenSSL::SSL OpenSSL::Crypto PRIVATE RapidJSON)
+
+if (vw_USE_AZURE_FACTORIES)
+  target_link_libraries(rlclientlib PUBLIC cpprestsdk::cpprest)
+endif()
+
 # Consuming Boost uuid requires BCrypt, normally this is automatically linked but vcpkg turns this feature off.
 if(WIN32)
   target_link_libraries(rlclientlib PUBLIC bcrypt)

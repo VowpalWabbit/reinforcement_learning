@@ -5,6 +5,7 @@
 #include "http_client.h"
 #include "trace_logger.h"
 
+#include <vector>
 #include <openssl/hmac.h>
 #include <sstream>
 
