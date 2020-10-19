@@ -22,6 +22,7 @@ int load_config_from_json(const std::string& file_name, u::configuration& cc);
 //helper to parse the json line
 void parse_and_send(std::string&, r::live_model&, r::api_status&, bool);
 void parse_and_send_outcome(json::value, r::live_model&, r::api_status&, bool);
+void parse_and_send_ca_event(json::value, r::live_model&, r::api_status&, bool);
 void parse_and_send_cb_event(json::value, r::live_model&, r::api_status&, bool);
 void parse_and_send_ccb_event(json::value, r::live_model&, r::api_status&, bool);
 
@@ -95,9 +96,13 @@ void parse_and_send(std::string& line, r::live_model& rl, r::api_status& status,
 
 		bool is_dangling = obj.has_field(U("RewardValue"));
 		bool is_ccb = obj.has_field(U("_outcomes"));
+		bool is_ca = obj.has_field(U("_label_ca"));
 
 		if (is_dangling) {
 			parse_and_send_outcome(obj, rl, status, debug);
+		}
+		else if (is_ca) {
+			parse_and_send_ca_event(obj, rl, status, debug);
 		}
 		else if (!is_ccb) {
 			parse_and_send_cb_event(obj, rl, status, debug);
@@ -132,6 +137,51 @@ void parse_and_send_outcome(json::value obj, r::live_model& rl, r::api_status& s
 	if (!debug && rl.report_outcome(event_id.c_str(), outcome, &status) != err::success) {
 		std::cout << status.get_error_msg() << std::endl;
 		return;
+	}
+}
+
+void parse_and_send_ca_event(json::value obj, r::live_model& rl, r::api_status& status, bool debug) {
+	//parse event id
+	auto evt_id = U("EventId");
+	bool has_event_id = obj.has_field(evt_id);
+	if (!has_event_id) {
+		std::cout << "missing 'EventId' field" << std::endl;
+		return;
+	}
+	std::string event_id = to_utf8string(obj.at(evt_id).as_string());
+
+	//parse the joined event
+	auto context = U("c");
+	bool has_context = obj.has_field(context);
+	if (!has_context) {
+		std::cout << "missing 'context' field" << std::endl;
+		return;
+	}
+	//extract context string
+	json::value v = obj.at(context);
+	std::string c = to_utf8string(v.serialize());
+
+	//request continuous action
+	std::cout << "request_continuous_action " << event_id << std::endl;
+	r::continuous_action_response response;
+	if (!debug && rl.request_continuous_action(event_id.c_str(), c.c_str(), response, &status) != err::success) {
+		std::cout << status.get_error_msg() << std::endl;
+		return;
+	}
+
+	//send outcome if cost exists and is non-zero
+	auto label_ca = U("_label_ca");
+	auto cost = U("cost");
+	bool has_label = obj.has_field(label_ca);
+	if (!has_label) return;
+
+	float reward = -(obj[label_ca][cost].as_double());
+	if (reward != 0.0) {
+		std::cout << "report_outcome " << event_id << " " << reward << std::endl;
+		if (!debug && rl.report_outcome(event_id.c_str(), reward, &status) != err::success) {
+			std::cout << status.get_error_msg() << std::endl;
+			return;
+		}
 	}
 }
 
