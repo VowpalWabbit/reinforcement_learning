@@ -6,6 +6,7 @@ add_executable(rltest
   data_buffer_test.cc
   data_callback_test.cc
   err_callback_test.cc
+  dedup_test.cc
   event_queue_test.cc
   eventhub_client_test.cc
   explore_test.cc
