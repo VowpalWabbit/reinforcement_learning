@@ -57,8 +57,8 @@ namespace reinforcement_learning
 
   int dedup_dict::transform_payload_and_add_actions(const char* payload, std::string& edited_payload, action_list_t& action_ids, api_status* status)
   {
-    utility::ContextInfo context_info;
-    RETURN_IF_FAIL(utility::get_context_info(payload, context_info, nullptr, status));
+    u::ContextInfo context_info;
+    RETURN_IF_FAIL(u::get_context_info(payload, context_info, nullptr, status));
 
     edited_payload = payload;
     action_ids.clear();
