@@ -20,6 +20,7 @@ build_flatbuffers("${RL_FLAT_BUFFER_FILES_V1}" "" fbgenerator_v1 "" "${CMAKE_CUR
 build_flatbuffers("${RL_FLAT_BUFFER_FILES_V2}" "" fbgenerator_v2 "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v2/" "" "")
 
 set(PROJECT_SOURCES
+  constants.cc
   api_status.cc
   console_tracer.cc
   continuous_action_response.cc
