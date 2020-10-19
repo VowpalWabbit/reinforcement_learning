@@ -9,8 +9,8 @@
 namespace reinforcement_learning {
 class dedup_dict {
 public:
-    typedef uint64_t action_id_t;
-    typedef std::vector<action_id_t> action_list_t;
+    using action_id_t = uint64_t;
+    using action_list_t = std::vector<action_id_t>;
     dedup_dict() = default;
 
     dedup_dict(const dedup_dict&) = delete;
@@ -22,7 +22,7 @@ public:
 
     //! Returns true if the action was found. This doesn't tell the ref count status of that action
     bool remove_action(action_id_t aid);
-    //! Returns the action id of the action described by [start, start+size[
+    //! Returns the action id of the action described by [start, start+length[
     action_id_t add_action(const char* start, size_t length);
     //! Return a string_view of the action content, or an empty view if not found
     string_view get_action(action_id_t aid) const;

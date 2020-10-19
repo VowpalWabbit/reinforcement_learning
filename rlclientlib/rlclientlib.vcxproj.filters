@@ -48,6 +48,7 @@
     <ClCompile Include="logger\logger_facade.cc" />
     <ClCompile Include="serialization\payload_serializer.cc" />
     <ClCompile Include="generic_event.cc" />
+    <ClCompile Include="dedup.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -118,6 +119,7 @@
     <ClInclude Include="logger\logger_facade.h" />
     <ClInclude Include="serialization\payload_serializer.h" />
     <ClInclude Include="generic_event.h" />
+    <ClInclude Include="dedup.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
