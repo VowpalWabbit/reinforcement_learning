@@ -9,6 +9,7 @@
 
 #include "generated/v2/Event_generated.h"
 
+#include "content_encoding.h"
 #include "generic_event.h"
 #include "ranking_event.h"
 
@@ -216,8 +217,8 @@ namespace reinforcement_learning { namespace logger {
     using buffer_t = utility::data_buffer;
     static int message_id() { return message_type::UNKNOWN; }
 
-    fb_collection_serializer(buffer_t& buffer)
-      : _allocator(buffer), _builder(buffer.body_capacity(), &_allocator), _buffer(buffer) {}
+    fb_collection_serializer(buffer_t& buffer, content_encoding_enum content_encoding = content_encoding_enum::IDENTITY)
+      : _allocator(buffer), _builder(buffer.body_capacity(), &_allocator), _buffer(buffer), _content_encoding(content_encoding)  {}
 
     int add(event_t& evt, api_status* status = nullptr) {
       flatbuffers::Offset<typename serializer_t::fb_event_t> offset;
@@ -228,10 +229,20 @@ namespace reinforcement_learning { namespace logger {
 
     uint64_t size() const { return _builder.GetSize(); }
 
+    void create_header() {
+      return;
+    }
+
+    void add_header(typename serializer_t::batch_builder_t &batch_builder) {
+      return;
+    }
+
     void finalize() {
       auto event_offsets = _builder.CreateVector(_event_offsets);
+      create_header();
       typename serializer_t::batch_builder_t batch_builder(_builder);
       batch_builder.add_events(event_offsets);
+      add_header(batch_builder);
       auto batch_offset = batch_builder.Finish();
       _builder.Finish(batch_offset);
       // Where does the body of the data begin in relation to the start
@@ -245,6 +256,8 @@ namespace reinforcement_learning { namespace logger {
     flatbuffer_allocator _allocator;
     flatbuffers::FlatBufferBuilder _builder;
     buffer_t& _buffer;
+    content_encoding_enum _content_encoding;
+    flatbuffers::Offset<v2::BatchMetadata> _batch_metadata_offset;
   };
 
   template <>
@@ -273,7 +286,6 @@ namespace reinforcement_learning { namespace logger {
     }
   };
 
-
   template <>
   inline int fb_collection_serializer<outcome_event>::message_id() { return message_type::fb_outcome_event_collection; }
 
@@ -289,4 +301,14 @@ namespace reinforcement_learning { namespace logger {
   template <>
   inline int fb_collection_serializer<generic_event>::message_id() { return message_type::fb_generic_event_collection; }
 
+  template <>
+  inline void fb_collection_serializer<generic_event>::create_header() {
+    _batch_metadata_offset = v2::CreateBatchMetadataDirect(_builder, to_content_encoding_string(_content_encoding));
+    return;
+  }
+
+  template <>
+  inline void fb_collection_serializer<generic_event>::add_header(typename serializer_t::batch_builder_t& batch_builder) {
+    batch_builder.add_metadata(_batch_metadata_offset);
+  }
 }}

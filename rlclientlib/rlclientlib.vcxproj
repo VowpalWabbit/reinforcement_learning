@@ -241,6 +241,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="constants.cc" />
+    <ClCompile Include="content_encoding.cc" />
     <ClCompile Include="generic_event.cc" />
     <ClCompile Include="learning_mode.cc" />
     <ClCompile Include="logger\file\file_logger.cc" />

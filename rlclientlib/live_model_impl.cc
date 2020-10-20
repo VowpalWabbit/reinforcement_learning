@@ -48,6 +48,12 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(init_model(status));
     RETURN_IF_FAIL(init_model_mgmt(status));
     RETURN_IF_FAIL(init_loggers(status));
+
+    if (_protocol_version == 1 &&
+      _configuration.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY) != value::CONTENT_ENCODING_IDENTITY) {
+      RETURN_ERROR_LS(_trace_logger.get(), status, content_encoding_error);
+    }
+
     _initial_epsilon = _configuration.get_float(name::INITIAL_EPSILON, 0.2f);
     const char* app_id = _configuration.get(name::APP_ID, "");
     _seed_shift = uniform_hash(app_id, strlen(app_id), 0);

@@ -7,6 +7,7 @@
 #include "logger/message_type.h"
 #include "api_status.h"
 #include "utility/data_buffer_streambuf.h"
+#include "content_encoding.h"
 
 namespace reinforcement_learning { namespace logger {
 
@@ -87,8 +88,8 @@ namespace reinforcement_learning { namespace logger {
 
     static int message_id() { return 0; }
 
-    json_collection_serializer(buffer_t& buffer) :
-      _buffer(buffer),
+    json_collection_serializer(buffer_t& buffer, content_encoding_enum content_encoding = content_encoding_enum::IDENTITY)
+      : _buffer(buffer),
       _streambuf{&_buffer},
       _ostream{&_streambuf} {
       _ostream << std::unitbuf;

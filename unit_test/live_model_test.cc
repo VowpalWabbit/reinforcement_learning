@@ -95,6 +95,25 @@ namespace {
 
 }
 
+BOOST_AUTO_TEST_CASE(schema_v1_with_non_identity_content_encoding) {
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::INTERACTION_CONTENT_ENCODING, "something_random");
+  r::api_status status;
+  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::content_encoding_error);
+}
+
+BOOST_AUTO_TEST_CASE(schema_v2_with_zstd_and_dedup_content_encoding) {
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::PROTOCOL_VERSION, "2");
+  config.set(r::name::INTERACTION_CONTENT_ENCODING, r::value::CONTENT_ENCODING_ZSTD_AND_DEDUP);
+  r::api_status status;
+  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+}
+
 BOOST_AUTO_TEST_CASE(live_model_ranking_request) {
   //create a simple ds configuration
   u::configuration config;
