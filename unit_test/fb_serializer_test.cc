@@ -6,13 +6,10 @@
 #include <boost/test/unit_test.hpp>
 #include "learning_mode.h"
 #include "ranking_event.h"
-#include "generic_event.h"
 #include "api_status.h"
-#include "serialization/fb_serializer.h"
 #include "constants.h"
-#include <iostream>
+#include "serialization/fb_serializer.h"
 #include "serialization/payload_serializer.h"
-#include "generated/v2/CbEvent_generated.h"
 
 using namespace reinforcement_learning;
 using namespace logger;

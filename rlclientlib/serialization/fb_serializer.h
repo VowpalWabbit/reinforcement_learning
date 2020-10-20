@@ -15,7 +15,6 @@
 
 #include "logger/message_type.h"
 #include "err_constants.h"
-#include <iostream>
 
 using namespace reinforcement_learning::messages::flatbuff;
 namespace reinforcement_learning { namespace logger {
@@ -234,8 +233,7 @@ namespace reinforcement_learning { namespace logger {
       return;
     }
 
-    void add_header(typename serializer_t::batch_builder_t &batch_builder)
-    {
+    void add_header(typename serializer_t::batch_builder_t &batch_builder) {
       return;
     }
 
@@ -259,7 +257,7 @@ namespace reinforcement_learning { namespace logger {
     flatbuffers::FlatBufferBuilder _builder;
     buffer_t& _buffer;
     content_encoding_enum _content_encoding;
-    flatbuffers::Offset<reinforcement_learning::messages::flatbuff::v2::BatchMetadata> _batch_metadata_offset;
+    flatbuffers::Offset<v2::BatchMetadata> _batch_metadata_offset;
   };
 
   template <>
@@ -301,16 +299,16 @@ namespace reinforcement_learning { namespace logger {
   inline int fb_collection_serializer<ranking_event>::message_id() { return message_type::fb_ranking_learning_mode_event_collection; }
 
   template <>
-  inline void fb_collection_serializer<generic_event>::create_header()
-  {
-    const auto batch_metadata_offset = v2::CreateBatchMetadataDirect(_builder, to_content_encoding_string(_content_encoding));
-    _batch_metadata_offset = batch_metadata_offset;
+  inline int fb_collection_serializer<generic_event>::message_id() { return message_type::fb_generic_event_collection; }
+
+  template <>
+  inline void fb_collection_serializer<generic_event>::create_header() {
+    _batch_metadata_offset = v2::CreateBatchMetadataDirect(_builder, to_content_encoding_string(_content_encoding));
     return;
   }
 
   template <>
-  inline void fb_collection_serializer<generic_event>::add_header(typename serializer_t::batch_builder_t& batch_builder)
-  {
+  inline void fb_collection_serializer<generic_event>::add_header(typename serializer_t::batch_builder_t& batch_builder) {
     batch_builder.add_metadata(_batch_metadata_offset);
   }
 }}

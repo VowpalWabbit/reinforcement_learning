@@ -2,7 +2,6 @@
 #include "ranking_event.h"
 #include "data_buffer.h"
 #include "config_utility.h"
-#include "constants.h"
 #include <fstream>
 #include <iostream>
 #include <thread>

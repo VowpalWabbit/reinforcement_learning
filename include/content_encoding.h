@@ -1,8 +1,7 @@
 #pragma once
 
 namespace reinforcement_learning {
-  enum class content_encoding_enum
-  {
+  enum class content_encoding_enum {
     IDENTITY,
     ZSTD_AND_DEDUP
   };

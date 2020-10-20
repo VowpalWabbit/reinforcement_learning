@@ -163,7 +163,7 @@ namespace reinforcement_learning { namespace logger {
   async_batcher<TEvent, TSerializer>::async_batcher(
     i_message_sender* sender,
     utility::watchdog& watchdog,
-	  error_callback_fn* perror_cb, 
+    error_callback_fn* perror_cb,
     const size_t send_high_water_mark,
     const size_t batch_timeout_ms,
     const size_t queue_max_capacity,

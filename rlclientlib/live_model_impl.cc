@@ -49,7 +49,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(init_model_mgmt(status));
     RETURN_IF_FAIL(init_loggers(status));
 
-	  if (_protocol_version == 1 &&
+    if (_protocol_version == 1 &&
       _configuration.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY) != value::CONTENT_ENCODING_IDENTITY) {
       RETURN_ERROR_LS(_trace_logger.get(), status, content_encoding_error);
     }
