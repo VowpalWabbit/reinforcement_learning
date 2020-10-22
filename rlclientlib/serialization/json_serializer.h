@@ -7,7 +7,7 @@
 #include "logger/message_type.h"
 #include "api_status.h"
 #include "utility/data_buffer_streambuf.h"
-#include "content_encoding.h"
+#include "utility/config_helper.h"
 
 namespace reinforcement_learning { namespace logger {
 

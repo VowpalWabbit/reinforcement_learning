@@ -3,7 +3,6 @@
 #include "event_queue.h"
 #include "api_status.h"
 #include "constants.h"
-#include "content_encoding.h"
 #include "error_callback_fn.h"
 #include "err_constants.h"
 #include "data_buffer.h"
@@ -12,17 +11,10 @@
 #include "serialization/fb_serializer.h"
 #include "serialization/json_serializer.h"
 #include "message_sender.h"
+#include "utility/config_helper.h"
 #include "utility/object_pool.h"
 
 namespace reinforcement_learning {
-  //this enum sets the behavior of the queue managed by the async_batcher
-  enum queue_mode_enum {
-    DROP,//queue drops events if it is full (default)
-    BLOCK//queue block if it is full
-  };
-
-  //convert a string to an enum value
-  queue_mode_enum to_queue_mode_enum(const char* queue_mode);
   class error_callback_fn;
 };
 
@@ -50,12 +42,8 @@ namespace reinforcement_learning { namespace logger {
   public:
     async_batcher(i_message_sender* sender,
                   utility::watchdog& watchdog,
-                  error_callback_fn* perror_cb = nullptr,
-                  size_t send_high_water_mark = (1024 * 1024 * 4),
-                  size_t batch_timeout_ms = 1000,
-                  size_t queue_max_capacity = (16 * 1024 * 1024),
-                  queue_mode_enum queue_mode = DROP,
-                  content_encoding_enum content_encoding = content_encoding_enum::IDENTITY);
+                  error_callback_fn* perror_cb,
+                  utility::async_batcher_config& config);
     ~async_batcher();
 
   private:
@@ -86,11 +74,11 @@ namespace reinforcement_learning { namespace logger {
 
     //block or drop events if the queue if full
     if (_queue.is_full()) {
-      if (BLOCK == _queue_mode) {
+      if (queue_mode_enum::BLOCK == _queue_mode) {
         std::unique_lock<std::mutex> lk(_m);
         _cv.wait(lk, [this] { return !_queue.is_full(); });
       }
-      else if (DROP == _queue_mode) {
+      else if (queue_mode_enum::DROP == _queue_mode) {
         _queue.prune(_pass_prob);
       }
     }
@@ -120,7 +108,7 @@ namespace reinforcement_learning { namespace logger {
 
     while (remaining > 0 && collection_serializer.size() < _send_high_water_mark) {
       if (_queue.pop(&evt)) {
-        if (BLOCK == _queue_mode) {
+        if (queue_mode_enum::BLOCK == _queue_mode) {
           _cv.notify_one();
         }
         RETURN_IF_FAIL(collection_serializer.add(evt, status));
@@ -164,19 +152,15 @@ namespace reinforcement_learning { namespace logger {
     i_message_sender* sender,
     utility::watchdog& watchdog,
     error_callback_fn* perror_cb,
-    const size_t send_high_water_mark,
-    const size_t batch_timeout_ms,
-    const size_t queue_max_capacity,
-    queue_mode_enum queue_mode,
-    content_encoding_enum content_encoding)
+    utility::async_batcher_config& config)
     : _sender(sender)
-    , _queue(queue_max_capacity)
-    , _send_high_water_mark(send_high_water_mark)
+    , _queue(config.send_queue_max_capacity)
+    , _send_high_water_mark(config.send_high_water_mark)
     , _perror_cb(perror_cb)
-    , _periodic_background_proc(static_cast<int>(batch_timeout_ms), watchdog, "Async batcher thread", perror_cb)
+    , _periodic_background_proc(static_cast<int>(config.send_batch_interval_ms), watchdog, "Async batcher thread", perror_cb)
     , _pass_prob(0.5)
-    , _queue_mode(queue_mode)
-    , _content_encoding(content_encoding)
+    , _queue_mode(config.queue_mode)
+    , _content_encoding(config.content_encoding)
   {}
 
   template<typename TEvent, template<typename> class TSerializer>

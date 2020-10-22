@@ -10,6 +10,7 @@
 #include "serialization/json_serializer.h"
 #include "logger/async_batcher.h"
 #include "sender.h"
+
 using namespace reinforcement_learning;
 //This class simply implement a 'send' method, in order to be used as a template in the async_batcher
 class message_sender : public logger::i_message_sender {
@@ -95,7 +96,11 @@ BOOST_AUTO_TEST_CASE(flush_timeout) {
   size_t timeout_ms = 100; //set a short timeout
   error_callback_fn error_fn(expect_no_error, nullptr);
   utility::watchdog watchdog(nullptr);
-  logger::async_batcher<test_undroppable_event> batcher(s, watchdog, &error_fn, 262143, timeout_ms, 8192);
+  utility::async_batcher_config config;
+  config.send_high_water_mark = 262143;
+  config.send_batch_interval_ms = timeout_ms;
+  config.send_queue_max_capacity = 8192;
+  logger::async_batcher<test_undroppable_event> batcher(s, watchdog, &error_fn, config);
   batcher.init(nullptr); // Allow periodic_background_proc inside async_batcher to start waiting
   // on a timer before sending any events to it. Else we risk not
   // triggering the batch mechanism and might get triggered by initial
@@ -118,8 +123,11 @@ BOOST_AUTO_TEST_CASE(flush_batches) {
   size_t send_high_water_mark = 10; //bytes
   error_callback_fn error_fn(expect_no_error, nullptr);
   utility::watchdog watchdog(nullptr);
+  utility::async_batcher_config config;
+  config.send_high_water_mark = send_high_water_mark;
+  config.send_batch_interval_ms = 100000;
   auto batcher = new logger::async_batcher<test_undroppable_event>
-      (s, watchdog, &error_fn, send_high_water_mark, 100000);
+      (s, watchdog, &error_fn, config);
   batcher->init(nullptr); // Allow periodic_background_proc inside async_batcher to start waiting
   // on a timer before sending any events to it.   Else we risk not
   // triggering the batch mechanism and might get triggered by initial
@@ -144,8 +152,9 @@ BOOST_AUTO_TEST_CASE(flush_after_deletion) {
   std::vector<std::string> items;
   auto s = new message_sender(items);
   utility::watchdog watchdog(nullptr);
+   utility::async_batcher_config config;
   auto* batcher = new logger::async_batcher<test_undroppable_event>
-      (s, watchdog);
+      (s, watchdog, nullptr, config);
   batcher->init(nullptr); // Allow periodic_background_proc to start waiting
   std::this_thread::sleep_for(std::chrono::milliseconds(20));
   std::string foo("foo");
@@ -163,11 +172,15 @@ BOOST_AUTO_TEST_CASE(queue_overflow_do_not_drop_event) {
   auto s = new message_sender(items);
   size_t timeout_ms = 100;
   size_t queue_max_size = 3;
-  queue_mode_enum queue_mode = BLOCK;
+  queue_mode_enum queue_mode = queue_mode_enum::BLOCK;
   error_callback_fn error_fn(expect_no_error, nullptr);
   utility::watchdog watchdog(nullptr);
-  auto batcher = new logger::async_batcher<test_droppable_event>(s, watchdog, &error_fn, 262143, timeout_ms,
-                                                                 queue_max_size, queue_mode);
+  utility::async_batcher_config config;
+  config.send_high_water_mark = 262143;
+  config.send_batch_interval_ms = timeout_ms;
+  config.send_queue_max_capacity = queue_max_size;
+  config.queue_mode = queue_mode;
+  auto batcher = new logger::async_batcher<test_droppable_event>(s, watchdog, &error_fn, config);
   batcher->init(nullptr); // Allow periodic_background_proc to start waiting
   std::this_thread::sleep_for(std::chrono::milliseconds(20));
   int n = 10;
@@ -186,7 +199,7 @@ BOOST_AUTO_TEST_CASE(queue_overflow_do_not_drop_event) {
 }
 
 BOOST_AUTO_TEST_CASE(convert_to_queue_mode_enum) {
-  BOOST_CHECK_EQUAL(DROP, to_queue_mode_enum("DROP"));
-  BOOST_CHECK_EQUAL(BLOCK, to_queue_mode_enum("BLOCK")); //default is DROP
-  BOOST_CHECK_EQUAL(DROP, to_queue_mode_enum("something_else"));
+  BOOST_CHECK_EQUAL((int)queue_mode_enum::DROP, (int)to_queue_mode_enum("DROP"));
+  BOOST_CHECK_EQUAL((int)queue_mode_enum::BLOCK, (int)to_queue_mode_enum("BLOCK")); //default is DROP
+  BOOST_CHECK_EQUAL((int)queue_mode_enum::DROP, (int)to_queue_mode_enum("something_else"));
 }
