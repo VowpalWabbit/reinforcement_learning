@@ -25,7 +25,6 @@
     <ClCompile Include="trace_logger.cc" />
     <ClCompile Include="azure_factories.cc" />
     <ClCompile Include="logger\flatbuffer_allocator.cc" />
-    <ClCompile Include="logger\async_batcher.cc" />
     <ClCompile Include="logger\preamble_sender.cc" />
     <ClCompile Include="logger\endian.cc" />
     <ClCompile Include="logger\preamble.cc" />
@@ -35,6 +34,7 @@
     <ClCompile Include="utility\data_buffer.cc" />
     <ClCompile Include="utility\stl_container_adapter.cc" />
     <ClCompile Include="utility\data_buffer_streambuf.cc" />
+    <ClCompile Include="utility\config_helper.cc" />
     <ClCompile Include="logger\file\file_logger.cc" />
     <ClCompile Include="model_mgmt\empty_data_transport.cc" />
     <ClCompile Include="vw_model\pdf_model.cc" />

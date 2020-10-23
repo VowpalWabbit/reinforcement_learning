@@ -43,7 +43,7 @@ namespace reinforcement_learning { namespace logger {
     async_batcher(i_message_sender* sender,
                   utility::watchdog& watchdog,
                   error_callback_fn* perror_cb,
-                  utility::async_batcher_config& config);
+                  const utility::async_batcher_config& config);
     ~async_batcher();
 
   private:
@@ -152,7 +152,7 @@ namespace reinforcement_learning { namespace logger {
     i_message_sender* sender,
     utility::watchdog& watchdog,
     error_callback_fn* perror_cb,
-    utility::async_batcher_config& config)
+    const utility::async_batcher_config& config)
     : _sender(sender)
     , _queue(config.send_queue_max_capacity)
     , _send_high_water_mark(config.send_high_water_mark)

@@ -241,7 +241,6 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="constants.cc" />
-    <ClCompile Include="content_encoding.cc" />
     <ClCompile Include="generic_event.cc" />
     <ClCompile Include="learning_mode.cc" />
     <ClCompile Include="logger\file\file_logger.cc" />
@@ -274,7 +273,6 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClCompile Include="decision_response.cc" />
     <ClCompile Include="dedup.cc" />
     <ClCompile Include="continuous_action_response.cc" />
-    <ClCompile Include="logger\async_batcher.cc" />
     <ClCompile Include="console_tracer.cc" />
     <ClCompile Include="utility\data_buffer_streambuf.cc" />
     <ClCompile Include="logger\endian.cc" />
@@ -284,6 +282,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClCompile Include="logger\preamble_sender.cc" />
     <ClCompile Include="trace_logger.cc" />
     <ClCompile Include="utility\data_buffer.cc" />
+    <ClCompile Include="utility\config_helper.cc" />
   </ItemGroup>
   <ItemGroup Condition="'$(SkipAzureFactories)' != 'true'">
     <ClInclude Include="azure_factories.h" />

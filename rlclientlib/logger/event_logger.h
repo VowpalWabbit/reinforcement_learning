@@ -27,7 +27,7 @@ namespace reinforcement_learning { namespace logger {
   public:
     event_logger(
       i_message_sender* sender,
-      utility::async_batcher_config batcher_config,
+      const utility::async_batcher_config &batcher_config,
       utility::watchdog& watchdog,
       i_time_provider* time_provider,
       error_callback_fn* perror_cb = nullptr);
@@ -49,7 +49,7 @@ namespace reinforcement_learning { namespace logger {
   template<typename TEvent>
   event_logger<TEvent>::event_logger(
     i_message_sender* sender,
-    utility::async_batcher_config config,
+    const utility::async_batcher_config &config,
     utility::watchdog& watchdog,
     i_time_provider* time_provider,
     error_callback_fn* perror_cb
