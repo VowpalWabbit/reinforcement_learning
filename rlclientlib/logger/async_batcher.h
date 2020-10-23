@@ -20,17 +20,30 @@ namespace reinforcement_learning {
 
 namespace reinforcement_learning { namespace logger {
 
+  template<typename TEvent>
+  class i_async_batcher {
+  public:
+    virtual ~i_async_batcher() {}
+
+    virtual int init(api_status* status) = 0;
+
+    virtual int append(TEvent&& evt, api_status* status = nullptr) = 0;
+    virtual int append(TEvent& evt, api_status* status = nullptr) = 0;
+
+    virtual int run_iteration(api_status* status) = 0;
+  };
+
   // This class takes uses a queue and a background thread to accumulate events, and send them by batch asynchronously.
   // A batch is shipped with TSender::send(data)
   template<typename TEvent, template<typename> class TSerializer = json_collection_serializer>
-  class async_batcher {
+  class async_batcher: public i_async_batcher<TEvent> {
   public:
-    int init(api_status* status);
+    int init(api_status* status) override;
 
-    int append(TEvent&& evt, api_status* status = nullptr);
-    int append(TEvent& evt, api_status* status = nullptr);
+    int append(TEvent&& evt, api_status* status = nullptr) override;
+    int append(TEvent& evt, api_status* status = nullptr) override;
 
-    int run_iteration(api_status* status);
+    int run_iteration(api_status* status) override;
 
   private:
     int fill_buffer(std::shared_ptr<utility::data_buffer>& retbuffer,

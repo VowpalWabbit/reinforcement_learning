@@ -24,6 +24,7 @@ set(TEST_SOURCES
   str_util_test.cc
   unit_test.vcxproj.filters
   watchdog_test.cc
+  event_logger_test.cc
 )
 
 if (vw_USE_AZURE_FACTORIES)

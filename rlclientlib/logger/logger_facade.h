@@ -23,7 +23,7 @@ namespace reinforcement_learning
     public:
       interaction_logger_facade(reinforcement_learning::model_management::model_type_t model_type,
         const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog,
-        i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
+        i_time_provider* time_provider, i_payload_transformer* transformer = nullptr, error_callback_fn* perror_cb = nullptr);
       
       interaction_logger_facade(const interaction_logger_facade& other) = delete;
       interaction_logger_facade& operator=(const interaction_logger_facade& other) = delete;
@@ -65,7 +65,9 @@ namespace reinforcement_learning
 
     class observation_logger_facade {
     public:
-      observation_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
+      observation_logger_facade(const utility::configuration& c,
+        i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider,
+        i_payload_transformer* transformer, error_callback_fn* perror_cb = nullptr);
 
       observation_logger_facade(const observation_logger_facade& other) = delete;
       observation_logger_facade& operator=(const observation_logger_facade& other) = delete;

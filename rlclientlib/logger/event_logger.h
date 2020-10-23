@@ -25,12 +25,7 @@ namespace reinforcement_learning { namespace logger {
   template<typename TEvent>
   class event_logger {
   public:
-    event_logger(
-      i_message_sender* sender,
-      const utility::async_batcher_config &batcher_config,
-      utility::watchdog& watchdog,
-      i_time_provider* time_provider,
-      error_callback_fn* perror_cb = nullptr);
+    event_logger(i_time_provider* time_provider, i_async_batcher<TEvent>* batcher);
 
     int init(api_status* status);
 
@@ -43,29 +38,19 @@ namespace reinforcement_learning { namespace logger {
     std::unique_ptr<i_time_provider> _time_provider;
 
     // Handle batching for the data sent to the eventhub client
-    async_batcher<TEvent, fb_collection_serializer> _batcher;
+    std::unique_ptr<i_async_batcher<TEvent>> _batcher;
   };
 
   template<typename TEvent>
-  event_logger<TEvent>::event_logger(
-    i_message_sender* sender,
-    const utility::async_batcher_config &config,
-    utility::watchdog& watchdog,
-    i_time_provider* time_provider,
-    error_callback_fn* perror_cb
-  )
-    : _batcher(
-      sender,
-      watchdog,
-      perror_cb,
-      config
-),
-      _time_provider(time_provider)
-  {}
+  event_logger<TEvent>::event_logger(i_time_provider* time_provider, i_async_batcher<TEvent>* batcher) :
+      _time_provider(time_provider),
+      _batcher(batcher)
+  {
+  }
 
   template<typename TEvent>
   int event_logger<TEvent>::init(api_status* status) {
-    RETURN_IF_FAIL(_batcher.init(status));
+    RETURN_IF_FAIL(_batcher->init(status));
     _initialized = true;
     return error_code::success;
   }
@@ -79,7 +64,7 @@ namespace reinforcement_learning { namespace logger {
     }
 
     // Add item to the batch (will be sent later)
-    return _batcher.append(item, status);
+    return _batcher->append(item, status);
   }
 
   template<typename TEvent>
@@ -89,13 +74,8 @@ namespace reinforcement_learning { namespace logger {
 
   class interaction_logger : public event_logger<ranking_event> {
   public:
-    interaction_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider,error_callback_fn* perror_cb = nullptr)
-      : event_logger(
-        sender,
-        utility::get_batcher_config(c, INTERACTION_SECTION),
-        watchdog,
-        time_provider,
-        perror_cb)
+    interaction_logger(i_time_provider* time_provider, i_async_batcher<ranking_event>* batcher)
+      : event_logger(time_provider, batcher)
     {}
 
     int log(const char* event_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
@@ -103,13 +83,8 @@ namespace reinforcement_learning { namespace logger {
 
 class ccb_logger : public event_logger<decision_ranking_event> {
   public:
-    ccb_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
-      : event_logger(
-        sender,
-        utility::get_batcher_config(c, INTERACTION_SECTION),
-        watchdog,
-        time_provider,
-        perror_cb)
+    ccb_logger(i_time_provider* time_provider, i_async_batcher<decision_ranking_event>* batcher)
+      : event_logger(time_provider, batcher)
     {}
 
     int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
@@ -118,13 +93,8 @@ class ccb_logger : public event_logger<decision_ranking_event> {
 
 class multi_slot_logger : public event_logger<multi_slot_decision_event> {
   public:
-    multi_slot_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
-      : event_logger(
-        sender,
-        utility::get_batcher_config(c, INTERACTION_SECTION),
-        watchdog,
-        time_provider,
-        perror_cb)
+    multi_slot_logger(i_time_provider* time_provider, i_async_batcher<multi_slot_decision_event>* batcher)
+      : event_logger(time_provider, batcher)
     {}
 
     int log_decision(const std::string &event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
@@ -133,13 +103,8 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
 
   class observation_logger : public event_logger<outcome_event> {
   public:
-    observation_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
-      : event_logger(
-        sender,
-        utility::get_batcher_config(c, OBSERVATION_SECTION),
-        watchdog,
-        time_provider,
-        perror_cb)
+    observation_logger(i_time_provider* time_provider, i_async_batcher<outcome_event>* batcher)
+      : event_logger(time_provider, batcher)
     {}
 
     template <typename D>
@@ -151,21 +116,23 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
     int report_action_taken(const char* event_id, api_status* status);
   };
 
+  class i_payload_transformer {
+  public:
+    virtual int transform(generic_event::payload_buffer_t &input, api_status* status) = 0;
+
+    virtual ~i_payload_transformer() { }
+  };
+
   class generic_event_logger : public event_logger<generic_event> {
   public:
-    generic_event_logger(i_message_sender* sender,
-      utility::async_batcher_config config,
-      utility::watchdog& watchdog,
-      i_time_provider* time_provider,
-      error_callback_fn* perror_cb = nullptr)
-      : event_logger(
-        sender,
-        config,
-        watchdog,
-        time_provider,
-        perror_cb)
+    generic_event_logger(i_time_provider* time_provider, i_async_batcher<generic_event>* batcher, i_payload_transformer *transformer = nullptr)
+      : event_logger(time_provider, batcher)
+      , _payload_transformer(transformer)
     {}
 
     int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, api_status* status);
+
+    private:
+      std::unique_ptr<i_payload_transformer> _payload_transformer;
   };
 }}
