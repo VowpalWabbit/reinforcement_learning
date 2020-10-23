@@ -7,11 +7,11 @@
 
 #include "configuration.h"
 #include "constants.h"
-#include "content_encoding.h"
 #include "learning_mode.h"
 #include "async_batcher.h"
 #include "api_status.h"
 #include "error_callback_fn.h"
+#include "utility/config_helper.h"
 #include "utility/watchdog.h"
 #include "ranking_response.h"
 #include "ranking_event.h"
@@ -27,11 +27,7 @@ namespace reinforcement_learning { namespace logger {
   public:
     event_logger(
       i_message_sender* sender,
-      int send_high_watermark,
-      int send_batch_interval_ms,
-      int send_queue_max_capacity,
-      const char* queue_mode,
-      const char* content_encoding,
+      const utility::async_batcher_config &batcher_config,
       utility::watchdog& watchdog,
       i_time_provider* time_provider,
       error_callback_fn* perror_cb = nullptr);
@@ -53,11 +49,7 @@ namespace reinforcement_learning { namespace logger {
   template<typename TEvent>
   event_logger<TEvent>::event_logger(
     i_message_sender* sender,
-    int send_high_watermark,
-    int send_batch_interval_ms,
-    int send_queue_max_capacity,
-    const char* queue_mode,
-    const char* content_encoding,
+    const utility::async_batcher_config &config,
     utility::watchdog& watchdog,
     i_time_provider* time_provider,
     error_callback_fn* perror_cb
@@ -66,11 +58,8 @@ namespace reinforcement_learning { namespace logger {
       sender,
       watchdog,
       perror_cb,
-      send_high_watermark,
-      send_batch_interval_ms,
-      send_queue_max_capacity,
-      to_queue_mode_enum(queue_mode),
-      to_content_encoding_enum(content_encoding)),
+      config
+),
       _time_provider(time_provider)
   {}
 
@@ -103,11 +92,7 @@ namespace reinforcement_learning { namespace logger {
     interaction_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider,error_callback_fn* perror_cb = nullptr)
       : event_logger(
         sender,
-        c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
-        c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
-        c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
-        c.get(name::QUEUE_MODE, "DROP"),
-        c.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY),
+        utility::get_batcher_config(c, INTERACTION_SECTION),
         watchdog,
         time_provider,
         perror_cb)
@@ -121,11 +106,7 @@ class ccb_logger : public event_logger<decision_ranking_event> {
     ccb_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
       : event_logger(
         sender,
-        c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
-        c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
-        c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
-        c.get(name::QUEUE_MODE, "DROP"),
-        c.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY),
+        utility::get_batcher_config(c, INTERACTION_SECTION),
         watchdog,
         time_provider,
         perror_cb)
@@ -140,11 +121,7 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
     multi_slot_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
       : event_logger(
         sender,
-        c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
-        c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
-        c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
-        c.get(name::QUEUE_MODE, "DROP"),
-        c.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY),
+        utility::get_batcher_config(c, INTERACTION_SECTION),
         watchdog,
         time_provider,
         perror_cb)
@@ -159,11 +136,7 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
     observation_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
       : event_logger(
         sender,
-        c.get_int(name::OBSERVATION_SEND_HIGH_WATER_MARK, 198 * 1024),
-        c.get_int(name::OBSERVATION_SEND_BATCH_INTERVAL_MS, 1000),
-        c.get_int(name::OBSERVATION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
-        c.get(name::QUEUE_MODE, "DROP"),
-        c.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY),
+        utility::get_batcher_config(c, OBSERVATION_SECTION),
         watchdog,
         time_provider,
         perror_cb)
@@ -181,21 +154,13 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
   class generic_event_logger : public event_logger<generic_event> {
   public:
     generic_event_logger(i_message_sender* sender,
-      int send_high_watermark,
-      int send_batch_interval_ms,
-      int send_queue_max_capacity,
-      const char* queue_mode,
-      const char* content_encoding,
+      utility::async_batcher_config config,
       utility::watchdog& watchdog,
       i_time_provider* time_provider,
       error_callback_fn* perror_cb = nullptr)
       : event_logger(
         sender,
-        send_high_watermark,
-        send_batch_interval_ms,
-        send_queue_max_capacity,
-        queue_mode,
-        content_encoding,
+        config,
         watchdog,
         time_provider,
         perror_cb)

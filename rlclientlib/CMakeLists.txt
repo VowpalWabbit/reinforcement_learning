@@ -23,7 +23,6 @@ set(PROJECT_SOURCES
   constants.cc
   api_status.cc
   console_tracer.cc
-  content_encoding.cc
   continuous_action_response.cc
   decision_response.cc
   dedup.cc
@@ -33,7 +32,6 @@ set(PROJECT_SOURCES
   live_model.cc
   learning_mode.cc
   time_helper.cc
-  logger/async_batcher.cc
   logger/event_logger.cc
   logger/flatbuffer_allocator.cc
   logger/logger_facade.cc
@@ -54,6 +52,7 @@ set(PROJECT_SOURCES
   multi_slot_response.cc
   trace_logger.cc
   utility/stl_container_adapter.cc
+  utility/config_helper.cc
   utility/config_utility.cc
   utility/configuration.cc
   utility/context_helper.cc
@@ -126,6 +125,7 @@ set(PROJECT_PRIVATE_HEADERS
   utility/object_pool.h
   utility/periodic_background_proc.h
   utility/watchdog.h
+  utility/config_helper.h
   vw_model/pdf_model.h
   vw_model/safe_vw.h
   vw_model/vw_model.h

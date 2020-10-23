@@ -26,6 +26,7 @@ namespace reinforcement_learning {  namespace name {
       const char *const  INTERACTION_SEND_BATCH_INTERVAL_MS   = "interaction.send.batchintervalms";
       const char *const  INTERACTION_SENDER_IMPLEMENTATION    = "interaction.sender.implementation";
       const char *const  INTERACTION_CONTENT_ENCODING = "interaction.content.encoding";
+      const char *const  INTERACTION_QUEUE_MODE = "interaction.queue.mode";
 
       // Observation
       const char *const  OBSERVATION_EH_HOST     = "observation.eventhub.host";
@@ -38,10 +39,19 @@ namespace reinforcement_learning {  namespace name {
       const char *const  OBSERVATION_SEND_QUEUE_MAX_CAPACITY_KB    = "observation.send.queue.maxcapacity.kb";
       const char *const  OBSERVATION_SEND_BATCH_INTERVAL_MS   = "observation.send.batchintervalms";
       const char *const  OBSERVATION_SENDER_IMPLEMENTATION    = "observation.sender.implementation";
+      const char *const  OBSERVATION_CONTENT_ENCODING = "observation.content.encoding";
+      const char *const  OBSERVATION_QUEUE_MODE = "observation.queue.mode";
+
+
+      //global sender properties
+      const char *const SEND_HIGH_WATER_MARK        = "send.highwatermark";
+      const char *const SEND_QUEUE_MAX_CAPACITY_KB  = "send.queue.maxcapacity.kb";
+      const char *const SEND_BATCH_INTERVAL_MS      = "send.batchintervalms";
+      const char *const CONTENT_ENCODING            = "content.encoding";
+      const char *const QUEUE_MODE                  = "queue.mode";
 
       const char *const  EH_TEST                 = "eventhub.mock";
       const char *const  TRACE_LOG_IMPLEMENTATION = "trace.logger.implementation";
-      const char *const  QUEUE_MODE = "queue.mode";
       const char *const  INTERACTION_FILE_NAME = "interaction.file.name";
       const char *const  OBSERVATION_FILE_NAME = "observation.file.name";
       const char *const  TIME_PROVIDER_IMPLEMENTATION = "time_provider.implementation";
@@ -70,6 +80,9 @@ namespace reinforcement_learning {  namespace value {
       const char *const LEARNING_MODE_LOGGINGONLY = "LOGGINGONLY";
       const char *const CONTENT_ENCODING_IDENTITY = "IDENTITY";
       const char *const CONTENT_ENCODING_ZSTD_AND_DEDUP = "ZSTD_AND_DEDUP";
+
+      const char *const QUEUE_MODE_DROP = "DROP";
+      const char *const QUEUE_MODE_BLOCK = "BLOCK";
 
       const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
       const int DEFAULT_VW_POOL_INIT_SIZE = 4;
