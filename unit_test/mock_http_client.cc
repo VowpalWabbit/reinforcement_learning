@@ -27,10 +27,9 @@ mock_http_client::response_t mock_http_client::request(mock_http_client::request
   });
 }
 
-mock_http_client::response_t mock_http_client::request(mock_http_client::method_t method) {
-  mock_http_client::request_t req;
-  req.set_method(method);
-  return request(req);
+std::unique_ptr<reinforcement_learning::response_base> mock_http_client::request(const reinforcement_learning::request_base& request) {
+  // TODO: implement
+  return std::unique_ptr<reinforcement_learning::response_base>();
 }
 
 void mock_http_client::set_responder(http::method method, std::function<response_fn> responder) {

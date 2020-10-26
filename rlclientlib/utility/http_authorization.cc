@@ -88,6 +88,7 @@ namespace reinforcement_learning {
     }
     digest.resize(digest_len);
 
+    // TODO: Do not use cpprestsdk here.
     // encode digest (base64 + url encoding)
     const auto encoded_digest = web::uri::encode_data_string(conversions::to_base64(digest));
 

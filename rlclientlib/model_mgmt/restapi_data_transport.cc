@@ -1,13 +1,13 @@
 #include "restapi_data_transport.h"
-#include <cpprest/http_client.h>
-#include <cpprest/asyncrt_utils.h>
-#include <cpprest/rawptrstream.h>
+// #include <cpprest/http_client.h>
+// #include <cpprest/asyncrt_utils.h>
+// #include <cpprest/rawptrstream.h>
 #include "api_status.h"
 #include "factory_resolver.h"
 #include "trace_logger.h"
 
-using namespace web; // Common features like URIs.
-using namespace web::http; // Common HTTP functionality
+// using namespace web; // Common features like URIs.
+// using namespace web::http; // Common HTTP functionality
 using namespace std::chrono;
 
 namespace u = reinforcement_learning::utility;
@@ -38,34 +38,30 @@ namespace reinforcement_learning { namespace model_management {
    * x-ms-version = 2017-04-17
    */
 
-  int restapi_data_transport::get_data_info(::utility::datetime& last_modified, ::utility::size64_t& sz, api_status* status) {
+  // TODO: Add tests for restpi_data_transport.
 
-    // Build request URI and start the request.
-    auto request_task = _httpcli->request(methods::HEAD)
-      // Handle response headers arriving.
-      .then([&](http_response response) {
-      if ( response.status_code() != 200 )
+  int restapi_data_transport::get_data_info(::utility::datetime& last_modified, ::utility::size64_t& sz, api_status* status) {
+    try {
+      const auto response = _httpcli->request(request_base(HttpMethod::HEAD));
+
+      // TODO: status_is_ok()
+      if (response->status_code() != 200)
         RETURN_ERROR_ARG(_trace, status, http_bad_status_code, _httpcli->get_url());
 
-      const auto iter = response.headers().find(U("Last-Modified"));
-      if ( iter == response.headers().end() )
+      const auto last_modified_str = response->last_modified();
+      if (last_modified_str.empty())
         RETURN_ERROR_ARG(_trace, status, last_modified_not_found, _httpcli->get_url());
 
-      last_modified = ::utility::datetime::from_string(iter->second);
-      if( last_modified.to_interval() == 0)
+      last_modified = ::utility::datetime::from_string(last_modified_str);
+      if (last_modified.to_interval() == 0)
         RETURN_ERROR_ARG(_trace, status, last_modified_invalid, _httpcli->get_url());
 
-      sz = response.headers().content_length();
+      sz = response->content_length();
 
       return error_code::success;
-    });
-
-    // Wait for all the outstanding I/O to complete and handle any exceptions
-    try {
-      return request_task.get();
     }
-    catch ( const std::exception &e ) {
-      RETURN_ERROR_LS(_trace, status,exception_during_http_req) << e.what() << "\n URL: " << _httpcli->get_url();
+    catch (const std::exception &e) {
+      RETURN_ERROR_LS(_trace, status, exception_during_http_req) << e.what() << "\n URL: " << _httpcli->get_url();
     }
   }
 
@@ -78,31 +74,25 @@ namespace reinforcement_learning { namespace model_management {
     if ( curr_last_modified == _last_modified && curr_datasz == _datasz )
       return error_code::success;
 
-    // Build request URI and start the request.
-    auto request_task = _httpcli->request(methods::GET)
-      // Handle response headers arriving.
-      .then([&](pplx::task<http_response> resp_task) {
-      auto response = resp_task.get();
-      if ( response.status_code() != 200 )
-        RETURN_ERROR_ARG(_trace, status, http_bad_status_code, "Found: ", response.status_code(), _httpcli->get_url());
+    try {
+      const auto response = _httpcli->request(request_base(HttpMethod::GET));
 
-      const auto iter = response.headers().find(U("Last-Modified"));
-      if ( iter == response.headers().end() )
+      if (response->status_code() != 200)
+        RETURN_ERROR_ARG(_trace, status, http_bad_status_code, "Found: ", response->status_code(), _httpcli->get_url());
+
+      const auto last_modified_str = response->last_modified();
+      if (last_modified_str.empty())
         RETURN_ERROR_ARG(_trace, status, last_modified_not_found, _httpcli->get_url());
 
-      curr_last_modified = ::utility::datetime::from_string(iter->second);
-      if ( curr_last_modified.to_interval() == 0 )
+      curr_last_modified = ::utility::datetime::from_string(last_modified_str);
+      if (curr_last_modified.to_interval() == 0)
         RETURN_ERROR_ARG(_trace, status, last_modified_invalid, "Found: ",
           ::utility::conversions::to_utf8string(curr_last_modified.to_string()), _httpcli->get_url());
 
-      curr_datasz = response.headers().content_length();
-      if ( curr_datasz > 0 ) {
-        const auto buff = ret.alloc(curr_datasz);
-        const Concurrency::streams::rawptr_buffer<char> rb(buff, curr_datasz, std::ios::out);
-
-        // Write response body into the file.
-        const auto readval = response.body().read_to_end(rb).get();  // need to use task.get to throw exceptions properly
-
+      curr_datasz = response->content_length();
+      if (curr_datasz > 0) {
+        const auto buffer = ret.alloc(curr_datasz);
+        const auto readval = response->body(buffer);
         ret.data_sz(readval);
         ret.increment_refresh_count();
         _datasz = readval;
@@ -113,11 +103,6 @@ namespace reinforcement_learning { namespace model_management {
 
       _last_modified = curr_last_modified;
       return error_code::success;
-    });
-
-    // Wait for all the outstanding I/O to complete and handle any exceptions
-    try {
-      request_task.wait();
     }
     catch ( const std::exception &e ) {
       ret.free();
@@ -127,7 +112,6 @@ namespace reinforcement_learning { namespace model_management {
       ret.free();
       RETURN_ERROR_LS(_trace, status, exception_during_http_req) << error_code::unknown_s;
     }
-
-    return request_task.get();
   }
+
 }}

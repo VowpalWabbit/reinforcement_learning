@@ -10,10 +10,13 @@
 #include <sstream>
 #include "utility/stl_container_adapter.h"
 
+#include <future>
+#include "api_status.h"
+
 using namespace std::chrono;
 using namespace utility; // Common utilities like string conversions
-using namespace web; // Common features like URIs.
-using namespace web::http; // Common HTTP functionality
+// using namespace web; // Common features like URIs.
+// using namespace web::http; // Common HTTP functionality
 namespace u = reinforcement_learning::utility;
 
 namespace reinforcement_learning {
@@ -36,46 +39,34 @@ namespace reinforcement_learning {
       _task = send_request(0 /* inital try */);
     }
 
-  pplx::task<web::http::status_code> eventhub_client::http_request_task::send_request(size_t try_count) {
-    http_request request(methods::POST);
-    request.headers().add(_XPLATSTR("Authorization"), _auth.c_str());
-    request.headers().add(_XPLATSTR("Host"), _host.c_str());
+  // pplx::task<web::http::status_code>
+  std::future<response_base::status_t>
+  eventhub_client::http_request_task::send_request(size_t try_count) {
+    return std::async(std::launch::async, [this, try_count]() {
+      request_base request(HttpMethod::POST);
+      request.add_header_field("Authorization", _auth.c_str());
+      request.add_header_field("Host", _host.c_str());
 
-    utility::stl_container_adapter container(_post_data.get());
-    const size_t container_size = container.size();
-    const auto stream = concurrency::streams::bytestream::open_istream(container);
-    request.set_body(stream, container_size);
+      request.set_body(_post_data);
 
-    return _client->request(request).then([this, try_count](pplx::task<http_response> response) {
-      web::http::status_code code = status_codes::InternalError;
+      response_base::status_t code = 500;   // InternalError
       api_status status;
 
       try {
-        code = response.get().status_code();
+        const auto response = _client->request(request);
+
+        code = response->status_code();
+        if (code != 201/*Created*/) {
+          // TODO: Handle retry using try_count & _max_retries, here or as part of HTTP interface? If resend the request here as before, then we have duplicate reads of body data _post_data -- even if that's not resulting in errors, there will be a performance problem.
+          auto msg = u::concat("(expected 201): Found ", code, ", failed after ", try_count, " retries.");
+            api_status::try_update(&status, error_code::http_bad_status_code, msg.c_str());
+            ERROR_CALLBACK(_error_callback, status);
+        }
       }
       catch (const std::exception& e) {
-        TRACE_ERROR(_trace, e.what());
+          TRACE_ERROR(_trace, e.what());
       }
 
-      // If the response is not the expected code then it has failed. Retry if possible otherwise report background error.
-      if(code != status_codes::Created) {
-        // Stop condition of recurison.
-        if(try_count < _max_retries){
-          TRACE_ERROR(_trace, "HTTP request failed, retrying...");
-
-          // Yes, recursively send another request inside this one. If a subsequent request returns success we are good, otherwise the failure will propagate.
-          return send_request(try_count + 1).get();
-        }
-        else {
-          auto msg = u::concat("(expected 201): Found ", code, ", failed after ", try_count, " retries.");
-          api_status::try_update(&status, error_code::http_bad_status_code, msg.c_str());
-          ERROR_CALLBACK(_error_callback, status);
-
-          return code;
-        }
-      }
-
-      // We have succeeded, return success.
       return code;
     });
   }

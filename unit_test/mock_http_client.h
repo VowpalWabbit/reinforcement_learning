@@ -14,8 +14,10 @@ public:
 
   virtual const std::string& get_url() const override;
 
-  virtual response_t request(method_t method) override;
+  // TODO: Remove the old request method below.
   virtual response_t request(request_t request) override;
+
+  virtual std::unique_ptr<reinforcement_learning::response_base> request(const reinforcement_learning::request_base& request) override;
 
   void set_responder(http::method, std::function<response_fn> custom_responder);
 private:
@@ -27,5 +29,6 @@ private:
 
 private:
   const std::string _url;
+  // TODO: static
   std::map<http::method, std::function<response_fn>> _responders;
 };

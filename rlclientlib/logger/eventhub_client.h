@@ -8,7 +8,8 @@
 #include "utility/http_authorization.h"
 #include "utility/http_client.h"
 
-#include <pplx/pplxtasks.h>
+// #include <pplx/pplxtasks.h>
+#include <future>
 
 #include <memory>
 #include "data_buffer.h"
@@ -21,7 +22,7 @@ namespace reinforcement_learning {
   class eventhub_client : public i_sender {
   public:
     virtual int init(api_status* status) override;
-    
+
     // Takes the ownership of the i_http_client and delete it at the end of lifetime
     eventhub_client(i_http_client* client, const std::string& host, const std::string& key_name,
                     const std::string& key, const std::string& name,
@@ -54,14 +55,16 @@ namespace reinforcement_learning {
       // Return error_code
       int join();
     private:
-      pplx::task<web::http::status_code> send_request(size_t try_count);
+      // pplx::task<web::http::status_code> send_request(size_t try_count);
+      std::future<response_base::status_t> send_request(size_t try_count);
 
       i_http_client* _client;
       std::string _host;
       std::string _auth;
       buffer _post_data;
 
-      pplx::task<web::http::status_code> _task;
+      // pplx::task<web::http::status_code> _task;
+      std::future<response_base::status_t> _task;
 
       size_t _max_retries = 1;
 
