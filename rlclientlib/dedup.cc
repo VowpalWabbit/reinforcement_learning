@@ -1,83 +1,315 @@
-#include "dedup.h"
+#include "dedup-internals.h"
 #include "hash.h"
+#include "serialization/payload_serializer.h"
 #include "utility/context_helper.h"
+#include "utility/config_helper.h"
 
+#include "zstd.h"
 #include <sstream>
 
 namespace reinforcement_learning
 {
-  namespace u = utility;
+namespace u = utility;
+namespace fb = flatbuffers;
+namespace l = reinforcement_learning::logger;
 
-  dedup_dict::dict_entry::dict_entry(const char *data, size_t length) : _count(1),
-                                                                        _length(length),
-                                                                        _content(data, data + length)
+dedup_dict::dict_entry::dict_entry(const char *data, size_t length) : _count(1),
+                                                                      _length(length),
+                                                                      _content(data, data + length)
+{
+}
+
+static generic_event::object_id_t hash_content(const char *start, size_t size)
+{
+  return uniform_hash(start, size, 0);
+}
+
+generic_event::object_id_t dedup_dict::add_object(const char *start, size_t length)
+{
+  auto hash = hash_content(start, length);
+  auto it = _entries.find(hash);
+  if (it == _entries.end())
   {
+    _entries.insert({ hash, dict_entry(start, length) });
+  }
+  else
+  {
+    ++it->second._count;
+  }
+  return hash;
+}
+
+bool dedup_dict::remove_object(generic_event::object_id_t aid, size_t count)
+{
+  if (count < 1)
+    return true;
+
+  auto it = _entries.find(aid);
+  if (it == _entries.end())
+    return false;
+
+  //XXX should we fail when count is bigger than the current dict count?
+  count = std::min(count, it->second._count);
+  it->second._count -= count;
+  if (!it->second._count)
+    _entries.erase(it);
+
+  return true;
+}
+
+string_view dedup_dict::get_object(generic_event::object_id_t aid) const
+{
+  auto it = _entries.find(aid);
+  if (it == _entries.end())
+    return string_view();
+  return string_view(it->second._content.data(), it->second._length);
+}
+
+int dedup_dict::transform_payload_and_add_objects(const char* payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status)
+{
+  u::ContextInfo context_info;
+  RETURN_IF_FAIL(u::get_context_info(payload, context_info, nullptr, status));
+
+  edited_payload = payload;
+  object_ids.clear();
+  object_ids.reserve(context_info.actions.size());
+
+  int edit_offset = 0;
+  for (auto &p : context_info.actions)
+  {
+    auto hash = add_object(&payload[p.first], p.second);
+    object_ids.push_back(hash);
+    std::stringstream replacement;
+    replacement << "{\"__aid\":";
+    replacement << hash << "}";
+    edited_payload.replace(p.first - edit_offset, p.second, replacement.str());
+
+    //adjust the edit position based on how many bytes were deleted.
+    edit_offset += p.second - replacement.tellp();
   }
 
-  static generic_event::object_id_t hash_content(const char *start, size_t size)
-  {
-    return uniform_hash(start, size, 0);
+  return error_code::success;
+}
+
+
+zstd_compressor::zstd_compressor(int level): _level(level) {}
+
+int zstd_compressor::compress(generic_event::payload_buffer_t& input, api_status* status) const
+{
+  size_t buff_size = ZSTD_compressBound(input.size());
+
+  std::unique_ptr<uint8_t[]> data(fb::DefaultAllocator().allocate(buff_size));
+  size_t res = ZSTD_compress(data.get(), buff_size, input.data(), input.size(), _level);
+
+  if(ZSTD_isError(res))
+    RETURN_ERROR_ARG(nullptr, status, compression_error, ZSTD_getErrorName(res));
+
+  auto data_ptr = data.release();
+  input = fb::DetachedBuffer(nullptr, false, data_ptr, 0, data_ptr, res);
+  return error_code::success;
+}
+
+int zstd_compressor::decompress(generic_event::payload_buffer_t& buf, api_status* status) const
+{
+  size_t buff_size = ZSTD_getFrameContentSize(buf.data(), buf.size());
+  if(buff_size == ZSTD_CONTENTSIZE_ERROR)
+    RETURN_ERROR_ARG(nullptr, status, compression_error, "Invalid compressed content.");
+  if(buff_size == ZSTD_CONTENTSIZE_UNKNOWN)
+    RETURN_ERROR_ARG(nullptr, status, compression_error, "Unknown compressed size.");
+
+  std::unique_ptr<uint8_t[]> data(fb::DefaultAllocator().allocate(buff_size));
+  size_t res = ZSTD_decompress(data.get(), buff_size, buf.data(), buf.size());
+
+  if(ZSTD_isError(res))
+    RETURN_ERROR_ARG(nullptr, status, compression_error, ZSTD_getErrorName(res));
+
+  auto data_ptr = data.release();
+  buf = fb::DetachedBuffer(nullptr, false, data_ptr, 0, data_ptr, res);
+  return error_code::success;
+}
+
+
+dedup_state::dedup_state(const utility::configuration &c): 
+  _compressor(c.get_int(name::ZSTD_COMPRESSION_LEVEL, zstd_compressor::ZSTD_DEFAULT_COMPRESSION_LEVEL))
+{
+}
+
+string_view dedup_state::get_object(generic_event::object_id_t aid) {
+  std::unique_lock<std::mutex> mlock(_mutex);
+  return _dict.get_object(aid);
+}
+
+float dedup_state::get_ewma_value() const {
+  return _ewma.value();
+}
+
+int dedup_state::get_all_values(const std::unordered_map<generic_event::object_id_t, size_t>& src, generic_event::object_list_t& action_ids, std::vector<string_view>& action_values, api_status* status)
+{
+  std::unique_lock<std::mutex> mlock(_mutex);
+
+  for(auto a : src) {
+    auto content = _dict.get_object(a.first);
+    if(content.size() == 0) {
+      RETURN_ERROR_LS(nullptr, status, compression_error) << "Key not found while building batch dictionary";
+    }
+    action_ids.push_back(a.first);
+    action_values.push_back(content);
   }
 
-  generic_event::object_id_t dedup_dict::add_object(const char *start, size_t length)
-  {
-    auto hash = hash_content(start, length);
-    auto it = _entries.find(hash);
-    if (it == _entries.end())
+  return error_code::success;
+}
+
+int dedup_state::remove_all_values(const std::unordered_map<generic_event::object_id_t, size_t>&input, api_status* status) {
+  std::unique_lock<std::mutex> mlock(_mutex);
+  for(auto kv: input) {
+    if(!_dict.remove_object(kv.first, kv.second)) {
+      RETURN_ERROR_LS(nullptr, status, compression_error) << "Key not found while prunning dedup_dict";
+    }
+  }
+
+  return error_code::success;
+}
+
+void dedup_state::update_ewma(float value)
+{
+  //This is racy, but update only reads and modifies a single value, so it won't lead to data corruption 
+  _ewma.update(value);
+}
+
+int dedup_state::compress(generic_event::payload_buffer_t& input, api_status* status) const {
+  //XXX this method is only const because we're not reusing the compression context
+  return _compressor.compress(input, status);
+}
+
+int dedup_state::transform_payload_and_add_objects(const char* payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status){
+  std::unique_lock<std::mutex> mlock(_mutex);
+  return _dict.transform_payload_and_add_objects(payload, edited_payload, object_ids, status);
+}
+
+action_dict_builder::action_dict_builder(dedup_state& state):
+  _size_estimate(0)
+  , _state(state) {}
+
+void action_dict_builder::add(const generic_event::object_list_t &object_ids)
+{
+  for(auto aid : object_ids) {
+    auto it = _used_objects.find(aid);
+    if (it == _used_objects.end())
     {
-      _entries.insert({ hash, dict_entry(start, length) });
+      //XXX FAIL had if the action is missing
+      auto content = _state.get_object(aid);
+      _used_objects.insert({ aid, 1 });
+      _size_estimate += sizeof(size_t) + content.size();
     }
     else
     {
-      ++it->second._count;
+      ++it->second;
     }
-    return hash;
+  }
+}
+
+size_t action_dict_builder::size() const
+{
+  return _size_estimate * _state.get_ewma_value();
+}
+
+int action_dict_builder::finalize(generic_event& evt, api_status* status)
+{
+  i_time_provider* _time_provider = nullptr;
+  l::dedup_info_serializer ser;
+  const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
+  generic_event::object_list_t action_ids;
+  std::vector<string_view> action_values;
+
+  RETURN_IF_FAIL(_state.get_all_values(_used_objects, action_ids, action_values, status));
+  auto payload = ser.event(action_ids, action_values);
+
+  //remove used actions from the dictionary
+  RETURN_IF_FAIL(_state.remove_all_values(_used_objects, status));
+
+  //compress the payload
+  size_t old_size = payload.size();
+  RETURN_IF_FAIL(_state.compress(payload, status));
+  size_t new_size = payload.size();
+
+  //update compression ratio estimator
+  _state.update_ewma(new_size / (float)old_size);
+
+  evt = generic_event(DEDUP_DICT_EVENT_ID, now, generic_event::payload_type_t::PayloadType_DedupInfo, std::move(payload));
+  return error_code::success;
+}
+
+template <typename event_t>
+struct dedup_collection_serializer
+{
+  using serializer_t = logger::fb_event_serializer<event_t>;
+  using buffer_t = utility::data_buffer;
+  using shared_state_t = dedup_state;
+
+  static int message_id() { return logger::message_type::fb_generic_event_collection; }
+
+  dedup_collection_serializer(buffer_t &buffer, content_encoding_enum content_encoding, shared_state_t &state)
+      : _dummy(0), _ser(buffer, content_encoding, _dummy), _state(state), _builder(state) {}
+
+  int add(event_t &evt, api_status *status = nullptr)
+  {
+    _builder.add(evt.get_object_list());
+    return _ser.add(evt, status);
   }
 
-  bool dedup_dict::remove_object(generic_event::object_id_t oid)
-  {
-    auto it = _entries.find(oid);
-    if (it == _entries.end())
-      return false;
-
-    --it->second._count;
-    if (!it->second._count)
-      _entries.erase(it);
-
-    return true;
+  uint64_t size() const {
+    return _ser.size() + _builder.size();
   }
 
-  string_view dedup_dict::get_object(generic_event::object_id_t oid) const
+  int finalize(api_status* status)
   {
-    auto it = _entries.find(oid);
-    if (it == _entries.end())
-      return string_view();
-    return string_view(it->second._content.data(), it->second._length);
-  }
-
-  int dedup_dict::transform_payload_and_add_objects(const char* payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status)
-  {
-    u::ContextInfo context_info;
-    RETURN_IF_FAIL(u::get_context_info(payload, context_info, nullptr, status));
-
-    edited_payload = payload;
-    object_ids.clear();
-    object_ids.reserve(context_info.actions.size());
-
-    int edit_offset = 0;
-    for (auto &p : context_info.actions)
-    {
-      auto hash = add_object(&payload[p.first], p.second);
-      object_ids.push_back(hash);
-      std::stringstream replacement;
-      replacement << "{\"__aid\":";
-      replacement << hash << "}";
-      edited_payload.replace(p.first - edit_offset, p.second, replacement.str());
-
-      //adjust the edit position based on how many bytes were deleted.
-      edit_offset += p.second - replacement.tellp();
-    }
-
+    generic_event evt;
+    RETURN_IF_FAIL(_builder.finalize(evt, status));
+    RETURN_IF_FAIL(_ser.prepend(evt, status));
+    RETURN_IF_FAIL(_ser.finalize(status));
     return error_code::success;
   }
-} // namespace reinforcement_learning
+
+  int _dummy;
+  shared_state_t &_state;
+  action_dict_builder _builder;
+  logger::fb_collection_serializer<event_t> _ser;
+};
+
+class dedup_extensions : public logger::i_logger_extensions
+{
+public:
+	dedup_extensions(const utility::configuration &c) : logger::i_logger_extensions(c), _dedup_state(c) {}
+
+	logger::i_async_batcher<generic_event> *create_batcher(logger::i_message_sender *sender, utility::watchdog &watchdog,
+																									error_callback_fn *perror_cb, const char *section) override {
+		auto config = utility::get_batcher_config(_config, section);
+		int _dummy = 0;
+		return new logger::async_batcher<generic_event, dedup_collection_serializer>(
+				sender,
+				watchdog,
+				_dedup_state,
+				perror_cb,
+				config);
+	}
+
+	bool is_enabled() override { return true; }
+
+	int transform_payload_and_extract_objects(const char* context, std::string &edited_payload, generic_event::object_list_t &objects, api_status* status) override {
+		// std::unique_lock<std::mutex> mlock(_mutex); < actually goes into dedup_state since it's shared
+		return _dedup_state.transform_payload_and_add_objects(context, edited_payload, objects, status);
+	}
+
+  int transform_serialized_payload(generic_event::payload_buffer_t &input, api_status* status) override {
+		return _dedup_state.compress(input, status);
+	}
+private:
+	dedup_state _dedup_state;
+};
+
+
+logger::i_logger_extensions *create_dedup_logger_extension(const utility::configuration& config) {
+  return new dedup_extensions(config);
+}
+
+}

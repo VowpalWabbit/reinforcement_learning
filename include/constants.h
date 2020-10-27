@@ -59,6 +59,8 @@ namespace reinforcement_learning {  namespace name {
       const char *const  HTTP_CLIENT_TIMEOUT                  = "http.timeout"; // Timeout is in seconds, default is 30.
       const char *const  MODEL_FILE_NAME                      = "model_file_loader.file_name";
       const char *const  MODEL_FILE_MUST_EXIST                = "model_file_loader.file_must_exist";
+
+      const char *const ZSTD_COMPRESSION_LEVEL = "zstd.compression_level";
 }}
 
 namespace reinforcement_learning {  namespace value {
