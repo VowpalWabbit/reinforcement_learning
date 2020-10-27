@@ -167,5 +167,6 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
     {}
 
     int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, api_status* status);
+    int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, generic_event::action_list_t&& actions, api_status* status);
   };
 }}
