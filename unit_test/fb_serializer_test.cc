@@ -20,7 +20,7 @@ using namespace reinforcement_learning::messages::flatbuff;
 
 BOOST_AUTO_TEST_CASE(fb_serializer_outcome_event) {
   data_buffer db;
-  fb_collection_serializer<outcome_event> serializer(db);
+  fb_collection_serializer<outcome_event> serializer(db, content_encoding_enum::IDENTITY);
   std::string event_id("an_event_id");
   const timestamp ts;
   auto ro = outcome_event::report_outcome(event_id.c_str(), 0.75f, ts, 0.54f);
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(fb_serializer_outcome_event) {
 
 BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
   data_buffer db;
-  fb_collection_serializer<ranking_event> serializer(db);
+  fb_collection_serializer<ranking_event> serializer(db, content_encoding_enum::IDENTITY);
   ranking_response resp;
   std::string model_id("a_model_id");
   resp.set_model_id(model_id.c_str());
