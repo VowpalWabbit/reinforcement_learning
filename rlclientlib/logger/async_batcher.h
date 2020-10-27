@@ -54,6 +54,7 @@ namespace reinforcement_learning { namespace logger {
   public:
     async_batcher(i_message_sender* sender,
                   utility::watchdog& watchdog,
+                  typename TSerializer<TEvent>::shared_state_t& shared_state,
                   error_callback_fn* perror_cb,
                   const utility::async_batcher_config& config);
     ~async_batcher();
@@ -64,6 +65,7 @@ namespace reinforcement_learning { namespace logger {
     event_queue<TEvent> _queue;       // A queue to accumulate batch of events.
     size_t _send_high_water_mark;
     error_callback_fn* _perror_cb;
+    typename TSerializer<TEvent>::shared_state_t& _shared_state;
 
     utility::periodic_background_proc<async_batcher> _periodic_background_proc;
     float _pass_prob;
@@ -116,7 +118,7 @@ namespace reinforcement_learning { namespace logger {
                                                       api_status* status)
   {
     TEvent evt;
-    TSerializer<TEvent> collection_serializer(*buffer.get(), _content_encoding); 
+    TSerializer<TEvent> collection_serializer(*buffer.get(), _content_encoding, _shared_state);
 
     while (remaining > 0 && collection_serializer.size() < _send_high_water_mark) {
       if (_queue.pop(&evt)) {
@@ -163,12 +165,14 @@ namespace reinforcement_learning { namespace logger {
   async_batcher<TEvent, TSerializer>::async_batcher(
     i_message_sender* sender,
     utility::watchdog& watchdog,
+    typename TSerializer<TEvent>::shared_state_t& shared_state,
     error_callback_fn* perror_cb,
     const utility::async_batcher_config& config)
     : _sender(sender)
     , _queue(config.send_queue_max_capacity)
     , _send_high_water_mark(config.send_high_water_mark)
     , _perror_cb(perror_cb)
+    , _shared_state(shared_state)
     , _periodic_background_proc(static_cast<int>(config.send_batch_interval_ms), watchdog, "Async batcher thread", perror_cb)
     , _pass_prob(0.5)
     , _queue_mode(config.queue_mode)
