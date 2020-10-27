@@ -14,14 +14,14 @@ namespace reinforcement_learning
   {
   }
 
-  static dedup_dict::action_id_t hash_content(const char *start, size_t size)
+  static generic_event::action_id_t hash_content(const char *start, size_t size)
   {
     return uniform_hash(start, size, 0);
   }
 
-  dedup_dict::action_id_t dedup_dict::add_action(const char *start, size_t length)
+  generic_event::action_id_t dedup_dict::add_action(const char *start, size_t length)
   {
-    action_id_t hash = hash_content(start, length);
+    auto hash = hash_content(start, length);
     auto it = _entries.find(hash);
     if (it == _entries.end())
     {
@@ -34,7 +34,7 @@ namespace reinforcement_learning
     return hash;
   }
 
-  bool dedup_dict::remove_action(action_id_t aid)
+  bool dedup_dict::remove_action(generic_event::action_id_t aid)
   {
     auto it = _entries.find(aid);
     if (it == _entries.end())
@@ -47,7 +47,7 @@ namespace reinforcement_learning
     return true;
   }
 
-  string_view dedup_dict::get_action(action_id_t aid) const
+  string_view dedup_dict::get_action(generic_event::action_id_t aid) const
   {
     auto it = _entries.find(aid);
     if (it == _entries.end())
@@ -55,7 +55,7 @@ namespace reinforcement_learning
     return string_view(it->second._content.data(), it->second._length);
   }
 
-  int dedup_dict::transform_payload_and_add_actions(const char* payload, std::string& edited_payload, action_list_t& action_ids, api_status* status)
+  int dedup_dict::transform_payload_and_add_actions(const char* payload, std::string& edited_payload, generic_event::action_list_t& action_ids, api_status* status)
   {
     u::ContextInfo context_info;
     RETURN_IF_FAIL(u::get_context_info(payload, context_info, nullptr, status));
