@@ -15,11 +15,13 @@
 #include "api_status.h"
 #include "utility/data_buffer_streambuf.h"
 #include "learning_mode.h"
+#include "rl_string_view.h"
 
 #include "generated/v2/OutcomeEvent_generated.h"
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/CaEvent_generated.h"
 #include "generated/v2/MultiSlotEvent_generated.h"
+#include "generated/v2/ActionDictionary_generated.h"
 
 namespace reinforcement_learning {
   namespace logger {
@@ -80,6 +82,23 @@ namespace reinforcement_learning {
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
         auto fb = v2::CreateMultiSlotEventDirect(fbb, &_context, &slots, model_version.c_str(), flags & action_flags::DEFERRED);
+        fbb.Finish(fb);
+        return fbb.Release();
+      }
+    };
+
+    struct action_dictionary_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_ActionDictionary> {
+      static generic_event::payload_buffer_t event(const std::vector<generic_event::action_id_t>& action_ids, const std::vector<string_view>& action_values) {
+        flatbuffers::FlatBufferBuilder fbb;
+        std::vector<flatbuffers::Offset<flatbuffers::String>> vals;
+        vals.reserve(action_values.size());
+
+        for(auto sv: action_values)
+        {
+          vals.push_back(fbb.CreateString(sv.begin(), sv.size()));
+        }
+
+        auto fb = v2::CreateActionDictionaryDirect(fbb, &action_ids, &vals);
         fbb.Finish(fb);
         return fbb.Release();
       }

@@ -1,0 +1,8 @@
+namespace reinforcement_learning.messages.flatbuff.v2;
+
+table ActionDictionary {
+	ids: [ulong];
+    values: [string];
+}
+
+root_type ActionDictionary;
