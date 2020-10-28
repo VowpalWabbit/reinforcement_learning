@@ -12,8 +12,8 @@ steps:
 - checkout: self
   submodules: true
 - bash: |
-    sudo apt update -y
-    sudo apt install -y valgrind
+    apt update -y
+    apt install -y valgrind
   displayName: Install Valgrind
 - bash: ./.scripts/linux/build.sh
   displayName: Build C++
