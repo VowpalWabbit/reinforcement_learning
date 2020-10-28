@@ -5,12 +5,12 @@
 
 using namespace std;
 namespace reinforcement_learning {
-  generic_event::generic_event(const char* _id, const timestamp& ts, payload_type_t type, flatbuffers::DetachedBuffer&& payload, action_list_t &&actions, float pass_prob)
+  generic_event::generic_event(const char* _id, const timestamp& ts, payload_type_t type, flatbuffers::DetachedBuffer&& payload, object_list_t &&objects, float pass_prob)
     : _id(_id)
     , _client_time_gmt(ts)
     , _payload_type(type)
     , _payload(std::move(payload))
-    , _actions(std::move(actions))
+    , _objects(std::move(objects))
     , _pass_prob(pass_prob) {}
 
   generic_event::generic_event(const char* _id, const timestamp& ts, payload_type_t type, flatbuffers::DetachedBuffer&& payload, float pass_prob)
@@ -28,7 +28,7 @@ namespace reinforcement_learning {
   const char* generic_event::get_id() const { return _id.c_str(); }
 
   float generic_event::get_pass_prob() const { return _pass_prob; }
-  const generic_event::action_list_t& generic_event::get_action_list() const { return _actions; }
+  const generic_event::object_list_t& generic_event::get_object_list() const { return _objects; }
 
   timestamp generic_event::get_client_time_gmt() const { return _client_time_gmt; }
 

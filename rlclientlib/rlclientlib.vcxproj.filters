@@ -134,6 +134,7 @@
     <None Include="schema\v2\CaEvent.fbs" />
     <None Include="schema\v2\MultiSlotEvent.fbs" />
     <None Include="schema\v2\Event.fbs" />
+    <None Include="schema\v2\DedupInfo.fbs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

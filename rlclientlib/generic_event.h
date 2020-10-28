@@ -11,11 +11,11 @@ namespace reinforcement_learning {
     using payload_type_t = messages::flatbuff::v2::PayloadType;
 
   public:
-    using action_id_t = uint64_t;
-    using action_list_t = std::vector<action_id_t>;
+    using object_id_t = uint64_t;
+    using object_list_t = std::vector<object_id_t>;
 
     generic_event() = default;
-    generic_event(const char* id, const timestamp& ts, payload_type_t type, payload_buffer_t&& payload, action_list_t &&actions, float pass_prob = 1.f);
+    generic_event(const char* id, const timestamp& ts, payload_type_t type, payload_buffer_t&& payload, object_list_t &&objects, float pass_prob = 1.f);
     generic_event(const char* id, const timestamp& ts, payload_type_t type, payload_buffer_t&& payload, float pass_prob = 1.f);
 
     generic_event(const generic_event&) = delete;
@@ -29,7 +29,7 @@ namespace reinforcement_learning {
     timestamp get_client_time_gmt() const;
     bool try_drop(float pass_prob, int drop_pass);
 
-    const action_list_t& get_action_list() const;
+    const object_list_t& get_object_list() const;
 
     const char* get_id() const;
 
@@ -45,7 +45,7 @@ namespace reinforcement_learning {
     timestamp _client_time_gmt;
     payload_type_t _payload_type;
     payload_buffer_t _payload;
-    action_list_t _actions;
+    object_list_t _objects;
     float _pass_prob = 1.0;
   };
 }

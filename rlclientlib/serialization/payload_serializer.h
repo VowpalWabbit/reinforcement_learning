@@ -88,17 +88,17 @@ namespace reinforcement_learning {
     };
 
     struct dedup_info_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_DedupInfo> {
-      static generic_event::payload_buffer_t event(const std::vector<generic_event::action_id_t>& action_ids, const std::vector<string_view>& action_values) {
+      static generic_event::payload_buffer_t event(const std::vector<generic_event::object_id_t>& object_ids, const std::vector<string_view>& object_values) {
         flatbuffers::FlatBufferBuilder fbb;
         std::vector<flatbuffers::Offset<flatbuffers::String>> vals;
-        vals.reserve(action_values.size());
+        vals.reserve(object_values.size());
 
-        for(auto sv: action_values)
+        for(auto sv: object_values)
         {
           vals.push_back(fbb.CreateString(sv.begin(), sv.size()));
         }
 
-        auto fb = v2::CreateDedupInfoDirect(fbb, &action_ids, &vals);
+        auto fb = v2::CreateDedupInfoDirect(fbb, &object_ids, &vals);
         fbb.Finish(fb);
         return fbb.Release();
       }
