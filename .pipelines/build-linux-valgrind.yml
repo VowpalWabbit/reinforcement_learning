@@ -5,15 +5,15 @@ pool:
   vmImage: 'ubuntu-16.04'
 
 container:
-  image: vowpalwabbit/rl-ubuntu-1604:0.2.0
+  image: vowpalwabbit/rl-ubuntu-1604:latest
   endpoint: DockerHub
 
 steps:
 - checkout: self
   submodules: true
 - bash: |
-    apt update -y
-    apt install -y valgrind
+    sudo apt update -y
+    sudo apt install -y valgrind
   displayName: Install Valgrind
 - bash: ./.scripts/linux/build.sh
   displayName: Build C++
