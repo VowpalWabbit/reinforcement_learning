@@ -165,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mock_util.h" />
+    <ClInclude Include="common_test_utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="async_batcher_test.cc" />

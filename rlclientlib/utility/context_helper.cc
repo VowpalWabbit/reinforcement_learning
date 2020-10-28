@@ -66,11 +66,13 @@ namespace reinforcement_learning { namespace utility {
   struct MessageHandler : public rj::BaseReaderHandler<rj::UTF8<>, MessageHandler> {
     rj::InsituStringStream &_is;
     ContextInfo &_info;
-    int _level;
-    int _array_level;
+    int _level = 0;
+    int _array_level = 0;
+    // TODO booleans to be initialized to false before merging this PR
+    // this is here to make sure that valgrind pipeline will fail on error
     bool _is_multi;
     bool _is_slots;
-    size_t _item_start;
+    size_t _item_start = 0;
 
     MessageHandler(rj::InsituStringStream &is, ContextInfo &info) : 
       _is(is),
