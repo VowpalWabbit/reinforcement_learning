@@ -37,6 +37,8 @@ namespace reinforcement_learning { namespace logger {
   template<typename TEvent, template<typename> class TSerializer = json_collection_serializer>
   class async_batcher: public i_async_batcher<TEvent> {
   public:
+    using shared_state_t = typename TSerializer<TEvent>::shared_state_t;
+
     int init(api_status* status) override;
 
     int append(TEvent&& evt, api_status* status = nullptr) override;
@@ -54,7 +56,7 @@ namespace reinforcement_learning { namespace logger {
   public:
     async_batcher(i_message_sender* sender,
                   utility::watchdog& watchdog,
-                  typename TSerializer<TEvent>::shared_state_t& shared_state,
+                  shared_state_t& shared_state,
                   error_callback_fn* perror_cb,
                   const utility::async_batcher_config& config);
     ~async_batcher();
@@ -65,7 +67,7 @@ namespace reinforcement_learning { namespace logger {
     event_queue<TEvent> _queue;       // A queue to accumulate batch of events.
     size_t _send_high_water_mark;
     error_callback_fn* _perror_cb;
-    typename TSerializer<TEvent>::shared_state_t& _shared_state;
+    shared_state_t& _shared_state;
 
     utility::periodic_background_proc<async_batcher> _periodic_background_proc;
     float _pass_prob;
