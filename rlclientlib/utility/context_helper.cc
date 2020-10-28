@@ -68,10 +68,8 @@ namespace reinforcement_learning { namespace utility {
     ContextInfo &_info;
     int _level = 0;
     int _array_level = 0;
-    // TODO booleans to be initialized to false before merging this PR
-    // this is here to make sure that valgrind pipeline will fail on error
-    bool _is_multi;
-    bool _is_slots;
+    bool _is_multi = false;
+    bool _is_slots = false;
     size_t _item_start = 0;
 
     MessageHandler(rj::InsituStringStream &is, ContextInfo &info) : 
