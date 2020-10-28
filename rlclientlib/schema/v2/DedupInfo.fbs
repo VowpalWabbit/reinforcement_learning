@@ -1,8 +1,8 @@
 namespace reinforcement_learning.messages.flatbuff.v2;
 
-table ActionDictionary {
+table DedupInfo {
 	ids: [ulong];
     values: [string];
 }
 
-root_type ActionDictionary;
+root_type DedupInfo;

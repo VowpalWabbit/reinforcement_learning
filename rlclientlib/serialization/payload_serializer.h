@@ -21,7 +21,7 @@
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/CaEvent_generated.h"
 #include "generated/v2/MultiSlotEvent_generated.h"
-#include "generated/v2/ActionDictionary_generated.h"
+#include "generated/v2/DedupInfo_generated.h"
 
 namespace reinforcement_learning {
   namespace logger {
@@ -87,7 +87,7 @@ namespace reinforcement_learning {
       }
     };
 
-    struct action_dictionary_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_ActionDictionary> {
+    struct dedup_info_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_DedupInfo> {
       static generic_event::payload_buffer_t event(const std::vector<generic_event::action_id_t>& action_ids, const std::vector<string_view>& action_values) {
         flatbuffers::FlatBufferBuilder fbb;
         std::vector<flatbuffers::Offset<flatbuffers::String>> vals;
@@ -98,7 +98,7 @@ namespace reinforcement_learning {
           vals.push_back(fbb.CreateString(sv.begin(), sv.size()));
         }
 
-        auto fb = v2::CreateActionDictionaryDirect(fbb, &action_ids, &vals);
+        auto fb = v2::CreateDedupInfoDirect(fbb, &action_ids, &vals);
         fbb.Finish(fb);
         return fbb.Release();
       }

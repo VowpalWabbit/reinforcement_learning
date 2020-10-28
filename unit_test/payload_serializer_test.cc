@@ -185,8 +185,8 @@ BOOST_AUTO_TEST_CASE(outcome_action_taken_payload_serializer_test) {
   BOOST_CHECK_EQUAL(true, event->action_taken());
 }
 
-BOOST_AUTO_TEST_CASE(action_dictionary_serialization_test) {
-  action_dictionary_serializer serializer;
+BOOST_AUTO_TEST_CASE(dedup_info_serialization_test) {
+  dedup_info_serializer serializer;
 
   std::vector<std::string> action_vals;
   generic_event::action_list_t action_ids;
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(action_dictionary_serialization_test) {
 
   const auto buffer = serializer.event(action_ids, action_views);
 
-  const auto event = v2::GetActionDictionary(buffer.data());
+  const auto event = v2::GetDedupInfo(buffer.data());
   BOOST_CHECK_EQUAL(1, event->ids()->size());
   BOOST_CHECK_EQUAL(1, event->values()->size());
 
