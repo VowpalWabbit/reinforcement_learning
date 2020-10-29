@@ -9,4 +9,4 @@ REPO_DIR=$SCRIPT_DIR/../../
 cd $REPO_DIR/build
 
 # Run unit test suite with valgrind
-valgrind --quiet --error-exitcode=100 --track-origins=yes --leak-check=full ./unit_test/rltest -- valgrind
+valgrind --gen-suppressions=yes -v --quiet --error-exitcode=100 --track-origins=yes --leak-check=full ./unit_test/rltest -- valgrind
