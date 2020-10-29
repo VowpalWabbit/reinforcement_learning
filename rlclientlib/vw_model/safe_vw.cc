@@ -220,7 +220,7 @@ namespace reinforcement_learning {
 
     VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
     // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the example tag.
-    for(int i = 0; i < slot_count; i++)
+    for(uint32_t i = 0; i < slot_count; i++)
     {
       const size_t slot_example_indx = examples.size() - slot_count + i;
       auto index_as_string = std::to_string(i);

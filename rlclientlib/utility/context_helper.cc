@@ -42,11 +42,11 @@ namespace reinforcement_learning { namespace utility {
       const rj::Value::ConstMemberIterator& itr = obj.FindMember(slots);
       if (itr != obj.MemberEnd() && itr->value.IsArray()) {
         const auto& arr = itr->value.GetArray();
-        for (int i = 0; i < arr.Size(); ++i) {
+        for (rj::SizeType i = 0; i < arr.Size(); ++i) {
           const auto& current = arr[i];
-          const auto itr = current.FindMember(event_id);
-          if(itr != current.MemberEnd() && itr->value.IsString()) {
-            const auto event_id_string = std::string(itr->value.GetString());
+          const auto member_itr = current.FindMember(event_id);
+          if(member_itr != current.MemberEnd() && member_itr->value.IsString()) {
+            const auto event_id_string = std::string(member_itr->value.GetString());
             event_ids[i] = std::string{ event_id_string.begin(), event_id_string.end() };
           }
         }
