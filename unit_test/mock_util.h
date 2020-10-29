@@ -17,9 +17,10 @@
 #include <fakeit/fakeit.hpp>
 
 using buffer_t = std::shared_ptr <reinforcement_learning::utility::data_buffer>;
+using buffer_data_t = reinforcement_learning::utility::data_buffer;
 
 std::unique_ptr<fakeit::Mock<reinforcement_learning::i_sender>> get_mock_sender(int send_return_code);
-std::unique_ptr<fakeit::Mock<reinforcement_learning::i_sender>> get_mock_sender(std::vector<buffer_t>& recorded_messages);
+std::unique_ptr<fakeit::Mock<reinforcement_learning::i_sender>> get_mock_sender(std::vector<buffer_data_t>& recorded_messages);
 
 std::unique_ptr<fakeit::Mock<reinforcement_learning::model_management::i_data_transport>> get_mock_data_transport();
 std::unique_ptr<fakeit::Mock<reinforcement_learning::model_management::i_data_transport>> get_mock_failing_data_transport();

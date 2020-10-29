@@ -66,11 +66,11 @@ namespace reinforcement_learning { namespace utility {
   struct MessageHandler : public rj::BaseReaderHandler<rj::UTF8<>, MessageHandler> {
     rj::InsituStringStream &_is;
     ContextInfo &_info;
-    int _level;
-    int _array_level;
-    bool _is_multi;
-    bool _is_slots;
-    size_t _item_start;
+    int _level = 0;
+    int _array_level = 0;
+    bool _is_multi = false;
+    bool _is_slots = false;
+    size_t _item_start = 0;
 
     MessageHandler(rj::InsituStringStream &is, ContextInfo &info) : 
       _is(is),

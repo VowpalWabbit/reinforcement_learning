@@ -6,7 +6,8 @@
 
 #include "utility/watchdog.h"
 #include "str_util.h"
-
+#include "common_test_utils.h"
+#include <iostream>
 #include <atomic>
 
 using namespace reinforcement_learning;
@@ -45,6 +46,13 @@ BOOST_AUTO_TEST_CASE(watchdog_unregister) {
 }
 
 BOOST_AUTO_TEST_CASE(watchdog_fail_after_several_iterations) {
+  if (is_invoked_with("valgrind"))
+  {
+    // this test depends on clock timeouts, can't guarantee test success under valgrind
+    std::cout << "skipping watchdog_fail_after_several_iterations test when running in valgrind" << std::endl;
+    return;
+  }
+
   utility::watchdog watchdog(nullptr);
   watchdog.start(nullptr);
 
@@ -83,6 +91,12 @@ BOOST_AUTO_TEST_CASE(watchdog_report_with_error_handler) {
 }
 
 BOOST_AUTO_TEST_CASE(watchdog_multiple_threads) {
+  if (is_invoked_with("valgrind"))
+  {
+    // this test depends on clock timeouts, can't guarantee test success under valgrind
+    std::cout << "skipping watchdog_multiple_threads test when running in valgrind" << std::endl;
+    return;
+  }
   utility::watchdog watchdog(nullptr);
   watchdog.start(nullptr);
 

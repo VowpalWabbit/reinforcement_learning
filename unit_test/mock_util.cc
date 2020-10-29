@@ -24,13 +24,17 @@ std::unique_ptr<fakeit::Mock<r::i_sender>> get_mock_sender(int send_return_code)
   return mock;
 }
 
-std::unique_ptr<fakeit::Mock<r::i_sender>> get_mock_sender(std::vector<buffer_t>& recorded_messages) {
+std::unique_ptr<fakeit::Mock<r::i_sender>> get_mock_sender(std::vector<buffer_data_t>& recorded_messages) {
   auto mock = std::unique_ptr<Mock<r::i_sender>>(
     new fakeit::Mock<r::i_sender>());
   const std::function<int(const buffer_t&, r::api_status*&)> send_fn =
 
     [&recorded_messages](const buffer_t& message, r::api_status*& status) {
-      recorded_messages.push_back(message);
+      // take a copy of the data
+      // the 'message' is a shared pointer to an object on the object pool
+      // if live_model dtor is called prior to the 'recorded_messages' vector (as is done in most of the test cases)
+      // there will be an invalid attempt to restore/free the object to/from the destructed object pool
+      recorded_messages.push_back(*message.get());
       return r::error_code::success;
     };
   When(Method((*mock), init)).AlwaysReturn(r::error_code::success);

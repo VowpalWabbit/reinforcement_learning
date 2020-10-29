@@ -573,7 +573,7 @@ BOOST_AUTO_TEST_CASE(typesafe_err_callback) {
 }
 
 BOOST_AUTO_TEST_CASE(live_model_mocks) {
-  std::vector<buffer_t> recorded;
+  std::vector<buffer_data_t> recorded;
   auto mock_sender = get_mock_sender(recorded);
   auto mock_data_transport = get_mock_data_transport();
   auto mock_model = get_mock_model(r::model_management::model_type_t::CB);
@@ -646,10 +646,10 @@ BOOST_AUTO_TEST_CASE(live_model_no_background_refresh_failure) {
 }
 
 BOOST_AUTO_TEST_CASE(live_model_logger_receive_data) {
-  std::vector<buffer_t> recorded_observations;
+  std::vector<buffer_data_t> recorded_observations;
   auto mock_observation_sender = get_mock_sender(recorded_observations);
 
-  std::vector<buffer_t> recorded_interactions;
+  std::vector<buffer_data_t> recorded_interactions;
   auto mock_interaction_sender = get_mock_sender(recorded_interactions);
 
   auto mock_data_transport = get_mock_data_transport();
