@@ -34,9 +34,9 @@ namespace reinforcement_learning
     return hash;
   }
 
-  bool dedup_dict::remove_object(generic_event::object_id_t aid)
+  bool dedup_dict::remove_object(generic_event::object_id_t oid)
   {
-    auto it = _entries.find(aid);
+    auto it = _entries.find(oid);
     if (it == _entries.end())
       return false;
 
@@ -47,9 +47,9 @@ namespace reinforcement_learning
     return true;
   }
 
-  string_view dedup_dict::get_object(generic_event::object_id_t aid) const
+  string_view dedup_dict::get_object(generic_event::object_id_t oid) const
   {
-    auto it = _entries.find(aid);
+    auto it = _entries.find(oid);
     if (it == _entries.end())
       return string_view();
     return string_view(it->second._content.data(), it->second._length);

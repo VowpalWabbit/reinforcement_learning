@@ -22,7 +22,7 @@ namespace reinforcement_learning { namespace logger {
   template<typename TEvent>
   class i_async_batcher {
   public:
-    virtual ~i_async_batcher() {}
+    virtual ~i_async_batcher() = default;
 
     virtual int init(api_status* status) = 0;
 
