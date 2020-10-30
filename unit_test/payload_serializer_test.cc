@@ -19,6 +19,8 @@ using namespace reinforcement_learning::logger;
 using namespace std;
 using namespace reinforcement_learning::messages::flatbuff;
 
+namespace r = reinforcement_learning;
+
 const float tolerance = 0.00001;
 
 BOOST_AUTO_TEST_CASE(cb_payload_serializer_test) {
@@ -181,4 +183,27 @@ BOOST_AUTO_TEST_CASE(outcome_action_taken_payload_serializer_test) {
   BOOST_CHECK_EQUAL(v2::OutcomeValue_NONE, event->value_type());
   BOOST_CHECK_EQUAL(v2::IndexValue_NONE, event->index_type());
   BOOST_CHECK_EQUAL(true, event->action_taken());
+}
+
+BOOST_AUTO_TEST_CASE(dedup_info_serialization_test) {
+  dedup_info_serializer serializer;
+
+  std::vector<std::string> object_vals;
+  generic_event::object_list_t object_ids;
+  std::vector<r::string_view> object_views;
+
+  object_ids.push_back(1020);
+  object_vals.push_back("hello");
+  object_views.push_back(object_vals[0]);
+
+  const auto buffer = serializer.event(object_ids, object_views);
+
+  const auto event = v2::GetDedupInfo(buffer.data());
+  BOOST_CHECK_EQUAL(1, event->ids()->size());
+  BOOST_CHECK_EQUAL(1, event->values()->size());
+
+  const auto& objects = *event->ids();
+  BOOST_CHECK_EQUAL(1020, objects[0]);
+  const auto& values = *event->values();
+  BOOST_CHECK_EQUAL("hello", values.GetAsString(0)->c_str());
 }

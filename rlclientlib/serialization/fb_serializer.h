@@ -215,10 +215,14 @@ namespace reinforcement_learning { namespace logger {
   struct fb_collection_serializer {
     using serializer_t = fb_event_serializer<event_t>;
     using buffer_t = utility::data_buffer;
+    using shared_state_t = int;
+
     static int message_id() { return message_type::UNKNOWN; }
 
-    fb_collection_serializer(buffer_t& buffer, content_encoding_enum content_encoding = content_encoding_enum::IDENTITY)
-      : _allocator(buffer), _builder(buffer.body_capacity(), &_allocator), _buffer(buffer), _content_encoding(content_encoding)  {}
+    fb_collection_serializer(buffer_t& buffer, content_encoding_enum content_encoding)
+      : _allocator(buffer), _builder(buffer.body_capacity(), &_allocator), _buffer(buffer), _content_encoding(content_encoding) {}
+
+    fb_collection_serializer(buffer_t& buffer, content_encoding_enum content_encoding, int /*dummy*/) : fb_collection_serializer(buffer, content_encoding) {}
 
     int add(event_t& evt, api_status* status = nullptr) {
       flatbuffers::Offset<typename serializer_t::fb_event_t> offset;

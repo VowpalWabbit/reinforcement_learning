@@ -15,11 +15,13 @@
 #include "api_status.h"
 #include "utility/data_buffer_streambuf.h"
 #include "learning_mode.h"
+#include "rl_string_view.h"
 
 #include "generated/v2/OutcomeEvent_generated.h"
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/CaEvent_generated.h"
 #include "generated/v2/MultiSlotEvent_generated.h"
+#include "generated/v2/DedupInfo_generated.h"
 
 namespace reinforcement_learning {
   namespace logger {
@@ -80,6 +82,23 @@ namespace reinforcement_learning {
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
         auto fb = v2::CreateMultiSlotEventDirect(fbb, &_context, &slots, model_version.c_str(), flags & action_flags::DEFERRED);
+        fbb.Finish(fb);
+        return fbb.Release();
+      }
+    };
+
+    struct dedup_info_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_DedupInfo> {
+      static generic_event::payload_buffer_t event(const std::vector<generic_event::object_id_t>& object_ids, const std::vector<string_view>& object_values) {
+        flatbuffers::FlatBufferBuilder fbb;
+        std::vector<flatbuffers::Offset<flatbuffers::String>> vals;
+        vals.reserve(object_values.size());
+
+        for(auto sv: object_values)
+        {
+          vals.push_back(fbb.CreateString(sv.begin(), sv.size()));
+        }
+
+        auto fb = v2::CreateDedupInfoDirect(fbb, &object_ids, &vals);
         fbb.Finish(fb);
         return fbb.Release();
       }

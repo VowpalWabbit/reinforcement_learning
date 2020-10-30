@@ -19,18 +19,32 @@ namespace reinforcement_learning {
 };
 
 namespace reinforcement_learning { namespace logger {
+  template<typename TEvent>
+  class i_async_batcher {
+  public:
+    virtual ~i_async_batcher() = default;
+
+    virtual int init(api_status* status) = 0;
+
+    virtual int append(TEvent&& evt, api_status* status = nullptr) = 0;
+    virtual int append(TEvent& evt, api_status* status = nullptr) = 0;
+
+    virtual int run_iteration(api_status* status) = 0;
+  };
 
   // This class takes uses a queue and a background thread to accumulate events, and send them by batch asynchronously.
   // A batch is shipped with TSender::send(data)
   template<typename TEvent, template<typename> class TSerializer = json_collection_serializer>
-  class async_batcher {
+  class async_batcher: public i_async_batcher<TEvent> {
   public:
-    int init(api_status* status);
+    using shared_state_t = typename TSerializer<TEvent>::shared_state_t;
 
-    int append(TEvent&& evt, api_status* status = nullptr);
-    int append(TEvent& evt, api_status* status = nullptr);
+    int init(api_status* status) override;
 
-    int run_iteration(api_status* status);
+    int append(TEvent&& evt, api_status* status = nullptr) override;
+    int append(TEvent& evt, api_status* status = nullptr) override;
+
+    int run_iteration(api_status* status) override;
 
   private:
     int fill_buffer(std::shared_ptr<utility::data_buffer>& retbuffer,
@@ -42,6 +56,7 @@ namespace reinforcement_learning { namespace logger {
   public:
     async_batcher(i_message_sender* sender,
                   utility::watchdog& watchdog,
+                  shared_state_t& shared_state,
                   error_callback_fn* perror_cb,
                   const utility::async_batcher_config& config);
     ~async_batcher();
@@ -52,6 +67,7 @@ namespace reinforcement_learning { namespace logger {
     event_queue<TEvent> _queue;       // A queue to accumulate batch of events.
     size_t _send_high_water_mark;
     error_callback_fn* _perror_cb;
+    shared_state_t& _shared_state;
 
     utility::periodic_background_proc<async_batcher> _periodic_background_proc;
     float _pass_prob;
@@ -104,7 +120,7 @@ namespace reinforcement_learning { namespace logger {
                                                       api_status* status)
   {
     TEvent evt;
-    TSerializer<TEvent> collection_serializer(*buffer.get(), _content_encoding); 
+    TSerializer<TEvent> collection_serializer(*buffer.get(), _content_encoding, _shared_state);
 
     while (remaining > 0 && collection_serializer.size() < _send_high_water_mark) {
       if (_queue.pop(&evt)) {
@@ -151,12 +167,14 @@ namespace reinforcement_learning { namespace logger {
   async_batcher<TEvent, TSerializer>::async_batcher(
     i_message_sender* sender,
     utility::watchdog& watchdog,
+    typename TSerializer<TEvent>::shared_state_t& shared_state,
     error_callback_fn* perror_cb,
     const utility::async_batcher_config& config)
     : _sender(sender)
     , _queue(config.send_queue_max_capacity)
     , _send_high_water_mark(config.send_high_water_mark)
     , _perror_cb(perror_cb)
+    , _shared_state(shared_state)
     , _periodic_background_proc(static_cast<int>(config.send_batch_interval_ms), watchdog, "Async batcher thread", perror_cb)
     , _pass_prob(0.5)
     , _queue_mode(config.queue_mode)

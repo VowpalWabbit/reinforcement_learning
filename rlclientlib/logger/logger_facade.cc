@@ -11,6 +11,20 @@ namespace reinforcement_learning {
       RETURN_ERROR_ARG(nullptr, status, protocol_not_supported, "Current protocol version is not supported");
     }
 
+    template<typename T>
+    i_async_batcher<T>* create_legacy_async_batcher(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog,
+      error_callback_fn* perror_cb, const char *section, typename async_batcher<T, fb_collection_serializer>::shared_state_t &shared_state) {
+
+      auto config = utility::get_batcher_config(c, section);
+      return new async_batcher<T, fb_collection_serializer>(
+        sender,
+        watchdog,
+        shared_state,
+        perror_cb,
+        config
+      );
+    }
+
     interaction_logger_facade::interaction_logger_facade(
       model_type_t model_type,
       const utility::configuration& c,
@@ -20,15 +34,13 @@ namespace reinforcement_learning {
       error_callback_fn* perror_cb)
     : _model_type(model_type)
     , _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
-    , _v1_cb(_version == 1 && _model_type == model_type_t::CB ? new interaction_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
-    , _v1_ccb(_version == 1 && _model_type == model_type_t::CCB ? new ccb_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
-    , _v1_multislot(_version == 1 && _model_type == model_type_t::SLATES ? new multi_slot_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
+    , _serializer_shared_state(0)
+    , _v1_cb(_version == 1 && _model_type == model_type_t::CB ? new interaction_logger(time_provider, create_legacy_async_batcher<ranking_event>(c, sender, watchdog, perror_cb, INTERACTION_SECTION, _serializer_shared_state)) : nullptr)
+    , _v1_ccb(_version == 1 && _model_type == model_type_t::CCB ? new ccb_logger(time_provider, create_legacy_async_batcher<decision_ranking_event>(c, sender, watchdog, perror_cb, INTERACTION_SECTION, _serializer_shared_state)) : nullptr)
+    , _v1_multislot(_version == 1 && _model_type == model_type_t::SLATES ? new multi_slot_logger(time_provider, create_legacy_async_batcher<multi_slot_decision_event>(c, sender, watchdog, perror_cb, INTERACTION_SECTION, _serializer_shared_state)) : nullptr)
     , _v2(_version == 2 ? new generic_event_logger(
-      sender,
-      utility::get_batcher_config(c, INTERACTION_SECTION),
-      watchdog,
       time_provider,
-      perror_cb) : nullptr) {
+      create_legacy_async_batcher<generic_event>(c, sender, watchdog, perror_cb, INTERACTION_SECTION, _serializer_shared_state)) : nullptr) {
     }
 
     int interaction_logger_facade::init(api_status* status) {
@@ -103,15 +115,18 @@ namespace reinforcement_learning {
       }
     }
 
-    observation_logger_facade::observation_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
+    observation_logger_facade::observation_logger_facade(
+      const utility::configuration& c,
+      i_message_sender* sender,
+      utility::watchdog& watchdog,
+      i_time_provider* time_provider,
+      error_callback_fn* perror_cb)
     : _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
-    , _v1(_version == 1 ? new observation_logger(c, sender, watchdog, time_provider, perror_cb) : nullptr)
+    , _serializer_shared_state(0)
+    , _v1(_version == 1 ? new observation_logger(time_provider, create_legacy_async_batcher<outcome_event>(c, sender, watchdog, perror_cb, OBSERVATION_SECTION, _serializer_shared_state)) : nullptr)
     , _v2(_version == 2 ? new generic_event_logger(
-      sender,
-      utility::get_batcher_config(c, OBSERVATION_SECTION),
-      watchdog,
       time_provider,
-      perror_cb) : nullptr) {
+      create_legacy_async_batcher<generic_event>(c, sender, watchdog, perror_cb, OBSERVATION_SECTION, _serializer_shared_state)) : nullptr) {
     }
 
     int observation_logger_facade::init(api_status* status) {

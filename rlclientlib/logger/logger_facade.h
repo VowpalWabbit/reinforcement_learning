@@ -51,6 +51,7 @@ namespace reinforcement_learning
     private:
       const reinforcement_learning::model_management::model_type_t _model_type;
       const int _version;
+      int _serializer_shared_state;
 
       const std::unique_ptr<interaction_logger> _v1_cb;
       const std::unique_ptr<ccb_logger> _v1_ccb;
@@ -88,6 +89,7 @@ namespace reinforcement_learning
 
     private:
       const int _version;
+      int _serializer_shared_state;
       const std::unique_ptr<observation_logger> _v1;
       const std::unique_ptr<generic_event_logger> _v2;
       const outcome_serializer _serializer;

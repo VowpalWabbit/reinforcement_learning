@@ -14,14 +14,14 @@ namespace reinforcement_learning
   {
   }
 
-  static dedup_dict::action_id_t hash_content(const char *start, size_t size)
+  static generic_event::object_id_t hash_content(const char *start, size_t size)
   {
     return uniform_hash(start, size, 0);
   }
 
-  dedup_dict::action_id_t dedup_dict::add_action(const char *start, size_t length)
+  generic_event::object_id_t dedup_dict::add_object(const char *start, size_t length)
   {
-    action_id_t hash = hash_content(start, length);
+    auto hash = hash_content(start, length);
     auto it = _entries.find(hash);
     if (it == _entries.end())
     {
@@ -34,9 +34,9 @@ namespace reinforcement_learning
     return hash;
   }
 
-  bool dedup_dict::remove_action(action_id_t aid)
+  bool dedup_dict::remove_object(generic_event::object_id_t oid)
   {
-    auto it = _entries.find(aid);
+    auto it = _entries.find(oid);
     if (it == _entries.end())
       return false;
 
@@ -47,28 +47,28 @@ namespace reinforcement_learning
     return true;
   }
 
-  string_view dedup_dict::get_action(action_id_t aid) const
+  string_view dedup_dict::get_object(generic_event::object_id_t oid) const
   {
-    auto it = _entries.find(aid);
+    auto it = _entries.find(oid);
     if (it == _entries.end())
       return string_view();
     return string_view(it->second._content.data(), it->second._length);
   }
 
-  int dedup_dict::transform_payload_and_add_actions(const char* payload, std::string& edited_payload, action_list_t& action_ids, api_status* status)
+  int dedup_dict::transform_payload_and_add_objects(const char* payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status)
   {
     u::ContextInfo context_info;
     RETURN_IF_FAIL(u::get_context_info(payload, context_info, nullptr, status));
 
     edited_payload = payload;
-    action_ids.clear();
-    action_ids.reserve(context_info.actions.size());
+    object_ids.clear();
+    object_ids.reserve(context_info.actions.size());
 
     int edit_offset = 0;
     for (auto &p : context_info.actions)
     {
-      auto hash = add_action(&payload[p.first], p.second);
-      action_ids.push_back(hash);
+      auto hash = add_object(&payload[p.first], p.second);
+      object_ids.push_back(hash);
       std::stringstream replacement;
       replacement << "{\"__aid\":";
       replacement << hash << "}";
