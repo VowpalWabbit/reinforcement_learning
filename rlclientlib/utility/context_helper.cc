@@ -42,11 +42,11 @@ namespace reinforcement_learning { namespace utility {
       const rj::Value::ConstMemberIterator& itr = obj.FindMember(slots);
       if (itr != obj.MemberEnd() && itr->value.IsArray()) {
         const auto& arr = itr->value.GetArray();
-        for (int i = 0; i < arr.Size(); ++i) {
+        for (rj::SizeType i = 0; i < arr.Size(); ++i) {
           const auto& current = arr[i];
-          const auto itr = current.FindMember(event_id);
-          if(itr != current.MemberEnd() && itr->value.IsString()) {
-            const auto event_id_string = std::string(itr->value.GetString());
+          const auto member_itr = current.FindMember(event_id);
+          if(member_itr != current.MemberEnd() && member_itr->value.IsString()) {
+            const auto event_id_string = std::string(member_itr->value.GetString());
             event_ids[i] = std::string{ event_id_string.begin(), event_id_string.end() };
           }
         }
@@ -66,11 +66,11 @@ namespace reinforcement_learning { namespace utility {
   struct MessageHandler : public rj::BaseReaderHandler<rj::UTF8<>, MessageHandler> {
     rj::InsituStringStream &_is;
     ContextInfo &_info;
-    int _level;
-    int _array_level;
-    bool _is_multi;
-    bool _is_slots;
-    size_t _item_start;
+    int _level = 0;
+    int _array_level = 0;
+    bool _is_multi = false;
+    bool _is_slots = false;
+    size_t _item_start = 0;
 
     MessageHandler(rj::InsituStringStream &is, ContextInfo &info) : 
       _is(is),
