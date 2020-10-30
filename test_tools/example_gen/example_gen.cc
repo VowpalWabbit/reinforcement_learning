@@ -16,6 +16,7 @@ static const char *options[] = {
   "cb",
   "ccb",
   "slates",
+  "ca",
   "f-reward",
   "fi-reward",
   "fs-reward",
@@ -30,6 +31,7 @@ enum options{
   CB_ACTION,
   CCB_ACTION,
   SLATES_ACTION,
+  CA_ACTION,
   F_REWARD,
   F_I_REWARD,
   F_S_REWARD,
@@ -67,6 +69,10 @@ void load_config_from_json(int action, u::configuration& config)
   } else if (action == SLATES_ACTION) {
     config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--slates --ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
   }
+  else if (action == CA_ACTION)
+  {
+    config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--cats 4 --min_value 1 --max_value 100 --bandwidth 1 --json --quiet --id N/A");
+  }
 }
 
 const auto JSON_CB_CONTEXT = R"({ "GUser":{"id":"a","major":"eng","hobby":"hiking"}, "_multi":[ { "TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}}]})";
@@ -75,6 +81,7 @@ const auto JSON_CCB_CONTEXT = R"({"GUser":{"id":"a","major":"eng","hobby":"hikin
 
 const auto JSON_SLATES_CONTEXT = R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"},"_slot_id":0},{"TAction":{"a2":"f2"},"_slot_id":0},{"TAction":{"a3":"f3"},"_slot_id":1},{"TAction":{"a4":"f4"},"_slot_id":1},{"TAction":{"a5":"f5"},"_slot_id":1}],"_slots":[{"Slot":{"a1":"f1"}},{"Slot":{"a2":"f2"}}]})";
 
+const auto JSON_CA_CONTEXT = R"({"RobotJoint1":{"friction":78}})";
 
 int run_config(int action) {
   u::configuration config;
@@ -103,6 +110,12 @@ int run_config(int action) {
     case SLATES_ACTION: {// "slates",
       r::multi_slot_response response;
       if(rl.request_multi_slot_decision("event_id", JSON_SLATES_CONTEXT, response, &status) != err::success)
+          std::cout << status.get_error_msg() << std::endl;
+      break;
+    };
+    case CA_ACTION: {// "ca",
+      r::continuous_action_response response;
+      if(rl.request_continuous_action("event_id", JSON_CA_CONTEXT, 0, response, &status) != err::success)
           std::cout << status.get_error_msg() << std::endl;
       break;
     };
