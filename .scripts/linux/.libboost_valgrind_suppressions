@@ -5,3 +5,28 @@
    obj:/usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so.1.58.0
    ...
 }
+
+{
+   strlen
+   Memcheck:Cond
+   fun:strlen
+   ...
+}
+
+{
+   safe_vw_rank_decision
+   Memcheck:Cond
+   ...
+   fun:_ZN22reinforcement_learning7safe_vw14rank_decisionsERKSt6vectorIPKcSaIS3_EES3_RS1_IS1_IjSaIjEESaIS9_EERS1_IS1_IfSaIfEESaISE_E
+}
+
+{
+   flush_event_logger
+   Memcheck:Param
+   write(buf)
+   ...
+   fun:_ZNSo5flushEv
+   ...
+   fun:_ZN22reinforcement_learning6logger12event_loggerINS_22decision_ranking_eventEED1Ev
+}
+
