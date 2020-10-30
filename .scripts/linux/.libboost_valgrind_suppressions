@@ -1,0 +1,7 @@
+{
+   suppress_libboost_unit_test_framework
+   Memcheck:Cond
+   ...
+   obj:/usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so.1.58.0
+   ...
+}
