@@ -25,6 +25,8 @@ namespace reinforcement_learning {  namespace name {
       const char *const  INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB    = "interaction.send.queue.maxcapacity.kb";
       const char *const  INTERACTION_SEND_BATCH_INTERVAL_MS   = "interaction.send.batchintervalms";
       const char *const  INTERACTION_SENDER_IMPLEMENTATION    = "interaction.sender.implementation";
+      const char *const  INTERACTION_CONTENT_ENCODING = "interaction.content.encoding";
+      const char *const  INTERACTION_QUEUE_MODE = "interaction.queue.mode";
 
       // Observation
       const char *const  OBSERVATION_EH_HOST     = "observation.eventhub.host";
@@ -37,22 +39,19 @@ namespace reinforcement_learning {  namespace name {
       const char *const  OBSERVATION_SEND_QUEUE_MAX_CAPACITY_KB    = "observation.send.queue.maxcapacity.kb";
       const char *const  OBSERVATION_SEND_BATCH_INTERVAL_MS   = "observation.send.batchintervalms";
       const char *const  OBSERVATION_SENDER_IMPLEMENTATION    = "observation.sender.implementation";
+      const char *const  OBSERVATION_CONTENT_ENCODING = "observation.content.encoding";
+      const char *const  OBSERVATION_QUEUE_MODE = "observation.queue.mode";
 
-      // Decisions
-      const char *const  DECISION_EH_HOST     = "decisions.eventhub.host";
-      const char *const  DECISION_EH_NAME     = "decisions.eventhub.name";
-      const char *const  DECISION_EH_KEY_NAME = "decisions.eventhub.keyname";
-      const char *const  DECISION_EH_KEY      = "decisions.eventhub.key";
-      const char *const  DECISION_EH_TASKS_LIMIT = "decisions.eventhub.tasks_limit";
-      const char *const  DECISION_EH_MAX_HTTP_RETRIES = "decisions.eventhub.max_http_retries";
-      const char *const  DECISION_SEND_HIGH_WATER_MARK     = "decisions.send.highwatermark";
-      const char *const  DECISION_SEND_QUEUE_MAX_CAPACITY_KB    = "decisions.send.queue.maxcapacity.kb";
-      const char *const  DECISION_SEND_BATCH_INTERVAL_MS   = "decisions.send.batchintervalms";
-      const char *const  DECISION_SENDER_IMPLEMENTATION    = "decisions.sender.implementation";
+
+      //global sender properties
+      const char *const SEND_HIGH_WATER_MARK        = "send.highwatermark";
+      const char *const SEND_QUEUE_MAX_CAPACITY_KB  = "send.queue.maxcapacity.kb";
+      const char *const SEND_BATCH_INTERVAL_MS      = "send.batchintervalms";
+      const char *const CONTENT_ENCODING            = "content.encoding";
+      const char *const QUEUE_MODE                  = "queue.mode";
 
       const char *const  EH_TEST                 = "eventhub.mock";
       const char *const  TRACE_LOG_IMPLEMENTATION = "trace.logger.implementation";
-      const char *const  QUEUE_MODE = "queue.mode";
       const char *const  INTERACTION_FILE_NAME = "interaction.file.name";
       const char *const  OBSERVATION_FILE_NAME = "observation.file.name";
       const char *const  TIME_PROVIDER_IMPLEMENTATION = "time_provider.implementation";
@@ -70,7 +69,6 @@ namespace reinforcement_learning {  namespace value {
       const char *const PASSTHROUGH_PDF_MODEL = "PASSTHROUGH_PDF";
       const char *const OBSERVATION_EH_SENDER = "OBSERVATION_EH_SENDER";
       const char *const INTERACTION_EH_SENDER = "INTERACTION_EH_SENDER";
-      const char *const DECISION_EH_SENDER = "DECISION_EH_SENDER";
       const char *const OBSERVATION_FILE_SENDER = "OBSERVATION_FILE_SENDER";
       const char *const INTERACTION_FILE_SENDER = "INTERACTION_FILE_SENDER";
       const char *const NULL_TRACE_LOGGER = "NULL_TRACE_LOGGER";
@@ -80,9 +78,19 @@ namespace reinforcement_learning {  namespace value {
       const char *const LEARNING_MODE_ONLINE = "ONLINE";
       const char *const LEARNING_MODE_APPRENTICE = "APPRENTICE";
       const char *const LEARNING_MODE_LOGGINGONLY = "LOGGINGONLY";
+      const char *const CONTENT_ENCODING_IDENTITY = "IDENTITY";
+      const char *const CONTENT_ENCODING_ZSTD_AND_DEDUP = "ZSTD_AND_DEDUP";
+
+      const char *const QUEUE_MODE_DROP = "DROP";
+      const char *const QUEUE_MODE_BLOCK = "BLOCK";
 
       const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
       const int DEFAULT_VW_POOL_INIT_SIZE = 4;
       const int DEFAULT_PROTOCOL_VERSION = 1;
+
+      const char *get_default_observation_sender();
+      const char *get_default_interaction_sender();
+      const char *get_default_data_transport();
+      const char *get_default_time_provider();
 }}
 

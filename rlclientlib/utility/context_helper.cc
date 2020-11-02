@@ -1,65 +1,57 @@
-#include <cpprest/json.h>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/error/en.h>
 #include <object_factory.h>
-#include <cpprest/asyncrt_utils.h>
 #include "err_constants.h"
-#include "http_helper.h"
+#include "utility/context_helper.h"
 
 #include <chrono>
 #include <cstring>
 
-namespace sutil = ::utility::conversions;
-
 namespace reinforcement_learning { namespace utility {
-  const auto multi = sutil::to_string_t("_multi");
-  const auto slots = sutil::to_string_t("_slots");
-  const auto event_id = sutil::to_string_t("_id");
+  namespace rj = rapidjson;
+
+  const auto multi = "_multi";
+  const auto slots = "_slots";
+  const auto event_id = "_id";
+
   /**
-   * \brief Get the number of actions found in context json string.  Actions should be in an array
-   * called _multi under the root name space.  {_multi:[{"name1":"val1"},{"name1":"val1"}]}
-   *
-   * \param count   : Return value passed in as a reference.
-   * \param context : String with context json
-   * \param status  : Pointer to api_status object that contains an error code and error description in
-   *                  case of failure
+   * \brief Get the event IDs from the slots entries in the context json string.
+   * 
+   * \param context   : String with context json
+   * \param event_ids : Reference to the mapping from slot index to event ID string, results will be
+   *                    put in here
+   * \param trace     : Pointer to the trace logger
+   * \param status    : Pointer to api_status object that contains an error code and error description in
+   *                    case of failure
    * \return  error_code::success if there are no errors.  If there are errors then the error code is
    *          returned.
    */
-  int get_action_count(size_t& count, const char *context, i_trace* trace, api_status* status) {
-    try {
-      const auto scontext = sutil::to_string_t(std::string(context));
-      auto json_obj = web::json::value::parse(scontext);
-      if ( json_obj.has_array_field(multi) ) {
-        auto const arr = json_obj.at(multi).as_array();
-        count = arr.size();
-        if ( count > 0 )
-          return reinforcement_learning::error_code::success;
-        RETURN_ERROR_LS(trace, status, json_no_actions_found);
-      }
-      RETURN_ERROR_LS(trace, status, json_no_actions_found);
-    }
-    catch ( const std::exception& e ) {
-      RETURN_ERROR_LS(trace, status, json_parse_error) << e.what();
-    }
-    catch ( ... ) {
-      RETURN_ERROR_LS(trace, status, json_parse_error) << error_code::unknown_s;
-    }
-  }
-
   int get_event_ids(const char* context, std::map<size_t, std::string>& event_ids, i_trace* trace, api_status* status) {
     try {
-      const auto scontext = sutil::to_string_t(std::string(context));
-      auto json_obj = web::json::value::parse(scontext);
-      if ( json_obj.has_array_field(slots) ) {
-        auto const arr = json_obj.at(slots).as_array();
-        for (int i = 0; i < arr.size(); i++) {
-          auto current = arr.at(i);
-          if(current.has_string_field(event_id))
-          {
-            auto event_id_string = current.at(event_id).as_string();
+      rj::Document obj;
+      obj.Parse(context);
+
+      if (obj.HasParseError()) {
+        RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << rj::GetParseError_En(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";
+      }
+
+      const rj::Value::ConstMemberIterator& itr = obj.FindMember(slots);
+      if (itr != obj.MemberEnd() && itr->value.IsArray()) {
+        const auto& arr = itr->value.GetArray();
+        for (rj::SizeType i = 0; i < arr.Size(); ++i) {
+          const auto& current = arr[i];
+          const auto member_itr = current.FindMember(event_id);
+          if(member_itr != current.MemberEnd() && member_itr->value.IsString()) {
+            const auto event_id_string = std::string(member_itr->value.GetString());
             event_ids[i] = std::string{ event_id_string.begin(), event_id_string.end() };
           }
         }
-        return reinforcement_learning::error_code::success;
+
+        return error_code::success;
       }
       RETURN_ERROR_LS(trace, status, json_no_slots_found);
     }
@@ -71,37 +63,85 @@ namespace reinforcement_learning { namespace utility {
     }
   }
 
-  int get_slot_count(size_t& count, const char *context, i_trace* trace, api_status* status) {
-    try {
-      const auto scontext = sutil::to_string_t(std::string(context));
-      auto json_obj = web::json::value::parse(scontext);
-      if (json_obj.has_array_field(slots)) {
-        auto const arr = json_obj.at(slots).as_array();
-        count = arr.size();
-        if ( count > 0 )
-          return reinforcement_learning::error_code::success;
-        RETURN_ERROR_LS(trace, status, json_no_slots_found);
-      }
-      RETURN_ERROR_LS(trace, status, json_no_slots_found);
-    }
-    catch ( const std::exception& e ) {
-      RETURN_ERROR_LS(trace, status, json_parse_error) << e.what();
-    }
-    catch ( ... ) {
-      RETURN_ERROR_LS(trace, status, json_parse_error) << error_code::unknown_s;
-    }
-  }
+  struct MessageHandler : public rj::BaseReaderHandler<rj::UTF8<>, MessageHandler> {
+    rj::InsituStringStream &_is;
+    ContextInfo &_info;
+    int _level = 0;
+    int _array_level = 0;
+    bool _is_multi = false;
+    bool _is_slots = false;
+    size_t _item_start = 0;
 
-  int validate_multi_before_slots(const char *context, i_trace* trace, api_status* status)
-  {
-    auto slots_pos = strstr(context, "_slots");
-    auto multi_pos = strstr(context, "_multi");
+    MessageHandler(rj::InsituStringStream &is, ContextInfo &info) : 
+      _is(is),
+      _info(info),
+      _level(0),
+      _array_level(0),
+      _is_multi(false),
+      _item_start(0)
+       { }
 
-    if(slots_pos != nullptr && multi_pos != nullptr && slots_pos < multi_pos)
+    bool Key(const char* str, size_t length, bool copy)
     {
-      RETURN_ERROR_LS(trace, status, json_parse_error) << " There must be both a _multi field and _slots, and _multi must come first.";
+      if(_level == 1 && _array_level == 0) {
+        _is_multi = !strcmp(str, multi);
+        _is_slots = !strcmp(str, slots);
+      }
+      return true;
     }
 
-    return reinforcement_learning::error_code::success;
+    bool StartObject()
+    {
+      if((_is_multi | _is_slots) && _level == 1 && _array_level == 1)
+        _item_start = _is.Tell() - 1;
+
+      ++_level;
+      return true;
+    }
+
+    bool EndObject(rj::SizeType memberCount)
+    {
+      --_level;
+
+      if((_is_multi | _is_slots) && _level == 1 && _array_level == 1) {
+        size_t item_end = _is.Tell() - _item_start;
+        if(_is_multi)
+          _info.actions.push_back(std::make_pair(_item_start, item_end));
+        if(_is_slots)
+          _info.slots.push_back(std::make_pair(_item_start, item_end));
+      }
+      return true;
+    }
+
+    bool StartArray()
+    {
+      ++_array_level;
+      return true;
+    }
+
+    bool EndArray(rj::SizeType elementCount)
+    {
+      --_array_level;
+      return true;
+    }
+  };
+
+  int get_context_info(const char *context, ContextInfo &info, i_trace* trace, api_status* status)
+  {
+    std::string copy(context);
+    info.actions.clear();
+    info.slots.clear();
+
+    rj::InsituStringStream iss((char*)copy.c_str());
+    MessageHandler mh(iss, info);
+
+    rj::Reader reader;
+    auto res = reader.Parse<rj::kParseInsituFlag>(iss, mh);
+    if(res.IsError()) {
+      std::ostringstream os;
+      os << "JSON parse error: " << rj::GetParseError_En(res.Code()) << " (" << res.Offset() << ")";
+      RETURN_ERROR_LS(trace, status, json_parse_error) << os.str();
+    }
+    return error_code::success;
   }
 }}

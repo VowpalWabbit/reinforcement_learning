@@ -25,14 +25,18 @@ namespace reinforcement_learning {
 
     void parse_context_with_pdf(const char* context, std::vector<int>& actions, std::vector<float>& scores);
     void rank(const char* context, std::vector<int>& actions, std::vector<float>& scores);
+    void choose_continuous_action(const char* context, float& action, float& pdf_value);
     // Used for CCB
     void rank_decisions(const std::vector<const char*>& event_ids, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores);
     // Used for slates
-    void rank_slates_decisions(const char* event_id, uint32_t slot_count, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores);
+    void rank_multi_slot_decisions(const char* event_id, uint32_t slot_count, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores);
 
     const char* id() const;
 
     bool is_compatible(const std::string& args) const;
+
+    static model_management::model_type_t get_model_type(const std::string& args);
+    static model_management::model_type_t get_model_type(const VW::config::options_i* args);
 
     friend class safe_vw_factory;
   };

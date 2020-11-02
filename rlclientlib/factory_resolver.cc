@@ -2,19 +2,23 @@
 
 #include "constants.h"
 #include "err_constants.h"
-#include "model_mgmt/restapi_data_transport.h"
 #include "model_mgmt/empty_data_transport.h"
 #include "vw_model/pdf_model.h"
 #include "vw_model/vw_model.h"
 #include "logger/event_logger.h"
 #include "utility/watchdog.h"
+
+#ifdef USE_AZURE_FACTORIES
+#include "model_mgmt/restapi_data_transport.h"
 #include "azure_factories.h"
+#endif
 
 #include <type_traits>
 #include "console_tracer.h"
 #include "error_callback_fn.h"
 #include "logger/file/file_logger.h"
 #include "model_mgmt/file_model_loader.h"
+
 namespace reinforcement_learning {
   namespace m = model_management;
   namespace u = utility;
@@ -120,7 +124,9 @@ namespace reinforcement_learning {
   }
 
   void factory_initializer::register_default_factories() {
+#ifdef USE_AZURE_FACTORIES
     register_azure_factories();
+#endif
 
     data_transport_factory.register_type(value::NO_MODEL_DATA, empty_data_transport_create);
     data_transport_factory.register_type(value::FILE_MODEL_DATA, file_model_loader_create);

@@ -9,9 +9,9 @@
 #include "constants.h"
 #include "learning_mode.h"
 #include "async_batcher.h"
-#include "eventhub_client.h"
 #include "api_status.h"
 #include "error_callback_fn.h"
+#include "utility/config_helper.h"
 #include "utility/watchdog.h"
 #include "ranking_response.h"
 #include "ranking_event.h"
@@ -19,20 +19,13 @@
 #include "serialization/fb_serializer.h"
 #include "message_sender.h"
 #include "time_helper.h"
+
 namespace reinforcement_learning { namespace logger {
   // This class wraps logging event to event_hub in a generic way that live_model can consume.
   template<typename TEvent>
   class event_logger {
   public:
-    event_logger(
-      i_message_sender* sender,
-      int send_high_watermark,
-      int send_batch_interval_ms,
-      int send_queue_max_capacity,
-      const char* queue_mode,
-      utility::watchdog& watchdog,
-      i_time_provider* time_provider,
-      error_callback_fn* perror_cb = nullptr);
+    event_logger(i_time_provider* time_provider, i_async_batcher<TEvent>* batcher);
 
     int init(api_status* status);
 
@@ -45,34 +38,19 @@ namespace reinforcement_learning { namespace logger {
     std::unique_ptr<i_time_provider> _time_provider;
 
     // Handle batching for the data sent to the eventhub client
-    async_batcher<TEvent, fb_collection_serializer> _batcher;
+    std::unique_ptr<i_async_batcher<TEvent>> _batcher;
   };
 
   template<typename TEvent>
-  event_logger<TEvent>::event_logger(
-    i_message_sender* sender,
-    int send_high_watermark,
-    int send_batch_interval_ms,
-    int send_queue_max_capacity,
-    const char* queue_mode,
-    utility::watchdog& watchdog,
-    i_time_provider* time_provider,
-    error_callback_fn* perror_cb
-  )
-    : _batcher(
-      sender,
-      watchdog,
-      perror_cb,
-      send_high_watermark,
-      send_batch_interval_ms,
-      send_queue_max_capacity,
-      to_queue_mode_enum(queue_mode)),
-      _time_provider(time_provider)
-  {}
+  event_logger<TEvent>::event_logger(i_time_provider* time_provider, i_async_batcher<TEvent>* batcher) :
+      _time_provider(time_provider),
+      _batcher(batcher)
+  {
+  }
 
   template<typename TEvent>
   int event_logger<TEvent>::init(api_status* status) {
-    RETURN_IF_FAIL(_batcher.init(status));
+    RETURN_IF_FAIL(_batcher->init(status));
     _initialized = true;
     return error_code::success;
   }
@@ -86,7 +64,7 @@ namespace reinforcement_learning { namespace logger {
     }
 
     // Add item to the batch (will be sent later)
-    return _batcher.append(item, status);
+    return _batcher->append(item, status);
   }
 
   template<typename TEvent>
@@ -96,16 +74,8 @@ namespace reinforcement_learning { namespace logger {
 
   class interaction_logger : public event_logger<ranking_event> {
   public:
-    interaction_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider,error_callback_fn* perror_cb = nullptr)
-      : event_logger(
-        sender,
-        c.get_int(name::INTERACTION_SEND_HIGH_WATER_MARK, 198 * 1024),
-        c.get_int(name::INTERACTION_SEND_BATCH_INTERVAL_MS, 1000),
-        c.get_int(name::INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
-        c.get(name::QUEUE_MODE, "DROP"),
-        watchdog,
-        time_provider,
-        perror_cb)
+    interaction_logger(i_time_provider* time_provider, i_async_batcher<ranking_event>* batcher)
+      : event_logger(time_provider, batcher)
     {}
 
     int log(const char* event_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
@@ -113,34 +83,18 @@ namespace reinforcement_learning { namespace logger {
 
 class ccb_logger : public event_logger<decision_ranking_event> {
   public:
-    ccb_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
-      : event_logger(
-        sender,
-        c.get_int(name::DECISION_SEND_HIGH_WATER_MARK, 198 * 1024),
-        c.get_int(name::DECISION_SEND_BATCH_INTERVAL_MS, 1000),
-        c.get_int(name::DECISION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
-        c.get(name::QUEUE_MODE, "DROP"),
-        watchdog,
-        time_provider,
-        perror_cb)
+    ccb_logger(i_time_provider* time_provider, i_async_batcher<decision_ranking_event>* batcher)
+      : event_logger(time_provider, batcher)
     {}
 
     int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
   };
 
-class slates_logger : public event_logger<slates_decision_event> {
+class multi_slot_logger : public event_logger<multi_slot_decision_event> {
   public:
-    slates_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
-      : event_logger(
-        sender,
-        c.get_int(name::DECISION_SEND_HIGH_WATER_MARK, 198 * 1024),
-        c.get_int(name::DECISION_SEND_BATCH_INTERVAL_MS, 1000),
-        c.get_int(name::DECISION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
-        c.get(name::QUEUE_MODE, "DROP"),
-        watchdog,
-        time_provider,
-        perror_cb)
+    multi_slot_logger(i_time_provider* time_provider, i_async_batcher<multi_slot_decision_event>* batcher)
+      : event_logger(time_provider, batcher)
     {}
 
     int log_decision(const std::string &event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
@@ -149,16 +103,8 @@ class slates_logger : public event_logger<slates_decision_event> {
 
   class observation_logger : public event_logger<outcome_event> {
   public:
-    observation_logger(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr)
-      : event_logger(
-        sender,
-        c.get_int(name::OBSERVATION_SEND_HIGH_WATER_MARK, 198 * 1024),
-        c.get_int(name::OBSERVATION_SEND_BATCH_INTERVAL_MS, 1000),
-        c.get_int(name::OBSERVATION_SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024,
-        c.get(name::QUEUE_MODE, "DROP"),
-        watchdog,
-        time_provider,
-        perror_cb)
+    observation_logger(i_time_provider* time_provider, i_async_batcher<outcome_event>* batcher)
+      : event_logger(time_provider, batcher)
     {}
 
     template <typename D>
@@ -172,25 +118,11 @@ class slates_logger : public event_logger<slates_decision_event> {
 
   class generic_event_logger : public event_logger<generic_event> {
   public:
-    generic_event_logger(i_message_sender* sender,
-      int send_high_watermark,
-      int send_batch_interval_ms,
-      int send_queue_max_capacity,
-      const char* queue_mode,
-      utility::watchdog& watchdog,
-      i_time_provider* time_provider,
-      error_callback_fn* perror_cb = nullptr)
-      : event_logger(
-        sender,
-        send_high_watermark,
-        send_batch_interval_ms,
-        send_queue_max_capacity,
-        queue_mode,
-        watchdog,
-        time_provider,
-        perror_cb)
+    generic_event_logger(i_time_provider* time_provider, i_async_batcher<generic_event>* batcher)
+      : event_logger(time_provider, batcher)
     {}
 
     int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, api_status* status);
+    int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, generic_event::object_list_t&& objects, api_status* status);
   };
 }}

@@ -77,6 +77,30 @@ namespace reinforcement_learning
     return _pimpl->choose_rank(context_json, flags, response, status);
   }
 
+  int live_model::request_continuous_action(const char * event_id, const char * context_json, unsigned int flags, continuous_action_response& response, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->request_continuous_action(event_id, context_json, flags, response, status);
+  }
+
+  int live_model::request_continuous_action(const char * event_id, const char * context_json, continuous_action_response& response, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->request_continuous_action(event_id, context_json, action_flags::DEFAULT, response, status);
+  }
+
+  int live_model::request_continuous_action(const char * context_json, unsigned int flags, continuous_action_response& response, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->request_continuous_action(context_json, flags, response, status);
+  }
+
+  int live_model::request_continuous_action(const char * context_json, continuous_action_response& response, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->request_continuous_action(context_json, action_flags::DEFAULT, response, status);
+  }
+
   int live_model::request_decision(const char * context_json, unsigned int flags, decision_response& resp, api_status* status)
   {
     INIT_CHECK();
@@ -89,26 +113,26 @@ namespace reinforcement_learning
     return request_decision(context_json, action_flags::DEFAULT, resp, status);
   }
 
-  int live_model::request_slates_decision(const char * event_id, const char * context_json, unsigned int flags, slates_response& resp, api_status* status)
+  int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
   {
     INIT_CHECK();
-    return _pimpl->request_slates_decision(event_id, context_json, flags, resp, status);
+    return _pimpl->request_multi_slot_decision(event_id, context_json, flags, resp, status);
   }
 
-  int live_model::request_slates_decision(const char * event_id, const char * context_json, slates_response& resp, api_status* status)
+  int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, multi_slot_response& resp, api_status* status)
   {
-    return request_slates_decision(event_id, context_json, action_flags::DEFAULT, resp, status);
+    return request_multi_slot_decision(event_id, context_json, action_flags::DEFAULT, resp, status);
   }
 
-  int live_model::request_slates_decision(const char * context_json, unsigned int flags, slates_response& resp, api_status* status)
+  int live_model::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
   {
     INIT_CHECK();
-    return _pimpl->request_slates_decision(context_json, flags, resp, status);
+    return _pimpl->request_multi_slot_decision(context_json, flags, resp, status);
   }
 
-  int live_model::request_slates_decision(const char * context_json, slates_response& resp, api_status* status)
+  int live_model::request_multi_slot_decision(const char * context_json, multi_slot_response& resp, api_status* status)
   {
-    return request_slates_decision(context_json, action_flags::DEFAULT, resp, status);
+    return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, status);
   }
 
 
@@ -128,6 +152,30 @@ namespace reinforcement_learning
   {
     INIT_CHECK();
     return _pimpl->report_outcome(event_id, outcome, status);
+  }
+
+  int live_model::report_outcome(const char* primary_id, int secondary_id, const char* outcome, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);
+  }
+
+  int live_model::report_outcome(const char* primary_id, int secondary_id, float outcome, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);
+  }
+
+  int live_model::report_outcome(const char* primary_id, const char* secondary_id, const char* outcome, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);
+  }
+
+  int live_model::report_outcome(const char* primary_id, const char* secondary_id, float outcome, api_status* status)
+  {
+    INIT_CHECK();
+    return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);
   }
 
   int live_model::refresh_model(api_status* status)

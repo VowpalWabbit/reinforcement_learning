@@ -1,20 +1,20 @@
 #include <map>
 #include <set>
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/error/en.h>
 #include <regex>
 #include "config_utility.h"
-#include "cpprest/json.h"
 #include "configuration.h"
 #include "constants.h"
 #include "err_constants.h"
 #include "api_status.h"
 #include "str_util.h"
 #include "trace_logger.h"
-#include "../model_mgmt/restapi_data_transport.h"
-
-using namespace web;
-using namespace utility::conversions; // string conversions utilities
 
 namespace reinforcement_learning { namespace utility { namespace config {
+  namespace rj = rapidjson;
+
   std::string load_config_json() {
     //TODO: Load appid configuration from Azure storage
     //TODO: error handling.  (return code or exception)
@@ -110,23 +110,35 @@ namespace reinforcement_learning { namespace utility { namespace config {
      "QueueMaxSize"
     };
 
-    web::json::value obj;
+    rj::Document obj;
     try {
-      obj = json::value::parse(to_string_t(config_json));
-    }
-    catch (const web::json::json_exception& e) {
-      RETURN_ERROR_LS(trace, status, json_parse_error) << e.what();
+      obj.Parse<rj::kParseNumbersAsStringsFlag | rj::kParseDefaultFlags>(config_json.c_str());
+      if (obj.HasParseError()) {
+        RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << rj::GetParseError_En(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";
+      }
     }
     catch (const std::exception& e) {
       RETURN_ERROR_LS(trace, status, json_parse_error) << e.what();
     }
 
-    auto jsonObj = obj.as_object();
+    auto const& jsonObj = obj.GetObject();
 
     for (auto const& prop_pair : jsonObj) {
-      auto prop_name = to_utf8string(prop_pair.first);
-      auto const& prop_value = prop_pair.second;
-      auto const string_value = to_utf8string(prop_value.is_string() ? prop_value.as_string() : prop_value.serialize());
+      auto prop_name_raw = prop_pair.name.GetString();
+      auto prop_name = std::string(prop_name_raw);
+      auto const& prop_value = prop_pair.value;
+
+      const char *string_value;
+      if (prop_value.IsString()) {
+        string_value = prop_value.GetString();
+      }
+      else if (prop_value.IsBool()) {
+        string_value = prop_value.GetBool() ? "true" : "false";
+      }
+      else {
+        RETURN_ERROR_LS(trace, status, json_parse_error) << "Invalid json type found: " << prop_value.GetType();
+      }
+
       prop_name = translate(legacy_translation_mapping, prop_name);
       if (deprecated.find(prop_name) != deprecated.end()) {
         auto message = concat("Field '", prop_name, "' is unresponsive.");
@@ -141,7 +153,7 @@ namespace reinforcement_learning { namespace utility { namespace config {
       }
       else {
         // Otherwise, just set the value in the config collection.
-        cc.set(prop_name.c_str(), string_value.c_str());
+        cc.set(prop_name.c_str(), string_value);
       }
     }
 

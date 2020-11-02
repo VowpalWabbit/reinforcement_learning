@@ -7,6 +7,7 @@
 #include "v_array.h"
 
 #include <iostream>
+namespace mm = reinforcement_learning::model_management;
 
 namespace reinforcement_learning {
   static const std::string SEED_TAG = "seed=";
@@ -132,6 +133,32 @@ namespace reinforcement_learning {
     examples.delete_v();
   }
 
+  void safe_vw::choose_continuous_action(const char* context, float& action, float& pdf_value)
+  {
+    auto examples = v_init<example*>();
+    examples.push_back(get_or_create_example());
+
+    std::vector<char> line_vec(context, context + strlen(context) + 1);
+
+    VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
+    
+    // finalize example
+    VW::setup_examples(*_vw, examples);
+
+    _vw->predict(*examples[0]);
+
+    action = examples[0]->pred.pdf_value.action;
+    pdf_value = examples[0]->pred.pdf_value.pdf_value;
+
+    for (auto&& ex : examples) {
+      ex->l.cb_cont.costs.delete_v();
+      _example_pool.emplace_back(ex);
+    }
+
+    // cleanup
+    examples.delete_v();
+  }
+
   void safe_vw::rank_decisions(const std::vector<const char*>& event_ids, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
   {
     auto examples = v_init<example*>();
@@ -184,7 +211,7 @@ namespace reinforcement_learning {
     examples.delete_v();
   }
 
-  void safe_vw::rank_slates_decisions(const char* event_id, uint32_t slot_count, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
+  void safe_vw::rank_multi_slot_decisions(const char* event_id, uint32_t slot_count, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
   {
     auto examples = v_init<example*>();
     examples.push_back(get_or_create_example());
@@ -193,7 +220,7 @@ namespace reinforcement_learning {
 
     VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
     // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the example tag.
-    for(int i = 0; i < slot_count; i++)
+    for(uint32_t i = 0; i < slot_count; i++)
     {
       const size_t slot_example_indx = examples.size() - slot_count + i;
       auto index_as_string = std::to_string(i);
@@ -241,59 +268,61 @@ const char* safe_vw::id() const {
   return _vw->id.c_str();
 }
 
-enum class model_type_t
-{
-  UNKNOWN,
-  CB,
-  CCB,
-  SLATES
-};
-
-model_type_t get_model_type(const std::string& args)
+mm::model_type_t safe_vw::get_model_type(const std::string& args)
 {
   // slates == slates
   if (args.find("slates") != std::string::npos)
   {
-    return model_type_t::SLATES;
+    return mm::model_type_t::SLATES;
   }
 
   // ccb = ccb && !slates
   if (args.find("ccb_explore_adf") != std::string::npos)
   {
-    return model_type_t::CCB;
+    return mm::model_type_t::CCB;
   }
 
   // cb = !slates && !ccb && cb
   if (args.find("cb_explore_adf") != std::string::npos)
   {
-    return model_type_t::CB;
+    return mm::model_type_t::CB;
   }
 
-  return model_type_t::UNKNOWN;
+  if (args.find("cats") != std::string::npos)
+  {
+    return mm::model_type_t::CA;
+  }
+
+  return mm::model_type_t::UNKNOWN;
 }
 
 // TODO make this const when was_supplied becomes const.
-model_type_t get_model_type(VW::config::options_i* args)
+mm::model_type_t safe_vw::get_model_type(const VW::config::options_i* args)
 {
     // slates == slates
   if (args->was_supplied("slates"))
   {
-    return model_type_t::SLATES;
+    return mm::model_type_t::SLATES;
   }
 
   // ccb = ccb && !slates
   if (args->was_supplied("ccb_explore_adf"))
   {
-    return model_type_t::CCB;
+    return mm::model_type_t::CCB;
   }
 
   // cb = !slates && !ccb && cb
   if (args->was_supplied("cb_explore_adf"))
   {
-    return model_type_t::CB;
+    return mm::model_type_t::CB;
   }
 
-  return model_type_t::UNKNOWN;
+  if (args->was_supplied("cats"))
+  {
+    return mm::model_type_t::CA;
+  }
+
+  return mm::model_type_t::UNKNOWN;
 }
 
 bool safe_vw::is_compatible(const std::string& args) const {
@@ -301,7 +330,7 @@ bool safe_vw::is_compatible(const std::string& args) const {
   const auto inbound_model_type = get_model_type(args);
 
   // This really is an error but errors cant be reported here...
-  if(local_model_type == model_type_t::UNKNOWN || inbound_model_type ==  model_type_t::UNKNOWN)
+  if(local_model_type == mm::model_type_t::UNKNOWN || inbound_model_type ==  mm::model_type_t::UNKNOWN)
   {
     return false;
   }

@@ -18,11 +18,10 @@ namespace u = r::utility;
 namespace cfg = u::config;
 namespace err = r::error_code;
 
+int basic_usage_cb();
+int basic_usage_ca();
+int basic_usage_ccb();
+int basic_usage_slates();
+
 int load_file(const std::string& file_name, std::string& file_data);
 int load_config_from_json(const std::string& file_name, u::configuration& cc);
-
-char const * const  event_id    = "event_id";
-char const * const  context = R"({
-                                  "GUser":{"id":"a","major":"eng","hobby":"hiking"},
-                                  "_multi":[ { "TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}}]})";
-float outcome  = 1.0f;

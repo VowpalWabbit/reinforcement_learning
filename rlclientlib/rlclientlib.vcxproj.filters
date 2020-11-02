@@ -25,7 +25,6 @@
     <ClCompile Include="trace_logger.cc" />
     <ClCompile Include="azure_factories.cc" />
     <ClCompile Include="logger\flatbuffer_allocator.cc" />
-    <ClCompile Include="logger\async_batcher.cc" />
     <ClCompile Include="logger\preamble_sender.cc" />
     <ClCompile Include="logger\endian.cc" />
     <ClCompile Include="logger\preamble.cc" />
@@ -35,6 +34,7 @@
     <ClCompile Include="utility\data_buffer.cc" />
     <ClCompile Include="utility\stl_container_adapter.cc" />
     <ClCompile Include="utility\data_buffer_streambuf.cc" />
+    <ClCompile Include="utility\config_helper.cc" />
     <ClCompile Include="logger\file\file_logger.cc" />
     <ClCompile Include="model_mgmt\empty_data_transport.cc" />
     <ClCompile Include="vw_model\pdf_model.cc" />
@@ -42,12 +42,14 @@
     <ClCompile Include="time_helper.cc" />
     <ClCompile Include="model_mgmt\file_model_loader.cc" />
     <ClCompile Include="decision_response.cc" />
+    <ClCompile Include="continuous_action_response.cc" />
     <ClCompile Include="learning_mode.cc" />
-    <ClCompile Include="slates_response.cc" />
+    <ClCompile Include="multi_slot_response.cc" />
     <ClCompile Include="logger\logger_facade.cc" />
     <ClCompile Include="serialization\payload_serializer.cc" />
     <ClCompile Include="multistep.cc" />
     <ClCompile Include="generic_event.cc" />
+    <ClCompile Include="dedup.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -111,13 +113,15 @@
     <ClInclude Include="model_mgmt\file_model_loader.h" />
     <ClInclude Include="..\include\decision_response.h" />
     <ClInclude Include="..\include\container_iterator.h" />
+    <ClInclude Include="..\include\continuous_action_response.h" />
     <ClInclude Include="..\include\future_compat.h" />
-    <ClInclude Include="..\include\slates_response.h" />
+    <ClInclude Include="..\include\multi_slot_response.h" />
     <ClInclude Include="..\include\errors_data.h" />
     <ClInclude Include="logger\logger_facade.h" />
     <ClInclude Include="serialization\payload_serializer.h" />
     <ClInclude Include="..\include\multistep.h" />
     <ClInclude Include="generic_event.h" />
+    <ClInclude Include="dedup.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -127,12 +131,13 @@
     <None Include="schema\v1\DecisionRankingEvent.fbs" />
     <None Include="schema\v1\SlatesEvent.fbs" />
     <None Include="schema\v2\Metadata.fbs" />
-    <None Include="schema\v2\OutcomeSingle.fbs" />
+    <None Include="schema\v2\OutcomeEvent.fbs" />
     <None Include="schema\v2\CbEvent.fbs" />
-    <None Include="schema\v2\CcbEvent.fbs" />
-    <None Include="schema\v2\SlatesEvent.fbs" />
+    <None Include="schema\v2\CaEvent.fbs" />
+    <None Include="schema\v2\MultiSlotEvent.fbs" />
     <None Include="schema\v2\Event.fbs" />
     <None Include="schema\v2\MultiStepEvent.fbs" />
+    <None Include="schema\v2\DedupInfo.fbs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

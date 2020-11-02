@@ -62,3 +62,7 @@ REM Repo-specific paths
 IF NOT DEFINED rlRoot (
     SET rlRoot=%~dp0..
 )
+
+IF NOT DEFINED SkipAzureFactories (
+    SET "SkipAzureFactories=false"
+)

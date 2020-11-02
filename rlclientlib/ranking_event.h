@@ -4,7 +4,7 @@
 #include "ranking_response.h"
 #include "time_helper.h"
 #include "decision_response.h"
-#include "slates_response.h"
+#include "multi_slot_response.h"
 
 #include <flatbuffers/flatbuffers.h>
 
@@ -106,11 +106,11 @@ namespace reinforcement_learning {
 
 
   //serializable decision ranking event
-  class slates_decision_event : public event {
+  class multi_slot_decision_event : public event {
   public:
-    slates_decision_event() = default;
-    slates_decision_event(slates_decision_event&& other) = default;
-    slates_decision_event& operator=(slates_decision_event&& other) = default;
+    multi_slot_decision_event() = default;
+    multi_slot_decision_event(multi_slot_decision_event&& other) = default;
+    multi_slot_decision_event& operator=(multi_slot_decision_event&& other) = default;
 
     const std::vector<unsigned char>& get_context() const;
     const std::vector<std::vector<uint32_t>>& get_actions_ids() const;
@@ -120,11 +120,11 @@ namespace reinforcement_learning {
     const std::string& get_event_id() const;
 
   public:
-    static slates_decision_event request_decision(const std::string& event_id, const char* context,
+    static multi_slot_decision_event request_decision(const std::string& event_id, const char* context,
       unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts, float pass_prob = 1.f);
 
   private:
-    slates_decision_event(const std::string& event_id, bool deferred_action, float pass_prob, const char* context,
+    multi_slot_decision_event(const std::string& event_id, bool deferred_action, float pass_prob, const char* context,
       const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts);
 
     std::vector<unsigned char> _context;

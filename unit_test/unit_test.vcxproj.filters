@@ -21,6 +21,9 @@
     <ClInclude Include="mock_util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="common_test_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="mock_http_client.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -74,6 +74,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(SkipAzureFactories)'!='true'">
+    <ClCompile>
+      <PreprocessorDefinitions>USE_AZURE_FACTORIES;$(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -89,7 +94,7 @@
     <PreBuildEvent>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs
-$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeSingle.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CcbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\SlatesEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiStepEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs</Command>
+$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CaEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiSlotEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiStepEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs $(SolutionDir)rlclientlib\schema\v2\DedupInfo.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -110,7 +115,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <PreBuildEvent>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs
-$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeSingle.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CcbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\SlatesEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiStepEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs</Command>
+$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CaEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiSlotEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiStepEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs $(SolutionDir)rlclientlib\schema\v2\DedupInfo.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -135,7 +140,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <PreBuildEvent>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs
-$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeSingle.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CcbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\SlatesEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiStepEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs</Command>
+$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CaEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiSlotEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiStepEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs $(SolutionDir)rlclientlib\schema\v2\DedupInfo.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -160,7 +165,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <PreBuildEvent>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs
-$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeSingle.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CcbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\SlatesEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiStepEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs</Command>
+$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CaEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiSlotEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiStepEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs $(SolutionDir)rlclientlib\schema\v2\DedupInfo.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -174,12 +179,13 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClInclude Include="..\include\api_status.h" />
     <ClInclude Include="..\include\configuration.h" />
     <ClInclude Include="..\include\container_iterator.h" />
+    <ClInclude Include="..\include\continuous_action_response.h" />
     <ClInclude Include="..\include\errors_data.h" />
     <ClInclude Include="..\include\future_compat.h" />
     <ClInclude Include="..\include\live_model.h" />
     <ClInclude Include="..\include\multistep.h" />
     <ClInclude Include="..\include\sender.h" />
-    <ClInclude Include="..\include\slates_response.h" />
+    <ClInclude Include="..\include\multi_slot_response.h" />
     <ClInclude Include="..\include\object_factory.h" />
     <ClInclude Include="..\include\personalization.h" />
     <ClInclude Include="..\include\ranking_response.h" />
@@ -202,7 +208,6 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClInclude Include="generated\OutcomeEvent_generated.h" />
     <ClInclude Include="generated\RankingEvent_generated.h" />
     <ClInclude Include="generated\Metadata_generated.h" />
-    <ClInclude Include="azure_factories.h" />
     <ClInclude Include="console_tracer.h" />
     <ClInclude Include="logger\endian.h" />
     <ClInclude Include="logger\event_logger.h" />
@@ -215,20 +220,15 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClInclude Include="serialization\fb_serializer.h" />
     <ClInclude Include="serialization\json_serializer.h" />
     <ClInclude Include="utility\context_helper.h" />
-    <ClInclude Include="utility\http_authorization.h" />
-    <ClInclude Include="utility\http_client.h" />
     <ClInclude Include="utility\interruptable_sleeper.h" />
     <ClInclude Include="utility\object_pool.h" />
     <ClInclude Include="utility\periodic_background_proc.h" />
     <ClInclude Include="utility\versioned_object_pool.h" />
-    <ClInclude Include="utility\http_helper.h" />
     <ClInclude Include="model_mgmt\model_downloader.h" />
     <ClInclude Include="model_mgmt\data_callback_fn.h" />
     <ClInclude Include="model_mgmt\empty_data_transport.h" />
-    <ClInclude Include="model_mgmt\restapi_data_transport.h" />
     <ClInclude Include="logger\async_batcher.h" />
     <ClInclude Include="logger\event_queue.h" />
-    <ClInclude Include="logger\eventhub_client.h" />
     <ClInclude Include="utility\stl_container_adapter.h" />
     <ClInclude Include="utility\watchdog.h" />
     <ClInclude Include="vw_model\vw_model.h" />
@@ -238,8 +238,10 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClInclude Include="live_model_impl.h" />
     <ClInclude Include="error_callback_fn.h" />
     <ClInclude Include="ranking_event.h" />
+    <ClInclude Include="dedup.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="constants.cc" />
     <ClCompile Include="generic_event.cc" />
     <ClCompile Include="learning_mode.cc" />
     <ClCompile Include="logger\file\file_logger.cc" />
@@ -249,8 +251,6 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClCompile Include="model_mgmt\file_model_loader.cc" />
     <ClCompile Include="model_mgmt\model_downloader.cc" />
     <ClCompile Include="model_mgmt\model_mgmt.cc" />
-    <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
-    <ClCompile Include="logger\eventhub_client.cc" />
     <ClCompile Include="multistep.cc" />
     <ClCompile Include="serialization\payload_serializer.cc" />
     <ClCompile Include="time_helper.cc" />
@@ -264,7 +264,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClCompile Include="vw_model\pdf_model.cc" />
     <ClCompile Include="vw_model\safe_vw.cc" />
     <ClCompile Include="sampling.cc" />
-    <ClCompile Include="slates_response.cc" />
+    <ClCompile Include="multi_slot_response.cc" />
     <ClCompile Include="factory_resolver.cc" />
     <ClCompile Include="live_model_impl.cc" />
     <ClCompile Include="error_callback_fn.cc" />
@@ -273,8 +273,8 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClCompile Include="ranking_event.cc" />
     <ClCompile Include="ranking_response.cc" />
     <ClCompile Include="decision_response.cc" />
-    <ClCompile Include="logger\async_batcher.cc" />
-    <ClCompile Include="azure_factories.cc" />
+    <ClCompile Include="dedup.cc" />
+    <ClCompile Include="continuous_action_response.cc" />
     <ClCompile Include="console_tracer.cc" />
     <ClCompile Include="utility\data_buffer_streambuf.cc" />
     <ClCompile Include="logger\endian.cc" />
@@ -284,9 +284,22 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClCompile Include="logger\preamble_sender.cc" />
     <ClCompile Include="trace_logger.cc" />
     <ClCompile Include="utility\data_buffer.cc" />
-    <ClCompile Include="utility\http_authorization.cc" />
+    <ClCompile Include="utility\config_helper.cc" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(SkipAzureFactories)' != 'true'">
+    <ClInclude Include="azure_factories.h" />
+    <ClInclude Include="logger\eventhub_client.h" />
+    <ClInclude Include="model_mgmt\restapi_data_transport.h" />
+    <ClInclude Include="utility\http_client.h" />
+    <ClInclude Include="utility\http_helper.h" />
+    <ClInclude Include="utility\http_authorization.h" />
+
+    <ClCompile Include="azure_factories.cc" />
+    <ClCompile Include="logger\eventhub_client.cc" />
+    <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="utility\http_client.cc" />
     <ClCompile Include="utility\http_helper.cc" />
+    <ClCompile Include="utility\http_authorization.cc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ext_libs\vowpal_wabbit\vowpalwabbit\vw_core.vcxproj">
@@ -301,10 +314,10 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <None Include="schema\v1\DecisionRankingEvent.fbs" />
     <None Include="schema\v1\SlatesEvent.fbs" />
     <None Include="schema\v2\Metadata.fbs" />
-    <None Include="schema\v2\OutcomeSingle.fbs" />
+    <None Include="schema\v2\OutcomeEvent.fbs" />
     <None Include="schema\v2\CbEvent.fbs" />
-    <None Include="schema\v2\CcbEvent.fbs" />
-    <None Include="schema\v2\SlatesEvent.fbs" />
+    <None Include="schema\v2\CaEvent.fbs" />
+    <None Include="schema\v2\MultiSlotEvent.fbs" />
     <None Include="schema\v2\MultiStepEvent.fbs" />
     <None Include="schema\v2\Event.fbs" />
   </ItemGroup>

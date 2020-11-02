@@ -8,9 +8,14 @@ table Event {
     payload:[ubyte];                 // payload
 }
 
+table BatchMetadata {
+    content_encoding: string;
+}
+
 // Collection of Ranking events
 table EventBatch {
     events:[Event];
+    metadata: BatchMetadata;
 }
 
 root_type EventBatch;

@@ -31,6 +31,7 @@ namespace Rl.Net.Cli
 
             public string DecisionContext { get; set; }
             public string SlatesContext { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            public string ContinuousActionContext { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
             public float GetOutcome(long actionIndex, IEnumerable<ActionProbability> actionDistribution)
             {
@@ -43,6 +44,11 @@ namespace Rl.Net.Cli
             }
 
             public float GetSlatesOutcome(int[] actionIndexes, float[] probabilities)
+            {
+                throw new NotImplementedException();
+            }
+
+            public float GetContinuousActionOutcome(float action, float pdfValue)
             {
                 throw new NotImplementedException();
             }

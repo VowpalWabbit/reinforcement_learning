@@ -13,6 +13,7 @@
 #include "ranking_event.h"
 
 #include "logger/message_type.h"
+#include "utility/config_helper.h"
 #include "err_constants.h"
 
 using namespace reinforcement_learning::messages::flatbuff;
@@ -118,12 +119,12 @@ namespace reinforcement_learning { namespace logger {
   };
 
   template <>
-  struct fb_event_serializer<slates_decision_event> {
+  struct fb_event_serializer<multi_slot_decision_event> {
     using fb_event_t = SlatesEvent;
     using offset_vector_t = typename std::vector<flatbuffers::Offset<fb_event_t>>;
     using batch_builder_t = SlatesEventBatchBuilder;
 
-    static size_t size_estimate(const slates_decision_event& evt) {
+    static size_t size_estimate(const multi_slot_decision_event& evt) {
       size_t estimate = 0;
       auto action_ids = evt.get_actions_ids();
       auto probs = evt.get_probabilities();
@@ -140,7 +141,7 @@ namespace reinforcement_learning { namespace logger {
       return estimate;
     }
 
-    static int serialize(slates_decision_event& evt, flatbuffers::FlatBufferBuilder& builder,
+    static int serialize(multi_slot_decision_event& evt, flatbuffers::FlatBufferBuilder& builder,
                          flatbuffers::Offset<fb_event_t>& ret_val, api_status* status) {
       const auto event_id_offset = builder.CreateString(evt.get_event_id());
       const auto context_offset = builder.CreateVector(evt.get_context());
@@ -214,10 +215,14 @@ namespace reinforcement_learning { namespace logger {
   struct fb_collection_serializer {
     using serializer_t = fb_event_serializer<event_t>;
     using buffer_t = utility::data_buffer;
+    using shared_state_t = int;
+
     static int message_id() { return message_type::UNKNOWN; }
 
-    fb_collection_serializer(buffer_t& buffer)
-      : _allocator(buffer), _builder(buffer.body_capacity(), &_allocator), _buffer(buffer) {}
+    fb_collection_serializer(buffer_t& buffer, content_encoding_enum content_encoding)
+      : _allocator(buffer), _builder(buffer.body_capacity(), &_allocator), _buffer(buffer), _content_encoding(content_encoding) {}
+
+    fb_collection_serializer(buffer_t& buffer, content_encoding_enum content_encoding, int /*dummy*/) : fb_collection_serializer(buffer, content_encoding) {}
 
     int add(event_t& evt, api_status* status = nullptr) {
       flatbuffers::Offset<typename serializer_t::fb_event_t> offset;
@@ -228,10 +233,20 @@ namespace reinforcement_learning { namespace logger {
 
     uint64_t size() const { return _builder.GetSize(); }
 
+    void create_header() {
+      return;
+    }
+
+    void add_header(typename serializer_t::batch_builder_t &batch_builder) {
+      return;
+    }
+
     void finalize() {
       auto event_offsets = _builder.CreateVector(_event_offsets);
+      create_header();
       typename serializer_t::batch_builder_t batch_builder(_builder);
       batch_builder.add_events(event_offsets);
+      add_header(batch_builder);
       auto batch_offset = batch_builder.Finish();
       _builder.Finish(batch_offset);
       // Where does the body of the data begin in relation to the start
@@ -245,6 +260,8 @@ namespace reinforcement_learning { namespace logger {
     flatbuffer_allocator _allocator;
     flatbuffers::FlatBufferBuilder _builder;
     buffer_t& _buffer;
+    content_encoding_enum _content_encoding;
+    flatbuffers::Offset<v2::BatchMetadata> _batch_metadata_offset;
   };
 
   template <>
@@ -280,7 +297,7 @@ namespace reinforcement_learning { namespace logger {
   inline int fb_collection_serializer<decision_ranking_event>::message_id() { return message_type::fb_decision_event_collection; }
 
   template <>
-  inline int fb_collection_serializer<slates_decision_event>::message_id() { return message_type::fb_slates_event_collection; }
+  inline int fb_collection_serializer<multi_slot_decision_event>::message_id() { return message_type::fb_slates_event_collection; }
 
   template <>
   inline int fb_collection_serializer<ranking_event>::message_id() { return message_type::fb_ranking_learning_mode_event_collection; }
@@ -288,4 +305,14 @@ namespace reinforcement_learning { namespace logger {
   template <>
   inline int fb_collection_serializer<generic_event>::message_id() { return message_type::fb_generic_event_collection; }
 
+  template <>
+  inline void fb_collection_serializer<generic_event>::create_header() {
+    _batch_metadata_offset = v2::CreateBatchMetadataDirect(_builder, to_content_encoding_string(_content_encoding));
+    return;
+  }
+
+  template <>
+  inline void fb_collection_serializer<generic_event>::add_header(typename serializer_t::batch_builder_t& batch_builder) {
+    batch_builder.add_metadata(_batch_metadata_offset);
+  }
 }}

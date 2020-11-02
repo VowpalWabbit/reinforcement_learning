@@ -10,6 +10,7 @@ PUSHD %~dp0
 
 %vcpkgPath% install cpprestsdk:x64-windows
 %vcpkgPath% install flatbuffers:x64-windows
+%vcpkgPath% install openssl-windows:x64-windows
 
 REM TODO: This really should be out-of-source (also, can we switch to vcpkg for these?)
 ECHO Restoring "%rlRoot%\ext_libs\vowpal_wabbit\vowpalwabbit\packages.config"

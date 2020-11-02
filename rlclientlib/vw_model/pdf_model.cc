@@ -44,6 +44,10 @@ namespace reinforcement_learning { namespace model_management {
     }
   }
 
+  int pdf_model::choose_continuous_action(const char* features, float& action, float& pdf_value, std::string& model_version, api_status* status)
+  {
+    return error_code::not_supported;
+  }
 
   // Not supported.
   int pdf_model::request_decision(const std::vector<const char*>& event_ids, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string & model_version, api_status * status)
@@ -51,9 +55,14 @@ namespace reinforcement_learning { namespace model_management {
     return error_code::not_supported;
   }
 
-  int pdf_model::request_slates_decision(const char *event_id, uint32_t slot_count, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
+  int pdf_model::request_multi_slot_decision(const char *event_id, uint32_t slot_count, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
     return error_code::not_supported;
+  }
+
+  model_type_t pdf_model::model_type() const
+  {
+    return model_type_t::CB;
   }
 
   int pdf_model::choose_rank_ms(

@@ -373,6 +373,28 @@ namespace Rl.Net.Cli.Test
             Run_LiveModelRequestDecisionWithFlags_Test(liveModel, PseudoLocContextJsonWithPdf);
         }
 
+        private void Run_LiveModelRequestContinuousAction_Test(LiveModel liveModel, string contextJson)
+        {
+            NativeMethods.LiveModelRequestContinuousActionOverride =
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, IntPtr continuousActionResponse, IntPtr ApiStatus) =>
+                {
+                    string contextJsonMarshalledBack = NativeMethods.StringMarshallingFunc(contextJsonPtr);
+                    Assert.AreEqual(contextJson, contextJsonMarshalledBack, "Marshalling contextJson does not work properly in LiveModelRequestContinuousAction");
+
+                    return NativeMethods.SuccessStatus;
+                };
+
+            liveModel.RequestContinuousAction(PseudoLocEventId, contextJson);
+        }
+
+        [TestMethod]
+        public void Test_LiveModel_RequestContinuousAction()
+        {
+            LiveModel liveModel = this.ConfigureLiveModel();
+
+            Run_LiveModelRequestContinuousAction_Test(liveModel, PseudoLocContextJsonWithPdf);
+        }
+
         // TODO: Create a real CCB context json and add an E2E test (pending CCB E2E and
         // clarity around sample mode.)
 
