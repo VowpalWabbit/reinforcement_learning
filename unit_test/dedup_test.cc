@@ -12,8 +12,10 @@ namespace fb = flatbuffers;
 
 fb::DetachedBuffer str_to_buff(const char *str)
 {
-  char *copy = strdup(str);
-  return fb::DetachedBuffer(nullptr, false, (uint8_t*)copy, 0, (uint8_t*)copy, strlen(copy));
+  auto len = strlen(str) + 1;
+  uint8_t *copy = fb::DefaultAllocator().allocate(len);
+  memcpy(copy, str, len);
+  return fb::DetachedBuffer(nullptr, false, copy, 0, copy, len);
 }
 
 
