@@ -188,9 +188,4 @@ namespace reinforcement_learning
     INIT_CHECK();
     return _pimpl->request_episodic_decision(event_id, previous_id, context_json, resp, episode, status);
   }
-
-  int live_model::report_outcome(const char* episode_id, const char* event_id, float outcome, api_status* status) {
-    INIT_CHECK();
-    return _pimpl->report_outcome(episode_id, event_id, outcome, status);
-  }
 }

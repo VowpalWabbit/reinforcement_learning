@@ -543,12 +543,8 @@ namespace reinforcement_learning {
     resp.set_event_id(event_id);
 
     RETURN_IF_FAIL(episode.update(previous_id, context_json, resp, status));
-    RETURN_IF_FAIL(_ranking_logger->log(episode.get_episode_id(), previous_id, context_patched.c_str(), resp, status));
+    RETURN_IF_FAIL(_interaction_logger->log(episode.get_episode_id(), previous_id, context_patched.c_str(), resp, status));
     return error_code::success;
-  }
-
-  int live_model_impl::report_outcome(const char* episode_id, const char* event_id, float outcome, api_status* status) {
-    return _outcome_logger->log(episode_id, event_id, outcome, status);
   }
 
   //helper: check if at least one of the arguments is null or empty
