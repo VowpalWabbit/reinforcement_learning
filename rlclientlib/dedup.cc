@@ -129,8 +129,9 @@ int zstd_compressor::decompress(generic_event::payload_buffer_t& buf, api_status
 }
 
 
-dedup_state::dedup_state(const utility::configuration &c): 
+dedup_state::dedup_state(const utility::configuration& c, i_time_provider* time_provider): 
   _compressor(c.get_int(name::ZSTD_COMPRESSION_LEVEL, zstd_compressor::ZSTD_DEFAULT_COMPRESSION_LEVEL))
+  , _time_provider(time_provider)
 {
 }
 
@@ -215,10 +216,9 @@ size_t action_dict_builder::size() const
 
 int action_dict_builder::finalize(generic_event& evt, api_status* status)
 {
-  i_time_provider* _time_provider = nullptr;
   l::dedup_info_serializer ser;
-  const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
   generic_event::object_list_t action_ids;
+  const auto now = _state.get_time_provider() != nullptr ? _state.get_time_provider()->gmt_now() : timestamp();
   std::vector<string_view> action_values;
 
   RETURN_IF_FAIL(_state.get_all_values(_used_objects, action_ids, action_values, status));
@@ -279,7 +279,7 @@ struct dedup_collection_serializer
 class dedup_extensions : public logger::i_logger_extensions
 {
 public:
-	dedup_extensions(const utility::configuration &c) : logger::i_logger_extensions(c), _dedup_state(c) {}
+	dedup_extensions(const utility::configuration &c, i_time_provider* time_provider) : logger::i_logger_extensions(c), _dedup_state(c, time_provider) {}
 
 	logger::i_async_batcher<generic_event> *create_batcher(logger::i_message_sender *sender, utility::watchdog &watchdog,
 																									error_callback_fn *perror_cb, const char *section) override {
@@ -307,8 +307,8 @@ private:
 };
 
 
-logger::i_logger_extensions *create_dedup_logger_extension(const utility::configuration& config) {
-  return new dedup_extensions(config);
+logger::i_logger_extensions *create_dedup_logger_extension(const utility::configuration& config, i_time_provider* time_provider) {
+  return new dedup_extensions(config, time_provider);
 }
 
 }

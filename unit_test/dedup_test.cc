@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(compression_transformer)
 BOOST_AUTO_TEST_CASE(action_dict_builder)
 {
   r::utility::configuration c;
-  r::dedup_state state(c);
+  r::dedup_state state(c, nullptr);
   r::action_dict_builder builder(state);
 
   BOOST_CHECK_EQUAL(0, builder.size());
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(dedup_state_expected_use)
 {
   //This test the expected usage of it
   r::utility::configuration c;
-  r::dedup_state state(c);
+  r::dedup_state state(c, nullptr);
 
   BOOST_CHECK_EQUAL(1, state.get_ewma_value());
   state.update_ewma(2);
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(dedup_state_expected_use)
 BOOST_AUTO_TEST_CASE(dedup_state_and_bad_state)
 {
   r::utility::configuration c;
-  r::dedup_state state(c);
+  r::dedup_state state(c, nullptr);
 
   BOOST_CHECK_EQUAL(0, state.get_object(10).size());
 

@@ -4,5 +4,5 @@
 
 namespace reinforcement_learning
 {
-  logger::i_logger_extensions *create_dedup_logger_extension(const utility::configuration&);
+  logger::i_logger_extensions* create_dedup_logger_extension(const utility::configuration& config, i_time_provider* time_provider);
 }

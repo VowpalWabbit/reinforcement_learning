@@ -32,7 +32,7 @@ namespace reinforcement_learning
       virtual int transform_payload_and_extract_objects(const char* context, std::string &edited_payload, generic_event::object_list_t &objects, api_status* status) = 0;
       virtual int transform_serialized_payload(generic_event::payload_buffer_t &input, api_status* status) = 0;
 
-      static i_logger_extensions* get_extensions(const utility::configuration&);
+      static i_logger_extensions* get_extensions(const utility::configuration& config, i_time_provider* time_provider);
     };
 
     class interaction_logger_facade {

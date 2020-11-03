@@ -67,7 +67,7 @@ namespace reinforcement_learning
 
   class dedup_state {
   public:
-    explicit dedup_state(const utility::configuration &c);
+    dedup_state(const utility::configuration &c, i_time_provider* time_provider);
 
     string_view get_object(generic_event::object_id_t aid);
     float get_ewma_value() const;
@@ -80,6 +80,8 @@ namespace reinforcement_learning
     int compress(generic_event::payload_buffer_t& input, api_status* status) const;
     int transform_payload_and_add_objects(const char* payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status);
 
+    i_time_provider* get_time_provider() { return _time_provider.get(); } 
+
     //test helpers, don't use them directly
     inline dedup_dict& get_dict() { return _dict; }
     inline ewma& get_ewma() { return _ewma; }
@@ -88,6 +90,7 @@ namespace reinforcement_learning
     dedup_dict _dict;
     zstd_compressor _compressor;
     std::mutex _mutex;
+    std::unique_ptr<i_time_provider> _time_provider;
   };
 
   static const char* DEDUP_DICT_EVENT_ID = "3defd95a-0122-4aac-9068-0b9ac30b66d8";

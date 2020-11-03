@@ -6,7 +6,9 @@ namespace reinforcement_learning { namespace logger {
 class default_extensions : public i_logger_extensions
 {
 public:
-	default_extensions(const utility::configuration &c) : i_logger_extensions(c) {}
+	default_extensions(const utility::configuration &c, i_time_provider* provider) : i_logger_extensions(c) {
+		delete provider; //We don't use it
+	}
 
 	i_async_batcher<generic_event> *create_batcher(i_message_sender *sender, utility::watchdog &watchdog, error_callback_fn *perror_cb, const char *section) override {
 		auto config = utility::get_batcher_config(_config, section);
@@ -35,11 +37,11 @@ i_logger_extensions::i_logger_extensions(const utility::configuration &config): 
 i_logger_extensions::~i_logger_extensions() { }
 
 
-i_logger_extensions *i_logger_extensions::get_extensions(const utility::configuration &config) {
+i_logger_extensions *i_logger_extensions::get_extensions(const utility::configuration &config, i_time_provider* time_provider) {
 	const bool enable_dedup = config.get_int(name::PROTOCOL_VERSION, 1) == 2 &&
 		to_content_encoding_enum(config.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY)) == content_encoding_enum::ZSTD_AND_DEDUP;
 
-	return enable_dedup ? create_dedup_logger_extension(config) : new default_extensions(config);
+	return enable_dedup ? create_dedup_logger_extension(config, time_provider) : new default_extensions(config, time_provider);
 }
 
 } } 
