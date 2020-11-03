@@ -163,7 +163,7 @@ int dedup_state::remove_all_values(const std::unordered_map<generic_event::objec
   std::unique_lock<std::mutex> mlock(_mutex);
   for(auto kv: input) {
     if(!_dict.remove_object(kv.first, kv.second)) {
-      RETURN_ERROR_LS(nullptr, status, compression_error) << "Key not found while prunning dedup_dict";
+      RETURN_ERROR_LS(nullptr, status, compression_error) << "Key not found while pruning dedup_dict";
     }
   }
 

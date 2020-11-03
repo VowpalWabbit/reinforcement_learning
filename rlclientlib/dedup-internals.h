@@ -42,16 +42,16 @@ namespace reinforcement_learning
 
   class ewma {
   public:
-    ewma(float initial = 1, float weigth = 0.5): _current(initial), _weigth(weigth) {}
+    ewma(float initial = 1, float weight = 0.5): _current(initial), _weight(weight) {}
 
     void update(float new_value) {
-      _current = (1 - _weigth) * _current + (_weigth * new_value);
+      _current = (1 - _weight) * _current + (_weight * new_value);
     }
 
     float value() const { return _current; }
   private:
     float _current;
-    const float _weigth;
+    const float _weight;
   };
 
   class zstd_compressor {
