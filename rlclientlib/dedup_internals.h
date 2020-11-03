@@ -82,7 +82,7 @@ namespace reinforcement_learning
     int compress(generic_event::payload_buffer_t& input, api_status* status) const;
     int transform_payload_and_add_objects(const char* payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status);
 
-    i_time_provider* get_time_provider() { return _time_provider.get(); } 
+    i_time_provider* get_time_provider() { return _time_provider.get(); }
 
     //test helpers, don't use them directly
     inline dedup_dict& get_dict() { return _dict; }

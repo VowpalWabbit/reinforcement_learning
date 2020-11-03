@@ -13,18 +13,18 @@ namespace u = utility;
 namespace fb = flatbuffers;
 namespace l = reinforcement_learning::logger;
 
-dedup_dict::dict_entry::dict_entry(const char *data, size_t length) : _count(1),
+dedup_dict::dict_entry::dict_entry(const char* data, size_t length) : _count(1),
                                                                       _length(length),
                                                                       _content(data, data + length)
 {
 }
 
-static generic_event::object_id_t hash_content(const char *start, size_t size)
+static generic_event::object_id_t hash_content(const char*start, size_t size)
 {
   return uniform_hash(start, size, 0);
 }
 
-generic_event::object_id_t dedup_dict::add_object(const char *start, size_t length)
+generic_event::object_id_t dedup_dict::add_object(const char*start, size_t length)
 {
   auto hash = hash_content(start, length);
   auto it = _entries.find(hash);
@@ -129,7 +129,7 @@ int zstd_compressor::decompress(generic_event::payload_buffer_t& buf, api_status
 }
 
 
-dedup_state::dedup_state(const utility::configuration& c, i_time_provider* time_provider): 
+dedup_state::dedup_state(const utility::configuration& c, i_time_provider* time_provider):
   _compressor(c.get_int(name::ZSTD_COMPRESSION_LEVEL, zstd_compressor::ZSTD_DEFAULT_COMPRESSION_LEVEL))
   , _time_provider(time_provider)
 {
@@ -254,8 +254,8 @@ class dedup_extensions : public logger::i_logger_extensions
 public:
 	dedup_extensions(const utility::configuration &c, i_time_provider* time_provider) : logger::i_logger_extensions(c), _dedup_state(c, time_provider) {}
 
-	logger::i_async_batcher<generic_event> *create_batcher(logger::i_message_sender *sender, utility::watchdog &watchdog,
-																									error_callback_fn *perror_cb, const char *section) override {
+	logger::i_async_batcher<generic_event>* create_batcher(logger::i_message_sender* sender, utility::watchdog &watchdog,
+																									error_callback_fn* perror_cb, const char* section) override {
 		auto config = utility::get_batcher_config(_config, section);
 		int _dummy = 0;
 		return new logger::async_batcher<generic_event, dedup_collection_serializer>(
@@ -268,11 +268,11 @@ public:
 
 	bool is_enabled() override { return true; }
 
-	int transform_payload_and_extract_objects(const char* context, std::string &edited_payload, generic_event::object_list_t &objects, api_status* status) override {
+	int transform_payload_and_extract_objects(const char* context, std::string& edited_payload, generic_event::object_list_t& objects, api_status* status) override {
 		return _dedup_state.transform_payload_and_add_objects(context, edited_payload, objects, status);
 	}
 
-  int transform_serialized_payload(generic_event::payload_buffer_t &input, api_status* status) override {
+  int transform_serialized_payload(generic_event::payload_buffer_t& input, api_status* status) override {
 		return _dedup_state.compress(input, status);
 	}
 private:
