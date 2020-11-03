@@ -228,7 +228,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClInclude Include="model_mgmt\empty_data_transport.h" />
     <ClInclude Include="logger\async_batcher.h" />
     <ClInclude Include="logger\event_queue.h" />
-    <ClInclude Include="dedup-internals.h" />
+    <ClInclude Include="dedup_internals.h" />
     <ClInclude Include="utility\stl_container_adapter.h" />
     <ClInclude Include="utility\watchdog.h" />
     <ClInclude Include="vw_model\vw_model.h" />

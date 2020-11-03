@@ -4,7 +4,7 @@
 #endif
 
 #include <boost/test/unit_test.hpp>
-#include "dedup-internals.h"
+#include "dedup_internals.h"
 
 namespace r = reinforcement_learning;
 namespace err = reinforcement_learning::error_code;

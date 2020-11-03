@@ -1,4 +1,4 @@
-#include "dedup-internals.h"
+#include "dedup_internals.h"
 #include "hash.h"
 #include "serialization/payload_serializer.h"
 #include "utility/context_helper.h"
