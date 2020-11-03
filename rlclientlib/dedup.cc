@@ -296,7 +296,6 @@ public:
 	bool is_enabled() override { return true; }
 
 	int transform_payload_and_extract_objects(const char* context, std::string &edited_payload, generic_event::object_list_t &objects, api_status* status) override {
-		// std::unique_lock<std::mutex> mlock(_mutex); < actually goes into dedup_state since it's shared
 		return _dedup_state.transform_payload_and_add_objects(context, edited_payload, objects, status);
 	}
 
