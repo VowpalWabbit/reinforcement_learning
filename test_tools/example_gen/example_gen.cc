@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
     ("help", "Produce help message")
     ("all", "use all args")
     ("dedup", "Enable dedup/zstd")
-    ("kind", po::value<std::string>(), "which kind of example to generate (cb,ccb,slates,(f|s)(s|i)?-reward,action-taken)");
+    ("kind", po::value<std::string>(), "which kind of example to generate (cb,ccb,slates,ca,(f|s)(s|i)?-reward,action-taken)");
 
   po::positional_options_description pd;
   pd.add("kind", 1);
