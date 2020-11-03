@@ -72,9 +72,11 @@ namespace reinforcement_learning
     string_view get_object(generic_event::object_id_t aid);
     float get_ewma_value() const;
 
-    //FIXME pass a value-oblivious interator to the keys
-    int get_all_values(const std::unordered_map<generic_event::object_id_t, size_t>& src, generic_event::object_list_t& action_ids, std::vector<string_view>& action_values, api_status* status);
-    int remove_all_values(const std::unordered_map<generic_event::object_id_t, size_t>&input, api_status* status);
+    template<typename I>
+    int get_all_values(I start, I end, generic_event::object_list_t& action_ids, std::vector<string_view>& action_values, api_status* status);
+
+    template<typename I>
+    int remove_all_values(I start, I end, api_status* status);
 
     void update_ewma(float value);
     int compress(generic_event::payload_buffer_t& input, api_status* status) const;
@@ -108,4 +110,31 @@ namespace reinforcement_learning
     std::unordered_map<generic_event::object_id_t, size_t> _used_objects;
   };
 
+  template<typename I>
+  int dedup_state::get_all_values(I start, I end, generic_event::object_list_t& action_ids, std::vector<string_view>& action_values, api_status* status) {
+    std::unique_lock<std::mutex> mlock(_mutex);
+
+    for(; start != end; ++start) {
+      auto content = _dict.get_object(start->first);
+      if(content.size() == 0) {
+        RETURN_ERROR_LS(nullptr, status, compression_error) << "Key not found while building batch dictionary";
+      }
+      action_ids.push_back(start->first);
+      action_values.push_back(content);
+    }
+
+    return error_code::success;
+  }
+
+  template<typename I>
+  int dedup_state::remove_all_values(I start, I end, api_status* status) {
+    std::unique_lock<std::mutex> mlock(_mutex);
+    for(; start != end; ++start) {
+      if(!_dict.remove_object(start->first, start->second)) {
+        RETURN_ERROR_LS(nullptr, status, compression_error) << "Key not found while pruning dedup_dict";
+      }
+    }
+
+    return error_code::success;
+  }
 }

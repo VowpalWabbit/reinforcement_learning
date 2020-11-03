@@ -144,33 +144,6 @@ float dedup_state::get_ewma_value() const {
   return _ewma.value();
 }
 
-int dedup_state::get_all_values(const std::unordered_map<generic_event::object_id_t, size_t>& src, generic_event::object_list_t& action_ids, std::vector<string_view>& action_values, api_status* status)
-{
-  std::unique_lock<std::mutex> mlock(_mutex);
-
-  for(auto a : src) {
-    auto content = _dict.get_object(a.first);
-    if(content.size() == 0) {
-      RETURN_ERROR_LS(nullptr, status, compression_error) << "Key not found while building batch dictionary";
-    }
-    action_ids.push_back(a.first);
-    action_values.push_back(content);
-  }
-
-  return error_code::success;
-}
-
-int dedup_state::remove_all_values(const std::unordered_map<generic_event::object_id_t, size_t>&input, api_status* status) {
-  std::unique_lock<std::mutex> mlock(_mutex);
-  for(auto kv: input) {
-    if(!_dict.remove_object(kv.first, kv.second)) {
-      RETURN_ERROR_LS(nullptr, status, compression_error) << "Key not found while pruning dedup_dict";
-    }
-  }
-
-  return error_code::success;
-}
-
 void dedup_state::update_ewma(float value)
 {
   //This is racy, but update only reads and modifies a single value, so it won't lead to data corruption 
@@ -221,11 +194,11 @@ int action_dict_builder::finalize(generic_event& evt, api_status* status)
   const auto now = _state.get_time_provider() != nullptr ? _state.get_time_provider()->gmt_now() : timestamp();
   std::vector<string_view> action_values;
 
-  RETURN_IF_FAIL(_state.get_all_values(_used_objects, action_ids, action_values, status));
+  RETURN_IF_FAIL(_state.get_all_values(_used_objects.begin(), _used_objects.end(), action_ids, action_values, status));
   auto payload = ser.event(action_ids, action_values);
 
   //remove used actions from the dictionary
-  RETURN_IF_FAIL(_state.remove_all_values(_used_objects, status));
+  RETURN_IF_FAIL(_state.remove_all_values(_used_objects.begin(), _used_objects.end(), status));
 
   //compress the payload
   size_t old_size = payload.size();

@@ -212,13 +212,13 @@ BOOST_AUTO_TEST_CASE(dedup_state_expected_use)
 
   r::generic_event::object_list_t action_ids;
   std::vector<r::string_view> action_values;
-  BOOST_CHECK_EQUAL(err::success, state.get_all_values(batch_actions, action_ids, action_values, nullptr));
+  BOOST_CHECK_EQUAL(err::success, state.get_all_values(batch_actions.begin(), batch_actions.end(), action_ids, action_values, nullptr));
 
   BOOST_CHECK_EQUAL(2, action_ids.size());
   BOOST_CHECK_EQUAL(2, action_values.size());
 
   //3nd - we remove those ids from dedup_state_dict
-  BOOST_CHECK_EQUAL(err::success, state.remove_all_values(batch_actions, nullptr));
+  BOOST_CHECK_EQUAL(err::success, state.remove_all_values(batch_actions.begin(), batch_actions.end(), nullptr));
   BOOST_CHECK_EQUAL(state.get_dict().get_object(obj_list[0]).size(), 0);
   BOOST_CHECK_EQUAL(state.get_dict().get_object(obj_list[1]).size(), 0);
 }
@@ -238,8 +238,8 @@ BOOST_AUTO_TEST_CASE(dedup_state_and_bad_state)
 
   r::generic_event::object_list_t action_ids;
   std::vector<r::string_view> action_values;
-  BOOST_CHECK_EQUAL(err::compression_error, state.get_all_values(batch_actions, action_ids, action_values, nullptr));
-  BOOST_CHECK_EQUAL(err::compression_error, state.remove_all_values(batch_actions, nullptr));
+  BOOST_CHECK_EQUAL(err::compression_error, state.get_all_values(batch_actions.begin(), batch_actions.end(), action_ids, action_values, nullptr));
+  BOOST_CHECK_EQUAL(err::compression_error, state.remove_all_values(batch_actions.begin(), batch_actions.end(), nullptr));
 
   auto id = state.get_dict().add_object("abc", 3);
 
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(dedup_state_and_bad_state)
     { id, 100 },
   };
   //dedup_dict clamps the remove count to its current count
-  BOOST_CHECK_EQUAL(err::success, state.remove_all_values(batch_actions, nullptr));
+  BOOST_CHECK_EQUAL(err::success, state.remove_all_values(batch_actions.begin(), batch_actions.end(), nullptr));
   BOOST_CHECK_EQUAL(0, state.get_dict().get_object(id).size());
 }
 
