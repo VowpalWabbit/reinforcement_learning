@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(action_dict_builder)
   //include them in the dict-builder
   r::generic_event::object_list_t lst = { id1, id2 };
 
-  builder.add(lst);
+  BOOST_CHECK_EQUAL(r::error_code::success, builder.add(lst, nullptr));
   BOOST_CHECK_GT(builder.size(), 0);
 
   r::generic_event evt;
@@ -164,6 +164,24 @@ BOOST_AUTO_TEST_CASE(action_dict_builder)
   BOOST_CHECK_EQUAL(1, evt.get_pass_prob());
   BOOST_CHECK_EQUAL(r::generic_event::payload_type_t::PayloadType_DedupInfo, evt.get_payload_type());
 }
+
+BOOST_AUTO_TEST_CASE(action_dict_builder_missing_actions_in_dict)
+{
+  r::utility::configuration c;
+  r::dedup_state state(c, nullptr);
+  r::action_dict_builder builder(state);
+
+  BOOST_CHECK_EQUAL(0, builder.size());
+
+  //lets add a couple of actions to the dict
+  auto id = state.get_dict().add_object("abc", 3);
+
+  //include an invalid one
+  r::generic_event::object_list_t lst = { id + 1 };
+
+  BOOST_CHECK_EQUAL(r::error_code::compression_error, builder.add(lst, nullptr));
+}
+
 
 BOOST_AUTO_TEST_CASE(ewma_test)
 {

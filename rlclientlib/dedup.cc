@@ -48,7 +48,6 @@ bool dedup_dict::remove_object(generic_event::object_id_t aid, size_t count)
   if (it == _entries.end())
     return false;
 
-  //XXX should we fail when count is bigger than the current dict count?
   count = std::min(count, it->second._count);
   it->second._count -= count;
   if (!it->second._count)
@@ -151,7 +150,6 @@ void dedup_state::update_ewma(float value)
 }
 
 int dedup_state::compress(generic_event::payload_buffer_t& input, api_status* status) const {
-  //XXX this method is only const because we're not reusing the compression context
   return _compressor.compress(input, status);
 }
 
@@ -164,14 +162,16 @@ action_dict_builder::action_dict_builder(dedup_state& state):
   _size_estimate(0)
   , _state(state) {}
 
-void action_dict_builder::add(const generic_event::object_list_t& object_ids)
+int action_dict_builder::add(const generic_event::object_list_t& object_ids, api_status* status)
 {
   for(auto aid : object_ids) {
     auto it = _used_objects.find(aid);
     if (it == _used_objects.end())
     {
-      //XXX FAIL had if the action is missing
       auto content = _state.get_object(aid);
+      if(content.size() == 0) {
+        RETURN_ERROR_LS(nullptr, status, compression_error) << "Key not found while processing event into batch dictionary";
+      }
       _used_objects.insert({ aid, 1 });
       _size_estimate += sizeof(size_t) + content.size();
     }
@@ -180,6 +180,7 @@ void action_dict_builder::add(const generic_event::object_list_t& object_ids)
       ++it->second;
     }
   }
+  return error_code::success;
 }
 
 size_t action_dict_builder::size() const
@@ -226,7 +227,7 @@ struct dedup_collection_serializer
 
   int add(event_t& evt, api_status* status = nullptr)
   {
-    _builder.add(evt.get_object_list());
+    RETURN_IF_FAIL(_builder.add(evt.get_object_list(), status));
     return _ser.add(evt, status);
   }
 

@@ -101,7 +101,7 @@ namespace reinforcement_learning
 
     explicit action_dict_builder(dedup_state& state);
 
-    void add(const generic_event::object_list_t& object_ids);
+    int add(const generic_event::object_list_t& object_ids, api_status* status);
     size_t size() const;
     int finalize(generic_event& evt, api_status* status);
   private:
