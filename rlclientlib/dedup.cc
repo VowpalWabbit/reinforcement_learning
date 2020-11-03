@@ -75,7 +75,7 @@ int dedup_dict::transform_payload_and_add_objects(const char* payload, std::stri
   object_ids.reserve(context_info.actions.size());
 
   int edit_offset = 0;
-  for (auto &p : context_info.actions)
+  for (auto& p : context_info.actions)
   {
     auto hash = add_object(&payload[p.first], p.second);
     object_ids.push_back(hash);
@@ -164,7 +164,7 @@ action_dict_builder::action_dict_builder(dedup_state& state):
   _size_estimate(0)
   , _state(state) {}
 
-void action_dict_builder::add(const generic_event::object_list_t &object_ids)
+void action_dict_builder::add(const generic_event::object_list_t& object_ids)
 {
   for(auto aid : object_ids) {
     auto it = _used_objects.find(aid);
@@ -221,10 +221,10 @@ struct dedup_collection_serializer
 
   static int message_id() { return logger::message_type::fb_generic_event_collection; }
 
-  dedup_collection_serializer(buffer_t &buffer, content_encoding_enum content_encoding, shared_state_t &state)
+  dedup_collection_serializer(buffer_t& buffer, content_encoding_enum content_encoding, shared_state_t& state)
       : _dummy(0), _ser(buffer, content_encoding, _dummy), _state(state), _builder(state) {}
 
-  int add(event_t &evt, api_status *status = nullptr)
+  int add(event_t& evt, api_status* status = nullptr)
   {
     _builder.add(evt.get_object_list());
     return _ser.add(evt, status);
@@ -244,7 +244,7 @@ struct dedup_collection_serializer
   }
 
   int _dummy;
-  shared_state_t &_state;
+  shared_state_t& _state;
   action_dict_builder _builder;
   logger::fb_collection_serializer<event_t> _ser;
 };
@@ -252,9 +252,9 @@ struct dedup_collection_serializer
 class dedup_extensions : public logger::i_logger_extensions
 {
 public:
-	dedup_extensions(const utility::configuration &c, i_time_provider* time_provider) : logger::i_logger_extensions(c), _dedup_state(c, time_provider) {}
+	dedup_extensions(const utility::configuration& c, i_time_provider* time_provider) : logger::i_logger_extensions(c), _dedup_state(c, time_provider) {}
 
-	logger::i_async_batcher<generic_event>* create_batcher(logger::i_message_sender* sender, utility::watchdog &watchdog,
+	logger::i_async_batcher<generic_event>* create_batcher(logger::i_message_sender* sender, utility::watchdog& watchdog,
 																									error_callback_fn* perror_cb, const char* section) override {
 		auto config = utility::get_batcher_config(_config, section);
 		int _dummy = 0;
@@ -280,7 +280,7 @@ private:
 };
 
 
-logger::i_logger_extensions *create_dedup_logger_extension(const utility::configuration& config, i_time_provider* time_provider) {
+logger::i_logger_extensions* create_dedup_logger_extension(const utility::configuration& config, i_time_provider* time_provider) {
   return new dedup_extensions(config, time_provider);
 }
 

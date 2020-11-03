@@ -61,7 +61,7 @@ namespace reinforcement_learning {
 
 
     template<typename TSerializer, typename... Rest>
-    int wrap_log_call(i_logger_extensions &ext, TSerializer& serializer, const char* context, generic_event::object_list_t& objects, generic_event::payload_buffer_t& payload, api_status* status, const Rest&... rest) {
+    int wrap_log_call(i_logger_extensions& ext, TSerializer& serializer, const char* context, generic_event::object_list_t& objects, generic_event::payload_buffer_t& payload, api_status* status, const Rest&... rest) {
       if(!ext.is_enabled()) {
         payload = serializer.event(context, rest...);
       } else {

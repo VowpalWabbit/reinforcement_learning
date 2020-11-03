@@ -67,7 +67,7 @@ namespace reinforcement_learning
 
   class dedup_state {
   public:
-    dedup_state(const utility::configuration &c, i_time_provider* time_provider);
+    dedup_state(const utility::configuration& c, i_time_provider* time_provider);
 
     string_view get_object(generic_event::object_id_t aid);
     float get_ewma_value() const;
@@ -101,7 +101,7 @@ namespace reinforcement_learning
 
     explicit action_dict_builder(dedup_state& state);
 
-    void add(const generic_event::object_list_t &object_ids);
+    void add(const generic_event::object_list_t& object_ids);
     size_t size() const;
     int finalize(generic_event& evt, api_status* status);
   private:

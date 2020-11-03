@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
     enable_dedup = vm.count("dedup");
     if(vm.count("kind") > 0)
       action_name = vm["kind"].as<std::string>();
-  } catch(std::exception &e) {
+  } catch(std::exception& e) {
     std::cout << e.what() << std::endl;
     std::cout << desc << std::endl;
     return 0;

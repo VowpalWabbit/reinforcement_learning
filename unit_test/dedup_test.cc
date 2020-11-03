@@ -10,10 +10,10 @@ namespace r = reinforcement_learning;
 namespace err = reinforcement_learning::error_code;
 namespace fb = flatbuffers;
 
-fb::DetachedBuffer str_to_buff(const char *str)
+fb::DetachedBuffer str_to_buff(const char* str)
 {
   auto len = strlen(str) + 1;
-  uint8_t *copy = fb::DefaultAllocator().allocate(len);
+  uint8_t* copy = fb::DefaultAllocator().allocate(len);
   memcpy(copy, str, len);
   return fb::DetachedBuffer(nullptr, false, copy, 0, copy, len);
 }
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(compression_transformer)
 {
   r::zstd_compressor compressor(1);
 
-  const char *input = "fheu83bf vcnCD,mkfne9";
+  const char* input = "fheu83bf vcnCD,mkfne9";
   auto in = str_to_buff(input);
   auto ptr1 = in.data();
 
