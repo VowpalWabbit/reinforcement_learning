@@ -9,6 +9,7 @@
 #include "trace_logger.h"
 
 namespace reinforcement_learning {
+
 enum class http_method { HEAD, GET, POST };
 
 // Generic request class used by all http client library implementations.

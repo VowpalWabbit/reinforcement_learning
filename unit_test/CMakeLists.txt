@@ -28,6 +28,7 @@ set(TEST_SOURCES
 
 if (vw_USE_AZURE_FACTORIES)
   list(APPEND TEST_SOURCES
+    cpprest_http_client_test.cc
     eventhub_client_test.cc
     http_client_test.cc
   )
