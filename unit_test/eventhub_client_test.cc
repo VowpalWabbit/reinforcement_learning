@@ -32,6 +32,7 @@ void error_counter_func(const r::api_status &, void *counter)
 
 BOOST_AUTO_TEST_CASE(send_something)
 {
+  // TODO: Use create_http_client with mock client option in configuration.
   auto http_client = new mock_http_client("localhost:8080");
 
   //create a client

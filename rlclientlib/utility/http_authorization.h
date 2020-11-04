@@ -1,10 +1,11 @@
 #pragma once
 
-#include "api_status.h"
-
 #include <chrono>
 #include <mutex>
 #include <string>
+
+#include "api_status.h"
+#include "http_client.h"
 
 namespace reinforcement_learning {
   class i_trace;
@@ -16,14 +17,15 @@ namespace reinforcement_learning {
     http_authorization(const std::string& host, const std::string& key_name,
       const std::string& key, const std::string& name, i_trace* trace);
     ~http_authorization() = default;
-    
-    int init(api_status* status);
-    int get(std::string& authorization, api_status* status);
+
+    int init(const i_http_client* client, api_status* status);
+    int get(const i_http_client* client, std::string& authorization, api_status* status);
 
   private:
-    int check_authorization_validity_generate_if_needed(api_status* status);
+    int check_authorization_validity_generate_if_needed(const i_http_client* client, api_status* status);
 
     static int generate_authorization_string(
+      const i_http_client* client,
       std::chrono::seconds now,
       const std::string& shared_access_key,
       const std::string& shared_access_key_name,

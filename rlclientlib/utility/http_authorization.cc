@@ -1,17 +1,15 @@
-#define OPENSSL_API_COMPAT 0x0908
-#include "error_callback_fn.h"
-#include "err_constants.h"
 #include "http_authorization.h"
-#include "http_client.h"
-#include "trace_logger.h"
 
 #include <vector>
-#include <openssl/hmac.h>
 #include <sstream>
 
-// TODO: Replace cpprest utility used here.
-#include <cpprest/http_client.h>
-using namespace utility; // Common utilities like string conversions
+#define OPENSSL_API_COMPAT 0x0908
+#include <openssl/hmac.h>
+
+#include "error_callback_fn.h"
+#include "err_constants.h"
+#include "http_client.h"
+#include "trace_logger.h"
 
 using namespace std::chrono;
 
@@ -30,30 +28,31 @@ namespace reinforcement_learning {
     , _trace(trace) {
   }
 
-  int http_authorization::init(api_status* status) {
-    return check_authorization_validity_generate_if_needed(status);
+  int http_authorization::init(const i_http_client* client, api_status* status) {
+    return check_authorization_validity_generate_if_needed(client, status);
   }
 
-  int http_authorization::get(std::string& authorization, api_status* status) {
-    RETURN_IF_FAIL(check_authorization_validity_generate_if_needed(status));
+  int http_authorization::get(const i_http_client* client, std::string& authorization, api_status* status) {
+    RETURN_IF_FAIL(check_authorization_validity_generate_if_needed(client, status));
     std::lock_guard<std::mutex> lock(_mutex);
     authorization = _authorization;
     return error_code::success;
   }
 
-  int http_authorization::check_authorization_validity_generate_if_needed(api_status* status) {
+  int http_authorization::check_authorization_validity_generate_if_needed(const i_http_client* client, api_status* status) {
     const auto now = duration_cast<std::chrono::seconds>(system_clock::now().time_since_epoch());
     std::lock_guard<std::mutex> lock(_mutex);
     // re-create authorization token if needed
     if (now.count() > _valid_until - 60 * 15) {
       RETURN_IF_FAIL(generate_authorization_string(
-        now, _shared_access_key, _shared_access_key_name, _eventhub_host, _eventhub_name,
+        client, now, _shared_access_key, _shared_access_key_name, _eventhub_host, _eventhub_name,
         _authorization, _valid_until, status, _trace));
     }
     return error_code::success;
   }
 
   int http_authorization::generate_authorization_string(
+    const i_http_client* client,
     std::chrono::seconds now,
     const std::string& shared_access_key,
     const std::string& shared_access_key_name,
@@ -72,8 +71,7 @@ namespace reinforcement_learning {
     resource_stream << "https://" << eventhub_host << "/" << eventhub_name;
 
     // encode(resource_stream)
-    const auto encoded_uri = conversions::to_utf8string(
-      web::uri::encode_data_string(conversions::to_string_t(resource_stream.str())));
+    const auto encoded_uri = client->encode(resource_stream.str());
 
     // construct data to be signed
     std::ostringstream data_stream;
@@ -92,7 +90,7 @@ namespace reinforcement_learning {
     digest.resize(digest_len);
 
     // encode digest (base64 + url encoding)
-    const auto encoded_digest = conversions::to_utf8string(web::uri::encode_data_string(conversions::to_base64(digest)));
+    const auto encoded_digest = client->encode(digest);
 
     // construct SAS
     std::ostringstream authorization_stream;

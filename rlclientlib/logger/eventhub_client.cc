@@ -37,11 +37,11 @@ namespace reinforcement_learning {
     // TODO: Use a custom thread pool to avoid the overhead of std::async thread creation.
     return std::async(std::launch::async, [this, try_count]() {
       http_request request(http_method::POST);
-      request.add_header_field("Authorization", _auth.c_str());
-      request.add_header_field("Host", _host.c_str());
+      request.set_header_field("Authorization", _auth.c_str());
+      request.set_header_field("Host", _host.c_str());
       request.set_body(_post_data);
 
-      http_response::status_t code = 500 /*InternalError*/;
+      http_response::status_t code = http_response::status::INTERNAL_ERROR;
       api_status status;
 
       try
@@ -55,7 +55,7 @@ namespace reinforcement_learning {
       }
 
       // If the response is not the expected code then it has failed. Retry if possible otherwise report background error.
-      if (code != 201 /*Created*/)
+      if (code != http_response::status::CREATED)
       {
         // TODO: Handle retrying as part of HTTP interface, to avoid repeated reading of the body _post_data.
 
@@ -85,7 +85,7 @@ namespace reinforcement_learning {
   }
 
   int eventhub_client::init(api_status* status) {
-    RETURN_IF_FAIL(_authorization.init(status));
+    RETURN_IF_FAIL(_authorization.init(_client.get(), status));
     return error_code::success;
   }
 
@@ -111,7 +111,7 @@ namespace reinforcement_learning {
   int eventhub_client::v_send(const buffer& post_data, api_status* status) {
 
     std::string auth_str;
-    RETURN_IF_FAIL(_authorization.get(auth_str, status));
+    RETURN_IF_FAIL(_authorization.get(_client.get(), auth_str, status));
 
     try {
       // Before creating the task, ensure that it is allowed to be created.

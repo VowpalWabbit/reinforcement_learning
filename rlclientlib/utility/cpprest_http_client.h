@@ -4,69 +4,74 @@
 
 #include "http_client.h"
 
-namespace reinforcement_learning
-{
+namespace reinforcement_learning {
 
-  // TODO: Rename to cpprest_http_response.
-  class cpprest_http_response : public http_response
-  {
-  public:
-    // TODO: other ctors.
-    cpprest_http_response(web::http::http_response &&response) : _response{std::move(response)} {}
+class cpprest_http_response : public http_response {
+ public:
+  cpprest_http_response(web::http::http_response &&response)
+      : _response{std::move(response)} {}
 
-    virtual status_t status_code() const override
-    {
-      return _response.status_code();
-    }
+  cpprest_http_response &operator=(web::http::http_response &&response) =
+      delete;
+  cpprest_http_response(const web::http::http_response &response) = delete;
+  cpprest_http_response &operator=(const web::http::http_response &response) =
+      delete;
 
-    virtual int last_modified(std::string &last_modified_str) const override;
+  virtual status_t status_code() const override {
+    return _response.status_code();
+  }
 
-    virtual size_t content_length() const override
-    {
-      return _response.headers().content_length();
-    }
+  virtual int last_modified(std::string &last_modified_str) const override;
 
-    virtual size_t body(char *buffer) const override;
+  virtual size_t content_length() const override {
+    return _response.headers().content_length();
+  }
 
-  private:
-    web::http::http_response _response;
-  };
+  virtual size_t body(char *buffer) const override;
 
-  class cpprest_http_client : public i_http_client
-  {
-  public:
-    cpprest_http_client(const char *url, const utility::configuration &cfg)
-        : _url(url),
-          _impl(::utility::conversions::to_string_t(url), get_http_config(cfg))
-    {
-    }
+ private:
+  web::http::http_response _response;
+};
 
-    cpprest_http_client(cpprest_http_client &&other) = delete;
-    cpprest_http_client &operator=(cpprest_http_client &&other) = delete;
-    cpprest_http_client(const cpprest_http_client &) = delete;
-    cpprest_http_client &operator=(const cpprest_http_client &) = delete;
+class cpprest_http_client : public i_http_client {
+ public:
+  cpprest_http_client(const char *url, const utility::configuration &cfg)
+      : _url(url),
+        _impl(::utility::conversions::to_string_t(url), get_http_config(cfg)) {}
 
-    virtual std::unique_ptr<http_response> request(const http_request &req) override;
+  cpprest_http_client(cpprest_http_client &&other) = delete;
+  cpprest_http_client &operator=(cpprest_http_client &&other) = delete;
+  cpprest_http_client(const cpprest_http_client &) = delete;
+  cpprest_http_client &operator=(const cpprest_http_client &) = delete;
 
-    virtual const std::string &get_url() const override
-    {
-      // TODO: avoid saving url?
-      // return _impl.base_uri().to_string();
-      return _url;
-    }
+  virtual std::unique_ptr<http_response> request(
+      const http_request &req) override;
 
-  private:
-    web::http::method get_cpprest_method(http_method method)
-    {
-      return _method_map.at(method);
-    }
+  virtual const std::string &get_url() const override { return _url; }
 
-    web::http::client::http_client_config get_http_config(const utility::configuration &cfg);
+  virtual std::string encode(const std::string &uri) const override {
+    return ::utility::conversions::to_utf8string(
+        web::uri::encode_data_string(::utility::conversions::to_string_t(uri)));
+  }
 
-    static const std::map<http_method, web::http::method> _method_map;
+  virtual std::string encode(
+      const std::vector<unsigned char> &uri) const override {
+    return ::utility::conversions::to_utf8string(
+        web::uri::encode_data_string(::utility::conversions::to_base64(uri)));
+  }
 
-    const std::string _url;
-    web::http::client::http_client _impl;
-  };
+ private:
+  web::http::method get_cpprest_method(http_method method) {
+    return _method_map.at(method);
+  }
 
-} // namespace reinforcement_learning
+  web::http::client::http_client_config get_http_config(
+      const utility::configuration &cfg);
+
+  static const std::map<http_method, web::http::method> _method_map;
+
+  const std::string _url;
+  web::http::client::http_client _impl;
+};
+
+}  // namespace reinforcement_learning

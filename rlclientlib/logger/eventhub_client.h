@@ -11,11 +11,6 @@
 #include "utility/http_authorization.h"
 #include "utility/http_client.h"
 
-#include <pplx/pplxtasks.h>
-
-#include <memory>
-#include "data_buffer.h"
-
 namespace reinforcement_learning {
 
   class i_trace;
