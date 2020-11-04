@@ -290,14 +290,14 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClInclude Include="logger\eventhub_client.h" />
     <ClInclude Include="model_mgmt\restapi_data_transport.h" />
     <ClInclude Include="utility\http_client.h" />
-    <ClInclude Include="utility\http_helper.h" />
+    <ClInclude Include="utility\cpprest_http_client.h" />
     <ClInclude Include="utility\http_authorization.h" />
 
     <ClCompile Include="azure_factories.cc" />
     <ClCompile Include="logger\eventhub_client.cc" />
     <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="utility\http_client.cc" />
-    <ClCompile Include="utility\http_helper.cc" />
+    <ClCompile Include="utility\cpprest_http_client.cc" />
     <ClCompile Include="utility\http_authorization.cc" />
   </ItemGroup>
   <ItemGroup>

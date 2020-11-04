@@ -198,9 +198,11 @@
     <ClCompile Include="watchdog_test.cc" />
   </ItemGroup>
   <ItemGroup Condition="'$(SkipAzureFactories)' != 'true'">
+    <ClInclude Include="mock_http_client.h" />
+
     <ClCompile Include="eventhub_client_test.cc" />
-    <ClCompile Include="mock_http_client.cc" />
     <ClCompile Include="http_client_test.cc" />
+    <ClCompile Include="cpprest_http_client_test.cc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\rlclientlib\rlclientlib.vcxproj">

@@ -54,7 +54,9 @@ BOOST_AUTO_TEST_CASE(cpprest_http_responses) {
   BOOST_CHECK_EQUAL(resp2.content_length(), resp_data.length());
   BOOST_CHECK_EQUAL(resp2.body(resp_buffer_sz, resp_buffer), e::success);
   BOOST_CHECK_EQUAL(resp_buffer_sz, resp_data.length());
-  BOOST_CHECK_EQUAL(std::string(resp_buffer), resp_data);
+  BOOST_CHECK_EQUAL(
+      std::string(resp_buffer, resp_buffer + resp2.content_length()),
+      resp_data);
 
   delete[] resp_buffer;
 }
