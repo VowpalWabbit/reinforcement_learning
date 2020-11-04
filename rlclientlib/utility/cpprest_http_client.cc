@@ -28,17 +28,18 @@ web::http::client::http_client_config cpprest_http_client::get_http_config(
   return config;
 }
 
-std::unique_ptr<http_response> cpprest_http_client::request(
-    const http_request &request) {
+int cpprest_http_client::request(const http_request &request,
+                                 std::unique_ptr<http_response> &response,
+                                 api_status *status, i_trace *trace) {
   pplx::task<web::http::http_response> response_task;
 
   if (request.method() == http_method::POST) {
     web::http::http_request cpprest_request(web::http::methods::POST);
-    for (const auto &field : request._header_fields)
+    for (const auto &field : request.header_fields())
       cpprest_request.headers().add(_XPLATSTR(field.first.c_str()),
                                     field.second);
 
-    utility::stl_container_adapter container(request._body_buffer.get());
+    utility::stl_container_adapter container(request.body().get());
     const size_t container_size = container.size();
     const auto stream =
         concurrency::streams::bytestream::open_istream(container);
@@ -50,13 +51,14 @@ std::unique_ptr<http_response> cpprest_http_client::request(
   }
 
   try {
-    // TODO: make_unique
-    return std::unique_ptr<http_response>(
+    response = std::unique_ptr<http_response>(
         new cpprest_http_response(response_task.get()));
   } catch (const std::exception &e) {
-    // TODO: handle exceptions
-    throw e;
+    RETURN_ERROR_LS(trace, status, exception_during_http_req)
+        << e.what() << "\n URL: " << get_url();
   }
+
+  return error_code::success;
 }
 
 int cpprest_http_response::last_modified(std::string &last_modified_str) const {
@@ -73,15 +75,15 @@ int cpprest_http_response::last_modified(std::string &last_modified_str) const {
   return error_code::success;
 }
 
-size_t cpprest_http_response::body(char *buffer) const {
-  // TODO: check buffer not null, or handle exceptions.
-  const Concurrency::streams::rawptr_buffer<char> rb(buffer, content_length(),
-                                                     std::ios::out);
-
-  // Write response body into the buffer.
-  // TODO: handle exception here?
-  // TODO: Does this allow reading twice?
-  return _response.body().read_to_end(rb).get();
+int cpprest_http_response::body(size_t &sz, char *buffer) const {
+  try {
+    const Concurrency::streams::rawptr_buffer<char> rb(buffer, content_length(),
+                                                       std::ios::out);
+    sz = _response.body().read_to_end(rb).get();
+  } catch (...) {
+    return error_code::http_response_read_error;
+  }
+  return error_code::success;
 }
 
 }  // namespace reinforcement_learning

@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(background_mock_azure_get) {
   std::string timestamp{"now"};
   auto responder = [&timestamp](const r::http_request &) {
     return std::unique_ptr<r::http_response>(
-        new mock_http_response(200 /*OK*/, timestamp, "response"));
+        new mock_http_response(r::http_response::status::OK, timestamp, "response"));
   };
   http_client->set_responder(r::http_method::HEAD, responder);
   http_client->set_responder(r::http_method::GET, responder);  std::unique_ptr<m::i_data_transport> transport(new m::restapi_data_transport(http_client, nullptr));
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(mock_azure_storage_model_data)
   std::string timestamp{"now"};
   auto responder = [&timestamp](const r::http_request &) {
     return std::unique_ptr<r::http_response>(
-        new mock_http_response(200 /*OK*/, timestamp, "response"));
+        new mock_http_response(r::http_response::status::OK, timestamp, "response"));
   };
   http_client->set_responder(r::http_method::HEAD, responder);
   http_client->set_responder(r::http_method::GET, responder);

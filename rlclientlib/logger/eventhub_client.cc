@@ -44,14 +44,10 @@ namespace reinforcement_learning {
       http_response::status_t code = http_response::status::INTERNAL_ERROR;
       api_status status;
 
-      try
-      {
-        const auto response = _client->request(request);
+      std::unique_ptr<http_response> response;
+      const int err = _client->request(request, response, &status, _trace);
+      if (err == error_code::success) {
         code = response->status_code();
-      }
-      catch (const std::exception &e)
-      {
-        TRACE_ERROR(_trace, e.what());
       }
 
       // If the response is not the expected code then it has failed. Retry if possible otherwise report background error.

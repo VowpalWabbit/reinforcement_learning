@@ -34,22 +34,18 @@ restapi_data_transport::restapi_data_transport(i_http_client *httpcli,
 
 int restapi_data_transport::get_data_info(std::string &last_modified,
                                           uint64_t &sz, api_status *status) {
-  try {
-    const auto response = _httpcli->request(http_request(http_method::HEAD));
+  std::unique_ptr<http_response> response;
+  RETURN_IF_FAIL(_httpcli->request(http_request(http_method::HEAD), response,
+                                   status, _trace));
 
-    if (response->status_code() != http_response::status::OK)
-      RETURN_ERROR_ARG(_trace, status, http_bad_status_code,
-                       _httpcli->get_url());
+  if (response->status_code() != http_response::status::OK)
+    RETURN_ERROR_ARG(_trace, status, http_bad_status_code, _httpcli->get_url());
 
-    RETURN_IF_FAIL(response->last_modified(last_modified));
+  RETURN_IF_FAIL(response->last_modified(last_modified));
 
-    sz = response->content_length();
+  sz = response->content_length();
 
-    return error_code::success;
-  } catch (const std::exception &e) {
-    RETURN_ERROR_LS(_trace, status, exception_during_http_req)
-        << e.what() << "\n URL: " << _httpcli->get_url();
-  }
+  return error_code::success;
 }
 
 int restapi_data_transport::get_data(model_data &ret, api_status *status) {
@@ -60,36 +56,30 @@ int restapi_data_transport::get_data(model_data &ret, api_status *status) {
   if (curr_last_modified == _last_modified && curr_datasz == _datasz)
     return error_code::success;
 
-  try {
-    const auto response = _httpcli->request(http_request(http_method::GET));
+  std::unique_ptr<http_response> response;
+  RETURN_IF_FAIL(_httpcli->request(http_request(http_method::GET), response,
+                                   status, _trace));
 
-    if (response->status_code() != http_response::status::OK)
-      RETURN_ERROR_ARG(_trace, status, http_bad_status_code,
-                       "Found: ", response->status_code(), _httpcli->get_url());
+  if (response->status_code() != http_response::status::OK)
+    RETURN_ERROR_ARG(_trace, status, http_bad_status_code,
+                     "Found: ", response->status_code(), _httpcli->get_url());
 
-    RETURN_IF_FAIL(response->last_modified(curr_last_modified));
+  RETURN_IF_FAIL(response->last_modified(curr_last_modified));
 
-    curr_datasz = response->content_length();
-    if (curr_datasz > 0) {
-      const auto buffer = ret.alloc(curr_datasz);
-      const auto readval = response->body(buffer);
-      ret.data_sz(readval);
-      ret.increment_refresh_count();
-      _datasz = readval;
-    } else {
-      ret.data_sz(0);
-    }
-
-    _last_modified = curr_last_modified;
-    return error_code::success;
-  } catch (const std::exception &e) {
-    ret.free();
-    RETURN_ERROR_LS(_trace, status, exception_during_http_req) << e.what();
-  } catch (...) {
-    ret.free();
-    RETURN_ERROR_LS(_trace, status, exception_during_http_req)
-        << error_code::unknown_s;
+  curr_datasz = response->content_length();
+  if (curr_datasz > 0) {
+    const auto buffer = ret.alloc(curr_datasz);
+    size_t datasz{};
+    RETURN_IF_FAIL(response->body(datasz, buffer));
+    ret.increment_refresh_count();
+    _datasz = datasz;
+  } else {
+    ret.data_sz(0);
   }
+
+  _last_modified = curr_last_modified;
+
+  return error_code::success;
 }
 
 }  // namespace model_management

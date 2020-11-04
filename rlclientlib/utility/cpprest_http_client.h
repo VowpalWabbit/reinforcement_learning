@@ -2,6 +2,7 @@
 
 #include <cpprest/http_client.h>
 
+#include "api_status.h"
 #include "http_client.h"
 
 namespace reinforcement_learning {
@@ -27,7 +28,7 @@ class cpprest_http_response : public http_response {
     return _response.headers().content_length();
   }
 
-  virtual size_t body(char *buffer) const override;
+  virtual int body(size_t &size, char *buffer) const override;
 
  private:
   web::http::http_response _response;
@@ -44,8 +45,9 @@ class cpprest_http_client : public i_http_client {
   cpprest_http_client(const cpprest_http_client &) = delete;
   cpprest_http_client &operator=(const cpprest_http_client &) = delete;
 
-  virtual std::unique_ptr<http_response> request(
-      const http_request &req) override;
+  virtual int request(const http_request &request,
+                      std::unique_ptr<http_response> &response,
+                      api_status *status, i_trace *trace) override;
 
   virtual const std::string &get_url() const override { return _url; }
 

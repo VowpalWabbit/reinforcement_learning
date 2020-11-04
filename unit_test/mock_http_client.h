@@ -4,6 +4,7 @@
 #include <string>
 
 #include "api_status.h"
+#include "trace_logger.h"
 #include "utility/http_client.h"
 
 class mock_http_response : public reinforcement_learning::http_response {
@@ -23,9 +24,10 @@ class mock_http_response : public reinforcement_learning::http_response {
 
   virtual size_t content_length() const override { return _body.length(); }
 
-  virtual size_t body(char *buffer) const override {
+  virtual int body(size_t &sz, char *buffer) const override {
+    sz = _body.length();
     _body.copy(buffer, _body.length());
-    return _body.length();
+    return reinforcement_learning::error_code::success;
   }
 
  private:
@@ -43,10 +45,13 @@ class mock_http_client : public reinforcement_learning::i_http_client {
 
   mock_http_client(const std::string &url) : _url{url} {}
 
-  virtual std::unique_ptr<http_response> request(
-      const http_request &request) override {
+  virtual int request(const http_request &request,
+                      std::unique_ptr<http_response> &response,
+                      reinforcement_learning::api_status *status,
+                      reinforcement_learning::i_trace *trace) override {
     auto responder = _responders[request.method()];
-    return responder(request);
+    response = responder(request);
+    return reinforcement_learning::error_code::success;
   }
 
   virtual const std::string &get_url() const override { return _url; }

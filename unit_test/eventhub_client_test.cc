@@ -71,10 +71,10 @@ BOOST_AUTO_TEST_CASE(retry_http_send_success)
 
         if (tries > succeed_after_n_tries)
           return std::unique_ptr<r::http_response>(
-              new mock_http_response(201 /*Created*/));
+              new mock_http_response(r::http_response::status::CREATED));
 
         return std::unique_ptr<r::http_response>(
-            new mock_http_response(500 /*InternalError*/));
+            new mock_http_response(r::http_response::status::INTERNAL_ERROR));
       });
 
   error_counter counter;
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(retry_http_send_fail)
       [&tries](const r::http_request &) {
         tries++;
         return std::unique_ptr<r::http_response>(
-            new mock_http_response(500 /*InternalError*/));
+            new mock_http_response(r::http_response::status::INTERNAL_ERROR));
       });
 
   error_counter counter;
@@ -151,13 +151,14 @@ BOOST_AUTO_TEST_CASE(http_in_order_after_retry)
         if (tries >= 4)
         {
           tries = 0;
-          const auto buffer = request._body_buffer;
+          const auto buffer = request.body();
           received_messages.push_back(std::string(buffer->body_begin(), buffer->body_begin() + buffer->body_filled_size()));
           return std::unique_ptr<r::http_response>(
-              new mock_http_response(201 /*Created*/));
+              new mock_http_response(r::http_response::status::CREATED));
         }
 
-        return std::unique_ptr<r::http_response>(new mock_http_response(500 /*InternalError*/));
+        return std::unique_ptr<r::http_response>(
+          new mock_http_response(r::http_response::status::INTERNAL_ERROR));
       });
 
   error_counter counter;
