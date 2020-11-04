@@ -71,8 +71,8 @@ if(vw_USE_AZURE_FACTORIES)
     azure_factories.cc
     logger/eventhub_client.cc
     model_mgmt/restapi_data_transport.cc
+    utility/cpprest_http_client.cc
     utility/http_client.cc
-    utility/http_helper.cc
     utility/http_authorization.cc
   )
 endif()
@@ -136,8 +136,8 @@ if(vw_USE_AZURE_FACTORIES)
     azure_factories.h
     logger/eventhub_client.h
     model_mgmt/restapi_data_transport.h
+    utility/cpprest_http_client.h
     utility/http_client.h
-    utility/http_helper.h
     utility/http_authorization.h
   )
 endif()

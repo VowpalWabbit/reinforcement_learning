@@ -1,39 +1,38 @@
 #define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
-#   define BOOST_TEST_MODULE Main
+#define BOOST_TEST_MODULE Main
 #endif
 
 #include <boost/test/unit_test.hpp>
-#include "logger/eventhub_client.h"
-#include "mock_http_client.h"
-#include "err_constants.h"
-#include "utility/data_buffer_streambuf.h"
-#include "logger/preamble.h"
 
-namespace reinforcement_learning {namespace utility {
-  class data_buffer_streambuf;
-}}
-using namespace web;
+#include "err_constants.h"
+#include "logger/eventhub_client.h"
+#include "logger/preamble.h"
+#include "mock_http_client.h"
+#include "utility/data_buffer_streambuf.h"
+
 namespace r = reinforcement_learning;
 namespace u = reinforcement_learning::utility;
 
-class error_counter {
+class error_counter
+{
 public:
-  void _error_handler(void) {
+  void _error_handler(void)
+  {
     _err_count++;
   }
 
   int _err_count = 0;
 };
 
-void error_counter_func(const r::api_status&, void* counter) {
-  static_cast<error_counter*>(counter)->_error_handler();
+void error_counter_func(const r::api_status &, void *counter)
+{
+  static_cast<error_counter *>(counter)->_error_handler();
 }
-
 
 BOOST_AUTO_TEST_CASE(send_something)
 {
-  mock_http_client* http_client = new mock_http_client("localhost:8080");
+  auto http_client = new mock_http_client("localhost:8080");
 
   //create a client
   r::eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, 1, nullptr, nullptr);
@@ -60,20 +59,22 @@ BOOST_AUTO_TEST_CASE(send_something)
 
 BOOST_AUTO_TEST_CASE(retry_http_send_success)
 {
-  mock_http_client* http_client = new mock_http_client("localhost:8080");
+  auto http_client = new mock_http_client("localhost:8080");
 
   int tries = 0;
   int succeed_after_n_tries = 3;
-  http_client->set_responder(methods::POST, [&tries, succeed_after_n_tries](const http_request& message, http_response& resp) {
-    tries++;
+  http_client->set_responder(
+      r::http_method::POST,
+      [&tries, succeed_after_n_tries](const r::http_request &) {
+        tries++;
 
-    if (tries > succeed_after_n_tries) {
-      resp.set_status_code(status_codes::Created);
-    }
-    else {
-      resp.set_status_code(status_codes::InternalError);
-    }
-  });
+        if (tries > succeed_after_n_tries)
+          return std::unique_ptr<r::http_response>(
+              new mock_http_response(201 /*Created*/));
+
+        return std::unique_ptr<r::http_response>(
+            new mock_http_response(500 /*InternalError*/));
+      });
 
   error_counter counter;
   reinforcement_learning::error_callback_fn error_callback(&error_counter_func, &counter);
@@ -99,15 +100,18 @@ BOOST_AUTO_TEST_CASE(retry_http_send_success)
 
 BOOST_AUTO_TEST_CASE(retry_http_send_fail)
 {
-  mock_http_client* http_client = new mock_http_client("localhost:8080");
+  auto http_client = new mock_http_client("localhost:8080");
 
   const int MAX_RETRIES = 10;
 
   int tries = 0;
-  http_client->set_responder(methods::POST, [&tries](const http_request& message, http_response& resp) {
-    tries++;
-    resp.set_status_code(status_codes::InternalError);
-  });
+  http_client->set_responder(
+      r::http_method::POST,
+      [&tries](const r::http_request &) {
+        tries++;
+        return std::unique_ptr<r::http_response>(
+            new mock_http_response(500 /*InternalError*/));
+      });
 
   error_counter counter;
   r::error_callback_fn error_callback(&error_counter_func, &counter);
@@ -130,29 +134,30 @@ BOOST_AUTO_TEST_CASE(retry_http_send_fail)
   BOOST_CHECK_EQUAL(counter._err_count, 1);
 }
 
-
 BOOST_AUTO_TEST_CASE(http_in_order_after_retry)
 {
-  mock_http_client* http_client = new mock_http_client("localhost:8080");
+  auto *http_client = new mock_http_client("localhost:8080");
 
   const int MAX_RETRIES = 10;
   int tries = 0;
   std::vector<std::string> received_messages;
-  http_client->set_responder(methods::POST, [&tries, &received_messages](const http_request& message, http_response& resp) {
-    tries++;
+  http_client->set_responder(
+      r::http_method::POST,
+      [&tries, &received_messages](const r::http_request &request) {
+        tries++;
 
-    // Succeed every 4th attempt.
-    if (tries >= 4) {
-      // extract_string can only be called once on an http_request but we only do it once. Using const cast to avoid having to read out the stream.
-      std::vector<unsigned char> data = const_cast<http_request&>(message).extract_vector().get();
-      received_messages.push_back(std::string(data.begin() + reinforcement_learning::logger::preamble::size(),data.end()));
-      resp.set_status_code(status_codes::Created);
-      tries = 0;
-    }
-    else {
-      resp.set_status_code(status_codes::InternalError);
-    }
-  });
+        // Succeed every 4th attempt.
+        if (tries >= 4)
+        {
+          tries = 0;
+          const auto buffer = request._body_buffer;
+          received_messages.push_back(std::string(buffer->body_begin(), buffer->body_begin() + buffer->body_filled_size()));
+          return std::unique_ptr<r::http_response>(
+              new mock_http_response(201 /*Created*/));
+        }
+
+        return std::unique_ptr<r::http_response>(new mock_http_response(500 /*InternalError*/));
+      });
 
   error_counter counter;
   r::error_callback_fn error_callback(&error_counter_func, &counter);

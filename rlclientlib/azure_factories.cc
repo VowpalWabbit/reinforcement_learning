@@ -1,11 +1,11 @@
 #include "azure_factories.h"
 
-#include "factory_resolver.h"
 #include "constants.h"
+#include "factory_resolver.h"
 #include "model_mgmt/restapi_data_transport.h"
 #include "logger/event_logger.h"
 #include "logger/eventhub_client.h"
-#include "utility/http_helper.h"
+#include "utility/http_client.h"
 
 namespace reinforcement_learning {
   namespace m = model_management;

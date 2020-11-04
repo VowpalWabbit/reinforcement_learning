@@ -1,25 +1,17 @@
-#define OPENSSL_API_COMPAT 0x0908
 #include "eventhub_client.h"
-#include "err_constants.h"
-#include "trace_logger.h"
-#include "str_util.h"
 
+#include "api_status.h"
+#include "err_constants.h"
+#include "str_util.h"
+#include "trace_logger.h"
 #include "utility/http_authorization.h"
 #include "utility/http_client.h"
-
-#include <sstream>
 #include "utility/stl_container_adapter.h"
 
-#include <future>
-#include "api_status.h"
-
-using namespace std::chrono;
-using namespace utility; // Common utilities like string conversions
-// using namespace web; // Common features like URIs.
-// using namespace web::http; // Common HTTP functionality
 namespace u = reinforcement_learning::utility;
 
 namespace reinforcement_learning {
+
   eventhub_client::http_request_task::http_request_task(
     i_http_client* client,
     const std::string& host,
@@ -39,32 +31,45 @@ namespace reinforcement_learning {
       _task = send_request(0 /* inital try */);
     }
 
-  // pplx::task<web::http::status_code>
-  std::future<response_base::status_t>
-  eventhub_client::http_request_task::send_request(size_t try_count) {
+  std::future<http_response::status_t>
+  eventhub_client::http_request_task::send_request(size_t try_count)
+  {
+    // TODO: Use a custom thread pool to avoid the overhead of std::async thread creation.
     return std::async(std::launch::async, [this, try_count]() {
-      request_base request(HttpMethod::POST);
+      http_request request(http_method::POST);
       request.add_header_field("Authorization", _auth.c_str());
       request.add_header_field("Host", _host.c_str());
-
       request.set_body(_post_data);
 
-      response_base::status_t code = 500;   // InternalError
+      http_response::status_t code = 500 /*InternalError*/;
       api_status status;
 
-      try {
+      try
+      {
         const auto response = _client->request(request);
-
         code = response->status_code();
-        if (code != 201/*Created*/) {
-          // TODO: Handle retry using try_count & _max_retries, here or as part of HTTP interface? If resend the request here as before, then we have duplicate reads of body data _post_data -- even if that's not resulting in errors, there will be a performance problem.
-          auto msg = u::concat("(expected 201): Found ", code, ", failed after ", try_count, " retries.");
-            api_status::try_update(&status, error_code::http_bad_status_code, msg.c_str());
-            ERROR_CALLBACK(_error_callback, status);
-        }
       }
-      catch (const std::exception& e) {
-          TRACE_ERROR(_trace, e.what());
+      catch (const std::exception &e)
+      {
+        TRACE_ERROR(_trace, e.what());
+      }
+
+      // If the response is not the expected code then it has failed. Retry if possible otherwise report background error.
+      if (code != 201 /*Created*/)
+      {
+        // TODO: Handle retrying as part of HTTP interface, to avoid repeated reading of the body _post_data.
+
+        // Stop condition of recurison.
+        if(try_count < _max_retries){
+          TRACE_ERROR(_trace, "HTTP request failed, retrying...");
+
+          // Yes, recursively send another request inside this one. If a subsequent request returns success we are good, otherwise the failure will propagate.
+          return send_request(try_count + 1).get();
+        }
+
+        auto msg = u::concat("(expected 201): Found ", code, ", failed after ", try_count, " retries.");
+        api_status::try_update(&status, error_code::http_bad_status_code, msg.c_str());
+        ERROR_CALLBACK(_error_callback, status);
       }
 
       return code;
@@ -141,4 +146,5 @@ namespace reinforcement_learning {
       pop_task(nullptr);
     }
   }
-}
+
+} // namespace reinforcement_learning

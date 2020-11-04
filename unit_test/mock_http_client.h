@@ -1,34 +1,54 @@
 #pragma once
-#include "utility/http_client.h"
 
 #include <functional>
 
-using namespace web;
-using namespace http;
+#include "utility/http_client.h"
 
-class mock_http_client : public reinforcement_learning::i_http_client {
+class mock_http_response : public reinforcement_learning::http_response
+{
 public:
-  using response_fn = void(const http_request&, http_response&);
+  mock_http_response(status_t status_code) : _status_code{status_code} {}
 
-  mock_http_client(const std::string& url);
+  virtual status_t status_code() const override { return _status_code; }
 
-  virtual const std::string& get_url() const override;
+  virtual int last_modified(std::string &last_modified_str) const override
+  {
+    // TODO: error_code::success
+    return 0;
+  }
 
-  // TODO: Remove the old request method below.
-  virtual response_t request(request_t request) override;
+  virtual size_t content_length() const override { return 0; }
 
-  virtual std::unique_ptr<reinforcement_learning::response_base> request(const reinforcement_learning::request_base& request) override;
+  virtual size_t body(char *buffer) const override { return 0; }
 
-  void set_responder(http::method, std::function<response_fn> custom_responder);
 private:
-  static void handle_get(const http_request& message, http_response& resp);
-  static void handle_put(const http_request& message, http_response& resp);
-  static void handle_post(const http_request& message, http_response& resp);
-  static void handle_delete(const http_request& message, http_response& resp);
-  static void handle_head(const http_request& message, http_response& resp);
+  status_t _status_code;
+};
+
+class mock_http_client : public reinforcement_learning::i_http_client
+{
+public:
+  using http_method = reinforcement_learning::http_method;
+  using http_request = reinforcement_learning::http_request;
+  using http_response = reinforcement_learning::http_response;
+  using response_fn = std::unique_ptr<http_response>(const http_request &);
+
+  mock_http_client(const std::string &url) : _url{url} {}
+
+  virtual std::unique_ptr<http_response> request(const http_request &request) override
+  {
+    auto responder = _responders[request.method()];
+    return responder(request);
+  }
+
+  virtual const std::string &get_url() const override { return _url; }
+
+  void set_responder(http_method method, std::function<response_fn> custom_responder)
+  {
+    _responders[method] = custom_responder;
+  }
 
 private:
   const std::string _url;
-  // TODO: static
-  std::map<http::method, std::function<response_fn>> _responders;
+  std::map<http_method, std::function<response_fn>> _responders;
 };

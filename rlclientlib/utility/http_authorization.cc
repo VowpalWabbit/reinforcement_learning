@@ -9,8 +9,11 @@
 #include <openssl/hmac.h>
 #include <sstream>
 
-using namespace std::chrono;
+// TODO: Replace cpprest utility used here.
+#include <cpprest/http_client.h>
 using namespace utility; // Common utilities like string conversions
+
+using namespace std::chrono;
 
 namespace reinforcement_learning {
   http_authorization::http_authorization(
@@ -88,15 +91,14 @@ namespace reinforcement_learning {
     }
     digest.resize(digest_len);
 
-    // TODO: Do not use cpprestsdk here.
     // encode digest (base64 + url encoding)
-    const auto encoded_digest = web::uri::encode_data_string(conversions::to_base64(digest));
+    const auto encoded_digest = conversions::to_utf8string(web::uri::encode_data_string(conversions::to_base64(digest)));
 
     // construct SAS
     std::ostringstream authorization_stream;
     authorization_stream
       << "SharedAccessSignature sr=" << encoded_uri
-      << "&sig=" << conversions::to_utf8string(encoded_digest)
+      << "&sig=" << encoded_digest
       << "&se=" << valid_until
       << "&skn=" << shared_access_key_name;
     authorization_string = authorization_stream.str();

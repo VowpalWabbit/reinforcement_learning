@@ -1,20 +1,23 @@
 #pragma once
 
+#include <memory>
+#include <future>
+
 #include "api_status.h"
+#include "error_callback_fn.h"
+#include "data_buffer.h"
 #include "moving_queue.h"
 #include "sender.h"
-#include "error_callback_fn.h"
-
 #include "utility/http_authorization.h"
 #include "utility/http_client.h"
 
-// #include <pplx/pplxtasks.h>
-#include <future>
+#include <pplx/pplxtasks.h>
 
 #include <memory>
 #include "data_buffer.h"
 
 namespace reinforcement_learning {
+
   class i_trace;
 
   // The eventhub_client send string data in POST requests to an HTTP endpoint.
@@ -28,13 +31,15 @@ namespace reinforcement_learning {
                     const std::string& key, const std::string& name,
                     size_t tasks_count, size_t MAX_RETRIES, i_trace* trace, error_callback_fn* _error_cb);
     ~eventhub_client();
+
   protected:
     int v_send(const buffer& data, api_status* status) override;
 
   private:
     class http_request_task {
     public:
-      using buffer = std::shared_ptr< utility::data_buffer>;
+      using buffer = std::shared_ptr<utility::data_buffer>;
+
       http_request_task() = default;
       http_request_task(
         i_http_client* client,
@@ -52,19 +57,18 @@ namespace reinforcement_learning {
       http_request_task(const http_request_task&) = delete;
       http_request_task& operator=(const http_request_task&) = delete;
 
-      // Return error_code
+      // Returns error_code.
       int join();
+
     private:
-      // pplx::task<web::http::status_code> send_request(size_t try_count);
-      std::future<response_base::status_t> send_request(size_t try_count);
+      std::future<http_response::status_t> send_request(size_t try_count);
 
       i_http_client* _client;
       std::string _host;
       std::string _auth;
       buffer _post_data;
 
-      // pplx::task<web::http::status_code> _task;
-      std::future<response_base::status_t> _task;
+      std::future<http_response::status_t> _task;
 
       size_t _max_retries = 1;
 
@@ -93,4 +97,5 @@ namespace reinforcement_learning {
     i_trace* _trace;
     error_callback_fn* _error_callback;
   };
-}
+
+} // namespace reinforcement_learning
