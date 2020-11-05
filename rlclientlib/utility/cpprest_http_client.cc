@@ -36,8 +36,7 @@ int cpprest_http_client::request(const http_request &request,
   if (request.method() == http_method::POST) {
     web::http::http_request cpprest_request(web::http::methods::POST);
     for (const auto &field : request.header_fields())
-      cpprest_request.headers().add(_XPLATSTR(field.first.c_str()),
-                                    field.second);
+      cpprest_request.headers().add(field.first.c_str(), field.second);
 
     utility::stl_container_adapter container(request.body().get());
     const size_t container_size = container.size();
@@ -65,12 +64,13 @@ int cpprest_http_response::last_modified(std::string &last_modified_str) const {
   const auto iter = _response.headers().find(U("Last-Modified"));
   if (iter == _response.headers().end())
     return error_code::last_modified_not_found;
-  last_modified_str = iter->second;
 
-  const auto last_modified =
-      ::utility::datetime::from_string(last_modified_str);
+  const auto last_modified = ::utility::datetime::from_string(iter->second);
   if (last_modified.to_interval() == 0)
     return error_code::last_modified_invalid;
+
+  last_modified_str =
+      ::utility::conversions::to_utf8string(last_modified.to_string());
 
   return error_code::success;
 }

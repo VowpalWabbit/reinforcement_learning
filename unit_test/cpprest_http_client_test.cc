@@ -40,8 +40,7 @@ BOOST_AUTO_TEST_CASE(cpprest_http_responses) {
 
   r::cpprest_http_response resp1(std::move(
       web::http::http_response(web::http::status_codes::InternalError)));
-  BOOST_CHECK_EQUAL(resp1.status_code(),
-                    r::http_response::status::INTERNAL_ERROR);
+  BOOST_CHECK(resp1.status_code() == r::http_response::status::INTERNAL_ERROR);
   BOOST_CHECK_EQUAL(resp1.content_length(), 0);
   BOOST_CHECK_EQUAL(resp1.last_modified(resp_str), e::last_modified_not_found);
   BOOST_CHECK_EQUAL(resp1.body(resp_buffer_sz, resp_buffer),
@@ -50,13 +49,16 @@ BOOST_AUTO_TEST_CASE(cpprest_http_responses) {
   web::http::http_response tmp(web::http::status_codes::OK);
   tmp.set_body(resp_data);
   r::cpprest_http_response resp2(std::move(tmp));
-  BOOST_CHECK_EQUAL(resp2.status_code(), r::http_response::status::OK);
+  BOOST_CHECK(resp2.status_code() == r::http_response::status::OK);
   BOOST_CHECK_EQUAL(resp2.content_length(), resp_data.length());
   BOOST_CHECK_EQUAL(resp2.body(resp_buffer_sz, resp_buffer), e::success);
   BOOST_CHECK_EQUAL(resp_buffer_sz, resp_data.length());
   BOOST_CHECK_EQUAL(
       std::string(resp_buffer, resp_buffer + resp2.content_length()),
       resp_data);
+
+  // Support repeated reads.
+  BOOST_CHECK_EQUAL(resp2.body(resp_buffer_sz, resp_buffer), e::success);
 
   delete[] resp_buffer;
 }
