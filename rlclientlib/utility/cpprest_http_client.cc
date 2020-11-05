@@ -2,6 +2,8 @@
 
 #include <cpprest/rawptrstream.h>
 
+#include <chrono>
+
 #include "api_status.h"
 #include "constants.h"
 #include "stl_container_adapter.h"
@@ -35,8 +37,10 @@ int cpprest_http_client::request(const http_request &request,
 
   if (request.method() == http_method::POST) {
     web::http::http_request cpprest_request(web::http::methods::POST);
-    for (const auto &field : request.header_fields())
-      cpprest_request.headers().add(field.first, field.second);
+    for (const auto &field : request.header_fields()) {
+      cpprest_request.headers().add(
+          ::utility::conversions::to_string_t(field.first), field.second);
+    }
 
     utility::stl_container_adapter container(request.body().get());
     const size_t container_size = container.size();
