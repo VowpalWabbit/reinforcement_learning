@@ -92,7 +92,10 @@ BOOST_AUTO_TEST_CASE(background_mock_azure_get) {
         new mock_http_response(r::http_response::status::OK, timestamp, "response"));
   };
   http_client->set_responder(r::http_method::HEAD, responder);
-  http_client->set_responder(r::http_method::GET, responder);  std::unique_ptr<m::i_data_transport> transport(new m::restapi_data_transport(http_client, nullptr));
+  http_client->set_responder(r::http_method::GET, responder);
+  std::unique_ptr<m::i_data_transport> transport(
+    new m::restapi_data_transport(
+      std::unique_ptr<r::i_http_client>(http_client), nullptr));
 
   r::api_status status;
 
@@ -137,7 +140,8 @@ BOOST_AUTO_TEST_CASE(mock_azure_storage_model_data)
   http_client->set_responder(r::http_method::HEAD, responder);
   http_client->set_responder(r::http_method::GET, responder);
   std::unique_ptr<m::i_data_transport> data_transport(
-      new m::restapi_data_transport(http_client, nullptr));
+    new m::restapi_data_transport(
+      std::unique_ptr<r::i_http_client>(http_client), nullptr));
 
   r::api_status status;
 

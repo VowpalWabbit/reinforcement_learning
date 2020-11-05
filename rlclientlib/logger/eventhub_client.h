@@ -74,7 +74,7 @@ class eventhub_client : public i_sender {
  private:
   int pop_task(api_status* status);
 
-  // cannot be copied or assigned
+  // Not copyable or movable
   eventhub_client(const eventhub_client&) = delete;
   eventhub_client(eventhub_client&&) = delete;
   eventhub_client& operator=(const eventhub_client&) = delete;
