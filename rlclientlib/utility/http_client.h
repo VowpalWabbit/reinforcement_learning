@@ -76,8 +76,9 @@ class i_http_client {
   virtual std::string encode(const std::vector<unsigned char> &data) const = 0;
 };
 
-// Factory for http_client
+// Factory for http clients.
 int create_http_client(const char *url, const utility::configuration &cfg,
-                       i_http_client **client, api_status *status = nullptr);
+                       std::unique_ptr<i_http_client> &client,
+                       api_status *status = nullptr);
 
 }  // namespace reinforcement_learning

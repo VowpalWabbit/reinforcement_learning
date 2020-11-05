@@ -12,11 +12,10 @@ class cpprest_http_response : public http_response {
   cpprest_http_response(web::http::http_response &&response)
       : _response{std::move(response)} {}
 
-  cpprest_http_response &operator=(web::http::http_response &&response) =
-      delete;
-  cpprest_http_response(const web::http::http_response &response) = delete;
-  cpprest_http_response &operator=(const web::http::http_response &response) =
-      delete;
+  cpprest_http_response(cpprest_http_response &&) = delete;
+  cpprest_http_response &operator=(cpprest_http_response &&) = delete;
+  cpprest_http_response(const cpprest_http_response &) = delete;
+  cpprest_http_response &operator=(const cpprest_http_response &) = delete;
 
   virtual status_t status_code() const override {
     return _response.status_code();
@@ -40,8 +39,8 @@ class cpprest_http_client : public i_http_client {
       : _url(url),
         _impl(::utility::conversions::to_string_t(url), get_http_config(cfg)) {}
 
-  cpprest_http_client(cpprest_http_client &&other) = delete;
-  cpprest_http_client &operator=(cpprest_http_client &&other) = delete;
+  cpprest_http_client(cpprest_http_client &&) = delete;
+  cpprest_http_client &operator=(cpprest_http_client &&) = delete;
   cpprest_http_client(const cpprest_http_client &) = delete;
   cpprest_http_client &operator=(const cpprest_http_client &) = delete;
 

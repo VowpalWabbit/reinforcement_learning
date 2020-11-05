@@ -8,9 +8,9 @@ namespace u = reinforcement_learning::utility;
 namespace reinforcement_learning {
 namespace model_management {
 
-restapi_data_transport::restapi_data_transport(i_http_client *httpcli,
-                                               i_trace *trace)
-    : _httpcli(httpcli), _datasz{0}, _trace{trace} {}
+restapi_data_transport::restapi_data_transport(
+    std::unique_ptr<i_http_client> httpcli, i_trace *trace)
+    : _httpcli{std::move(httpcli)}, _datasz{0}, _trace{trace} {}
 
 /*
  * Example successful response

@@ -37,8 +37,8 @@ BOOST_AUTO_TEST_CASE(http_client_init_validation_test) {
   const auto scode = cfg::create_from_json(JSON_CFG, cc);
   BOOST_CHECK_EQUAL(scode, r::error_code::success);
 
-  r::i_http_client* client;
-  const auto result = r::create_http_client("invalid_url", cc, &client);
+  std::unique_ptr<r::i_http_client> client;
+  const auto result = r::create_http_client("invalid_url", cc, client);
   BOOST_CHECK_EQUAL(result, r::error_code::http_client_init_error);
 }
 
@@ -47,9 +47,9 @@ BOOST_AUTO_TEST_CASE(http_client_init_and_encode) {
   const auto scode = cfg::create_from_json(JSON_CFG, cc);
   BOOST_CHECK_EQUAL(scode, r::error_code::success);
 
-  r::i_http_client* client;
+  std::unique_ptr<r::i_http_client> client;
   const std::string url{"http://localhost:8080/_test&key=v@lue?"};
-  const auto result = r::create_http_client(url.c_str(), cc, &client);
+  const auto result = r::create_http_client(url.c_str(), cc, client);
   BOOST_CHECK_EQUAL(result, r::error_code::success);
   BOOST_CHECK_EQUAL(client->get_url(), url);
 
@@ -63,6 +63,4 @@ BOOST_AUTO_TEST_CASE(http_client_init_and_encode) {
   std::vector<unsigned char> data(url.begin(), url.end());
   const auto encoded_data = client->encode(data);
   BOOST_CHECK_EQUAL(encoded_data, expected_encoded_data);
-
-  delete client;
 }

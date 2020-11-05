@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(cpprest_http_responses) {
       std::string(resp_buffer, resp_buffer + resp2.content_length()),
       resp_data);
 
-  // Repeated reads should be successful.
+  // Repeated reads should succeed.
   BOOST_CHECK_EQUAL(resp2.body(resp_buffer_sz, resp_buffer), e::success);
 
   delete[] resp_buffer;

@@ -1,12 +1,13 @@
 #define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
-#   define BOOST_TEST_MODULE Main
+#define BOOST_TEST_MODULE Main
 #endif
 
 #include <boost/test/unit_test.hpp>
 
-#include "err_constants.h"
 #include "logger/eventhub_client.h"
+
+#include "err_constants.h"
 #include "logger/preamble.h"
 #include "mock_http_client.h"
 #include "utility/data_buffer_streambuf.h"
@@ -14,29 +15,25 @@
 namespace r = reinforcement_learning;
 namespace u = reinforcement_learning::utility;
 
-class error_counter
-{
-public:
-  void _error_handler(void)
-  {
-    _err_count++;
-  }
+class error_counter {
+ public:
+  void _error_handler(void) { _err_count++; }
 
   int _err_count = 0;
 };
 
-void error_counter_func(const r::api_status &, void *counter)
-{
+void error_counter_func(const r::api_status &, void *counter) {
   static_cast<error_counter *>(counter)->_error_handler();
 }
 
-BOOST_AUTO_TEST_CASE(send_something)
-{
+BOOST_AUTO_TEST_CASE(send_something) {
   // TODO: Use create_http_client with mock client option in configuration.
-  auto http_client = new mock_http_client("localhost:8080");
+  auto http_client =
+      std::unique_ptr<r::i_http_client>(new mock_http_client("localhost:8080"));
 
-  //create a client
-  r::eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, 1, nullptr, nullptr);
+  // Create a client
+  r::eventhub_client eh(std::move(http_client), "localhost:8080", "", "", "", 1,
+                        1, nullptr, nullptr);
   r::api_status ret;
 
   std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
@@ -51,15 +48,14 @@ BOOST_AUTO_TEST_CASE(send_something)
 
   message2 << "message 2";
 
-  //send events
+  // Send events
   sbuff1.finalize();
   sbuff2.finalize();
   BOOST_CHECK_EQUAL(eh.send(db1, &ret), r::error_code::success);
   BOOST_CHECK_EQUAL(eh.send(db2, &ret), r::error_code::success);
 }
 
-BOOST_AUTO_TEST_CASE(retry_http_send_success)
-{
+BOOST_AUTO_TEST_CASE(retry_http_send_success) {
   auto http_client = new mock_http_client("localhost:8080");
 
   int tries = 0;
@@ -78,12 +74,15 @@ BOOST_AUTO_TEST_CASE(retry_http_send_success)
       });
 
   error_counter counter;
-  reinforcement_learning::error_callback_fn error_callback(&error_counter_func, &counter);
+  reinforcement_learning::error_callback_fn error_callback(&error_counter_func,
+                                                           &counter);
 
   // Use scope to force destructor and therefore flushing of buffers.
   {
-    //create a client
-    reinforcement_learning::eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, 8 /* retries */, nullptr, &error_callback);
+    // Create a client
+    reinforcement_learning::eventhub_client eh(
+        std::unique_ptr<r::i_http_client>(http_client), "localhost:8080", "",
+        "", "", 1, 8 /* retries */, nullptr, &error_callback);
     reinforcement_learning::api_status ret;
 
     std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
@@ -94,21 +93,20 @@ BOOST_AUTO_TEST_CASE(retry_http_send_success)
     BOOST_CHECK_EQUAL(eh.send(db1, &ret), r::error_code::success);
   }
 
-  // Although it was allowed to retry 8 times, it should stop after succeeding at 4.
+  // Although it was allowed to retry 8 times, it should stop after succeeding
+  // at 4.
   BOOST_CHECK_EQUAL(tries, succeed_after_n_tries + 1);
   BOOST_CHECK_EQUAL(counter._err_count, 0);
 }
 
-BOOST_AUTO_TEST_CASE(retry_http_send_fail)
-{
+BOOST_AUTO_TEST_CASE(retry_http_send_fail) {
   auto http_client = new mock_http_client("localhost:8080");
 
   const int MAX_RETRIES = 10;
 
   int tries = 0;
   http_client->set_responder(
-      r::http_method::POST,
-      [&tries](const r::http_request &) {
+      r::http_method::POST, [&tries](const r::http_request &) {
         tries++;
         return std::unique_ptr<r::http_response>(
             new mock_http_response(r::http_response::status::INTERNAL_ERROR));
@@ -119,8 +117,10 @@ BOOST_AUTO_TEST_CASE(retry_http_send_fail)
 
   // Use scope to force destructor and therefore flushing of buffers.
   {
-    //create a client
-    r::eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, MAX_RETRIES, nullptr, &error_callback);
+    // Create a client
+    r::eventhub_client eh(std::unique_ptr<r::i_http_client>(http_client),
+                          "localhost:8080", "", "", "", 1, MAX_RETRIES, nullptr,
+                          &error_callback);
 
     r::api_status ret;
     std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
@@ -135,9 +135,8 @@ BOOST_AUTO_TEST_CASE(retry_http_send_fail)
   BOOST_CHECK_EQUAL(counter._err_count, 1);
 }
 
-BOOST_AUTO_TEST_CASE(http_in_order_after_retry)
-{
-  auto *http_client = new mock_http_client("localhost:8080");
+BOOST_AUTO_TEST_CASE(http_in_order_after_retry) {
+  auto http_client = new mock_http_client("localhost:8080");
 
   const int MAX_RETRIES = 10;
   int tries = 0;
@@ -148,17 +147,18 @@ BOOST_AUTO_TEST_CASE(http_in_order_after_retry)
         tries++;
 
         // Succeed every 4th attempt.
-        if (tries >= 4)
-        {
+        if (tries >= 4) {
           tries = 0;
           const auto buffer = request.body();
-          received_messages.push_back(std::string(buffer->body_begin(), buffer->body_begin() + buffer->body_filled_size()));
+          received_messages.push_back(
+              std::string(buffer->body_begin(),
+                          buffer->body_begin() + buffer->body_filled_size()));
           return std::unique_ptr<r::http_response>(
               new mock_http_response(r::http_response::status::CREATED));
         }
 
         return std::unique_ptr<r::http_response>(
-          new mock_http_response(r::http_response::status::INTERNAL_ERROR));
+            new mock_http_response(r::http_response::status::INTERNAL_ERROR));
       });
 
   error_counter counter;
@@ -166,8 +166,10 @@ BOOST_AUTO_TEST_CASE(http_in_order_after_retry)
 
   // Use scope to force destructor and therefore flushing of buffers.
   {
-    //create a client
-    r::eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, MAX_RETRIES, nullptr, &error_callback);
+    // Create a client
+    r::eventhub_client eh(std::unique_ptr<r::i_http_client>(http_client),
+                          "localhost:8080", "", "", "", 1, MAX_RETRIES, nullptr,
+                          &error_callback);
 
     r::api_status ret;
     std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
