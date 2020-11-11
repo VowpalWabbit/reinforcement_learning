@@ -113,14 +113,14 @@ int rl_sim::ccb_loop() {
     auto& p = pick_a_random_person();
     const auto context_features = p.get_features();
     const auto action_features = get_action_features();
-	const auto event_id = create_event_id();
+    const auto event_id = create_event_id();
     const auto slot_json =  get_slot_features();
     const auto context_json = create_context_json(context_features,action_features, slot_json);
     std::cout << context_json <<std::endl;
     r::api_status status;
 
     // Choose an action
-	if (_rl->request_multi_slot_decision(event_id.c_str(), context_json.c_str(), decision, &status) != err::success) {
+    if ( _rl->request_multi_slot_decision(event_id.c_str(), context_json.c_str(), decision, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
@@ -144,7 +144,7 @@ int rl_sim::ccb_loop() {
       index++;
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));	
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
   }
 
   return 0;

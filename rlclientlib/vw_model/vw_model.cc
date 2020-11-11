@@ -8,7 +8,7 @@
 
 namespace reinforcement_learning { namespace model_management {
   vw_model::vw_model(i_trace* trace_logger, const utility::configuration& config)
-    : _initial_command_line(config.get(name::MODEL_VW_INITIAL_COMMAND_LINE, "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A"))	
+    : _initial_command_line(config.get(name::MODEL_VW_INITIAL_COMMAND_LINE, "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A"))
     , _vw_pool(new safe_vw_factory(_initial_command_line), config.get_int(name::VW_POOL_INIT_SIZE, value::DEFAULT_VW_POOL_INIT_SIZE))
     , _trace_logger(trace_logger)
     , _vw_command_line(config.get(name::VW_CMDLINE, "--quiet --json")) {
@@ -18,31 +18,31 @@ namespace reinforcement_learning { namespace model_management {
     try {
       TRACE_INFO(_trace_logger, utility::concat("Received new model data. With size ", data.data_sz()));
 
-	  if (data.data_sz() > 0)
-	  {
-		  std::unique_ptr<safe_vw> init_vw(new safe_vw(data.data(), data.data_sz()));
+      if (data.data_sz() > 0)
+      {
+        std::unique_ptr<safe_vw> init_vw(new safe_vw(data.data(), data.data_sz()));
 
-		  std::unique_ptr<safe_vw_factory> factory;		  
-		  if (init_vw->is_CB_to_CCB_model_upgrade(_initial_command_line))
-		  {
-		  	factory.reset(new safe_vw_factory(std::move(data), _vw_command_line));
-		  }
-		  else
-		  {
-		  	factory.reset(new safe_vw_factory(std::move(data)));
-		  }
+        std::unique_ptr<safe_vw_factory> factory;		  
+        if (init_vw->is_CB_to_CCB_model_upgrade(_initial_command_line))
+        {
+          factory.reset(new safe_vw_factory(std::move(data), _vw_command_line));
+        }
+        else
+        {
+          factory.reset(new safe_vw_factory(std::move(data)));
+        }
 
-		  std::unique_ptr<safe_vw> test_vw((*factory)());
-		  if (test_vw->is_compatible(_initial_command_line)) {
-			  // safe_vw_factory will create a copy of the model data to use for vw object construction.
-			  _vw_pool.update_factory(factory.release());
-			  model_ready = true;
-		  }
-		  else {
-			  RETURN_ERROR_LS(_trace_logger, status, model_update_error)
-				  << "Received model is incompatible with initial configuration " << _initial_command_line;
-		  }
-	  }
+        std::unique_ptr<safe_vw> test_vw((*factory)());
+        if (test_vw->is_compatible(_initial_command_line)) {
+          // safe_vw_factory will create a copy of the model data to use for vw object construction.
+          _vw_pool.update_factory(factory.release());
+          model_ready = true;
+        }
+        else {
+          RETURN_ERROR_LS(_trace_logger, status, model_update_error)
+            << "Received model is incompatible with initial configuration " << _initial_command_line;
+        }
+      }
     }
     catch(const std::exception& e) {
       RETURN_ERROR_LS(_trace_logger, status, model_update_error) << e.what();

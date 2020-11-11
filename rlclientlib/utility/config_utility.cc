@@ -104,9 +104,9 @@ namespace reinforcement_learning { namespace utility { namespace config {
       { "ModelRefreshIntervalMs"    , name::MODEL_REFRESH_INTERVAL_MS },
       { "QueueMode"                 , name::QUEUE_MODE }, // expect either DROP or BLOCK, default is DROP
       { "LearningMode"              , name::LEARNING_MODE},
-	  { "VWInitialCommandLine"      , name::MODEL_VW_INITIAL_COMMAND_LINE},
-	  { "VWCommandLine"             , name::VW_CMDLINE },
-	  { "ProtocolVersion"           , name::PROTOCOL_VERSION}
+      { "VWInitialCommandLine"      , name::MODEL_VW_INITIAL_COMMAND_LINE},
+      { "VWCommandLine"             , name::VW_CMDLINE },
+      { "ProtocolVersion"           , name::PROTOCOL_VERSION}
     };
 
     const std::set<std::string> deprecated = {

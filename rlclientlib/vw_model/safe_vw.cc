@@ -248,7 +248,7 @@ namespace reinforcement_learning {
     // prediction are in the first-example
     auto& predictions = examples2[0]->pred.decision_scores;
     actions.resize(predictions.size());
-	scores.resize(predictions.size());
+    scores.resize(predictions.size());
     for (size_t i = 0; i < predictions.size(); ++i) {
       actions[i].reserve(predictions[i].size());
       scores[i].reserve(predictions[i].size());
@@ -306,7 +306,7 @@ mm::model_type_t safe_vw::get_model_type(const std::string& args)
 
 // TODO make this const when was_supplied becomes const.
 mm::model_type_t safe_vw::get_model_type(const VW::config::options_i* args)
-{	
+{
     // slates == slates
   if (args->was_supplied("slates"))
   {
@@ -340,7 +340,7 @@ bool safe_vw::is_compatible(const std::string& args) const {
   // This really is an error but errors cant be reported here...
   if(local_model_type == mm::model_type_t::UNKNOWN || inbound_model_type ==  mm::model_type_t::UNKNOWN)
   {
-	return false;
+    return false;
   }
 
   return local_model_type == inbound_model_type;
@@ -383,17 +383,17 @@ safe_vw* safe_vw_factory::operator()()
 {
 	if (_master_data.data() && _command_line.size() > 0)
 	{
-		// Construct new vw object from raw model data and command line argument
-		return new safe_vw(_master_data.data(), _master_data.data_sz(), _command_line);
+      // Construct new vw object from raw model data and command line argument
+      return new safe_vw(_master_data.data(), _master_data.data_sz(), _command_line);
 	}
     else if (_master_data.data())
     {
-		// Construct new vw object from raw model data.
-		return new safe_vw(_master_data.data(), _master_data.data_sz());
+      // Construct new vw object from raw model data.
+      return new safe_vw(_master_data.data(), _master_data.data_sz());
     }
     else
     {
-		return new safe_vw(_command_line);
+      return new safe_vw(_command_line);
     }
   }
 }
