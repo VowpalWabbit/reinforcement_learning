@@ -348,15 +348,15 @@ bool safe_vw::is_compatible(const std::string& args) const {
 
 bool safe_vw::is_CB_to_CCB_model_upgrade(const std::string& args) const
 {
-	const auto local_model_type = get_model_type(args);
-	const auto inbound_model_type = get_model_type(_vw->options);
+    const auto local_model_type = get_model_type(args);
+    const auto inbound_model_type = get_model_type(_vw->options);
 
-	if (local_model_type == mm::model_type_t::CCB && inbound_model_type == mm::model_type_t::CB)
-	{
-		return true;
-	}
+    if (local_model_type == mm::model_type_t::CCB && inbound_model_type == mm::model_type_t::CB)
+    {
+      return true;
+    }
 
-	return false;
+    return false;
 }
 
 safe_vw_factory::safe_vw_factory(const std::string& command_line)
@@ -376,16 +376,16 @@ safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data
   {}
 
 safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_data, const std::string& command_line)
-	: _master_data(master_data), _command_line(command_line)
+  : _master_data(master_data), _command_line(command_line)
   {}
 
 safe_vw* safe_vw_factory::operator()() 
 {
-	if (_master_data.data() && _command_line.size() > 0)
-	{
+    if (_master_data.data() && _command_line.size() > 0)
+    {
       // Construct new vw object from raw model data and command line argument
       return new safe_vw(_master_data.data(), _master_data.data_sz(), _command_line);
-	}
+    }
     else if (_master_data.data())
     {
       // Construct new vw object from raw model data.
