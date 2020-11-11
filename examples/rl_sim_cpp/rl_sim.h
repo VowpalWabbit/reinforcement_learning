@@ -146,7 +146,7 @@ public:
      */
     std::string get_slates_action_features();
 
-    static std::string get_slot_features(const std::vector<std::string>& ids);
+    std::string get_slot_features();
 
   private:
     enum LoopKind {
@@ -160,6 +160,7 @@ public:
     std::unique_ptr<reinforcement_learning::live_model> _rl;
     std::vector<person> _people;
     std::vector<std::string> _topics;
+	std::vector<std::string> _slot_sizes;
     std::vector<joint> _robot_joints;
     std::vector<float> _friction;
     const uint8_t NUM_SLOTS = 3;

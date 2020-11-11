@@ -25,8 +25,16 @@ namespace reinforcement_learning {
     _vw = VW::initialize("--quiet --json", &buf, false, nullptr, nullptr);
   }
 
-  safe_vw::safe_vw(std::string vw_commandline)
+  safe_vw::safe_vw(const char* model_data, size_t len, std::string vw_commandline)
   {
+	io_buf buf;
+	buf.add_file(VW::io::create_buffer_view(model_data, len));
+
+	_vw = VW::initialize(vw_commandline, &buf, false, nullptr, nullptr);
+  }
+
+  safe_vw::safe_vw(std::string vw_commandline)
+  {	  
 	  _vw = VW::initialize(vw_commandline);
   }
 
@@ -240,7 +248,7 @@ namespace reinforcement_learning {
     // prediction are in the first-example
     auto& predictions = examples2[0]->pred.decision_scores;
     actions.resize(predictions.size());
-    scores.resize(predictions.size());
+	scores.resize(predictions.size());
     for (size_t i = 0; i < predictions.size(); ++i) {
       actions[i].reserve(predictions[i].size());
       scores[i].reserve(predictions[i].size());
@@ -298,7 +306,7 @@ mm::model_type_t safe_vw::get_model_type(const std::string& args)
 
 // TODO make this const when was_supplied becomes const.
 mm::model_type_t safe_vw::get_model_type(const VW::config::options_i* args)
-{
+{	
     // slates == slates
   if (args->was_supplied("slates"))
   {
@@ -326,16 +334,29 @@ mm::model_type_t safe_vw::get_model_type(const VW::config::options_i* args)
 }
 
 bool safe_vw::is_compatible(const std::string& args) const {
-  const auto local_model_type = get_model_type(_vw->options);
-  const auto inbound_model_type = get_model_type(args);
+  const auto local_model_type = get_model_type(args);
+  const auto inbound_model_type = get_model_type(_vw->options);
 
   // This really is an error but errors cant be reported here...
   if(local_model_type == mm::model_type_t::UNKNOWN || inbound_model_type ==  mm::model_type_t::UNKNOWN)
   {
-    return false;
+	return false;
   }
 
   return local_model_type == inbound_model_type;
+}
+
+bool safe_vw::is_CB_to_CCB_model_upgrade(const std::string& args) const
+{
+	const auto local_model_type = get_model_type(args);
+	const auto inbound_model_type = get_model_type(_vw->options);
+
+	if (local_model_type == mm::model_type_t::CCB && inbound_model_type == mm::model_type_t::CB)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 safe_vw_factory::safe_vw_factory(const std::string& command_line)
@@ -350,16 +371,29 @@ safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_dat
   : _master_data(master_data)
   {}
 
-  safe_vw* safe_vw_factory::operator()()
-  {
-    if (_master_data.data())
+safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data, const std::string& command_line)
+  : _master_data(master_data), _command_line(command_line)
+  {}
+
+safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_data, const std::string& command_line)
+	: _master_data(master_data), _command_line(command_line)
+  {}
+
+safe_vw* safe_vw_factory::operator()() 
+{
+	if (_master_data.data() && _command_line.size() > 0)
+	{
+		// Construct new vw object from raw model data and command line argument
+		return new safe_vw(_master_data.data(), _master_data.data_sz(), _command_line);
+	}
+    else if (_master_data.data())
     {
-      // Construct new vw object from raw model data.
-      return new safe_vw(_master_data.data(), _master_data.data_sz());
+		// Construct new vw object from raw model data.
+		return new safe_vw(_master_data.data(), _master_data.data_sz());
     }
     else
     {
-      return new safe_vw(_command_line);
+		return new safe_vw(_command_line);
     }
   }
 }
