@@ -184,6 +184,36 @@ namespace Rl.Net
                 return LiveModelReportOutcomeJsonNative(liveModel, eventId, outcomeJson, apiStatus);
             }
 
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelReportOutcomeSlotF")]
+            private static extern int LiveModelReportOutcomeSlotFNative(IntPtr liveModel, IntPtr eventId, int slotIndex, float outcome, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, int, float, IntPtr, int> LiveModelReportOutcomeSlotFOverride { get; set; }
+
+            public static int LiveModelReportOutcomeSlotF(IntPtr liveModel, IntPtr eventId, int slotIndex, float outcome, IntPtr apiStatus)
+            {
+                if (LiveModelReportOutcomeSlotFOverride != null)
+                {
+                    return LiveModelReportOutcomeSlotFOverride(liveModel, eventId, slotIndex, outcome, apiStatus);
+                }
+
+                return LiveModelReportOutcomeSlotFNative(liveModel, eventId, slotIndex, outcome, apiStatus);
+            }
+
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelReportOutcomeSlotJson")]
+            private static extern int LiveModelReportOutcomeSlotJsonNative(IntPtr liveModel, IntPtr eventId, int slotIndex, IntPtr outcomeJson, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, int, IntPtr, IntPtr, int> LiveModelReportOutcomeSlotJsonOverride { get; set; }
+
+            public static int LiveModelReportOutcomeSlotJson(IntPtr liveModel, IntPtr eventId, int slotIndex, IntPtr outcomeJson, IntPtr apiStatus)
+            {
+                if (LiveModelReportOutcomeSlotJsonOverride != null)
+                {
+                    return LiveModelReportOutcomeSlotJsonOverride(liveModel, eventId, slotIndex, outcomeJson, apiStatus);
+                }
+
+                return LiveModelReportOutcomeSlotJsonNative(liveModel, eventId, slotIndex, outcomeJson, apiStatus);
+            }
+
             [DllImport("rl.net.native.dll")]
             public static extern int LiveModelRefreshModel(IntPtr liveModel, IntPtr apiStatus);
 
