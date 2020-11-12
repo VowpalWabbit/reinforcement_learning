@@ -462,7 +462,7 @@ namespace Rl.Net.Cli.Test
                     return NativeMethods.SuccessStatus;
                 };
 
-            liveModel.QueueOutcomeEvent(eventId, outcome);
+            liveModel.QueueOutcomeEvent(eventId, slotIndex, outcome);
         }
 
         private void Run_LiveModelReportOutcomeSlotJson_Test(LiveModel liveModel, string eventId, int slotIndex, string outcomeJson)
@@ -479,7 +479,7 @@ namespace Rl.Net.Cli.Test
                     return NativeMethods.SuccessStatus;
                 };
 
-            liveModel.QueueOutcomeEvent(eventId, outcomeJson);
+            liveModel.QueueOutcomeEvent(eventId, slotIndex, outcomeJson);
         }
 
         [TestMethod]

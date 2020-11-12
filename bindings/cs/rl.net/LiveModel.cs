@@ -462,6 +462,45 @@ namespace Rl.Net
             }
         }
 
+        unsafe private static int LiveModelReportOutcomeSlotF(IntPtr liveModel, string eventId, int slotIndex, float outcome, IntPtr apiStatus)
+        {
+            if (eventId == null)
+            {
+                throw new ArgumentNullException("eventId");
+            }
+
+            if (slotIndex < 0)
+            {
+                throw new ArgumentOutOfRangeException("slotIndex");
+            }
+
+            fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+            {
+                return NativeMethods.LiveModelReportOutcomeF(liveModel, new IntPtr(eventIdUtf8Bytes), outcome, apiStatus);
+            }
+        }
+
+        unsafe private static int LiveModelReportOutcomeSlotJson(IntPtr liveModel, string eventId, int slotIndex, string outcomeJson, IntPtr apiStatus)
+        {
+            if (eventId == null)
+            {
+                throw new ArgumentNullException("eventId");
+            }
+
+            if (slotIndex < 0)
+            {
+                throw new ArgumentOutOfRangeException("slotIndex");
+            }
+
+            CheckJsonString(outcomeJson);
+
+            fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+            fixed (byte* outcomeJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(outcomeJson))
+            {
+                return NativeMethods.LiveModelReportOutcomeJson(liveModel, new IntPtr(eventIdUtf8Bytes), new IntPtr(outcomeJsonUtf8Bytes), apiStatus);
+            }
+        }
+
         private void WrapStatusAndRaiseBackgroundError(IntPtr apiStatusHandle)
         {
             using (ApiStatus status = new ApiStatus(apiStatusHandle)) 
@@ -803,6 +842,40 @@ namespace Rl.Net
             {
                 throw new RLException(apiStatus);
             }
+        }
+
+        public bool TryQueueOutcomeEvent(string eventId, int slotIndex, float outcome, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelReportOutcomeSlotF(this.DangerousGetHandle(), eventId, slotIndex, outcome, apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public void QueueOutcomeEvent(string eventId, int slotIndex, float outcome)
+        {
+            using (ApiStatus apiStatus = new ApiStatus())
+                if (!this.TryQueueOutcomeEvent(eventId, slotIndex, outcome, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
+        }
+
+        public bool TryQueueOutcomeEvent(string eventId, int slotIndex, string outcomeJson, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelReportOutcomeSlotJson(this.DangerousGetHandle(), eventId, slotIndex, outcomeJson, apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public void QueueOutcomeEvent(string eventId, int slotIndex, string outcomeJson)
+        {
+            using (ApiStatus apiStatus = new ApiStatus())
+                if (!this.TryQueueOutcomeEvent(eventId, slotIndex, outcomeJson, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
         }
 
         public void RefreshModel()
