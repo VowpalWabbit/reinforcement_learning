@@ -47,6 +47,9 @@ extern "C" {
     API int LiveModelReportActionTaken(livemodel_context_t* livemodel, const char * event_id, reinforcement_learning::api_status* status = nullptr);
     API int LiveModelReportOutcomeF(livemodel_context_t* livemodel, const char * event_id, float outcome, reinforcement_learning::api_status* status = nullptr);
     API int LiveModelReportOutcomeJson(livemodel_context_t* livemodel, const char * event_id, const char * outcomeJson, reinforcement_learning::api_status* status = nullptr);
+	API int LiveModelReportOutcomeSlotF(livemodel_context_t* context, const char* event_id, int slot_index, float outcome, reinforcement_learning::api_status* status = nullptr);
+	API int LiveModelReportOutcomeSlotJson(livemodel_context_t* context, const char* event_id, int slot_index, const char* outcome_json, reinforcement_learning::api_status* status = nullptr);
+
 
     API int LiveModelRefreshModel(livemodel_context_t* context, reinforcement_learning::api_status* status = nullptr);
     
