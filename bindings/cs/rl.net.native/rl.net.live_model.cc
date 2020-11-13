@@ -162,12 +162,12 @@ API int LiveModelReportOutcomeJson(livemodel_context_t* context, const char* eve
   return context->livemodel->report_outcome(event_id, outcome_json, status);
 }
 
-API int LiveModelReportOutcomeSlotF(livemodel_context_t* context, const char* event_id, int slot_index, float outcome, reinforcement_learning::api_status* status)
+API int LiveModelReportOutcomeSlotF(livemodel_context_t* context, const char* event_id, unsigned int slot_index, float outcome, reinforcement_learning::api_status* status)
 {
 	return context->livemodel->report_outcome(event_id, slot_index, outcome, status);
 }
 
-API int LiveModelReportOutcomeSlotJson(livemodel_context_t* context, const char* event_id, int slot_index, const char* outcome_json, reinforcement_learning::api_status* status)
+API int LiveModelReportOutcomeSlotJson(livemodel_context_t* context, const char* event_id, unsigned int slot_index, const char* outcome_json, reinforcement_learning::api_status* status)
 {
 	return context->livemodel->report_outcome(event_id, slot_index, outcome_json, status);
 }
