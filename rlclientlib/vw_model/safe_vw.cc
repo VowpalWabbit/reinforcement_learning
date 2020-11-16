@@ -351,7 +351,7 @@ bool safe_vw::is_CB_to_CCB_model_upgrade(const std::string& args) const
     const auto local_model_type = get_model_type(args);
     const auto inbound_model_type = get_model_type(_vw->options);
 
-	return local_model_type == mm::model_type_t::CCB && inbound_model_type == mm::model_type_t::CB;    
+    return local_model_type == mm::model_type_t::CCB && inbound_model_type == mm::model_type_t::CB;    
 }
 
 safe_vw_factory::safe_vw_factory(const std::string& command_line)
