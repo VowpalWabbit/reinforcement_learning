@@ -25,7 +25,7 @@ namespace reinforcement_learning {
     _vw = VW::initialize("--quiet --json", &buf, false, nullptr, nullptr);
   }
 
-  safe_vw::safe_vw(const char* model_data, size_t len, std::string vw_commandline)
+  safe_vw::safe_vw(const char* model_data, size_t len, const std::string& vw_commandline)
   {
 	io_buf buf;
 	buf.add_file(VW::io::create_buffer_view(model_data, len));
@@ -33,7 +33,7 @@ namespace reinforcement_learning {
 	_vw = VW::initialize(vw_commandline, &buf, false, nullptr, nullptr);
   }
 
-  safe_vw::safe_vw(std::string vw_commandline)
+  safe_vw::safe_vw(const std::string& vw_commandline)
   {	  
 	  _vw = VW::initialize(vw_commandline);
   }
@@ -351,12 +351,7 @@ bool safe_vw::is_CB_to_CCB_model_upgrade(const std::string& args) const
     const auto local_model_type = get_model_type(args);
     const auto inbound_model_type = get_model_type(_vw->options);
 
-    if (local_model_type == mm::model_type_t::CCB && inbound_model_type == mm::model_type_t::CB)
-    {
-      return true;
-    }
-
-    return false;
+	return local_model_type == mm::model_type_t::CCB && inbound_model_type == mm::model_type_t::CB;    
 }
 
 safe_vw_factory::safe_vw_factory(const std::string& command_line)
