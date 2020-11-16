@@ -20,7 +20,18 @@ namespace reinforcement_learning { namespace model_management {
 
       if (data.data_sz() > 0)
       {
-        std::unique_ptr<safe_vw_factory> factory(new safe_vw_factory(std::move(data)));
+        std::unique_ptr<safe_vw> init_vw(new safe_vw(data.data(), data.data_sz()));
+
+        std::unique_ptr<safe_vw_factory> factory;		  
+        if (init_vw->is_CB_to_CCB_model_upgrade(_initial_command_line))
+        {
+          factory.reset(new safe_vw_factory(std::move(data), _upgrade_to_CCB_vw_commandline_options));
+        }
+        else
+        {
+          factory.reset(new safe_vw_factory(std::move(data)));
+        }
+
         std::unique_ptr<safe_vw> test_vw((*factory)());
         if (test_vw->is_compatible(_initial_command_line)) {
           // safe_vw_factory will create a copy of the model data to use for vw object construction.

@@ -18,8 +18,9 @@ namespace reinforcement_learning {
 
   public:
     safe_vw(const std::shared_ptr<safe_vw>& master);
+    safe_vw(const char* model_data, size_t len, const std::string& vw_parameters);
     safe_vw(const char* model_data, size_t len);
-    safe_vw(std::string vw_parameters);
+    safe_vw(const std::string& vw_parameters);
 
     ~safe_vw();
 
@@ -34,6 +35,7 @@ namespace reinforcement_learning {
     const char* id() const;
 
     bool is_compatible(const std::string& args) const;
+    bool is_CB_to_CCB_model_upgrade(const std::string& args) const;
 
     static model_management::model_type_t get_model_type(const std::string& args);
     static model_management::model_type_t get_model_type(const VW::config::options_i* args);
@@ -50,6 +52,8 @@ namespace reinforcement_learning {
     safe_vw_factory(const std::string& command_line);
     safe_vw_factory(const model_management::model_data& master_data);
     safe_vw_factory(const model_management::model_data&& master_data);
+    safe_vw_factory(const model_management::model_data& master_data, const std::string& command_line);
+    safe_vw_factory(const model_management::model_data&& master_data, const std::string& command_line);
 
     safe_vw* operator()();
   };
