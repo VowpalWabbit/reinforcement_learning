@@ -231,6 +231,13 @@ namespace reinforcement_learning { namespace logger {
       return error_code::success;
     }
 
+    int prepend(event_t& evt, api_status* status = nullptr) {
+      flatbuffers::Offset<typename serializer_t::fb_event_t> offset;
+      RETURN_IF_FAIL(serializer_t::serialize(evt, _builder, offset, status));
+      _event_offsets.insert(_event_offsets.begin(), offset);
+      return error_code::success;
+    }
+
     uint64_t size() const { return _builder.GetSize(); }
 
     void create_header() {
@@ -241,7 +248,7 @@ namespace reinforcement_learning { namespace logger {
       return;
     }
 
-    void finalize() {
+    int finalize(api_status* status) {
       auto event_offsets = _builder.CreateVector(_event_offsets);
       create_header();
       typename serializer_t::batch_builder_t batch_builder(_builder);
@@ -254,6 +261,8 @@ namespace reinforcement_learning { namespace logger {
       const auto offset = _builder.GetBufferPointer() - _buffer.raw_begin();
       _buffer.set_body_endoffset(_buffer.preamble_size() + _buffer.body_capacity());
       _buffer.set_body_beginoffset(offset);
+
+      return error_code::success;
     }
 
     typename serializer_t::offset_vector_t _event_offsets;

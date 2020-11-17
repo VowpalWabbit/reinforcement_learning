@@ -86,7 +86,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\zstd\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,7 +107,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\zstd\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -130,7 +130,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\zstd\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -155,7 +155,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\zstd\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -228,6 +228,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClInclude Include="model_mgmt\empty_data_transport.h" />
     <ClInclude Include="logger\async_batcher.h" />
     <ClInclude Include="logger\event_queue.h" />
+    <ClInclude Include="dedup_internals.h" />
     <ClInclude Include="utility\stl_container_adapter.h" />
     <ClInclude Include="utility\watchdog.h" />
     <ClInclude Include="vw_model\vw_model.h" />
@@ -245,6 +246,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClCompile Include="learning_mode.cc" />
     <ClCompile Include="logger\file\file_logger.cc" />
     <ClCompile Include="logger\logger_facade.cc" />
+    <ClCompile Include="logger\logger_extensions.cc" />
     <ClCompile Include="model_mgmt\data_callback_fn.cc" />
     <ClCompile Include="model_mgmt\empty_data_transport.cc" />
     <ClCompile Include="model_mgmt\file_model_loader.cc" />

@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(fb_serializer_outcome_event) {
   serializer.add(ro);
   ro = outcome_event::report_action_taken(event_id.c_str(), ts, 0.54f);
   serializer.add(ro);
-  serializer.finalize();
+  BOOST_CHECK_EQUAL(reinforcement_learning::error_code::success, serializer.finalize(nullptr));
 
   flatbuffers::Verifier v(db.body_begin(), db.body_filled_size());
   const OutcomeEventBatch* outcome_event_batch = GetOutcomeEventBatch(db.body_begin());
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
     auto re = ranking_event::choose_rank(event_id.c_str(), context.c_str(), 0, resp, ts, 0.33f, mode);
     serializer.add(re);
   }
-  serializer.finalize();
+  BOOST_CHECK_EQUAL(reinforcement_learning::error_code::success, serializer.finalize(nullptr));
 
   flatbuffers::Verifier v(db.body_begin(), db.body_filled_size());
   const RankingEventBatch* ranking_event_batch = GetRankingEventBatch(db.body_begin());
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_content_encoding) {
 
   generic_event ge(event_id, ts, v2::PayloadType_CB, std::move(buffer));
   collection_serializer.add(ge);
-  collection_serializer.finalize();
+  BOOST_CHECK_EQUAL(reinforcement_learning::error_code::success, collection_serializer.finalize(nullptr));
 
   flatbuffers::Verifier v(db.body_begin(), db.body_filled_size());
   const v2::EventBatch *event_batch = v2::GetEventBatch(db.body_begin());

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <boost/program_options.hpp>
 
 #include "config_utility.h"
 #include "live_model.h"
@@ -9,8 +10,14 @@
 namespace r = reinforcement_learning;
 namespace u = reinforcement_learning::utility;
 namespace m = reinforcement_learning::model_management;
+namespace nm = reinforcement_learning::name;
+namespace val = reinforcement_learning::value;
 namespace err = reinforcement_learning::error_code;
 namespace cfg = reinforcement_learning::utility::config;
+namespace po = boost::program_options;
+
+//global var, yeah ugg
+bool enable_dedup = false;
 
 static const char *options[] = {
   "cb",
@@ -46,7 +53,6 @@ void load_config_from_json(int action, u::configuration& config)
   std::string file_name(options[action]);
   file_name += "_v2.fbs";
 
-
   config.set("ApplicationID", "<appid>");
   config.set("interaction.sender.implementation", "INTERACTION_FILE_SENDER");
   config.set("observation.sender.implementation", "OBSERVATION_FILE_SENDER");
@@ -63,6 +69,9 @@ void load_config_from_json(int action, u::configuration& config)
   }
   config.set("protocol.version", "2");
   config.set("InitialExplorationEpsilon", "1.0");
+
+  if(enable_dedup)
+    config.set(nm::INTERACTION_CONTENT_ENCODING, val::CONTENT_ENCODING_ZSTD_AND_DEDUP);
 
   if(action == CCB_ACTION) {
     config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
@@ -156,13 +165,39 @@ int run_config(int action) {
 }
 
 int main(int argc, char *argv[]) {
-    if(argc == 1) {
-      printf("usage:\n");
-      printf("\texample_gen action|--all\n");
-      return -1;
-    }
+  po::options_description desc("example-gen");
+  std::string action_name;
+  bool gen_all = false;
 
-  if(!strcmp("--all", argv[1])) {
+  desc.add_options()
+    ("help", "Produce help message")
+    ("all", "use all args")
+    ("dedup", "Enable dedup/zstd")
+    ("kind", po::value<std::string>(), "which kind of example to generate (cb,ccb,slates,ca,(f|s)(s|i)?-reward,action-taken)");
+
+  po::positional_options_description pd;
+  pd.add("kind", 1);
+
+  po::variables_map vm;
+  try {
+    store(po::command_line_parser(argc, argv).options(desc).positional(pd).run(), vm);
+    po::notify(vm);
+    gen_all = vm.count("all");
+    enable_dedup = vm.count("dedup");
+    if(vm.count("kind") > 0)
+      action_name = vm["kind"].as<std::string>();
+  } catch(std::exception& e) {
+    std::cout << e.what() << std::endl;
+    std::cout << desc << std::endl;
+    return 0;
+  }
+
+  if(vm.count("help") > 0 || action_name.empty()) {
+    std::cout << desc << std::endl;
+    return 0;
+  }
+
+  if(gen_all) {
     for(int i = 0; options[i]; ++i) {
       if(run_config(i))
         return -1;
@@ -172,14 +207,15 @@ int main(int argc, char *argv[]) {
 
   int action = -1;
   for (int i = 0; options[i]; ++i) {
-    if(!strcmp(options[i], argv[1])) {
+    if(action_name == options[i]) {
       action = i;
       break;
     }
   }
 
   if(action == -1) {
-    std::cout << "Invalid action " << std::endl;
+    std::cout << "Invalid action: " << action_name << std::endl;
+    std::cout << desc << std::endl;
     return -1;
   }
 
