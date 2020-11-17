@@ -106,7 +106,7 @@ namespace reinforcement_learning
     int finalize(generic_event& evt, api_status* status);
   private:
     dedup_state& _state;
-    int _size_estimate;
+    size_t _size_estimate;
     std::unordered_map<generic_event::object_id_t, size_t> _used_objects;
   };
 
