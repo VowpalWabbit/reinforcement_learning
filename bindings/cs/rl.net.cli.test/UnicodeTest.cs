@@ -451,6 +451,37 @@ namespace Rl.Net.Cli.Test
             liveModel.QueueOutcomeEvent(eventId, outcomeJson);
         }
 
+        private void Run_LiveModelReportOutcomeSlotF_Test(LiveModel liveModel, string eventId, uint slotIndex, float outcome)
+        {
+            NativeMethods.LiveModelReportOutcomeSlotFOverride =
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, uint slotI, float o, IntPtr apiStatus) =>
+                {
+                    string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
+                    Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in LiveModelReportOutcomeF");
+
+                    return NativeMethods.SuccessStatus;
+                };
+
+            liveModel.QueueOutcomeEvent(eventId, slotIndex, outcome);
+        }
+
+        private void Run_LiveModelReportOutcomeSlotJson_Test(LiveModel liveModel, string eventId, uint slotIndex, string outcomeJson)
+        {
+            NativeMethods.LiveModelReportOutcomeSlotJsonOverride =
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, uint slotI, IntPtr outcomeJsonPtr, IntPtr apiStatus) =>
+                {
+                    string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
+                    Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in LiveModelReportOutcomeJson");
+
+                    string outcomeJsonMarshalledBack = NativeMethods.StringMarshallingFunc(outcomeJsonPtr);
+                    Assert.AreEqual(outcomeJson, outcomeJsonMarshalledBack, "Marshalling outcomeJson does not work properly in LiveModelReportOutcomeJson");
+
+                    return NativeMethods.SuccessStatus;
+                };
+
+            liveModel.QueueOutcomeEvent(eventId, slotIndex, outcomeJson);
+        }
+
         [TestMethod]
         public void Test_LiveModel_ReportOutcome()
         {
@@ -458,6 +489,8 @@ namespace Rl.Net.Cli.Test
 
             Run_LiveModelReportOutcomeF_Test(liveModel, PseudoLocEventId, 1.0f);
             Run_LiveModelReportOutcomeJson_Test(liveModel, PseudoLocEventId, PseudoLocOutcomeJson);
+            Run_LiveModelReportOutcomeSlotF_Test(liveModel, PseudoLocEventId, 1, 1.0f);
+            Run_LiveModelReportOutcomeSlotJson_Test(liveModel, PseudoLocEventId, 1, PseudoLocOutcomeJson);
         }
 
         private void Run_StringReturnMarshallingTest<TNativeObject>(string valueToReturn, Action<Func<IntPtr, IntPtr>> registerNativeOverride, Func<TNativeObject, string> targetInvocation, string targetInvocationName)
