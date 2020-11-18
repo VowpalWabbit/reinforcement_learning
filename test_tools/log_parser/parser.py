@@ -5,8 +5,9 @@ import reinforcement_learning.messages.flatbuff.v2.EventBatch as eb
 import reinforcement_learning.messages.flatbuff.v2.PayloadType as pt
 import reinforcement_learning.messages.flatbuff.v2.LearningModeType as lm
 import flatbuffers
-import zstd
+import zstandard as zstd
 import sys
+import json
 
 PREAMBLE_LENGTH = 8
 
@@ -38,7 +39,9 @@ def process_payload(payload, is_dedup):
 def parse_cb(payload):
     evt = cb.CbEvent.GetRootAsCbEvent(payload, 0)
     print(f'\tcb: actions:{evt.ActionIdsLength()} ctx:{evt.ContextLength()} probs:{evt.ProbabilitiesLength()} lm:{learning_mode_name(evt.LearningMode())}')
-    print('\tcontext: ' + bytearray(evt.ContextAsNumpy()).decode('utf-8'))
+    payload = json.loads(bytearray(evt.ContextAsNumpy()).decode('utf-8'))
+    print('\tcontext:')
+    print(json.dumps(payload, indent = 1))
 
 def parse_action_dict(payload):
     evt = ad.ActionDictionary.GetRootAsActionDictionary(payload, 0)
@@ -52,7 +55,7 @@ def dump_event(evt, idx, is_dedup):
 
     payload = process_payload(evt.PayloadAsNumpy(), is_dedup)
 
-    if m.PayloadType() == pt.PayloadType.ActionDictionary:
+    if m.PayloadType() == pt.PayloadType.DedupInfo:
         parse_action_dict(payload)
     elif m.PayloadType() == pt.PayloadType.CB:
         parse_cb(payload)
