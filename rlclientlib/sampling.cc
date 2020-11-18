@@ -62,7 +62,6 @@ int populate_multi_slot_response(const std::vector<std::vector<uint32_t>>& actio
     {
       RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids[i] and pdfs[i] must be the same size";
     }
-
     response.push_back(action_ids[i][0], pdfs[i][0]);
   }
 

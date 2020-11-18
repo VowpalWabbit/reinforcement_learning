@@ -183,6 +183,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClInclude Include="..\include\errors_data.h" />
     <ClInclude Include="..\include\future_compat.h" />
     <ClInclude Include="..\include\live_model.h" />
+    <ClInclude Include="..\include\multi_slot_response_detailed.h" />
     <ClInclude Include="..\include\sender.h" />
     <ClInclude Include="..\include\multi_slot_response.h" />
     <ClInclude Include="..\include\object_factory.h" />
@@ -202,6 +203,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClInclude Include="logger\logger_facade.h" />
     <ClInclude Include="model_mgmt\file_model_loader.h" />
     <ClInclude Include="serialization\payload_serializer.h" />
+    <ClInclude Include="..\include\slot_detailed.h" />
     <ClInclude Include="time_helper.h" />
     <ClInclude Include="utility\data_buffer_streambuf.h" />
     <ClInclude Include="generated\OutcomeEvent_generated.h" />
@@ -250,7 +252,9 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClCompile Include="model_mgmt\file_model_loader.cc" />
     <ClCompile Include="model_mgmt\model_downloader.cc" />
     <ClCompile Include="model_mgmt\model_mgmt.cc" />
+    <ClCompile Include="multi_slot_response_detailed.cc" />
     <ClCompile Include="serialization\payload_serializer.cc" />
+    <ClCompile Include="slot_detailed.cc" />
     <ClCompile Include="time_helper.cc" />
     <ClCompile Include="utility\config_utility.cc" />
     <ClCompile Include="utility\stl_container_adapter.cc" />
@@ -291,7 +295,6 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClInclude Include="utility\http_client.h" />
     <ClInclude Include="utility\http_helper.h" />
     <ClInclude Include="utility\http_authorization.h" />
-
     <ClCompile Include="azure_factories.cc" />
     <ClCompile Include="logger\eventhub_client.cc" />
     <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
@@ -305,6 +308,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram.cd" />
     <None Include="packages.config" />
     <None Include="schema\v1\Metadata.fbs" />
     <None Include="schema\v1\OutcomeEvent.fbs" />

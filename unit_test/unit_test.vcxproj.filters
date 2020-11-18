@@ -24,9 +24,6 @@
     <ClInclude Include="common_test_utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mock_http_client.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cc">
@@ -123,6 +120,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="http_client_test.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="slot_detailed_test.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="multi_slot_response_detailed_test.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

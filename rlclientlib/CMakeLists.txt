@@ -101,6 +101,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/str_util.h
   ../include/trace_logger.h
   ../include/data_buffer.h
+  ../include/slot_detailed.h
 )
 
 set(PROJECT_PRIVATE_HEADERS
