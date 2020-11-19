@@ -30,6 +30,13 @@ namespace reinforcement_learning
 		return _model_id.c_str();
 	}
 
+	int multi_slot_response_detailed::set_slot_at_index(const unsigned int index, slot_detailed&& slot, api_status* status) {
+		if (index >= _decision.size()) {
+			RETURN_ERROR_ARG(nullptr, status, slot_index_out_of_bounds_error);
+		}
+		_decision[index] = std::move(slot);
+	}
+
 	void multi_slot_response_detailed::clear() {
 		_model_id.clear();
 		_event_id.clear();

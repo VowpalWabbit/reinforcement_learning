@@ -45,35 +45,20 @@ namespace reinforcement_learning {
 		return _ranking.size();
 	}
 
-	void slot_detailed::set_model_id(const char* model_id) {
-		_model_id = model_id;
-	}
-
-	void slot_detailed::set_model_id(std::string&& model_id) {
-		_model_id.assign(std::move(model_id));
-	}
-
-	const char* slot_detailed::get_model_id() const {
-		return _model_id.c_str();
-	}
-
 	void slot_detailed::clear() {
 		_join_id.clear();
 		_chosen_action_id = 0;
-		_model_id.clear();
 		_ranking.clear();
 	}
 
 	slot_detailed::slot_detailed(slot_detailed&& tmp) noexcept :
 		_join_id(std::move(tmp._join_id)),
 		_chosen_action_id(tmp._chosen_action_id),
-		_model_id(std::move(tmp._model_id)),
 		_ranking(std::move(tmp._ranking)) {}
 
 	slot_detailed& slot_detailed::operator=(slot_detailed&& tmp) noexcept {
 		std::swap(_join_id, tmp._join_id);
 		std::swap(_chosen_action_id, tmp._chosen_action_id);
-		std::swap(_model_id, tmp._model_id);
 		std::swap(_ranking, tmp._ranking);
 		return *this;
 	}

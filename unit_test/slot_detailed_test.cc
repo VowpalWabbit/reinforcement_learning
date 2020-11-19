@@ -25,8 +25,8 @@ datacol get_slot_detailed_test_data() {
 BOOST_AUTO_TEST_CASE(slot_detailed_join_id) {
 	slot_detailed slot1;
 	BOOST_CHECK_EQUAL(slot1.get_join_id(), "");
-	slot_detailed slot2("event_id");
-	BOOST_CHECK_EQUAL(slot2.get_join_id(), "event_id");
+	slot_detailed slot2("join_id");
+	BOOST_CHECK_EQUAL(slot2.get_join_id(), "join_id");
 }
 
 BOOST_AUTO_TEST_CASE(slot_detailed_empty_collection) {

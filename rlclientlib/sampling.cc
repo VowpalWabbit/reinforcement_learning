@@ -47,6 +47,15 @@ int populate_response(const std::vector<std::vector<uint32_t>>& action_ids, cons
   return error_code::success;
 }
 
+int populate_slot(size_t chosen_action_index, const std::vector<uint32_t>& action_ids, const std::vector<float>& pdf, slot_detailed& response, i_trace* trace_logger, api_status* status) {
+	for (size_t idx = 0; idx < pdf.size(); ++idx) {
+		response.push_back(action_ids[idx], pdf[idx]);
+	}
+
+	RETURN_IF_FAIL(response.set_chosen_action_id(action_ids[chosen_action_index]));
+	return error_code::success;
+}
+
 int populate_multi_slot_response(const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, std::string&& event_id, std::string&& model_id, multi_slot_response& response, i_trace* trace_logger, api_status* status) {
   if(action_ids.size() != pdfs.size())
   {
@@ -66,6 +75,28 @@ int populate_multi_slot_response(const std::vector<std::vector<uint32_t>>& actio
   }
 
   return error_code::success;
+}
+
+int populate_multi_slot_response_detailed(const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, std::string&& event_id, std::string&& model_id, multi_slot_response_detailed& response, i_trace* trace_logger, api_status* status) {
+	if (! (action_ids.size() == pdfs.size() && pdfs.size() == response.size() ))
+	{
+		RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids, pdfs, and number of slots must be the same size";
+	}
+
+	response.set_event_id(std::move(event_id));
+	response.set_model_id(std::move(model_id));
+
+	auto r = response.begin();
+	for (size_t i = 0; i < action_ids.size() && r!= response.end(); i++, ++r)
+	{
+		if (action_ids[i].size() != pdfs[i].size())
+		{
+			RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids[i] and pdfs[i] must be the same size";
+		}
+		populate_slot((size_t)0, action_ids[i], pdfs[i], *r, trace_logger, status);
+	}
+
+	return error_code::success;
 }
 
 int sample_and_populate_response(uint64_t rnd_seed, std::vector<int>& action_ids, std::vector<float>& pdf, std::string&& model_id, ranking_response& response, i_trace* trace_logger, api_status* status) {

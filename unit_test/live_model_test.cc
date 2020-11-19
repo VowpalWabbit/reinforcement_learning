@@ -758,6 +758,77 @@ BOOST_AUTO_TEST_CASE(populate_response_different_size_test) {
     BOOST_CHECK_EQUAL(populate_response(action_ids, pdfs, event_ids, std::move(model_id), resp, nullptr, &status), err::invalid_argument);
 }
 
+BOOST_AUTO_TEST_CASE(populate_slot_test) {
+	r::api_status status;
+	const std::vector<uint32_t> action_ids = { 0, 1, 2 };
+	const std::vector<float> pdfs = { 0.8667f, 0.9f, 1.0f };
+
+	r::slot_detailed slot;
+
+	BOOST_CHECK_EQUAL(populate_slot(size_t(0), action_ids, pdfs, slot, nullptr, &status), err::success);
+
+	BOOST_CHECK_EQUAL(slot.size(), 3);
+
+	size_t action_id;
+	int x = slot.get_chosen_action_id(action_id);
+	BOOST_CHECK_EQUAL(action_id, 0);
+
+	int i = 0;
+	for (const auto& d : slot) {
+		BOOST_CHECK_EQUAL(d.action_id, action_ids[i]);
+		BOOST_CHECK_EQUAL(d.probability, pdfs[i++]);
+	}
+}
+
+BOOST_AUTO_TEST_CASE(populate_multi_slot_response_same_size_test) {
+	r::api_status status;
+	std::vector<std::vector<uint32_t>> action_ids = { {0,1,2}, {1,2}, {2} };
+	std::vector<std::vector<float>> pdfs = { {0.8667f, 0.0667f, 0.0667f}, {0.9f, 0.1f}, {1.0f} };
+	std::string event_id = "a";
+	std::string model_id = "id";
+
+	r::multi_slot_response_detailed resp;
+	resp.resize(3);
+
+	BOOST_CHECK_EQUAL(populate_multi_slot_response_detailed(action_ids, pdfs, std::move(event_id), std::move(model_id), resp, nullptr, &status), err::success);
+
+	BOOST_CHECK(strcmp(resp.get_model_id(), "id") == 0);
+	BOOST_CHECK_EQUAL(resp.size(), 3);
+
+	auto it = resp.begin();
+	size_t action_id = 0;
+	auto& rank_resp = *it;
+
+	int i = 0;
+	for (const auto& s : resp) {
+		int j = 0;
+		for (const auto& d : s) {
+			BOOST_CHECK_EQUAL(d.action_id, action_ids[i][j]);
+			BOOST_CHECK_EQUAL(d.probability, pdfs[i][j++]);
+		}
+		++i;
+	}
+}
+
+BOOST_AUTO_TEST_CASE(populate_multi_slot_response_different_size_test) {
+	r::api_status status;
+	std::vector<std::vector<uint32_t>> action_ids = { {0,1,2}, {1,2} };
+	std::vector<std::vector<float>> pdfs = { {0.8667f, 0.0667f, 0.0667f}, {0.9f, 0.1f}, {1.0f} };
+	std::string event_id = "a";
+	std::string model_id = "id";
+
+	r::multi_slot_response_detailed resp;
+	//int populate_multi_slot_response_detailed(const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, std::string&& event_id, std::string&& model_id, multi_slot_response_detailed& response, i_trace* trace_logger, api_status* status) {
+
+	BOOST_CHECK_EQUAL(populate_multi_slot_response_detailed(action_ids, pdfs, std::move(event_id), std::move(model_id), resp, nullptr, &status), err::invalid_argument);
+
+	action_ids = { {0,1}, {1,2}, {1} };
+	pdfs = { {0.8667f, 0.0667f, 0.0667f}, {0.9f, 0.1f}, {1.0f} };
+	BOOST_CHECK_EQUAL(populate_multi_slot_response_detailed(action_ids, pdfs, std::move(event_id), std::move(model_id), resp, nullptr, &status), err::invalid_argument);
+}
+
+
+
 const auto JSON_CCB_CONTEXT = R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[ { "TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}}],"_slots":[{"Slot":{"a1":"f1"}},{"Slot":{"a1":"f1"}}]})";
 
 BOOST_AUTO_TEST_CASE(ccb_explore_only_mode) {
@@ -796,11 +867,41 @@ BOOST_AUTO_TEST_CASE(ccb_explore_only_mode) {
   ++it;
 }
 
+BOOST_AUTO_TEST_CASE(ccb_explore_only_mode_multi_slot_response_detailed) {
+	u::configuration config;
+	cfg::create_from_json(JSON_CFG, config);
+	config.set(r::name::EH_TEST, "true");
+	config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+	config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
+	config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
+	config.set(r::name::INTERACTION_FILE_NAME, "interaction.txt");
+	config.set(r::name::OBSERVATION_FILE_NAME, "observation.txt");
+	config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
+
+	r::api_status status;
+	r::live_model model(config);
+	BOOST_CHECK_EQUAL(model.init(&status), err::success);
+
+	r::multi_slot_response_detailed response;
+	BOOST_CHECK_EQUAL(model.request_multi_slot_decision(JSON_CCB_CONTEXT, response), err::success);
+
+	BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+	BOOST_CHECK_EQUAL(response.size(), 2);
+
+
+	for (const auto& s : response) {
+		size_t action_id;
+		s.get_chosen_action_id(action_id);
+		BOOST_CHECK_EQUAL(action_id, 0);
+	}
+}
+
 const auto JSON_SLATES_CONTEXT = R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"},"_slot_id":0},{"TAction":{"a2":"f2"},"_slot_id":0},{"TAction":{"a3":"f3"},"_slot_id":1},{"TAction":{"a4":"f4"},"_slot_id":1},{"TAction":{"a5":"f5"},"_slot_id":1}],"_slots":[{"Slot":{"a1":"f1"}},{"Slot":{"a2":"f2"}}]})";
 
 BOOST_AUTO_TEST_CASE(slates_explore_only_mode) {
   u::configuration config;
   cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::PROTOCOL_VERSION, "2");
   config.set(r::name::EH_TEST, "true");
   config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
   config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);

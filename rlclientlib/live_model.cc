@@ -135,27 +135,27 @@ namespace reinforcement_learning
     return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, status);
   }
 
-  //int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
-  //{
-	 // INIT_CHECK();
-	 // return _pimpl->request_multi_slot_decision(event_id, context_json, flags, resp, status);
-  //}
+  int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
+  {
+	  INIT_CHECK();
+	  return _pimpl->request_multi_slot_decision(event_id, context_json, flags, resp, status);
+  }
 
-  //int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, multi_slot_response_detailed& resp, api_status* status)
-  //{
-	 // return request_multi_slot_decision(event_id, context_json, action_flags::DEFAULT, resp, status);
-  //}
+  int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, multi_slot_response_detailed& resp, api_status* status)
+  {
+	  return request_multi_slot_decision(event_id, context_json, action_flags::DEFAULT, resp, status);
+  }
 
-  //int live_model::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
-  //{
-	 // INIT_CHECK();
-	 // return _pimpl->request_multi_slot_decision(context_json, flags, resp, status);
-  //}
+  int live_model::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
+  {
+	  INIT_CHECK();
+	  return _pimpl->request_multi_slot_decision(context_json, flags, resp, status);
+  }
 
-  //int live_model::request_multi_slot_decision(const char * context_json, multi_slot_response_detailed& resp, api_status* status)
-  //{
-	 // return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, status);
-  //}
+  int live_model::request_multi_slot_decision(const char * context_json, multi_slot_response_detailed& resp, api_status* status)
+  {
+	  return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, status);
+  }
 
 
   //not implemented yet

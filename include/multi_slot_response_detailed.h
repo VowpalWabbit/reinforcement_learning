@@ -38,6 +38,8 @@ namespace reinforcement_learning {
 		void set_model_id(std::string&& model_id);
 		const char* get_model_id() const;
 
+		int set_slot_at_index(const unsigned int index, slot_detailed&& slot, api_status* status = nullptr);
+
 		void clear();
 		const_iterator_t begin() const;
 		iterator_t begin();

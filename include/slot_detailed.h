@@ -58,109 +58,83 @@ namespace reinforcement_learning {
 		* @brief Set the join_id.  (This is set internally by the API)
 		* @param event_id
 		*/
-		void set_join_id(const char* event_id);
+		void set_join_id(const char* join_id);
 
 		/**
-			* @brief Get the chosen action id.
-			*
-			* @param action_id Chosen action id
-			* @param status Optional field with detailed string description if there is an error
-			* @return int Error code
-			*/
+		* @brief Get the chosen action id.
+		*
+		* @param action_id Chosen action id
+		* @param status Optional field with detailed string description if there is an error
+		* @return int Error code
+		*/
 		int get_chosen_action_id(size_t& action_id, api_status* status = nullptr) const; // id of the top action chosen by the model
 
 		/**
-			* @brief Set the chosen action id.  (This is set internally by the API)
-			*
-			* @param action_id Chosen action id
-			* @param status Optional field with detailed string description if there is an error
-			* @return int Error code
-			*/
+		* @brief Set the chosen action id.  (This is set internally by the API)
+		*
+		* @param action_id Chosen action id
+		* @param status Optional field with detailed string description if there is an error
+		* @return int Error code
+		*/
 		int set_chosen_action_id(size_t action_id, api_status* status = nullptr); // id of the top action chosen by the model
 
 		/**
-			* @brief Set the chosen action id, but do not verify the index fits within the ranking.  (This is set internally by the API)
-			* This is used in CCB where subsequent ranking_responses have subsets of the orignal actionset.
-			*
-			* @param action_id Chosen action id
-			* @param status Optional field with detailed string description if there is an error
-			* @return int Error code
-			*/
+		* @brief Set the chosen action id, but do not verify the index fits within the ranking.  (This is set internally by the API)
+		* This is used in CCB where subsequent ranking_responses have subsets of the orignal actionset.
+		*
+		* @param action_id Chosen action id
+		* @param status Optional field with detailed string description if there is an error
+		* @return int Error code
+		*/
 		int set_chosen_action_id_unchecked(size_t action_id, api_status* = nullptr);
 
 		/**
-			* @brief Add (action id, probability) pair to the slot (This is set internally by the API)
-			*
-			* @param action_id
-			* @param prob
-			*/
+		* @brief Add (action id, probability) pair to the slot (This is set internally by the API)
+		*
+		* @param action_id
+		* @param prob
+		*/
 		void push_back(const size_t action_id, const float prob);
 
 		/**
-			* @brief Size of the action collection.
-			*
-			* @return size_t
-			*/
+		* @brief Size of the action collection.
+		*
+		* @return size_t
+		*/
 		size_t size() const;
 
 		/**
-			* @brief Set the model_id.
-			* Every rank call (single or multi slot) is associated with a unique model used to predict.  A unique model_id
-			* is associated with each unique model. (This is set internally by the API)
-			* @param model_id
-			*/
-		void set_model_id(const char* model_id);
-
-		/**
-			* @brief Set the model_id.
-			* Every rank call (single or multi slot) is associated with a unique model used to predict.  A unique model_id
-			* is associated with each unique model. (This is set internally by the API).
-			* Input model_id is left in an unspecified but valid state.
-			* @param model_id
-			*/
-		void set_model_id(std::string&& model_id);
-
-		/**
-			* @brief Get the model_id.
-			* Every rank call (single or multi slot) is associated with a unique model used to predict.  A unique model_id
-			* is associated with each unique model. (This is set internally by the API)
-			* @return const char*
-			*/
-		const char * get_model_id() const;
-
-		/**
-			* @brief Clear the slot detailed object so that it can be reused.
-			* The goal is to reuse response without reallocating as much as possible.
-			*/
+		* @brief Clear the slot detailed object so that it can be reused.
+		* The goal is to reuse response without reallocating as much as possible.
+		*/
 		void clear();
 
 		/**
-			* @brief Move construct a new slot detailed object.
-			* The underlying data is taken from the rvalue reference.
-			*/
+		* @brief Move construct a new slot detailed object.
+		* The underlying data is taken from the rvalue reference.
+		*/
 		slot_detailed(slot_detailed&&) noexcept;
 
 		/**
-			* @brief Move assignment operator for slot detailed.
-			* The underlying data is taken from rvalue reference, and then it is cleared.
-			* @return ranking_response&
-			*/
+		* @brief Move assignment operator for slot detailed.
+		* The underlying data is taken from rvalue reference, and then it is cleared.
+		* @return ranking_response&
+		*/
 		slot_detailed& operator=(slot_detailed&&) noexcept;
 
 		/**
-			* @brief Copy constructor is removed since implementation will be deleted twice
-			*/
+		* @brief Copy constructor is removed since implementation will be deleted twice
+		*/
 		slot_detailed(const slot_detailed&) = delete;
 
 		/**
-			* @brief assignment operator is removed since implementation will be deleted twice
-			*/
+		* @brief assignment operator is removed since implementation will be deleted twice
+		*/
 		slot_detailed& operator =(const slot_detailed&) = delete;
 
 	private:
 		std::string _join_id;
 		size_t _chosen_action_id;
-		std::string _model_id;
 		using coll_t = std::vector<action_prob>;
 		coll_t _ranking;
 
