@@ -870,6 +870,7 @@ BOOST_AUTO_TEST_CASE(ccb_explore_only_mode) {
 BOOST_AUTO_TEST_CASE(ccb_explore_only_mode_multi_slot_response_detailed) {
 	u::configuration config;
 	cfg::create_from_json(JSON_CFG, config);
+	config.set(r::name::PROTOCOL_VERSION, "2");
 	config.set(r::name::EH_TEST, "true");
 	config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
 	config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
