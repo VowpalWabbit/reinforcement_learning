@@ -561,6 +561,48 @@ namespace Rl.Net.Cli.Test
             Run_GetRankingModelId_Test(null);
         }
 
+        [TestMethod]
+        public void Test_SlotRankingStringProperties()
+        {
+            void RegisterNativeOverride(Func<IntPtr, IntPtr> nativeOverrideCallback)
+            {
+                NativeMethods.GetSlotIdOverride = nativeOverrideCallback;
+            }
+
+            Run_StringReturnMarshallingTest<SlotRanking>(PseudoLocEventId, RegisterNativeOverride, slotRanking => slotRanking.EventId, nameof(NativeMethods.GetSlotId));
+        }
+
+        private void Run_GetMultiSlotDetailedModelId_Test(string modelIdToReturn)
+        {
+            void RegisterNativeOverride(Func<IntPtr, IntPtr> nativeOverrideCallback)
+            {
+                NativeMethods.GetMultiSlotDetailedModelIdOverride = nativeOverrideCallback;
+            }
+
+            Run_StringReturnMarshallingTest<MultiSlotResponseDetailed>(modelIdToReturn, RegisterNativeOverride, multiSlot => multiSlot.ModelId, nameof(NativeMethods.GetMultiSlotDetailedModelId));
+        }
+
+        private void Run_GetMultiSlotDetailedEventId_Test(string eventIdToReturn)
+        {
+            void RegisterNativeOverride(Func<IntPtr, IntPtr> nativeOverrideCallback)
+            {
+                NativeMethods.GetMultiSlotDetailedEventIdOverride = nativeOverrideCallback;
+            }
+
+            Run_StringReturnMarshallingTest<MultiSlotResponseDetailed>(eventIdToReturn, RegisterNativeOverride, multiSlot => multiSlot.EventId, nameof(NativeMethods.GetMultiSlotDetailedEventId));
+        }
+
+        [TestMethod]
+        public void Test_MultiSlotDetailedStringProperties()
+        {
+            Run_GetMultiSlotDetailedEventId_Test(PseudoLocEventId);
+
+            Run_GetMultiSlotDetailedModelId_Test(String.Join("/", PseudoLocEventId, PseudoLocEventId));
+            Run_GetMultiSlotDetailedModelId_Test(String.Empty);
+            Run_GetMultiSlotDetailedModelId_Test(null);
+        }
+
+
         private void Run_GetDecisionModelId_Test(string modelIdToReturn)
         {
             void RegisterNativeOverride(Func<IntPtr, IntPtr> nativeOverrideCallback)

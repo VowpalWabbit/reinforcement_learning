@@ -7,7 +7,7 @@
  */
 #pragma once
 #include "container_iterator.h"
-#include "slot_detailed.h"
+#include "slot_ranking.h"
 #include <cstddef>
 #include <iterator>
 #include <vector>
@@ -25,7 +25,7 @@ namespace reinforcement_learning {
   private:
 	using coll_t = std::vector<action_prob>;
 	std::string _model_id;
-	slot_detailed _slot_impl;
+	slot_ranking _slot_impl;
 
 
   public:
@@ -142,12 +142,12 @@ namespace reinforcement_learning {
 	/**
 	* @brief Copy constructor is removed since implementation will be deleted twice
 	*/
-	ranking_response(const slot_detailed&) = delete;
+	ranking_response(const slot_ranking&) = delete;
 
 	/**
 	* @brief assignment operator is removed since implementation will be deleted twice
 	*/
-	ranking_response& operator =(const slot_detailed&) = delete;
+	ranking_response& operator =(const slot_ranking&) = delete;
 
 
   public:

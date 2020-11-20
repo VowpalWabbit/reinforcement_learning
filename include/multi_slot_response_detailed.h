@@ -1,7 +1,7 @@
 #pragma once
 
 #include "container_iterator.h"
-#include "slot_detailed.h"
+#include "slot_ranking.h"
 #include <cstddef>
 #include <iterator>
 #include <vector>
@@ -12,15 +12,15 @@ namespace reinforcement_learning {
 
 	class multi_slot_response_detailed {
 	private:
-		using coll_t = std::vector<slot_detailed>;
+		using coll_t = std::vector<slot_ranking>;
 
 		std::string _event_id;
 		std::string _model_id;
 		coll_t _decision;
 
 	public:
-		using iterator_t = container_iterator<slot_detailed, coll_t>;
-		using const_iterator_t = const_container_iterator<slot_detailed, coll_t>;
+		using iterator_t = container_iterator<slot_ranking, coll_t>;
+		using const_iterator_t = const_container_iterator<slot_ranking, coll_t>;
 
 		multi_slot_response_detailed() = default;
 		~multi_slot_response_detailed() = default;
@@ -38,7 +38,7 @@ namespace reinforcement_learning {
 		void set_model_id(std::string&& model_id);
 		const char* get_model_id() const;
 
-		int set_slot_at_index(const unsigned int index, slot_detailed&& slot, api_status* status = nullptr);
+		int set_slot_at_index(const unsigned int index, slot_ranking&& slot, api_status* status = nullptr);
 
 		void clear();
 		const_iterator_t begin() const;

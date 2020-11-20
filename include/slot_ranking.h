@@ -1,5 +1,5 @@
 /**
- * @brief slot_detailed definition. slot_detailed contains the cosen action, along with the action probability distribution for a slot. 
+ * @brief slot_ranking definition. slot_ranking contains the cosen action, along with the action probability distribution for a slot. 
  */
 #pragma once
 #include "container_iterator.h"
@@ -33,19 +33,19 @@ namespace reinforcement_learning {
 
 	/**
 	 * @brief
-	 * slot_detailed contains all the actions and distribution from with the action was sampled.  It also contains the chosen action id and
+	 * slot_ranking contains all the actions and distribution from with the action was sampled.  It also contains the chosen action id and
 	 * the unique join_id representing the choice.
 	 */
-	class slot_detailed {
+	class slot_ranking {
 	public:
-		slot_detailed() = default;
-		~slot_detailed() = default;
+		slot_ranking() = default;
+		~slot_ranking() = default;
 		/**
 			* @brief Construct a new slot detailed object.
 			*
 			* @param join_id The unique identifier for this interaction.  This event_id must be used when reporting the outcome for this action
 			*/
-		slot_detailed(char const* join_id);
+		slot_ranking(char const* join_id);
 
 		/**
 		* @brief Unique join_id for this slot detailed instance.
@@ -113,24 +113,24 @@ namespace reinforcement_learning {
 		* @brief Move construct a new slot detailed object.
 		* The underlying data is taken from the rvalue reference.
 		*/
-		slot_detailed(slot_detailed&&) noexcept;
+		slot_ranking(slot_ranking&&) noexcept;
 
 		/**
 		* @brief Move assignment operator for slot detailed.
 		* The underlying data is taken from rvalue reference, and then it is cleared.
 		* @return ranking_response&
 		*/
-		slot_detailed& operator=(slot_detailed&&) noexcept;
+		slot_ranking& operator=(slot_ranking&&) noexcept;
 
 		/**
 		* @brief Copy constructor is removed since implementation will be deleted twice
 		*/
-		slot_detailed(const slot_detailed&) = delete;
+		slot_ranking(const slot_ranking&) = delete;
 
 		/**
 		* @brief assignment operator is removed since implementation will be deleted twice
 		*/
-		slot_detailed& operator =(const slot_detailed&) = delete;
+		slot_ranking& operator =(const slot_ranking&) = delete;
 
 	private:
 		std::string _join_id;

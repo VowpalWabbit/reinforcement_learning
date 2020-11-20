@@ -47,7 +47,7 @@ int populate_response(const std::vector<std::vector<uint32_t>>& action_ids, cons
   return error_code::success;
 }
 
-int populate_slot(size_t chosen_action_index, const std::vector<uint32_t>& action_ids, const std::vector<float>& pdf, slot_detailed& response, i_trace* trace_logger, api_status* status) {
+int populate_slot(size_t chosen_action_index, const std::vector<uint32_t>& action_ids, const std::vector<float>& pdf, slot_ranking& response, i_trace* trace_logger, api_status* status) {
 	for (size_t idx = 0; idx < pdf.size(); ++idx) {
 		response.push_back(action_ids[idx], pdf[idx]);
 	}

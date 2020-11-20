@@ -3,7 +3,7 @@
 #   define BOOST_TEST_MODULE Main
 #endif
 
-#include "slot_detailed.h"
+#include "slot_ranking.h"
 #include <boost/test/unit_test.hpp>
 #include "api_status.h"
 
@@ -12,7 +12,7 @@ using namespace std;
 
 using datacol = vector<pair<int, float>>;
 
-datacol get_slot_detailed_test_data() {
+datacol get_slot_ranking_test_data() {
 	return {
 	  { 2,1.1f },
 	  { 6,0.1f },
@@ -22,15 +22,15 @@ datacol get_slot_detailed_test_data() {
 	};
 }
 
-BOOST_AUTO_TEST_CASE(slot_detailed_join_id) {
-	slot_detailed slot1;
+BOOST_AUTO_TEST_CASE(slot_ranking_join_id) {
+	slot_ranking slot1;
 	BOOST_CHECK_EQUAL(slot1.get_join_id(), "");
-	slot_detailed slot2("join_id");
+	slot_ranking slot2("join_id");
 	BOOST_CHECK_EQUAL(slot2.get_join_id(), "join_id");
 }
 
-BOOST_AUTO_TEST_CASE(slot_detailed_empty_collection) {
-	slot_detailed slot;
+BOOST_AUTO_TEST_CASE(slot_ranking_empty_collection) {
+	slot_ranking slot;
 	api_status s;
 	size_t action_id;
 	auto scode = slot.get_chosen_action_id(action_id, &s);
@@ -42,10 +42,10 @@ BOOST_AUTO_TEST_CASE(slot_detailed_empty_collection) {
 	BOOST_CHECK_GT(scode, 0);
 }
 
-BOOST_AUTO_TEST_CASE(slot_detailed_write_read_iterator) {
-	auto test_data = get_slot_detailed_test_data();
+BOOST_AUTO_TEST_CASE(slot_ranking_write_read_iterator) {
+	auto test_data = get_slot_ranking_test_data();
 
-	slot_detailed slot;
+	slot_ranking slot;
 
 	for (auto& p : test_data) {
 		slot.push_back(p.first, p.second);

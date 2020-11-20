@@ -1,10 +1,11 @@
 #include "multi_slot_response_detailed.h"
+#include "slot_ranking.h"
 #include "api_status.h"
 #include "err_constants.h"
 
 namespace reinforcement_learning
 {
-	using coll_t = std::vector<slot_detailed>;
+	using coll_t = std::vector<slot_ranking>;
 
 	void multi_slot_response_detailed::set_event_id(const char* event_id) {
 		_event_id = event_id;
@@ -30,7 +31,7 @@ namespace reinforcement_learning
 		return _model_id.c_str();
 	}
 
-	int multi_slot_response_detailed::set_slot_at_index(const unsigned int index, slot_detailed&& slot, api_status* status) {
+	int multi_slot_response_detailed::set_slot_at_index(const unsigned int index, slot_ranking&& slot, api_status* status) {
 		if (index >= _decision.size()) {
 			RETURN_ERROR_ARG(nullptr, status, slot_index_out_of_bounds_error);
 		}

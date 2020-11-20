@@ -763,7 +763,7 @@ BOOST_AUTO_TEST_CASE(populate_slot_test) {
 	const std::vector<uint32_t> action_ids = { 0, 1, 2 };
 	const std::vector<float> pdfs = { 0.8667f, 0.9f, 1.0f };
 
-	r::slot_detailed slot;
+	r::slot_ranking slot;
 
 	BOOST_CHECK_EQUAL(populate_slot(size_t(0), action_ids, pdfs, slot, nullptr, &status), err::success);
 

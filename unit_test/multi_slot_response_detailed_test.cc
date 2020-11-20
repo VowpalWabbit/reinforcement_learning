@@ -3,7 +3,7 @@
 #   define BOOST_TEST_MODULE Main
 #endif
 
-#include "slot_detailed.h"
+#include "slot_ranking.h"
 #include "multi_slot_response_detailed.h"
 #include <boost/test/unit_test.hpp>
 #include "api_status.h"
@@ -14,7 +14,7 @@ using namespace std;
 
 using datacol = vector<pair<int, float>>;
 
-datacol get_slot_detailed_test_data1() {
+datacol get_slot_ranking_test_data1() {
 	return {
 	  { 2,1.1f },
 	  { 6,0.1f },
@@ -43,9 +43,9 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_write_read_iterator) {
 	multi_slot_response_detailed multi;
 	multi.resize(2);
 
-	slot_detailed slot1;
-	slot_detailed slot2;
-	auto test_data = get_slot_detailed_test_data1();
+	slot_ranking slot1;
+	slot_ranking slot2;
+	auto test_data = get_slot_ranking_test_data1();
 	for (auto& p : test_data) {
 		slot1.push_back(p.first, p.second);
 		slot2.push_back(p.first, p.second);

@@ -51,7 +51,7 @@
     <ClCompile Include="dedup.cc" />
     <ClCompile Include="constants.cc" />
     <ClCompile Include="multi_slot_response_detailed.cc" />
-    <ClCompile Include="slot_detailed.cc" />
+    <ClCompile Include="slot_ranking.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -123,8 +123,8 @@
     <ClInclude Include="serialization\payload_serializer.h" />
     <ClInclude Include="generic_event.h" />
     <ClInclude Include="dedup.h" />
-    <ClInclude Include="..\include\slot_detailed.h" />
     <ClInclude Include="..\include\multi_slot_response_detailed.h" />
+    <ClInclude Include="..\include\slot_ranking.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

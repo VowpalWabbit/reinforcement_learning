@@ -5,7 +5,7 @@
 namespace reinforcement_learning {
 	
 	ranking_response::ranking_response(char const* event_id)
-		: _slot_impl { slot_detailed(event_id) } {}
+		: _slot_impl { slot_ranking(event_id) } {}
 
 	char const* ranking_response::get_event_id() const {
 	return _slot_impl.get_join_id();

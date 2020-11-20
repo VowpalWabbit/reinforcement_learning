@@ -139,6 +139,38 @@ namespace Rl.Net
                 return LiveModelRequestMultiSlotDecisionWithFlagsNative(liveModel, eventId, contextJson, flags, multiSlotResponse, apiStatus);
             }
 
+
+
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestMultiSlotDecisionDetailed")]
+            private static extern int LiveModelRequestMultiSlotDecisionDetailedNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr multiSlotResponseDetailed, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionDetailedOverride { get; set; }
+
+            public static int LiveModelRequestMultiSlotDecisionDetailed(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr multiSlotResponseDetailed, IntPtr apiStatus)
+            {
+                if (LiveModelRequestMultiSlotDecisionDetailedOverride != null)
+                {
+                    return LiveModelRequestMultiSlotDecisionDetailedOverride(liveModel, eventId, contextJson, multiSlotResponseDetailed, apiStatus);
+                }
+
+                return LiveModelRequestMultiSlotDecisionDetailedNative(liveModel, eventId, contextJson, multiSlotResponseDetailed, apiStatus);
+            }
+
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestMultiSlotDecisionDetailedWithFlags")]
+            private static extern int LiveModelRequestMultiSlotDecisionDetailedWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr multiSlotResponseDetailed, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionDetailedWithFlagsOverride { get; set; }
+
+            public static int LiveModelRequestMultiSlotDecisionDetailedWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr multiSlotResponseDetailed, IntPtr apiStatus)
+            {
+                if (LiveModelRequestMultiSlotDecisionDetailedWithFlagsOverride != null)
+                {
+                    return LiveModelRequestMultiSlotDecisionDetailedWithFlagsOverride(liveModel, eventId, contextJson, flags, multiSlotResponseDetailed, apiStatus);
+                }
+
+                return LiveModelRequestMultiSlotDecisionDetailedWithFlagsNative(liveModel, eventId, contextJson, flags, multiSlotResponseDetailed, apiStatus);
+            }
+
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelReportActionTaken")]
             private static extern int LiveModelReportActionTakenNative(IntPtr liveModel, IntPtr eventId, IntPtr apiStatus);
 
