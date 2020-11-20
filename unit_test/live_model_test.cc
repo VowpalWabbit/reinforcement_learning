@@ -818,7 +818,6 @@ BOOST_AUTO_TEST_CASE(populate_multi_slot_response_different_size_test) {
 	std::string model_id = "id";
 
 	r::multi_slot_response_detailed resp;
-	//int populate_multi_slot_response_detailed(const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, std::string&& event_id, std::string&& model_id, multi_slot_response_detailed& response, i_trace* trace_logger, api_status* status) {
 
 	BOOST_CHECK_EQUAL(populate_multi_slot_response_detailed(action_ids, pdfs, std::move(event_id), std::move(model_id), resp, nullptr, &status), err::invalid_argument);
 
