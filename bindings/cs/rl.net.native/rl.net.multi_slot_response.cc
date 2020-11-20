@@ -38,11 +38,6 @@ public:
     }
 };
 
-API int GetSlotEntrySlotId(reinforcement_learning::slot_entry* slot)
-{
-  return slot->get_slot_id();
-}
-
 API int GetSlotEntryActionId(reinforcement_learning::slot_entry* slot)
 {
   return slot->get_action_id();
