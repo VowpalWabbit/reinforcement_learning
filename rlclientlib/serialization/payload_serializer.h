@@ -74,7 +74,7 @@ namespace reinforcement_learning {
         std::vector<flatbuffers::Offset<v2::SlotEvent>> slots;
         for (size_t i = 0; i < action_ids.size(); i++)
         {
-          slots.push_back(v2::CreateSlotEventDirect(fbb, &action_ids[i], &pdfs[i]));
+          slots.push_back(v2::CreateSlotEventDirect(fbb, &action_ids[i], &pdfs[i], nullptr));
         }
 
         std::vector<unsigned char> _context;

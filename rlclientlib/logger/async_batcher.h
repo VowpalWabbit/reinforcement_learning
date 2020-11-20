@@ -132,7 +132,7 @@ namespace reinforcement_learning { namespace logger {
       }
     }
 
-    collection_serializer.finalize();
+    RETURN_IF_FAIL(collection_serializer.finalize(status));
 
     return error_code::success;
   }

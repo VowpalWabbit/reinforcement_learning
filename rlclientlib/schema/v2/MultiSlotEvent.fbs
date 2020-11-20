@@ -4,6 +4,7 @@ namespace reinforcement_learning.messages.flatbuff.v2;
 table SlotEvent {
     action_ids:[uint32];     // ranked action ids
     probabilities:[float];   // probabilities
+    id:string; // id for slot
 }
 
 // this event covers both ccb and slates events from v1 schema

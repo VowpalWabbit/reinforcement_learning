@@ -8,7 +8,6 @@ class multi_slot_enumerator_adapter;
 // Global exports
 extern "C" {
     // NOTE: THIS IS NOT POLYMORPHISM SAFE!
-    API int GetSlotEntrySlotId(reinforcement_learning::slot_entry* slot);
     API int GetSlotEntryActionId(reinforcement_learning::slot_entry* slot);
     API float GetSlotEntryProbability(reinforcement_learning::slot_entry* slot);
 

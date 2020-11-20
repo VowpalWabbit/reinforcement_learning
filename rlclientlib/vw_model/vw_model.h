@@ -24,6 +24,7 @@ namespace reinforcement_learning { namespace model_management {
 
   private:
     const std::string _initial_command_line;
+	const std::string _upgrade_to_CCB_vw_commandline_options{ "--ccb_explore_adf --json --quiet" };
 
     using vw_ptr = std::shared_ptr<safe_vw>;
     using pooled_vw = utility::pooled_object_guard<safe_vw, safe_vw_factory>;

@@ -112,8 +112,9 @@ namespace reinforcement_learning { namespace logger {
       _buffer.reset();
     }
 
-    void finalize() {
+    int finalize(api_status* status) {
       _streambuf.finalize();
+      return error_code::success;
     }
 
     buffer_t& _buffer;

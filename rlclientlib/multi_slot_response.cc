@@ -4,14 +4,9 @@
 
 namespace reinforcement_learning
 {
-  slot_entry::slot_entry(uint32_t _slot_id, uint32_t _action_id, float _probability)
-    : slot_id(_slot_id)
-    , action_id(_action_id)
+  slot_entry::slot_entry(uint32_t _action_id, float _probability)
+    : action_id(_action_id)
     , probability(_probability) {
-  }
-
-  uint32_t slot_entry::get_slot_id() const {
-    return slot_id;
   }
 
   uint32_t slot_entry::get_action_id() const {
@@ -53,7 +48,7 @@ namespace reinforcement_learning
   }
 
   void multi_slot_response::push_back(uint32_t action_id, float prob) {
-    _decision.emplace_back(_decision.size(), action_id, prob);
+    _decision.emplace_back(action_id, prob);
   }
 
   size_t multi_slot_response::size() const {

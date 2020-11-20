@@ -36,6 +36,7 @@ set(PROJECT_SOURCES
   logger/event_logger.cc
   logger/flatbuffer_allocator.cc
   logger/logger_facade.cc
+  logger/logger_extensions.cc
   logger/preamble.cc
   logger/preamble_sender.cc
   logger/endian.cc

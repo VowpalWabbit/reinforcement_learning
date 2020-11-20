@@ -13,9 +13,6 @@ namespace Rl.Net {
         internal partial class NativeMethods
         {
             [DllImport("rl.net.native.dll")]
-            public static extern int GetSlotEntrySlotId(IntPtr slotEntryResponse);
-
-            [DllImport("rl.net.native.dll")]
             public static extern int GetSlotEntryActionId(IntPtr slotEntryResponse);
 
             [DllImport("rl.net.native.dll")]
@@ -69,17 +66,6 @@ namespace Rl.Net {
     {
         internal SlotEntryResponse(IntPtr sharedmultiSlotResponseHandle) : base(sharedmultiSlotResponseHandle, ownsHandle: false)
         {
-        }
-
-        public int SlotId
-        {
-            get
-            {
-                int result = NativeMethods.GetSlotEntrySlotId(this.DangerousGetHandle());
-
-                GC.KeepAlive(this);
-                return result;
-            }
         }
 
         public int ActionId

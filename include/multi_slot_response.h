@@ -10,20 +10,17 @@ namespace reinforcement_learning {
   class api_status;
 
   /**
-   * @brief Holds triples (slot_id, action_id, probability) that tells which action was choosen for the given slot.
+   * @brief Holds (action_id, probability) that tells which action was choosen for the given slot.
    */
   struct slot_entry {
   public:
     ~slot_entry() = default;
 
-    slot_entry(uint32_t _slot_id, uint32_t _action_id, float _probability);
+    slot_entry(uint32_t _action_id, float _probability);
 
-    uint32_t get_slot_id() const;
     uint32_t get_action_id() const;
     float get_probability() const;
   private:
-    //! slot_id
-    uint32_t slot_id;
     //! action id
     uint32_t action_id;
     //! probability associated with the action id

@@ -106,27 +106,21 @@ int rl_sim::ca_loop(){
 }
 
 int rl_sim::ccb_loop() {
-  r::decision_response decision;
+  r::multi_slot_response decision;
   simulation_stats<size_t> stats;
 
   while ( _run_loop ) {
     auto& p = pick_a_random_person();
     const auto context_features = p.get_features();
     const auto action_features = get_action_features();
-
-    std::vector<std::string> ids;
-    for(int i = 0; i < NUM_SLOTS; i++)
-    {
-      ids.push_back(create_event_id());
-    }
-
-    const auto slot_json =  get_slot_features(ids);
+    const auto event_id = create_event_id();
+    const auto slot_json =  get_slot_features();
     const auto context_json = create_context_json(context_features,action_features, slot_json);
     std::cout << context_json <<std::endl;
     r::api_status status;
 
     // Choose an action
-    if ( _rl->request_decision(context_json.c_str(), decision, &status) != err::success ) {
+    if ( _rl->request_multi_slot_decision(event_id.c_str(), context_json.c_str(), decision, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
@@ -138,7 +132,7 @@ int rl_sim::ccb_loop() {
       const auto outcome = p.get_outcome(_topics[chosen_action]);
 
       // Report outcome received
-      if ( _rl->report_outcome(ids[index].c_str(), outcome, &status) != err::success && outcome > 0.00001f ) {
+      if ( _rl->report_outcome(event_id.c_str(), index, outcome, &status) != err::success && outcome > 0.00001f ) {
         std::cout << status.get_error_msg() << std::endl;
         continue;
       }
@@ -307,6 +301,12 @@ bool rl_sim::init_sim_world() {
     "MachineLearning"
   };
 
+  _slot_sizes = {
+	  "large",
+	  "medium",
+	  "small"
+  };
+
   // Initialize click probability for p1
   person::topic_prob tp = {
     { _topics[0],0.08f },
@@ -399,15 +399,15 @@ std::string rl_sim::get_slates_action_features() {
   return oss.str();
 }
 
-std::string rl_sim::get_slot_features(const std::vector<std::string>& ids) {
+std::string rl_sim::get_slot_features() {
   std::ostringstream oss;
   // example
-  // R"("_slots": [ { "_id":"abc"}, {"_id":"def"} ])";
+  // R"("_slots": [ { "_size":"large"}, {"_size":"medium"}, {"_size":"small"} ])";
   oss << R"("_slots": [ )";
-   for ( auto idx = 0; idx < ids.size() - 1; ++idx) {
-    oss << R"({ "_id":")" << ids[idx] << R"("}, )";
+   for ( auto idx = 0; idx < NUM_SLOTS - 1; ++idx) {
+    oss << R"({ "_size":")" << _slot_sizes[idx] << R"("}, )";
   }
-  oss << R"({ "_id":")" << ids.back() << R"("}] )";
+  oss << R"({ "_size":")" << _slot_sizes.back() << R"("}] )";
   return oss.str();
 }
 
@@ -475,7 +475,7 @@ std::string get_dist_str(const reinforcement_learning::slot_response& response) 
 std::string get_dist_str(const reinforcement_learning::slot_entry& response) {
   std::string ret;
   ret += "(";
-  ret += "[" + to_string(response.get_slot_id()) + ",";
+  ret += "[";
   ret += to_string(response.get_action_id()) + ",";
   ret += to_string(response.get_probability()) + "]";
   ret += " ,";
