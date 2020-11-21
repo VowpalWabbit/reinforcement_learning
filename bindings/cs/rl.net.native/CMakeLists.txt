@@ -11,6 +11,8 @@ set(rl_net_native_SOURCES
   rl.net.native.cc
   rl.net.ranking_response.cc
   rl.net.multi_slot_response.cc
+  rl.net.multi_slot_response_detailed.cc
+  rl.net.slot_ranking.cc
 )
 
 set(rl_net_native_HEADERS
@@ -26,6 +28,8 @@ set(rl_net_native_HEADERS
   rl.net.native.h
   rl.net.ranking_response.h
   rl.net.multi_slot_response.h
+  rl.net.multi_slot_response_detailed.h
+  rl.net.slot_ranking.h
 )
 
 source_group("Sources" FILES ${rl_net_native_SOURCES})
