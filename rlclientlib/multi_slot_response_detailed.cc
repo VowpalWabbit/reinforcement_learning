@@ -33,7 +33,7 @@ namespace reinforcement_learning
 
 	int multi_slot_response_detailed::set_slot_at_index(const unsigned int index, slot_ranking&& slot, api_status* status) {
 		if (index >= _decision.size()) {
-			RETURN_ERROR_ARG(nullptr, status, slot_index_out_of_bounds_error);
+			RETURN_ERROR_ARG(nullptr, status, slot_index_out_of_bounds_error, "Slot index out of bounds");
 		}
 		_decision[index] = std::move(slot);
 	}
