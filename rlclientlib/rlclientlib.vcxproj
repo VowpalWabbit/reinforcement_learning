@@ -305,6 +305,9 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClCompile Include="utility\http_authorization.cc" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ext_libs\libzstd.vcxproj">
+      <Project>{8bfd8150-94d5-4bf9-8a50-7bd9929a0850}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\ext_libs\vowpal_wabbit\vowpalwabbit\vw_core.vcxproj">
       <Project>{1e205806-7f80-47dd-a38d-fc08083f3593}</Project>
     </ProjectReference>

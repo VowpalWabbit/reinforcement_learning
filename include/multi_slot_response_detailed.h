@@ -46,11 +46,18 @@ namespace reinforcement_learning {
 		const_iterator_t end() const;
 		iterator_t end();
 
-		//what is the no except?? methods 2 and 4 are overlaods for the = operand but what are 1 and 3? what is the &&reference?
 		multi_slot_response_detailed(multi_slot_response_detailed&&) noexcept;
 		multi_slot_response_detailed& operator=(multi_slot_response_detailed&&) noexcept;
-		multi_slot_response_detailed(const multi_slot_response_detailed&) = default;
-		multi_slot_response_detailed& operator =(const multi_slot_response_detailed&) = default;
+
+		/**
+		* @brief Copy constructor is removed since implementation will be deleted twice
+		*/
+		multi_slot_response_detailed(const multi_slot_response_detailed&) = delete;
+
+		/**
+		* @brief assignment operator is removed since implementation will be deleted twice
+		*/
+		multi_slot_response_detailed& operator =(const multi_slot_response_detailed&) = delete;
 
 
 	};

@@ -20,6 +20,6 @@ extern "C" {
 	API void DeleteMultiSlotDetailedEnumeratorAdapter(multi_slot_detailed_enumerator_adapter* adapter);
 
 	API int MultiSlotDetailedEnumeratorInit(multi_slot_detailed_enumerator_adapter* adapter);
-	API int MultiSlotEnumeratorDetailedMoveNext(multi_slot_detailed_enumerator_adapter* adapter);
+	API int MultiSlotDetailedEnumeratorMoveNext(multi_slot_detailed_enumerator_adapter* adapter);
 	API reinforcement_learning::slot_ranking const* GetMultiSlotDetailedEnumeratorCurrent(multi_slot_detailed_enumerator_adapter* adapter);
 }

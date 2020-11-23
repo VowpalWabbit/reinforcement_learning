@@ -23,7 +23,6 @@ namespace reinforcement_learning {
    */
   class ranking_response {
   private:
-	using coll_t = std::vector<action_prob>;
 	std::string _model_id;
 	slot_ranking _slot_impl;
 
@@ -33,9 +32,9 @@ namespace reinforcement_learning {
 	~ranking_response() = default;
 
 	/**
-	* @brief Construct a new reanking response object.
+	* @brief Construct a new ranking response object.
 	*
-	* @param join_id The unique identifier for this interaction.  This event_id must be used when reporting the outcome for this action
+	* @param event_id The unique identifier for this interaction.  This event_id must be used when reporting the outcome for this action
 	*/
 	ranking_response(char const* event_id);
 
@@ -121,19 +120,19 @@ namespace reinforcement_learning {
 	const char * get_model_id() const;
 
 	/**
-	* @brief Clear the slot detailed object so that it can be reused.
+	* @brief Clear the ranking response object so that it can be reused.
 	* The goal is to reuse response without reallocating as much as possible.
 	*/
 	void clear();
 
 	/**
-	* @brief Move construct a new slot detailed object.
+	* @brief Move construct a new ranking response object.
 	* The underlying data is taken from the rvalue reference.
 	*/
 	ranking_response(ranking_response&&) noexcept;
 
 	/**
-	* @brief Move assignment operator for slot detailed.
+	* @brief Move assignment operator for ranking response.
 	* The underlying data is taken from rvalue reference, and then it is cleared.
 	* @return ranking_response&
 	*/
@@ -142,17 +141,18 @@ namespace reinforcement_learning {
 	/**
 	* @brief Copy constructor is removed since implementation will be deleted twice
 	*/
-	ranking_response(const slot_ranking&) = delete;
+	ranking_response(const ranking_response&) = delete;
 
 	/**
 	* @brief assignment operator is removed since implementation will be deleted twice
 	*/
-	ranking_response& operator =(const slot_ranking&) = delete;
+	ranking_response& operator =(const ranking_response&) = delete;
 
 
   public:
-	  using iterator = container_iterator<action_prob, coll_t>;
-	  using const_iterator = const_container_iterator<action_prob, coll_t>;
+	  using iterator = slot_ranking::iterator;
+	  using const_iterator = slot_ranking::const_iterator;
+
 	  //! Returns an iterator pointing to the first element of the (action, probability) collection
 	  const_iterator begin() const;
 	  iterator begin();
