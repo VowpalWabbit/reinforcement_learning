@@ -22,5 +22,5 @@ namespace reinforcement_learning {
 
   int get_event_ids(const char* context, std::map<size_t, std::string>& event_ids, i_trace* trace, api_status* status);
   int get_context_info(const char* context, ContextInfo &info, i_trace* trace = nullptr, api_status* status = nullptr);
-  int get_slot_ids(const char* context, const ContextInfo::index_vector_t& slots, std::vector<std::string>& slot_ids, i_trace* trace = nullptr, api_status* status = nullptr);
+  int get_slot_ids_or_add_string_index(const char* context, const ContextInfo::index_vector_t& slots, std::vector<std::string>& slot_ids, i_trace* trace = nullptr, api_status* status = nullptr);
 }}
