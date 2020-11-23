@@ -192,3 +192,54 @@ BOOST_AUTO_TEST_CASE(get_context_info_test) {
   BOOST_CHECK_EQUAL("{\"a\":4}", get_slot_str(context, info, 0));
   BOOST_CHECK_EQUAL("{}", get_slot_str(context, info, 2));
 }
+
+BOOST_AUTO_TEST_CASE(get_slot_ids_test)
+{
+  auto const context = R"({
+    "UserAge":15,
+    "_multi":[
+      {"_text":"elections maine", "Source":"TV"},
+      {"Source":"www", "topic":4, "_label":"2:3:.3"}
+    ],
+    "_slots": [
+      {"id":"provided_slot_id_1", "a":4},
+      {"id":"provided_slot_id_2", "_id":"test"}
+    ]
+  })";
+  rlutil::ContextInfo info;
+  auto scode = rlutil::get_context_info(context, info);
+  BOOST_CHECK_EQUAL(scode, error_code::success);
+  std::vector<std::string> slot_ids;
+
+  scode = rlutil::get_slot_ids(context, info.slots, slot_ids);
+  BOOST_CHECK_EQUAL(scode, error_code::success);
+
+  BOOST_CHECK_EQUAL(slot_ids.size(), 2);
+  BOOST_CHECK_EQUAL(slot_ids[0], "provided_slot_id_1");
+  BOOST_CHECK_EQUAL(slot_ids[1], "provided_slot_id_2");
+}
+
+
+BOOST_AUTO_TEST_CASE(get_slot_ids_no_slot_ids_test)
+{
+  auto const context = R"({
+    "UserAge":15,
+    "_multi":[
+      {"_text":"elections maine", "Source":"TV"},
+      {"Source":"www", "topic":4, "_label":"2:3:.3"}
+    ],
+    "_slots": [
+      {"a":4},
+      {"_id":"test"}
+    ]
+  })";
+  rlutil::ContextInfo info;
+  auto scode = rlutil::get_context_info(context, info);
+  BOOST_CHECK_EQUAL(scode, error_code::success);
+  std::vector<std::string> slot_ids;
+
+  scode = rlutil::get_slot_ids(context, info.slots, slot_ids);
+  BOOST_CHECK_EQUAL(scode, error_code::success);
+
+  BOOST_CHECK_EQUAL(slot_ids.size(), 0);
+}

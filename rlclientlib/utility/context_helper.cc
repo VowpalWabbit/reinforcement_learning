@@ -17,6 +17,7 @@ namespace reinforcement_learning { namespace utility {
   const auto multi = "_multi";
   const auto slots = "_slots";
   const auto event_id = "_id";
+  const auto slot_id = "id";
 
   /**
    * \brief Get the event IDs from the slots entries in the context json string.
@@ -141,6 +142,33 @@ namespace reinforcement_learning { namespace utility {
       std::ostringstream os;
       os << "JSON parse error: " << rj::GetParseError_En(res.Code()) << " (" << res.Offset() << ")";
       RETURN_ERROR_LS(trace, status, json_parse_error) << os.str();
+    }
+    return error_code::success;
+  }
+
+  int get_slot_ids(const char* context, const ContextInfo::index_vector_t& slots, std::vector<std::string>& slot_ids, i_trace* trace, api_status* status)
+  {
+    for(size_t i = 0; i < slots.size(); i++)
+    {
+      try {
+        rj::Document obj;
+        obj.Parse(std::string(context + slots[i].first, slots[i].second).c_str());
+
+        if (obj.HasParseError()) {
+          RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << rj::GetParseError_En(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";
+        }
+
+        const rj::Value::ConstMemberIterator& itr = obj.FindMember(slot_id);
+        if (itr != obj.MemberEnd() && itr->value.IsString()) {
+          slot_ids.emplace_back(std::string(itr->value.GetString()));
+        }
+      }
+      catch ( const std::exception& e ) {
+        RETURN_ERROR_LS(trace, status, json_parse_error) << e.what();
+      }
+      catch ( ... ) {
+        RETURN_ERROR_LS(trace, status, json_parse_error) << error_code::unknown_s;
+      }
     }
     return error_code::success;
   }
