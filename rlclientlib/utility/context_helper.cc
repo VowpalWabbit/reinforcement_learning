@@ -1,7 +1,6 @@
 #include <iostream>
 #include <map>
 #include <memory>
-#include <algorithm>
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/error/en.h>
