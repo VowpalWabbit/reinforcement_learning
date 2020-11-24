@@ -202,8 +202,8 @@ BOOST_AUTO_TEST_CASE(get_slot_ids_test)
       {"Source":"www", "topic":4, "_label":"2:3:.3"}
     ],
     "_slots": [
-      {"id":"provided_slot_id_1", "a":4},
-      {"id":"provided_slot_id_2", "_id":"test"}
+      {"_id":"provided_slot_id_1", "a":4},
+      {"_id":"provided_slot_id_2", "b":"test"}
     ]
   })";
   rlutil::ContextInfo info;
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE(get_slot_ids_no_slot_ids_test)
     ],
     "_slots": [
       {"a":4},
-      {"_id":"test"}
+      {"b":"test"}
     ]
   })";
   rlutil::ContextInfo info;
@@ -253,9 +253,9 @@ BOOST_AUTO_TEST_CASE(get_slot_ids_some_slots_missing)
       {"Source":"www", "topic":4, "_label":"2:3:.3"}
     ],
     "_slots": [
-      {"a":4, "id":"provided_id_0"},
-      {"_id":"test"},
-      {"_id":"test", "id":"provided_id_2"}
+      {"a":4, "_id":"provided_id_0"},
+      {"b":"test"},
+      {"id":"test", "_id":"provided_id_2"}
     ]
   })";
   rlutil::ContextInfo info;

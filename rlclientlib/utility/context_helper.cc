@@ -17,7 +17,7 @@ namespace reinforcement_learning { namespace utility {
   const auto multi = "_multi";
   const auto slots = "_slots";
   const auto event_id = "_id";
-  const auto slot_id = "id";
+  const auto slot_id = "_id";
 
   /**
    * \brief Get the event IDs from the slots entries in the context json string.
