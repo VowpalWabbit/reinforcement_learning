@@ -839,6 +839,7 @@ namespace Rl.Net
         {
             int result = LiveModelReportActionTaken(this.DangerousGetHandle(), eventId, apiStatus.ToNativeHandleOrNullptrDangerous());
 
+            GC.KeepAlive(apiStatus);
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
@@ -864,6 +865,7 @@ namespace Rl.Net
         {
             int result = LiveModelReportOutcomeF(this.DangerousGetHandle(), eventId, outcome, apiStatus.ToNativeHandleOrNullptrDangerous());
 
+            GC.KeepAlive(apiStatus);
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
@@ -889,6 +891,7 @@ namespace Rl.Net
         {
             int result = LiveModelReportOutcomeJson(this.DangerousGetHandle(), eventId, outcomeJson, apiStatus.ToNativeHandleOrNullptrDangerous());
 
+            GC.KeepAlive(apiStatus);
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
@@ -910,6 +913,7 @@ namespace Rl.Net
         {
             int result = LiveModelReportOutcomeSlotF(this.DangerousGetHandle(), eventId, slotIndex, outcome, apiStatus.ToNativeHandleOrNullptrDangerous());
 
+            GC.KeepAlive(apiStatus);
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
@@ -917,16 +921,17 @@ namespace Rl.Net
         public void QueueOutcomeEvent(string eventId, uint slotIndex, float outcome)
         {
             using (ApiStatus apiStatus = new ApiStatus())
-                if (!this.TryQueueOutcomeEvent(eventId, slotIndex, outcome, apiStatus))
-                {
-                    throw new RLException(apiStatus);
-                }
+            if (!this.TryQueueOutcomeEvent(eventId, slotIndex, outcome, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
         }
 
         public bool TryQueueOutcomeEvent(string eventId, uint slotIndex, string outcomeJson, ApiStatus apiStatus = null)
         {
             int result = LiveModelReportOutcomeSlotJson(this.DangerousGetHandle(), eventId, slotIndex, outcomeJson, apiStatus.ToNativeHandleOrNullptrDangerous());
 
+            GC.KeepAlive(apiStatus);
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
@@ -934,16 +939,17 @@ namespace Rl.Net
         public void QueueOutcomeEvent(string eventId, uint slotIndex, string outcomeJson)
         {
             using (ApiStatus apiStatus = new ApiStatus())
-                if (!this.TryQueueOutcomeEvent(eventId, slotIndex, outcomeJson, apiStatus))
-                {
-                    throw new RLException(apiStatus);
-                }
+            if (!this.TryQueueOutcomeEvent(eventId, slotIndex, outcomeJson, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
         }
 
         public bool TryQueueOutcomeEvent(string eventId, string slotId, float outcome, ApiStatus apiStatus = null)
         {
             int result = LiveModelReportOutcomeSlotStringIdF(this.DangerousGetHandle(), eventId, slotId, outcome, apiStatus.ToNativeHandleOrNullptrDangerous());
 
+            GC.KeepAlive(apiStatus);
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
@@ -951,16 +957,17 @@ namespace Rl.Net
         public void QueueOutcomeEvent(string eventId, string slotId, float outcome)
         {
             using (ApiStatus apiStatus = new ApiStatus())
-                if (!this.TryQueueOutcomeEvent(eventId, slotId, outcome, apiStatus))
-                {
-                    throw new RLException(apiStatus);
-                }
+            if (!this.TryQueueOutcomeEvent(eventId, slotId, outcome, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
         }
 
         public bool TryQueueOutcomeEvent(string eventId, string slotId, string outcomeJson, ApiStatus apiStatus = null)
         {
             int result = LiveModelReportOutcomeSlotStringIdJson(this.DangerousGetHandle(), eventId, slotId, outcomeJson, apiStatus.ToNativeHandleOrNullptrDangerous());
 
+            GC.KeepAlive(apiStatus);
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
@@ -968,10 +975,10 @@ namespace Rl.Net
         public void QueueOutcomeEvent(string eventId, string slotId, string outcomeJson)
         {
             using (ApiStatus apiStatus = new ApiStatus())
-                if (!this.TryQueueOutcomeEvent(eventId, slotId, outcomeJson, apiStatus))
-                {
-                    throw new RLException(apiStatus);
-                }
+            if (!this.TryQueueOutcomeEvent(eventId, slotId, outcomeJson, apiStatus))
+            {
+                throw new RLException(apiStatus);
+            }
         }
 
         public void RefreshModel()
@@ -987,6 +994,7 @@ namespace Rl.Net
         {
             int result = NativeMethods.LiveModelRefreshModel(this.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
 
+            GC.KeepAlive(apiStatus);
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
