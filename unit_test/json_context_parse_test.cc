@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE(get_slot_ids_test)
   BOOST_CHECK_EQUAL(scode, error_code::success);
   std::vector<std::string> slot_ids;
 
-  scode = rlutil::get_slot_ids_or_add_string_index(context, info.slots, slot_ids);
+  scode = rlutil::get_slot_ids_or_generate_from_index(context, info.slots, slot_ids);
   BOOST_CHECK_EQUAL(scode, error_code::success);
 
   BOOST_CHECK_EQUAL(slot_ids.size(), 2);
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(get_slot_ids_no_slot_ids_test)
   BOOST_CHECK_EQUAL(scode, error_code::success);
   std::vector<std::string> slot_ids;
 
-  scode = rlutil::get_slot_ids_or_add_string_index(context, info.slots, slot_ids);
+  scode = rlutil::get_slot_ids_or_generate_from_index(context, info.slots, slot_ids);
   BOOST_CHECK_EQUAL(scode, error_code::success);
 
   BOOST_CHECK_EQUAL(slot_ids.size(), 2);
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(get_slot_ids_some_slots_missing)
   BOOST_CHECK_EQUAL(scode, error_code::success);
   std::vector<std::string> slot_ids;
 
-  scode = rlutil::get_slot_ids_or_add_string_index(context, info.slots, slot_ids);
+  scode = rlutil::get_slot_ids_or_generate_from_index(context, info.slots, slot_ids);
   BOOST_CHECK_EQUAL(scode, error_code::success);
 
   BOOST_CHECK_EQUAL(slot_ids.size(), 3);

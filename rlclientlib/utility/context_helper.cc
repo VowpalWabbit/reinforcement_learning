@@ -146,7 +146,7 @@ namespace reinforcement_learning { namespace utility {
     return error_code::success;
   }
 
-  int get_slot_ids_or_add_string_index(const char* context, const ContextInfo::index_vector_t& slots, std::vector<std::string>& slot_ids, i_trace* trace, api_status* status)
+  int get_slot_ids_or_generate_from_index(const char* context, const ContextInfo::index_vector_t& slots, std::vector<std::string>& slot_ids, i_trace* trace, api_status* status)
   {
     // if slot id missing, use the slot index as the slot id
     for(size_t i = 0; i < slots.size(); i++)
