@@ -822,13 +822,11 @@ BOOST_AUTO_TEST_CASE(slates_explore_only_mode) {
   auto it = response.begin();
   size_t action_id = 0;
   auto& slot_response = *it;
-  BOOST_CHECK_EQUAL(slot_response.get_slot_id(), 0);
   BOOST_CHECK_EQUAL(slot_response.get_action_id(), 0);
   BOOST_CHECK_CLOSE(slot_response.get_probability(), 1.f, FLOAT_TOL);
   ++it;
 
   auto& slot_response1 = *it;
-  BOOST_CHECK_EQUAL(slot_response1.get_slot_id(), 1);
   BOOST_CHECK_EQUAL(slot_response1.get_action_id(), 0);
   BOOST_CHECK_CLOSE(slot_response1.get_probability(), 1.f, FLOAT_TOL);
   ++it;

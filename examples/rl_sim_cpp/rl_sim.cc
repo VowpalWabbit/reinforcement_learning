@@ -475,7 +475,7 @@ std::string get_dist_str(const reinforcement_learning::slot_response& response) 
 std::string get_dist_str(const reinforcement_learning::slot_entry& response) {
   std::string ret;
   ret += "(";
-  ret += "[" + to_string(response.get_slot_id()) + ",";
+  ret += "[";
   ret += to_string(response.get_action_id()) + ",";
   ret += to_string(response.get_probability()) + "]";
   ret += " ,";
