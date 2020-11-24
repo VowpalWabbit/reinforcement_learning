@@ -148,7 +148,6 @@ namespace reinforcement_learning { namespace utility {
 
   int get_slot_ids(const char* context, const ContextInfo::index_vector_t& slots, std::map<size_t, std::string>& slot_ids, i_trace* trace, api_status* status)
   {
-    // if slot id missing, use the slot index as the slot id
     for(size_t i = 0; i < slots.size(); i++)
     {
       try {
