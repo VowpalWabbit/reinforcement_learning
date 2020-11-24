@@ -209,9 +209,9 @@ BOOST_AUTO_TEST_CASE(get_slot_ids_test)
   rlutil::ContextInfo info;
   auto scode = rlutil::get_context_info(context, info);
   BOOST_CHECK_EQUAL(scode, error_code::success);
-  std::vector<std::string> slot_ids;
+  std::map<size_t, std::string> slot_ids;
 
-  scode = rlutil::get_slot_ids_or_generate_from_index(context, info.slots, slot_ids);
+  scode = rlutil::get_slot_ids(context, info.slots, slot_ids);
   BOOST_CHECK_EQUAL(scode, error_code::success);
 
   BOOST_CHECK_EQUAL(slot_ids.size(), 2);
@@ -236,14 +236,12 @@ BOOST_AUTO_TEST_CASE(get_slot_ids_no_slot_ids_test)
   rlutil::ContextInfo info;
   auto scode = rlutil::get_context_info(context, info);
   BOOST_CHECK_EQUAL(scode, error_code::success);
-  std::vector<std::string> slot_ids;
+  std::map<size_t, std::string> slot_ids;
 
-  scode = rlutil::get_slot_ids_or_generate_from_index(context, info.slots, slot_ids);
+  scode = rlutil::get_slot_ids(context, info.slots, slot_ids);
   BOOST_CHECK_EQUAL(scode, error_code::success);
 
-  BOOST_CHECK_EQUAL(slot_ids.size(), 2);
-  BOOST_CHECK_EQUAL(slot_ids[0], "0");
-  BOOST_CHECK_EQUAL(slot_ids[1], "1");
+  BOOST_CHECK_EQUAL(slot_ids.size(), 0);
 }
 
 BOOST_AUTO_TEST_CASE(get_slot_ids_some_slots_missing)
@@ -255,21 +253,21 @@ BOOST_AUTO_TEST_CASE(get_slot_ids_some_slots_missing)
       {"Source":"www", "topic":4, "_label":"2:3:.3"}
     ],
     "_slots": [
-      {"a":4, "id": "provided_id_0"},
+      {"a":4, "id":"provided_id_0"},
       {"_id":"test"},
-      {"_id":"test", "id": "provided_id_2"}
+      {"_id":"test", "id":"provided_id_2"}
     ]
   })";
   rlutil::ContextInfo info;
   auto scode = rlutil::get_context_info(context, info);
   BOOST_CHECK_EQUAL(scode, error_code::success);
-  std::vector<std::string> slot_ids;
+  std::map<size_t, std::string> slot_ids;
 
-  scode = rlutil::get_slot_ids_or_generate_from_index(context, info.slots, slot_ids);
+  scode = rlutil::get_slot_ids(context, info.slots, slot_ids);
   BOOST_CHECK_EQUAL(scode, error_code::success);
 
   BOOST_CHECK_EQUAL(slot_ids.size(), 3);
   BOOST_CHECK_EQUAL(slot_ids[0], "provided_id_0");
-  BOOST_CHECK_EQUAL(slot_ids[1], "1");
+  BOOST_CHECK_EQUAL(slot_ids[1], "");
   BOOST_CHECK_EQUAL(slot_ids[2], "provided_id_2");
 }
