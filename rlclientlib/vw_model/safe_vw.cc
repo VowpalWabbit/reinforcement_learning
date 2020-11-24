@@ -219,7 +219,7 @@ namespace reinforcement_learning {
     examples.delete_v();
   }
 
-  void safe_vw::rank_multi_slot_decisions(const char* event_id, uint32_t slot_count, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
+  void safe_vw::rank_multi_slot_decisions(const char* event_id, const std::vector<std::string>& slot_ids, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
   {
     auto examples = v_init<example*>();
     examples.push_back(get_or_create_example());
@@ -228,13 +228,12 @@ namespace reinforcement_learning {
 
     VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
     // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the example tag.
-    for(uint32_t i = 0; i < slot_count; i++)
+    for(uint32_t i = 0; i < slot_ids.size(); i++)
     {
-      const size_t slot_example_indx = examples.size() - slot_count + i;
-      auto index_as_string = std::to_string(i);
+      const size_t slot_example_indx = examples.size() - slot_ids.size() + i;
       push_many(examples[slot_example_indx]->tag, SEED_TAG.c_str(), SEED_TAG.size());
       push_many(examples[slot_example_indx]->tag, event_id, strlen(event_id));
-      push_many(examples[slot_example_indx]->tag, index_as_string.c_str(), index_as_string.size());
+      push_many(examples[slot_example_indx]->tag, slot_ids[i].c_str(), slot_ids[i].size());
     }
 
     // finalize example

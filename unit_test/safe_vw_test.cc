@@ -55,8 +55,10 @@ BOOST_AUTO_TEST_CASE(factory_with_cb_model_and_ccb_arguments)
 
 	  std::vector<std::vector<uint32_t>> actions_ids;
 	  std::vector<std::vector<float>> action_pdfs;
-	  
-	  guard->rank_multi_slot_decisions(event_id, slot_count, features, actions_ids, action_pdfs);
+
+    std::vector<std::string> slot_ids = {"0", "1"};
+
+	  guard->rank_multi_slot_decisions(event_id, slot_ids, features, actions_ids, action_pdfs);
 	  BOOST_CHECK_EQUAL(actions_ids.size(), slot_count);
 	  BOOST_CHECK_EQUAL(action_pdfs.size(), slot_count);
 	  //todo: add more accurate assertions once vw is updated with cb and ccb single slot equivalence changes

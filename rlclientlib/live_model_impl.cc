@@ -227,16 +227,19 @@ namespace reinforcement_learning {
     }
 
     size_t num_decisions = context_info.slots.size();
+    std::vector<std::string> slot_ids;
+    slot_ids.reserve(context_info.slots.size());
+    RETURN_IF_FAIL(utility::get_slot_ids_or_generate_from_index(context_json, context_info.slots, slot_ids, _trace_logger.get(), status));
 
     std::vector<std::vector<uint32_t>> actions_ids;
     std::vector<std::vector<float>> actions_pdfs;
     std::string model_version;
 
     // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
-    RETURN_IF_FAIL(_model->request_multi_slot_decision(event_id, (uint32_t)num_decisions, context_json, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(_model->request_multi_slot_decision(event_id, slot_ids, context_json, actions_ids, actions_pdfs, model_version, status));
 
-    RETURN_IF_FAIL(populate_multi_slot_response(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(populate_multi_slot_response(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
+    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, slot_ids, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {

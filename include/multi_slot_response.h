@@ -10,17 +10,20 @@ namespace reinforcement_learning {
   class api_status;
 
   /**
-   * @brief Holds (action_id, probability) that tells which action was choosen for the given slot.
+   * @brief Holds (id, action_id, probability) that tells which action was choosen for the given slot.
    */
   struct slot_entry {
   public:
     ~slot_entry() = default;
 
-    slot_entry(uint32_t _action_id, float _probability);
+    slot_entry(std::string id, uint32_t _action_id, float _probability);
 
+    const char* get_id() const;
     uint32_t get_action_id() const;
     float get_probability() const;
   private:
+    //! slot entry id
+    std::string id;
     //! action id
     uint32_t action_id;
     //! probability associated with the action id
@@ -46,7 +49,7 @@ namespace reinforcement_learning {
     ~multi_slot_response() = default;
 
     // push_back calls must be done in slot order
-    void push_back(uint32_t action_id, float prob);
+    void push_back(std::string id, uint32_t action_id, float prob);
 
     size_t size() const;
 
