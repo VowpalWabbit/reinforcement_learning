@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE(get_slot_ids_some_slots_missing)
   scode = rlutil::get_slot_ids(context, info.slots, slot_ids);
   BOOST_CHECK_EQUAL(scode, error_code::success);
 
-  BOOST_CHECK_EQUAL(slot_ids.size(), 3);
+  BOOST_CHECK_EQUAL(slot_ids.size(), 2);
   BOOST_CHECK_EQUAL(slot_ids[0], "provided_id_0");
   BOOST_CHECK_EQUAL(slot_ids[1], "");
   BOOST_CHECK_EQUAL(slot_ids[2], "provided_id_2");
