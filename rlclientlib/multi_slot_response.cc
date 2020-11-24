@@ -4,7 +4,7 @@
 
 namespace reinforcement_learning
 {
-  slot_entry::slot_entry(std::string _id, uint32_t _action_id, float _probability)
+  slot_entry::slot_entry(const std::string& _id, uint32_t _action_id, float _probability)
     : id(_id)
     , action_id(_action_id)
     , probability(_probability) {
@@ -52,7 +52,7 @@ namespace reinforcement_learning
     _event_id.clear();
   }
 
-  void multi_slot_response::push_back(std::string id, uint32_t action_id, float prob) {
+  void multi_slot_response::push_back(const std::string& id, uint32_t action_id, float prob) {
     _decision.emplace_back(id, action_id, prob);
   }
 
