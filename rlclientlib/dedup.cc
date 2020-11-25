@@ -73,7 +73,7 @@ int dedup_dict::transform_payload_and_add_objects(const char* payload, std::stri
   object_ids.clear();
   object_ids.reserve(context_info.actions.size());
 
-  int edit_offset = 0;
+  size_t edit_offset = 0;
   for (auto& p : context_info.actions)
   {
     auto hash = add_object(&payload[p.first], p.second);
@@ -185,7 +185,7 @@ int action_dict_builder::add(const generic_event::object_list_t& object_ids, api
 
 size_t action_dict_builder::size() const
 {
-  return _size_estimate * _state.get_ewma_value();
+  return (size_t)(_size_estimate * _state.get_ewma_value());
 }
 
 int action_dict_builder::finalize(generic_event& evt, api_status* status)

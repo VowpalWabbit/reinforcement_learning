@@ -414,7 +414,7 @@ BOOST_AUTO_TEST_CASE(live_model_outcome) {
   config.set(r::name::EH_TEST, "true");
 
   //create a ds live_model, and initialize with configuration
-  r::live_model ds = create_mock_live_model(config);
+  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
 
   //check api_status content when errors are returned
   r::api_status status;
@@ -459,7 +459,7 @@ BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v1) {
   config.set(r::name::EH_TEST, "true");
 
   //create a ds live_model, and initialize with configuration
-  r::live_model ds = create_mock_live_model(config);
+  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
 
   //check api_status content when errors are returned
   r::api_status status;
@@ -485,7 +485,7 @@ BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v2) {
   config.set(r::name::PROTOCOL_VERSION, "2");
 
   //create a ds live_model, and initialize with configuration
-  r::live_model ds = create_mock_live_model(config);
+  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
 
   //check api_status content when errors are returned
   r::api_status status;
@@ -608,7 +608,7 @@ BOOST_AUTO_TEST_CASE(live_model_background_refresh) {
 
     config.set(r::name::EH_TEST, "true");
 
-    r::live_model model = create_mock_live_model(config);
+    r::live_model model = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
 
     r::api_status status;
     BOOST_CHECK_EQUAL(model.init(&status), err::success);
@@ -622,7 +622,7 @@ BOOST_AUTO_TEST_CASE(live_model_no_background_refresh) {
     config.set(r::name::EH_TEST, "true");
     config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
 
-    r::live_model model = create_mock_live_model(config);
+    r::live_model model = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
 
     r::api_status status;
     BOOST_CHECK_EQUAL(model.init(&status), err::success);
@@ -822,13 +822,11 @@ BOOST_AUTO_TEST_CASE(slates_explore_only_mode) {
   auto it = response.begin();
   size_t action_id = 0;
   auto& slot_response = *it;
-  BOOST_CHECK_EQUAL(slot_response.get_slot_id(), 0);
   BOOST_CHECK_EQUAL(slot_response.get_action_id(), 0);
   BOOST_CHECK_CLOSE(slot_response.get_probability(), 1.f, FLOAT_TOL);
   ++it;
 
   auto& slot_response1 = *it;
-  BOOST_CHECK_EQUAL(slot_response1.get_slot_id(), 1);
   BOOST_CHECK_EQUAL(slot_response1.get_action_id(), 0);
   BOOST_CHECK_CLOSE(slot_response1.get_probability(), 1.f, FLOAT_TOL);
   ++it;
