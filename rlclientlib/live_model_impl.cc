@@ -165,7 +165,7 @@ namespace reinforcement_learning {
 
     size_t num_decisions = context_info.slots.size();
 
-    std::vector<std::string> event_ids_str(num_decisions, "");
+    std::vector<std::string> event_ids_str(num_decisions);
     std::vector<const char*> event_ids(num_decisions, nullptr);
     std::map<size_t, std::string> found_ids;
     RETURN_IF_FAIL(utility::get_event_ids(context_json, found_ids, _trace_logger.get(), status));
@@ -219,7 +219,7 @@ namespace reinforcement_learning {
       RETURN_ERROR_LS(_trace_logger.get(), status, json_parse_error) << "There must be both a _multi field and _slots, and _multi must come first.";
     }
 
-    std::vector<std::string> slot_ids(context_info.slots.size(), "");
+    std::vector<std::string> slot_ids(context_info.slots.size());
     std::map<size_t, std::string> found_ids;
     RETURN_IF_FAIL(utility::get_slot_ids(context_json, context_info.slots, found_ids, _trace_logger.get(), status));
     
@@ -567,7 +567,7 @@ namespace reinforcement_learning {
 
     for (int i = 0; i < complete_ids.size(); i++)
     {
-      if (complete_ids[i] == "")
+      if (complete_ids[i].empty())
       {
         complete_ids[i] = boost::uuids::to_string(boost::uuids::random_generator()()) + std::to_string(seed_shift);
       }
