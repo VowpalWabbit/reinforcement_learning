@@ -45,7 +45,7 @@ namespace reinforcement_learning { namespace utility {
     //! Gets the value as a float.  If the value does not exist or if there is an error, it returns defval
     float get_float(const char* name, float defval) const; 
     //! friend Left shift operator
-    friend std::ostream& ::operator<<(std::ostream& os, const configuration&);
+    friend std::ostream& ::operator<<(std::ostream& os, const reinforcement_learning::utility::configuration&);
 
   private:
     using map_type = std::unordered_map<std::string, std::string>;  //! Collection type that holds the (name,value) pairs 
