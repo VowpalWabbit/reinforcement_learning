@@ -763,10 +763,11 @@ BOOST_AUTO_TEST_CASE(populate_slot_test) {
 	r::api_status status;
 	const std::vector<uint32_t> action_ids = { 0, 1, 2 };
 	const std::vector<float> pdfs = { 0.8667f, 0.9f, 1.0f };
+  const std::string slot_id = "testslot";
 
 	r::slot_ranking slot;
 
-	BOOST_CHECK_EQUAL(populate_slot(size_t(0), action_ids, pdfs, slot, nullptr, &status), err::success);
+	BOOST_CHECK_EQUAL(populate_slot(size_t(0), action_ids, pdfs, slot, slot_id, nullptr, &status), err::success);
 
 	BOOST_CHECK_EQUAL(slot.size(), 3);
 
@@ -785,13 +786,14 @@ BOOST_AUTO_TEST_CASE(populate_multi_slot_response_same_size_test) {
 	r::api_status status;
 	std::vector<std::vector<uint32_t>> action_ids = { {0,1,2}, {1,2}, {2} };
 	std::vector<std::vector<float>> pdfs = { {0.8667f, 0.0667f, 0.0667f}, {0.9f, 0.1f}, {1.0f} };
+  std::vector<std::string> slot_ids = { "slot0", "slot1", "slot2" };
 	std::string event_id = "a";
 	std::string model_id = "id";
 
 	r::multi_slot_response_detailed resp;
 	resp.resize(3);
 
-	BOOST_CHECK_EQUAL(populate_multi_slot_response_detailed(action_ids, pdfs, std::move(event_id), std::move(model_id), resp, nullptr, &status), err::success);
+  BOOST_CHECK_EQUAL(populate_multi_slot_response_detailed(action_ids, pdfs, std::move(event_id), std::move(model_id), slot_ids, resp, nullptr, &status), err::success);
 
 	BOOST_CHECK(strcmp(resp.get_model_id(), "id") == 0);
 	BOOST_CHECK_EQUAL(resp.size(), 3);
@@ -815,16 +817,17 @@ BOOST_AUTO_TEST_CASE(populate_multi_slot_response_different_size_test) {
 	r::api_status status;
 	std::vector<std::vector<uint32_t>> action_ids = { {0,1,2}, {1,2} };
 	std::vector<std::vector<float>> pdfs = { {0.8667f, 0.0667f, 0.0667f}, {0.9f, 0.1f}, {1.0f} };
+  std::vector<std::string> slot_ids = { "slot0", "slot1", "slot2" };
 	std::string event_id = "a";
 	std::string model_id = "id";
 
 	r::multi_slot_response_detailed resp;
 
-	BOOST_CHECK_EQUAL(populate_multi_slot_response_detailed(action_ids, pdfs, std::move(event_id), std::move(model_id), resp, nullptr, &status), err::invalid_argument);
+	BOOST_CHECK_EQUAL(populate_multi_slot_response_detailed(action_ids, pdfs, std::move(event_id), std::move(model_id), slot_ids, resp, nullptr, &status), err::invalid_argument);
 
 	action_ids = { {0,1}, {1,2}, {1} };
 	pdfs = { {0.8667f, 0.0667f, 0.0667f}, {0.9f, 0.1f}, {1.0f} };
-	BOOST_CHECK_EQUAL(populate_multi_slot_response_detailed(action_ids, pdfs, std::move(event_id), std::move(model_id), resp, nullptr, &status), err::invalid_argument);
+	BOOST_CHECK_EQUAL(populate_multi_slot_response_detailed(action_ids, pdfs, std::move(event_id), std::move(model_id), slot_ids, resp, nullptr, &status), err::invalid_argument);
 }
 
 

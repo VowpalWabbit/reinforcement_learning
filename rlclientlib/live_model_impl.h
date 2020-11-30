@@ -35,8 +35,8 @@ namespace reinforcement_learning
     int request_decision(const char* context_json, unsigned int flags, decision_response& resp, api_status* status);
     int request_multi_slot_decision(const char* event_id, const char* context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
     int request_multi_slot_decision(const char* context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
-	int request_multi_slot_decision(const char* event_id, const char* context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
-	int request_multi_slot_decision(const char* context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
+	  int request_multi_slot_decision(const char* event_id, const char* context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
+	  int request_multi_slot_decision(const char* context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
 
     int report_action_taken(const char* event_id, api_status* status);
 

@@ -272,6 +272,12 @@ namespace reinforcement_learning {
 		  RETURN_ERROR_LS(_trace_logger.get(), status, json_parse_error) << "There must be both a _multi field and _slots, and _multi must come first.";
 	  }
 
+    std::vector<std::string> slot_ids(context_info.slots.size());
+    std::map<size_t, std::string> found_ids;
+    RETURN_IF_FAIL(utility::get_slot_ids(context_json, context_info.slots, found_ids, _trace_logger.get(), status));
+
+    autogenerate_missing_uuids(found_ids, slot_ids, _seed_shift);
+
 	  size_t num_decisions = context_info.slots.size();
 
 	  std::vector<std::vector<uint32_t>> actions_ids;
@@ -279,11 +285,11 @@ namespace reinforcement_learning {
 	  std::string model_version;
 
 	  // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
-	  RETURN_IF_FAIL(_model->request_multi_slot_decision(event_id, (uint32_t)num_decisions, context_json, actions_ids, actions_pdfs, model_version, status));
+	  RETURN_IF_FAIL(_model->request_multi_slot_decision(event_id, slot_ids, context_json, actions_ids, actions_pdfs, model_version, status));
 	  //set the size of buffer in response to match the number of slots
 	  resp.resize(num_decisions);
-	  RETURN_IF_FAIL(populate_multi_slot_response_detailed(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), resp, _trace_logger.get(), status));
-	  RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+	  RETURN_IF_FAIL(populate_multi_slot_response_detailed(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
+	  RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, slot_ids, status));
 
 	  // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
 	  if (_watchdog.has_background_error_been_reported()) {
