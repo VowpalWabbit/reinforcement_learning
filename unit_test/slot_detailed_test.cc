@@ -22,11 +22,11 @@ datacol get_slot_ranking_test_data() {
 	};
 }
 
-BOOST_AUTO_TEST_CASE(slot_ranking_join_id) {
+BOOST_AUTO_TEST_CASE(slot_ranking_id) {
 	slot_ranking slot1;
-	BOOST_CHECK_EQUAL(slot1.get_join_id(), "");
-	slot_ranking slot2("join_id");
-	BOOST_CHECK_EQUAL(slot2.get_join_id(), "join_id");
+	BOOST_CHECK_EQUAL(slot1.get_id(), "");
+	slot_ranking slot2("id");
+	BOOST_CHECK_EQUAL(slot2.get_id(), "id");
 }
 
 BOOST_AUTO_TEST_CASE(slot_ranking_empty_collection) {

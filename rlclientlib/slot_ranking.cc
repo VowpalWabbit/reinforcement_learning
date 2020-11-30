@@ -4,15 +4,15 @@
 
 namespace reinforcement_learning {
 
-	slot_ranking::slot_ranking(char const* join_id)
-		: _join_id{ join_id }, _chosen_action_id{ 0 } {}
+	slot_ranking::slot_ranking(char const* id)
+		: _id{ id }, _chosen_action_id{ 0 } {}
 
-	char const* slot_ranking::get_join_id() const {
-		return _join_id.c_str();
+	char const* slot_ranking::get_id() const {
+		return _id.c_str();
 	}
 
-	void slot_ranking::set_join_id(char const* join_id) {
-		_join_id = join_id;
+	void slot_ranking::set_id(char const* id) {
+		_id = id;
 	}
 
 	int slot_ranking::get_chosen_action_id(size_t& action_id, api_status* status) const {
@@ -46,18 +46,18 @@ namespace reinforcement_learning {
 	}
 
 	void slot_ranking::clear() {
-		_join_id.clear();
+		_id.clear();
 		_chosen_action_id = 0;
 		_ranking.clear();
 	}
 
 	slot_ranking::slot_ranking(slot_ranking&& tmp) noexcept :
-		_join_id(std::move(tmp._join_id)),
+		_id(std::move(tmp._id)),
 		_chosen_action_id(tmp._chosen_action_id),
 		_ranking(std::move(tmp._ranking)) {}
 
 	slot_ranking& slot_ranking::operator=(slot_ranking&& tmp) noexcept {
-		std::swap(_join_id, tmp._join_id);
+		std::swap(_id, tmp._id);
 		std::swap(_chosen_action_id, tmp._chosen_action_id);
 		std::swap(_ranking, tmp._ranking);
 		return *this;

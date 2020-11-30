@@ -1,5 +1,5 @@
 /**
- * @brief slot_ranking definition. slot_ranking contains the cosen action, along with the action probability distribution for a slot. 
+ * @brief slot_ranking definition. slot_ranking contains the chosen action, along with the action probability distribution for a slot. 
  */
 #pragma once
 #include "container_iterator.h"
@@ -34,7 +34,7 @@ namespace reinforcement_learning {
 	/**
 	 * @brief
 	 * slot_ranking contains all the actions and distribution from with the action was sampled.  It also contains the chosen action id and
-	 * the unique join_id representing the choice.
+	 * the unique id representing the choice.
 	 */
 	class slot_ranking {
 	public:
@@ -43,22 +43,22 @@ namespace reinforcement_learning {
 		/**
 			* @brief Construct a new slot detailed object.
 			*
-			* @param join_id The unique identifier for this interaction.  This event_id must be used when reporting the outcome for this action
+			* @param id The unique identifier for this interaction.  This id must be used when reporting the outcome for this action
 			*/
-		slot_ranking(char const* join_id);
+		slot_ranking(char const* id);
 
 		/**
-		* @brief Unique join_id for this slot detailed instance.
-		* This join_id must be used when calling report_outcome so it can be joined with the chosen action
+		* @brief Unique id for this slot detailed instance.
+		* This id must be used when calling report_outcome so it can be joined with the chosen action
 		* @return const char*
 		*/
-		const char* get_join_id() const;
+		const char* get_id() const;
 
 		/**
-		* @brief Set the join_id.  (This is set internally by the API)
-		* @param event_id
+		* @brief Set the id. (This is set internally by the API)
+		* @param _id
 		*/
-		void set_join_id(const char* join_id);
+		void set_id(const char* id);
 
 		/**
 		* @brief Get the chosen action id.
@@ -133,7 +133,7 @@ namespace reinforcement_learning {
 		slot_ranking& operator =(const slot_ranking&) = delete;
 
 	private:
-		std::string _join_id;
+		std::string _id;
 		size_t _chosen_action_id;
 		using coll_t = std::vector<action_prob>;
 		coll_t _ranking;

@@ -193,11 +193,3 @@ namespace Rl.Net
     }
 }
 
-//        API slot_enumerator_adapter* CreateSlotEnumeratorAdapter(reinforcement_learning::slot_ranking* slot);
-//        API void DeleteSlotEnumeratorAdapter(slot_enumerator_adapter* adapter);
-
-//        API int SlotEnumeratorInit(slot_enumerator_adapter* adapter);
-//        API int SlotEnumeratorMoveNext(slot_enumerator_adapter* adapter);
-//        API reinforcement_learning::action_prob_d GetSlotEnumeratorCurrent(slot_enumerator_adapter* adapter);
-//    }
-//}

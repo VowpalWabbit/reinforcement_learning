@@ -50,9 +50,6 @@
     <ClCompile Include="serialization\payload_serializer.cc" />
     <ClCompile Include="generic_event.cc" />
     <ClCompile Include="dedup.cc" />
-    <ClCompile Include="constants.cc" />
-    <ClCompile Include="multi_slot_response_detailed.cc" />
-    <ClCompile Include="slot_ranking.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -125,8 +122,6 @@
     <ClInclude Include="generic_event.h" />
     <ClInclude Include="dedup.h" />
     <ClInclude Include="dedup_internals.h" />
-    <ClInclude Include="..\include\multi_slot_response_detailed.h" />
-    <ClInclude Include="..\include\slot_ranking.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -141,7 +136,7 @@
     <None Include="schema\v2\CaEvent.fbs" />
     <None Include="schema\v2\MultiSlotEvent.fbs" />
     <None Include="schema\v2\Event.fbs" />
-    <None Include="ClassDiagram.cd" />
+    <None Include="schema\v2\DedupInfo.fbs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />

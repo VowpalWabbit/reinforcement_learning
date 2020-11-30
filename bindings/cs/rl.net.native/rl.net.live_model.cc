@@ -136,7 +136,7 @@ API int LiveModelRequestMultiSlotDecision(livemodel_context_t* context, const ch
   RL_IGNORE_DEPRECATED_USAGE_END
 }
 
-API int LiveModelRequestMultiSlotDecisionWithFlags(livemodel_context_t* context, const char * event_id, const char * context_json, unsigned int flags, reinforcement_learning::multi_slot_response_detailed* resp, reinforcement_learning::api_status* status)
+API int LiveModelRequestMultiSlotDecisionWithFlags(livemodel_context_t* context, const char * event_id, const char * context_json, unsigned int flags, reinforcement_learning::multi_slot_response* resp, reinforcement_learning::api_status* status)
 {
   RL_IGNORE_DEPRECATED_USAGE_START
   if (event_id == nullptr)

@@ -49,7 +49,7 @@ API void DeleteSlotRanking(reinforcement_learning::slot_ranking* slot)
 
 API const char* GetSlotId(reinforcement_learning::slot_ranking* slot)
 {
-	return slot->get_join_id();
+	return slot->get_id();
 }
 
 API size_t GetSlotActionCount(reinforcement_learning::slot_ranking* slot)
