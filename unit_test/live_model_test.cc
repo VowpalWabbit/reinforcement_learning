@@ -56,6 +56,7 @@ namespace {
 
   const auto JSON_CONTEXT = R"({"_multi":[{},{}]})";
   const auto JSON_CONTEXT_WITH_SLOTS = R"({"_multi":[{},{}],"_slots":[{}]})";
+  const auto JSON_CONTEXT_WITH_SLOTS_WITH_SLOT_IDS = R"({"_multi":[{},{}],"_slots":[{"_id":"provided_slot_id_1"}, {}]})";
   const auto JSON_CONTEXT_PDF = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}}],"p":[0.4, 0.6]})";
   const auto JSON_CONTEXT_LEARNING = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}},{"Action":{"c":3}}],"p":[0.4, 0.1, 0.5]})";
   const auto JSON_CONTEXT_CONTINUOUS_ACTIONS = R"({"Temperature":{"18-25":1,"4":1,"C":1,"0":1,"1":1,"2":1,"15":1,"M":1}})";
@@ -822,11 +823,15 @@ BOOST_AUTO_TEST_CASE(slates_explore_only_mode) {
   auto it = response.begin();
   size_t action_id = 0;
   auto& slot_response = *it;
+  std::string first_slot_id = slot_response.get_id();
+  BOOST_CHECK_NE(slot_response.get_id(), ""); //uuid
   BOOST_CHECK_EQUAL(slot_response.get_action_id(), 0);
   BOOST_CHECK_CLOSE(slot_response.get_probability(), 1.f, FLOAT_TOL);
   ++it;
 
   auto& slot_response1 = *it;
+  BOOST_CHECK_NE(slot_response1.get_id(), ""); //uuid
+  BOOST_CHECK_NE(slot_response1.get_id(), first_slot_id); //uuid
   BOOST_CHECK_EQUAL(slot_response1.get_action_id(), 0);
   BOOST_CHECK_CLOSE(slot_response1.get_probability(), 1.f, FLOAT_TOL);
   ++it;
@@ -854,7 +859,7 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2) {
   BOOST_CHECK_EQUAL(ds.request_multi_slot_decision("event_id", JSON_CONTEXT_WITH_SLOTS, slates_response, &status), err::protocol_not_supported);
 
   config.set(r::name::PROTOCOL_VERSION, "2");
-  r::live_model ds2 = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::live_model ds2 = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr, r::model_management::model_type_t::CCB);
   BOOST_CHECK_EQUAL(ds2.init(&status), err::success);
 
   //slates API work for ccb with v2
@@ -864,4 +869,35 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2) {
   //old ccb api doesn't work under v2
   BOOST_CHECK_EQUAL(ds2.request_decision(JSON_CONTEXT_WITH_SLOTS, ccb_response, &status), err::protocol_not_supported);
 
+}
+
+BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids) {
+  //create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
+  config.set(r::name::PROTOCOL_VERSION, "2");
+
+  r::api_status status;
+
+  // Create the ds live_model, and initialize it with the config
+  r::live_model ds = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr, r::model_management::model_type_t::CCB);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  r::multi_slot_response response;
+
+  BOOST_CHECK_EQUAL(ds.request_multi_slot_decision("event_id", JSON_CONTEXT_WITH_SLOTS_WITH_SLOT_IDS, response, &status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  auto it = response.begin();
+  auto& ccb_response = *it;
+  BOOST_CHECK_EQUAL(ccb_response.get_id(), "provided_slot_id_1");
+  ++it;
+
+  auto& ccb_response2 = *it;
+  BOOST_CHECK_NE(ccb_response2.get_id(), "provided_slot_id_1");
+  BOOST_CHECK_NE(ccb_response2.get_id(), ""); //uuid
+  ++it;
+  BOOST_CHECK(it == response.end());
 }

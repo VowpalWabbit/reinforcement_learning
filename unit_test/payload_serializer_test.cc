@@ -80,7 +80,8 @@ BOOST_AUTO_TEST_CASE(multi_slot_payload_serializer_test){
 
   vector<vector<uint32_t>> actions{ { 2, 1, 0 }, { 1, 0 }};
   vector<vector<float>> probs{ { 0.5, 0.3, 0.2 }, { 0.8, 0.2 }};
-  const auto buffer = serializer.event("my_context", action_flags::DEFAULT, actions, probs, "model_id");
+  vector<std::string> slot_ids = {"0", "1"};
+  const auto buffer = serializer.event("my_context", action_flags::DEFAULT, actions, probs, "model_id", slot_ids);
 
   const auto event = v2::GetMultiSlotEvent(buffer.data());
 
@@ -92,6 +93,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_payload_serializer_test){
 
   const auto& slots = *event->slots();
   for (size_t i = 0; i < slots.size(); ++i) {
+    BOOST_CHECK_EQUAL(slot_ids[i], slots[i]->id()->str());
     BOOST_CHECK_EQUAL(actions[i].size(), slots[i]->action_ids()->size());
     BOOST_CHECK_EQUAL(probs[i].size(), slots[i]->probabilities()->size());
     for (size_t j = 0; j < actions[i].size(); ++j) {
