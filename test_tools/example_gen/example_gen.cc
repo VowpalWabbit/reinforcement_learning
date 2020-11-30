@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
-  if(vm.count("help") > 0 || action_name.empty()) {
+  if(vm.count("help") > 0 || (action_name.empty() && !gen_all)) {
     std::cout << desc << std::endl;
     return 0;
   }

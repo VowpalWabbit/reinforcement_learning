@@ -37,6 +37,7 @@ namespace reinforcement_learning {
   int check_null_or_empty(const char* arg1, const char* arg2, i_trace* trace, api_status* status);
   int check_null_or_empty(const char* arg1, i_trace* trace, api_status* status);
   int reset_action_order(ranking_response& response);
+  void autogenerate_missing_uuids(const std::map<size_t, std::string>& found_ids, std::vector<std::string>& complete_ids, uint64_t seed_shift);
 
   void default_error_callback(const api_status& status, void* watchdog_context) {
     auto watchdog = static_cast<utility::watchdog*>(watchdog_context);
@@ -168,20 +169,12 @@ namespace reinforcement_learning {
     std::vector<const char*> event_ids(num_decisions, nullptr);
     std::map<size_t, std::string> found_ids;
     RETURN_IF_FAIL(utility::get_event_ids(context_json, found_ids, _trace_logger.get(), status));
-
-    for (auto ids : found_ids)
-    {
-      event_ids_str[ids.first] = ids.second;
-      event_ids[ids.first] = event_ids_str[ids.first].c_str();
-    }
-
+    
+    autogenerate_missing_uuids(found_ids, event_ids_str, _seed_shift);
+    
     for (int i = 0; i < event_ids.size(); i++)
     {
-      if (event_ids[i] == nullptr)
-      {
-        event_ids_str[i] = boost::uuids::to_string(boost::uuids::random_generator()()) + std::to_string(_seed_shift);
-        event_ids[i] = event_ids_str[i].c_str();
-      }
+      event_ids[i] = event_ids_str[i].c_str();
     }
 
     // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
@@ -226,17 +219,22 @@ namespace reinforcement_learning {
       RETURN_ERROR_LS(_trace_logger.get(), status, json_parse_error) << "There must be both a _multi field and _slots, and _multi must come first.";
     }
 
-    size_t num_decisions = context_info.slots.size();
+    std::vector<std::string> slot_ids(context_info.slots.size());
+    std::map<size_t, std::string> found_ids;
+    RETURN_IF_FAIL(utility::get_slot_ids(context_json, context_info.slots, found_ids, _trace_logger.get(), status));
+    
+    autogenerate_missing_uuids(found_ids, slot_ids, _seed_shift);
+
 
     std::vector<std::vector<uint32_t>> actions_ids;
     std::vector<std::vector<float>> actions_pdfs;
     std::string model_version;
 
     // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
-    RETURN_IF_FAIL(_model->request_multi_slot_decision(event_id, (uint32_t)num_decisions, context_json, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(_model->request_multi_slot_decision(event_id, slot_ids, context_json, actions_ids, actions_pdfs, model_version, status));
 
-    RETURN_IF_FAIL(populate_multi_slot_response(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(populate_multi_slot_response(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
+    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, slot_ids, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -608,5 +606,20 @@ namespace reinforcement_learning {
     response.set_chosen_action_id((*(response.begin())).action_id);
 
     return error_code::success;
+  }
+
+  void autogenerate_missing_uuids(const std::map<size_t, std::string>& found_ids, std::vector<std::string>& complete_ids, uint64_t seed_shift) {
+    for (auto ids : found_ids)
+    {
+      complete_ids[ids.first] = ids.second;
+    }
+
+    for (int i = 0; i < complete_ids.size(); i++)
+    {
+      if (complete_ids[i].empty())
+      {
+        complete_ids[i] = boost::uuids::to_string(boost::uuids::random_generator()()) + std::to_string(seed_shift);
+      }
+    }    
   }
 }

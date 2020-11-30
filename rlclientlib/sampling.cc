@@ -56,10 +56,15 @@ int populate_slot(size_t chosen_action_index, const std::vector<uint32_t>& actio
 	return error_code::success;
 }
 
-int populate_multi_slot_response(const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, std::string&& event_id, std::string&& model_id, multi_slot_response& response, i_trace* trace_logger, api_status* status) {
+int populate_multi_slot_response(const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, std::string&& event_id, std::string&& model_id, const std::vector<std::string>& slot_ids, multi_slot_response& response, i_trace* trace_logger, api_status* status) {
   if(action_ids.size() != pdfs.size())
   {
     RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids and pdfs must be the same size";
+  }
+
+  if(action_ids.size() != slot_ids.size())
+  {
+    RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids and slot_ids must be the same size";
   }
 
   response.set_event_id(std::move(event_id));
@@ -71,7 +76,8 @@ int populate_multi_slot_response(const std::vector<std::vector<uint32_t>>& actio
     {
       RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids[i] and pdfs[i] must be the same size";
     }
-    response.push_back(action_ids[i][0], pdfs[i][0]);
+
+    response.push_back(slot_ids[i], action_ids[i][0], pdfs[i][0]);
   }
 
   return error_code::success;
