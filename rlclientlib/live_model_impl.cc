@@ -190,20 +190,12 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int live_model_impl::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
-  {
-    const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
-    return request_multi_slot_decision(uuid.c_str(), context_json, flags, resp, status);
-  }
-
-  int live_model_impl::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
+  int live_model_impl::request_multi_slot_decision_shared(const char *event_id, const char * context_json, std::vector<std::string>& slot_ids, std::vector<std::vector<uint32_t>>& action_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
     if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY) {
       // Apprentice mode and LoggingOnly mode are not supported here at this moment
       return error_code::not_supported;
     }
-
-    resp.clear();
     //clear previous errors if any
     api_status::try_clear(status);
 
@@ -215,26 +207,38 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(utility::get_context_info(context_json, context_info, _trace_logger.get(), status));
 
     // Ensure multi comes before slots, this is a current limitation of the parser.
-    if(context_info.slots.size() < 1 || context_info.actions.size() < 1 || context_info.slots[0].first < context_info.actions[0].first) {
+    if (context_info.slots.size() < 1 || context_info.actions.size() < 1 || context_info.slots[0].first < context_info.actions[0].first) {
       RETURN_ERROR_LS(_trace_logger.get(), status, json_parse_error) << "There must be both a _multi field and _slots, and _multi must come first.";
     }
 
-    std::vector<std::string> slot_ids(context_info.slots.size());
+    slot_ids.resize(context_info.slots.size());
     std::map<size_t, std::string> found_ids;
     RETURN_IF_FAIL(utility::get_slot_ids(context_json, context_info.slots, found_ids, _trace_logger.get(), status));
-    
     autogenerate_missing_uuids(found_ids, slot_ids, _seed_shift);
 
+    RETURN_IF_FAIL(_model->request_multi_slot_decision(event_id, slot_ids, context_json, action_ids, action_pdfs, model_version, status));
+    return error_code::success;
+  }
 
-    std::vector<std::vector<uint32_t>> actions_ids;
-    std::vector<std::vector<float>> actions_pdfs;
+  int live_model_impl::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
+  {
+    const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
+    return request_multi_slot_decision(uuid.c_str(), context_json, flags, resp, status);
+  }
+
+  int live_model_impl::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
+  {
+    resp.clear();
+
+    std::vector<std::string> slot_ids;
+    std::vector<std::vector<uint32_t>> action_ids;
+    std::vector<std::vector<float>> action_pdfs;
     std::string model_version;
 
-    // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
-    RETURN_IF_FAIL(_model->request_multi_slot_decision(event_id, slot_ids, context_json, actions_ids, actions_pdfs, model_version, status));
+    RETURN_IF_FAIL(live_model_impl::request_multi_slot_decision_shared(event_id, context_json, slot_ids, action_ids, action_pdfs, model_version, status));
 
-    RETURN_IF_FAIL(populate_multi_slot_response(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, slot_ids, status));
+    RETURN_IF_FAIL(populate_multi_slot_response(action_ids, action_pdfs, std::string(event_id), std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
+    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs, model_version, slot_ids, status));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -251,45 +255,20 @@ namespace reinforcement_learning {
 
   int live_model_impl::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
   {
-	  if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY) {
-		  // Apprentice mode and LoggingOnly mode are not supported here at this moment
-		  return error_code::not_supported;
-	  }
+    resp.clear();
 
-	  resp.clear();
-	  //clear previous errors if any
-	  api_status::try_clear(status);
+    std::vector<std::string> slot_ids;
+    std::vector<std::vector<uint32_t>> action_ids;
+    std::vector<std::vector<float>> action_pdfs;
+    std::string model_version;
 
-	  //check arguments
-	  RETURN_IF_FAIL(check_null_or_empty(event_id, _trace_logger.get(), status));
-	  RETURN_IF_FAIL(check_null_or_empty(context_json, _trace_logger.get(), status));
+    RETURN_IF_FAIL(live_model_impl::request_multi_slot_decision_shared(event_id, context_json, slot_ids, action_ids, action_pdfs, model_version, status));
 
-	  utility::ContextInfo context_info;
-	  RETURN_IF_FAIL(utility::get_context_info(context_json, context_info, _trace_logger.get(), status));
-
-	  // Ensure multi comes before slots, this is a current limitation of the parser.
-	  if (context_info.slots.size() < 1 || context_info.actions.size() < 1 || context_info.slots[0].first < context_info.actions[0].first) {
-		  RETURN_ERROR_LS(_trace_logger.get(), status, json_parse_error) << "There must be both a _multi field and _slots, and _multi must come first.";
-	  }
-
-    std::vector<std::string> slot_ids(context_info.slots.size());
-    std::map<size_t, std::string> found_ids;
-    RETURN_IF_FAIL(utility::get_slot_ids(context_json, context_info.slots, found_ids, _trace_logger.get(), status));
-
-    autogenerate_missing_uuids(found_ids, slot_ids, _seed_shift);
-
-	  size_t num_decisions = context_info.slots.size();
-
-	  std::vector<std::vector<uint32_t>> actions_ids;
-	  std::vector<std::vector<float>> actions_pdfs;
-	  std::string model_version;
-
-	  // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
-	  RETURN_IF_FAIL(_model->request_multi_slot_decision(event_id, slot_ids, context_json, actions_ids, actions_pdfs, model_version, status));
 	  //set the size of buffer in response to match the number of slots
-	  resp.resize(num_decisions);
-	  RETURN_IF_FAIL(populate_multi_slot_response_detailed(actions_ids, actions_pdfs, std::string(event_id), std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
-	  RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, actions_ids, actions_pdfs, model_version, slot_ids, status));
+	  resp.resize(slot_ids.size());
+
+	  RETURN_IF_FAIL(populate_multi_slot_response_detailed(action_ids, action_pdfs, std::string(event_id), std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
+	  RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs, model_version, slot_ids, status));
 
 	  // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
 	  if (_watchdog.has_background_error_been_reported()) {

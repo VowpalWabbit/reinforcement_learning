@@ -79,6 +79,7 @@ namespace reinforcement_learning
     int report_outcome_internal(const char* event_id, D outcome, api_status* status);
     template<typename D, typename I>
     int report_outcome_internal(const char* primary_id, I secondary_id, D outcome, api_status* status);
+    int request_multi_slot_decision_shared(const char *event_id, const char * context_json, std::vector<std::string>& slot_ids, std::vector<std::vector<uint32_t>>& action_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status);
 
   private:
     // Internal implementation state
