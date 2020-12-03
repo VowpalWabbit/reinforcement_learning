@@ -190,7 +190,7 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int live_model_impl::request_multi_slot_decision_shared(const char *event_id, const char * context_json, std::vector<std::string>& slot_ids, std::vector<std::vector<uint32_t>>& action_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
+  int live_model_impl::request_multi_slot_decision_impl(const char *event_id, const char * context_json, std::vector<std::string>& slot_ids, std::vector<std::vector<uint32_t>>& action_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
     if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY) {
       // Apprentice mode and LoggingOnly mode are not supported here at this moment
@@ -235,7 +235,7 @@ namespace reinforcement_learning {
     std::vector<std::vector<float>> action_pdfs;
     std::string model_version;
 
-    RETURN_IF_FAIL(live_model_impl::request_multi_slot_decision_shared(event_id, context_json, slot_ids, action_ids, action_pdfs, model_version, status));
+    RETURN_IF_FAIL(live_model_impl::request_multi_slot_decision_impl(event_id, context_json, slot_ids, action_ids, action_pdfs, model_version, status));
 
     RETURN_IF_FAIL(populate_multi_slot_response(action_ids, action_pdfs, std::string(event_id), std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
     RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs, model_version, slot_ids, status));
@@ -252,7 +252,7 @@ namespace reinforcement_learning {
 	  const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
 	  return request_multi_slot_decision(uuid.c_str(), context_json, flags, resp, status);
   }
-
+  
   int live_model_impl::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
   {
     resp.clear();
@@ -262,7 +262,7 @@ namespace reinforcement_learning {
     std::vector<std::vector<float>> action_pdfs;
     std::string model_version;
 
-    RETURN_IF_FAIL(live_model_impl::request_multi_slot_decision_shared(event_id, context_json, slot_ids, action_ids, action_pdfs, model_version, status));
+    RETURN_IF_FAIL(live_model_impl::request_multi_slot_decision_impl(event_id, context_json, slot_ids, action_ids, action_pdfs, model_version, status));
 
 	  //set the size of buffer in response to match the number of slots
 	  resp.resize(slot_ids.size());
