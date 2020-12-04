@@ -70,14 +70,14 @@ namespace reinforcement_learning {
     multi_slot_response(multi_slot_response&&) noexcept;
     multi_slot_response& operator=(multi_slot_response&&) noexcept;
 
-	/**
-	* @brief Copy constructor is removed since implementation will be deleted twice
-	*/
+  /**
+  * @brief Copy constructor is removed since implementation will be deleted twice
+  */
     multi_slot_response(const multi_slot_response&) = delete;
 
-	/**
-	* @brief assignment operator is removed since implementation will be deleted twice
-	*/
+  /**
+  * @brief assignment operator is removed since implementation will be deleted twice
+  */
     multi_slot_response& operator =(const multi_slot_response&) = delete;
   };
 }

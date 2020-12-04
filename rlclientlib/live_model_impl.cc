@@ -249,8 +249,8 @@ namespace reinforcement_learning {
 
   int live_model_impl::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
   {
-	  const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
-	  return request_multi_slot_decision(uuid.c_str(), context_json, flags, resp, status);
+    const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
+    return request_multi_slot_decision(uuid.c_str(), context_json, flags, resp, status);
   }
   
   int live_model_impl::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
@@ -264,17 +264,17 @@ namespace reinforcement_learning {
 
     RETURN_IF_FAIL(live_model_impl::request_multi_slot_decision_impl(event_id, context_json, slot_ids, action_ids, action_pdfs, model_version, status));
 
-	  //set the size of buffer in response to match the number of slots
-	  resp.resize(slot_ids.size());
+    //set the size of buffer in response to match the number of slots
+    resp.resize(slot_ids.size());
 
-	  RETURN_IF_FAIL(populate_multi_slot_response_detailed(action_ids, action_pdfs, std::string(event_id), std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
-	  RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs, model_version, slot_ids, status));
+    RETURN_IF_FAIL(populate_multi_slot_response_detailed(action_ids, action_pdfs, std::string(event_id), std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
+    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs, model_version, slot_ids, status));
 
-	  // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
-	  if (_watchdog.has_background_error_been_reported()) {
-		  RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
-	  }
-	  return error_code::success;
+    // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
+    if (_watchdog.has_background_error_been_reported()) {
+      RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+    }
+    return error_code::success;
   }
 
   int live_model_impl::report_action_taken(const char* event_id, api_status* status) {
