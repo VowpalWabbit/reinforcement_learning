@@ -10,6 +10,7 @@
 #include "ranking_response.h"
 #include "decision_response.h"
 #include "multi_slot_response.h"
+#include "multi_slot_response_detailed.h"
 #include "continuous_action_response.h"
 #include "err_constants.h"
 #include "factory_resolver.h"
@@ -240,10 +241,21 @@ namespace reinforcement_learning {
     */
     RL_DEPRECATED("New unified example builder interface is coming")
     int request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
-
+    RL_DEPRECATED("New unified example builder interface is coming")
     int request_multi_slot_decision(const char * event_id, const char * context_json, multi_slot_response& resp, api_status* status = nullptr);
+    RL_DEPRECATED("New unified example builder interface is coming")
     int request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
+    RL_DEPRECATED("New unified example builder interface is coming")
     int request_multi_slot_decision(const char * context_json, multi_slot_response& resp, api_status* status = nullptr);
+
+    RL_DEPRECATED("New unified example builder interface is coming")
+    int request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
+    RL_DEPRECATED("New unified example builder interface is coming")
+    int request_multi_slot_decision(const char * event_id, const char * context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
+    RL_DEPRECATED("New unified example builder interface is coming")
+    int request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
+    RL_DEPRECATED("New unified example builder interface is coming")
+    int request_multi_slot_decision(const char * context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
 
     /**
     * @brief Report that action was taken.

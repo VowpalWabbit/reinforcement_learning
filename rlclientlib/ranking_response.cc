@@ -3,46 +3,36 @@
 #include "err_constants.h"
 
 namespace reinforcement_learning {
-
+  
   ranking_response::ranking_response(char const* event_id)
-    : _event_id { event_id }, _chosen_action_id { 0 } {}
+    : _slot_impl { slot_ranking(event_id) } {}
 
   char const* ranking_response::get_event_id() const {
-    return _event_id.c_str();
-  }
-
-  int ranking_response::get_chosen_action_id(size_t& action_id, api_status* status) const {
-    if ( _ranking.empty() ) {
-      RETURN_ERROR_LS(nullptr, status, action_not_found);
-    }
-    action_id = _chosen_action_id;
-    return error_code::success;
-  }
-
-  int ranking_response::set_chosen_action_id(size_t action_id, api_status* status) {
-    if ( action_id >= _ranking.size() ) {
-      RETURN_ERROR_LS(nullptr, status, action_out_of_bounds) << " id:" << action_id << ", size:" << _ranking.size();
-    }
-
-    _chosen_action_id = action_id;
-    return error_code::success;
-  }
-
-  int ranking_response::set_chosen_action_id_unchecked(size_t action_id, api_status*) {
-    _chosen_action_id = action_id;
-    return error_code::success;
+    return _slot_impl.get_id();
   }
 
   void ranking_response::set_event_id(char const* event_id) {
-    _event_id = event_id;
+    _slot_impl.set_id(event_id);
+  }
+
+  int ranking_response::get_chosen_action_id(size_t& action_id, api_status* status) const {
+    return _slot_impl.get_chosen_action_id(action_id, status);
+  }
+  
+  int ranking_response::set_chosen_action_id(size_t action_id, api_status* status) {
+    return _slot_impl.set_chosen_action_id(action_id, status);
+  }
+
+  int ranking_response::set_chosen_action_id_unchecked(size_t action_id, api_status* status) {
+    return _slot_impl.set_chosen_action_id(action_id, status);
   }
 
   void ranking_response::push_back(const size_t action_id, const float prob) {
-    _ranking.emplace_back(action_id, prob);
+    _slot_impl.push_back(action_id, prob);
   }
 
   size_t ranking_response::size() const {
-    return _ranking.size();
+    return _slot_impl.size();
   }
 
   void ranking_response::set_model_id(const char* model_id) {
@@ -58,23 +48,17 @@ namespace reinforcement_learning {
   }
 
   void ranking_response::clear() {
-    _event_id.clear();
-    _chosen_action_id = 0;
+    _slot_impl.clear();
     _model_id.clear();
-    _ranking.clear();
   }
 
   ranking_response::ranking_response(ranking_response&& tmp) noexcept :
-  _event_id(std::move(tmp._event_id)),
-    _chosen_action_id(tmp._chosen_action_id),
-    _model_id(std::move(tmp._model_id)),
-    _ranking(std::move(tmp._ranking)) {}
+    _slot_impl(std::move(tmp._slot_impl)),
+    _model_id(std::move(tmp._model_id)){}
 
   ranking_response& ranking_response::operator=(ranking_response&& tmp) noexcept {
-    std::swap(_event_id, tmp._event_id);
-    std::swap(_chosen_action_id, tmp._chosen_action_id);
+    std::swap(_slot_impl, tmp._slot_impl);
     std::swap(_model_id, tmp._model_id);
-    std::swap(_ranking, tmp._ranking);
     return *this;
   }
 
@@ -82,18 +66,18 @@ namespace reinforcement_learning {
   using const_iterator = ranking_response::const_iterator;
 
   const_iterator ranking_response::begin() const {
-    return { _ranking };
+    return _slot_impl.begin();
   }
 
   iterator ranking_response::begin() {
-    return { _ranking };
+    return _slot_impl.begin();
   }
 
   const_iterator ranking_response::end() const {
-    return { _ranking, _ranking.size() };
+    return _slot_impl.end();
   }
 
   iterator ranking_response::end() {
-    return { _ranking, _ranking.size() };
+    return _slot_impl.end();
   }
 }

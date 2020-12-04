@@ -9,6 +9,7 @@
 **/obj
 **/Debug
 **/Release
+**/bin
 
 # VS files
 *.vcxproj.user

@@ -75,4 +75,4 @@ namespace reinforcement_learning
   multi_slot_response::iterator_t multi_slot_response::end() {
     return { _decision, _decision.size() };
   }
-} // namespace reinforcement_learning
+}
