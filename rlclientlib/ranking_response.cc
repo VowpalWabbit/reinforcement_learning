@@ -8,7 +8,7 @@ namespace reinforcement_learning {
     : _slot_impl { slot_ranking(event_id) } {}
 
   char const* ranking_response::get_event_id() const {
-  return _slot_impl.get_id();
+    return _slot_impl.get_id();
   }
 
   void ranking_response::set_event_id(char const* event_id) {
