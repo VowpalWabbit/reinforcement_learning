@@ -42,7 +42,7 @@ namespace reinforcement_learning {
   {
     // cleanup examples
     for (auto&& ex : _example_pool) {
-      VW::dealloc_example(_vw->p->lp.delete_label, *ex);
+      VW::dealloc_example(_vw->example_parser->lbl_parser.delete_label, *ex);
       ::free_it(ex);
     }
 
@@ -57,7 +57,7 @@ namespace reinforcement_learning {
     // alloc new element if we don't have any left
     if (_example_pool.size() == 0) {
       auto ex = VW::alloc_examples(0, 1);
-      _vw->p->lp.default_label(&ex->l);
+      _vw->example_parser->lbl_parser.default_label(&ex->l);
 
       return ex;
     }
