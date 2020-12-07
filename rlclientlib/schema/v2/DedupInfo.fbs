@@ -1,7 +1,7 @@
 namespace reinforcement_learning.messages.flatbuff.v2;
 
 table DedupInfo {
-	ids: [ulong];
+    ids: [ulong];
     values: [string];
 }
 
