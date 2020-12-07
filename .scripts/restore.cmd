@@ -36,7 +36,7 @@ ECHO Restoring SDK-Style projects in "%rlRoot%\rl.sln"
 ECHO.
 
 ECHO Restoring DotNet Tools (made simpler in .NET Core 3.0)
-%dotnetPath% tool install -g dotnet-t4
+%dotnetPath% tool install -g dotnet-t4 --version 2.0.5
 
 REM TODO: Is this still necessary?
 SET PATH=%PATH%;%VcpkgInstallRoot%installed\x64-windows\tools\flatbuffers
