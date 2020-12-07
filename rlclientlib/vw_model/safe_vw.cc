@@ -67,7 +67,7 @@ namespace reinforcement_learning {
     _example_pool.pop_back();
 
     VW::empty_example(*_vw, *ex);
-    _vw->p->lp.default_label(&ex->l);
+    _vw->example_parser->lbl_parser.default_label(&ex->l);
 
     return ex;
   }
