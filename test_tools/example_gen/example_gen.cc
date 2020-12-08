@@ -51,7 +51,7 @@ enum options{
 void load_config_from_json(int action, u::configuration& config)
 {
   std::string file_name(options[action]);
-  file_name += "_v2.fbs";
+  file_name += "_v2.fb";
 
   config.set("ApplicationID", "<appid>");
   config.set("interaction.sender.implementation", "INTERACTION_FILE_SENDER");
@@ -84,9 +84,9 @@ void load_config_from_json(int action, u::configuration& config)
   }
 }
 
-const auto JSON_CB_CONTEXT = R"({ "GUser":{"id":"a","major":"eng","hobby":"hiking"}, "_multi":[ { "TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}}]})";
+const auto JSON_CB_CONTEXT = R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"}},{"TAction":{"a2":"f2"}}]})";
 
-const auto JSON_CCB_CONTEXT = R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[ { "TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}}],"_slots":[{"Slot":{"a1":"f1"}},{"Slot":{"a1":"f1"}}]})";
+const auto JSON_CCB_CONTEXT = R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"}},{"TAction":{"a2":"f2"}}],"_slots":[{"Slot":{"a1":"f1"}},{"Slot":{"a1":"f1"}}]})";
 
 const auto JSON_SLATES_CONTEXT = R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"},"_slot_id":0},{"TAction":{"a2":"f2"},"_slot_id":0},{"TAction":{"a3":"f3"},"_slot_id":1},{"TAction":{"a4":"f4"},"_slot_id":1},{"TAction":{"a5":"f5"},"_slot_id":1}],"_slots":[{"Slot":{"a1":"f1"}},{"Slot":{"a2":"f2"}}]})";
 
