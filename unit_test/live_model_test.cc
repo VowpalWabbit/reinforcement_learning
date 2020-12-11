@@ -57,6 +57,7 @@ namespace {
   const auto JSON_CONTEXT = R"({"_multi":[{},{}]})";
   const auto JSON_CONTEXT_WITH_SLOTS = R"({"_multi":[{},{}],"_slots":[{}]})";
   const auto JSON_CONTEXT_WITH_SLOTS_WITH_SLOT_IDS = R"({"_multi":[{},{}],"_slots":[{"_id":"provided_slot_id_1"}, {}]})";
+  const auto JSON_CONTEXT_WITH_SLOTS_W_SLOT_IDS_AND_SLOT_NS = R"({"_multi":[{},{}, {}],"_slots":[{"_id":"provided_slot_id_1", "slot_namespace":{"a":"b"}}, {}, {"ns":{"_id":"ignored_slot_id", "a":"b"}}]})";
   const auto JSON_CONTEXT_PDF = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}}],"p":[0.4, 0.6]})";
   const auto JSON_CONTEXT_LEARNING = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}},{"Action":{"c":3}}],"p":[0.4, 0.1, 0.5]})";
   const auto JSON_CONTEXT_CONTINUOUS_ACTIONS = R"({"Temperature":{"18-25":1,"4":1,"C":1,"0":1,"1":1,"2":1,"15":1,"M":1}})";
@@ -1001,6 +1002,47 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids) {
   auto& ccb_response2 = *it;
   BOOST_CHECK_NE(ccb_response2.get_id(), "provided_slot_id_1");
   BOOST_CHECK_NE(ccb_response2.get_id(), ""); //uuid
+  ++it;
+  BOOST_CHECK(it == response.end());
+}
+
+
+BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids_and_slot_ns) {
+  //create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --chain_hash --json --quiet --epsilon 0.0 --first_only --id N/A");
+  config.set(r::name::PROTOCOL_VERSION, "2");
+
+  r::api_status status;
+
+  // Create the ds live_model, and initialize it with the config
+  r::live_model ds = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr, r::model_management::model_type_t::CCB);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  r::multi_slot_response response;
+
+  BOOST_CHECK_EQUAL(ds.request_multi_slot_decision("event_id", JSON_CONTEXT_WITH_SLOTS_W_SLOT_IDS_AND_SLOT_NS, response, &status), err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  auto it = response.begin();
+  auto& ccb_response = *it;
+  BOOST_CHECK_EQUAL(ccb_response.get_id(), "provided_slot_id_1");
+  ++it;
+
+  auto& ccb_response2 = *it;
+  auto uuid_response_2 = ccb_response2.get_id();
+  BOOST_CHECK_NE(ccb_response2.get_id(), "provided_slot_id_1");
+  BOOST_CHECK_NE(uuid_response_2, ""); //uuid
+  ++it;
+
+  auto& ccb_response_3 = *it;
+  auto uuid_response_3 = ccb_response_3.get_id();
+  BOOST_CHECK_NE(ccb_response_3.get_id(), "provided_slot_id_1");
+  BOOST_CHECK_NE(uuid_response_3, ""); //uuid
+  BOOST_CHECK_NE(uuid_response_3, uuid_response_2); //uuid
+
   ++it;
   BOOST_CHECK(it == response.end());
 }
