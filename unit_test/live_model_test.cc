@@ -57,7 +57,7 @@ namespace {
   const auto JSON_CONTEXT = R"({"_multi":[{},{}]})";
   const auto JSON_CONTEXT_WITH_SLOTS = R"({"_multi":[{},{}],"_slots":[{}]})";
   const auto JSON_CONTEXT_WITH_SLOTS_WITH_SLOT_IDS = R"({"_multi":[{},{}],"_slots":[{"_id":"provided_slot_id_1"}, {}]})";
-  const auto JSON_CONTEXT_WITH_SLOTS_W_SLOT_IDS_AND_SLOT_NS = R"({"_multi":[{},{}],"_slots":[{"_id":"provided_slot_id_1", "slot_namespace":{"a":"b"}}, {}]})";
+  const auto JSON_CONTEXT_WITH_SLOTS_W_SLOT_IDS_AND_SLOT_NS = R"({"_multi":[{},{}, {}],"_slots":[{"_id":"provided_slot_id_1", "slot_namespace":{"a":"b"}}, {}, {"ns":{"_id":"ignored_slot_id", "a":"b"}}]})";
   const auto JSON_CONTEXT_PDF = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}}],"p":[0.4, 0.6]})";
   const auto JSON_CONTEXT_LEARNING = R"({"Shared":{"t":"abc"}, "_multi":[{"Action":{"c":1}},{"Action":{"c":2}},{"Action":{"c":3}}],"p":[0.4, 0.1, 0.5]})";
   const auto JSON_CONTEXT_CONTINUOUS_ACTIONS = R"({"Temperature":{"18-25":1,"4":1,"C":1,"0":1,"1":1,"2":1,"15":1,"M":1}})";
@@ -1032,8 +1032,17 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids_and_slot_ns) {
   ++it;
 
   auto& ccb_response2 = *it;
+  auto uuid_response_2 = ccb_response2.get_id();
   BOOST_CHECK_NE(ccb_response2.get_id(), "provided_slot_id_1");
-  BOOST_CHECK_NE(ccb_response2.get_id(), ""); //uuid
+  BOOST_CHECK_NE(uuid_response_2, ""); //uuid
+  ++it;
+
+  auto& ccb_response_3 = *it;
+  auto uuid_response_3 = ccb_response_3.get_id();
+  BOOST_CHECK_NE(ccb_response_3.get_id(), "provided_slot_id_1");
+  BOOST_CHECK_NE(uuid_response_3, ""); //uuid
+  BOOST_CHECK_NE(uuid_response_3, uuid_response_2); //uuid
+
   ++it;
   BOOST_CHECK(it == response.end());
 }
