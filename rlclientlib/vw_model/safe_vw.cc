@@ -334,7 +334,7 @@ mm::model_type_t safe_vw::get_model_type(const VW::config::options_i* args)
 
 bool safe_vw::is_compatible(const std::string& args) const {
   const auto local_model_type = get_model_type(args);
-  const auto inbound_model_type = get_model_type(_vw->options);
+  const auto inbound_model_type = get_model_type(_vw->options.get());
 
   // This really is an error but errors cant be reported here...
   if(local_model_type == mm::model_type_t::UNKNOWN || inbound_model_type ==  mm::model_type_t::UNKNOWN)
@@ -348,7 +348,7 @@ bool safe_vw::is_compatible(const std::string& args) const {
 bool safe_vw::is_CB_to_CCB_model_upgrade(const std::string& args) const
 {
     const auto local_model_type = get_model_type(args);
-    const auto inbound_model_type = get_model_type(_vw->options);
+    const auto inbound_model_type = get_model_type(_vw->options.get());
 
     return local_model_type == mm::model_type_t::CCB && inbound_model_type == mm::model_type_t::CB;    
 }
