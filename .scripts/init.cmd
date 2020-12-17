@@ -65,6 +65,3 @@ IF NOT DEFINED rlRoot (
 IF NOT DEFINED SkipAzureFactories (
     SET "SkipAzureFactories=false"
 )
-
-
-ECHO %PATH%
