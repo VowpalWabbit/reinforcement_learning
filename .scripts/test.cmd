@@ -7,8 +7,6 @@ SETLOCAL
 
 CALL %~dp0init.cmd
 
-PUSHD %rlRoot%
-
 REM TODO: Determine how to pass test failure out of this script so it can be used by CI/CD setups
 
 ECHO Running RL Unit Tests
