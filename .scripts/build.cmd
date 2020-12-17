@@ -1,5 +1,3 @@
-ECHO %PATH%
-
 @ECHO OFF
 IF DEFINED DebugBuildScripts (
     @ECHO ON
