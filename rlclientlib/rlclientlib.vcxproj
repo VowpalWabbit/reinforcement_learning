@@ -27,6 +27,10 @@
     <flatcPath Condition="'$(flatcPath)'==''">flatc.exe</flatcPath>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <Import Project="$(VcpkgIntegration)" Condition="Exists('$(VcpkgIntegration)')" />
+  <PropertyGroup Condition="'$(VcpkgAutoLink)'!=''">
+    <VcpkgAutoLink>false</VcpkgAutoLink>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -331,12 +335,14 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(SolutionDir)packages\boost.1.70.0.0\build\boost.targets" Condition="Exists('$(SolutionDir)packages\boost.1.70.0.0\build\boost.targets')" />
   </ImportGroup>
-  <Import Project="$(VcpkgIntegration)" Condition="Exists('$(VcpkgIntegration)')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)packages\boost.1.70.0.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)packages\boost.1.70.0.0\build\boost.targets'))" />
+  </Target>
+  <Target Name="Check Vcpkg" AfterTargets="PrepareForBuild">
+    <Error Condition="'$(VcpkgAutoLink)'==''" Text="Vcpkg version is too old, doesn't contain VcpkgAutoLink flag, please upgrade to avoid linking problems" />
   </Target>
   <Target Name="AfterClean">
     <RemoveDir Directories="$(SolutionDir)rlclientlib\generated" />
