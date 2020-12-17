@@ -1,6 +1,6 @@
 resources:
 - repo: self
-  submodules: recursive
+- submodules: recursive
 
 pool:
   name: Hosted VS2017
