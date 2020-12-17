@@ -14,6 +14,8 @@ variables:
   clone_folder: c:\reinforcement_learning\
 
 steps:
+- checkout: self
+  submodules: recursive
 - task: VisualStudioTestPlatformInstaller@1
   inputs:
     packageFeedSelector: 'nugetOrg' # Options: nugetOrg, customFeed, netShare
