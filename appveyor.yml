@@ -4,7 +4,7 @@ configuration: Release
 platform: x64
 clone_folder: c:\reinforcement_learning\
 cache:
-  - c:\tools\vcpkg\installed2\ -> build-windows.cmd, .scripts\restore.cmd
+  - c:\tools\vcpkg\installed\ -> build-windows.cmd, .scripts\restore.cmd
   - packages -> **\packages.config, build-windows.cmd, .scripts\restore.cmd
 environment:
   VcpkgInstallRoot: c:\tools\vcpkg\
