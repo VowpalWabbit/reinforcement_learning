@@ -29,11 +29,11 @@ steps:
     key: 'vcpkg | archives'
     path: $(VCPKG_ARCHIVE_DIR)
   displayName: Cache vcpkg dependencies
-- script: CALL .scripts/restore.cmd
-  displayName: 'Restore dependencies'
-  env:
-    nugetPath: $(Build.SourcesDirectory)\.nuget\nuget.exe
-  failOnStderr: true
+# - script: CALL .scripts/restore.cmd
+#   displayName: 'Restore dependencies'
+#   env:
+#     nugetPath: $(Build.SourcesDirectory)\.nuget\nuget.exe
+#   failOnStderr: true
 - script: CALL ./build-windows.cmd
   displayName: 'Build rl.sln'
   env:
