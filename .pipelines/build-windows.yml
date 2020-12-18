@@ -6,11 +6,9 @@ pool:
   demands: Cmd
 
 variables:
-  SuppressTag: $[ eq(variables.officialbuild, 'true') ]
   VCPKG_ARCHIVE_DIR: $(LOCALAPPDATA)\vcpkg\archives
   configuration: Release
   platform: x64
-  clone_folder: c:\reinforcement_learning\
 
 steps:
 - checkout: self
