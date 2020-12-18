@@ -34,30 +34,24 @@ steps:
   env:
     nugetPath: $(Build.SourcesDirectory)\.nuget\nuget.exe
   failOnStderr: true
-# - script: CALL .scripts/build.cmd
-#   displayName: 'Build rl.sln'
-#   env:
-#     nugetPath: $(Build.SourcesDirectory)\.nuget\nuget.exe
-#   failOnStderr: true
-# - script: CALL .scripts/test.cmd
-#   displayName: 'Run tests'
-#   env:
-#     nugetPath: $(Build.SourcesDirectory)\.nuget\nuget.exe
-#   failOnStderr: false
-# - task: PublishTestResults@2
-#   displayName: 'Publish Test Results'
-#   inputs:
-#     testResultsFormat: VSTest
-#     testResultsFiles: '**/out/test/Release/x64/*.trx'
-# - task: PublishBuildArtifacts@1
-#   displayName: 'Publish Artifact: target'
-#   inputs:
-#     PathtoPublish: $(Build.SourcesDirectory)\out\target
-#     ArtifactName: target
-#   condition: succeededOrFailed()
-# - task: PublishBuildArtifacts@1
-#   displayName: 'Publish Artifact: package'
-#   inputs:
-#     PathtoPublish: $(Build.SourcesDirectory)\out\package
-#     ArtifactName: package
-#   condition: succeededOrFailed()
+- script: CALL .scripts/build.cmd
+  displayName: 'Build rl.sln'
+  env:
+    nugetPath: $(Build.SourcesDirectory)\.nuget\nuget.exe
+  failOnStderr: true
+- script: CALL .scripts/test.cmd
+  displayName: 'Run tests'
+  env:
+    nugetPath: $(Build.SourcesDirectory)\.nuget\nuget.exe
+  failOnStderr: false
+- task: PublishTestResults@2
+  displayName: 'Publish Test Results'
+  inputs:
+    testResultsFormat: VSTest
+    testResultsFiles: '**/out/test/Release/x64/*.trx'
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: target'
+  inputs:
+    PathtoPublish: $(Build.SourcesDirectory)\out\target
+    ArtifactName: target
+  condition: succeededOrFailed()
