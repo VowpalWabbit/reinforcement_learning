@@ -15,6 +15,4 @@ ECHO Running RL Unit Tests
 ECHO Running RL.Net Unit Tests
 "%vstestPath%" /Platform:x64 /InIsolation "%rlRoot%\x64\Release\Rl.Net.Cli.Test.dll" /TestCaseFilter:"TestCategory!=NotOnVSO"
 
-POPD
-
 ENDLOCAL
