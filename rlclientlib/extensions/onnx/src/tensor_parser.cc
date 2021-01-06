@@ -1,10 +1,7 @@
 #include "tensor_parser.h"
-#include "onnx_input.h"
 
-#include <vector>
-#include <string>
-#include <sstream>
 #include <algorithm>
+#include <sstream>
 
 namespace reinforcement_learning { namespace onnx {
 
@@ -33,7 +30,7 @@ namespace tensor_parser
         return error_context(errors, prefix, parser_context);
       }
 
-      inline bool append_error(std::string detail)
+      inline bool append_error(const std::string& detail)
       {
         std::stringstream error_builder;
         error_builder << "Parse failure at position " << parser_context.position();
@@ -231,8 +228,6 @@ namespace tensor_parser
           error_detail_builder << "Invalid number of base64 characters: '" << count << "'.";
 
           return error_context.append_error(std::string(error_detail_builder.str()));
-
-          return false;
         }
 
         switch (padding_count)
@@ -288,13 +283,12 @@ namespace tensor_parser
 
       inline bool invoke(const char c)
       {
-        if (in_escape || c != escape)
+        if (c != escape || in_escape)
         {
           value.push_back(c);
           in_escape = false;
         }
-
-        if (c == escape)
+        else if (c == escape)
         {
           in_escape = true;
         }

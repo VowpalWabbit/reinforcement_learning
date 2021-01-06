@@ -1,8 +1,7 @@
-
-#include "onnx_input.h"
-
 #include <string>
 #include <vector>
+
+#include "onnx_input.h"
 
 namespace reinforcement_learning { namespace onnx {
 
@@ -18,7 +17,9 @@ namespace reinforcement_learning { namespace onnx {
 // <VALUES-BASE64> := { base64 encoding of float[] representing values of the tensor }
 //
 // Any other JSON concepts are not allowed. The reason for any relation to JSON is
-// the current setup for RLClientLib to log the context as JSON.
+// the current setup for RLClientLib to log the context as JSON. Note that whitespace is
+// not allowed.
+//
 // Ideally, we would use protobuf definitions from ONNX to represent the IOContext
 
 namespace tensor_parser

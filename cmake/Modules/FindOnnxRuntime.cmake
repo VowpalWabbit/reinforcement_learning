@@ -10,9 +10,10 @@ find_package_handle_standard_args(onnxruntime
 if(ONNXRUNTIME_FOUND)
   add_library(onnxruntime SHARED IMPORTED)
   set_target_properties(onnxruntime PROPERTIES IMPORTED_LOCATION ${ONNXRUNTIME_LIB})
-
+  
   set(ONNXRUNTIME_INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIR_ROOT}/include/onnxruntime)
-  set(ONNXRUNTIME_INCLUDE_DIR ${ONNXRUNTIME_INCLUDE_DIRS})
-# else()
-#   set(ONNXRUNTIME_INCLUDE_DIR)
+  
+  target_include_directories(onnxruntime INTERFACE ${ONNXRUNTIME_INCLUDE_DIRS})
+else()
+  set(ONNXRUNTIME_INCLUDE_DIR_ROOT)
 endif()

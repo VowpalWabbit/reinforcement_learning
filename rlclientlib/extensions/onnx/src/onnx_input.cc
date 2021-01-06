@@ -1,11 +1,10 @@
 #include "onnx_input.h"
-#include "err_constants.h"
-#include "api_status.h"
-#include "tensor_parser.h"
 
-#include <sstream>
 #include <numeric>
-#include <assert.h>
+#include <sstream>
+
+#include "err_constants.h"
+#include "tensor_parser.h"
 
 namespace reinforcement_learning { namespace onnx {
 
@@ -32,7 +31,7 @@ std::vector<Ort::Value> onnx_input_builder::inputs() const
   std::vector<Ort::Value> result;
   result.reserve(input_count());
 
-  bool succeeded = false;
+  bool failed = false;
 
   for (const tensor_data_t& tensor : _inputs)
   {
@@ -43,7 +42,7 @@ std::vector<Ort::Value> onnx_input_builder::inputs() const
     size_t rank = dimensions_bytes.size() / sizeof(int64_t);
     if (!check_array_size<int64_t>(dimensions_bytes, rank))
     {
-      // TODO: error
+      failed = true;
       break;
     }
 
@@ -55,18 +54,17 @@ std::vector<Ort::Value> onnx_input_builder::inputs() const
     size_t values_count = 0;
     if (!check_array_size<value_t>(values_bytes, expected_values_count, values_count))
     {
-      // TODO: error
+      failed = true;
       break;
     }
 
     value_t* values = (value_t*)values_bytes.data();
     result.push_back(std::move(Ort::Value::CreateTensor<value_t>(this->_memory_info, values, values_count, dimensions, rank)));
-
-    succeeded = true;
   }
 
-  if (!succeeded)
+  if (failed)
   {
+    // TODO: report error
     return {};
   }
 

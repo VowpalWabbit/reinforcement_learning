@@ -1,9 +1,10 @@
 #pragma once
 #include <string>
 
-#include "model_mgmt.h"
-
 #include <core/session/onnxruntime_cxx_api.h>
+
+#include "err_constants.h"
+#include "model_mgmt.h"
 
 namespace reinforcement_learning {
   class i_trace;

@@ -1,17 +1,15 @@
+#include "onnx_model.h"
+
 #include <memory>
 #include <sstream>
-#include <assert.h>
 
-#include "onnx_input.h"
-
-#include "trace_logger.h"
-#include "err_constants.h"
-#include "onnx_model.h"
-#include "str_util.h"
 #include "api_status.h"
-
+#include "err_constants.h"
 #include "factory_resolver.h"
+#include "onnx_input.h"
 #include "scope_exit.h"
+#include "str_util.h"
+#include "trace_logger.h"
 
 namespace reinforcement_learning { namespace onnx {
 

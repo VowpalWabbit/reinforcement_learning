@@ -1,12 +1,11 @@
 #pragma once
-
-#include "api_status.h"
-
 #include <algorithm>
 #include <string>
 #include <vector>
 
 #include <core/session/onnxruntime_cxx_api.h>
+
+#include "api_status.h"
 
 namespace reinforcement_learning { namespace onnx {
   using byte_t = unsigned char;

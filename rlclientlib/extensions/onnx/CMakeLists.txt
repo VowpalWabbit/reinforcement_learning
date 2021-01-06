@@ -33,7 +33,6 @@ target_include_directories(rlclientlib-onnx
                            ${CMAKE_CURRENT_SOURCE_DIR}/include
                            PRIVATE
                            ${CMAKE_CURRENT_SOURCE_DIR}/src
-                           ${ONNXRUNTIME_INCLUDE_DIRS}
-                           )
+)
 
 target_link_libraries(rlclientlib-onnx PUBLIC rlclientlib onnxruntime)
