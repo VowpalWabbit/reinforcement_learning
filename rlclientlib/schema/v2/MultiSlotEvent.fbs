@@ -13,6 +13,7 @@ table MultiSlotEvent {
     slots:[SlotEvent];        // actions and probabilities
     model_id:string;               // model ID
     deferred_action:bool = false;  // delayed activation flag
+    baseline_actions:[int];        // baseline actions for apprentice mode
 }
 
 root_type MultiSlotEvent;
