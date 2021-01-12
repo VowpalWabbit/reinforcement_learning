@@ -51,6 +51,10 @@ namespace reinforcement_learning
 
   const std::vector<int>& live_model::_c_array_to_vector(const int* c_array, size_t array_size)
   {
+    if (c_array == nullptr)
+    {
+      return std::vector<int>();
+    }
     return std::vector<int> (c_array, c_array + array_size);
   }
 
