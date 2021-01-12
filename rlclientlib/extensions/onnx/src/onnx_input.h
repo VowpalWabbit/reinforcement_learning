@@ -9,17 +9,17 @@
 
 namespace reinforcement_learning { namespace onnx {
   using byte_t = unsigned char;
-  using bytes_t = std::vector<unsigned char>;
+  using bytes_t = std::vector<byte_t>;
   using tensor_data_t = std::pair<bytes_t, bytes_t>;
 
   /**
-   * Check whether the provided bytes contain enough data to represent an
-   * array of elements of type element_t
+   * Check whether the provided bytes map exactly to a whole number of elements
+   * of type element_t.
    */
   template <typename element_t>
-  inline bool check_array_size(const bytes_t& bytes, size_t& element_count)
+  inline bool check_array_packing(const bytes_t& bytes, size_t& element_count)
   {
-    element_count = bytes.size() / sizeof(element_t);
+    element_count = (bytes.size() * sizeof(byte_t)) / sizeof(element_t);
     
     // The number of bytes in the dimensions array does not fit evenly into an 
     // array of elements of type element_t
@@ -33,9 +33,8 @@ namespace reinforcement_learning { namespace onnx {
   template <typename element_t>
   inline bool check_array_size(const bytes_t& bytes, size_t expected_element_count, size_t& element_count)
   {
-    check_array_size<element_t>(bytes, element_count);
-
-    return (element_count == expected_element_count);
+    return check_array_packing<element_t>(bytes, element_count) 
+           && (element_count == expected_element_count);
   }
 
   // TODO: Support reading type information for the tensor (and later map/sequence)

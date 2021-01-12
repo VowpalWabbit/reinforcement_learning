@@ -13,10 +13,6 @@ namespace reinforcement_learning {
 namespace reinforcement_learning { namespace onnx {
   class onnx_model : public model_management::i_model {
   public:
-    onnx_model(onnx_model&&) = delete;
-    onnx_model& operator=(onnx_model&&) = delete;
-
-  public:
     onnx_model(i_trace* trace_logger, const char* app_id, const char* output_name, bool use_unstructured_input);
     int update(const model_management::model_data& data, bool& model_ready, api_status* status = nullptr) override;
     int choose_rank(uint64_t rnd_seed, const char* features, std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) override;

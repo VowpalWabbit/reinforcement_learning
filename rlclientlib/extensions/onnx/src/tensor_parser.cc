@@ -15,34 +15,34 @@ namespace tensor_parser
     struct error_context
     {
     private:
-      std::vector<std::string>& errors;
-      const std::string prefix;
-      tensor_parser::parser_context& parser_context;
+      const std::string _prefix;
+      std::vector<std::string>& _errors;
+      tensor_parser::parser_context& _parser_context;
 
     public:
-      inline error_context(std::vector<std::string>& target, const std::string prefix, tensor_parser::parser_context& parser_context)
-        : errors(target), prefix(prefix), parser_context(parser_context)
+      inline error_context(std::vector<std::string>& target, const std::string& prefix, tensor_parser::parser_context& parser_context)
+        : _errors(target), _prefix(prefix), _parser_context(parser_context)
       {
       }
 
-      inline error_context with_prefix(const std::string prefix)
+      inline error_context with_prefix(const std::string& prefix)
       {
-        return error_context(errors, prefix, parser_context);
+        return error_context(_errors, prefix, _parser_context);
       }
 
       inline bool append_error(const std::string& detail)
       {
         std::stringstream error_builder;
-        error_builder << "Parse failure at position " << parser_context.position();
+        error_builder << "Parse failure at position " << _parser_context.position();
 
-        if (prefix.size() > 0)
+        if (_prefix.size() > 0)
         {
-          error_builder << " " << prefix;
+          error_builder << " " << _prefix;
         }
           
         error_builder << ": " << detail;
 
-        errors.push_back(error_builder.str());
+        _errors.push_back(error_builder.str());
 
         // This is intended to be used as an || append during the consume/consume_exact API pattern
         return false;
@@ -155,48 +155,48 @@ namespace tensor_parser
     struct parse_context
     {
     private:
-      size_t padding_count;
-      size_t count;
-      uint32_t running;
-      std::vector<uint8_t>& bytes;
-      errors::error_context& error_context;
+      size_t _count;
+      uint32_t _running;
+      size_t _padding_count;
+      std::vector<uint8_t>& _bytes;
+      errors::error_context& _error_context;
 
     public:
 
-      inline parse_context(std::vector<uint8_t>& target, errors::error_context& errors_target) : bytes(target), error_context(errors_target), count(0), running(0), padding_count(0)
+      inline parse_context(std::vector<uint8_t>& target, errors::error_context& errors_target) : _bytes(target), _error_context(errors_target), _count(0), _running(0), _padding_count(0)
       {
       }
 
       inline bool invoke(const char c)
       {
-        running = running << 6;
-        count++;
+        _running = _running << 6;
+        _count++;
 
-        if (padding_count || c == '=')
+        if (_padding_count || c == '=')
         {
-          padding_count++;
+          _padding_count++;
         }
-        else if (!padding_count)
+        else if (!_padding_count)
         {
           if (c >= 'A' /* 65 */ && c <= 'Z' /* 90 */)
           {
-            running = running | (c - 'A' + 0); // 0 - 25
+            _running = _running | (c - 'A' + 0); // 0 - 25
           }
           else if (c >= 'a' /* 97 */ && c <= 'z' /* 122 */)
           {
-            running = running | (c - 'a' + 26); // 26 - 51
+            _running = _running | (c - 'a' + 26); // 26 - 51
           }
           else if (c >= '0' /* 48 */ && c <= '9' /* 57 */)
           {
-            running = running | (c - '0' + 52); // 52 - 61
+            _running = _running | (c - '0' + 52); // 52 - 61
           }
           else if (c == '+')
           {
-            running = running | 62;
+            _running = _running | 62;
           }
           else if (c == '/')
           {
-            running = running | 63;
+            _running = _running | 63;
           }
           else
           {
@@ -204,16 +204,16 @@ namespace tensor_parser
             std::stringstream error_detail_builder;
             error_detail_builder << "Invalid base64 character: '" << c << "'.";
 
-            return error_context.append_error(std::string(error_detail_builder.str()));
+            return _error_context.append_error(std::string(error_detail_builder.str()));
           }
 
-          if (count % 4 == 0)
+          if (_count % 4 == 0)
           {
-            bytes.push_back((running >> 16) & 0xFF);
-            bytes.push_back((running >> 8) & 0xFF);
-            bytes.push_back(running & 0xFF);
+            _bytes.push_back((_running >> 16) & 0xFF);
+            _bytes.push_back((_running >> 8) & 0xFF);
+            _bytes.push_back(_running & 0xFF);
 
-            running = 0;
+            _running = 0;
           }
         }
 
@@ -222,30 +222,30 @@ namespace tensor_parser
 
       inline bool end()
       {
-        if (count % 4 != 0)
+        if (_count % 4 != 0)
         {
           std::stringstream error_detail_builder;
-          error_detail_builder << "Invalid number of base64 characters: '" << count << "'.";
+          error_detail_builder << "Invalid number of base64 characters: '" << _count << "'.";
 
-          return error_context.append_error(std::string(error_detail_builder.str()));
+          return _error_context.append_error(std::string(error_detail_builder.str()));
         }
 
-        switch (padding_count)
+        switch (_padding_count)
         {
         case 0:
           break;
         case 1:
-          bytes.push_back((running >> 16) & 0xFF);
-          bytes.push_back((running >> 8) & 0xFF);
+          _bytes.push_back((_running >> 16) & 0xFF);
+          _bytes.push_back((_running >> 8) & 0xFF);
           break;
         case 2:
-          bytes.push_back((running >> 16) & 0xFF);
+          _bytes.push_back((_running >> 16) & 0xFF);
           break;
         default:
           std::stringstream error_detail_builder;
-          error_detail_builder << "Invalid number of base64 padding characters: '" << padding_count << "'.";
+          error_detail_builder << "Invalid number of base64 padding characters: '" << _padding_count << "'.";
 
-          return error_context.append_error(std::string(error_detail_builder.str()));
+          return _error_context.append_error(std::string(error_detail_builder.str()));
         }
 
         return true;
@@ -273,24 +273,24 @@ namespace tensor_parser
   public:
     struct parse_context
     {
-      bool in_escape;
-      std::string& value;
+      bool _in_escape;
+      std::string& _value;
 
     public:
-      parse_context(std::string& target) : value(target), in_escape(false)
+      parse_context(std::string& target) : _value(target), _in_escape(false)
       {
       }
 
       inline bool invoke(const char c)
       {
-        if (c != escape || in_escape)
+        if (c != escape || _in_escape)
         {
-          value.push_back(c);
-          in_escape = false;
+          _value.push_back(c);
+          _in_escape = false;
         }
         else if (c == escape)
         {
-          in_escape = true;
+          _in_escape = true;
         }
 
         return true;
@@ -402,7 +402,7 @@ namespace tensor_parser
 
     return 
       consume_exact<CLOSE_BRACE>(reading_head) 
-      || // on error:
+      || // the OR condition here only runs on error
          error_context.append_error("Expected '}'.");
   }
 

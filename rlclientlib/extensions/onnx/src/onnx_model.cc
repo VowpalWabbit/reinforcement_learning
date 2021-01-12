@@ -74,21 +74,20 @@ namespace reinforcement_learning { namespace onnx {
     try {
       TRACE_INFO(_trace_logger, utility::concat("Received new model data. With size ", data.data_sz()));
 	  
-      Ort::Session* new_session = nullptr;
       if (data.data_sz() <= 0)
       {
         RETURN_ERROR_LS(_trace_logger, status, model_update_error) << "Empty model data.";
       }
 
-      new_session = new Ort::Session(_env, data.data(), data.data_sz(), _session_options);
-      
+      std::shared_ptr<Ort::Session> new_session = std::make_shared<Ort::Session>(_env, data.data(), data.data_sz(), _session_options);
+
       // Validate that the model makes sense
       // Rules: 
       // 1. There are N inputs, which are all tensors of floats
       // 2. There is an output with the provided name, which is a tensor of floats
 
       size_t input_count = new_session->GetInputCount();
-      for (int i = 0; i < input_count; i++)
+      for (size_t i = 0; i < input_count; i++)
       {
         // TODO: Support more input types (by making the input interface richer)
         Ort::TypeInfo input_type_info = new_session->GetInputTypeInfo(i);
@@ -135,8 +134,7 @@ namespace reinforcement_learning { namespace onnx {
       // TODO: Should we add additional checks to make sure the next two sets are atomic?
       _output_index = output_index;
 
-      // TODO: Should this be moved/forwarded?
-      _master_session = std::shared_ptr<Ort::Session>(new_session);
+      _master_session = std::move(new_session);
     }
     catch(const std::exception& e) {
       RETURN_ERROR_LS(_trace_logger, status, model_update_error) << e.what();
@@ -192,7 +190,12 @@ namespace reinforcement_learning { namespace onnx {
     // This cast-chain is taken from the OnnxRuntime code implementation of the C++ API of Ort::Session::Run().
     auto ort_input_values = reinterpret_cast<const OrtValue**>(const_cast<Ort::Value*>(inputs.data()));
 
-    OrtStatus* run_status = OnnxRuntimeCApi.Run(local_session->operator OrtSession *(), Ort::RunOptions{nullptr}, input_names.data(), ort_input_values, input_context.input_count(), (const char* const*)&_output_name, 1, &onnx_output);
+    OrtStatus* run_status = OnnxRuntimeCApi.Run(
+      local_session->operator OrtSession *(), // Unwrap the underlying C reference to pass to the C API
+      Ort::RunOptions{nullptr}, 
+      input_names.data(), ort_input_values, input_context.input_count(),     // Inputs: Names, Values, Count
+      reinterpret_cast<const char* const*>(&_output_name), 1, &onnx_output); // Outputs: Names, Count, Values; note the inconsistency
+
     if (run_status)
     {
       auto release_guard = VW::scope_exit([&run_status] { OnnxRuntimeCApi.ReleaseStatus(run_status); });

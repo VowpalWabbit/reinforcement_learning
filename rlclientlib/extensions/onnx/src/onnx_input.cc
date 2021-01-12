@@ -39,7 +39,7 @@ int onnx_input_builder::allocate_inputs(std::vector<Ort::Value>& result, const O
         
     // Unpack the dimensions
     size_t rank;
-    if (!check_array_size<int64_t>(dimensions_bytes, rank))
+    if (!check_array_packing<int64_t>(dimensions_bytes, rank))
     {
       RETURN_ERROR_LS(_trace_logger, status, extension_error) 
         << "Invalid tensor dimension data packing for input '" << _input_names[result.size()] 
@@ -78,16 +78,16 @@ int read_tensor_notation(const char* tensor_notation, onnx_input_builder& input_
   tensor_parser::parser_context ctx(std::string(tensor_notation), input_context);
   if (!tensor_parser::parse(ctx))
   {
-    std::string error_detail = "OnnxExtensions: Failed to deserialize input";
+    std::string error_detail = "OnnxExtension: Failed to deserialize input";
 
     if (status != nullptr)
     {
       std::stringstream detail_stream;
       
       detail_stream << ": ";
-      for (const auto& error_detail : ctx.errors())
+      for (const auto& error_info : ctx.errors())
       {
-        detail_stream << std::endl << error_detail;
+        detail_stream << std::endl << error_info;
       }
 
       error_detail += detail_stream.str();
