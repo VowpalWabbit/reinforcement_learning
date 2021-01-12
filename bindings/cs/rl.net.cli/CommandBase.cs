@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.CompilerServices;
 using CommandLine;
-[assembly: InternalsVisibleTo("rl.net.cli.test")]
 
 namespace Rl.Net.Cli
 {
