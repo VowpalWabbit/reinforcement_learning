@@ -129,20 +129,40 @@ API int LiveModelRequestDecisionWithFlags(livemodel_context_t* context, const ch
 API int LiveModelRequestMultiSlotDecision(livemodel_context_t* context, const char* event_id, const char* context_json, reinforcement_learning::multi_slot_response* resp, reinforcement_learning::api_status* status)
 {
   RL_IGNORE_DEPRECATED_USAGE_START
-  if (event_id == nullptr)
-    return context->livemodel->request_multi_slot_decision(context_json, *resp, status);
-  else
-    return context->livemodel->request_multi_slot_decision(event_id, context_json, *resp, status);
+    if (event_id == nullptr)
+      return context->livemodel->request_multi_slot_decision(context_json, *resp, status);
+    else
+      return context->livemodel->request_multi_slot_decision(event_id, context_json, *resp, status);
   RL_IGNORE_DEPRECATED_USAGE_END
 }
 
 API int LiveModelRequestMultiSlotDecisionWithFlags(livemodel_context_t* context, const char* event_id, const char* context_json, unsigned int flags, reinforcement_learning::multi_slot_response* resp, reinforcement_learning::api_status* status)
 {
   RL_IGNORE_DEPRECATED_USAGE_START
-  if (event_id == nullptr)
-    return context->livemodel->request_multi_slot_decision(context_json, flags, *resp, status);
-  else
-    return context->livemodel->request_multi_slot_decision(event_id, context_json, flags, *resp, status);
+    if (event_id == nullptr)
+      return context->livemodel->request_multi_slot_decision(context_json, flags, *resp, status);
+    else
+      return context->livemodel->request_multi_slot_decision(event_id, context_json, flags, *resp, status);
+  RL_IGNORE_DEPRECATED_USAGE_END
+}
+
+API int LiveModelRequestMultiSlotDecisionWithBaseline(livemodel_context_t* context, const char* event_id, const char* context_json, reinforcement_learning::multi_slot_response* resp, const int* baseline_actions, size_t baseline_actions_size, reinforcement_learning::api_status* status)
+{
+  RL_IGNORE_DEPRECATED_USAGE_START
+    if (event_id == nullptr)
+      return context->livemodel->request_multi_slot_decision(context_json, *resp, baseline_actions, baseline_actions_size, status);
+    else
+      return context->livemodel->request_multi_slot_decision(event_id, context_json, *resp, baseline_actions, baseline_actions_size, status);
+  RL_IGNORE_DEPRECATED_USAGE_END
+}
+
+API int LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(livemodel_context_t* context, const char* event_id, const char* context_json, unsigned int flags, reinforcement_learning::multi_slot_response* resp, const int* baseline_actions, size_t baseline_actions_size, reinforcement_learning::api_status* status)
+{
+  RL_IGNORE_DEPRECATED_USAGE_START
+    if (event_id == nullptr)
+      return context->livemodel->request_multi_slot_decision(context_json, flags, *resp, baseline_actions, baseline_actions_size, status);
+    else
+      return context->livemodel->request_multi_slot_decision(event_id, context_json, flags, *resp, baseline_actions, baseline_actions_size, status);
   RL_IGNORE_DEPRECATED_USAGE_END
 }
 
@@ -165,6 +185,28 @@ API int LiveModelRequestMultiSlotDecisionDetailedWithFlags(livemodel_context_t* 
       return context->livemodel->request_multi_slot_decision(event_id, context_json, flags, *resp, status);
   RL_IGNORE_DEPRECATED_USAGE_END
 }
+
+API int LiveModelRequestMultiSlotDecisionDetailedWithBaseline(livemodel_context_t* context, const char * event_id, const char * context_json, reinforcement_learning::multi_slot_response_detailed* resp, const int* baseline_actions, size_t baseline_actions_size, reinforcement_learning::api_status* status)
+{
+  RL_IGNORE_DEPRECATED_USAGE_START
+    if (event_id == nullptr)
+      return context->livemodel->request_multi_slot_decision(context_json, *resp, baseline_actions, baseline_actions_size, status);
+    else
+      return context->livemodel->request_multi_slot_decision(event_id, context_json, *resp, baseline_actions, baseline_actions_size, status);
+  RL_IGNORE_DEPRECATED_USAGE_END
+}
+
+API int LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(livemodel_context_t* context, const char * event_id, const char * context_json, unsigned int flags, reinforcement_learning::multi_slot_response_detailed* resp, const int* baseline_actions, size_t baseline_actions_size, reinforcement_learning::api_status* status)
+{
+  RL_IGNORE_DEPRECATED_USAGE_START
+    if (event_id == nullptr)
+      return context->livemodel->request_multi_slot_decision(context_json, flags, *resp, baseline_actions, baseline_actions_size, status);
+    else
+      return context->livemodel->request_multi_slot_decision(event_id, context_json, flags, *resp, baseline_actions, baseline_actions_size, status);
+  RL_IGNORE_DEPRECATED_USAGE_END
+}
+
+
 
 API int LiveModelReportActionTaken(livemodel_context_t* context, const char* event_id, reinforcement_learning::api_status* status)
 {

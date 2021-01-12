@@ -139,7 +139,35 @@ namespace Rl.Net
                 return LiveModelRequestMultiSlotDecisionWithFlagsNative(liveModel, eventId, contextJson, flags, multiSlotResponse, apiStatus);
             }
 
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestMultiSlotDecisionWithBaseline")]
+            private static extern int LiveModelRequestMultiSlotDecisionWithBaselineNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr multiSlotResponse, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus);
 
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionWithBaselineOverride { get; set; }
+
+            public static int LiveModelRequestMultiSlotDecisionWithBaseline(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr multiSlotResponse, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus)
+            {
+                if (LiveModelRequestMultiSlotDecisionWithBaselineOverride != null)
+                {
+                    return LiveModelRequestMultiSlotDecisionWithBaselineOverride(liveModel, eventId, contextJson, multiSlotResponse, baselineActions, baselineActionsSize, apiStatus);
+                }
+
+                return LiveModelRequestMultiSlotDecisionWithBaselineNative(liveModel, eventId, contextJson, multiSlotResponse, baselineActions, baselineActionsSize, apiStatus);
+            }
+
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestMultiSlotDecisionWithBaselineAndFlags")]
+            private static extern int LiveModelRequestMultiSlotDecisionWithBaselineAndFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr multiSlotResponse, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionWithBaselineAndFlagsOverride { get; set; }
+
+            public static int LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr multiSlotResponse, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus)
+            {
+                if (LiveModelRequestMultiSlotDecisionWithBaselineAndFlagsOverride != null)
+                {
+                    return LiveModelRequestMultiSlotDecisionWithBaselineAndFlagsOverride(liveModel, eventId, contextJson, flags, multiSlotResponse, baselineActions, baselineActionsSize, apiStatus);
+                }
+
+                return LiveModelRequestMultiSlotDecisionWithBaselineAndFlagsNative(liveModel, eventId, contextJson, flags, multiSlotResponse, baselineActions, baselineActionsSize, apiStatus);
+            }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestMultiSlotDecisionDetailed")]
             private static extern int LiveModelRequestMultiSlotDecisionDetailedNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr multiSlotResponseDetailed, IntPtr apiStatus);
@@ -169,6 +197,36 @@ namespace Rl.Net
                 }
 
                 return LiveModelRequestMultiSlotDecisionDetailedWithFlagsNative(liveModel, eventId, contextJson, flags, multiSlotResponseDetailed, apiStatus);
+            }
+
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestMultiSlotDecisionDetailedWithBaseline")]
+            private static extern int LiveModelRequestMultiSlotDecisionDetailedWithBaselineNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr multiSlotResponseDetailed, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionDetailedWithBaselineOverride { get; set; }
+
+            public static int LiveModelRequestMultiSlotDecisionDetailedWithBaseline(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr multiSlotResponseDetailed, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus)
+            {
+                if (LiveModelRequestMultiSlotDecisionDetailedWithBaselineOverride != null)
+                {
+                    return LiveModelRequestMultiSlotDecisionDetailedWithBaselineOverride(liveModel, eventId, contextJson, multiSlotResponseDetailed, baselineActions, baselineActionsSize, apiStatus);
+                }
+
+                return LiveModelRequestMultiSlotDecisionDetailedWithBaselineNative(liveModel, eventId, contextJson, multiSlotResponseDetailed, baselineActions, baselineActionsSize, apiStatus);
+            }
+
+            [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags")]
+            private static extern int LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr multiSlotResponseDetailed, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlagsOverride { get; set; }
+
+            public static int LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr multiSlotResponseDetailed, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus)
+            {
+                if (LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlagsOverride != null)
+                {
+                    return LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlagsOverride(liveModel, eventId, contextJson, flags, multiSlotResponseDetailed, baselineActions, baselineActionsSize, apiStatus);
+                }
+
+                return LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlagsNative(liveModel, eventId, contextJson, flags, multiSlotResponseDetailed, baselineActions, baselineActionsSize, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelReportActionTaken")]
@@ -479,7 +537,44 @@ namespace Rl.Net
                     return NativeMethods.LiveModelRequestMultiSlotDecisionWithFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, flags, multiSlotResponse, apiStatus);
                 }
             }
+        }
 
+        unsafe private static int LiveModelRequestMultiSlotDecisionWithBaseline(IntPtr liveModel, string eventId, string contextJson, IntPtr multiSlotResponse, int[] baselineActions, IntPtr apiStatus)
+        {
+            CheckJsonString(contextJson);
+
+            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            fixed (int* baselineActionsFixed = baselineActions)
+            {
+                if (eventId == null)
+                {
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithBaseline(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, multiSlotResponse, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                }
+
+                fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+                {
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithBaseline(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, multiSlotResponse, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                }
+            }
+        }
+
+        unsafe private static int LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(IntPtr liveModel, string eventId, string contextJson, uint flags, IntPtr multiSlotResponse, int[] baselineActions, IntPtr apiStatus)
+        {
+            CheckJsonString(contextJson);
+
+            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            fixed (int* baselineActionsFixed = baselineActions)
+            {
+                if (eventId == null)
+                {
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, flags, multiSlotResponse, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                }
+
+                fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+                {
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, flags, multiSlotResponse, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                }
+            }
         }
 
         unsafe private static int LiveModelRequestMultiSlotDecisionDetailed(IntPtr liveModel, string eventId, string contextJson, IntPtr multiSlotResponseDetailed, IntPtr apiStatus)
@@ -516,8 +611,46 @@ namespace Rl.Net
                     return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, flags, multiSlotResponseDetailed, apiStatus);
                 }
             }
-
         }
+
+        unsafe private static int LiveModelRequestMultiSlotDecisionDetailedWithBaseline(IntPtr liveModel, string eventId, string contextJson, IntPtr multiSlotResponseDetailed, int[] baselineActions, IntPtr apiStatus)
+        {
+            CheckJsonString(contextJson);
+
+            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            fixed(int* baselineActionsFixed = baselineActions)
+            {
+                if (eventId == null)
+                {
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithBaseline(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, multiSlotResponseDetailed, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                }
+
+                fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+                {
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithBaseline(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, multiSlotResponseDetailed, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                }
+            }
+        }
+
+        unsafe private static int LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(IntPtr liveModel, string eventId, string contextJson, uint flags, IntPtr multiSlotResponseDetailed, int[] baselineActions, IntPtr apiStatus)
+        {
+            CheckJsonString(contextJson);
+
+            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            fixed(int* baselineActionsFixed = baselineActions)
+            {
+                if (eventId == null)
+                {
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, flags, multiSlotResponseDetailed, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                }
+
+                fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+                {
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, flags, multiSlotResponseDetailed, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                }
+            }
+        }
+
         unsafe private static int LiveModelReportActionTaken(IntPtr liveModel, string eventId, IntPtr apiStatus)
         {
             if (eventId == null)
@@ -899,6 +1032,60 @@ namespace Rl.Net
             return result;
         }
 
+        public bool TryRequestMultiSlotDecision(string eventId, string contextJson, out MultiSlotResponse response, int[] baselineActions, ApiStatus apiStatus)
+        {
+            response = new MultiSlotResponse();
+
+            GC.KeepAlive(this);
+            return this.TryRequestMultiSlotDecision(eventId, contextJson, response, baselineActions, apiStatus);
+        }
+
+        public bool TryRequestMultiSlotDecision(string eventId, string contextJson, MultiSlotResponse response, int[] baselineActions, ApiStatus apiStatus)
+        {
+            int result = LiveModelRequestMultiSlotDecisionWithBaseline(this.DangerousGetHandle(), eventId, contextJson, response.DangerousGetHandle(), baselineActions, apiStatus.ToNativeHandleOrNullptrDangerous());
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public MultiSlotResponse RequestMultiSlotDecision(string eventId, string contextJson, int[] baselineActions)
+        {
+            MultiSlotResponse result = new MultiSlotResponse();
+
+            using (ApiStatus apiStatus = new ApiStatus())
+                if (!this.TryRequestMultiSlotDecision(eventId, contextJson, result, baselineActions, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
+
+            return result;
+        }
+
+        public bool TryRequestMultiSlotDecision(string eventId, string contextJson, ActionFlags flags, out MultiSlotResponse response, int[] baselineActions, ApiStatus apiStatus)
+        {
+            response = new MultiSlotResponse();
+
+            GC.KeepAlive(this);
+            return this.TryRequestMultiSlotDecision(eventId, contextJson, flags, response, baselineActions, apiStatus);
+        }
+
+        public bool TryRequestMultiSlotDecision(string eventId, string contextJson, ActionFlags flags, MultiSlotResponse response, int[] baselineActions, ApiStatus apiStatus)
+        {
+            int result = LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(this.DangerousGetHandle(), eventId, contextJson, (uint)flags, response.DangerousGetHandle(), baselineActions, apiStatus.ToNativeHandleOrNullptrDangerous());
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public MultiSlotResponse RequestMultiSlotDecision(string eventId, string contextJson, ActionFlags flags, int[] baselineActions)
+        {
+            MultiSlotResponse result = new MultiSlotResponse();
+
+            using (ApiStatus apiStatus = new ApiStatus())
+                if (!this.TryRequestMultiSlotDecision(eventId, contextJson, flags, result, baselineActions, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
+
+            return result;
+        }
+
         public bool TryRequestMultiSlotDecisionDetailed(string eventId, string contextJson, out MultiSlotResponseDetailed response, ApiStatus apiStatus = null)
         {
             response = new MultiSlotResponseDetailed();
@@ -952,6 +1139,66 @@ namespace Rl.Net
 
             return result;
         }
+
+        public bool TryRequestMultiSlotDecisionDetailed(string eventId, string contextJson, out MultiSlotResponseDetailed response, int[] baselineActions, ApiStatus apiStatus)
+        {
+            response = new MultiSlotResponseDetailed();
+
+            GC.KeepAlive(this);
+            return this.TryRequestMultiSlotDecisionDetailed(eventId, contextJson, response, baselineActions, apiStatus);
+        }
+
+        public bool TryRequestMultiSlotDecisionDetailed(string eventId, string contextJson, MultiSlotResponseDetailed response, int[] baselineActions, ApiStatus apiStatus)
+        {
+            int result = LiveModelRequestMultiSlotDecisionDetailedWithBaseline(this.DangerousGetHandle(), eventId, contextJson, response.DangerousGetHandle(), baselineActions, apiStatus.ToNativeHandleOrNullptrDangerous());
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public MultiSlotResponseDetailed RequestMultiSlotDecisionDetailed(string eventId, string contextJson, int[] baselineActions)
+        {
+            MultiSlotResponseDetailed result = new MultiSlotResponseDetailed();
+
+            using (ApiStatus apiStatus = new ApiStatus())
+                if (!this.TryRequestMultiSlotDecisionDetailed(eventId, contextJson, result, baselineActions, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
+
+            return result;
+        }
+
+        public bool TryRequestMultiSlotDecisionDetailed(string eventId, string contextJson, ActionFlags flags, out MultiSlotResponseDetailed response, int[] baselineActions, ApiStatus apiStatus)
+        {
+            response = new MultiSlotResponseDetailed();
+
+            GC.KeepAlive(this);
+            return this.TryRequestMultiSlotDecisionDetailed(eventId, contextJson, flags, response, baselineActions, apiStatus);
+        }
+
+        public bool TryRequestMultiSlotDecisionDetailed(string eventId, string contextJson, ActionFlags flags, MultiSlotResponseDetailed response, int[] baselineActions, ApiStatus apiStatus)
+        {
+            int result = LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(this.DangerousGetHandle(), eventId, contextJson, (uint)flags, response.DangerousGetHandle(), baselineActions, apiStatus.ToNativeHandleOrNullptrDangerous());
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public MultiSlotResponseDetailed RequestMultiSlotDecisionDetailed(string eventId, string contextJson, ActionFlags flags, int[] baselineActions)
+        {
+            MultiSlotResponseDetailed result = new MultiSlotResponseDetailed();
+
+            using (ApiStatus apiStatus = new ApiStatus())
+                if (!this.TryRequestMultiSlotDecisionDetailed(eventId, contextJson, flags, result, baselineActions, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
+
+            return result;
+        }
+
+
+
+
+
+
 
         [Obsolete("Use TryQueueActionTakenEvent instead.")]
         public bool TryReportActionTaken(string eventId, ApiStatus apiStatus = null) 

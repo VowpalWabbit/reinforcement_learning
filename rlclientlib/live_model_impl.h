@@ -33,10 +33,10 @@ namespace reinforcement_learning
     //here the event_id is auto-generated
     int request_continuous_action(const char* context, unsigned int flags, continuous_action_response& response, api_status* status);
     int request_decision(const char* context_json, unsigned int flags, decision_response& resp, api_status* status);
-    int request_multi_slot_decision(const char* event_id, const char* context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
-    int request_multi_slot_decision(const char* context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
-    int request_multi_slot_decision(const char* event_id, const char* context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
-    int request_multi_slot_decision(const char* context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
+    int request_multi_slot_decision(const char* event_id, const char* context_json, unsigned int flags, multi_slot_response& resp, const std::vector<int>* baseline_actions, api_status* status = nullptr);
+    int request_multi_slot_decision(const char* context_json, unsigned int flags, multi_slot_response& resp, const std::vector<int>* baseline_actions, api_status* status = nullptr);
+    int request_multi_slot_decision(const char* event_id, const char* context_json, unsigned int flags, multi_slot_response_detailed& resp, const std::vector<int>* baseline_actions, api_status* status = nullptr);
+    int request_multi_slot_decision(const char* context_json, unsigned int flags, multi_slot_response_detailed& resp, const std::vector<int>* baseline_actions, api_status* status = nullptr);
 
     int report_action_taken(const char* event_id, api_status* status);
 

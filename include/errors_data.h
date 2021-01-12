@@ -43,4 +43,5 @@ ERROR_CODE_DEFINITION(41, http_client_init_error, "Cannot initialize http client
 ERROR_CODE_DEFINITION(42, content_encoding_error, "Content encoding should be set to IDENTITY")
 ERROR_CODE_DEFINITION(43, compression_error, "Compression error")
 ERROR_CODE_DEFINITION(44, slot_index_out_of_bounds_error, "Slot index out of bounds")
+ERROR_CODE_DEFINITION(45, baseline_actions_not_defined, "Baseline Actions must be defined in apprentice mode")
 //! [Error Definitions]

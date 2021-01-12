@@ -49,6 +49,11 @@ namespace reinforcement_learning
     return err_code;
   }
 
+  const std::vector<int>& live_model::_c_array_to_vector(const int* c_array, size_t array_size)
+  {
+    return std::vector<int> (c_array, c_array + array_size);
+  }
+
   int live_model::choose_rank(const char* event_id, const char* context_json, ranking_response& response,
                               api_status* status)
   {
@@ -116,45 +121,93 @@ namespace reinforcement_learning
   int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
   {
     INIT_CHECK();
-    return _pimpl->request_multi_slot_decision(event_id, context_json, flags, resp, status);
+    return _pimpl->request_multi_slot_decision(event_id, context_json, flags, resp, nullptr, status);
   }
 
   int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, multi_slot_response& resp, api_status* status)
   {
-    return request_multi_slot_decision(event_id, context_json, action_flags::DEFAULT, resp, status);
+    return request_multi_slot_decision(event_id, context_json, action_flags::DEFAULT, resp, nullptr, 0, status);
   }
 
   int live_model::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
   {
     INIT_CHECK();
-    return _pimpl->request_multi_slot_decision(context_json, flags, resp, status);
+    return _pimpl->request_multi_slot_decision(context_json, flags, resp, nullptr, status);
   }
 
   int live_model::request_multi_slot_decision(const char * context_json, multi_slot_response& resp, api_status* status)
   {
-    return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, status);
+    return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, nullptr, 0, status);
+  }
+
+  int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
+  {
+    INIT_CHECK();
+    std::vector<int> baseline_vector = _c_array_to_vector(baseline_actions, baseline_actions_size);
+    return _pimpl->request_multi_slot_decision(event_id, context_json, flags, resp, &baseline_vector, status);
+  }
+
+  int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, multi_slot_response& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
+  {
+    return request_multi_slot_decision(event_id, context_json, action_flags::DEFAULT, resp, baseline_actions, baseline_actions_size, status);
+  }
+
+  int live_model::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
+  {
+    INIT_CHECK();
+    std::vector<int> baseline_vector = _c_array_to_vector(baseline_actions, baseline_actions_size);
+    return _pimpl->request_multi_slot_decision(context_json, flags, resp, &baseline_vector, status);
+  }
+
+  int live_model::request_multi_slot_decision(const char * context_json, multi_slot_response& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
+  {
+    return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, baseline_actions, baseline_actions_size, status);
   }
 
   int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
   {
-	  INIT_CHECK();
-	  return _pimpl->request_multi_slot_decision(event_id, context_json, flags, resp, status);
+    INIT_CHECK();
+    return _pimpl->request_multi_slot_decision(event_id, context_json, flags, resp, nullptr, status);
   }
 
   int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, multi_slot_response_detailed& resp, api_status* status)
   {
-	  return request_multi_slot_decision(event_id, context_json, action_flags::DEFAULT, resp, status);
+    return request_multi_slot_decision(event_id, context_json, action_flags::DEFAULT, resp, nullptr, 0, status);
   }
 
   int live_model::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
   {
-	  INIT_CHECK();
-	  return _pimpl->request_multi_slot_decision(context_json, flags, resp, status);
+    INIT_CHECK();
+    return _pimpl->request_multi_slot_decision(context_json, flags, resp, nullptr, status);
   }
 
   int live_model::request_multi_slot_decision(const char * context_json, multi_slot_response_detailed& resp, api_status* status)
   {
-	  return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, status);
+    return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, nullptr, 0, status);
+  }
+
+  int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
+  {
+	  INIT_CHECK();
+    std::vector<int> baseline_vector = _c_array_to_vector(baseline_actions, baseline_actions_size);
+	  return _pimpl->request_multi_slot_decision(event_id, context_json, flags, resp, &baseline_vector, status);
+  }
+
+  int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
+  {
+	  return request_multi_slot_decision(event_id, context_json, action_flags::DEFAULT, resp, baseline_actions, baseline_actions_size, status);
+  }
+
+  int live_model::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
+  {
+	  INIT_CHECK();
+    std::vector<int> baseline_vector = _c_array_to_vector(baseline_actions, baseline_actions_size);
+	  return _pimpl->request_multi_slot_decision(context_json, flags, resp, &baseline_vector, status);
+  }
+
+  int live_model::request_multi_slot_decision(const char * context_json, multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
+  {
+	  return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, baseline_actions, baseline_actions_size, status);
   }
 
 
