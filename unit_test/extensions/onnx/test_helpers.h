@@ -59,10 +59,15 @@ inline void validate_input_context(o::onnx_input_builder& input_context, size_t 
   BOOST_REQUIRE_EQUAL_COLLECTIONS(input_names.cbegin(), input_names.cend(), expected_names.cbegin(), expected_names.cend());
 }
 
-inline void validate_empty(o::onnx_input_builder& input_context)
+inline void validate_empty(o::onnx_input_builder& input_context, const Ort::MemoryInfo& memory_info = TestMemoryInfo)
 {
   validate_input_context(input_context, 0, TestEmptyNames);
-  std::vector<Ort::Value> values = input_context.inputs();
+  std::vector<Ort::Value> values;
+  
+  r::api_status status;
+  input_context.allocate_inputs(values, memory_info, &status);
+  require_success(status);
+
   BOOST_REQUIRE_EQUAL_COLLECTIONS(values.cbegin(), values.cend(), TestEmptyTensors.cbegin(), TestEmptyTensors.cend());
 }
 
@@ -91,7 +96,7 @@ inline void validate_tensor(Ort::Value& parsed_value, dimensions expected_dimens
 }
 
 template <typename string_t>
-inline void validate_tensors(o::onnx_input_builder& input_context, expectations<string_t> expectations)
+inline void validate_tensors(o::onnx_input_builder& input_context, expectations<string_t> expectations, const Ort::MemoryInfo& memory_info = TestMemoryInfo)
 {
   std::map<string_t, size_t> input_name_map;
   size_t expected_input_count = input_context.input_count();
@@ -102,7 +107,11 @@ inline void validate_tensors(o::onnx_input_builder& input_context, expectations<
     input_name_map.insert(std::make_pair(string_t{input_names[i]}, i));
   }
 
-  std::vector<Ort::Value> inputs = input_context.inputs();
+  std::vector<Ort::Value> inputs;
+  
+  r::api_status status;
+  input_context.allocate_inputs(inputs, memory_info, &status);
+  require_success(status);
 
   // If these are not equal, it means we are not able to allocate the tensors.
   BOOST_REQUIRE_EQUAL(inputs.size(), expected_input_count);

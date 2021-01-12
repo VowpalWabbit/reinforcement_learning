@@ -167,7 +167,7 @@ namespace reinforcement_learning { namespace onnx {
     // based on what version of onnxruntime we are loading. 
     Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
     
-    onnx_input_builder input_context(memory_info);
+    onnx_input_builder input_context(_trace_logger);
     if (_use_unstructured_input)
     {
       RETURN_IF_FAIL(read_tensor_notation(features, input_context, status));
@@ -182,12 +182,9 @@ namespace reinforcement_learning { namespace onnx {
     Ort::RunOptions run_options{nullptr};
 
     std::vector<const char*> input_names = input_context.input_names();
-    std::vector<Ort::Value> inputs = input_context.inputs();
-    if (inputs.size() != input_context.input_count())
-    {
-      // TODO: propagate errors to be more specific about which input(s) is/are bad
-      RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << "Could not interpret input values to match expected inputs.";
-    }
+    std::vector<Ort::Value> inputs;
+    
+    RETURN_IF_FAIL(input_context.allocate_inputs(inputs, memory_info, status));
 
     // Use the C API to avoid an unneeded throw in the error case
     OrtValue* onnx_output = nullptr;

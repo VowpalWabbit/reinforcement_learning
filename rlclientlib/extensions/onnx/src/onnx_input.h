@@ -44,12 +44,12 @@ namespace reinforcement_learning { namespace onnx {
   class onnx_input_builder
   {
   public:
-    onnx_input_builder(const Ort::MemoryInfo& allocator_info) : _memory_info{allocator_info}
+    onnx_input_builder(i_trace* trace_logger) : _trace_logger{trace_logger}
     {}
 
   public:
     std::vector<const char*> input_names() const;
-    std::vector<Ort::Value> inputs() const;
+    int allocate_inputs(std::vector<Ort::Value>& result, const Ort::MemoryInfo& allocator_info, api_status* status = nullptr) const;
 
     inline size_t input_count() const
     {
@@ -72,7 +72,7 @@ namespace reinforcement_learning { namespace onnx {
     std::vector<std::string> _input_names{};
     std::vector<tensor_data_t> _inputs{};
 
-    const Ort::MemoryInfo& _memory_info;
+    i_trace* _trace_logger;
   };
 
   int read_tensor_notation(const char* tensor_notation, onnx_input_builder& input_context, api_status* status = nullptr);

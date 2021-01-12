@@ -24,11 +24,10 @@ std::vector<const char*> onnx_input_builder::input_names() const
   return result;
 }
 
-std::vector<Ort::Value> onnx_input_builder::inputs() const
+int onnx_input_builder::allocate_inputs(std::vector<Ort::Value>& result, const Ort::MemoryInfo& memory_info, api_status* status) const
 {
   // TODO: enable non-float tensors (see tensor_notation.cc for hook location)
   int count = 0;
-  std::vector<Ort::Value> result;
   result.reserve(input_count());
 
   bool failed = false;
@@ -39,11 +38,12 @@ std::vector<Ort::Value> onnx_input_builder::inputs() const
     const bytes_t& values_bytes = tensor.second;
         
     // Unpack the dimensions
-    size_t rank = dimensions_bytes.size() / sizeof(int64_t);
+    size_t rank;
     if (!check_array_size<int64_t>(dimensions_bytes, rank))
     {
-      failed = true;
-      break;
+      RETURN_ERROR_LS(_trace_logger, status, extension_error) 
+        << "Invalid tensor dimension data packing for input '" << _input_names[result.size()] 
+        << "'. Expecting multiple of " << sizeof(int64_t) << ". Got " << dimensions_bytes.size() << ".";
     }
 
     // TODO: Should we validate that dimensions are all positive numbers during model load?
@@ -54,21 +54,17 @@ std::vector<Ort::Value> onnx_input_builder::inputs() const
     size_t values_count = 0;
     if (!check_array_size<value_t>(values_bytes, expected_values_count, values_count))
     {
-      failed = true;
-      break;
+      RETURN_ERROR_LS(_trace_logger, status, extension_error) 
+        << "Invalid tensor value packing/data for input '" << _input_names[result.size()] 
+        << "'. Expecting multiple of " << sizeof(int64_t) << ". Got " << values_bytes.size()
+        << ". Expecting " << expected_values_count << " elements. Got " << values_count << ".";
     }
 
     value_t* values = (value_t*)values_bytes.data();
-    result.push_back(std::move(Ort::Value::CreateTensor<value_t>(this->_memory_info, values, values_count, dimensions, rank)));
+    result.push_back(std::move(Ort::Value::CreateTensor<value_t>(memory_info, values, values_count, dimensions, rank)));
   }
 
-  if (failed)
-  {
-    // TODO: report error
-    return {};
-  }
-
-  return result;
+  return error_code::success;
 }
 
 int read_tensor_notation(const char* tensor_notation, onnx_input_builder& input_context, api_status* status)
