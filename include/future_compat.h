@@ -2,13 +2,8 @@
 
 #if __cplusplus >= 201103L || defined(_MSC_VER) && (_MSC_VER >= 1900)
 
-#if __cplusplus >= 201402L || defined(_MSC_VER) && (_MSC_VER >= 1910) && (_MSVC_LANG >= 201402L)
-#define HAS_STD14
-#endif
-
-#if __cplusplus >= 201703L  || defined(_MSC_VER) && (_MSC_VER >= 1914) && (_MSVC_LANG >= 201703L)
-#define HAS_STD17
-#endif
+// Rely on the VW implementation of future_compat to set up HAS_STD(NN)
+#include "../ext_libs/vowpal_wabbit/explore/future_compat.h"
 
 #ifdef HAS_STD17
 #define RL_ATTR(name) [[ name ]]
