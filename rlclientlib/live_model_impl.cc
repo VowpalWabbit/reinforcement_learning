@@ -114,7 +114,7 @@ namespace reinforcement_learning {
     api_status::try_clear(status);
 
     RETURN_IF_FAIL(check_null_or_empty(event_id, context, _trace_logger.get(), status));
-
+    
     float action;
     float pdf_value;
     std::string model_version;
@@ -122,7 +122,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_model->choose_continuous_action(context, action, pdf_value, model_version, status));
     RETURN_IF_FAIL(populate_response(action, pdf_value, std::string(event_id), std::string(model_version), response, _trace_logger.get(), status));
     RETURN_IF_FAIL(_interaction_logger->log_continuous_action(context, flags, response, status));
-
+    
     if (_watchdog.has_background_error_been_reported())
     {
       RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
@@ -130,7 +130,7 @@ namespace reinforcement_learning {
 
     return error_code::success;
   }
-
+    
   int live_model_impl::request_continuous_action(const char* context, unsigned int flags, continuous_action_response& response, api_status* status)
   {
     const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
