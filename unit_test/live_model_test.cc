@@ -90,7 +90,6 @@ namespace {
           sender_factory = default_sender_factory.get();
       }
 
-
       r::live_model model(config, nullptr, nullptr, &r::trace_logger_factory, data_transport_factory, model_factory, sender_factory);
       return model;
   }
