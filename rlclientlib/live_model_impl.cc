@@ -169,9 +169,9 @@ namespace reinforcement_learning {
     std::vector<const char*> event_ids(num_decisions, nullptr);
     std::map<size_t, std::string> found_ids;
     RETURN_IF_FAIL(utility::get_event_ids(context_json, found_ids, _trace_logger.get(), status));
-
+    
     autogenerate_missing_uuids(found_ids, event_ids_str, _seed_shift);
-
+    
     for (int i = 0; i < event_ids.size(); i++)
     {
       event_ids[i] = event_ids_str[i].c_str();
@@ -262,7 +262,7 @@ namespace reinforcement_learning {
     const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
     return request_multi_slot_decision(uuid.c_str(), context_json, flags, resp, baseline_actions, status);
   }
-
+  
   int live_model_impl::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, const std::vector<int>& baseline_actions, api_status* status)
   {
     resp.clear();
@@ -624,6 +624,6 @@ namespace reinforcement_learning {
       {
         complete_ids[i] = boost::uuids::to_string(boost::uuids::random_generator()()) + std::to_string(seed_shift);
       }
-    }
+    }    
   }
 }
