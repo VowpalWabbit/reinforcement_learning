@@ -60,6 +60,7 @@ namespace Rl.Net
                 {
                     return LiveModelRequestContinuousActionOverride(liveModel, eventId, contextJson, continuousActionResponse, apiStatus);
                 }
+
                 return LiveModelRequestContinuousActionNative(liveModel, eventId, contextJson, continuousActionResponse, apiStatus);
             }
 
