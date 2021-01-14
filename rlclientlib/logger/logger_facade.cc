@@ -47,7 +47,7 @@ namespace reinforcement_learning {
 
     int interaction_logger_facade::init(api_status* status) {
       switch (_version) {
-        case 1: 
+        case 1:
           switch (_model_type) {
           case model_type_t::CB: return _v1_cb->init(status);
           case model_type_t::CCB: return _v1_ccb->init(status);
@@ -111,7 +111,7 @@ namespace reinforcement_learning {
 
 
     int interaction_logger_facade::log_decision(const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
-      const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids, api_status* status, const std::vector<int>* baseline_actions = nullptr) {
+      const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids, api_status* status, const std::vector<int>& baseline_actions) {
       switch (_version) {
       case 1: {
         switch (_model_type) {
