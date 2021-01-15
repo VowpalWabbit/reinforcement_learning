@@ -24,7 +24,7 @@ namespace reinforcement_learning {
   }
 
   int slot_ranking::set_chosen_action_id(size_t action_id, api_status* status) {
-    if (action_id >= _ranking.size()) {
+    if (action_id > _ranking.size()) {
       RETURN_ERROR_LS(nullptr, status, action_out_of_bounds) << " id:" << action_id << ", size:" << _ranking.size();
     }
 

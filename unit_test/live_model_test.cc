@@ -893,11 +893,20 @@ BOOST_AUTO_TEST_CASE(ccb_explore_only_mode_multi_slot_response_detailed) {
   BOOST_CHECK_EQUAL(response.size(), 2);
 
 
-  for (const auto& s : response) {
-    size_t action_id;
-    s.get_chosen_action_id(action_id);
-    BOOST_CHECK_EQUAL(action_id, 0);
-  }
+  auto it = response.begin();
+  size_t action_id = 0;
+  auto& slot_rank0 = *it;
+  slot_rank0.get_chosen_action_id(action_id);
+  BOOST_CHECK(strcmp(slot_rank0.get_id(), "") != 0);
+  BOOST_CHECK_EQUAL(action_id, 0);
+  ++it;
+
+  auto& slot_rank1 = *it;
+  slot_rank1.get_chosen_action_id(action_id);
+  slot_rank1.get_chosen_action_id(action_id);
+  BOOST_CHECK(strcmp(slot_rank1.get_id(), "") != 0);
+  BOOST_CHECK_EQUAL(action_id, 1);
+  ++it;
 }
 
 const auto JSON_SLATES_CONTEXT = R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"},"_slot_id":0},{"TAction":{"a2":"f2"},"_slot_id":0},{"TAction":{"a3":"f3"},"_slot_id":1},{"TAction":{"a4":"f4"},"_slot_id":1},{"TAction":{"a5":"f5"},"_slot_id":1}],"_slots":[{"Slot":{"a1":"f1"}},{"Slot":{"a2":"f2"}}]})";
