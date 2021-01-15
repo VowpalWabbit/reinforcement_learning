@@ -767,7 +767,7 @@ BOOST_AUTO_TEST_CASE(populate_slot_test) {
 
   r::slot_ranking slot;
 
-  BOOST_CHECK_EQUAL(populate_slot(size_t(0), action_ids, pdfs, slot, slot_id, nullptr, &status), err::success);
+  BOOST_CHECK_EQUAL(populate_slot(action_ids, pdfs, slot, slot_id, nullptr, &status), err::success);
 
   BOOST_CHECK_EQUAL(slot.size(), 3);
 
