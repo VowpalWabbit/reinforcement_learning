@@ -69,7 +69,7 @@ namespace reinforcement_learning {
 
     struct multi_slot_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_Slates> {
       static generic_event::payload_buffer_t event(const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
-        const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids, const std::vector<int>& baseline_actions = std::vector<int>()) {
+        const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids) {
         flatbuffers::FlatBufferBuilder fbb;
         std::vector<flatbuffers::Offset<v2::SlotEvent>> slots;
         for (size_t i = 0; i < action_ids.size(); i++)
@@ -81,7 +81,7 @@ namespace reinforcement_learning {
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-        auto fb = v2::CreateMultiSlotEventDirect(fbb, &_context, &slots, model_version.c_str(), flags & action_flags::DEFERRED, &baseline_actions);
+        auto fb = v2::CreateMultiSlotEventDirect(fbb, &_context, &slots, model_version.c_str(), flags & action_flags::DEFERRED);
         fbb.Finish(fb);
         return fbb.Release();
       }
