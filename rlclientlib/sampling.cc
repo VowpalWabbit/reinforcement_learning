@@ -47,12 +47,12 @@ int populate_response(const std::vector<std::vector<uint32_t>>& action_ids, cons
   return error_code::success;
 }
 
-int populate_slot(size_t chosen_action_index, const std::vector<uint32_t>& action_ids, const std::vector<float>& pdf, slot_ranking& response, const std::string& slot_id, i_trace* trace_logger, api_status* status) {
+int populate_slot(const std::vector<uint32_t>& action_ids, const std::vector<float>& pdf, slot_ranking& response, const std::string& slot_id, i_trace* trace_logger, api_status* status) {
   for (size_t idx = 0; idx < pdf.size(); ++idx) {
     response.push_back(action_ids[idx], pdf[idx]);
   }
   response.set_id(slot_id.c_str());
-  RETURN_IF_FAIL(response.set_chosen_action_id(action_ids[chosen_action_index]));
+  RETURN_IF_FAIL(response.set_chosen_action_id(action_ids[reinforcement_learning::default_chosen_action_index]));
   return error_code::success;
 }
 
@@ -95,11 +95,11 @@ int populate_multi_slot_response_detailed(const std::vector<std::vector<uint32_t
   auto r = response.begin();
   for (size_t i = 0; i < action_ids.size() && r!= response.end(); i++, ++r)
   {
-    if (action_ids[i].size() != pdfs[i].size())
+    if (action_ids[i].size() != pdfs[i].size() || action_ids[i].empty())
     {
-      RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids[i] and pdfs[i] must be the same size";
+      RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids[i] and pdfs[i] must be the same size and non empty";
     }
-    populate_slot((size_t)0, action_ids[i], pdfs[i], *r, slot_ids[i], trace_logger, status);
+    populate_slot(action_ids[i], pdfs[i], *r, slot_ids[i], trace_logger, status);
   }
 
   return error_code::success;
