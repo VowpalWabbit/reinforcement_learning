@@ -49,7 +49,7 @@ namespace reinforcement_learning
     return err_code;
   }
 
-  std::vector<int> live_model::_c_array_to_vector(const int* c_array, size_t array_size)
+  std::vector<int> live_model::c_array_to_vector(const int* c_array, size_t array_size)
   {
     if (c_array == nullptr)
     {
@@ -147,7 +147,7 @@ namespace reinforcement_learning
   int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
   {
     INIT_CHECK();
-    std::vector<int> baseline_vector = _c_array_to_vector(baseline_actions, baseline_actions_size);
+    std::vector<int> baseline_vector = c_array_to_vector(baseline_actions, baseline_actions_size);
     if (event_id == nullptr && flags == NULL)
     {
       return _pimpl->request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, baseline_vector, status);
@@ -188,7 +188,7 @@ namespace reinforcement_learning
   int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
   {
 	  INIT_CHECK();
-    std::vector<int> baseline_vector = _c_array_to_vector(baseline_actions, baseline_actions_size);
+    std::vector<int> baseline_vector = c_array_to_vector(baseline_actions, baseline_actions_size);
     if (event_id == nullptr && flags == NULL)
     {
       return _pimpl->request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, baseline_vector, status);
