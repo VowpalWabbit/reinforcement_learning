@@ -148,17 +148,9 @@ namespace reinforcement_learning
   {
     INIT_CHECK();
     std::vector<int> baseline_vector = c_array_to_vector(baseline_actions, baseline_actions_size);
-    if (event_id == nullptr && flags == NULL)
-    {
-      return _pimpl->request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, baseline_vector, status);
-    }
     if (event_id == nullptr)
     {
       return _pimpl->request_multi_slot_decision(context_json, flags, resp, baseline_vector, status);
-    }
-    if (flags == NULL)
-    {
-      return _pimpl->request_multi_slot_decision(event_id, context_json, action_flags::DEFAULT, resp, baseline_vector, status);
     }
     return _pimpl->request_multi_slot_decision(event_id, context_json, flags, resp, baseline_vector, status);
   }
@@ -189,17 +181,9 @@ namespace reinforcement_learning
   {
 	  INIT_CHECK();
     std::vector<int> baseline_vector = c_array_to_vector(baseline_actions, baseline_actions_size);
-    if (event_id == nullptr && flags == NULL)
-    {
-      return _pimpl->request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, baseline_vector, status);
-    }
     if (event_id == nullptr)
     {
       return _pimpl->request_multi_slot_decision(context_json, flags, resp, baseline_vector, status);
-    }
-    if (flags == NULL)
-    {
-      return _pimpl->request_multi_slot_decision(event_id, context_json, action_flags::DEFAULT, resp, baseline_vector, status);
     }
 	  return _pimpl->request_multi_slot_decision(event_id, context_json, flags, resp, baseline_vector, status);
   }
