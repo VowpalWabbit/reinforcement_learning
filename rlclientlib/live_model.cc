@@ -53,7 +53,7 @@ namespace reinforcement_learning
   {
     if (c_array == nullptr)
     {
-      return live_model::default_baseline_vector;
+      return std::vector<int>();
     }
     return std::vector<int> (c_array, c_array + array_size);
   }

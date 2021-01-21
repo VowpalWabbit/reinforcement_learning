@@ -114,7 +114,7 @@ namespace reinforcement_learning {
     api_status::try_clear(status);
 
     RETURN_IF_FAIL(check_null_or_empty(event_id, context, _trace_logger.get(), status));
-    
+
     float action;
     float pdf_value;
     std::string model_version;
@@ -122,7 +122,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_model->choose_continuous_action(context, action, pdf_value, model_version, status));
     RETURN_IF_FAIL(populate_response(action, pdf_value, std::string(event_id), std::string(model_version), response, _trace_logger.get(), status));
     RETURN_IF_FAIL(_interaction_logger->log_continuous_action(context, flags, response, status));
-    
+
     if (_watchdog.has_background_error_been_reported())
     {
       RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
@@ -130,7 +130,7 @@ namespace reinforcement_learning {
 
     return error_code::success;
   }
-    
+
   int live_model_impl::request_continuous_action(const char* context, unsigned int flags, continuous_action_response& response, api_status* status)
   {
     const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
@@ -169,9 +169,9 @@ namespace reinforcement_learning {
     std::vector<const char*> event_ids(num_decisions, nullptr);
     std::map<size_t, std::string> found_ids;
     RETURN_IF_FAIL(utility::get_event_ids(context_json, found_ids, _trace_logger.get(), status));
-    
+
     autogenerate_missing_uuids(found_ids, event_ids_str, _seed_shift);
-    
+
     for (int i = 0; i < event_ids.size(); i++)
     {
       event_ids[i] = event_ids_str[i].c_str();
@@ -231,13 +231,9 @@ namespace reinforcement_learning {
   {
     resp.clear();
 
-    if (_learning_mode == APPRENTICE)
+    if (_learning_mode == APPRENTICE && baseline_actions.empty())
     {
-      if (baseline_actions.size() == 0)
-      {
-        return error_code::baseline_actions_not_defined;
-      }
-      //TODO: validity check for baseline actions
+      return error_code::baseline_actions_not_defined;
     }
 
     std::vector<std::string> slot_ids;
@@ -262,7 +258,7 @@ namespace reinforcement_learning {
     const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
     return request_multi_slot_decision(uuid.c_str(), context_json, flags, resp, baseline_actions, status);
   }
-  
+
   int live_model_impl::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, const std::vector<int>& baseline_actions, api_status* status)
   {
     resp.clear();
@@ -624,6 +620,6 @@ namespace reinforcement_learning {
       {
         complete_ids[i] = boost::uuids::to_string(boost::uuids::random_generator()()) + std::to_string(seed_shift);
       }
-    }    
+    }
   }
 }

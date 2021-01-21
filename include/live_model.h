@@ -413,7 +413,7 @@ namespace reinforcement_learning {
   private:
     std::unique_ptr<live_model_impl> _pimpl;  //! The actual implementation details are forwarded to this object (PIMPL pattern)
     bool _initialized = false;                //! Guard to ensure that live_model is properly initialized. i.e. init() was called and successfully initialized.
-    std::vector<int> default_baseline_vector = std::vector<int>();
+    const std::vector<int> default_baseline_vector = std::vector<int>();
     std::vector<int> c_array_to_vector(const int* c_array, size_t array_size);  //! Convert baseline_actions from c array to std vector.
   };
 
