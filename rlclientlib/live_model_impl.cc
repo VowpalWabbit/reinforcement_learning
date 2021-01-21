@@ -269,7 +269,6 @@ namespace reinforcement_learning {
       {
         return error_code::baseline_actions_not_defined;
       }
-      //TODO: validity check for baseline actions
     }
 
     std::vector<std::string> slot_ids;
