@@ -206,11 +206,11 @@ namespace Rl.Net.Cli
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
                 }
-                int[] actions = runContext.MultiSlotResponseContainer.Select(slot => slot.ActionId).ToArray();
-                float[] probs = runContext.MultiSlotResponseContainer.Select(slot => slot.Probability).ToArray();
-                outcome = step.GetOutcome(actions, probs);
                 foreach (var slot in runContext.MultiSlotResponseDetailedContainer)
                 {
+                    int[] actions = slot.Select(actionProb => (int)actionProb.ActionIndex).ToArray();
+                    float[] probs = slot.Select(actionProb => actionProb.Probability).ToArray();
+                    outcome = step.GetOutcome(actions, probs);
                     if (!outcomeReporter.TryQueueOutcomeEvent(runContext, eventId, slot.EventId, outcome))
                     {
                         this.SafeRaiseError(runContext.ApiStatusContainer);
