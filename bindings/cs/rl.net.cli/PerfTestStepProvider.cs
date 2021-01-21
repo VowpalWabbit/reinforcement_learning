@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Newtonsoft.Json;
 
 namespace Rl.Net.Cli
 {
@@ -24,7 +24,8 @@ namespace Rl.Net.Cli
                 set;
             }
 
-            public float Outcome {
+            public float Outcome
+            {
                 get;
                 set;
             }
@@ -62,15 +63,28 @@ namespace Rl.Net.Cli
 
         public Statistics Stats { get; private set; }
 
-        public PerfTestStepProvider(int actionsCount, int sharedFeatures, int actionFeatures)
+        public PerfTestStepProvider(int actionsCount, int sharedFeatures, int actionFeatures, int numSlots)
         {
             for (int i = 0; i < this.RingSize; ++i)
             {
                 FeatureSet shared = Enumerable.Range(1, sharedFeatures).ToDictionary(f => $"f{f}", f => f + i);
                 List<Dictionary<string, FeatureSet>> actions = Enumerable.Range(1, actionsCount).Select(a => new Dictionary<string, FeatureSet> { { $"a{a}", Enumerable.Range(1, actionFeatures).ToDictionary(f => $"af{f}", f => f + i) } }).ToList();
                 var context = new Dictionary<string, object> { { "GUser", shared }, { "_multi", actions } };
+                if (numSlots > 0)
+                {
+                    List<Dictionary<string, string>> slots = new List<Dictionary<string, string>>();
+                    for (int j = 0; j < numSlots; ++j)
+                    {
+                        slots.Add(new Dictionary<string, string>
+                        {
+                            { "_id", "slot" + j }
+                        });
+                    }
+                    context.Add("_slots", slots);
+                }
                 var message = JsonConvert.SerializeObject(context);
                 Contexts.Add(message);
+                Console.Out.WriteLine(message);
             }
         }
 

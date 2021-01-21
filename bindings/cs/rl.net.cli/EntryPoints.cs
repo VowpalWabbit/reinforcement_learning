@@ -1,13 +1,13 @@
+using CommandLine;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using CommandLine;
 
-
-namespace Rl.Net.Cli {
+namespace Rl.Net.Cli
+{
     static class EntryPoints
     {
-        public static void Main(string [] args)
+        public static void Main(string[] args)
         {
             Parser.Default.ParseArguments
                 <RunSimulatorCommand, ReplayCommand, PerfTestCommand>(args)

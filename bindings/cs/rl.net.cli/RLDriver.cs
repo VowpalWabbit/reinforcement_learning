@@ -1,10 +1,7 @@
-using Rl.Net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Rl.Net.Cli
 {
@@ -12,6 +9,7 @@ namespace Rl.Net.Cli
     {
         CB,
         CCB,
+        CCBv2,
         Slates,
         CA
     }
@@ -31,6 +29,7 @@ namespace Rl.Net.Cli
         {
             get;
         }
+
         string SlatesContext
         {
             get;
@@ -54,25 +53,36 @@ namespace Rl.Net.Cli
             get;
         } = new RankingResponse();
 
-        public ApiStatus ApiStatusContainer
+        public DecisionResponse DecisionResponseContainer
         {
             get;
-        } = new ApiStatus();
+        } = new DecisionResponse();
 
-        public MultiSlotResponse SlatesContainer
+        public MultiSlotResponse MultiSlotResponseContainer
         {
             get;
         } = new MultiSlotResponse();
+
+        public MultiSlotResponseDetailed MultiSlotResponseDetailedContainer
+        {
+            get;
+        } = new MultiSlotResponseDetailed();
 
         public ContinuousActionResponse ContinuousActionContainer
         {
             get;
         } = new ContinuousActionResponse();
+
+        public ApiStatus ApiStatusContainer
+        {
+            get;
+        } = new ApiStatus();
     }
 
     internal interface IOutcomeReporter<TOutcome>
     {
         bool TryQueueOutcomeEvent(RunContext runContext, string eventId, TOutcome outcome);
+        bool TryQueueOutcomeEvent(RunContext runContext, string eventId, string slotId, TOutcome outcome);
     }
 
     public class RLDriver : IOutcomeReporter<float>, IOutcomeReporter<string>
@@ -107,7 +117,6 @@ namespace Rl.Net.Cli
             {
                 this.Step(runContext, outcomeReporter, step);
 
-                // TODO: Change this to be a command-line arg
                 Thread.Sleep(StepInterval);
 
                 if (++stepsCount % 10000 == 0)
@@ -129,25 +138,38 @@ namespace Rl.Net.Cli
             return this.liveModel.TryQueueOutcomeEvent(eventId, outcome, runContext.ApiStatusContainer);
         }
 
+        bool IOutcomeReporter<float>.TryQueueOutcomeEvent(RunContext runContext, string eventId, string slotId, float outcome)
+        {
+            return this.liveModel.TryQueueOutcomeEvent(eventId, slotId, outcome, runContext.ApiStatusContainer);
+        }
+
+        bool IOutcomeReporter<string>.TryQueueOutcomeEvent(RunContext runContext, string eventId, string slotId, string outcome)
+        {
+            return this.liveModel.TryQueueOutcomeEvent(eventId, slotId, outcome, runContext.ApiStatusContainer);
+        }
+
         private void Step<TOutcome>(RunContext runContext, IOutcomeReporter<TOutcome> outcomeReporter, IStepContext<TOutcome> step)
         {
             string eventId = step.EventId;
             TOutcome outcome = default(TOutcome);
 
-            if(loopKind == LoopKind.Slates) {
-                if(!liveModel.TryRequestMultiSlotDecision(eventId, step.SlatesContext, runContext.SlatesContainer, runContext.ApiStatusContainer))
+            if (loopKind == LoopKind.Slates)
+            {
+                if (!liveModel.TryRequestMultiSlotDecision(eventId, step.SlatesContext, runContext.MultiSlotResponseContainer, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
                 }
 
-                int[] actions = runContext.SlatesContainer.Select(slot => slot.ActionId).ToArray();
-                float[] probs = runContext.SlatesContainer.Select(slot => slot.Probability).ToArray();
+                int[] actions = runContext.MultiSlotResponseContainer.Select(slot => slot.ActionId).ToArray();
+                float[] probs = runContext.MultiSlotResponseContainer.Select(slot => slot.Probability).ToArray();
                 outcome = step.GetSlatesOutcome(actions, probs);
                 if (outcome == null)
                 {
                     return;
                 }
-            } else if (loopKind == LoopKind.CA) {
+            }
+            else if (loopKind == LoopKind.CA)
+            {
                 if (!liveModel.TryRequestContinuousAction(eventId, step.ContinuousActionContext, runContext.ContinuousActionContainer, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
@@ -159,6 +181,42 @@ namespace Rl.Net.Cli
                 {
                     return;
                 }
+            }
+            else if (loopKind == LoopKind.CCB)
+            {
+                if (!liveModel.TryRequestDecision(step.DecisionContext, runContext.DecisionResponseContainer, runContext.ApiStatusContainer))
+                {
+                    this.SafeRaiseError(runContext.ApiStatusContainer);
+                }
+                int[] actions = runContext.DecisionResponseContainer.Select(slot => slot.ActionId).ToArray();
+                float[] probs = runContext.DecisionResponseContainer.Select(slot => slot.Probability).ToArray();
+                outcome = step.GetOutcome(actions, probs);
+                foreach (var slot in runContext.DecisionResponseContainer)
+                {
+                    if (!outcomeReporter.TryQueueOutcomeEvent(runContext, slot.SlotId, outcome))
+                    {
+                        this.SafeRaiseError(runContext.ApiStatusContainer);
+                    }
+                }
+                return;
+            }
+            else if (loopKind == LoopKind.CCBv2)
+            {
+                if (!liveModel.TryRequestMultiSlotDecisionDetailed(eventId, step.DecisionContext, runContext.MultiSlotResponseDetailedContainer, runContext.ApiStatusContainer))
+                {
+                    this.SafeRaiseError(runContext.ApiStatusContainer);
+                }
+                int[] actions = runContext.MultiSlotResponseContainer.Select(slot => slot.ActionId).ToArray();
+                float[] probs = runContext.MultiSlotResponseContainer.Select(slot => slot.Probability).ToArray();
+                outcome = step.GetOutcome(actions, probs);
+                foreach (var slot in runContext.MultiSlotResponseDetailedContainer)
+                {
+                    if (!outcomeReporter.TryQueueOutcomeEvent(runContext, eventId, slot.EventId, outcome))
+                    {
+                        this.SafeRaiseError(runContext.ApiStatusContainer);
+                    }
+                }
+                return;
             }
             else
             {
