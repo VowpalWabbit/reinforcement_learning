@@ -168,13 +168,13 @@ namespace reinforcement_learning
 
   int live_model::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
   {
-    INIT_CHECK();
+		INIT_CHECK();
     return _pimpl->request_multi_slot_decision(context_json, flags, resp, live_model::default_baseline_vector, status);
   }
 
   int live_model::request_multi_slot_decision(const char * context_json, multi_slot_response_detailed& resp, api_status* status)
   {
-    return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, status);
+  	return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, status);
   }
 
   int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
