@@ -188,11 +188,10 @@ namespace Rl.Net.Cli
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
                 }
-                int[] actions = runContext.DecisionResponseContainer.Select(slot => slot.ActionId).ToArray();
-                float[] probs = runContext.DecisionResponseContainer.Select(slot => slot.Probability).ToArray();
-                outcome = step.GetOutcome(actions, probs);
+                ActionProbability[] actionProbs = new ActionProbability[runContext.DecisionResponseContainer.Count];
                 foreach (var slot in runContext.DecisionResponseContainer)
                 {
+                    outcome = step.GetOutcome(slot.ActionId, actionProbs);
                     if (!outcomeReporter.TryQueueOutcomeEvent(runContext, slot.SlotId, outcome))
                     {
                         this.SafeRaiseError(runContext.ApiStatusContainer);
@@ -208,9 +207,7 @@ namespace Rl.Net.Cli
                 }
                 foreach (var slot in runContext.MultiSlotResponseDetailedContainer)
                 {
-                    int[] actions = slot.Select(actionProb => (int)actionProb.ActionIndex).ToArray();
-                    float[] probs = slot.Select(actionProb => actionProb.Probability).ToArray();
-                    outcome = step.GetOutcome(actions, probs);
+                    outcome = step.GetOutcome(slot.ChosenAction, slot);
                     if (!outcomeReporter.TryQueueOutcomeEvent(runContext, eventId, slot.EventId, outcome))
                     {
                         this.SafeRaiseError(runContext.ApiStatusContainer);
