@@ -52,7 +52,7 @@ namespace Rl.Net
         {
         }
 
-        public string EventId
+        public string SlotId
         {
             get
             {

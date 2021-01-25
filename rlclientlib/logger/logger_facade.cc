@@ -47,7 +47,7 @@ namespace reinforcement_learning {
 
     int interaction_logger_facade::init(api_status* status) {
       switch (_version) {
-        case 1: 
+        case 1:
           switch (_model_type) {
           case model_type_t::CB: return _v1_cb->init(status);
           case model_type_t::CCB: return _v1_ccb->init(status);
