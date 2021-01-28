@@ -188,6 +188,7 @@ namespace Rl.Net.Cli
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
                 }
+                // TODO: Populate actionProbs. Currently GetOutcome() just returns a fixed outcome value, so the values of actionProbs don't matter.
                 ActionProbability[] actionProbs = new ActionProbability[runContext.DecisionResponseContainer.Count];
                 foreach (var slot in runContext.DecisionResponseContainer)
                 {
@@ -208,7 +209,7 @@ namespace Rl.Net.Cli
                 foreach (var slot in runContext.MultiSlotResponseDetailedContainer)
                 {
                     outcome = step.GetOutcome(slot.ChosenAction, slot);
-                    if (!outcomeReporter.TryQueueOutcomeEvent(runContext, eventId, slot.EventId, outcome))
+                    if (!outcomeReporter.TryQueueOutcomeEvent(runContext, eventId, slot.SlotId, outcome))
                     {
                         this.SafeRaiseError(runContext.ApiStatusContainer);
                     }
