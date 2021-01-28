@@ -114,7 +114,7 @@ namespace reinforcement_learning {
     api_status::try_clear(status);
 
     RETURN_IF_FAIL(check_null_or_empty(event_id, context, _trace_logger.get(), status));
-    
+
     float action;
     float pdf_value;
     std::string model_version;
@@ -122,7 +122,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(_model->choose_continuous_action(context, action, pdf_value, model_version, status));
     RETURN_IF_FAIL(populate_response(action, pdf_value, std::string(event_id), std::string(model_version), response, _trace_logger.get(), status));
     RETURN_IF_FAIL(_interaction_logger->log_continuous_action(context, flags, response, status));
-    
+
     if (_watchdog.has_background_error_been_reported())
     {
       RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
@@ -130,7 +130,7 @@ namespace reinforcement_learning {
 
     return error_code::success;
   }
-    
+
   int live_model_impl::request_continuous_action(const char* context, unsigned int flags, continuous_action_response& response, api_status* status)
   {
     const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
@@ -169,9 +169,9 @@ namespace reinforcement_learning {
     std::vector<const char*> event_ids(num_decisions, nullptr);
     std::map<size_t, std::string> found_ids;
     RETURN_IF_FAIL(utility::get_event_ids(context_json, found_ids, _trace_logger.get(), status));
-    
+
     autogenerate_missing_uuids(found_ids, event_ids_str, _seed_shift);
-    
+
     for (int i = 0; i < event_ids.size(); i++)
     {
       event_ids[i] = event_ids_str[i].c_str();
@@ -192,10 +192,11 @@ namespace reinforcement_learning {
 
   int live_model_impl::request_multi_slot_decision_impl(const char *event_id, const char * context_json, std::vector<std::string>& slot_ids, std::vector<std::vector<uint32_t>>& action_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
-    if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY) {
-      // Apprentice mode and LoggingOnly mode are not supported here at this moment
+    if (_learning_mode == LOGGINGONLY) {
+      //LoggingOnly mode are not supported here at this moment
       return error_code::not_supported;
     }
+
     //clear previous errors if any
     api_status::try_clear(status);
 
@@ -220,15 +221,20 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int live_model_impl::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
+  int live_model_impl::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response& resp, const std::vector<int>& baseline_actions, api_status* status)
   {
     const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
-    return request_multi_slot_decision(uuid.c_str(), context_json, flags, resp, status);
+    return request_multi_slot_decision(uuid.c_str(), context_json, flags, resp, baseline_actions, status);
   }
 
-  int live_model_impl::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
+  int live_model_impl::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response& resp, const std::vector<int>& baseline_actions, api_status* status)
   {
     resp.clear();
+
+    if (_learning_mode == APPRENTICE && baseline_actions.empty())
+    {
+      return error_code::baseline_actions_not_defined;
+    }
 
     std::vector<std::string> slot_ids;
     std::vector<std::vector<uint32_t>> action_ids;
@@ -238,7 +244,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(live_model_impl::request_multi_slot_decision_impl(event_id, context_json, slot_ids, action_ids, action_pdfs, model_version, status));
 
     RETURN_IF_FAIL(populate_multi_slot_response(action_ids, action_pdfs, std::string(event_id), std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs, model_version, slot_ids, status));
+    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs, model_version, slot_ids, status, baseline_actions));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -247,15 +253,20 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int live_model_impl::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
+  int live_model_impl::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, const std::vector<int>& baseline_actions, api_status* status)
   {
     const auto uuid = boost::uuids::to_string(boost::uuids::random_generator()());
-    return request_multi_slot_decision(uuid.c_str(), context_json, flags, resp, status);
+    return request_multi_slot_decision(uuid.c_str(), context_json, flags, resp, baseline_actions, status);
   }
-  
-  int live_model_impl::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
+
+  int live_model_impl::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, const std::vector<int>& baseline_actions, api_status* status)
   {
     resp.clear();
+
+    if (_learning_mode == APPRENTICE && baseline_actions.empty())
+    {
+      return error_code::baseline_actions_not_defined;
+    }
 
     std::vector<std::string> slot_ids;
     std::vector<std::vector<uint32_t>> action_ids;
@@ -268,7 +279,7 @@ namespace reinforcement_learning {
     resp.resize(slot_ids.size());
 
     RETURN_IF_FAIL(populate_multi_slot_response_detailed(action_ids, action_pdfs, std::string(event_id), std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs, model_version, slot_ids, status));
+    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs, model_version, slot_ids, status, baseline_actions));
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -438,7 +449,7 @@ namespace reinforcement_learning {
     i_time_provider* observation_time_provider;
     RETURN_IF_FAIL(_time_provider_factory->create(&observation_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
-    // Create a logger for interactions that will use msg sender to send interaction messages
+    // Create a logger for observations that will use msg sender to send observation messages
     _outcome_logger.reset(new logger::observation_logger_facade(_configuration, outcome_msg_sender, _watchdog, observation_time_provider, &_error_cb));
     RETURN_IF_FAIL(_outcome_logger->init(status));
 
@@ -605,6 +616,6 @@ namespace reinforcement_learning {
       {
         complete_ids[i] = boost::uuids::to_string(boost::uuids::random_generator()()) + std::to_string(seed_shift);
       }
-    }    
+    }
   }
 }

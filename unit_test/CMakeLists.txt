@@ -38,13 +38,21 @@ endif()
 add_executable(rltest ${TEST_SOURCES})
 
 # Add the include directories from rlclientlib target for testing
-target_include_directories(rltest PRIVATE $<TARGET_PROPERTY:rlclientlib,INCLUDE_DIRECTORIES>)
+target_include_directories(rltest 
+  PRIVATE 
+    $<TARGET_PROPERTY:rlclientlib,INCLUDE_DIRECTORIES>
+)
 
 if(vw_USE_AZURE_FACTORIES)
   target_compile_definitions(rltest PRIVATE USE_AZURE_FACTORIES)
 endif()
 
-target_link_libraries(rltest PRIVATE
-  rlclientlib fakeit Boost::unit_test_framework Boost::system)
+target_link_libraries(rltest 
+  PRIVATE
+    rlclientlib
+    fakeit 
+    Boost::unit_test_framework 
+    Boost::system
+)
 
 add_test(rltest rltest)

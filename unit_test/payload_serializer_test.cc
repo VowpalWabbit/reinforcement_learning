@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(ca_payload_serializer_test)
 
   std::string context;
   copy(event->context()->begin(), event->context()->end(), std::back_inserter(context));
-  
+
   BOOST_CHECK_EQUAL(context.c_str(), "my_context");
   BOOST_CHECK_EQUAL(event->model_id()->c_str(), "model_id");
   BOOST_CHECK_EQUAL(event->action(), action);
@@ -81,7 +81,8 @@ BOOST_AUTO_TEST_CASE(multi_slot_payload_serializer_test){
   vector<vector<uint32_t>> actions{ { 2, 1, 0 }, { 1, 0 }};
   vector<vector<float>> probs{ { 0.5, 0.3, 0.2 }, { 0.8, 0.2 }};
   vector<std::string> slot_ids = {"0", "1"};
-  const auto buffer = serializer.event("my_context", action_flags::DEFAULT, actions, probs, "model_id", slot_ids);
+  vector<int> baseline_actions = { 1, 0 };
+  const auto buffer = serializer.event("my_context", action_flags::DEFAULT, actions, probs, "model_id", slot_ids, baseline_actions);
 
   const auto event = v2::GetMultiSlotEvent(buffer.data());
 
@@ -102,6 +103,11 @@ BOOST_AUTO_TEST_CASE(multi_slot_payload_serializer_test){
     for (size_t j = 0; j < probs[i].size(); ++j) {
         BOOST_CHECK_CLOSE(probs[i][j], (*slots[i]->probabilities())[j], tolerance);
     }
+  }
+
+  const auto& baseline = *event->baseline_actions();
+  for (size_t i = 0; i < baseline_actions.size(); ++i) {
+    BOOST_CHECK_EQUAL(baseline_actions[i], baseline[i]);
   }
 
   BOOST_CHECK_EQUAL(false, event->deferred_action());

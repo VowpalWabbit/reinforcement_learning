@@ -40,7 +40,7 @@ namespace reinforcement_learning
       interaction_logger_facade(reinforcement_learning::model_management::model_type_t model_type,
         const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog,
         i_time_provider* time_provider, i_logger_extensions& ext, error_callback_fn* perror_cb = nullptr);
-      
+
       interaction_logger_facade(const interaction_logger_facade& other) = delete;
       interaction_logger_facade& operator=(const interaction_logger_facade& other) = delete;
       interaction_logger_facade(interaction_logger_facade&& other) = delete;
@@ -52,14 +52,14 @@ namespace reinforcement_learning
 
       //CB v1/v2
       int log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
- 
+
       //CCB v1
       int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
 
       //Multislot (Slates v1/v2 + CCB v2)
       int log_decision(const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
-        const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids, api_status* status);
+        const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids, api_status* status, const std::vector<int>& baseline_actions);
 
       //Continuous
       int log_continuous_action(const char* context, unsigned int flags, const continuous_action_response& response, api_status* status);
