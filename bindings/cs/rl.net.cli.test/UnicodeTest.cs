@@ -719,7 +719,7 @@ namespace Rl.Net.Cli.Test
                 NativeMethods.GetSlotIdOverride = nativeOverrideCallback;
             }
 
-            Run_StringReturnMarshallingTest<SlotRanking>(PseudoLocEventId, RegisterNativeOverride, slotRanking => slotRanking.EventId, nameof(NativeMethods.GetSlotId));
+            Run_StringReturnMarshallingTest<SlotRanking>(PseudoLocEventId, RegisterNativeOverride, slotRanking => slotRanking.SlotId, nameof(NativeMethods.GetSlotId));
         }
 
         private void Run_GetMultiSlotDetailedModelId_Test(string modelIdToReturn)
