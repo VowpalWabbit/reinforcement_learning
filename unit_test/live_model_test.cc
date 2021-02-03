@@ -906,7 +906,6 @@ BOOST_AUTO_TEST_CASE(multi_slot_response) {
   ++it;
 }
 
-
 BOOST_AUTO_TEST_CASE(multi_slot_response_apprentice_mode_no_baseline) {
   u::configuration config;
   cfg::create_from_json(JSON_CFG, config);
