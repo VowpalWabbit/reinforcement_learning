@@ -38,6 +38,8 @@ namespace reinforcement_learning {
   int check_null_or_empty(const char* arg1, i_trace* trace, api_status* status);
   int reset_action_order(ranking_response& response);
   void autogenerate_missing_uuids(const std::map<size_t, std::string>& found_ids, std::vector<std::string>& complete_ids, uint64_t seed_shift);
+  int reset_action_order_multi_slot(multi_slot_response& response, const std::vector<int>& baseline_actions = std::vector<int>());
+  int reset_action_order_multi_slot(multi_slot_response_detailed& response, const std::vector<int>& baseline_actions = std::vector<int>());
 
   void default_error_callback(const api_status& status, void* watchdog_context) {
     auto watchdog = static_cast<utility::watchdog*>(watchdog_context);
@@ -192,11 +194,6 @@ namespace reinforcement_learning {
 
   int live_model_impl::request_multi_slot_decision_impl(const char *event_id, const char * context_json, std::vector<std::string>& slot_ids, std::vector<std::vector<uint32_t>>& action_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
-    if (_learning_mode == LOGGINGONLY) {
-      //LoggingOnly mode are not supported here at this moment
-      return error_code::not_supported;
-    }
-
     //clear previous errors if any
     api_status::try_clear(status);
 
@@ -244,7 +241,20 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(live_model_impl::request_multi_slot_decision_impl(event_id, context_json, slot_ids, action_ids, action_pdfs, model_version, status));
 
     RETURN_IF_FAIL(populate_multi_slot_response(action_ids, action_pdfs, std::string(event_id), std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
+
+    if (_learning_mode == LOGGINGONLY)
+    {
+      // Reset the ranked action order before logging
+      RETURN_IF_FAIL(reset_action_order_multi_slot(resp, baseline_actions));
+    }
+
     RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs, model_version, slot_ids, status, baseline_actions));
+
+    if (_learning_mode == APPRENTICE)
+    {
+      // Reset the ranked action order after logging
+      RETURN_IF_FAIL(reset_action_order_multi_slot(resp, baseline_actions));
+    }
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -279,7 +289,20 @@ namespace reinforcement_learning {
     resp.resize(slot_ids.size());
 
     RETURN_IF_FAIL(populate_multi_slot_response_detailed(action_ids, action_pdfs, std::string(event_id), std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
+
+    if (_learning_mode == LOGGINGONLY)
+    {
+      // Reset the ranked action order before logging
+      RETURN_IF_FAIL(reset_action_order_multi_slot(resp, baseline_actions));
+    }
+
     RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs, model_version, slot_ids, status, baseline_actions));
+
+    if (_learning_mode == APPRENTICE)
+    {
+      // Reset the ranked action order after logging
+      RETURN_IF_FAIL(reset_action_order_multi_slot(resp, baseline_actions));
+    }
 
     // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
     if (_watchdog.has_background_error_been_reported()) {
@@ -601,6 +624,45 @@ namespace reinforcement_learning {
 #endif
     response.set_chosen_action_id((*(response.begin())).action_id);
 
+    return error_code::success;
+  }
+
+  int reset_action_order_multi_slot(multi_slot_response& response, const std::vector<int>& baseline_actions)
+  {
+    int index = 0;
+    for (auto &slot : response)
+    {
+      if (baseline_actions.size() != 0 && baseline_actions.size() >= index)
+      {
+        slot.set_action_id(baseline_actions[index]);
+      }
+      else
+      {
+        //implicit baseline is the action corresponding to the slot index
+        slot.set_action_id(index);
+      }
+      slot.set_probability(1);
+      ++index;
+    }
+    return error_code::success;
+  }
+
+  int reset_action_order_multi_slot(multi_slot_response_detailed& response, const std::vector<int>& baseline_actions)
+  {
+    int index = 0;
+    for (auto &slot : response)
+    {
+      if (baseline_actions.size() != 0 && baseline_actions.size() >= index)
+      {
+        slot.set_chosen_action_id(baseline_actions[index]);
+      }
+      else
+      {
+        //implicit baseline is the action corresponding to the slot index
+        slot.set_chosen_action_id(index);
+      }
+      ++index;
+    }
     return error_code::success;
   }
 

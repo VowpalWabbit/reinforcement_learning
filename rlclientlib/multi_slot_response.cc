@@ -18,6 +18,14 @@ namespace reinforcement_learning
     return action_id;
   }
 
+  void slot_entry::set_action_id(uint32_t id) {
+    action_id = id;
+  }
+
+  void slot_entry::set_probability(float prob) {
+    probability = prob;
+  }
+
   float slot_entry::get_probability() const {
     return probability;
   }
