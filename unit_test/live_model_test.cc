@@ -957,12 +957,14 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_apprentice_mode_with_baseline) {
   size_t action_id = slot_entry0.get_action_id();
   BOOST_CHECK(strcmp(slot_entry0.get_id(), "") != 0);
   BOOST_CHECK_EQUAL(action_id, 3);
+  BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
   ++it;
 
   auto& slot_entry1 = *it;
   action_id = slot_entry1.get_action_id();
   BOOST_CHECK(strcmp(slot_entry1.get_id(), "") != 0);
   BOOST_CHECK_EQUAL(action_id, 1);
+  BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
   ++it;
 }
 
@@ -996,12 +998,14 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_logging_only_with_baseline) {
   size_t action_id = slot_entry0.get_action_id();
   BOOST_CHECK(strcmp(slot_entry0.get_id(), "") != 0);
   BOOST_CHECK_EQUAL(action_id, 3);
+  BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
   ++it;
 
   auto& slot_entry1 = *it;
   action_id = slot_entry1.get_action_id();
   BOOST_CHECK(strcmp(slot_entry1.get_id(), "") != 0);
   BOOST_CHECK_EQUAL(action_id, 1);
+  BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
   ++it;
 }
 
@@ -1033,12 +1037,14 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_logging_only_no_baseline) {
   size_t action_id = slot_entry0.get_action_id();
   BOOST_CHECK(strcmp(slot_entry0.get_id(), "") != 0);
   BOOST_CHECK_EQUAL(action_id, 0);
+  BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
   ++it;
 
   auto& slot_entry1 = *it;
   action_id = slot_entry1.get_action_id();
   BOOST_CHECK(strcmp(slot_entry1.get_id(), "") != 0);
   BOOST_CHECK_EQUAL(action_id, 1);
+  BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
   ++it;
 }
 
