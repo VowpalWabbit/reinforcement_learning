@@ -629,7 +629,7 @@ namespace reinforcement_learning {
 
   int reset_action_order_multi_slot(multi_slot_response& response, const std::vector<int>& baseline_actions)
   {
-    int index = 0;
+    size_t index = 0;
     for (auto &slot : response)
     {
       if (!baseline_actions.empty() && baseline_actions.size() >= index)
@@ -649,7 +649,7 @@ namespace reinforcement_learning {
 
   int reset_action_order_multi_slot(multi_slot_response_detailed& response, const std::vector<int>& baseline_actions)
   {
-    int index = 0;
+    size_t index = 0;
     for (auto &slot : response)
     {
       if (!baseline_actions.empty() && baseline_actions.size() >= index)
