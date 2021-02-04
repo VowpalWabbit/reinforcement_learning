@@ -632,7 +632,7 @@ namespace reinforcement_learning {
     int index = 0;
     for (auto &slot : response)
     {
-      if (baseline_actions.size() != 0 && baseline_actions.size() >= index)
+      if (!baseline_actions.empty() && baseline_actions.size() >= index)
       {
         slot.set_action_id(baseline_actions[index]);
       }
@@ -652,7 +652,7 @@ namespace reinforcement_learning {
     int index = 0;
     for (auto &slot : response)
     {
-      if (baseline_actions.size() != 0 && baseline_actions.size() >= index)
+      if (!baseline_actions.empty() && baseline_actions.size() >= index)
       {
         slot.set_chosen_action_id(baseline_actions[index]);
       }
