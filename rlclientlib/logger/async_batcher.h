@@ -75,7 +75,7 @@ namespace reinforcement_learning { namespace logger {
     std::condition_variable _cv;
     std::mutex _m;
     utility::object_pool<utility::data_buffer> _buffer_pool;
-    content_encoding_enum _content_encoding;
+    const char* _batch_content_encoding;
   };
 
   template<typename TEvent, template<typename> class TSerializer>
@@ -120,7 +120,7 @@ namespace reinforcement_learning { namespace logger {
                                                       api_status* status)
   {
     TEvent evt;
-    TSerializer<TEvent> collection_serializer(*buffer.get(), _content_encoding, _shared_state);
+    TSerializer<TEvent> collection_serializer(*buffer.get(), _batch_content_encoding, _shared_state);
 
     while (remaining > 0 && collection_serializer.size() < _send_high_water_mark) {
       if (_queue.pop(&evt)) {
@@ -178,7 +178,7 @@ namespace reinforcement_learning { namespace logger {
     , _periodic_background_proc(static_cast<int>(config.send_batch_interval_ms), watchdog, "Async batcher thread", perror_cb)
     , _pass_prob(0.5)
     , _queue_mode(config.queue_mode)
-    , _content_encoding(config.content_encoding)
+    , _batch_content_encoding(config.batch_content_encoding)
   {}
 
   template<typename TEvent, template<typename> class TSerializer>

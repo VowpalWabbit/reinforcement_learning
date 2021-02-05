@@ -9,12 +9,15 @@ table Event {
 }
 
 table BatchMetadata {
-    content_encoding: string;
+    content_encoding: string; //valid values: IDENTITY and DEDUP
 }
 
-// Collection of Ranking events
+table SerializedEvent {
+    payload:[ubyte]; //serialized Event objects
+}
+
 table EventBatch {
-    events:[Event];
+    events:[SerializedEvent];
     metadata: BatchMetadata;
 }
 

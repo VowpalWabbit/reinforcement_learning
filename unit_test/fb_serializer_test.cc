@@ -20,7 +20,7 @@ using namespace reinforcement_learning::messages::flatbuff;
 
 BOOST_AUTO_TEST_CASE(fb_serializer_outcome_event) {
   data_buffer db;
-  fb_collection_serializer<outcome_event> serializer(db, content_encoding_enum::IDENTITY);
+  fb_collection_serializer<outcome_event> serializer(db, value::CONTENT_ENCODING_IDENTITY);
   std::string event_id("an_event_id");
   const timestamp ts;
   auto ro = outcome_event::report_outcome(event_id.c_str(), 0.75f, ts, 0.54f);
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(fb_serializer_outcome_event) {
 
 BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
   data_buffer db;
-  fb_collection_serializer<ranking_event> serializer(db, content_encoding_enum::IDENTITY);
+  fb_collection_serializer<ranking_event> serializer(db, value::CONTENT_ENCODING_IDENTITY);
   ranking_response resp;
   std::string model_id("a_model_id");
   resp.set_model_id(model_id.c_str());
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
 
 BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_content_encoding) {
   data_buffer db;
-  fb_collection_serializer<generic_event> collection_serializer(db, to_content_encoding_enum(value::CONTENT_ENCODING_ZSTD_AND_DEDUP));
+  fb_collection_serializer<generic_event> collection_serializer(db, value::CONTENT_ENCODING_DEDUP);
   const char* event_id("event_id");
   const timestamp ts;
   
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_content_encoding) {
 
   auto buffer = serializer.event("my_context", action_flags::DEFERRED, v2::LearningModeType_Apprentice, rr);
 
-  generic_event ge(event_id, ts, v2::PayloadType_CB, std::move(buffer));
+  generic_event ge(event_id, ts, v2::PayloadType_CB, std::move(buffer), event_content_type::IDENTITY);
   collection_serializer.add(ge);
   BOOST_CHECK_EQUAL(reinforcement_learning::error_code::success, collection_serializer.finalize(nullptr));
 
@@ -135,5 +135,5 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_content_encoding) {
   const v2::EventBatch *event_batch = v2::GetEventBatch(db.body_begin());
   BOOST_CHECK(event_batch->Verify(v));
   const auto& batch_metadata = *(event_batch->metadata());
-  BOOST_CHECK_EQUAL(batch_metadata.content_encoding()->c_str(), value::CONTENT_ENCODING_ZSTD_AND_DEDUP);
+  BOOST_CHECK_EQUAL(batch_metadata.content_encoding()->c_str(), value::CONTENT_ENCODING_DEDUP);
 }

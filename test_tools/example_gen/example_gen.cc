@@ -70,8 +70,10 @@ void load_config_from_json(int action, u::configuration& config)
   config.set("protocol.version", "2");
   config.set("InitialExplorationEpsilon", "1.0");
 
-  if(enable_dedup)
-    config.set(nm::INTERACTION_CONTENT_ENCODING, val::CONTENT_ENCODING_ZSTD_AND_DEDUP);
+  if(enable_dedup) {
+    config.set(nm::INTERACTION_USE_DEDUP, "true");
+    config.set(nm::INTERACTION_USE_COMPRESSION, "true");
+  }
 
   if(action == CCB_ACTION) {
     config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
