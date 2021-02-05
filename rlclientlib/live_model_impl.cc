@@ -628,7 +628,7 @@ namespace reinforcement_learning {
         //implicit baseline is the action corresponding to the slot index
         slot.set_action_id(index);
       }
-      slot.set_probability(1);
+      slot.set_probability(1.f);
       ++index;
     }
     return error_code::success;
