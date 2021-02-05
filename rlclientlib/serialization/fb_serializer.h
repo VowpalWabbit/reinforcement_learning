@@ -288,8 +288,6 @@ namespace reinforcement_learning { namespace logger {
 
       flatbuffers::FlatBufferBuilder builder;
 
-      const auto id_offset = builder.CreateString(evt.get_id());
-
       const auto& ts = evt.get_client_time_gmt();
       v2::TimeStamp client_ts(ts.year, ts.month, ts.day, ts.hour,
         ts.minute, ts.second, ts.sub_second);
