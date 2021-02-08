@@ -303,14 +303,14 @@ public:
 
 	}
 
-  bool is_object_extraction_enabled() override { return _use_dedup; }
-  bool is_serialization_transform_enabled() override { return _use_compression; }
+  bool is_object_extraction_enabled() const override { return _use_dedup; }
+  bool is_serialization_transform_enabled() const override { return _use_compression; }
 
 	int transform_payload_and_extract_objects(const char* context, std::string& edited_payload, generic_event::object_list_t& objects, api_status* status) override {
     return _dedup_state.transform_payload_and_add_objects(context, edited_payload, objects, status);
 	}
 
-  int transform_serialized_payload(generic_event::payload_buffer_t& input, event_content_type& content_type, api_status* status) override {
+  int transform_serialized_payload(generic_event::payload_buffer_t& input, event_content_type& content_type, api_status* status) const override {
 		return _dedup_state.compress(input, content_type, status);
 	}
 private:
