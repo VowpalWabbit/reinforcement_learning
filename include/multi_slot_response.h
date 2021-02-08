@@ -21,6 +21,8 @@ namespace reinforcement_learning {
     const char* get_id() const;
     uint32_t get_action_id() const;
     float get_probability() const;
+    void set_action_id(uint32_t id);
+    void set_probability(float prob);
   private:
     //! slot entry id
     std::string id;

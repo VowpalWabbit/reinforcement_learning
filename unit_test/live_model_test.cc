@@ -258,7 +258,6 @@ BOOST_AUTO_TEST_CASE(live_model_request_continuous_action)
 
   BOOST_CHECK_EQUAL(status.get_error_code(), 0);
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
-
 }
 
 BOOST_AUTO_TEST_CASE(live_model_request_continuous_action_invalid_ctx)
@@ -928,7 +927,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_apprentice_mode_no_baseline) {
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(JSON_CCB_CONTEXT, response), err::baseline_actions_not_defined);
 }
 
-BOOST_AUTO_TEST_CASE(multi_slot_response_with_baseline_apprentice_mode) {
+BOOST_AUTO_TEST_CASE(multi_slot_response_apprentice_mode_with_baseline) {
   u::configuration config;
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::PROTOCOL_VERSION, "2");
@@ -956,13 +955,95 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_with_baseline_apprentice_mode) {
   auto& slot_entry0 = *it;
   size_t action_id = slot_entry0.get_action_id();
   BOOST_CHECK(strcmp(slot_entry0.get_id(), "") != 0);
-  BOOST_CHECK_EQUAL(action_id, 0);
+  BOOST_CHECK_EQUAL(action_id, 3);
+  BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
   ++it;
 
   auto& slot_entry1 = *it;
   action_id = slot_entry1.get_action_id();
   BOOST_CHECK(strcmp(slot_entry1.get_id(), "") != 0);
   BOOST_CHECK_EQUAL(action_id, 1);
+  BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
+  ++it;
+}
+
+BOOST_AUTO_TEST_CASE(multi_slot_response_logging_only_with_baseline) {
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::PROTOCOL_VERSION, "2");
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
+  config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
+  config.set(r::name::INTERACTION_FILE_NAME, "interaction.txt");
+  config.set(r::name::OBSERVATION_FILE_NAME, "observation.txt");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
+  config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_LOGGINGONLY);
+
+  r::api_status status;
+  r::live_model model(config);
+  BOOST_CHECK_EQUAL(model.init(&status), err::success);
+
+  r::multi_slot_response response;
+  //baseline actions are not valid action indicies, this is for testing purposes to make sure the action id is overriden in apprentice / logginonly mode.
+  int baseline_actions[2] = { 3, 1 };
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
+
+  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.size(), 2);
+
+  auto it = response.begin();
+  auto& slot_entry0 = *it;
+  size_t action_id = slot_entry0.get_action_id();
+  BOOST_CHECK(strcmp(slot_entry0.get_id(), "") != 0);
+  BOOST_CHECK_EQUAL(action_id, 3);
+  BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
+  ++it;
+
+  auto& slot_entry1 = *it;
+  action_id = slot_entry1.get_action_id();
+  BOOST_CHECK(strcmp(slot_entry1.get_id(), "") != 0);
+  BOOST_CHECK_EQUAL(action_id, 1);
+  BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
+  ++it;
+}
+
+BOOST_AUTO_TEST_CASE(multi_slot_response_logging_only_no_baseline) {
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::PROTOCOL_VERSION, "2");
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
+  config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
+  config.set(r::name::INTERACTION_FILE_NAME, "interaction.txt");
+  config.set(r::name::OBSERVATION_FILE_NAME, "observation.txt");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --id N/A");
+  config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_LOGGINGONLY);
+
+  r::api_status status;
+  r::live_model model(config);
+  BOOST_CHECK_EQUAL(model.init(&status), err::success);
+
+  r::multi_slot_response response;
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, nullptr, 0), err::success);
+
+  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.size(), 2);
+
+  auto it = response.begin();
+  auto& slot_entry0 = *it;
+  size_t action_id = slot_entry0.get_action_id();
+  BOOST_CHECK(strcmp(slot_entry0.get_id(), "") != 0);
+  BOOST_CHECK_EQUAL(action_id, 0);
+  BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
+  ++it;
+
+  auto& slot_entry1 = *it;
+  action_id = slot_entry1.get_action_id();
+  BOOST_CHECK(strcmp(slot_entry1.get_id(), "") != 0);
+  BOOST_CHECK_EQUAL(action_id, 1);
+  BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
   ++it;
 }
 
@@ -1102,7 +1183,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_apprentice_mode_no_baseline) {
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(JSON_CCB_CONTEXT, response), err::baseline_actions_not_defined);
 }
 
-BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_with_baseline_apprentice_mode) {
+BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_apprentice_mode_with_baseline) {
   u::configuration config;
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::PROTOCOL_VERSION, "2");
@@ -1122,6 +1203,85 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_with_baseline_apprentice_mode)
   r::multi_slot_response_detailed response;
   int baseline_actions[2] = { 3, 1 };
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
+
+  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.size(), 2);
+
+  auto it = response.begin();
+  size_t action_id = 0;
+  auto& slot_rank0 = *it;
+  slot_rank0.get_chosen_action_id(action_id);
+  BOOST_CHECK(strcmp(slot_rank0.get_id(), "") != 0);
+  BOOST_CHECK_EQUAL(action_id, 3);
+  ++it;
+
+  auto& slot_rank1 = *it;
+  slot_rank1.get_chosen_action_id(action_id);
+  slot_rank1.get_chosen_action_id(action_id);
+  BOOST_CHECK(strcmp(slot_rank1.get_id(), "") != 0);
+  BOOST_CHECK_EQUAL(action_id, 1);
+  ++it;
+}
+
+BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_logging_only_with_baseline) {
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::PROTOCOL_VERSION, "2");
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
+  config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
+  config.set(r::name::INTERACTION_FILE_NAME, "interaction.txt");
+  config.set(r::name::OBSERVATION_FILE_NAME, "observation.txt");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
+  config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_LOGGINGONLY);
+
+  r::api_status status;
+  r::live_model model(config);
+  BOOST_CHECK_EQUAL(model.init(&status), err::success);
+
+  r::multi_slot_response_detailed response;
+  int baseline_actions[2] = { 3, 1 };
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
+
+  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.size(), 2);
+
+  auto it = response.begin();
+  size_t action_id = 0;
+  auto& slot_rank0 = *it;
+  slot_rank0.get_chosen_action_id(action_id);
+  BOOST_CHECK(strcmp(slot_rank0.get_id(), "") != 0);
+  BOOST_CHECK_EQUAL(action_id, 3);
+  ++it;
+
+  auto& slot_rank1 = *it;
+  slot_rank1.get_chosen_action_id(action_id);
+  slot_rank1.get_chosen_action_id(action_id);
+  BOOST_CHECK(strcmp(slot_rank1.get_id(), "") != 0);
+  BOOST_CHECK_EQUAL(action_id, 1);
+  ++it;
+}
+
+BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_logging_only_no_baseline) {
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::PROTOCOL_VERSION, "2");
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
+  config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
+  config.set(r::name::INTERACTION_FILE_NAME, "interaction.txt");
+  config.set(r::name::OBSERVATION_FILE_NAME, "observation.txt");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --id N/A");
+  config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_LOGGINGONLY);
+
+  r::api_status status;
+  r::live_model model(config);
+  BOOST_CHECK_EQUAL(model.init(&status), err::success);
+
+  r::multi_slot_response_detailed response;
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, nullptr, 0), err::success);
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
