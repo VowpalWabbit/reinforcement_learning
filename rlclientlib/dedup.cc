@@ -90,7 +90,7 @@ int dedup_dict::transform_payload_and_add_objects(const char* payload, std::stri
   return error_code::success;
 }
 
-int dedup_dict::size() const
+size_t dedup_dict::size() const
 {
   return _entries.size();
 }

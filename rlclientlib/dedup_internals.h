@@ -28,7 +28,7 @@ namespace reinforcement_learning
     //! Return a string_view of the object content, or an empty view if not found
     string_view get_object(generic_event::object_id_t oid) const;
 
-    int size() const;
+    size_t size() const;
     int transform_payload_and_add_objects(const char* payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status);
   private:
     struct dict_entry {
