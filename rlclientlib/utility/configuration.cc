@@ -66,6 +66,17 @@ namespace reinforcement_learning { namespace utility {
     return defval;
   }
 
+  bool configuration::get_bool(const char *section, const char *name, bool defval) const {
+    std::stringstream ss;
+    ss << section << "." << name;
+    auto tmp = ss.str();
+    const char *key = tmp.c_str();
+    if(get(key, NULL) != nullptr) {
+      return get_bool(key, defval);
+    }
+    return get_bool(name, defval);
+  }
+
   float configuration::get_float(const char* name, float defval) const {
     auto& map = *_pmap;
     const auto it = map.find(name);

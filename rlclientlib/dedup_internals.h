@@ -28,6 +28,7 @@ namespace reinforcement_learning
     //! Return a string_view of the object content, or an empty view if not found
     string_view get_object(generic_event::object_id_t oid) const;
 
+    size_t size() const;
     int transform_payload_and_add_objects(const char* payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status);
   private:
     struct dict_entry {
@@ -67,7 +68,7 @@ namespace reinforcement_learning
 
   class dedup_state {
   public:
-    dedup_state(const utility::configuration& c, i_time_provider* time_provider);
+    dedup_state(const utility::configuration& c, bool use_compression, bool use_dedup, i_time_provider* time_provider);
 
     string_view get_object(generic_event::object_id_t aid);
     float get_ewma_value() const;
@@ -79,7 +80,7 @@ namespace reinforcement_learning
     int remove_all_values(I start, I end, api_status* status);
 
     void update_ewma(float value);
-    int compress(generic_event::payload_buffer_t& input, api_status* status) const;
+    int compress(generic_event::payload_buffer_t& input, event_content_type& content_type, api_status* status) const;
     int transform_payload_and_add_objects(const char* payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status);
 
     i_time_provider* get_time_provider() { return _time_provider.get(); }
@@ -93,6 +94,8 @@ namespace reinforcement_learning
     zstd_compressor _compressor;
     std::mutex _mutex;
     std::unique_ptr<i_time_provider> _time_provider;
+    bool _use_compression;
+    bool _use_dedup;
   };
 
   static const char* DEDUP_DICT_EVENT_ID = "3defd95a-0122-4aac-9068-0b9ac30b66d8";

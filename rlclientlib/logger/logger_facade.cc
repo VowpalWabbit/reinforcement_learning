@@ -61,14 +61,18 @@ namespace reinforcement_learning {
 
 
     template<typename TSerializer, typename... Rest>
-    int wrap_log_call(i_logger_extensions& ext, TSerializer& serializer, const char* context, generic_event::object_list_t& objects, generic_event::payload_buffer_t& payload, api_status* status, const Rest&... rest) {
-      if(!ext.is_enabled()) {
+    int wrap_log_call(i_logger_extensions& ext, TSerializer& serializer, const char* context, generic_event::object_list_t& objects, generic_event::payload_buffer_t& payload, event_content_type &content_type, api_status* status, const Rest&... rest) {
+      if(!ext.is_object_extraction_enabled()) {
         payload = serializer.event(context, rest...);
       } else {
         std::string tmp;
         RETURN_IF_FAIL(ext.transform_payload_and_extract_objects(context, tmp, objects, status));
         payload = serializer.event(tmp.c_str(), rest...);
-        RETURN_IF_FAIL(ext.transform_serialized_payload(payload, status));
+      }
+      if(ext.is_serialization_transform_enabled()) {
+        RETURN_IF_FAIL(ext.transform_serialized_payload(payload, content_type, status));
+      } else {
+        content_type = event_content_type::IDENTITY;
       }
       return error_code::success;
     }
@@ -81,8 +85,10 @@ namespace reinforcement_learning {
           RETURN_IF_FAIL(get_learning_mode(learning_mode, lmt, status));
           generic_event::object_list_t actions;
           generic_event::payload_buffer_t payload;
-          RETURN_IF_FAIL(wrap_log_call(_ext, _serializer_cb, context, actions, payload, status, flags, lmt, response));
-          return _v2->log(response.get_event_id(), std::move(payload), _serializer_cb.type, std::move(actions), status);
+          event_content_type content_type;
+
+          RETURN_IF_FAIL(wrap_log_call(_ext, _serializer_cb, context, actions, payload, content_type, status, flags, lmt, response));
+          return _v2->log(response.get_event_id(), std::move(payload), _serializer_cb.type, content_type, std::move(actions), status);
         }
         default: return protocol_not_supported(status);
       }
@@ -125,8 +131,10 @@ namespace reinforcement_learning {
 
         generic_event::object_list_t actions;
         generic_event::payload_buffer_t payload;
-        RETURN_IF_FAIL(wrap_log_call(_ext, _serializer_multislot, context, actions, payload, status, flags, action_ids, pdfs, model_version, slot_ids, baseline_actions));
-        return _v2->log(event_id.c_str(), std::move(payload), payload_type, std::move(actions), status);
+        event_content_type content_type;
+
+        RETURN_IF_FAIL(wrap_log_call(_ext, _serializer_multislot, context, actions, payload, content_type, status, flags, action_ids, pdfs, model_version, slot_ids, baseline_actions));
+        return _v2->log(event_id.c_str(), std::move(payload), payload_type, content_type, std::move(actions), status);
       }
       default: return protocol_not_supported(status);
       }
@@ -137,9 +145,10 @@ namespace reinforcement_learning {
       case 2: {
         generic_event::object_list_t actions;
         generic_event::payload_buffer_t payload;
+        event_content_type content_type;
 
-        RETURN_IF_FAIL(wrap_log_call(_ext, _serializer_ca, context, actions, payload, status, flags, response));
-        return _v2->log(response.get_event_id(), std::move(payload), _serializer_ca.type, std::move(actions), status);
+        RETURN_IF_FAIL(wrap_log_call(_ext, _serializer_ca, context, actions, payload, content_type, status, flags, response));
+        return _v2->log(response.get_event_id(), std::move(payload), _serializer_ca.type, content_type, std::move(actions), status);
       }
       default: return protocol_not_supported(status);
       }
@@ -170,7 +179,7 @@ namespace reinforcement_learning {
     int observation_logger_facade::log(const char* event_id, float outcome, api_status* status) {
       switch (_version) {
         case 1: return _v1->log(event_id, outcome, status);
-        case 2: return _v2->log(event_id, _serializer.numeric_event(outcome), _serializer.type, status);
+        case 2: return _v2->log(event_id, _serializer.numeric_event(outcome), _serializer.type, event_content_type::IDENTITY, status);
         default: return protocol_not_supported(status);
       }
     }
@@ -178,7 +187,7 @@ namespace reinforcement_learning {
     int observation_logger_facade::log(const char* event_id, const char* outcome, api_status* status) {
       switch (_version) {
         case 1: return _v1->log(event_id, outcome, status);
-        case 2: return _v2->log(event_id, _serializer.string_event(outcome), _serializer.type, status);
+        case 2: return _v2->log(event_id, _serializer.string_event(outcome), _serializer.type, event_content_type::IDENTITY, status);
         default: return protocol_not_supported(status);
       }
     }
@@ -186,28 +195,28 @@ namespace reinforcement_learning {
 
     int observation_logger_facade::log(const char* primary_id, int secondary_id, float outcome, api_status* status) {
       switch (_version) {
-        case 2: return _v2->log(primary_id, _serializer.numeric_event(secondary_id, outcome), _serializer.type, status);
+        case 2: return _v2->log(primary_id, _serializer.numeric_event(secondary_id, outcome), _serializer.type, event_content_type::IDENTITY, status);
         default: return protocol_not_supported(status);
       }
     }
 
     int observation_logger_facade::log(const char* primary_id, int secondary_id, const char* outcome, api_status* status) {
       switch (_version) {
-        case 2: return _v2->log(primary_id, _serializer.string_event(secondary_id, outcome), _serializer.type, status);
+        case 2: return _v2->log(primary_id, _serializer.string_event(secondary_id, outcome), _serializer.type, event_content_type::IDENTITY, status);
         default: return protocol_not_supported(status);
       }
     }
 
     int observation_logger_facade::log(const char* primary_id, const char* secondary_id, float outcome, api_status* status) {
       switch (_version) {
-        case 2: return _v2->log(primary_id, _serializer.numeric_event(secondary_id, outcome), _serializer.type, status);
+        case 2: return _v2->log(primary_id, _serializer.numeric_event(secondary_id, outcome), _serializer.type, event_content_type::IDENTITY, status);
         default: return protocol_not_supported(status);
       }
     }
 
     int observation_logger_facade::log(const char* primary_id, const char* secondary_id, const char* outcome, api_status* status) {
       switch (_version) {
-        case 2: return _v2->log(primary_id, _serializer.string_event(secondary_id, outcome), _serializer.type, status);
+        case 2: return _v2->log(primary_id, _serializer.string_event(secondary_id, outcome), _serializer.type, event_content_type::IDENTITY, status);
         default: return protocol_not_supported(status);
       }
     }
@@ -215,7 +224,7 @@ namespace reinforcement_learning {
     int observation_logger_facade::report_action_taken(const char* event_id, api_status* status) {
       switch (_version) {
         case 1: return _v1->report_action_taken(event_id, status);
-        case 2: return _v2->log(event_id, _serializer.report_action_taken(), _serializer.type, status);
+        case 2: return _v2->log(event_id, _serializer.report_action_taken(), _serializer.type, event_content_type::IDENTITY, status);
         default: return protocol_not_supported(status);
       }
     }

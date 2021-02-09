@@ -90,6 +90,11 @@ int dedup_dict::transform_payload_and_add_objects(const char* payload, std::stri
   return error_code::success;
 }
 
+size_t dedup_dict::size() const
+{
+  return _entries.size();
+}
+
 
 zstd_compressor::zstd_compressor(int level): _level(level) {}
 
@@ -128,9 +133,11 @@ int zstd_compressor::decompress(generic_event::payload_buffer_t& buf, api_status
 }
 
 
-dedup_state::dedup_state(const utility::configuration& c, i_time_provider* time_provider):
+dedup_state::dedup_state(const utility::configuration& c, bool use_compression, bool use_dedup, i_time_provider* time_provider):
   _compressor(c.get_int(name::ZSTD_COMPRESSION_LEVEL, zstd_compressor::ZSTD_DEFAULT_COMPRESSION_LEVEL))
   , _time_provider(time_provider)
+  , _use_compression(use_compression)
+  , _use_dedup(use_dedup)
 {
 }
 
@@ -149,13 +156,23 @@ void dedup_state::update_ewma(float value)
   _ewma.update(value);
 }
 
-int dedup_state::compress(generic_event::payload_buffer_t& input, api_status* status) const {
-  return _compressor.compress(input, status);
+int dedup_state::compress(generic_event::payload_buffer_t& input, event_content_type& content_type, api_status* status) const {
+  if(_use_compression) {
+    content_type = event_content_type::ZSTD;
+    return _compressor.compress(input, status);
+  }
+  content_type = event_content_type::IDENTITY;
+  return error_code::success;
 }
 
 int dedup_state::transform_payload_and_add_objects(const char* payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status){
-  std::unique_lock<std::mutex> mlock(_mutex);
-  return _dict.transform_payload_and_add_objects(payload, edited_payload, object_ids, status);
+  if(!_use_dedup) {
+    edited_payload = payload;
+    return error_code::success;
+  } else {
+    std::unique_lock<std::mutex> mlock(_mutex);
+    return _dict.transform_payload_and_add_objects(payload, edited_payload, object_ids, status);
+  }
 }
 
 action_dict_builder::action_dict_builder(dedup_state& state):
@@ -202,14 +219,21 @@ int action_dict_builder::finalize(generic_event& evt, api_status* status)
   RETURN_IF_FAIL(_state.remove_all_values(_used_objects.begin(), _used_objects.end(), status));
 
   //compress the payload
+  event_content_type content_type;
   size_t old_size = payload.size();
-  RETURN_IF_FAIL(_state.compress(payload, status));
+  RETURN_IF_FAIL(_state.compress(payload, content_type, status));    
   size_t new_size = payload.size();
 
   //update compression ratio estimator
   _state.update_ewma(new_size / (float)old_size);
 
-  evt = generic_event(DEDUP_DICT_EVENT_ID, now, generic_event::payload_type_t::PayloadType_DedupInfo, std::move(payload));
+  evt = generic_event(
+    DEDUP_DICT_EVENT_ID,
+    now,
+    generic_event::payload_type_t::PayloadType_DedupInfo,
+    std::move(payload),
+    content_type);
+
   return error_code::success;
 }
 
@@ -222,7 +246,7 @@ struct dedup_collection_serializer
 
   static int message_id() { return logger::message_type::fb_generic_event_collection; }
 
-  dedup_collection_serializer(buffer_t& buffer, content_encoding_enum content_encoding, shared_state_t& state)
+  dedup_collection_serializer(buffer_t& buffer, const char* content_encoding, shared_state_t& state)
       : _dummy(0), _ser(buffer, content_encoding, _dummy), _state(state), _builder(state) {}
 
   int add(event_t& evt, api_status* status = nullptr)
@@ -253,36 +277,59 @@ struct dedup_collection_serializer
 class dedup_extensions : public logger::i_logger_extensions
 {
 public:
-	dedup_extensions(const utility::configuration& c, i_time_provider* time_provider) : logger::i_logger_extensions(c), _dedup_state(c, time_provider) {}
+	dedup_extensions(const utility::configuration& c, bool use_compression, bool use_dedup, i_time_provider* time_provider) :
+    logger::i_logger_extensions(c), _dedup_state(c, use_compression, use_dedup, time_provider), _use_dedup(use_dedup), _use_compression(use_compression) {}
 
 	logger::i_async_batcher<generic_event>* create_batcher(logger::i_message_sender* sender, utility::watchdog& watchdog,
 																									error_callback_fn* perror_cb, const char* section) override {
 		auto config = utility::get_batcher_config(_config, section);
 		int _dummy = 0;
-		return new logger::async_batcher<generic_event, dedup_collection_serializer>(
-				sender,
-				watchdog,
-				_dedup_state,
-				perror_cb,
-				config);
+    if(_use_dedup) {
+      return new logger::async_batcher<generic_event, dedup_collection_serializer>(
+          sender,
+          watchdog,
+          _dedup_state,
+          perror_cb,
+          config);
+    } else {
+      int _dummy = 0;
+      return new logger::async_batcher<generic_event, logger::fb_collection_serializer>(
+          sender,
+          watchdog,
+          _dummy,
+          perror_cb,
+          config);
+    }
+
 	}
 
-	bool is_enabled() override { return true; }
+  bool is_object_extraction_enabled() const override { return _use_dedup; }
+  bool is_serialization_transform_enabled() const override { return _use_compression; }
 
 	int transform_payload_and_extract_objects(const char* context, std::string& edited_payload, generic_event::object_list_t& objects, api_status* status) override {
-		return _dedup_state.transform_payload_and_add_objects(context, edited_payload, objects, status);
+    return _dedup_state.transform_payload_and_add_objects(context, edited_payload, objects, status);
 	}
 
-  int transform_serialized_payload(generic_event::payload_buffer_t& input, api_status* status) override {
-		return _dedup_state.compress(input, status);
+  int transform_serialized_payload(generic_event::payload_buffer_t& input, event_content_type& content_type, api_status* status) const override {
+		return _dedup_state.compress(input, content_type, status);
 	}
 private:
 	dedup_state _dedup_state;
+  bool _use_compression;
+  bool _use_dedup;
 };
 
 
-logger::i_logger_extensions* create_dedup_logger_extension(const utility::configuration& config, i_time_provider* time_provider) {
-  return new dedup_extensions(config, time_provider);
+logger::i_logger_extensions* create_dedup_logger_extension(const utility::configuration& config, const char* section, i_time_provider* time_provider) {
+	if(config.get_int(name::PROTOCOL_VERSION, 1) != 2)
+    return nullptr;
+  const bool use_compression = config.get_bool(section, name::USE_COMPRESSION, false);
+  const bool use_dedup = config.get_bool(section, name::USE_DEDUP, false);
+
+  if(!use_compression && !use_dedup)
+    return nullptr;
+
+  return new dedup_extensions(config, use_compression, use_dedup, time_provider);
 }
 
 }
