@@ -25,7 +25,8 @@ namespace reinforcement_learning {  namespace name {
       const char *const  INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB    = "interaction.send.queue.maxcapacity.kb";
       const char *const  INTERACTION_SEND_BATCH_INTERVAL_MS   = "interaction.send.batchintervalms";
       const char *const  INTERACTION_SENDER_IMPLEMENTATION    = "interaction.sender.implementation";
-      const char *const  INTERACTION_CONTENT_ENCODING = "interaction.content.encoding";
+      const char *const  INTERACTION_USE_COMPRESSION = "interaction.send.use_compression";
+      const char *const  INTERACTION_USE_DEDUP = "interaction.send.use_dedup";
       const char *const  INTERACTION_QUEUE_MODE = "interaction.queue.mode";
 
       // Observation
@@ -39,7 +40,7 @@ namespace reinforcement_learning {  namespace name {
       const char *const  OBSERVATION_SEND_QUEUE_MAX_CAPACITY_KB    = "observation.send.queue.maxcapacity.kb";
       const char *const  OBSERVATION_SEND_BATCH_INTERVAL_MS   = "observation.send.batchintervalms";
       const char *const  OBSERVATION_SENDER_IMPLEMENTATION    = "observation.sender.implementation";
-      const char *const  OBSERVATION_CONTENT_ENCODING = "observation.content.encoding";
+      const char *const  OBSERVATION_USE_COMPRESSION = "observation.send.use_compression";
       const char *const  OBSERVATION_QUEUE_MODE = "observation.queue.mode";
 
 
@@ -47,7 +48,8 @@ namespace reinforcement_learning {  namespace name {
       const char *const SEND_HIGH_WATER_MARK        = "send.highwatermark";
       const char *const SEND_QUEUE_MAX_CAPACITY_KB  = "send.queue.maxcapacity.kb";
       const char *const SEND_BATCH_INTERVAL_MS      = "send.batchintervalms";
-      const char *const CONTENT_ENCODING            = "content.encoding";
+      const char *const USE_COMPRESSION             = "send.use_compression";
+      const char *const USE_DEDUP                   = "send.use_dedup";
       const char *const QUEUE_MODE                  = "queue.mode";
 
       const char *const  EH_TEST                 = "eventhub.mock";
@@ -59,6 +61,8 @@ namespace reinforcement_learning {  namespace name {
       const char *const  HTTP_CLIENT_TIMEOUT                  = "http.timeout"; // Timeout is in seconds, default is 30.
       const char *const  MODEL_FILE_NAME                      = "model_file_loader.file_name";
       const char *const  MODEL_FILE_MUST_EXIST                = "model_file_loader.file_must_exist";
+
+      const char *const ZSTD_COMPRESSION_LEVEL = "zstd.compression_level";
 }}
 
 namespace reinforcement_learning {  namespace value {
@@ -79,7 +83,7 @@ namespace reinforcement_learning {  namespace value {
       const char *const LEARNING_MODE_APPRENTICE = "APPRENTICE";
       const char *const LEARNING_MODE_LOGGINGONLY = "LOGGINGONLY";
       const char *const CONTENT_ENCODING_IDENTITY = "IDENTITY";
-      const char *const CONTENT_ENCODING_ZSTD_AND_DEDUP = "ZSTD_AND_DEDUP";
+      const char *const CONTENT_ENCODING_DEDUP = "DEDUP";
 
       const char *const QUEUE_MODE_DROP = "DROP";
       const char *const QUEUE_MODE_BLOCK = "BLOCK";

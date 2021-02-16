@@ -5,20 +5,22 @@
 
 using namespace std;
 namespace reinforcement_learning {
-  generic_event::generic_event(const char* id, const timestamp& ts, payload_type_t type, flatbuffers::DetachedBuffer&& payload, object_list_t &&objects, float pass_prob)
+  generic_event::generic_event(const char* id, const timestamp& ts, payload_type_t type, flatbuffers::DetachedBuffer&& payload, event_content_type content_type, object_list_t &&objects, float pass_prob)
     : _id(id)
     , _client_time_gmt(ts)
     , _payload_type(type)
     , _payload(std::move(payload))
     , _objects(std::move(objects))
-    , _pass_prob(pass_prob) {}
+    , _pass_prob(pass_prob)
+    , _content_type(content_type) {}
 
-  generic_event::generic_event(const char* id, const timestamp& ts, payload_type_t type, flatbuffers::DetachedBuffer&& payload, float pass_prob)
+  generic_event::generic_event(const char* id, const timestamp& ts, payload_type_t type, flatbuffers::DetachedBuffer&& payload, event_content_type content_type, float pass_prob)
     : _id(id)
     , _client_time_gmt(ts)
     , _payload_type(type)
     , _payload(std::move(payload))
-    , _pass_prob(pass_prob) {}
+    , _pass_prob(pass_prob)
+    , _content_type(content_type) {}
 
   bool generic_event::try_drop(float pass_prob, int drop_pass) {
     _pass_prob *= pass_prob;
@@ -44,5 +46,15 @@ namespace reinforcement_learning {
 
   const generic_event::payload_buffer_t& generic_event::get_payload() const {
     return _payload;
+  }
+
+  generic_event::encoding_type_t generic_event::get_encoding() const {
+    switch (_content_type) {
+      case event_content_type::ZSTD:
+        return encoding_type_t::EventEncoding_Zstd;
+      case event_content_type::IDENTITY:
+      default:
+        return encoding_type_t::EventEncoding_Identity;
+    }
   }
 }

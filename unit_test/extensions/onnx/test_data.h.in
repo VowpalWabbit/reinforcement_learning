@@ -1,0 +1,2 @@
+#define TEST_DATA(item_path) \
+  "@rltestonnx_DATA_ROOT@" "@rltestonnx_SYSTEM_PATH_SEPARATOR@" #item_path 

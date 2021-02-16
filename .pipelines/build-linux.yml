@@ -5,7 +5,7 @@ pool:
   vmImage: 'ubuntu-16.04'
 
 container:
-  image: vowpalwabbit/rl-ubuntu-1604:0.2.0
+  image: vowpalwabbit/rl-ubuntu-1604:0.6.0
   endpoint: DockerHub
 
 steps:

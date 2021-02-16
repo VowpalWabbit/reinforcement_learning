@@ -25,8 +25,16 @@ namespace reinforcement_learning {
     _vw = VW::initialize("--quiet --json", &buf, false, nullptr, nullptr);
   }
 
-  safe_vw::safe_vw(std::string vw_commandline)
+  safe_vw::safe_vw(const char* model_data, size_t len, const std::string& vw_commandline)
   {
+	io_buf buf;
+	buf.add_file(VW::io::create_buffer_view(model_data, len));
+
+	_vw = VW::initialize(vw_commandline, &buf, false, nullptr, nullptr);
+  }
+
+  safe_vw::safe_vw(const std::string& vw_commandline)
+  {	  
 	  _vw = VW::initialize(vw_commandline);
   }
 
@@ -34,7 +42,7 @@ namespace reinforcement_learning {
   {
     // cleanup examples
     for (auto&& ex : _example_pool) {
-      VW::dealloc_example(_vw->p->lp.delete_label, *ex);
+      VW::dealloc_example(_vw->example_parser->lbl_parser.delete_label, *ex);
       ::free_it(ex);
     }
 
@@ -49,7 +57,7 @@ namespace reinforcement_learning {
     // alloc new element if we don't have any left
     if (_example_pool.size() == 0) {
       auto ex = VW::alloc_examples(0, 1);
-      _vw->p->lp.default_label(&ex->l);
+      _vw->example_parser->lbl_parser.default_label(&ex->l);
 
       return ex;
     }
@@ -59,7 +67,7 @@ namespace reinforcement_learning {
     _example_pool.pop_back();
 
     VW::empty_example(*_vw, *ex);
-    _vw->p->lp.default_label(&ex->l);
+    _vw->example_parser->lbl_parser.default_label(&ex->l);
 
     return ex;
   }
@@ -211,7 +219,7 @@ namespace reinforcement_learning {
     examples.delete_v();
   }
 
-  void safe_vw::rank_multi_slot_decisions(const char* event_id, uint32_t slot_count, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
+  void safe_vw::rank_multi_slot_decisions(const char* event_id, const std::vector<std::string>& slot_ids, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
   {
     auto examples = v_init<example*>();
     examples.push_back(get_or_create_example());
@@ -220,13 +228,12 @@ namespace reinforcement_learning {
 
     VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
     // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the example tag.
-    for(uint32_t i = 0; i < slot_count; i++)
+    for(uint32_t i = 0; i < slot_ids.size(); i++)
     {
-      const size_t slot_example_indx = examples.size() - slot_count + i;
-      auto index_as_string = std::to_string(i);
+      const size_t slot_example_indx = examples.size() - slot_ids.size() + i;
       push_many(examples[slot_example_indx]->tag, SEED_TAG.c_str(), SEED_TAG.size());
       push_many(examples[slot_example_indx]->tag, event_id, strlen(event_id));
-      push_many(examples[slot_example_indx]->tag, index_as_string.c_str(), index_as_string.size());
+      push_many(examples[slot_example_indx]->tag, slot_ids[i].c_str(), slot_ids[i].size());
     }
 
     // finalize example
@@ -326,8 +333,8 @@ mm::model_type_t safe_vw::get_model_type(const VW::config::options_i* args)
 }
 
 bool safe_vw::is_compatible(const std::string& args) const {
-  const auto local_model_type = get_model_type(_vw->options);
-  const auto inbound_model_type = get_model_type(args);
+  const auto local_model_type = get_model_type(args);
+  const auto inbound_model_type = get_model_type(_vw->options.get());
 
   // This really is an error but errors cant be reported here...
   if(local_model_type == mm::model_type_t::UNKNOWN || inbound_model_type ==  mm::model_type_t::UNKNOWN)
@@ -336,6 +343,14 @@ bool safe_vw::is_compatible(const std::string& args) const {
   }
 
   return local_model_type == inbound_model_type;
+}
+
+bool safe_vw::is_CB_to_CCB_model_upgrade(const std::string& args) const
+{
+    const auto local_model_type = get_model_type(args);
+    const auto inbound_model_type = get_model_type(_vw->options.get());
+
+    return local_model_type == mm::model_type_t::CCB && inbound_model_type == mm::model_type_t::CB;    
 }
 
 safe_vw_factory::safe_vw_factory(const std::string& command_line)
@@ -350,9 +365,22 @@ safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_dat
   : _master_data(master_data)
   {}
 
-  safe_vw* safe_vw_factory::operator()()
-  {
-    if (_master_data.data())
+safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data, const std::string& command_line)
+  : _master_data(master_data), _command_line(command_line)
+  {}
+
+safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_data, const std::string& command_line)
+  : _master_data(master_data), _command_line(command_line)
+  {}
+
+safe_vw* safe_vw_factory::operator()() 
+{
+    if (_master_data.data() && _command_line.size() > 0)
+    {
+      // Construct new vw object from raw model data and command line argument
+      return new safe_vw(_master_data.data(), _master_data.data_sz(), _command_line);
+    }
+    else if (_master_data.data())
     {
       // Construct new vw object from raw model data.
       return new safe_vw(_master_data.data(), _master_data.data_sz());

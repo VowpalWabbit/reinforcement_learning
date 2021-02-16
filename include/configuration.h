@@ -45,7 +45,10 @@ namespace reinforcement_learning { namespace utility {
     //! Gets the value as a float.  If the value does not exist or if there is an error, it returns defval
     float get_float(const char* name, float defval) const; 
     //! friend Left shift operator
-    friend std::ostream& ::operator<<(std::ostream& os, const configuration&);
+    friend std::ostream& ::operator<<(std::ostream& os, const reinforcement_learning::utility::configuration&);
+
+    //! Same as get_bool, but use global value as fallback before defval. Sections names are dot delimited. IE: `section.property`
+    bool get_bool(const char* section, const char* name, bool defval) const;
 
   private:
     using map_type = std::unordered_map<std::string, std::string>;  //! Collection type that holds the (name,value) pairs 

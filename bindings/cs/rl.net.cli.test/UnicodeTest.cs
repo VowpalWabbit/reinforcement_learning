@@ -68,6 +68,43 @@ namespace Rl.Net.Cli.Test
         static float [] ExpectedPdf = { 0.4f, 0.6f };
         const float Epsilon = float.Epsilon;
 
+        const string PseudoLocMultiSlotContextWithPdf =
+@"{
+    ""GÛƨèř"": {
+    ""ƨλářèδ_ƒèáƭúřè"": ""ƒèáƭúřè""
+    }, 
+    ""_multi"": [
+    {
+    ""TÂçƭïôñ"": {
+    ""ƒèáƭúřè1"": 3.0,
+    ""ƒèáƭúřè2"": ""ñá₥è1""
+    }
+    }, 
+    {
+    ""TÂçƭïôñ"": {
+    ""ƒèáƭúřè1"": 3.0, 
+    ""ƒèáƭúřè2"": ""ñá₥è1"" 
+    }
+    }, 
+    {
+    ""TÂçƭïôñ"": {
+    ""ƒèáƭúřè1"": 3.0,
+    ""ƒèáƭúřè2"": ""ñá₥è1""
+    }
+    }
+    ], 
+    ""_slots"": [
+    {
+    ""ƨïƺè"": ""ƨ₥áℓℓ"",
+    ""_ïñç"": [0, 2]
+    }, 
+    {
+    ""ƨïƺè"": ""ℓářϱè""
+    }
+    ]
+}
+";
+
         private void Run_PtrToStringUtf8_RoundtripTest(string str, string message)
         {
             unsafe
@@ -373,6 +410,80 @@ namespace Rl.Net.Cli.Test
             Run_LiveModelRequestDecisionWithFlags_Test(liveModel, PseudoLocContextJsonWithPdf);
         }
 
+        private void Run_LiveModelRequestMultiSlotDetailed_Test(LiveModel liveModel, string contextJson, string eventId)
+        {
+            NativeMethods.LiveModelRequestMultiSlotDecisionDetailedOverride =
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, IntPtr rankingResponse, IntPtr ApiStatus) =>
+                {
+                    string contextJsonMarshalledBack = NativeMethods.StringMarshallingFunc(contextJsonPtr);
+                    Assert.AreEqual(contextJson, contextJsonMarshalledBack, "Marshalling contextJson does not work properly in LiveModelRequestMultiSlotDecisionDetailed");
+
+                    return NativeMethods.SuccessStatus;
+                };
+
+            liveModel.RequestMultiSlotDecisionDetailed(eventId, contextJson);
+        }
+
+        private void Run_LiveModelRequestMultiSlotDetailedWithFlags_Test(LiveModel liveModel, string contextJson, string eventId)
+        {
+            NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithFlagsOverride =
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, uint flags, IntPtr rankingResponse, IntPtr ApiStatus) =>
+                {
+                    string contextJsonMarshalledBack = NativeMethods.StringMarshallingFunc(contextJsonPtr);
+                    Assert.AreEqual(contextJson, contextJsonMarshalledBack, "Marshalling contextJson does not work properly in LiveModelRequestDecisionDetailedWithFlags");
+
+                    return NativeMethods.SuccessStatus;
+                };
+
+            liveModel.RequestMultiSlotDecisionDetailed(eventId, contextJson, ActionFlags.Deferred);
+        }
+
+        [TestMethod]
+        public void Test_LiveModel_RequestMultiSlotDecisionDetailed()
+        {
+            LiveModel liveModel = this.ConfigureLiveModel();
+
+            Run_LiveModelRequestMultiSlotDetailed_Test(liveModel, PseudoLocMultiSlotContextWithPdf, PseudoLocEventId);
+            Run_LiveModelRequestMultiSlotDetailedWithFlags_Test(liveModel, PseudoLocMultiSlotContextWithPdf, PseudoLocEventId);
+        }
+
+        private void Run_LiveModelRequestMultiSlot_Test(LiveModel liveModel, string contextJson, string eventId)
+        {
+            NativeMethods.LiveModelRequestMultiSlotDecisionOverride =
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, IntPtr rankingResponse, IntPtr ApiStatus) =>
+                {
+                    string contextJsonMarshalledBack = NativeMethods.StringMarshallingFunc(contextJsonPtr);
+                    Assert.AreEqual(contextJson, contextJsonMarshalledBack, "Marshalling contextJson does not work properly in LiveModelRequestMultiSlotDecision");
+
+                    return NativeMethods.SuccessStatus;
+                };
+
+            liveModel.RequestMultiSlotDecision(eventId, contextJson);
+        }
+
+        private void Run_LiveModelRequestMultiSlotWithFlags_Test(LiveModel liveModel, string contextJson, string eventId)
+        {
+            NativeMethods.LiveModelRequestMultiSlotDecisionWithFlagsOverride =
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, uint flags, IntPtr rankingResponse, IntPtr ApiStatus) =>
+                {
+                    string contextJsonMarshalledBack = NativeMethods.StringMarshallingFunc(contextJsonPtr);
+                    Assert.AreEqual(contextJson, contextJsonMarshalledBack, "Marshalling contextJson does not work properly in LiveModelRequestDecisionWithFlags");
+
+                    return NativeMethods.SuccessStatus;
+                };
+
+            liveModel.RequestMultiSlotDecision(eventId, contextJson, ActionFlags.Deferred);
+        }
+
+        [TestMethod]
+        public void Test_LiveModel_RequestMultiSlotDecision()
+        {
+            LiveModel liveModel = this.ConfigureLiveModel();
+
+            Run_LiveModelRequestMultiSlot_Test(liveModel, PseudoLocMultiSlotContextWithPdf, PseudoLocEventId);
+            Run_LiveModelRequestMultiSlotWithFlags_Test(liveModel, PseudoLocMultiSlotContextWithPdf, PseudoLocEventId);
+        }
+
         private void Run_LiveModelRequestContinuousAction_Test(LiveModel liveModel, string contextJson)
         {
             NativeMethods.LiveModelRequestContinuousActionOverride =
@@ -443,12 +554,80 @@ namespace Rl.Net.Cli.Test
                     Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in LiveModelReportOutcomeJson");
 
                     string outcomeJsonMarshalledBack = NativeMethods.StringMarshallingFunc(outcomeJsonPtr);
-                    Assert.AreEqual(outcomeJson, outcomeJsonMarshalledBack, "Marshalling eventId does not work properly in LiveModelReportOutcomeJson");
+                    Assert.AreEqual(outcomeJson, outcomeJsonMarshalledBack, "Marshalling outcomeJson does not work properly in LiveModelReportOutcomeJson");
 
                     return NativeMethods.SuccessStatus;
                 };
 
             liveModel.QueueOutcomeEvent(eventId, outcomeJson);
+        }
+
+        private void Run_LiveModelReportOutcomeSlotF_Test(LiveModel liveModel, string eventId, uint slotIndex, float outcome)
+        {
+            NativeMethods.LiveModelReportOutcomeSlotFOverride =
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, uint slotI, float o, IntPtr apiStatus) =>
+                {
+                    string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
+                    Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in LiveModelReportOutcomeSlotF");
+
+                    return NativeMethods.SuccessStatus;
+                };
+
+            liveModel.QueueOutcomeEvent(eventId, slotIndex, outcome);
+        }
+
+        private void Run_LiveModelReportOutcomeSlotJson_Test(LiveModel liveModel, string eventId, uint slotIndex, string outcomeJson)
+        {
+            NativeMethods.LiveModelReportOutcomeSlotJsonOverride =
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, uint slotI, IntPtr outcomeJsonPtr, IntPtr apiStatus) =>
+                {
+                    string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
+                    Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in LiveModelReportOutcomeSlotJson");
+
+                    string outcomeJsonMarshalledBack = NativeMethods.StringMarshallingFunc(outcomeJsonPtr);
+                    Assert.AreEqual(outcomeJson, outcomeJsonMarshalledBack, "Marshalling outcomeJson does not work properly in LiveModelReportOutcomeSlotJson");
+
+                    return NativeMethods.SuccessStatus;
+                };
+
+            liveModel.QueueOutcomeEvent(eventId, slotIndex, outcomeJson);
+        }
+
+        private void Run_LiveModelReportOutcomeSlotStringIdF_Test(LiveModel liveModel, string eventId, string slotId, float outcome)
+        {
+            NativeMethods.LiveModelReportOutcomeSlotStringIdFOverride =
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr slotIdPtr, float o, IntPtr apiStatus) =>
+                {
+                    string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
+                    Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in LiveModelReportOutcomeSlotStringIdF");
+
+                    string slotIdMarshalledBack = NativeMethods.StringMarshallingFunc(slotIdPtr);
+                    Assert.AreEqual(slotId, slotIdMarshalledBack, "Marshalling slotId does not work properly in LiveModelReportOutcomeSlotStringIdF");
+
+                    return NativeMethods.SuccessStatus;
+                };
+
+            liveModel.QueueOutcomeEvent(eventId, slotId, outcome);
+        }
+
+        private void Run_LiveModelReportOutcomeSlotStringIdJson_Test(LiveModel liveModel, string eventId, string slotId, string outcomeJson)
+        {
+            NativeMethods.LiveModelReportOutcomeSlotStringIdJsonOverride =
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr slotIdPtr, IntPtr outcomeJsonPtr, IntPtr apiStatus) =>
+                {
+                    string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
+                    Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in LiveModelReportOutcomeSlotStringIdJson");
+
+                    string slotIdMarshalledBack = NativeMethods.StringMarshallingFunc(slotIdPtr);
+                    Assert.AreEqual(slotId, slotIdMarshalledBack, "Marshalling slotId does not work properly in LiveModelReportOutcomeSlotStringIdJson");
+
+                    string outcomeJsonMarshalledBack = NativeMethods.StringMarshallingFunc(outcomeJsonPtr);
+                    Assert.AreEqual(outcomeJson, outcomeJsonMarshalledBack, "Marshalling outcomeJson does not work properly in LiveModelReportOutcomeSlotStringIdJson");
+
+                    return NativeMethods.SuccessStatus;
+                };
+
+            liveModel.QueueOutcomeEvent(eventId, slotId, outcomeJson);
         }
 
         [TestMethod]
@@ -458,6 +637,10 @@ namespace Rl.Net.Cli.Test
 
             Run_LiveModelReportOutcomeF_Test(liveModel, PseudoLocEventId, 1.0f);
             Run_LiveModelReportOutcomeJson_Test(liveModel, PseudoLocEventId, PseudoLocOutcomeJson);
+            Run_LiveModelReportOutcomeSlotF_Test(liveModel, PseudoLocEventId, 1, 1.0f);
+            Run_LiveModelReportOutcomeSlotJson_Test(liveModel, PseudoLocEventId, 1, PseudoLocOutcomeJson);
+            Run_LiveModelReportOutcomeSlotStringIdF_Test(liveModel, PseudoLocEventId, "SlotId", 1.0f);
+            Run_LiveModelReportOutcomeSlotStringIdJson_Test(liveModel, PseudoLocEventId, "SlotId", PseudoLocOutcomeJson);
         }
 
         private void Run_StringReturnMarshallingTest<TNativeObject>(string valueToReturn, Action<Func<IntPtr, IntPtr>> registerNativeOverride, Func<TNativeObject, string> targetInvocation, string targetInvocationName)
@@ -527,6 +710,48 @@ namespace Rl.Net.Cli.Test
             Run_GetRankingModelId_Test(String.Empty);
             Run_GetRankingModelId_Test(null);
         }
+
+        [TestMethod]
+        public void Test_SlotRankingStringProperties()
+        {
+            void RegisterNativeOverride(Func<IntPtr, IntPtr> nativeOverrideCallback)
+            {
+                NativeMethods.GetSlotIdOverride = nativeOverrideCallback;
+            }
+
+            Run_StringReturnMarshallingTest<SlotRanking>(PseudoLocEventId, RegisterNativeOverride, slotRanking => slotRanking.SlotId, nameof(NativeMethods.GetSlotId));
+        }
+
+        private void Run_GetMultiSlotDetailedModelId_Test(string modelIdToReturn)
+        {
+            void RegisterNativeOverride(Func<IntPtr, IntPtr> nativeOverrideCallback)
+            {
+                NativeMethods.GetMultiSlotDetailedModelIdOverride = nativeOverrideCallback;
+            }
+
+            Run_StringReturnMarshallingTest<MultiSlotResponseDetailed>(modelIdToReturn, RegisterNativeOverride, multiSlot => multiSlot.ModelId, nameof(NativeMethods.GetMultiSlotDetailedModelId));
+        }
+
+        private void Run_GetMultiSlotDetailedEventId_Test(string eventIdToReturn)
+        {
+            void RegisterNativeOverride(Func<IntPtr, IntPtr> nativeOverrideCallback)
+            {
+                NativeMethods.GetMultiSlotDetailedEventIdOverride = nativeOverrideCallback;
+            }
+
+            Run_StringReturnMarshallingTest<MultiSlotResponseDetailed>(eventIdToReturn, RegisterNativeOverride, multiSlot => multiSlot.EventId, nameof(NativeMethods.GetMultiSlotDetailedEventId));
+        }
+
+        [TestMethod]
+        public void Test_MultiSlotDetailedStringProperties()
+        {
+            Run_GetMultiSlotDetailedEventId_Test(PseudoLocEventId);
+
+            Run_GetMultiSlotDetailedModelId_Test(String.Join("/", PseudoLocEventId, PseudoLocEventId));
+            Run_GetMultiSlotDetailedModelId_Test(String.Empty);
+            Run_GetMultiSlotDetailedModelId_Test(null);
+        }
+
 
         private void Run_GetDecisionModelId_Test(string modelIdToReturn)
         {

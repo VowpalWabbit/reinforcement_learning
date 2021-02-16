@@ -1,5 +1,5 @@
-#include <map>
-#include <set>
+#include <unordered_map>
+#include <unordered_set>
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/error/en.h>
@@ -87,29 +87,73 @@ namespace reinforcement_learning { namespace utility { namespace config {
     return error_code::success;
   }
 
-  std::string translate(const std::map<std::string, std::string>& from_to, const std::string& from) {
-    const auto it = from_to.find(from);
-    if ( it != from_to.end() )
-      return it->second;
-    return from;
+  int translate_property(std::string prop_name, const char* string_value, configuration& cc, i_trace* trace, api_status* status) {
+    // TODO: Remove explicit lower-case translation mappings. This is not completely trivial, because we need to
+    // support UTF-8-encoded strings, and naive to_lower() will cause issues for code-points outside of ASCII7.
+    static const std::unordered_map<std::string, std::string> legacy_translation_mapping = {
+      { "ApplicationID"             , name::APP_ID },
+      { "applicationID"             , name::APP_ID },
+      { "ModelBlobUri"              , name::MODEL_BLOB_URI },
+      { "modelBlobUri"              , name::MODEL_BLOB_URI },
+      { "SendHighMaterMark"         , name::INTERACTION_SEND_HIGH_WATER_MARK },
+      { "sendHighMaterMark"         , name::INTERACTION_SEND_HIGH_WATER_MARK },
+      { "SendBatchIntervalMs"       , name::INTERACTION_SEND_BATCH_INTERVAL_MS },
+      { "sendBatchIntervalMs"       , name::INTERACTION_SEND_BATCH_INTERVAL_MS },
+      { "InitialExplorationEpsilon" , name::INITIAL_EPSILON },
+      { "initialExplorationEpsilon" , name::INITIAL_EPSILON },
+      { "ModelRefreshIntervalMs"    , name::MODEL_REFRESH_INTERVAL_MS },
+      { "modelRefreshIntervalMs"    , name::MODEL_REFRESH_INTERVAL_MS },
+      { "QueueMode"                 , name::QUEUE_MODE }, // expect either DROP or BLOCK, default is DROP
+      { "queueMode"                 , name::QUEUE_MODE }, // expect either DROP or BLOCK, default is DROP
+      { "LearningMode"              , name::LEARNING_MODE},
+      { "learningMode"              , name::LEARNING_MODE},
+      { "InitialCommandLine"        , name::MODEL_VW_INITIAL_COMMAND_LINE},
+      { "initialCommandLine"        , name::MODEL_VW_INITIAL_COMMAND_LINE},
+      { "ProtocolVersion"           , name::PROTOCOL_VERSION},
+      { "protocolVersion"           , name::PROTOCOL_VERSION}
+    };
+
+    static const std::unordered_map<std::string, std::string> parsed_translation_mapping = {
+      { "EventHubInteractionConnectionString" , "interaction" },
+      { "eventHubInteractionConnectionString" , "interaction" },
+      { "EventHubObservationConnectionString" , "observation" },
+      { "eventHubObservationConnectionString" , "observation" }
+    };
+
+    static const std::unordered_set<std::string> deprecated = {
+     "QueueMaxSize", 
+     "queueMaxSize"
+    };
+
+    const auto legacy_it = legacy_translation_mapping.find(prop_name);
+    if (legacy_it != legacy_translation_mapping.end())
+    {
+      prop_name = legacy_it->second;
+    }
+
+    if (trace != nullptr && deprecated.find(prop_name) != deprecated.end()) 
+    {
+      auto message = concat("Field '", prop_name, "' is unresponsive.");
+      TRACE_WARN(trace, message);
+    }
+
+    // Check if the current field is an EventHub connect string that needs to be parsed.
+    const auto parsed_it = parsed_translation_mapping.find(prop_name);
+    if (parsed_it != parsed_translation_mapping.end())
+    {
+      RETURN_IF_FAIL(set_eventhub_config(string_value, parsed_it->second, cc, trace, status));
+    }
+    else
+    {
+        // Otherwise, just set the value in the config collection.
+        cc.set(prop_name.c_str(), string_value);
+    }
+    
+    return error_code::success;
   }
 
+  // TODO: There was an attempt previously to make this work using case-insensitive hashing in std:map (and possibly switch to unordered_map)
   int create_from_json(const std::string& config_json, configuration& cc, i_trace* trace, api_status* status) {
-    static const std::map<std::string, std::string> legacy_translation_mapping = {
-      { "ApplicationID"             , name::APP_ID },
-      { "ModelBlobUri"              , name::MODEL_BLOB_URI },
-      { "SendHighMaterMark"         , name::INTERACTION_SEND_HIGH_WATER_MARK },
-      { "SendBatchIntervalMs"       , name::INTERACTION_SEND_BATCH_INTERVAL_MS },
-      { "InitialExplorationEpsilon" , name::INITIAL_EPSILON },
-      { "ModelRefreshIntervalMs"    , name::MODEL_REFRESH_INTERVAL_MS },
-      { "QueueMode"                 , name::QUEUE_MODE }, // expect either DROP or BLOCK, default is DROP
-      { "LearningMode"              , name::LEARNING_MODE}
-    };
-
-    const std::set<std::string> deprecated = {
-     "QueueMaxSize"
-    };
-
     rj::Document obj;
     try {
       obj.Parse<rj::kParseNumbersAsStringsFlag | rj::kParseDefaultFlags>(config_json.c_str());
@@ -139,22 +183,7 @@ namespace reinforcement_learning { namespace utility { namespace config {
         RETURN_ERROR_LS(trace, status, json_parse_error) << "Invalid json type found: " << prop_value.GetType();
       }
 
-      prop_name = translate(legacy_translation_mapping, prop_name);
-      if (deprecated.find(prop_name) != deprecated.end()) {
-        auto message = concat("Field '", prop_name, "' is unresponsive.");
-        TRACE_WARN(trace, message);
-      }
-      // Check if the current field is an EventHub connect string that needs to be parsed.
-      if (prop_name == "EventHubInteractionConnectionString") {
-        RETURN_IF_FAIL(set_eventhub_config(string_value, "interaction", cc, trace, status));
-      }
-      else if (prop_name == "EventHubObservationConnectionString") {
-        RETURN_IF_FAIL(set_eventhub_config(string_value, "observation", cc, trace, status));
-      }
-      else {
-        // Otherwise, just set the value in the config collection.
-        cc.set(prop_name.c_str(), string_value);
-      }
+      RETURN_IF_FAIL(translate_property(prop_name, string_value, cc, trace, status));
     }
 
     return error_code::success;

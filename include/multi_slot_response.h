@@ -10,20 +10,22 @@ namespace reinforcement_learning {
   class api_status;
 
   /**
-   * @brief Holds triples (slot_id, action_id, probability) that tells which action was choosen for the given slot.
+   * @brief Holds (id, action_id, probability) that tells which action was choosen for the given slot.
    */
   struct slot_entry {
   public:
     ~slot_entry() = default;
 
-    slot_entry(uint32_t _slot_id, uint32_t _action_id, float _probability);
+    slot_entry(const std::string& id, uint32_t _action_id, float _probability);
 
-    uint32_t get_slot_id() const;
+    const char* get_id() const;
     uint32_t get_action_id() const;
     float get_probability() const;
+    void set_action_id(uint32_t id);
+    void set_probability(float prob);
   private:
-    //! slot_id
-    uint32_t slot_id;
+    //! slot entry id
+    std::string id;
     //! action id
     uint32_t action_id;
     //! probability associated with the action id
@@ -49,7 +51,7 @@ namespace reinforcement_learning {
     ~multi_slot_response() = default;
 
     // push_back calls must be done in slot order
-    void push_back(uint32_t action_id, float prob);
+    void push_back(const std::string& id, uint32_t action_id, float prob);
 
     size_t size() const;
 
@@ -69,7 +71,15 @@ namespace reinforcement_learning {
 
     multi_slot_response(multi_slot_response&&) noexcept;
     multi_slot_response& operator=(multi_slot_response&&) noexcept;
-    multi_slot_response(const multi_slot_response&) = default;
-    multi_slot_response& operator =(const multi_slot_response&) = default;
+
+  /**
+  * @brief Copy constructor is removed since implementation will be deleted twice
+  */
+    multi_slot_response(const multi_slot_response&) = delete;
+
+  /**
+  * @brief assignment operator is removed since implementation will be deleted twice
+  */
+    multi_slot_response& operator =(const multi_slot_response&) = delete;
   };
 }

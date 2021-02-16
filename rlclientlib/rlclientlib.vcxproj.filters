@@ -28,6 +28,7 @@
     <ClCompile Include="logger\preamble_sender.cc" />
     <ClCompile Include="logger\endian.cc" />
     <ClCompile Include="logger\preamble.cc" />
+    <ClCompile Include="logger\logger_extensions.cc" />
     <ClCompile Include="utility\http_helper.cc" />
     <ClCompile Include="utility\http_client.cc" />
     <ClCompile Include="utility\http_authorization.cc" />
@@ -122,6 +123,7 @@
     <ClInclude Include="..\include\multistep.h" />
     <ClInclude Include="generic_event.h" />
     <ClInclude Include="dedup.h" />
+    <ClInclude Include="dedup_internals.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

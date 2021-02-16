@@ -20,7 +20,18 @@ namespace reinforcement_learning { namespace model_management {
 
       if (data.data_sz() > 0)
       {
-        std::unique_ptr<safe_vw_factory> factory(new safe_vw_factory(std::move(data)));
+        std::unique_ptr<safe_vw> init_vw(new safe_vw(data.data(), data.data_sz()));
+
+        std::unique_ptr<safe_vw_factory> factory;		  
+        if (init_vw->is_CB_to_CCB_model_upgrade(_initial_command_line))
+        {
+          factory.reset(new safe_vw_factory(std::move(data), _upgrade_to_CCB_vw_commandline_options));
+        }
+        else
+        {
+          factory.reset(new safe_vw_factory(std::move(data)));
+        }
+
         std::unique_ptr<safe_vw> test_vw((*factory)());
         if (test_vw->is_compatible(_initial_command_line)) {
           // safe_vw_factory will create a copy of the model data to use for vw object construction.
@@ -120,13 +131,13 @@ namespace reinforcement_learning { namespace model_management {
   }
 
 
-  int vw_model::request_multi_slot_decision(const char *event_id, uint32_t slot_count, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
+  int vw_model::request_multi_slot_decision(const char *event_id, const std::vector<std::string>& slot_ids, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
     try {
       pooled_vw vw(_vw_pool, _vw_pool.get_or_create());
 
       // Get a ranked list of action_ids and corresponding pdf
-      vw->rank_multi_slot_decisions(event_id, slot_count, features, actions_ids, action_pdfs);
+      vw->rank_multi_slot_decisions(event_id, slot_ids, features, actions_ids, action_pdfs);
 
       model_version = vw->id();
 

@@ -37,6 +37,7 @@ set(PROJECT_SOURCES
   logger/event_logger.cc
   logger/flatbuffer_allocator.cc
   logger/logger_facade.cc
+  logger/logger_extensions.cc
   logger/preamble.cc
   logger/preamble_sender.cc
   logger/endian.cc
@@ -51,6 +52,8 @@ set(PROJECT_SOURCES
   ranking_event.cc
   ranking_response.cc
   sampling.cc
+  multi_slot_response_detailed.cc
+  slot_ranking.cc
   serialization/payload_serializer.cc
   multi_slot_response.cc
   trace_logger.cc
@@ -104,6 +107,8 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/str_util.h
   ../include/trace_logger.h
   ../include/data_buffer.h
+  ../include/slot_ranking.h
+  ../include/multi_slot_response_detailed.h
 )
 
 set(PROJECT_PRIVATE_HEADERS

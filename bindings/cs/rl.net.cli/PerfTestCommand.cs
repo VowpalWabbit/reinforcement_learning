@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using CommandLine;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using CommandLine;
 
 namespace Rl.Net.Cli
 {
@@ -30,6 +26,9 @@ namespace Rl.Net.Cli
 
         [Option(longName: "action-features", HelpText = "Amount of action features", Required = false, Default = 2)]
         public int ActionFeatures { get; set; }
+
+        [Option(longName: "slots", HelpText = "Number of slots", Required = false, Default = 0)]
+        public int NumSlots { get; set; }
 
         [Option(longName: "tag", HelpText = "Tag of experiment", Required = false, Default = "test")]
         public string Tag { get; set; }
@@ -66,7 +65,7 @@ namespace Rl.Net.Cli
         {
             LiveModel liveModel = Helpers.CreateLiveModelOrExit(this.ConfigPath);
 
-            PerfTestStepProvider stepProvider = new PerfTestStepProvider(this.ActionsCount, this.SharedFeatures, this.ActionFeatures)
+            PerfTestStepProvider stepProvider = new PerfTestStepProvider(this.ActionsCount, this.SharedFeatures, this.ActionFeatures, this.NumSlots)
             {
                 Duration = TimeSpan.FromMilliseconds(this.DurationMs),
                 Tag = tag,

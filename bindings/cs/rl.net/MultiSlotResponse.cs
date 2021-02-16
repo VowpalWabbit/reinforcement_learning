@@ -13,9 +13,6 @@ namespace Rl.Net {
         internal partial class NativeMethods
         {
             [DllImport("rl.net.native.dll")]
-            public static extern int GetSlotEntrySlotId(IntPtr slotEntryResponse);
-
-            [DllImport("rl.net.native.dll")]
             public static extern int GetSlotEntryActionId(IntPtr slotEntryResponse);
 
             [DllImport("rl.net.native.dll")]
@@ -69,17 +66,6 @@ namespace Rl.Net {
     {
         internal SlotEntryResponse(IntPtr sharedmultiSlotResponseHandle) : base(sharedmultiSlotResponseHandle, ownsHandle: false)
         {
-        }
-
-        public int SlotId
-        {
-            get
-            {
-                int result = NativeMethods.GetSlotEntrySlotId(this.DangerousGetHandle());
-
-                GC.KeepAlive(this);
-                return result;
-            }
         }
 
         public int ActionId
@@ -140,7 +126,7 @@ namespace Rl.Net {
             {
                 ulong unsignedSize = NativeMethods.GetMultiSlotSize(this.DangerousGetHandle()).ToUInt64();
                 Debug.Assert(unsignedSize < Int64.MaxValue, "We do not support collections with size larger than _I64_MAX/Int64.MaxValue");
-    
+
                 GC.KeepAlive(this);
                 return (long)unsignedSize;
             }
@@ -163,13 +149,12 @@ namespace Rl.Net {
 
             private static New<MultiSlotResponseEnumerator> BindConstructorArguments(MultiSlotResponse multiSlotResponse)
             {
-                return new New<MultiSlotResponseEnumerator>(() => 
+                return new New<MultiSlotResponseEnumerator>(() =>
                 {
                     IntPtr result = CreateMultiSlotEnumeratorAdapter(multiSlotResponse.DangerousGetHandle());
 
                     GC.KeepAlive(multiSlotResponse); // Extend the lifetime of this handle because the delegate (and its data) is not stored on the heap.
                     return result;
-                    
                 });
             }
 
@@ -181,7 +166,7 @@ namespace Rl.Net {
 
             [DllImport("rl.net.native.dll")]
             private static extern int MultiSlotEnumeratorMoveNext(IntPtr multiSlotEnumeratorAdapter);
-        
+
             [DllImport("rl.net.native.dll")]
             private static extern IntPtr GetMultiSlotEnumeratorCurrent(IntPtr multiSlotEnumeratorAdapter);
 
