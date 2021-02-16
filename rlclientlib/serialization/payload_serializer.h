@@ -167,7 +167,7 @@ namespace reinforcement_learning {
     };
 
     struct multistep_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_MultiStep> {
-      static generic_event::payload_buffer_t event(const char* previous_id, const char* context, const ranking_response& response) {
+      static generic_event::payload_buffer_t event(const char* context, const char* previous_id, const ranking_response& response) {
         flatbuffers::FlatBufferBuilder fbb;
         std::vector<uint64_t> action_ids;
         std::vector<float> probabilities;
