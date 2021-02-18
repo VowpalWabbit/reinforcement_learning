@@ -94,7 +94,81 @@ const auto JSON_SLATES_CONTEXT = R"({"GUser":{"id":"a","major":"eng","hobby":"hi
 
 const auto JSON_CA_CONTEXT = R"({"RobotJoint1":{"friction":78}})";
 
-int run_config(int action) {
+
+int take_action(r::live_model& rl, const char *event_id, int action) {
+  r::api_status status;
+
+  switch(action) {
+    case CB_ACTION: {// "cb",
+      r::ranking_response response;
+      if(rl.choose_rank(event_id, JSON_CB_CONTEXT, response, &status))
+          std::cout << status.get_error_msg() << std::endl;
+      break;
+    }
+    case CCB_ACTION: {// "ccb",
+      r::multi_slot_response response;
+      if(rl.request_multi_slot_decision(event_id, JSON_CCB_CONTEXT, 0, response, &status) != err::success)
+          std::cout << status.get_error_msg() << std::endl;
+      break;
+    };
+    case SLATES_ACTION: {// "slates",
+      r::multi_slot_response response;
+      if(rl.request_multi_slot_decision(event_id, JSON_SLATES_CONTEXT, response, &status) != err::success)
+          std::cout << status.get_error_msg() << std::endl;
+      break;
+    };
+    case CA_ACTION: {// "ca",
+      r::continuous_action_response response;
+      if(rl.request_continuous_action(event_id, JSON_CA_CONTEXT, 0, response, &status) != err::success)
+          std::cout << status.get_error_msg() << std::endl;
+      break;
+    };
+    case F_REWARD: // "float"
+      if( rl.report_outcome(event_id, 1.5, &status) != err::success ) 
+          std::cout << status.get_error_msg() << std::endl;
+      break;
+
+    case F_I_REWARD: // "float-int",
+      if( rl.report_outcome(event_id, 10, 1.5, &status) != err::success )
+          std::cout << status.get_error_msg() << std::endl;
+      break;
+    case F_S_REWARD: // "float-string"
+      if( rl.report_outcome(event_id, "index_id", 1.5, &status) != err::success )
+          std::cout << status.get_error_msg() << std::endl;
+      break;
+    case S_REWARD: // "string-reward",
+        if( rl.report_outcome(event_id, "reward-str", &status) != err::success )
+          std::cout << status.get_error_msg() << std::endl;
+      break;
+    case S_I_REWARD: // "string-int-reward",
+        if( rl.report_outcome(event_id, 10, "reward-str", &status) != err::success )
+          std::cout << status.get_error_msg() << std::endl;
+      break;
+    case S_S_REWARD: // "string-string-reward",
+        if( rl.report_outcome(event_id, "index_id", "reward-str", &status) != err::success )
+          std::cout << status.get_error_msg() << std::endl;
+      break;
+    case ACTION_TAKEN:
+        if( rl.report_action_taken(event_id, &status) != err::success )
+          std::cout << status.get_error_msg() << std::endl;
+      break;
+    default:
+      std::cout << "Invalid action " << action << std::endl;
+      return -1;
+  }
+  return 0;
+}
+
+// We use this instead of rand to ensure it's xplat
+int pseudo_random(int seed) {
+  constexpr uint64_t CONSTANT_A = 0xeece66d5deece66dULL;
+  constexpr uint64_t CONSTANT_C = 2147483647;
+
+  uint64_t val = CONSTANT_A * seed + CONSTANT_C;
+  return (int)(val & 0xFFFFFFFF);
+}
+
+int run_config(int action, int count, int initial_seed) {
   u::configuration config;
 
   load_config_from_json(action, config);
@@ -106,63 +180,18 @@ int run_config(int action) {
     return -1;
   }
 
-  switch(action) {
-    case CB_ACTION: {// "cb",
-      r::ranking_response response;
-      rl.choose_rank("event_id", JSON_CB_CONTEXT, response, &status);
-      break;
-    }
-    case CCB_ACTION: {// "ccb",
-      r::multi_slot_response response;
-      if(rl.request_multi_slot_decision("event_id", JSON_CCB_CONTEXT, 0, response, &status) != err::success)
-          std::cout << status.get_error_msg() << std::endl;
-      break;
-    };
-    case SLATES_ACTION: {// "slates",
-      r::multi_slot_response response;
-      if(rl.request_multi_slot_decision("event_id", JSON_SLATES_CONTEXT, response, &status) != err::success)
-          std::cout << status.get_error_msg() << std::endl;
-      break;
-    };
-    case CA_ACTION: {// "ca",
-      r::continuous_action_response response;
-      if(rl.request_continuous_action("event_id", JSON_CA_CONTEXT, 0, response, &status) != err::success)
-          std::cout << status.get_error_msg() << std::endl;
-      break;
-    };
-    case F_REWARD: // "float"
-      if( rl.report_outcome("event_id", 1.5, &status) != err::success ) 
-          std::cout << status.get_error_msg() << std::endl;
-      break;
+  for(int i = 0; i < count; ++i) {
+    char event_id[128];
+    if(initial_seed == -1)
+      strcpy(event_id, "abcdefghijklm");
+    else
+      sprintf(event_id, "%x", pseudo_random(initial_seed + i * 997739));
 
-    case F_I_REWARD: // "float-int",
-      if( rl.report_outcome("event_id", 10, 1.5, &status) != err::success )
-          std::cout << status.get_error_msg() << std::endl;
-      break;
-    case F_S_REWARD: // "float-string"
-      if( rl.report_outcome("event_id", "index_id", 1.5, &status) != err::success )
-          std::cout << status.get_error_msg() << std::endl;
-      break;
-    case S_REWARD: // "string-reward",
-        if( rl.report_outcome("event_id", "reward-str", &status) != err::success )
-          std::cout << status.get_error_msg() << std::endl;
-      break;
-    case S_I_REWARD: // "string-int-reward",
-        if( rl.report_outcome("event_id", 10, "reward-str", &status) != err::success )
-          std::cout << status.get_error_msg() << std::endl;
-      break;
-    case S_S_REWARD: // "string-string-reward",
-        if( rl.report_outcome("event_id", "index_id", "reward-str", &status) != err::success )
-          std::cout << status.get_error_msg() << std::endl;
-      break;
-    case ACTION_TAKEN:
-        if( rl.report_action_taken("event_id", &status) != err::success )
-          std::cout << status.get_error_msg() << std::endl;
-      break;
-    default:
-      std::cout << "Invalid action " << action << std::endl;
-      return -1;
+    int r = take_action(rl, event_id, action);
+    if(r)
+      return r;
   }
+
   return 0;
 }
 
@@ -170,11 +199,15 @@ int main(int argc, char *argv[]) {
   po::options_description desc("example-gen");
   std::string action_name;
   bool gen_all = false;
+  int count = 1;
+  int seed = 473747277; //much random
 
   desc.add_options()
     ("help", "Produce help message")
     ("all", "use all args")
     ("dedup", "Enable dedup/zstd")
+    ("count", po::value<int>(), "Number of events to produce")
+    ("seed", po::value<int>(), "Initial seed used to produce event ids")
     ("kind", po::value<std::string>(), "which kind of example to generate (cb,ccb,slates,ca,(f|s)(s|i)?-reward,action-taken)");
 
   po::positional_options_description pd;
@@ -188,6 +221,10 @@ int main(int argc, char *argv[]) {
     enable_dedup = vm.count("dedup");
     if(vm.count("kind") > 0)
       action_name = vm["kind"].as<std::string>();
+    if(vm.count("count") > 0)
+      count = vm["count"].as<int>();
+    if(vm.count("seed") > 0)
+      seed = vm["seed"].as<int>();
   } catch(std::exception& e) {
     std::cout << e.what() << std::endl;
     std::cout << desc << std::endl;
@@ -201,7 +238,7 @@ int main(int argc, char *argv[]) {
 
   if(gen_all) {
     for(int i = 0; options[i]; ++i) {
-      if(run_config(i))
+      if(run_config(i, count, seed))
         return -1;
     }
     return 0;
@@ -221,5 +258,5 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  return run_config(action);
+  return run_config(action, count, seed);
 }

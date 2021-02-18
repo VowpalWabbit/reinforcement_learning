@@ -1,0 +1,25 @@
+include "Event.fbs";
+
+namespace reinforcement_learning.messages.flatbuff.v2;
+
+table JoinedEvent {
+    event: [ubyte];
+    timestamp: TimeStamp;
+}
+
+table JoinedPayload {
+    events: [JoinedEvent];
+}
+
+table KeyValue {
+    key: string;
+    value: string;
+}
+
+table FileHeader {
+    join_time: TimeStamp;
+    properties: [KeyValue];
+}
+
+root_type JoinedPayload;
+root_type FileHeader;

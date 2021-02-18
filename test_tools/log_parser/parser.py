@@ -1,9 +1,11 @@
 #! /usr/bin/env python3 -W ignore::DeprecationWarning
+from os import times
 import flatbuffers
 import zstd
 import sys
 import json
 import struct
+import datetime
 
 PREAMBLE_LENGTH = 8
 PRETTY_PRINT_JSON=False
@@ -37,6 +39,9 @@ def learning_mode_name(learning_mode):
 
 def event_encoding_name(batch_type):
     return enum_to_str(EventEncoding, batch_type)
+
+def timestamp_to_datetime(timestamp):
+    return datetime.datetime(timestamp.Year(), timestamp.Month(), timestamp.Day(), timestamp.Hour(), timestamp.Minute(), timestamp.Second(), timestamp.Subsecond())
 
 # Similar hack to the C# one due to limited binding codegen
 def getString(table):
@@ -91,15 +96,15 @@ def parse_dedup_info(payload):
     for i in range(0, evt.ValuesLength()):
         print(f'\t\t[{evt.Ids(i)}]: "{evt.Values(i).decode("utf-8")}"')
 
-def dump_event(ser_evt, idx):
-    evt = Event.GetRootAsEvent(ser_evt.PayloadAsNumpy(), 0)
+def dump_event(event_payload, idx, timestamp=None):
+    evt = Event.GetRootAsEvent(event_payload, 0)
     m = evt.Meta()
 
-    print(f'\t[{idx}] id:{m.Id().decode("utf-8")} type:{payload_name(m.PayloadType())} payload-size:{evt.PayloadLength()} encoding:{event_encoding_name(m.Encoding())}')
+    print(f'\t[{idx}] id:{m.Id().decode("utf-8")} type:{payload_name(m.PayloadType())} payload-size:{evt.PayloadLength()} encoding:{event_encoding_name(m.Encoding())} ts:{timestamp_to_datetime(timestamp)}')
 
     payload = evt.PayloadAsNumpy()
     if m.Encoding() == EventEncoding.Zstd:
-        payload = zstd.decompress(payload)
+        payload = zstd.decompress(evt.PayloadAsNumpy())
 
     if m.PayloadType() == PayloadType.CB:
         parse_cb(payload)
@@ -122,7 +127,7 @@ def dump_event_batch(buf):
     print(f'event-batch evt-count:{batch.EventsLength()} enc:{enc}')
     is_dedup = b'DEDUP' == meta.ContentEncoding()
     for i in range(0, batch.EventsLength()):
-        dump_event(batch.Events(i), i)
+        dump_event(batch.Events(i).PayloadAsNumpy(), i)
     print("----\n")
 
 
@@ -191,11 +196,10 @@ def dump_joined_log_file(file_name, buf):
         print(f'\t{k} = {reader.headers[k]}')
 
     for msg in reader.messages():
-        print(f'joined-batch count:{msg.BatchesLength()}')
-        for i in range(msg.BatchesLength()):
-            batch = msg.Batches(i)
-            print(f'ser-batch [{i}] kind:{batch_type_name(batch.Type())} size:{batch.PayloadLength()}')
-            dump_event_batch(batch.PayloadAsNumpy())
+        print(f'joined-batch events: {msg.EventsLength()}')
+        for i in range(msg.EventsLength()):
+            joined_event = msg.Events(i)
+            dump_event(joined_event.EventAsNumpy(), i, joined_event.Timestamp())
 
 def dump_file(f):
     buf = bytearray(open(f, 'rb').read())
@@ -235,6 +239,10 @@ from reinforcement_learning.messages.flatbuff.v2.OutcomeEvent import OutcomeEven
 from reinforcement_learning.messages.flatbuff.v2.MultiSlotEvent import MultiSlotEvent
 from reinforcement_learning.messages.flatbuff.v2.CaEvent import CaEvent
 from reinforcement_learning.messages.flatbuff.v2.DedupInfo import DedupInfo
+
+from reinforcement_learning.messages.flatbuff.v2.FileHeader import *  
+from reinforcement_learning.messages.flatbuff.v2.JoinedEvent import *  
+from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *  
 
 for input_file in sys.argv[1:]:
     dump_file(input_file)
