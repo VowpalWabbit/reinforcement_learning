@@ -28,8 +28,8 @@ set(PROJECT_SOURCES
   continuous_action_response.cc
   decision_response.cc
   dedup.cc
-  deserialization/joined_log_parser.cc
   deserialization/example_joiner.cc
+  deserialization/joined_log_parser.cc
   error_callback_fn.cc
   factory_resolver.cc
   live_model_impl.cc

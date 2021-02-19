@@ -190,14 +190,3 @@ example *ExampleJoiner::get_or_create_example() {
 example &ExampleJoiner::get_or_create_example_f(void *vw) {
   return *(((ExampleJoiner *)vw)->get_or_create_example());
 }
-
-//   reinforcement_learning::safe_vw _vw;
-//   // from dictionary id to example object
-//   // right now holding one dedup dictionary at a time, could be exented to a
-//   map
-//   // of maps holding more than one dedup dictionaries at a time
-//   std::unordered_map<std::string, example *> dedup_examples;
-//   // from event id to example object(s)
-//   std::unordered_map<std::string, v_array<example *>> unjoined_examples;
-//   // from event id to example metadata
-//   std::unordered_map<std::string, event_info> unjoined_examples_info;
