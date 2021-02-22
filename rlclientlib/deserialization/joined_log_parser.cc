@@ -15,6 +15,7 @@ JoinedLogParser::JoinedLogParser(const std::string &initial_command_line)
 JoinedLogParser::~JoinedLogParser() = default;
 
 // TODO make better error messages
+// TODO check endianness
 int JoinedLogParser::read_and_deserialize_file(const std::string &file_name) {
   std::ifstream fs(file_name.c_str(), std::ifstream::binary);
   std::vector<char> buffer(4, 0);

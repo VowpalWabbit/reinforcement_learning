@@ -10,18 +10,9 @@
 #include "v_array.h"
 
 ExampleJoiner::ExampleJoiner(const std::string &initial_command_line)
-    : _initial_command_line(initial_command_line),
-      _vw(VW::initialize(initial_command_line)) {}
+    : _initial_command_line(initial_command_line) {}
 
-ExampleJoiner::~ExampleJoiner() {
-  // cleanup examples
-  for (auto &&ex : _example_pool) {
-    VW::dealloc_example(_vw->example_parser->lbl_parser.delete_label, *ex);
-    ::free_it(ex);
-  }
-
-  VW::finish(*_vw);
-}
+ExampleJoiner::~ExampleJoiner() = default;
 
 int ExampleJoiner::process_event(const v2::JoinedEvent &joined_event) {
   auto event = flatbuffers::GetRoot<v2::Event>(joined_event.event()->data());
@@ -37,16 +28,16 @@ int ExampleJoiner::process_event(const v2::JoinedEvent &joined_event) {
   }
 
   if (metadata->payload_type() == v2::PayloadType_Outcome) {
-    process_outcome(event->payload(), *metadata);
+    process_outcome(*event, *metadata);
   } else {
-    process_interaction(event->payload(), *metadata);
+    process_interaction(*event, *metadata);
   }
 
   return err::success;
 }
 
-int ExampleJoiner::process_interaction(
-    const flatbuffers::Vector<uint8_t> *payload, const v2::Metadata &metadata) {
+int ExampleJoiner::process_interaction(const v2::Event &event,
+                                       const v2::Metadata &metadata) {
 
   metadata_info meta = {"client_time_utc",
                         metadata.app_id() ? metadata.app_id()->str() : "",
@@ -54,7 +45,7 @@ int ExampleJoiner::process_interaction(
                         metadata.encoding()};
 
   if (metadata.payload_type() == v2::PayloadType_CB) {
-    auto cb = v2::GetCbEvent(payload->data());
+    auto cb = v2::GetCbEvent(event.payload()->data());
     std::cout << std::endl
               << "cb: actions:"
               << (cb->action_ids() == nullptr ? 0 : cb->action_ids()->size())
@@ -70,7 +61,7 @@ int ExampleJoiner::process_interaction(
     }
 
     auto examples = v_init<example *>();
-    examples.push_back(get_or_create_example());
+    // TODO get examples from example pool
 
     std::vector<char> line_vec(cb->context()->data(),
                                cb->context()->data() + cb->context()->size() +
@@ -86,21 +77,21 @@ int ExampleJoiner::process_interaction(
     data.probabilityOfDrop = metadata.pass_probability();
     data.skipLearn = cb->deferred_action();
 
-    // DecisionServiceInteraction data will be used in creating the example
-    VW::read_line_json<false>(*_vw, examples, &line_vec[0],
-                              get_or_create_example_f, this);
+    // TODO enable json parsing
+    // VW::read_line_json<false>(*_vw, examples, &line_vec[0],
+    //                           get_or_create_example_f, this);
 
-    event_info info = {"joined_event_timestamp",
-                       examples,
-                       std::move(meta),
-                       std::move(data),
-                       {}};
+    joined_event info = {"joined_event_timestamp",
+                         examples,
+                         std::move(meta),
+                         std::move(data),
+                         {}};
     _unjoined_examples.emplace(metadata.id()->str(), std::move(info));
   }
   return err::success;
 }
 
-int ExampleJoiner::process_outcome(const flatbuffers::Vector<uint8_t> *payload,
+int ExampleJoiner::process_outcome(const v2::Event &event,
                                    const v2::Metadata &metadata) {
 
   outcome_event o_event;
@@ -109,7 +100,7 @@ int ExampleJoiner::process_outcome(const flatbuffers::Vector<uint8_t> *payload,
                       metadata.payload_type(), metadata.pass_probability(),
                       metadata.encoding()};
 
-  auto outcome = v2::GetOutcomeEvent(payload->data());
+  auto outcome = v2::GetOutcomeEvent(event.payload()->data());
 
   int index = -1;
 
@@ -135,11 +126,10 @@ int ExampleJoiner::process_outcome(const flatbuffers::Vector<uint8_t> *payload,
 
   std::cout << " action-taken:" << outcome->action_taken() << std::endl;
 
-  std::string id(metadata.id()->str());
-
-  if (_unjoined_examples.find(id) != _unjoined_examples.end()) {
-    auto &event_info = _unjoined_examples[id];
-    event_info.outcome_events.push_back(o_event);
+  if (_unjoined_examples.find(metadata.id()->str()) !=
+      _unjoined_examples.end()) {
+    auto &joined_event = _unjoined_examples[metadata.id()->str()];
+    joined_event.outcome_events.push_back(o_event);
   }
 
   return err::success;
@@ -147,53 +137,16 @@ int ExampleJoiner::process_outcome(const flatbuffers::Vector<uint8_t> *payload,
 
 int ExampleJoiner::train_on_joined() {
   for (auto &example : _unjoined_examples) {
-    auto &event_info = _unjoined_examples[example.first];
+    auto &joined_event = _unjoined_examples[example.first];
 
-    // dummy join
-    // dummy reward
-    // join logic to be inserted somewhere here
-    int index = event_info.interaction_data.actions[0];
-    event_info.examples[index]->l.cb.costs.push_back(
-        {1.0f, event_info.interaction_data.actions[index - 1],
-         event_info.interaction_data.probabilities[index - 1]});
-
-    VW::setup_examples(*_vw, event_info.examples);
-    multi_ex examples2(event_info.examples.begin(), event_info.examples.end());
-
-    _vw->learn(examples2);
-    // clean up examples and push examples back into pool for re-use
-    VW::finish_example(*_vw, examples2);
-    for (auto &&ex : event_info.examples) {
-      _example_pool.emplace_back(ex);
-    }
+    // TODO join/calculate reward/populate example label
+    // TODO call VW setup examples, learn, finish_example, return to example
+    // pool
 
     // cleanup
-    event_info.examples.delete_v();
+    joined_event.examples.delete_v();
   }
   _unjoined_examples.clear();
 
   return err::success;
-}
-
-example *ExampleJoiner::get_or_create_example() {
-  // alloc new element if we don't have any left
-  if (_example_pool.size() == 0) {
-    auto ex = VW::alloc_examples(0, 1);
-    _vw->example_parser->lbl_parser.default_label(&ex->l);
-
-    return ex;
-  }
-
-  // get last element
-  example *ex = _example_pool.back();
-  _example_pool.pop_back();
-
-  VW::empty_example(*_vw, *ex);
-  _vw->example_parser->lbl_parser.default_label(&ex->l);
-
-  return ex;
-}
-
-example &ExampleJoiner::get_or_create_example_f(void *vw) {
-  return *(((ExampleJoiner *)vw)->get_or_create_example());
 }
