@@ -1,8 +1,8 @@
+#include "joined_log_parser.h"
 #include <boost/program_options.hpp>
 #include <cstring>
 #include <iostream>
 #include <string>
-#include "joined_log_parser.h"
 
 namespace po = boost::program_options;
 
@@ -34,6 +34,6 @@ int main(int argc, char *argv[]) {
     std::cout << desc << std::endl;
     return 0;
   }
-
-  return read_and_deserialize_file(file_name);
+  JoinedLogParser parser("--quiet --cb_explore_adf -f amodel.model");
+  return parser.read_and_deserialize_file(file_name);
 }

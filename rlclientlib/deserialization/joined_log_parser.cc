@@ -1,36 +1,21 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <vector>
 
-#include "joined_log_parser.h"
-#include "example_joiner.h"
 #include "err_constants.h"
+#include "example_joiner.h"
+#include "joined_log_parser.h"
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 namespace err = reinforcement_learning::error_code;
 
-const unsigned int MSG_TYPE_HEADER = 0x55555555;
-const unsigned int MSG_TYPE_REGULAR = 0xFFFFFFFF;
-const unsigned int MSG_TYPE_EOF = 0xAAAAAAAA;
+JoinedLogParser::JoinedLogParser(const std::string &initial_command_line)
+    : example_joiner(VW::make_unique<ExampleJoiner>(initial_command_line)) {}
 
-class JoinedLogParser {
-public:
-  explicit JoinedLogParser(
-      const std::string &initial_command_line); // TODO Rule of 5
-  ~JoinedLogParser() = default;
-  // reads the header and adds it to the example joiner
-  int read_header(const std::vector<char> &payload);
-  // reads all the events from the joined payload and passes them to
-  int read_message(const std::vector<char> &payload);
+JoinedLogParser::~JoinedLogParser() = default;
 
-private:
-  ExampleJoiner example_joiner;
-};
-
-// TODO: what assumptions should we make about endianness?
 // TODO make better error messages
-int read_and_deserialize_file(const std::string &file_name) {
+int JoinedLogParser::read_and_deserialize_file(const std::string &file_name) {
   std::ifstream fs(file_name.c_str(), std::ifstream::binary);
   std::vector<char> buffer(4, 0);
   const std::vector<char> magic = {'V', 'W', 'F', 'B'};
@@ -60,9 +45,8 @@ int read_and_deserialize_file(const std::string &file_name) {
   // read the payload
   std::vector<char> payload(payload_size, 0);
   fs.read(payload.data(), payload.size());
-  // data is in the payload now can use it to deserialize header
-  JoinedLogParser logparser("--quiet --cb_explore_adf -f amodel.model");
-  logparser.read_header(payload);
+
+  read_header(payload);
 
   fs.read((char *)(&payload_type), sizeof(payload_type));
   while (payload_type != MSG_TYPE_EOF) {
@@ -74,16 +58,13 @@ int read_and_deserialize_file(const std::string &file_name) {
     // read the payload
     std::vector<char> payload(payload_size, 0);
     fs.read(payload.data(), payload.size());
-    if (logparser.read_message(payload) != err::success)
+    if (read_message(payload) != err::success)
       return err::file_read_error;
     fs.read((char *)(&payload_type), sizeof(payload_type));
   }
 
   return err::success;
 }
-
-JoinedLogParser::JoinedLogParser(const std::string &initial_command_line)
-    : example_joiner(initial_command_line) {}
 
 int JoinedLogParser::read_header(const std::vector<char> &payload) {
 
@@ -103,8 +84,8 @@ int JoinedLogParser::read_message(const std::vector<char> &payload) {
   auto joined_payload = flatbuffers::GetRoot<v2::JoinedPayload>(payload.data());
   for (size_t i = 0; i < joined_payload->events()->size(); i++) {
     // process events one-by-one
-    example_joiner.process_event(*joined_payload->events()->Get(i));
+    example_joiner->process_event(*joined_payload->events()->Get(i));
   }
-  example_joiner.train_on_joined();
+  example_joiner->train_on_joined();
   return err::success;
 }

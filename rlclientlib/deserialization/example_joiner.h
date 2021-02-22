@@ -11,21 +11,32 @@
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 namespace err = reinforcement_learning::error_code;
 
-// example joiner will need to hold a safe_vw object for training in memory
-// TODO: hold observations in memory too?
-// example joiner will need to hold a mapping from eventid -> example object
-// (easy to extend for dedup) when outcome comes in we join and then train
 
-// example_joiner will take the object in flatbuffer format, call dsjson parser
-// and create the example object when the example is complete with a label, it
-// can then call training/dispatch an example interactions that are multiline
-// come in one bundle so we can potentially do the check: vw->is_multiline and
-// hold either single examples or multiexamples -> depends on command line args
+struct metadata_info
+{
+  std::string client_time_utc;
+  std::string app_id;
+  v2::PayloadType payload_type;
+  float pass_probability;
+  v2::EventEncoding event_encoding;
+};
 
+struct outcome_event
+{
+  metadata_info metadata;
+  std::string s_index;
+  int index;
+  std::string s_value;
+  float value;
+};
+
+// TODO move to own file
 struct event_info {
-  std::string join_timestamp;
+  std::string joined_event_timestamp;
   v_array<example *> examples;
+  metadata_info interaction_metadata;
   DecisionServiceInteraction interaction_data;
+  std::vector<outcome_event> outcome_events;
 };
 
 class ExampleJoiner {
@@ -55,14 +66,12 @@ private:
                       const v2::Metadata &metadata);
 
 
-  //   reinforcement_learning::safe_vw _vw;
   // from dictionary id to example object
   // right now holding one dedup dictionary at a time, could be exented to a map
   // of maps holding more than one dedup dictionaries at a time
   std::unordered_map<std::string, example *> _dedup_examples;
-  // from event id to example object(s)
+  // from event id to all the information required to create a complete (multi)example
   std::unordered_map<std::string, event_info> _unjoined_examples;
-  std::vector<std::string> _ready_events;
 
   std::string _initial_command_line;
 

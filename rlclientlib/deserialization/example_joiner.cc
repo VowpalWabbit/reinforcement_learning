@@ -48,6 +48,11 @@ int ExampleJoiner::process_event(const v2::JoinedEvent &joined_event) {
 int ExampleJoiner::process_interaction(
     const flatbuffers::Vector<uint8_t> *payload, const v2::Metadata &metadata) {
 
+  metadata_info meta = {"client_time_utc",
+                        metadata.app_id() ? metadata.app_id()->str() : "",
+                        metadata.payload_type(), metadata.pass_probability(),
+                        metadata.encoding()};
+
   if (metadata.payload_type() == v2::PayloadType_CB) {
     auto cb = v2::GetCbEvent(payload->data());
     std::cout << std::endl
@@ -71,14 +76,6 @@ int ExampleJoiner::process_interaction(
                                cb->context()->data() + cb->context()->size() +
                                    1);
 
-    // table Metadata {
-
-    //     client_time_utc:TimeStamp;
-    //     app_id:string;
-    //     payload_type:PayloadType;
-    // encoding: EventEncoding;
-    // }
-
     DecisionServiceInteraction data;
     data.eventId = metadata.id()->str();
     data.actions = {cb->action_ids()->data(),
@@ -92,11 +89,12 @@ int ExampleJoiner::process_interaction(
     // DecisionServiceInteraction data will be used in creating the example
     VW::read_line_json<false>(*_vw, examples, &line_vec[0],
                               get_or_create_example_f, this);
-    // VW::read_line_decision_service_json<false>(
-    //     *_vw, examples, &line_vec[0], line_vec.size(), false /*copy line*/,
-    //     get_or_create_example_f, this, &data);
 
-    event_info info = {"timestamp", examples, std::move(data)};
+    event_info info = {"joined_event_timestamp",
+                       examples,
+                       std::move(meta),
+                       std::move(data),
+                       {}};
     _unjoined_examples.emplace(metadata.id()->str(), std::move(info));
   }
   return err::success;
@@ -105,23 +103,33 @@ int ExampleJoiner::process_interaction(
 int ExampleJoiner::process_outcome(const flatbuffers::Vector<uint8_t> *payload,
                                    const v2::Metadata &metadata) {
 
+  outcome_event o_event;
+  o_event.metadata = {"client_time_utc",
+                      metadata.app_id() ? metadata.app_id()->str() : "",
+                      metadata.payload_type(), metadata.pass_probability(),
+                      metadata.encoding()};
+
   auto outcome = v2::GetOutcomeEvent(payload->data());
 
   int index = -1;
 
   std::cout << "outcome: value:";
   if (outcome->value_type() == v2::OutcomeValue_literal) {
+    o_event.s_value = outcome->value_as_literal()->c_str();
     std::cout << outcome->value_as_literal()->c_str();
   } else if (outcome->value_type() == v2::OutcomeValue_numeric) {
+    o_event.value = outcome->value_as_numeric()->value();
     std::cout << outcome->value_as_numeric()->value();
   }
 
   std::cout << " index:";
   if (outcome->index_type() == v2::IndexValue_literal) {
     std::cout << outcome->index_as_literal()->c_str();
+    o_event.s_index = outcome->index_as_literal()->c_str();
     index = std::stoi(outcome->index_as_literal()->c_str());
   } else if (outcome->index_type() == v2::IndexValue_numeric) {
     std::cout << outcome->index_as_numeric()->index();
+    o_event.s_index = outcome->index_as_numeric()->index();
     index = outcome->index_as_numeric()->index();
   }
 
@@ -131,24 +139,24 @@ int ExampleJoiner::process_outcome(const flatbuffers::Vector<uint8_t> *payload,
 
   if (_unjoined_examples.find(id) != _unjoined_examples.end()) {
     auto &event_info = _unjoined_examples[id];
-    if (index == -1) {
-      index = event_info.interaction_data.actions[0];
-    }
-    // dummy join
-    // dummy reward
-    event_info.examples[index]->l.cb.costs.push_back(
-        {1.0f, event_info.interaction_data.actions[index - 1],
-         event_info.interaction_data.probabilities[index - 1]});
-
-    _ready_events.push_back(id);
+    event_info.outcome_events.push_back(o_event);
   }
 
   return err::success;
 }
 
 int ExampleJoiner::train_on_joined() {
-  for (auto &id : _ready_events) {
-    auto &event_info = _unjoined_examples[id];
+  for (auto &example : _unjoined_examples) {
+    auto &event_info = _unjoined_examples[example.first];
+
+    // dummy join
+    // dummy reward
+    // join logic to be inserted somewhere here
+    int index = event_info.interaction_data.actions[0];
+    event_info.examples[index]->l.cb.costs.push_back(
+        {1.0f, event_info.interaction_data.actions[index - 1],
+         event_info.interaction_data.probabilities[index - 1]});
+
     VW::setup_examples(*_vw, event_info.examples);
     multi_ex examples2(event_info.examples.begin(), event_info.examples.end());
 
@@ -161,10 +169,9 @@ int ExampleJoiner::train_on_joined() {
 
     // cleanup
     event_info.examples.delete_v();
-
-    _unjoined_examples.erase(id);
   }
-  _ready_events.clear();
+  _unjoined_examples.clear();
+
   return err::success;
 }
 
