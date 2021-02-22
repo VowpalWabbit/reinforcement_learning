@@ -28,17 +28,19 @@ JoinedLogParser::~JoinedLogParser() = default;
 // TODO check endianness
 int JoinedLogParser::read_and_deserialize_file(const std::string &file_name) {
   std::ifstream fs(file_name.c_str(), std::ifstream::binary);
+  if (fs.fail()) {return err::file_read_error;}
   std::vector<char> buffer(4, 0);
   const std::vector<char> magic = {'V', 'W', 'F', 'B'};
-
   // read the 4 magic bytes
   fs.read(buffer.data(), buffer.size());
+  if (fs.fail()) {return err::file_read_error;}
   if (buffer != magic) {
     return err::file_read_error;
   }
 
   // read the version
   fs.read(buffer.data(), buffer.size());
+  if (fs.fail()) {return err::file_read_error;}
   if (static_cast<int>(buffer[0]) != 1) {
     return err::file_read_error;
   }
@@ -46,32 +48,39 @@ int JoinedLogParser::read_and_deserialize_file(const std::string &file_name) {
   // payload type, check for header
   unsigned int payload_type;
   fs.read((char *)(&payload_type), sizeof(payload_type));
+  if (fs.fail()) {return err::file_read_error;}
   if (payload_type != MSG_TYPE_HEADER) {
     return err::file_read_error;
   }
 
   // read header size
   fs.read(buffer.data(), buffer.size());
+  if (fs.fail()) {return err::file_read_error;}
   uint32_t payload_size = *reinterpret_cast<const uint32_t *>(buffer.data());
   // read the payload
   std::vector<char> payload(payload_size, 0);
   fs.read(payload.data(), payload.size());
+  if (fs.fail()) {return err::file_read_error;}
 
   read_header(payload);
 
   fs.read((char *)(&payload_type), sizeof(payload_type));
+  if (fs.fail()) {return err::file_read_error;}
   while (payload_type != MSG_TYPE_EOF) {
     if (payload_type != MSG_TYPE_REGULAR)
       return err::file_read_error;
     // read payload size
     fs.read(buffer.data(), buffer.size());
+    if (fs.fail()) {return err::file_read_error;}
     uint32_t payload_size = *reinterpret_cast<const uint32_t *>(buffer.data());
     // read the payload
     std::vector<char> payload(payload_size, 0);
     fs.read(payload.data(), payload.size());
+    if (fs.fail()) {return err::file_read_error;}
     if (read_message(payload) != err::success)
       return err::file_read_error;
     fs.read((char *)(&payload_type), sizeof(payload_type));
+    if (fs.fail()) {return err::file_read_error;}
   }
 
   return err::success;
