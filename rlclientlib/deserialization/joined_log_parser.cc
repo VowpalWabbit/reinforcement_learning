@@ -9,8 +9,18 @@
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 namespace err = reinforcement_learning::error_code;
 
+// we could add any joiner logic that we want and have a flag or parameter that
+// desides which method to select
+int non_default_reward_calc(const joined_event &event) {
+  std::cout << "this is a different reward logic that does nothing"
+            << std::endl;
+
+  return err::success;
+}
+
 JoinedLogParser::JoinedLogParser(const std::string &initial_command_line)
-    : example_joiner(VW::make_unique<ExampleJoiner>(initial_command_line)) {}
+    : example_joiner(VW::make_unique<ExampleJoiner>(initial_command_line,
+                                                    non_default_reward_calc)) {}
 
 JoinedLogParser::~JoinedLogParser() = default;
 

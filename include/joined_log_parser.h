@@ -15,11 +15,11 @@ public:
   explicit JoinedLogParser(
       const std::string &initial_command_line); // TODO Rule of 5
   ~JoinedLogParser();
-  // reads and process the entire file
+  // reads and processes the entire file
   int read_and_deserialize_file(const std::string &file_name);
-  // reads the header and adds it to the example joiner
+  // reads process the header payload
   int read_header(const std::vector<char> &payload);
-  // reads all the events from the joined payload and passes them to
+  // reads and process regular message payloads
   int read_message(const std::vector<char> &payload);
 
 private:

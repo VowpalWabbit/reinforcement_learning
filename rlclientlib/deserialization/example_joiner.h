@@ -35,10 +35,15 @@ struct joined_event {
   std::vector<outcome_event> outcome_events;
 };
 
+using RewardCalcType = int (*)(const joined_event &);
+
+int default_reward_calculation(const joined_event &event);
+
 class ExampleJoiner {
 public:
-  explicit ExampleJoiner(
-      const std::string &initial_command_line); // TODO rule of 5
+  ExampleJoiner(
+      const std::string &initial_command_line,
+      RewardCalcType jl = default_reward_calculation); // TODO rule of 5
   ~ExampleJoiner();
   // takes an event which will have a timestamp and event payload, performs any
   // needed pre-processing (e.g. decompressing), keeps the relevant event
@@ -65,4 +70,6 @@ private:
   std::unordered_map<std::string, joined_event> _unjoined_examples;
 
   std::string _initial_command_line;
+
+  RewardCalcType reward_calculation;
 };

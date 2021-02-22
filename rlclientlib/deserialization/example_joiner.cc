@@ -9,8 +9,14 @@
 #include "parser.h"
 #include "v_array.h"
 
-ExampleJoiner::ExampleJoiner(const std::string &initial_command_line)
-    : _initial_command_line(initial_command_line) {}
+int default_reward_calculation(const joined_event &event) {
+  std::cout << "this is the default reward logic" << std::endl;
+  return err::success;
+}
+
+ExampleJoiner::ExampleJoiner(const std::string &initial_command_line,
+                             RewardCalcType rc)
+    : _initial_command_line(initial_command_line), reward_calculation(rc) {}
 
 ExampleJoiner::~ExampleJoiner() = default;
 
@@ -142,6 +148,9 @@ int ExampleJoiner::train_on_joined() {
     // TODO join/calculate reward/populate example label
     // TODO call VW setup examples, learn, finish_example, return to example
     // pool
+
+    // call logic that creates the reward
+    reward_calculation(joined_event);
 
     // cleanup
     joined_event.examples.delete_v();
