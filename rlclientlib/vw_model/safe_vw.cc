@@ -12,67 +12,35 @@ namespace mm = reinforcement_learning::model_management;
 namespace reinforcement_learning {
   static const std::string SEED_TAG = "seed=";
 
-  safe_vw::safe_vw(const std::shared_ptr<safe_vw>& master) : _master(master)
-  {
-    _vw = VW::seed_vw_model(_master->_vw, "", nullptr, nullptr);
-  }
+  safe_vw::safe_vw(const std::shared_ptr<safe_vw> &master)
+    : _master(master),
+      _example_pool(VW::seed_vw_model(_master->_example_pool.get_vw(), "", nullptr, nullptr)) {}
 
-  safe_vw::safe_vw(const char* model_data, size_t len)
-  {
+  safe_vw::safe_vw(const char *model_data, size_t len) {
     io_buf buf;
     buf.add_file(VW::io::create_buffer_view(model_data, len));
 
-    _vw = VW::initialize("--quiet --json", &buf, false, nullptr, nullptr);
+    _example_pool.set_vw(VW::initialize("--quiet --json", &buf, false, nullptr, nullptr));
   }
 
-  safe_vw::safe_vw(const char* model_data, size_t len, const std::string& vw_commandline)
-  {
-	io_buf buf;
-	buf.add_file(VW::io::create_buffer_view(model_data, len));
+  safe_vw::safe_vw(const char *model_data, size_t len, const std::string &vw_commandline) {
+    io_buf buf;
+    buf.add_file(VW::io::create_buffer_view(model_data, len));
 
-	_vw = VW::initialize(vw_commandline, &buf, false, nullptr, nullptr);
+    _example_pool.set_vw(VW::initialize(vw_commandline, &buf, false, nullptr, nullptr));
   }
 
-  safe_vw::safe_vw(const std::string& vw_commandline)
-  {	  
-	  _vw = VW::initialize(vw_commandline);
+  safe_vw::safe_vw(const std::string &vw_commandline) : _example_pool(VW::initialize(vw_commandline)) {}
+
+  safe_vw::~safe_vw() = default;
+
+  example *safe_vw::get_or_create_example() {
+    return _example_pool.get_or_create_example();
   }
 
-  safe_vw::~safe_vw()
-  {
-    // cleanup examples
-    for (auto&& ex : _example_pool) {
-      VW::dealloc_example(_vw->example_parser->lbl_parser.delete_label, *ex);
-      ::free_it(ex);
-    }
-
-    // cleanup VW instance
-    reset_source(*_vw, _vw->num_bits);
-
-    VW::finish(*_vw);
+  example &safe_vw::get_or_create_example_f(void *vw) {
+    return *(((safe_vw *)vw)->get_or_create_example());
   }
-
-  example* safe_vw::get_or_create_example()
-  {
-    // alloc new element if we don't have any left
-    if (_example_pool.size() == 0) {
-      auto ex = VW::alloc_examples(0, 1);
-      _vw->example_parser->lbl_parser.default_label(&ex->l);
-
-      return ex;
-    }
-
-    // get last element
-    example* ex = _example_pool.back();
-    _example_pool.pop_back();
-
-    VW::empty_example(*_vw, *ex);
-    _vw->example_parser->lbl_parser.default_label(&ex->l);
-
-    return ex;
-  }
-
-  example& safe_vw::get_or_create_example_f(void* vw) { return *(((safe_vw*)vw)->get_or_create_example()); }
 
   void safe_vw::parse_context_with_pdf(const char* context, std::vector<int>& actions, std::vector<float>& scores)
   {
@@ -83,10 +51,10 @@ namespace reinforcement_learning {
 
     std::vector<char> line_vec(context, context + strlen(context) + 1);
 
-    VW::read_line_decision_service_json<false>(*_vw, examples, &line_vec[0], line_vec.size(), false, get_or_create_example_f, this, &interaction);
+    VW::read_line_decision_service_json<false>(*_example_pool.get_vw(), examples, &line_vec[0], line_vec.size(), false, get_or_create_example_f, this, &interaction);
 
     // finalize example
-    VW::setup_examples(*_vw, examples);
+    VW::setup_examples(*_example_pool.get_vw(), examples);
 
     actions.resize(interaction.probabilities.size());
     scores.resize(interaction.probabilities.size());
@@ -98,7 +66,7 @@ namespace reinforcement_learning {
 
     // clean up examples and push examples back into pool for re-use
     for (auto&& ex : examples) {
-      _example_pool.emplace_back(ex);
+      _example_pool.return_example(ex);
     }
 
     // cleanup
@@ -112,15 +80,15 @@ namespace reinforcement_learning {
 
     std::vector<char> line_vec(context, context + strlen(context) + 1);
 
-    VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
+    VW::read_line_json<false>(*_example_pool.get_vw(), examples, &line_vec[0], get_or_create_example_f, this);
 
     // finalize example
-    VW::setup_examples(*_vw, examples);
+    VW::setup_examples(*_example_pool.get_vw(), examples);
 
     // TODO: refactor setup_examples/read_line_json to take in multi_ex
     multi_ex examples2(examples.begin(), examples.end());
 
-    _vw->predict(examples2);
+    _example_pool.get_vw()->predict(examples2);
 
     // prediction are in the first-example
     const auto& predictions = examples2[0]->pred.a_s;
@@ -134,7 +102,7 @@ namespace reinforcement_learning {
     // clean up examples and push examples back into pool for re-use
     for (auto&& ex : examples) {
       ex->pred.a_s.delete_v();
-      _example_pool.emplace_back(ex);
+      _example_pool.return_example(ex);
     }
 
     // cleanup
@@ -148,19 +116,19 @@ namespace reinforcement_learning {
 
     std::vector<char> line_vec(context, context + strlen(context) + 1);
 
-    VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
+    VW::read_line_json<false>(*_example_pool.get_vw(), examples, &line_vec[0], get_or_create_example_f, this);
     
     // finalize example
-    VW::setup_examples(*_vw, examples);
+    VW::setup_examples(*_example_pool.get_vw(), examples);
 
-    _vw->predict(*examples[0]);
+    _example_pool.get_vw()->predict(*examples[0]);
 
     action = examples[0]->pred.pdf_value.action;
     pdf_value = examples[0]->pred.pdf_value.pdf_value;
 
     for (auto&& ex : examples) {
       ex->l.cb_cont.costs.delete_v();
-      _example_pool.emplace_back(ex);
+      _example_pool.return_example(ex);
     }
 
     // cleanup
@@ -174,7 +142,7 @@ namespace reinforcement_learning {
 
     std::vector<char> line_vec(context, context + strlen(context) + 1);
 
-    VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
+    VW::read_line_json<false>(*_example_pool.get_vw(), examples, &line_vec[0], get_or_create_example_f, this);
 
     // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the example tag.
     for(int i = 0; i < event_ids.size(); i++)
@@ -185,12 +153,12 @@ namespace reinforcement_learning {
     }
 
     // finalize example
-    VW::setup_examples(*_vw, examples);
+    VW::setup_examples(*_example_pool.get_vw(), examples);
 
     // TODO: refactor setup_examples/read_line_json to take in multi_ex
     multi_ex examples2(examples.begin(), examples.end());
 
-    _vw->predict(examples2);
+    _example_pool.get_vw()->predict(examples2);
 
     // prediction are in the first-example
     auto& predictions = examples2[0]->pred.decision_scores;
@@ -212,7 +180,7 @@ namespace reinforcement_learning {
     }
     examples[0]->pred.decision_scores.delete_v();
     for (auto&& ex : examples) {
-      _example_pool.emplace_back(ex);
+      _example_pool.return_example(ex);
     }
 
     // cleanup
@@ -226,7 +194,7 @@ namespace reinforcement_learning {
 
     std::vector<char> line_vec(context, context + strlen(context) + 1);
 
-    VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
+    VW::read_line_json<false>(*_example_pool.get_vw(), examples, &line_vec[0], get_or_create_example_f, this);
     // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the example tag.
     for(uint32_t i = 0; i < slot_ids.size(); i++)
     {
@@ -237,12 +205,12 @@ namespace reinforcement_learning {
     }
 
     // finalize example
-    VW::setup_examples(*_vw, examples);
+    VW::setup_examples(*_example_pool.get_vw(), examples);
 
     // TODO: refactor setup_examples/read_line_json to take in multi_ex
     multi_ex examples2(examples.begin(), examples.end());
 
-    _vw->predict(examples2);
+    _example_pool.get_vw()->predict(examples2);
 
     // prediction are in the first-example
     auto& predictions = examples2[0]->pred.decision_scores;
@@ -264,7 +232,7 @@ namespace reinforcement_learning {
     }
     examples[0]->pred.decision_scores.delete_v();
     for (auto&& ex : examples) {
-      _example_pool.emplace_back(ex);
+      _example_pool.return_example(ex);
     }
 
     // cleanup
@@ -272,7 +240,7 @@ namespace reinforcement_learning {
   }
 
 const char* safe_vw::id() const {
-  return _vw->id.c_str();
+  return _example_pool.get_vw()->id.c_str();
 }
 
 mm::model_type_t safe_vw::get_model_type(const std::string& args)
@@ -334,7 +302,7 @@ mm::model_type_t safe_vw::get_model_type(const VW::config::options_i* args)
 
 bool safe_vw::is_compatible(const std::string& args) const {
   const auto local_model_type = get_model_type(args);
-  const auto inbound_model_type = get_model_type(_vw->options.get());
+  const auto inbound_model_type = get_model_type(_example_pool.get_vw()->options.get());
 
   // This really is an error but errors cant be reported here...
   if(local_model_type == mm::model_type_t::UNKNOWN || inbound_model_type ==  mm::model_type_t::UNKNOWN)
@@ -348,7 +316,7 @@ bool safe_vw::is_compatible(const std::string& args) const {
 bool safe_vw::is_CB_to_CCB_model_upgrade(const std::string& args) const
 {
     const auto local_model_type = get_model_type(args);
-    const auto inbound_model_type = get_model_type(_vw->options.get());
+    const auto inbound_model_type = get_model_type(_example_pool.get_vw()->options.get());
 
     return local_model_type == mm::model_type_t::CCB && inbound_model_type == mm::model_type_t::CB;    
 }

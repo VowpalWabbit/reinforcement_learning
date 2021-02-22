@@ -3,7 +3,7 @@
 #include "err_constants.h"
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
-#include "vw_model/safe_vw.h"
+#include "vw_model/vw_example_pool.h"
 
 // VW headers
 #include "json_utils.h"
@@ -70,6 +70,10 @@ private:
   std::unordered_map<std::string, joined_event> _unjoined_examples;
 
   std::string _initial_command_line;
+  reinforcement_learning::vw_example_pool _example_pool;
+
+  example *get_or_create_example();
+  static example &get_or_create_example_f(void *vw);
 
   RewardCalcType reward_calculation;
 };

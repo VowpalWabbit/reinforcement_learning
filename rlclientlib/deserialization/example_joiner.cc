@@ -16,9 +16,18 @@ int default_reward_calculation(const joined_event &event) {
 
 ExampleJoiner::ExampleJoiner(const std::string &initial_command_line,
                              RewardCalcType rc)
-    : _initial_command_line(initial_command_line), reward_calculation(rc) {}
+    : _initial_command_line(initial_command_line), reward_calculation(rc),
+      _example_pool(VW::initialize(initial_command_line)) {}
 
 ExampleJoiner::~ExampleJoiner() = default;
+
+example *ExampleJoiner::get_or_create_example() {
+  return _example_pool.get_or_create_example();
+}
+
+example &ExampleJoiner::get_or_create_example_f(void *example_joiner) {
+  return *(((ExampleJoiner *)example_joiner)->get_or_create_example());
+}
 
 int ExampleJoiner::process_event(const v2::JoinedEvent &joined_event) {
   auto event = flatbuffers::GetRoot<v2::Event>(joined_event.event()->data());
@@ -67,7 +76,7 @@ int ExampleJoiner::process_interaction(const v2::Event &event,
     }
 
     auto examples = v_init<example *>();
-    // TODO get examples from example pool
+    examples.push_back(_example_pool.get_or_create_example());
 
     std::vector<char> line_vec(cb->context()->data(),
                                cb->context()->data() + cb->context()->size() +
@@ -83,9 +92,8 @@ int ExampleJoiner::process_interaction(const v2::Event &event,
     data.probabilityOfDrop = metadata.pass_probability();
     data.skipLearn = cb->deferred_action();
 
-    // TODO enable json parsing
-    // VW::read_line_json<false>(*_vw, examples, &line_vec[0],
-    //                           get_or_create_example_f, this);
+    VW::read_line_json<false>(*_example_pool.get_vw(), examples, &line_vec[0],
+                              get_or_create_example_f, this);
 
     joined_event info = {"joined_event_timestamp",
                          examples,
@@ -145,12 +153,19 @@ int ExampleJoiner::train_on_joined() {
   for (auto &example : _unjoined_examples) {
     auto &joined_event = _unjoined_examples[example.first];
 
-    // TODO join/calculate reward/populate example label
-    // TODO call VW setup examples, learn, finish_example, return to example
-    // pool
-
     // call logic that creates the reward
     reward_calculation(joined_event);
+
+    VW::setup_examples(*_example_pool.get_vw(), joined_event.examples);
+    multi_ex examples2(joined_event.examples.begin(),
+                       joined_event.examples.end());
+
+    _example_pool.get_vw()->learn(examples2);
+    // clean up examples and push examples back into pool for re-use
+    VW::finish_example(*_example_pool.get_vw(), examples2);
+    for (auto &&ex : joined_event.examples) {
+      _example_pool.return_example(ex);
+    }
 
     // cleanup
     joined_event.examples.delete_v();

@@ -69,6 +69,7 @@ set(PROJECT_SOURCES
   utility/watchdog.cc
   vw_model/pdf_model.cc
   vw_model/safe_vw.cc
+  vw_model/vw_example_pool.cc
   vw_model/vw_model.cc
 )
 
@@ -139,6 +140,7 @@ set(PROJECT_PRIVATE_HEADERS
   utility/config_helper.h
   vw_model/pdf_model.h
   vw_model/safe_vw.h
+  vw_model/vw_example_pool.h
   vw_model/vw_model.h
 )
 
