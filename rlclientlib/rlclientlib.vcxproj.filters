@@ -11,6 +11,7 @@
     <ClCompile Include="utility\context_helper.cc" />
     <ClCompile Include="utility\configuration.cc" />
     <ClCompile Include="vw_model\vw_model.cc" />
+    <ClCompile Include="vw_model\vw_example_pool.cc" />
     <ClCompile Include="vw_model\safe_vw.cc" />
     <ClCompile Include="factory_resolver.cc" />
     <ClCompile Include="live_model_impl.cc" />
@@ -73,6 +74,7 @@
     <ClInclude Include="logger\event_queue.h" />
     <ClInclude Include="logger\eventhub_client.h" />
     <ClInclude Include="vw_model\vw_model.h" />
+    <ClInclude Include="vw_model\vw_example_pool.h" />
     <ClInclude Include="vw_model\safe_vw.h" />
     <ClInclude Include="live_model_impl.h" />
     <ClInclude Include="error_callback_fn.h" />
