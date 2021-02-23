@@ -271,6 +271,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClCompile Include="utility\watchdog.cc" />
     <ClCompile Include="vw_model\vw_model.cc" />
     <ClCompile Include="vw_model\pdf_model.cc" />
+    <ClCompile Include="vw_model\vw_example_pool.cc" />
     <ClCompile Include="vw_model\safe_vw.cc" />
     <ClCompile Include="sampling.cc" />
     <ClCompile Include="multi_slot_response.cc" />
