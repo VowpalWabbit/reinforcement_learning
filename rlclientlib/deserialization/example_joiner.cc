@@ -1,3 +1,4 @@
+#include <limits.h>
 #include "example_joiner.h"
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/Event_generated.h"
@@ -9,14 +10,50 @@
 #include "parser.h"
 #include "v_array.h"
 
-int default_reward_calculation(const joined_event &event) {
-  std::cout << "this is the default reward logic" << std::endl;
-  return err::success;
+float average(const joined_event &event) {
+  if (event.outcome_events.size() == 0) {
+    return 0.0f;
+  }
+
+  float sum = 0.0f;
+  for (const auto &o : event.outcome_events) {
+    sum += o.value;
+  }
+
+  return sum / event.outcome_events.size();
 }
 
-ExampleJoiner::ExampleJoiner(const std::string &initial_command_line,
-                             RewardCalcType rc)
-    : _initial_command_line(initial_command_line), reward_calculation(rc) {}
+float sum(const joined_event &event) {
+  float sum = 0.0f;
+  for (const auto &o : event.outcome_events) {
+    sum += o.value;
+  }
+
+  return sum;
+}
+
+float min(const joined_event &event) {
+  float min_reward = std::numeric_limits<float>::max();
+  for (const auto &o : event.outcome_events) {
+    if (o.value < min_reward) {
+      min_reward = o.value;
+    }
+  }
+  return min_reward;
+}
+
+float max(const joined_event &event) {
+  float max_reward = std::numeric_limits<float>::min();
+  for (const auto &o : event.outcome_events) {
+    if (o.value > max_reward) {
+      max_reward = o.value;
+    }
+  }
+  return max_reward;
+}
+
+ExampleJoiner::ExampleJoiner(const std::string &initial_command_line)
+    : _initial_command_line(initial_command_line) {}
 
 ExampleJoiner::~ExampleJoiner() = default;
 
@@ -40,6 +77,29 @@ int ExampleJoiner::process_event(const v2::JoinedEvent &joined_event) {
   }
 
   return err::success;
+}
+
+void ExampleJoiner::set_reward_function(const v2::RewardFunctionType type) {
+  switch(type) {
+    case v2::RewardFunctionType_Average:
+      reward_calculation = &average;
+      break;
+
+    case v2::RewardFunctionType_Sum:
+      reward_calculation = &sum;
+      break;
+
+    case v2::RewardFunctionType_Min:
+      reward_calculation = &min;
+      break;
+
+    case v2::RewardFunctionType_Max:
+      reward_calculation = &max;
+      break;
+
+    default:
+      break;
+  }
 }
 
 int ExampleJoiner::process_interaction(const v2::Event &event,
@@ -150,7 +210,9 @@ int ExampleJoiner::train_on_joined() {
     // pool
 
     // call logic that creates the reward
-    reward_calculation(joined_event);
+    float reward = reward_calculation(joined_event);
+
+    std::cout << "reward value: " << reward << std::endl;
 
     // cleanup
     joined_event.examples.delete_v();

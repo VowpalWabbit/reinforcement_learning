@@ -9,18 +9,8 @@
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 namespace err = reinforcement_learning::error_code;
 
-// we could add any joiner logic that we want and have a flag or parameter that
-// desides which method to select
-int non_default_reward_calc(const joined_event &event) {
-  std::cout << "this is a different reward logic that does nothing"
-            << std::endl;
-
-  return err::success;
-}
-
 JoinedLogParser::JoinedLogParser(const std::string &initial_command_line)
-    : example_joiner(VW::make_unique<ExampleJoiner>(initial_command_line,
-                                                    non_default_reward_calc)) {}
+    : example_joiner(VW::make_unique<ExampleJoiner>(initial_command_line)) {}
 
 JoinedLogParser::~JoinedLogParser() = default;
 
@@ -66,9 +56,12 @@ int JoinedLogParser::read_and_deserialize_file(const std::string &file_name) {
 
   fs.read((char *)(&payload_type), sizeof(payload_type));
   if (fs.fail()) {return err::file_read_error;}
+
   while (payload_type != MSG_TYPE_EOF) {
-    if (payload_type != MSG_TYPE_REGULAR)
+    if (payload_type != REWARD_FUNCTION && payload_type != MSG_TYPE_REGULAR) {
       return err::file_read_error;
+    }
+
     // read payload size
     fs.read(buffer.data(), buffer.size());
     if (fs.fail()) {return err::file_read_error;}
@@ -77,8 +70,22 @@ int JoinedLogParser::read_and_deserialize_file(const std::string &file_name) {
     std::vector<char> payload(payload_size, 0);
     fs.read(payload.data(), payload.size());
     if (fs.fail()) {return err::file_read_error;}
-    if (read_message(payload) != err::success)
-      return err::file_read_error;
+
+    if (payload_type == REWARD_FUNCTION) {
+      if (read_reward_function_info(payload) != err::success) {
+        return err::file_read_error;
+      }
+
+      fs.read((char *)(&payload_type), sizeof(payload_type));
+      if (fs.fail()) {return err::file_read_error;}
+    }
+
+    if (payload_type == MSG_TYPE_REGULAR) {
+      if (read_message(payload) != err::success) {
+        return err::file_read_error;
+      }
+    }
+
     fs.read((char *)(&payload_type), sizeof(payload_type));
     if (fs.fail()) {return err::file_read_error;}
   }
@@ -97,6 +104,13 @@ int JoinedLogParser::read_header(const std::vector<char> &payload) {
               << file_header->properties()->Get(i)->value()->c_str()
               << std::endl;
   }
+  return err::success;
+}
+
+int JoinedLogParser::read_reward_function_info(const std::vector<char> &payload) {
+  auto reward_function_info = flatbuffers::GetRoot<v2::RewardFunctionInfo>(payload.data());
+  std::cout << reward_function_info->type() <<std::endl;
+  example_joiner->set_reward_function(reward_function_info->type());
   return err::success;
 }
 

@@ -1,6 +1,7 @@
 include "Event.fbs";
 
 namespace reinforcement_learning.messages.flatbuff.v2;
+enum RewardFunctionType : ubyte { Earliest, Average, Median, Sum, Min, Max }
 
 table JoinedEvent {
     event: [ubyte];
@@ -21,5 +22,10 @@ table FileHeader {
     properties: [KeyValue];
 }
 
+table RewardFunctionInfo {
+    type: RewardFunctionType;
+}
+
+root_type RewardFunctionInfo;
 root_type JoinedPayload;
 root_type FileHeader;
