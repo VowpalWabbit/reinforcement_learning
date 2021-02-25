@@ -1,4 +1,6 @@
 // EventHubInteraction Schema used by FlatBuffer
+include "LearningModeType.fbs";
+
 namespace reinforcement_learning.messages.flatbuff.v2;
 
 table SlotEvent {
@@ -9,11 +11,12 @@ table SlotEvent {
 
 // this event covers both ccb and slates events from v1 schema
 table MultiSlotEvent {
-    context:[ubyte];               // context
-    slots:[SlotEvent];        // actions and probabilities
-    model_id:string;               // model ID
-    deferred_action:bool = false;  // delayed activation flag
-    baseline_actions:[int];        // baseline actions for apprentice mode
+    context:[ubyte];                 // context
+    slots:[SlotEvent];               // actions and probabilities
+    model_id:string;                 // model ID
+    deferred_action:bool = false;    // delayed activation flag
+    baseline_actions:[int];          // baseline actions for apprentice mode
+    learning_mode:LearningModeType;  // decision mode used to determine rank behavior
 }
 
 root_type MultiSlotEvent;

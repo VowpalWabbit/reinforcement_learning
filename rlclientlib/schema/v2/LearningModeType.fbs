@@ -1,0 +1,4 @@
+// LearningMode Schema used by FlatBuffer
+namespace reinforcement_learning.messages.flatbuff.v2;
+
+enum LearningModeType : ubyte { Online, Apprentice, LoggingOnly }

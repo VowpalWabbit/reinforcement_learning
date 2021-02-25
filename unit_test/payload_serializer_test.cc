@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_payload_serializer_test){
   vector<vector<float>> probs{ { 0.5, 0.3, 0.2 }, { 0.8, 0.2 }};
   vector<std::string> slot_ids = {"0", "1"};
   vector<int> baseline_actions = { 1, 0 };
-  const auto buffer = serializer.event("my_context", action_flags::DEFAULT, actions, probs, "model_id", slot_ids, baseline_actions);
+  const auto buffer = serializer.event("my_context", action_flags::DEFAULT, actions, probs, "model_id", slot_ids, baseline_actions, v2::LearningModeType_Apprentice);
 
   const auto event = v2::GetMultiSlotEvent(buffer.data());
 

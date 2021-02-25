@@ -59,7 +59,7 @@ namespace reinforcement_learning
 
       //Multislot (Slates v1/v2 + CCB v2)
       int log_decision(const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
-        const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids, api_status* status, const std::vector<int>& baseline_actions);
+        const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids, api_status* status, const std::vector<int>& baseline_actions, learning_mode learning_mode = ONLINE);
 
       //Continuous
       int log_continuous_action(const char* context, unsigned int flags, const continuous_action_response& response, api_status* status);
