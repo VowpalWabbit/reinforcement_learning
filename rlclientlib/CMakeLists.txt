@@ -28,8 +28,6 @@ set(PROJECT_SOURCES
   continuous_action_response.cc
   decision_response.cc
   dedup.cc
-  deserialization/example_joiner.cc
-  deserialization/joined_log_parser.cc
   error_callback_fn.cc
   factory_resolver.cc
   live_model_impl.cc
@@ -116,7 +114,6 @@ set(PROJECT_PUBLIC_HEADERS
 set(PROJECT_PRIVATE_HEADERS
   console_tracer.h
   dedup.h
-  deserialization/example_joiner.h
   live_model_impl.h
   logger/async_batcher.h
   logger/event_logger.h
