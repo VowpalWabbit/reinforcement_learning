@@ -2,6 +2,7 @@
 #include "ranking_event.h"
 #include "data_buffer.h"
 #include "config_utility.h"
+#include "constants.h"
 #include <fstream>
 #include <iostream>
 #include <thread>
@@ -100,7 +101,7 @@ void test_loop::cb_loop(size_t thread_id)
     }
 
     r::utility::data_buffer buffer;
-    fb_collection_serializer<ranking_event> serializer(buffer, r::content_encoding_enum::IDENTITY);
+    fb_collection_serializer<ranking_event> serializer(buffer, r::value::CONTENT_ENCODING_IDENTITY);
     auto choose_rank_event = r::ranking_event::choose_rank(warmup_id.c_str(), test_inputs.get_context(0, 0), r::action_flags::DEFAULT, response, timestamp{});
     serializer.add(choose_rank_event);
     serializer.finalize(nullptr);
@@ -161,7 +162,7 @@ void test_loop::ccb_loop(size_t thread_id)
     }
 
     r::utility::data_buffer buffer;
-    fb_collection_serializer<decision_ranking_event> serializer(buffer, r::content_encoding_enum::IDENTITY);
+    fb_collection_serializer<decision_ranking_event> serializer(buffer, r::value::CONTENT_ENCODING_IDENTITY);
     const std::vector<std::vector<uint32_t>> blank_action_ids(response.size());
     const std::vector<std::vector<float>> blank_pdf(response.size());
     auto decision_event = r::decision_ranking_event::request_decision(event_ids_c, context.c_str(), r::action_flags::DEFAULT, blank_action_ids, blank_pdf, "model", timestamp{});

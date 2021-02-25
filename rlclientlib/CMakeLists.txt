@@ -14,6 +14,7 @@ set(RL_FLAT_BUFFER_FILES_V2
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/OutcomeEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CbEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CaEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/FileFormat.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiSlotEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Event.fbs" )
 
@@ -27,6 +28,8 @@ set(PROJECT_SOURCES
   continuous_action_response.cc
   decision_response.cc
   dedup.cc
+  deserialization/example_joiner.cc
+  deserialization/joined_log_parser.cc
   error_callback_fn.cc
   factory_resolver.cc
   live_model_impl.cc
@@ -94,6 +97,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/errors_data.h
   ../include/factory_resolver.h
   ../include/future_compat.h
+  ../include/joined_log_parser.h
   ../include/live_model.h
   ../include/model_mgmt.h
   ../include/object_factory.h
@@ -111,6 +115,7 @@ set(PROJECT_PUBLIC_HEADERS
 set(PROJECT_PRIVATE_HEADERS
   console_tracer.h
   dedup.h
+  deserialization/example_joiner.h
   live_model_impl.h
   logger/async_batcher.h
   logger/event_logger.h

@@ -52,9 +52,12 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(init_model_mgmt(status));
     RETURN_IF_FAIL(init_loggers(status));
 
-    if (_protocol_version == 1 &&
-      _configuration.get(name::INTERACTION_CONTENT_ENCODING, value::CONTENT_ENCODING_IDENTITY) != value::CONTENT_ENCODING_IDENTITY) {
-      RETURN_ERROR_LS(_trace_logger.get(), status, content_encoding_error);
+    if (_protocol_version == 1) {
+      if(_configuration.get_bool("interaction", name::USE_COMPRESSION, false) || 
+        _configuration.get_bool("interaction", name::USE_DEDUP, false) ||
+        _configuration.get_bool("observation", name::USE_COMPRESSION, false)) {
+        RETURN_ERROR_LS(_trace_logger.get(), status, content_encoding_error);
+      }
     }
 
     _initial_epsilon = _configuration.get_float(name::INITIAL_EPSILON, 0.2f);

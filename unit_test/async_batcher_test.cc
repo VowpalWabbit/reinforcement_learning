@@ -201,9 +201,3 @@ BOOST_AUTO_TEST_CASE(queue_overflow_do_not_drop_event) {
   for (const auto& item : items) { actual_output.append(item); }
   BOOST_CHECK_EQUAL(expected_output, actual_output);
 }
-
-BOOST_AUTO_TEST_CASE(convert_to_queue_mode_enum) {
-  BOOST_CHECK_EQUAL((int)queue_mode_enum::DROP, (int)to_queue_mode_enum("DROP"));
-  BOOST_CHECK_EQUAL((int)queue_mode_enum::BLOCK, (int)to_queue_mode_enum("BLOCK")); //default is DROP
-  BOOST_CHECK_EQUAL((int)queue_mode_enum::DROP, (int)to_queue_mode_enum("something_else"));
-}

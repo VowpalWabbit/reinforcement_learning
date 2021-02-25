@@ -122,7 +122,7 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
       : event_logger(time_provider, batcher)
     {}
 
-    int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, api_status* status);
-    int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, generic_event::object_list_t&& objects, api_status* status);
+    int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, api_status* status);
+    int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, generic_event::object_list_t&& objects, api_status* status);
   };
 }}

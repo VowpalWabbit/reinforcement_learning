@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(compression_transformer)
 BOOST_AUTO_TEST_CASE(action_dict_builder)
 {
   r::utility::configuration c;
-  r::dedup_state state(c, nullptr);
+  r::dedup_state state(c, true, true, nullptr);
   r::action_dict_builder builder(state);
 
   BOOST_CHECK_EQUAL(0, builder.size());
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(action_dict_builder)
 BOOST_AUTO_TEST_CASE(action_dict_builder_missing_actions_in_dict)
 {
   r::utility::configuration c;
-  r::dedup_state state(c, nullptr);
+  r::dedup_state state(c, true, true, nullptr);
   r::action_dict_builder builder(state);
 
   BOOST_CHECK_EQUAL(0, builder.size());
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(dedup_state_expected_use)
 {
   //This test the expected usage of it
   r::utility::configuration c;
-  r::dedup_state state(c, nullptr);
+  r::dedup_state state(c, true, true, nullptr);
 
   BOOST_CHECK_EQUAL(1, state.get_ewma_value());
   state.update_ewma(2);
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(dedup_state_expected_use)
 BOOST_AUTO_TEST_CASE(dedup_state_and_bad_state)
 {
   r::utility::configuration c;
-  r::dedup_state state(c, nullptr);
+  r::dedup_state state(c, true, true, nullptr);
 
   BOOST_CHECK_EQUAL(0, state.get_object(10).size());
 
@@ -269,3 +269,66 @@ BOOST_AUTO_TEST_CASE(dedup_state_and_bad_state)
   BOOST_CHECK_EQUAL(0, state.get_dict().get_object(id).size());
 }
 
+BOOST_AUTO_TEST_CASE(dedup_enable_compression)
+{
+  r::utility::configuration c;
+  r::dedup_state state(c, true, true, nullptr);
+  r::zstd_compressor compressor(1);
+
+  const char* input = "fheu83bf vcnCD,mkfne9";
+  auto in = str_to_buff(input);
+  auto ptr1 = in.data();
+
+  auto content_type = r::event_content_type::IDENTITY;
+  BOOST_CHECK_EQUAL(err::success, state.compress(in, content_type, nullptr));
+  BOOST_CHECK_NE(ptr1, in.data());
+  BOOST_CHECK_EQUAL((int)r::event_content_type::ZSTD, (int)content_type);
+
+  auto ptr2 = in.data();
+
+  BOOST_CHECK_EQUAL(err::success, compressor.decompress(in, nullptr));
+  BOOST_CHECK_NE(ptr2, in.data());
+  BOOST_CHECK_EQUAL(input, (char*)in.data());
+}
+
+BOOST_AUTO_TEST_CASE(dedup_state_no_dedup)
+{
+  //This test the expected usage of it
+  r::utility::configuration c;
+  r::dedup_state state(c, true, false, nullptr);
+
+  std::string payload = R"(
+    {
+      "s_": "1",
+      "_multi": [
+        { "b_": "1" },
+        { "b_": "2" }
+      ],
+      "_slots": [ { "a": 10 }, { "b": 20 } ]
+    })";
+
+  std::string edited_payload;
+  r::generic_event::object_list_t obj_list;
+  //1st - the payload is edited to extract actions
+  BOOST_CHECK_EQUAL(err::success, state.transform_payload_and_add_objects(payload.c_str(), edited_payload, obj_list, nullptr));
+
+  BOOST_CHECK_EQUAL(0, obj_list.size());
+  BOOST_CHECK_EQUAL(0, state.get_dict().size());
+}
+
+BOOST_AUTO_TEST_CASE(dedup_disable_compression)
+{
+  r::utility::configuration c;
+  r::dedup_state state(c, false, true, nullptr);
+
+  const char* input = "fheu83bf vcnCD,mkfne9";
+  auto in = str_to_buff(input);
+
+  auto content_type = r::event_content_type::ZSTD;
+  auto old_len = in.size();
+  auto ptr1 = in.data();
+  BOOST_CHECK_EQUAL(err::success, state.compress(in, content_type, nullptr));
+  BOOST_CHECK_EQUAL((int)r::event_content_type::IDENTITY, (int)content_type);
+  BOOST_CHECK_EQUAL(old_len, in.size());
+  BOOST_CHECK_EQUAL(ptr1, in.data());
+}
