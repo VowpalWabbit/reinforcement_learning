@@ -213,6 +213,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <ClInclude Include="generated\OutcomeEvent_generated.h" />
     <ClInclude Include="generated\RankingEvent_generated.h" />
     <ClInclude Include="generated\Metadata_generated.h" />
+	<ClInclude Include="generated\LearningModeType_generated.h" />
     <ClInclude Include="console_tracer.h" />
     <ClInclude Include="logger\endian.h" />
     <ClInclude Include="logger\event_logger.h" />
