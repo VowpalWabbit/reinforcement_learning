@@ -1,7 +1,7 @@
 ﻿// EventHubInteraction Schema used by FlatBuffer
-namespace reinforcement_learning.messages.flatbuff.v2;
+include "LearningModeType.fbs";
 
-enum LearningModeType : ubyte { Online, Apprentice, LoggingOnly }
+namespace reinforcement_learning.messages.flatbuff.v2;
 
 table CbEvent {
     deferred_action:bool = false;

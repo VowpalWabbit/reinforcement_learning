@@ -98,7 +98,7 @@
     <PreBuildEvent>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs
-$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CaEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiSlotEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs $(SolutionDir)rlclientlib\schema\v2\DedupInfo.fbs</Command>
+$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CaEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiSlotEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs $(SolutionDir)rlclientlib\schema\v2\DedupInfo.fbs $(SolutionDir)rlclientlib\schema\v2\LearningModeType.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -119,7 +119,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <PreBuildEvent>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs
-$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CaEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiSlotEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs $(SolutionDir)rlclientlib\schema\v2\DedupInfo.fbs</Command>
+$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CaEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiSlotEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs $(SolutionDir)rlclientlib\schema\v2\DedupInfo.fbs $(SolutionDir)rlclientlib\schema\v2\LearningModeType.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -144,7 +144,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <PreBuildEvent>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs
-$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CaEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiSlotEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs $(SolutionDir)rlclientlib\schema\v2\DedupInfo.fbs</Command>
+$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CaEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiSlotEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs $(SolutionDir)rlclientlib\schema\v2\DedupInfo.fbs $(SolutionDir)rlclientlib\schema\v2\LearningModeType.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -169,7 +169,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <PreBuildEvent>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs</Command>
       <Command>$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v1\ --cpp $(SolutionDir)rlclientlib\schema\v1\Metadata.fbs $(SolutionDir)rlclientlib\schema\v1\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v1\RankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\DecisionRankingEvent.fbs $(SolutionDir)rlclientlib\schema\v1\SlatesEvent.fbs
-$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CaEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiSlotEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs $(SolutionDir)rlclientlib\schema\v2\DedupInfo.fbs</Command>
+$(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlclientlib\schema\v2\Metadata.fbs $(SolutionDir)rlclientlib\schema\v2\OutcomeEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CbEvent.fbs $(SolutionDir)rlclientlib\schema\v2\CaEvent.fbs $(SolutionDir)rlclientlib\schema\v2\MultiSlotEvent.fbs $(SolutionDir)rlclientlib\schema\v2\Event.fbs $(SolutionDir)rlclientlib\schema\v2\DedupInfo.fbs $(SolutionDir)rlclientlib\schema\v2\LearningModeType.fbs</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Generate FlatBuffer</Message>
@@ -330,6 +330,7 @@ $(flatcPath) -o $(SolutionDir)rlclientlib\generated\v2\ --cpp $(SolutionDir)rlcl
     <None Include="schema\v2\CaEvent.fbs" />
     <None Include="schema\v2\MultiSlotEvent.fbs" />
     <None Include="schema\v2\Event.fbs" />
+	<None Include="schema\v2\LearningModeType.fbs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
