@@ -162,7 +162,7 @@ int ExampleJoiner::train_on_joined() {
 
     _example_pool.get_vw()->learn(examples2);
     // clean up examples and push examples back into pool for re-use
-    VW::finish_example(*_example_pool.get_vw(), examples2);
+    _example_pool.get_vw()->finish_example(examples2);
     for (auto &&ex : joined_event.examples) {
       _example_pool.return_example(ex);
     }

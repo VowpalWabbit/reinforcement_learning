@@ -36,6 +36,6 @@ int main(int argc, char *argv[]) {
   }
 
   // TODO get file name and vw command from command line
-  JoinedLogParser parser("--quiet --cb_explore_adf -f modelfile.model");
+  JoinedLogParser parser("--cb_explore_adf -f modelfile.model --invert_hash inv_hash.inv -p p.txt");
   return parser.read_and_deserialize_file(file_name);
 }
