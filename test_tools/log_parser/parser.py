@@ -41,6 +41,8 @@ def event_encoding_name(batch_type):
     return enum_to_str(EventEncoding, batch_type)
 
 def timestamp_to_datetime(timestamp):
+    if timestamp == None:
+        return None
     return datetime.datetime(timestamp.Year(), timestamp.Month(), timestamp.Day(), timestamp.Hour(), timestamp.Minute(), timestamp.Second(), timestamp.Subsecond())
 
 # Similar hack to the C# one due to limited binding codegen
@@ -81,8 +83,10 @@ def parse_outcome(payload):
 def parse_multislot(payload):
     evt = MultiSlotEvent.GetRootAsMultiSlotEvent(payload, 0)
 
-    print(f'\tmulti-slot slots:{evt.SlotsLength()} model:{evt.ModelId()} deferred:{evt.DeferredAction()}')
+    print(f'\tmulti-slot slots:{evt.SlotsLength()} model:{evt.ModelId()} deferred:{evt.DeferredAction()} has-baseline:{not evt.BaselineActionsIsNone()}')
     print(f'\t\tcontext: {fmt_payload(evt.ContextAsNumpy())}')
+    if not evt.BaselineActionsIsNone():
+        print(f'\t\tbaselines: {" ".join([str(b) for b in evt.BaselineActionsAsNumpy()])}')
 
 def parse_continuous_action(payload):
     evt = CaEvent.GetRootAsCaEvent(payload, 0)
