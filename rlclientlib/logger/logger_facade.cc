@@ -117,7 +117,8 @@ namespace reinforcement_learning {
 
 
     int interaction_logger_facade::log_decision(const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
-      const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids, api_status* status, const std::vector<int>& baseline_actions) {
+      const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids, api_status* status,
+      const std::vector<int>& baseline_actions, learning_mode learning_mode) {
       switch (_version) {
       case 1: {
         switch (_model_type) {
@@ -126,6 +127,9 @@ namespace reinforcement_learning {
         }
       }
       case 2: {
+        v2::LearningModeType lmt;
+        RETURN_IF_FAIL(get_learning_mode(learning_mode, lmt, status));
+
         generic_event::payload_type_t payload_type;
         RETURN_IF_FAIL(multi_slot_model_type_to_payload_type(_model_type, payload_type, status));
 
@@ -133,7 +137,7 @@ namespace reinforcement_learning {
         generic_event::payload_buffer_t payload;
         event_content_type content_type;
 
-        RETURN_IF_FAIL(wrap_log_call(_ext, _serializer_multislot, context, actions, payload, content_type, status, flags, action_ids, pdfs, model_version, slot_ids, baseline_actions));
+        RETURN_IF_FAIL(wrap_log_call(_ext, _serializer_multislot, context, actions, payload, content_type, status, flags, action_ids, pdfs, model_version, slot_ids, baseline_actions, lmt));
         return _v2->log(event_id.c_str(), std::move(payload), payload_type, content_type, std::move(actions), status);
       }
       default: return protocol_not_supported(status);
