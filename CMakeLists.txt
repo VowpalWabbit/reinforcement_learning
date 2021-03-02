@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 option(BUILD_PYTHON "Build the Python bindings" OFF)
 option(USE_ZSTD "Whether to enable usage of zstandard compression" ON)
-option(BUILD_MY_EXTERNAL_PARSER "Build external parser" OFF)
+option(BUILD_VW_EXTERNAL_PARSER "Build external parser" OFF)
 
 option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" ON)
 
@@ -32,7 +32,7 @@ ProcessorCount(NumProcessors)
 message("Number of processors: ${NumProcessors}")
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/nprocs.txt ${NumProcessors})
 
-if(BUILD_MY_EXTERNAL_PARSER)
+if(BUILD_VW_EXTERNAL_PARSER)
     add_subdirectory(external_parser)
 else()
     add_subdirectory(bindings EXCLUDE_FROM_ALL)
