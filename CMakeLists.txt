@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 option(BUILD_PYTHON "Build the Python bindings" OFF)
 option(USE_ZSTD "Whether to enable usage of zstandard compression" ON)
+option(BUILD_EXTERNAL_PARSER "Build external parser" OFF)
 
 option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" ON)
 
@@ -33,6 +34,9 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/nprocs.txt ${NumProcessors})
 
 add_subdirectory(bindings EXCLUDE_FROM_ALL)
 add_subdirectory(doc EXCLUDE_FROM_ALL)
+if(BUILD_EXTERNAL_PARSER)
+    set(EXTERNAL_PARSER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test_tools/log_parser/external_parser)
+endif()
 add_subdirectory(ext_libs)
 add_subdirectory(rlclientlib)
 add_subdirectory(rlclientlib/extensions)
@@ -40,7 +44,6 @@ add_subdirectory(examples)
 add_subdirectory(test_tools/joiner)
 add_subdirectory(test_tools/sender_test)
 add_subdirectory(test_tools/example_gen)
-add_subdirectory(test_tools/log_parser)
 
 # enable_testing should be run after ext_libs so that the vw unit tests arent turned on.
 enable_testing()

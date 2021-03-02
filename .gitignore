@@ -27,3 +27,4 @@ build
 /.vscode
 /bindings/cs/rl.net/InternalsVisibleToTest.cs
 /bindings/cs/rl.net.cli/InternalsVisibleToTest.cs
+/test_tools/log_parser/reinforcement_learning/
