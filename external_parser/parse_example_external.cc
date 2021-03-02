@@ -32,9 +32,7 @@ int non_default_reward_calc(const joined_event &event,
 
 namespace VW {
 external_parser::external_parser(vw *all)
-    : _example_joiner(all, non_default_reward_calc) {
-  std::cout << "hey" << std::endl;
-}
+    : _example_joiner(all, non_default_reward_calc) {}
 
 bool external_parser::parse_examples(vw *all, v_array<example *> &examples) {
 
