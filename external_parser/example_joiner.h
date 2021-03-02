@@ -52,8 +52,7 @@ public:
   // needed pre-processing (e.g. decompressing), keeps the relevant event
   // information and then depending on whether the event is an interaction or an
   // observation it sends it to the correct event processor
-  int process_event(const v2::JoinedEvent &joined_event,
-                    v_array<example *> &examples);
+  int process_event(const v2::JoinedEvent &joined_event);
   // train on joined examples
   int train_on_joined(v_array<example *> &examples);
 
