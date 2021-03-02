@@ -1,7 +1,7 @@
 #include "example_joiner.h"
-#include "../../../rlclientlib/generated/v2/CbEvent_generated.h"
-#include "../../../rlclientlib/generated/v2/Event_generated.h"
-#include "../../../rlclientlib/generated/v2/OutcomeEvent_generated.h"
+#include "generated/v2/CbEvent_generated.h"
+#include "generated/v2/Event_generated.h"
+#include "generated/v2/OutcomeEvent_generated.h"
 
 // VW headers
 #include "example.h"
