@@ -6,7 +6,6 @@
 #include <fstream>
 #include <iostream>
 
-#include "../../../rlclientlib/generated/v2/Metadata_generated.h"
 #include "action_score.h"
 #include "best_constant.h"
 #include "cb.h"
@@ -103,6 +102,11 @@ bool external_parser::parse_examples(vw *all, v_array<example *> &examples) {
     _header_read = true;
   }
 
+  if (_example_joiner.processing_batch()) {
+    _example_joiner.train_on_joined(examples);
+    return true;
+  }
+
   auto len = all->example_parser->input->buf_read(line, sizeof(payload_type));
 
   if (len < sizeof(payload_type)) {
@@ -110,8 +114,7 @@ bool external_parser::parse_examples(vw *all, v_array<example *> &examples) {
   }
 
   payload_type = *reinterpret_cast<const unsigned int *>(line);
-  if (payload_type == 0)
-  {
+  if (payload_type == 0) {
     // try again?
     auto len = all->example_parser->input->buf_read(line, sizeof(payload_type));
 
@@ -139,10 +142,10 @@ bool external_parser::parse_examples(vw *all, v_array<example *> &examples) {
       return false;
     }
 
-    std::vector<char> payload = {line, line + payload_size};
+    _payload = {line, line + payload_size};
 
     auto joined_payload =
-        flatbuffers::GetRoot<v2::JoinedPayload>(payload.data());
+        flatbuffers::GetRoot<v2::JoinedPayload>(_payload.data());
     for (size_t i = 0; i < joined_payload->events()->size(); i++) {
       // process events one-by-one
       _example_joiner.process_event(*joined_payload->events()->Get(i),

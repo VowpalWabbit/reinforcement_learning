@@ -4,16 +4,12 @@
 
 #pragma once
 
-#include "../../../rlclientlib/generated/v2/FileFormat_generated.h"
 #include "example_joiner.h"
 #include "vw.h"
 
 const unsigned int MSG_TYPE_HEADER = 0x55555555;
 const unsigned int MSG_TYPE_REGULAR = 0xFFFFFFFF;
 const unsigned int MSG_TYPE_EOF = 0xAAAAAAAA;
-
-namespace v2 = reinforcement_learning::messages::flatbuff::v2;
-
 namespace VW {
 
 int parse_examples(vw *all, v_array<example *> &examples);
@@ -26,5 +22,7 @@ public:
 private:
   bool _header_read = false;
   ExampleJoiner _example_joiner;
+  // need to keep payload around
+  std::vector<char> _payload;
 };
 } // namespace VW

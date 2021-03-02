@@ -18,25 +18,15 @@ ExampleJoiner::ExampleJoiner(vw *vw, RewardCalcType rc)
     : _vw(vw), reward_calculation(rc) {}
 
 int ExampleJoiner::process_event(const v2::JoinedEvent &joined_event,
-                                 v_array<example *> &examples) {
+                                 v_array<example *> &examples /*TODO remove*/) {
   auto event = flatbuffers::GetRoot<v2::Event>(joined_event.event()->data());
-  auto metadata = event->meta();
-  std::cout << "id:" << metadata->id()->c_str()
-            << " type:" << v2::EnumNamePayloadType(metadata->payload_type())
-            << " payload-size:" << event->payload()->size()
-            << " encoding:" << v2::EnumNameEventEncoding(metadata->encoding())
-            << std::endl;
-
-  if (metadata->encoding() == v2::EventEncoding_Zstd) {
-    std::cout << "Decompression coming soon" << std::endl;
-  }
-
-  if (metadata->payload_type() == v2::PayloadType_Outcome) {
-    process_outcome(*event, *metadata);
+  std::string id = event->meta()->id()->str();
+  if (_unjoined_events.find(id) != _unjoined_events.end()) {
+    _unjoined_events[id].push_back(event);
   } else {
-    process_interaction(*event, *metadata, examples);
+    _unjoined_events.insert({id, {event}});
+    _event_order.push_back(id);
   }
-
   return 0;
 }
 
@@ -81,8 +71,7 @@ int ExampleJoiner::process_interaction(const v2::Event &event,
 
     VW::read_line_json<false>(
         *_vw, examples, &line_vec[0],
-        reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example),
-        _vw);
+        reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
 
     joined_event info = {"joiner_timestamp", std::move(meta), std::move(data)};
     _unjoined_examples.emplace(metadata.id()->str(), std::move(info));
@@ -135,15 +124,43 @@ int ExampleJoiner::process_outcome(const v2::Event &event,
 }
 
 int ExampleJoiner::train_on_joined(v_array<example *> &examples) {
-  for (auto &example : _unjoined_examples) {
-    auto &joined_event = _unjoined_examples[example.first];
+    if (_event_order.empty())
+    {
+      return 0;
+    }
 
+    // TODO event order store events backwards
+    auto& id = _event_order[0];  
+    for (auto *event : _unjoined_events[id]) {
+      auto metadata = event->meta();
+      std::cout << "id:" << metadata->id()->c_str()
+                << " type:" << v2::EnumNamePayloadType(metadata->payload_type())
+                << " payload-size:" << event->payload()->size() << " encoding:"
+                << v2::EnumNameEventEncoding(metadata->encoding()) << std::endl;
+
+      if (metadata->encoding() == v2::EventEncoding_Zstd) {
+        std::cout << "Decompression coming soon" << std::endl;
+      }
+
+      if (metadata->payload_type() == v2::PayloadType_Outcome) {
+        process_outcome(*event, *metadata);
+      } else {
+        process_interaction(*event, *metadata, examples);
+      }
+    }
     // call logic that creates the reward
-    reward_calculation(joined_event, examples);
+    reward_calculation(_unjoined_examples[id], examples);
     // return an empty example to signal end-of-multiline
     examples.push_back(&VW::get_unused_example(_vw));
-  }
-  _unjoined_examples.clear();
+  
+  _unjoined_events.erase(_unjoined_events.find(id));
+  _event_order.erase(_event_order.begin());
+  // _unjoined_examples.erase(_unjoined_examples.find(id));
 
   return 0;
+}
+
+bool ExampleJoiner::processing_batch()
+{
+  return !_event_order.empty();
 }

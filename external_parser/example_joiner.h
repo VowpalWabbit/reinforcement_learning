@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../../../rlclientlib/generated/v2/FileFormat_generated.h"
-#include "../../../rlclientlib/generated/v2/Metadata_generated.h"
 #include "err_constants.h"
 
 #include "example.h"
+#include "generated/v2/FileFormat_generated.h"
+#include "generated/v2/Metadata_generated.h"
 #include "v_array.h"
 #include <unordered_map>
 // VW headers
@@ -57,6 +57,8 @@ public:
   // train on joined examples
   int train_on_joined(v_array<example *> &examples);
 
+  bool processing_batch();
+
 private:
   int process_interaction(const v2::Event &event, const v2::Metadata &metadata,
                           v_array<example *> &examples);
@@ -73,6 +75,9 @@ private:
   // from event id to all the information required to create a complete
   // (multi)example
   std::unordered_map<std::string, joined_event> _unjoined_examples;
+  std::unordered_map<std::string, std::vector<const v2::Event *>>
+      _unjoined_events;
+  std::vector<std::string> _event_order;
 
   vw *_vw;
 
