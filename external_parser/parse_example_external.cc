@@ -148,8 +148,7 @@ bool external_parser::parse_examples(vw *all, v_array<example *> &examples) {
         flatbuffers::GetRoot<v2::JoinedPayload>(_payload.data());
     for (size_t i = 0; i < joined_payload->events()->size(); i++) {
       // process events one-by-one
-      _example_joiner.process_event(*joined_payload->events()->Get(i),
-                                    examples);
+      _example_joiner.process_event(*joined_payload->events()->Get(i));
     }
     _example_joiner.train_on_joined(examples);
     return true;
