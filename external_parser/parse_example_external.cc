@@ -31,7 +31,8 @@ int non_default_reward_calc(const joined_event &event,
 }
 
 // helpers start
-bool read_payload_type(char *line, io_buf *input, unsigned int &payload_type) {
+bool read_payload_type(io_buf *input, unsigned int &payload_type) {
+  char *line = nullptr;
   auto len = input->buf_read(line, sizeof(unsigned int));
 
   if (len < sizeof(unsigned int)) {
@@ -42,8 +43,8 @@ bool read_payload_type(char *line, io_buf *input, unsigned int &payload_type) {
   return true;
 }
 
-bool read_payload_size(char *line, io_buf *input, uint32_t &payload_size) {
-  // read payload size
+bool read_payload_size(io_buf *input, uint32_t &payload_size) {
+  char *line = nullptr;
   auto len = input->buf_read(line, sizeof(uint32_t));
   if (len < sizeof(uint32_t)) {
     return false;
@@ -53,8 +54,8 @@ bool read_payload_size(char *line, io_buf *input, uint32_t &payload_size) {
   return true;
 }
 
-bool read_payload(char *line, io_buf *input, char *&payload,
-                  size_t payload_size) {
+bool read_payload(io_buf *input, char *&payload, size_t payload_size) {
+  char *line = nullptr;
   auto len = input->buf_read(line, payload_size);
 
   if (len < payload_size) {
@@ -71,19 +72,16 @@ external_parser::external_parser(vw *all)
     : _example_joiner(all, non_default_reward_calc) {}
 
 bool external_parser::parse_examples(vw *all, v_array<example *> &examples) {
-
-  char *line = nullptr;
   unsigned int payload_type;
   uint32_t payload_size;
-  size_t buffer_length = 4 * sizeof(char);
-  char *payload;
+  const size_t buffer_length = 4 * sizeof(char);
 
   if (!_header_read) {
     // TODO change this to handle multiple files if needed?
     const std::vector<char> magic = {'V', 'W', 'F', 'B'};
+    char *payload = nullptr;
     // read the 4 magic bytes
-    if (!read_payload(line, all->example_parser->input, payload,
-                      buffer_length)) {
+    if (!read_payload(all->example_parser->input, payload, buffer_length)) {
       return false;
     }
 
@@ -94,8 +92,7 @@ bool external_parser::parse_examples(vw *all, v_array<example *> &examples) {
     }
 
     // read the version
-    if (!read_payload(line, all->example_parser->input, payload,
-                      buffer_length)) {
+    if (!read_payload(all->example_parser->input, payload, buffer_length)) {
       return false;
     }
 
@@ -104,7 +101,7 @@ bool external_parser::parse_examples(vw *all, v_array<example *> &examples) {
     }
 
     // payload type, check for header
-    if (!read_payload_type(line, all->example_parser->input, payload_type)) {
+    if (!read_payload_type(all->example_parser->input, payload_type)) {
       return false;
     }
 
@@ -113,17 +110,16 @@ bool external_parser::parse_examples(vw *all, v_array<example *> &examples) {
     }
 
     // read header size
-    if (!read_payload_size(line, all->example_parser->input, payload_size)) {
+    if (!read_payload_size(all->example_parser->input, payload_size)) {
       return false;
     }
 
     // read the payload
-    if (!read_payload(line, all->example_parser->input, payload,
-                      payload_size)) {
+    if (!read_payload(all->example_parser->input, payload, payload_size)) {
       return false;
     }
 
-    // std::vector<char> payload = {line, line + payload_size};
+    // std::vector<char> payload = {payload, payload + payload_size};
     // TODO:: deserialize header read_header(payload);
     _header_read = true;
   }
@@ -135,13 +131,13 @@ bool external_parser::parse_examples(vw *all, v_array<example *> &examples) {
     return true;
   }
 
-  if (!read_payload_type(line, all->example_parser->input, payload_type)) {
+  if (!read_payload_type(all->example_parser->input, payload_type)) {
     return false;
   }
 
   if (payload_type == 0) {
     // try again?
-    if (!read_payload_type(line, all->example_parser->input, payload_type)) {
+    if (!read_payload_type(all->example_parser->input, payload_type)) {
       return false;
     }
   }
@@ -150,12 +146,11 @@ bool external_parser::parse_examples(vw *all, v_array<example *> &examples) {
     if (payload_type != MSG_TYPE_REGULAR)
       return false;
     // read payload size
-    if (!read_payload_size(line, all->example_parser->input, payload_size)) {
+    if (!read_payload_size(all->example_parser->input, payload_size)) {
       return false;
     }
     // read the payload
-    if (!read_payload(line, all->example_parser->input, _payload,
-                      payload_size)) {
+    if (!read_payload(all->example_parser->input, _payload, payload_size)) {
       return false;
     }
 
