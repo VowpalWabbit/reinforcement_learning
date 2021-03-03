@@ -130,6 +130,8 @@ int ExampleJoiner::process_joined(v_array<example *> &examples) {
 
   // TODO event order store events backwards
   auto &id = _event_order[0];
+
+  bool multiline = true;
   for (auto *event : _unjoined_events[id]) {
     auto metadata = event->meta();
     std::cout << "id:" << metadata->id()->c_str()
@@ -145,13 +147,18 @@ int ExampleJoiner::process_joined(v_array<example *> &examples) {
     if (metadata->payload_type() == v2::PayloadType_Outcome) {
       process_outcome(*event, *metadata);
     } else {
+      if (metadata->payload_type() == v2::PayloadType_CA) {
+        multiline = false;
+      }
       process_interaction(*event, *metadata, examples);
     }
   }
   // call logic that creates the reward
   reward_calculation(_unjoined_examples[id], examples);
-  // return an empty example to signal end-of-multiline
-  examples.push_back(&VW::get_unused_example(_vw));
+  if (multiline) {
+    // return an empty example to signal end-of-multiline
+    examples.push_back(&VW::get_unused_example(_vw));
+  }
 
   _unjoined_events.erase(id);
   _event_order.erase(_event_order.begin());

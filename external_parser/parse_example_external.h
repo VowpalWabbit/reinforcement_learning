@@ -22,7 +22,5 @@ public:
 private:
   bool _header_read = false;
   ExampleJoiner _example_joiner;
-  // need to keep payload around
-  char* _payload;
 };
 } // namespace VW

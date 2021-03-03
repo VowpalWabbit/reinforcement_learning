@@ -35,7 +35,7 @@ bool read_payload_type(io_buf *input, unsigned int &payload_type) {
   char *line = nullptr;
   auto len = input->buf_read(line, sizeof(unsigned int));
 
-  if (len < sizeof(unsigned int)) {
+  if (len < sizeof(unsigned int) || line == nullptr) {
     return false;
   }
 
@@ -46,7 +46,7 @@ bool read_payload_type(io_buf *input, unsigned int &payload_type) {
 bool read_payload_size(io_buf *input, uint32_t &payload_size) {
   char *line = nullptr;
   auto len = input->buf_read(line, sizeof(uint32_t));
-  if (len < sizeof(uint32_t)) {
+  if (len < sizeof(uint32_t) || line == nullptr) {
     return false;
   }
 
@@ -58,7 +58,7 @@ bool read_payload(io_buf *input, char *&payload, size_t payload_size) {
   char *line = nullptr;
   auto len = input->buf_read(line, payload_size);
 
-  if (len < payload_size) {
+  if (len < payload_size || line == nullptr) {
     return false;
   }
   payload = line;
@@ -74,12 +74,12 @@ external_parser::external_parser(vw *all)
 bool external_parser::parse_examples(vw *all, v_array<example *> &examples) {
   unsigned int payload_type;
   uint32_t payload_size;
+  char *payload = nullptr;
   const size_t buffer_length = 4 * sizeof(char);
 
   if (!_header_read) {
     // TODO change this to handle multiple files if needed?
     const std::vector<char> magic = {'V', 'W', 'F', 'B'};
-    char *payload = nullptr;
     // read the 4 magic bytes
     if (!read_payload(all->example_parser->input, payload, buffer_length)) {
       return false;
@@ -150,11 +150,11 @@ bool external_parser::parse_examples(vw *all, v_array<example *> &examples) {
       return false;
     }
     // read the payload
-    if (!read_payload(all->example_parser->input, _payload, payload_size)) {
+    if (!read_payload(all->example_parser->input, payload, payload_size)) {
       return false;
     }
 
-    auto joined_payload = flatbuffers::GetRoot<v2::JoinedPayload>(_payload);
+    auto joined_payload = flatbuffers::GetRoot<v2::JoinedPayload>(payload);
     for (size_t i = 0; i < joined_payload->events()->size(); i++) {
       // process and group events in batch
       _example_joiner.process_event(*joined_payload->events()->Get(i));
