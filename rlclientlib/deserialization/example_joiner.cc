@@ -10,46 +10,72 @@
 #include "parser.h"
 #include "v_array.h"
 
-float average(const joined_event &event) {
-  if (event.outcome_events.size() == 0) {
-    return 0.0f;
+namespace RewardFunctions {
+  float average(const joined_event &event) {
+    if (event.outcome_events.size() == 0) {
+      return 0.f;
+    }
+
+    float sum = 0.f;
+    for (const auto &o : event.outcome_events) {
+      sum += o.value;
+    }
+
+    return sum / event.outcome_events.size();
   }
 
-  float sum = 0.0f;
-  for (const auto &o : event.outcome_events) {
-    sum += o.value;
+  float sum(const joined_event &event) {
+    float sum = 0.0f;
+    for (const auto &o : event.outcome_events) {
+      sum += o.value;
+    }
+
+    return sum;
   }
 
-  return sum / event.outcome_events.size();
-}
-
-float sum(const joined_event &event) {
-  float sum = 0.0f;
-  for (const auto &o : event.outcome_events) {
-    sum += o.value;
+  float min(const joined_event &event) {
+    float min_reward = std::numeric_limits<float>::max();
+    for (const auto &o : event.outcome_events) {
+      if (o.value < min_reward) {
+        min_reward = o.value;
+      }
+    }
+    return min_reward;
   }
 
-  return sum;
-}
+  float max(const joined_event &event) {
+    float max_reward = std::numeric_limits<float>::min();
+    for (const auto &o : event.outcome_events) {
+      if (o.value > max_reward) {
+        max_reward = o.value;
+      }
+    }
+    return max_reward;
+  }
 
-float min(const joined_event &event) {
-  float min_reward = std::numeric_limits<float>::max();
-  for (const auto &o : event.outcome_events) {
-    if (o.value < min_reward) {
-      min_reward = o.value;
+  float median(const joined_event &event) {
+    std::vector<float> values;
+    for (const auto &o : event.outcome_events) {
+      values.push_back(o.value);
+    }
+
+    int outcome_events_size = values.size();
+
+    if (outcome_events_size == 0) {
+      return 0.f;
+    }
+
+    sort(values.begin(), values.end());
+    if (outcome_events_size % 2 == 0) {
+      return (values[outcome_events_size / 2 - 1] + values[outcome_events_size / 2]) / 2;
+    } else {
+      return values[outcome_events_size / 2];
     }
   }
-  return min_reward;
-}
 
-float max(const joined_event &event) {
-  float max_reward = std::numeric_limits<float>::min();
-  for (const auto &o : event.outcome_events) {
-    if (o.value > max_reward) {
-      max_reward = o.value;
-    }
+  float earliest(const joined_event &event) {
+
   }
-  return max_reward;
 }
 
 ExampleJoiner::ExampleJoiner(const std::string &initial_command_line)
@@ -80,7 +106,12 @@ int ExampleJoiner::process_event(const v2::JoinedEvent &joined_event) {
 }
 
 void ExampleJoiner::set_reward_function(const v2::RewardFunctionType type) {
+  using namespace RewardFunctions;
+
   switch(type) {
+    case v2::RewardFunctionType_Earliest:
+      reward_calculation = &earliest;
+      break;
     case v2::RewardFunctionType_Average:
       reward_calculation = &average;
       break;
@@ -97,6 +128,10 @@ void ExampleJoiner::set_reward_function(const v2::RewardFunctionType type) {
       reward_calculation = &max;
       break;
 
+    case v2::RewardFunctionType_Median:
+      reward_calculation = &median;
+      break;
+
     default:
       break;
   }
@@ -104,11 +139,6 @@ void ExampleJoiner::set_reward_function(const v2::RewardFunctionType type) {
 
 int ExampleJoiner::process_interaction(const v2::Event &event,
                                        const v2::Metadata &metadata) {
-
-  metadata_info meta = {"client_time_utc",
-                        metadata.app_id() ? metadata.app_id()->str() : "",
-                        metadata.payload_type(), metadata.pass_probability(),
-                        metadata.encoding()};
 
   if (metadata.payload_type() == v2::PayloadType_CB) {
     auto cb = v2::GetCbEvent(event.payload()->data());
@@ -119,6 +149,15 @@ int ExampleJoiner::process_interaction(const v2::Event &event,
               << " lm:" << v2::EnumNameLearningModeType(cb->learning_mode())
               << " deferred:" << cb->deferred_action() << std::endl
               << "context:" << cb->context()->data() << std::endl;
+    v2::LearningModeType learning_mode = cb->learning_mode();
+
+    metadata_info meta = {
+      "client_time_utc",
+      metadata.app_id() ? metadata.app_id()->str() : "",
+      metadata.payload_type(), metadata.pass_probability(),
+      metadata.encoding(),
+      learning_mode
+    };
 
     for (size_t j = 0; j < cb->action_ids()->size(); j++) {
       std::cout << "action:" << cb->action_ids()->Get(j)
@@ -210,7 +249,15 @@ int ExampleJoiner::train_on_joined() {
     // pool
 
     // call logic that creates the reward
-    float reward = reward_calculation(joined_event);
+    float reward = 0.f;
+    if (joined_event.interaction_metadata.payload_type == v2::PayloadType_CB &&
+      joined_event.interaction_metadata.learning_mode == v2::LearningModeType_Apprentice) {
+      if (joined_event.interaction_data.actions[0] == 1) {
+        reward = reward_calculation(joined_event);
+      }
+    } else {
+      reward = reward_calculation(joined_event);
+    }
 
     std::cout << "reward value: " << reward << std::endl;
 

@@ -3,6 +3,7 @@
 #include "err_constants.h"
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
+#include "generated/v2/CbEvent_generated.h"
 #include "vw_model/safe_vw.h"
 
 // VW headers
@@ -17,6 +18,7 @@ struct metadata_info {
   v2::PayloadType payload_type;
   float pass_probability;
   v2::EventEncoding event_encoding;
+  v2::LearningModeType learning_mode;
 };
 
 struct outcome_event {
@@ -37,10 +39,15 @@ struct joined_event {
 
 using RewardCalcType = float (*)(const joined_event &);
 
-float average(const joined_event &event);
-float sum(const joined_event &event);
-float min(const joined_event &event);
-float max(const joined_event &event);
+namespace RewardFunctions {
+  extern float default_reward;
+  float average(const joined_event &event);
+  float sum(const joined_event &event);
+  float min(const joined_event &event);
+  float max(const joined_event &event);
+  float median(const joined_event &event);
+  float apprentice(const joined_event &event);
+}
 
 class ExampleJoiner {
 public:

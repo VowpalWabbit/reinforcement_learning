@@ -24,6 +24,7 @@ table FileHeader {
 
 table RewardFunctionInfo {
     type: RewardFunctionType;
+    default_reward: float;
 }
 
 root_type RewardFunctionInfo;
