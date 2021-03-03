@@ -26,4 +26,4 @@ build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgen "" "${CMAKE_CURRENT_SOURCE_
 set(external_parser_headers ${CMAKE_CURRENT_SOURCE_DIR}/example_joiner.h ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_external.h)
 set(external_parser_sources ${CMAKE_CURRENT_SOURCE_DIR}/example_joiner.cc ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_external.cc)
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/ext_libs/vowpal_wabbit ${CMAKE_CURRENT_SOURCE_DIR}/external_parser/build/ext_libs)
+add_subdirectory(${CMAKE_SOURCE_DIR}/ext_libs/vowpal_wabbit ${CMAKE_CURRENT_BINARY_DIR}/vw_with_binary_parser)
