@@ -24,7 +24,7 @@ int ExampleJoiner::process_event(const v2::JoinedEvent &joined_event) {
     _batch_grouped_events[id].push_back(event);
   } else {
     _batch_grouped_events.insert({id, {event}});
-    _batch_event_order.push_back(id);
+    _batch_event_order.emplace(id);
   }
   return 0;
 }
@@ -128,8 +128,7 @@ int ExampleJoiner::process_joined(v_array<example *> &examples) {
     return 0;
   }
 
-  // TODO event order store events backwards
-  auto &id = _batch_event_order[0];
+  auto &id = _batch_event_order.front();
 
   bool multiline = true;
   for (auto *event : _batch_grouped_events[id]) {
@@ -161,7 +160,7 @@ int ExampleJoiner::process_joined(v_array<example *> &examples) {
   }
 
   _batch_grouped_events.erase(id);
-  _batch_event_order.erase(_batch_event_order.begin());
+  _batch_event_order.pop();
   _batch_grouped_examples.erase(id);
 
   return 0;

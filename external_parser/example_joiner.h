@@ -6,6 +6,8 @@
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "v_array.h"
+
+#include <queue>
 #include <unordered_map>
 // VW headers
 // vw.h has to come before json_utils.h
@@ -74,8 +76,9 @@ private:
   // (multi)example
   std::unordered_map<std::string, joined_event> _batch_grouped_examples;
   // from event id to all the events that have that event id
-  std::unordered_map<std::string, std::vector<const v2::Event *>> _batch_grouped_events;
-  std::vector<std::string> _batch_event_order;
+  std::unordered_map<std::string, std::vector<const v2::Event *>>
+      _batch_grouped_events;
+  std::queue<std::string> _batch_event_order;
 
   vw *_vw;
 
