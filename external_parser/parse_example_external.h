@@ -23,6 +23,6 @@ private:
   bool _header_read = false;
   ExampleJoiner _example_joiner;
   // need to keep payload around
-  std::vector<char> _payload;
+  char* _payload;
 };
 } // namespace VW

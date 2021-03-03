@@ -122,7 +122,7 @@ int ExampleJoiner::process_outcome(const v2::Event &event,
   return 0;
 }
 
-int ExampleJoiner::train_on_joined(v_array<example *> &examples) {
+int ExampleJoiner::process_joined(v_array<example *> &examples) {
   if (_event_order.empty()) {
     return 0;
   }

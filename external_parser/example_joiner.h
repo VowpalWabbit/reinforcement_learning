@@ -48,23 +48,22 @@ public:
   ExampleJoiner(
       vw *vw,
       RewardCalcType jl = default_reward_calculation); // TODO rule of 5
-  // takes an event which will have a timestamp and event payload, performs any
-  // needed pre-processing (e.g. decompressing), keeps the relevant event
-  // information and then depending on whether the event is an interaction or an
-  // observation it sends it to the correct event processor
+  // Takes an event which will have a timestamp and event payload
+  // groups all events interactions with their event observations based on their
+  // id. The grouped events can be processed when process_joined() is called
   int process_event(const v2::JoinedEvent &joined_event);
-  // train on joined examples
-  int train_on_joined(v_array<example *> &examples);
-
+  // Takes all grouped events, processes them (e.g. decompression) and populates
+  // the examples array with complete example(s) ready to be used by vw for
+  // training
+  int process_joined(v_array<example *> &examples);
+  // true if there are still event-groups to be processed from a deserialized
+  // batch
   bool processing_batch();
 
 private:
   int process_interaction(const v2::Event &event, const v2::Metadata &metadata,
                           v_array<example *> &examples);
 
-  // process outcome will find the examples that reside under the same event id,
-  // and store the outcome until all the information is available to join and
-  // train
   int process_outcome(const v2::Event &event, const v2::Metadata &metadata);
 
   // from dictionary id to example object
@@ -74,6 +73,7 @@ private:
   // from event id to all the information required to create a complete
   // (multi)example
   std::unordered_map<std::string, joined_event> _unjoined_examples;
+  // from event id to all the events that have that event id
   std::unordered_map<std::string, std::vector<const v2::Event *>>
       _unjoined_events;
   std::vector<std::string> _event_order;
