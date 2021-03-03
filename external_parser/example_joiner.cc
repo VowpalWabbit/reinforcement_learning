@@ -20,11 +20,11 @@ ExampleJoiner::ExampleJoiner(vw *vw, RewardCalcType rc)
 int ExampleJoiner::process_event(const v2::JoinedEvent &joined_event) {
   auto event = flatbuffers::GetRoot<v2::Event>(joined_event.event()->data());
   std::string id = event->meta()->id()->str();
-  if (_unjoined_events.find(id) != _unjoined_events.end()) {
-    _unjoined_events[id].push_back(event);
+  if (_batch_grouped_events.find(id) != _batch_grouped_events.end()) {
+    _batch_grouped_events[id].push_back(event);
   } else {
-    _unjoined_events.insert({id, {event}});
-    _event_order.push_back(id);
+    _batch_grouped_events.insert({id, {event}});
+    _batch_event_order.push_back(id);
   }
   return 0;
 }
@@ -72,7 +72,7 @@ int ExampleJoiner::process_interaction(const v2::Event &event,
         *_vw, examples, &line_vec[0],
         reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
 
-    _unjoined_examples.emplace(std::make_pair<std::string, joined_event>(
+    _batch_grouped_examples.emplace(std::make_pair<std::string, joined_event>(
         metadata.id()->str(),
         {"joiner_timestamp", std::move(meta), std::move(data)}));
   }
@@ -114,9 +114,9 @@ int ExampleJoiner::process_outcome(const v2::Event &event,
 
   std::cout << " action-taken:" << outcome->action_taken() << std::endl;
 
-  if (_unjoined_examples.find(metadata.id()->str()) !=
-      _unjoined_examples.end()) {
-    auto &joined_event = _unjoined_examples[metadata.id()->str()];
+  if (_batch_grouped_examples.find(metadata.id()->str()) !=
+      _batch_grouped_examples.end()) {
+    auto &joined_event = _batch_grouped_examples[metadata.id()->str()];
     joined_event.outcome_events.push_back(o_event);
   }
 
@@ -124,15 +124,15 @@ int ExampleJoiner::process_outcome(const v2::Event &event,
 }
 
 int ExampleJoiner::process_joined(v_array<example *> &examples) {
-  if (_event_order.empty()) {
+  if (_batch_event_order.empty()) {
     return 0;
   }
 
   // TODO event order store events backwards
-  auto &id = _event_order[0];
+  auto &id = _batch_event_order[0];
 
   bool multiline = true;
-  for (auto *event : _unjoined_events[id]) {
+  for (auto *event : _batch_grouped_events[id]) {
     auto metadata = event->meta();
     std::cout << "id:" << metadata->id()->c_str()
               << " type:" << v2::EnumNamePayloadType(metadata->payload_type())
@@ -154,17 +154,17 @@ int ExampleJoiner::process_joined(v_array<example *> &examples) {
     }
   }
   // call logic that creates the reward
-  reward_calculation(_unjoined_examples[id], examples);
+  reward_calculation(_batch_grouped_examples[id], examples);
   if (multiline) {
-    // return an empty example to signal end-of-multiline
+    // add an empty example to signal end-of-multiline
     examples.push_back(&VW::get_unused_example(_vw));
   }
 
-  _unjoined_events.erase(id);
-  _event_order.erase(_event_order.begin());
-  _unjoined_examples.erase(id);
+  _batch_grouped_events.erase(id);
+  _batch_event_order.erase(_batch_event_order.begin());
+  _batch_grouped_examples.erase(id);
 
   return 0;
 }
 
-bool ExampleJoiner::processing_batch() { return !_event_order.empty(); }
+bool ExampleJoiner::processing_batch() { return !_batch_event_order.empty(); }

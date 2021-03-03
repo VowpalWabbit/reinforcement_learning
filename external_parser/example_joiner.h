@@ -72,11 +72,10 @@ private:
   std::unordered_map<std::string, example *> _dedup_examples;
   // from event id to all the information required to create a complete
   // (multi)example
-  std::unordered_map<std::string, joined_event> _unjoined_examples;
+  std::unordered_map<std::string, joined_event> _batch_grouped_examples;
   // from event id to all the events that have that event id
-  std::unordered_map<std::string, std::vector<const v2::Event *>>
-      _unjoined_events;
-  std::vector<std::string> _event_order;
+  std::unordered_map<std::string, std::vector<const v2::Event *>> _batch_grouped_events;
+  std::vector<std::string> _batch_event_order;
 
   vw *_vw;
 
