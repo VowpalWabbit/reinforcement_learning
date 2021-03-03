@@ -72,8 +72,9 @@ int ExampleJoiner::process_interaction(const v2::Event &event,
         *_vw, examples, &line_vec[0],
         reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
 
-    joined_event info = {"joiner_timestamp", std::move(meta), std::move(data)};
-    _unjoined_examples.emplace(metadata.id()->str(), std::move(info));
+    _unjoined_examples.emplace(std::make_pair<std::string, joined_event>(
+        metadata.id()->str(),
+        {"joiner_timestamp", std::move(meta), std::move(data)}));
   }
   return 0;
 }
@@ -152,9 +153,9 @@ int ExampleJoiner::process_joined(v_array<example *> &examples) {
   // return an empty example to signal end-of-multiline
   examples.push_back(&VW::get_unused_example(_vw));
 
-  _unjoined_events.erase(_unjoined_events.find(id));
+  _unjoined_events.erase(id);
   _event_order.erase(_event_order.begin());
-  // _unjoined_examples.erase(_unjoined_examples.find(id));
+  _unjoined_examples.erase(id);
 
   return 0;
 }
