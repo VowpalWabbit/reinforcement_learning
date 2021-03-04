@@ -22,7 +22,7 @@ public:
 
 private:
   bool _header_read = false;
-  ExampleJoiner _example_joiner;
+  example_joiner _example_joiner;
 };
 } // namespace external
 } // namespace VW

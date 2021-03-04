@@ -14,10 +14,10 @@ int default_reward_calculation(const joined_event &event) {
   return 0;
 }
 
-ExampleJoiner::ExampleJoiner(vw *vw, RewardCalcType rc)
+example_joiner::example_joiner(vw *vw, RewardCalcType rc)
     : _vw(vw), reward_calculation(rc) {}
 
-int ExampleJoiner::process_event(const v2::JoinedEvent &joined_event) {
+int example_joiner::process_event(const v2::JoinedEvent &joined_event) {
   auto event = flatbuffers::GetRoot<v2::Event>(joined_event.event()->data());
   std::string id = event->meta()->id()->str();
   if (_batch_grouped_events.find(id) != _batch_grouped_events.end()) {
@@ -29,7 +29,7 @@ int ExampleJoiner::process_event(const v2::JoinedEvent &joined_event) {
   return 0;
 }
 
-int ExampleJoiner::process_interaction(const v2::Event &event,
+int example_joiner::process_interaction(const v2::Event &event,
                                        const v2::Metadata &metadata,
                                        v_array<example *> &examples) {
 
@@ -79,7 +79,7 @@ int ExampleJoiner::process_interaction(const v2::Event &event,
   return 0;
 }
 
-int ExampleJoiner::process_outcome(const v2::Event &event,
+int example_joiner::process_outcome(const v2::Event &event,
                                    const v2::Metadata &metadata) {
 
   outcome_event o_event;
@@ -123,7 +123,7 @@ int ExampleJoiner::process_outcome(const v2::Event &event,
   return 0;
 }
 
-int ExampleJoiner::process_joined(v_array<example *> &examples) {
+int example_joiner::process_joined(v_array<example *> &examples) {
   if (_batch_event_order.empty()) {
     return 0;
   }
@@ -166,4 +166,4 @@ int ExampleJoiner::process_joined(v_array<example *> &examples) {
   return 0;
 }
 
-bool ExampleJoiner::processing_batch() { return !_batch_event_order.empty(); }
+bool example_joiner::processing_batch() { return !_batch_event_order.empty(); }

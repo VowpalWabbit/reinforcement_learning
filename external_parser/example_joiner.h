@@ -45,9 +45,9 @@ using RewardCalcType = int (*)(const joined_event &, v_array<example *> &);
 
 int default_reward_calculation(const joined_event &event, v_array<example *> &);
 
-class ExampleJoiner {
+class example_joiner {
 public:
-  ExampleJoiner(
+  example_joiner(
       vw *vw,
       RewardCalcType jl = default_reward_calculation); // TODO rule of 5
   // Takes an event which will have a timestamp and event payload
