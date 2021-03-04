@@ -3,24 +3,20 @@
 // license as described in the file LICENSE.
 
 #pragma once
-
-#include "example_joiner.h"
+#include "memory.h"
 #include "vw.h"
 
-const unsigned int MSG_TYPE_HEADER = 0x55555555;
-const unsigned int MSG_TYPE_REGULAR = 0xFFFFFFFF;
-const unsigned int MSG_TYPE_EOF = 0xAAAAAAAA;
 namespace VW {
+namespace external {
 
 int parse_examples(vw *all, v_array<example *> &examples);
 
-class external_parser {
+class parser {
 public:
-  external_parser(vw *all);
-  bool parse_examples(vw *all, v_array<example *> &examples);
-
-private:
-  bool _header_read = false;
-  ExampleJoiner _example_joiner;
+  static std::unique_ptr<parser> get_external_parser(vw *all, const std::string &parser_type);
+  virtual ~parser();
+  virtual bool parse_examples(vw *all, v_array<example *> &examples) = 0;
 };
+
+} // namespace external
 } // namespace VW

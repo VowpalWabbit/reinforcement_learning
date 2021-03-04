@@ -17,7 +17,13 @@ set(EXTERNAL_PARSER_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(WARNINGS OFF CACHE BOOL "")
 build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgen "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v2/" "" "")
 
-set(external_parser_headers ${CMAKE_CURRENT_SOURCE_DIR}/example_joiner.h ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_external.h)
-set(external_parser_sources ${CMAKE_CURRENT_SOURCE_DIR}/example_joiner.cc ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_external.cc)
+set(external_parser_headers ${CMAKE_CURRENT_SOURCE_DIR}/example_joiner.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_external.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_binary.h
+)
+set(external_parser_sources ${CMAKE_CURRENT_SOURCE_DIR}/example_joiner.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_external.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_binary.cc
+)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/ext_libs/vowpal_wabbit ${CMAKE_CURRENT_BINARY_DIR}/vw_with_binary_parser)
