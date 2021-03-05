@@ -65,6 +65,16 @@ bool read_payload(io_buf *input, char *&payload, size_t payload_size) {
   return true;
 }
 
+bool read_padding(io_buf *input, size_t previous_payload_size) {
+  char *line = nullptr;
+  auto padding_bytes = previous_payload_size % 8;
+  if (padding_bytes > 0) {
+    // read and discard padding bytes
+    return read_payload(input, line, padding_bytes);
+  }
+  return true;
+}
+
 // helpers end
 
 namespace VW {
@@ -76,7 +86,6 @@ binary_parser::~binary_parser(){};
 
 bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
   unsigned int payload_type;
-  uint32_t payload_size;
   char *payload = nullptr;
   const size_t buffer_length = 4 * sizeof(char);
 
@@ -113,16 +122,16 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
     }
 
     // read header size
-    if (!read_payload_size(all->example_parser->input, payload_size)) {
+    if (!read_payload_size(all->example_parser->input, _payload_size)) {
       return false;
     }
 
     // read the payload
-    if (!read_payload(all->example_parser->input, payload, payload_size)) {
+    if (!read_payload(all->example_parser->input, payload, _payload_size)) {
       return false;
     }
 
-    // std::vector<char> payload = {payload, payload + payload_size};
+    // std::vector<char> payload = {payload, payload + _payload_size};
     // TODO:: deserialize header read_header(payload);
     _header_read = true;
   }
@@ -134,26 +143,24 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
     return true;
   }
 
-  if (!read_payload_type(all->example_parser->input, payload_type)) {
+  // read potential excess padding after last payload read
+  if (!read_padding(all->example_parser->input, _payload_size)) {
     return false;
   }
 
-  if (payload_type == 0) {
-    // try again?
-    if (!read_payload_type(all->example_parser->input, payload_type)) {
-      return false;
-    }
+  if (!read_payload_type(all->example_parser->input, payload_type)) {
+    return false;
   }
 
   if (payload_type != MSG_TYPE_EOF) {
     if (payload_type != MSG_TYPE_REGULAR)
       return false;
     // read payload size
-    if (!read_payload_size(all->example_parser->input, payload_size)) {
+    if (!read_payload_size(all->example_parser->input, _payload_size)) {
       return false;
     }
     // read the payload
-    if (!read_payload(all->example_parser->input, payload, payload_size)) {
+    if (!read_payload(all->example_parser->input, payload, _payload_size)) {
       return false;
     }
 
