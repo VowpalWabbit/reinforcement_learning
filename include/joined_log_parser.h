@@ -6,6 +6,7 @@
 
 const unsigned int MSG_TYPE_HEADER = 0x55555555;
 const unsigned int MSG_TYPE_REGULAR = 0xFFFFFFFF;
+const unsigned int REWARD_FUNCTION = 0x11111111;
 const unsigned int MSG_TYPE_EOF = 0xAAAAAAAA;
 
 class ExampleJoiner;
@@ -21,6 +22,8 @@ public:
   int read_header(const std::vector<char> &payload);
   // reads and process regular message payloads
   int read_message(const std::vector<char> &payload);
+  //reads and process reward function information
+  int read_reward_function_info(const std::vector<char> &payload);
 
 private:
   std::unique_ptr<ExampleJoiner> example_joiner;
