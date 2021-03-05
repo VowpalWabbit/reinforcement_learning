@@ -17,7 +17,7 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
   if (parsed_options.ext_opts->binary) {
     return VW::make_unique<binary_parser>(all);
   }
-  throw std::runtime_error("parser_type specified is not recognised");
+  throw std::runtime_error("external parser type not recognised");
 }
 
 void parser::set_parse_args(VW::config::option_group_definition &in_options,
