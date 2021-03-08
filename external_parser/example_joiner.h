@@ -3,6 +3,7 @@
 #include "err_constants.h"
 
 #include "example.h"
+#include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "v_array.h"
@@ -24,6 +25,7 @@ struct metadata_info {
   v2::PayloadType payload_type;
   float pass_probability;
   v2::EventEncoding event_encoding;
+  v2::LearningModeType learning_mode;
 };
 
 struct outcome_event {
@@ -41,15 +43,23 @@ struct joined_event {
   std::vector<outcome_event> outcome_events;
 };
 
-using RewardCalcType = int (*)(const joined_event &, v_array<example *> &);
+using RewardCalcType = float (*)(const joined_event &);
 
-int default_reward_calculation(const joined_event &event, v_array<example *> &);
+namespace RewardFunctions {
+extern float default_reward;
+float average(const joined_event &event);
+float sum(const joined_event &event);
+float min(const joined_event &event);
+float max(const joined_event &event);
+float median(const joined_event &event);
+float apprentice(const joined_event &event);
+} // namespace RewardFunctions
 
 class example_joiner {
 public:
-  example_joiner(
-      vw *vw,
-      RewardCalcType jl = default_reward_calculation); // TODO rule of 5
+  example_joiner(vw *vw); // TODO rule of 5
+
+  void set_reward_function(const v2::RewardFunctionType type);
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their
   // id. The grouped events can be processed when process_joined() is called

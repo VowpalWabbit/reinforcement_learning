@@ -15,21 +15,6 @@
 #include "memory.h"
 #include "parse_example_binary.h"
 
-// we could add any joiner logic that we want and have a flag or parameter that
-// desides which method to select
-int non_default_reward_calc(const joined_event &event,
-                            v_array<example *> &examples) {
-  int index = event.interaction_data.actions[0];
-  examples[index]->l.cb.costs.push_back(
-      {1.0f, event.interaction_data.actions[index - 1],
-       event.interaction_data.probabilities[index - 1]});
-  std::cout << "this is a different reward logic that does some dummy reward "
-               "calculation"
-            << std::endl;
-
-  return 0;
-}
-
 // helpers start
 bool read_payload_type(io_buf *input, unsigned int &payload_type) {
   char *line = nullptr;
@@ -79,8 +64,7 @@ bool read_padding(io_buf *input, size_t previous_payload_size) {
 
 namespace VW {
 namespace external {
-binary_parser::binary_parser(vw *all)
-    : _example_joiner(all, non_default_reward_calc) {}
+binary_parser::binary_parser(vw *all) : _example_joiner(all) {}
 
 binary_parser::~binary_parser(){};
 
@@ -152,6 +136,31 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
     return false;
   }
 
+  if (payload_type == MSG_TYPE_REWARD_FUNCTION) {
+    // read payload size
+    if (!read_payload_size(all->example_parser->input, _payload_size)) {
+      return false;
+    }
+    // read the payload
+    if (!read_payload(all->example_parser->input, payload, _payload_size)) {
+      return false;
+    }
+
+    auto reward_function_info =
+        flatbuffers::GetRoot<v2::RewardFunctionInfo>(payload);
+    std::cout << reward_function_info->type() << std::endl;
+    _example_joiner.set_reward_function(reward_function_info->type());
+  }
+
+  // read potential excess padding after last payload read
+  if (!read_padding(all->example_parser->input, _payload_size)) {
+    return false;
+  }
+
+  if (!read_payload_type(all->example_parser->input, payload_type)) {
+    return false;
+  }
+
   if (payload_type != MSG_TYPE_EOF) {
     if (payload_type != MSG_TYPE_REGULAR)
       return false;
@@ -170,6 +179,7 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
       _example_joiner.process_event(*joined_payload->events()->Get(i));
     }
     _example_joiner.process_joined(examples);
+
     return true;
   }
   return false;

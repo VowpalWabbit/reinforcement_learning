@@ -27,3 +27,4 @@ set(external_parser_sources ${CMAKE_CURRENT_SOURCE_DIR}/example_joiner.cc
 )
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/ext_libs/vowpal_wabbit ${CMAKE_CURRENT_BINARY_DIR}/vw_with_binary_parser)
+add_dependencies(vw fbgen)
