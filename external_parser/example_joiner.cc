@@ -12,10 +12,6 @@
 
 namespace RewardFunctions {
 float average(const joined_event &event) {
-  if (event.outcome_events.size() == 0) {
-    return 0.f;
-  }
-
   float sum = 0.f;
   for (const auto &o : event.outcome_events) {
     sum += o.value;
@@ -25,7 +21,7 @@ float average(const joined_event &event) {
 }
 
 float sum(const joined_event &event) {
-  float sum = 0.0f;
+  float sum = 0.f;
   for (const auto &o : event.outcome_events) {
     sum += o.value;
   }
@@ -60,10 +56,6 @@ float median(const joined_event &event) {
   }
 
   int outcome_events_size = values.size();
-
-  if (outcome_events_size == 0) {
-    return 0.f;
-  }
 
   sort(values.begin(), values.end());
   if (outcome_events_size % 2 == 0) {
@@ -221,7 +213,7 @@ int example_joiner::process_outcome(const v2::Event &event,
   return 0;
 }
 
-int example_joiner::process_joined(v_array<example *> &examples) {
+int example_joiner::process_joined(v_array<example *> &examples, float default_reward) {
   if (_batch_event_order.empty()) {
     return 0;
   }
@@ -251,16 +243,18 @@ int example_joiner::process_joined(v_array<example *> &examples) {
     }
   }
   // call logic that creates the reward
-  float reward = 0.f;
+  float reward = default_reward;
   auto &je = _batch_grouped_examples[id];
-  if (je.interaction_metadata.payload_type == v2::PayloadType_CB &&
+  if (je.outcome_events.size() > 0) {
+    if (je.interaction_metadata.payload_type == v2::PayloadType_CB &&
       je.interaction_metadata.learning_mode ==
           v2::LearningModeType_Apprentice) {
-    if (je.interaction_data.actions[0] == 1) {
+      if (je.interaction_data.actions[0] == 1) {
+        reward = reward_calculation(je);
+      }
+    } else {
       reward = reward_calculation(je);
     }
-  } else {
-    reward = reward_calculation(je);
   }
 
   int index = je.interaction_data.actions[0];

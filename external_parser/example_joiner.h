@@ -46,7 +46,6 @@ struct joined_event {
 using RewardCalcType = float (*)(const joined_event &);
 
 namespace RewardFunctions {
-extern float default_reward;
 float average(const joined_event &event);
 float sum(const joined_event &event);
 float min(const joined_event &event);
@@ -67,7 +66,7 @@ public:
   // Takes all grouped events, processes them (e.g. decompression) and populates
   // the examples array with complete example(s) ready to be used by vw for
   // training
-  int process_joined(v_array<example *> &examples);
+  int process_joined(v_array<example *> &examples, float default_reward);
   // true if there are still event-groups to be processed from a deserialized
   // batch
   bool processing_batch();

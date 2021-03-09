@@ -34,7 +34,7 @@ namespace reinforcement_learning {
   }
 
   safe_vw::safe_vw(const std::string& vw_commandline)
-  {	  
+  {
 	  _vw = VW::initialize(vw_commandline);
   }
 
@@ -149,7 +149,7 @@ namespace reinforcement_learning {
     std::vector<char> line_vec(context, context + strlen(context) + 1);
 
     VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
-    
+
     // finalize example
     VW::setup_examples(*_vw, examples);
 
