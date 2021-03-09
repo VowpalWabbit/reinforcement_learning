@@ -23,7 +23,6 @@ public:
 
 private:
   bool _header_read = false;
-  float _default_reward = 0.f;
   example_joiner _example_joiner;
   uint32_t _payload_size;
 };

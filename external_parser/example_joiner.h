@@ -59,6 +59,8 @@ public:
   example_joiner(vw *vw); // TODO rule of 5
 
   void set_reward_function(const v2::RewardFunctionType type);
+  void set_default_reward(float default_reward);
+
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their
   // id. The grouped events can be processed when process_joined() is called
@@ -66,7 +68,7 @@ public:
   // Takes all grouped events, processes them (e.g. decompression) and populates
   // the examples array with complete example(s) ready to be used by vw for
   // training
-  int process_joined(v_array<example *> &examples, float default_reward);
+  int process_joined(v_array<example *> &examples);
   // true if there are still event-groups to be processed from a deserialized
   // batch
   bool processing_batch();
@@ -91,5 +93,6 @@ private:
 
   vw *_vw;
 
+  float _default_reward = 0.f;
   RewardCalcType reward_calculation;
 };

@@ -84,6 +84,10 @@ int example_joiner::process_event(const v2::JoinedEvent &joined_event) {
   return 0;
 }
 
+void example_joiner::set_default_reward(float default_reward) {
+  _default_reward = default_reward;
+}
+
 void example_joiner::set_reward_function(const v2::RewardFunctionType type) {
   using namespace RewardFunctions;
 
@@ -213,7 +217,7 @@ int example_joiner::process_outcome(const v2::Event &event,
   return 0;
 }
 
-int example_joiner::process_joined(v_array<example *> &examples, float default_reward) {
+int example_joiner::process_joined(v_array<example *> &examples) {
   if (_batch_event_order.empty()) {
     return 0;
   }
@@ -243,7 +247,7 @@ int example_joiner::process_joined(v_array<example *> &examples, float default_r
     }
   }
   // call logic that creates the reward
-  float reward = default_reward;
+  float reward = _default_reward;
   auto &je = _batch_grouped_examples[id];
   if (je.outcome_events.size() > 0) {
     if (je.interaction_metadata.payload_type == v2::PayloadType_CB &&

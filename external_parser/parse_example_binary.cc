@@ -123,7 +123,7 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
   // either process next id from an ongoing batch
   // or read the next batch from file
   if (_example_joiner.processing_batch()) {
-    _example_joiner.process_joined(examples, _default_reward);
+    _example_joiner.process_joined(examples);
     return true;
   }
 
@@ -149,12 +149,13 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
     auto reward_function_info =
         flatbuffers::GetRoot<v2::RewardFunctionInfo>(payload);
     v2::RewardFunctionType reward_function_type = reward_function_info->type();
-    _default_reward = reward_function_info->default_reward();
+    float default_reward = reward_function_info->default_reward();
 
     std::cout << "reward function type: " << reward_function_type << std::endl;
-    std::cout << "default reward: " << _default_reward << std::endl;
+    std::cout << "default reward: " << default_reward << std::endl;
 
     _example_joiner.set_reward_function(reward_function_type);
+    _example_joiner.set_default_reward(default_reward);
   }
 
   // read potential excess padding after last payload read
@@ -183,7 +184,7 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
       // process and group events in batch
       _example_joiner.process_event(*joined_payload->events()->Get(i));
     }
-    _example_joiner.process_joined(examples, _default_reward);
+    _example_joiner.process_joined(examples);
 
     return true;
   }
