@@ -210,7 +210,7 @@ namespace reinforcement_learning {
     {
       a_s.delete_v();
     }
-    examples[0]->pred.decision_scores.delete_v();
+    examples[0]->pred.decision_scores.clear();
     for (auto&& ex : examples) {
       _example_pool.emplace_back(ex);
     }
@@ -262,7 +262,7 @@ namespace reinforcement_learning {
     {
       a_s.delete_v();
     }
-    examples[0]->pred.decision_scores.delete_v();
+    examples[0]->pred.decision_scores.clear();
     for (auto&& ex : examples) {
       _example_pool.emplace_back(ex);
     }
