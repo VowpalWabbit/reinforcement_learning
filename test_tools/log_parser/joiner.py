@@ -142,12 +142,14 @@ class BinLogWriter:
         builder.Finish(joined_payload_off)
         self.write_message(MSG_TYPE_REGULAR, builder.Output())
 
-    def write_reward_function(self, reward_function_type):
+    def write_reward_function(self, reward_function_type, default_reward=0.0):
         print("reward function type: ", reward_function_type)
+        print("default reward: ", default_reward)
         builder = flatbuffers.Builder(0)
-        
+
         RewardFunctionInfoStart(builder)
         RewardFunctionInfoAddType(builder, reward_function_type)
+        RewardFunctionInfoAddDefaultReward(builder, default_reward)
         reward_off = RewardFunctionInfoEnd(builder)
         builder.Finish(reward_off)
         self.write_message(REWARD_FUNCTION, builder.Output())
@@ -186,7 +188,7 @@ print(f'found {obs_count} observations with {obs_ids} ids')
 
 bin_f = BinLogWriter(result_file)
 bin_f.write_header({ 'eud': '-1', 'joiner': 'joiner.py'})
-bin_f.write_reward_function(RewardFunctionType.Average)
+bin_f.write_reward_function(RewardFunctionType.Average, 0.3)
 
 for msg in interactions_file.messages():
     batch = EventBatch.GetRootAsEventBatch(msg, 0)
