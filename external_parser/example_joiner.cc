@@ -114,8 +114,9 @@ example &example_joiner::get_or_create_example_f(void *vw) {
 
 void example_joiner::clean_label_and_prediction(example *ex) {
   _vw->example_parser->lbl_parser.default_label(&ex->l);
-  // TODO depending on what type of reduction is enabled, clean appropriate
-  // prediction
+  if (_vw->example_parser->lbl_parser.label_type == label_type_t::cb) {
+    ex->pred.a_s.clear();
+  }
 }
 
 int example_joiner::process_event(const v2::JoinedEvent &joined_event) {
