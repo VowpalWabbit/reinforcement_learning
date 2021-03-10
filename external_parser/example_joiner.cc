@@ -1,4 +1,6 @@
 #include "example_joiner.h"
+
+#include "generated/v2/DedupInfo_generated.h"
 #include "generated/v2/Event_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
 
@@ -80,9 +82,49 @@ float earliest(const joined_event &event) { return 0.0; }
 
 example_joiner::example_joiner(vw *vw) : _vw(vw) {}
 
+example_joiner::~example_joiner() {
+  // cleanup examples
+  for (auto *ex : _example_pool) {
+    VW::dealloc_examples(ex, 1);
+  }
+}
+
+example *example_joiner::get_or_create_example() {
+  // alloc new element if we don't have any left
+  if (_example_pool.size() == 0) {
+    auto ex = VW::alloc_examples(1);
+    _vw->example_parser->lbl_parser.default_label(&ex->l);
+
+    return ex;
+  }
+
+  // get last element
+  example *ex = _example_pool.back();
+  _example_pool.pop_back();
+
+  clean_label_and_prediction(ex);
+  VW::empty_example(*_vw, *ex);
+
+  return ex;
+}
+
+example &example_joiner::get_or_create_example_f(void *vw) {
+  return *(((example_joiner *)vw)->get_or_create_example());
+}
+
+void example_joiner::clean_label_and_prediction(example *ex) {
+  _vw->example_parser->lbl_parser.default_label(&ex->l);
+  // TODO depending on what type of reduction is enabled, clean appropriate
+  // prediction
+}
+
 int example_joiner::process_event(const v2::JoinedEvent &joined_event) {
   auto event = flatbuffers::GetRoot<v2::Event>(joined_event.event()->data());
   std::string id = event->meta()->id()->str();
+  if (event->meta()->payload_type() == v2::PayloadType_DedupInfo) {
+    process_dedup(*event, *event->meta());
+    return 0;
+  }
   if (_batch_grouped_events.find(id) != _batch_grouped_events.end()) {
     _batch_grouped_events[id].push_back(event);
   } else {
@@ -168,7 +210,8 @@ int example_joiner::process_interaction(const v2::Event &event,
 
     VW::read_line_json<false>(
         *_vw, examples, &line_vec[0],
-        reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
+        reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
+        &_dedup_examples);
 
     _batch_grouped_examples.emplace(std::make_pair<std::string, joined_event>(
         metadata.id()->str(),
@@ -221,9 +264,49 @@ int example_joiner::process_outcome(const v2::Event &event,
   return 0;
 }
 
+int example_joiner::process_dedup(const v2::Event &event,
+                                  const v2::Metadata &metadata) {
+
+  // new dedup payload, we need to clear the old one
+  if (!_dedup_examples.empty()) {
+    // push examples back into pool for re-use
+    for (auto &item : _dedup_examples) {
+      _example_pool.push_back(item.second);
+    }
+    _dedup_examples.clear();
+  }
+
+  if (metadata.encoding() == v2::EventEncoding_Zstd) {
+    std::cout << "Decompression coming soon" << std::endl;
+  }
+
+  auto dedup = v2::GetDedupInfo(event.payload()->data());
+
+  for (size_t i = 0; i < dedup->ids()->size(); i++) {
+
+    auto examples = v_init<example *>();
+    examples.push_back(get_or_create_example());
+
+    VW::read_line_json<false>(
+        *_vw, examples, const_cast<char *>(dedup->values()->Get(i)->c_str()),
+        get_or_create_example_f, this);
+    _dedup_examples.emplace(dedup->ids()->Get(i), examples[0]);
+  }
+
+  return 0;
+}
+
 int example_joiner::process_joined(v_array<example *> &examples) {
   if (_batch_event_order.empty()) {
     return 0;
+  }
+
+  if (!_dedup_examples.empty()) {
+    for (auto &item : _dedup_examples) {
+      // we are potentially re-using dedup examples, we need to make sure that
+      // their labels and predictions are clear for re-use
+      clean_label_and_prediction(item.second);
+    }
   }
 
   auto &id = _batch_event_order.front();

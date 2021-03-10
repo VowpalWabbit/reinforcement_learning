@@ -59,6 +59,8 @@ class example_joiner {
 public:
   example_joiner(vw *vw); // TODO rule of 5
 
+  ~example_joiner();
+
   void set_reward_function(const v2::RewardFunctionType type);
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their
@@ -73,15 +75,23 @@ public:
   bool processing_batch();
 
 private:
+  int process_dedup(const v2::Event &event, const v2::Metadata &metadata);
+
   int process_interaction(const v2::Event &event, const v2::Metadata &metadata,
                           v_array<example *> &examples);
 
   int process_outcome(const v2::Event &event, const v2::Metadata &metadata);
 
+  static example &get_or_create_example_f(void *vw);
+
+  example *get_or_create_example();
+
+  void clean_label_and_prediction(example *ex);
+
   // from dictionary id to example object
   // right now holding one dedup dictionary at a time, could be exented to a map
   // of maps holding more than one dedup dictionaries at a time
-  std::unordered_map<std::string, example *> _dedup_examples;
+  std::unordered_map<uint64_t, example *> _dedup_examples;
   // from event id to all the information required to create a complete
   // (multi)example
   std::unordered_map<std::string, joined_event> _batch_grouped_examples;
@@ -89,6 +99,8 @@ private:
   std::unordered_map<std::string, std::vector<const v2::Event *>>
       _batch_grouped_events;
   std::queue<std::string> _batch_event_order;
+
+  std::vector<example *> _example_pool;
 
   vw *_vw;
 
