@@ -82,6 +82,10 @@ private:
 
   int process_outcome(const v2::Event &event, const v2::Metadata &metadata);
 
+  template <typename T>
+  const T *process_compression(const uint8_t *data, size_t size,
+                               const v2::Metadata &metadata);
+
   static example &get_or_create_example_f(void *vw);
 
   example *get_or_create_example();
@@ -103,6 +107,7 @@ private:
   std::vector<example *> _example_pool;
 
   vw *_vw;
+  flatbuffers::DetachedBuffer _detached_buffer;
 
   RewardCalcType reward_calculation;
 };

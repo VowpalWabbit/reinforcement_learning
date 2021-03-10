@@ -3,6 +3,7 @@
 #include "generated/v2/DedupInfo_generated.h"
 #include "generated/v2/Event_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
+#include "zstd.h"
 
 #include <limits.h>
 
@@ -166,12 +167,53 @@ void example_joiner::set_reward_function(const v2::RewardFunctionType type) {
   }
 }
 
+template <typename T>
+const T *example_joiner::process_compression(const uint8_t *data, size_t size,
+                                             const v2::Metadata &metadata) {
+
+  const T *payload = nullptr;
+
+  if (metadata.encoding() == v2::EventEncoding_Zstd) {
+    size_t buff_size = ZSTD_getFrameContentSize(data, size);
+    if (buff_size == ZSTD_CONTENTSIZE_ERROR) {
+      // TODO figure out error handling behaviour for parser
+      throw("Invalid compressed content.");
+    }
+    if (buff_size == ZSTD_CONTENTSIZE_UNKNOWN) {
+      // TODO figure out error handling behaviour for parser
+      throw("Unknown compressed size.");
+    }
+
+    std::unique_ptr<uint8_t[]> buff_data(
+        flatbuffers::DefaultAllocator().allocate(buff_size));
+    size_t res = ZSTD_decompress(buff_data.get(), buff_size, data, size);
+
+    if (ZSTD_isError(res)) {
+      // TODO figure out error handling behaviour for parser
+      throw(ZSTD_getErrorName(res));
+    }
+
+    auto data_ptr = buff_data.release();
+
+    _detached_buffer =
+        flatbuffers::DetachedBuffer(nullptr, false, data_ptr, 0, data_ptr, res);
+    payload = flatbuffers::GetRoot<T>(_detached_buffer.data());
+
+  } else {
+    payload = flatbuffers::GetRoot<T>(data);
+  }
+  return payload;
+}
+
 int example_joiner::process_interaction(const v2::Event &event,
                                         const v2::Metadata &metadata,
                                         v_array<example *> &examples) {
 
   if (metadata.payload_type() == v2::PayloadType_CB) {
-    auto cb = v2::GetCbEvent(event.payload()->data());
+
+    auto cb = process_compression<v2::CbEvent>(
+        event.payload()->data(), event.payload()->size(), metadata);
+
     std::cout << std::endl
               << "cb: actions:"
               << (cb->action_ids() == nullptr ? 0 : cb->action_ids()->size())
@@ -236,7 +278,9 @@ int example_joiner::process_outcome(const v2::Event &event,
                       metadata.payload_type(), metadata.pass_probability(),
                       metadata.encoding()};
 
-  auto outcome = v2::GetOutcomeEvent(event.payload()->data());
+  flatbuffers::DetachedBuffer detached_buffer;
+  auto outcome = process_compression<v2::OutcomeEvent>(
+      event.payload()->data(), event.payload()->size(), metadata);
 
   int index = -1;
 
@@ -283,11 +327,8 @@ int example_joiner::process_dedup(const v2::Event &event,
     _dedup_examples.clear();
   }
 
-  if (metadata.encoding() == v2::EventEncoding_Zstd) {
-    std::cout << "Decompression coming soon" << std::endl;
-  }
-
-  auto dedup = v2::GetDedupInfo(event.payload()->data());
+  auto dedup = process_compression<v2::DedupInfo>(
+      event.payload()->data(), event.payload()->size(), metadata);
 
   for (size_t i = 0; i < dedup->ids()->size(); i++) {
 
@@ -333,10 +374,6 @@ int example_joiner::process_joined(v_array<example *> &examples) {
               << " payload-size:" << event->payload()->size()
               << " encoding:" << v2::EnumNameEventEncoding(metadata->encoding())
               << std::endl;
-
-    if (metadata->encoding() == v2::EventEncoding_Zstd) {
-      std::cout << "Decompression coming soon" << std::endl;
-    }
 
     if (metadata->payload_type() == v2::PayloadType_Outcome) {
       process_outcome(*event, *metadata);

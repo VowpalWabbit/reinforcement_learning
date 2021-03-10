@@ -28,7 +28,6 @@ set(RL_FLAT_BUFFER_FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/LearningModeType.fbs" )
 
 set(BUILD_EXTERNAL_PARSER "Build external parser" ON)
-set(EXTERNAL_PARSER_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(WARNINGS OFF CACHE BOOL "")
 build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgen "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v2/" "" "")
 
@@ -40,6 +39,11 @@ set(external_parser_sources ${CMAKE_CURRENT_SOURCE_DIR}/example_joiner.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_external.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_binary.cc
 )
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/zstd/build/cmake ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser/zstd EXCLUDE_FROM_ALL)
+set(EXTERNAL_PARSER_DIR ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/zstd/lib/)
+set(EXTERNAL_PARSER_LIBS libzstd_static)
+
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/../ext_libs/vowpal_wabbit ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser)
 add_dependencies(vw fbgen)
