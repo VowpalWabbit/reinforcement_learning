@@ -208,10 +208,17 @@ int example_joiner::process_interaction(const v2::Event &event,
                                cb->context()->data() + cb->context()->size() +
                                    1);
 
-    VW::read_line_json<false>(
-        *_vw, examples, &line_vec[0],
-        reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
-        &_dedup_examples);
+    if (_vw->audit || _vw->hash_inv) {
+      VW::template read_line_json<true>(
+          *_vw, examples, &line_vec[0],
+          reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
+          &_dedup_examples);
+    } else {
+      VW::template read_line_json<false>(
+          *_vw, examples, &line_vec[0],
+          reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
+          &_dedup_examples);
+    }
 
     _batch_grouped_examples.emplace(std::make_pair<std::string, joined_event>(
         metadata.id()->str(),
@@ -287,9 +294,16 @@ int example_joiner::process_dedup(const v2::Event &event,
     auto examples = v_init<example *>();
     examples.push_back(get_or_create_example());
 
-    VW::read_line_json<false>(
-        *_vw, examples, const_cast<char *>(dedup->values()->Get(i)->c_str()),
-        get_or_create_example_f, this);
+    if (_vw->audit || _vw->hash_inv) {
+      VW::template read_line_json<true>(
+          *_vw, examples, const_cast<char *>(dedup->values()->Get(i)->c_str()),
+          get_or_create_example_f, this);
+    } else {
+      VW::template read_line_json<false>(
+          *_vw, examples, const_cast<char *>(dedup->values()->Get(i)->c_str()),
+          get_or_create_example_f, this);
+    }
+
     _dedup_examples.emplace(dedup->ids()->Get(i), examples[0]);
   }
 
