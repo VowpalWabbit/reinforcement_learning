@@ -48,6 +48,10 @@ namespace reinforcement_learning {
     TElem& operator*() {
       return _coll[_idx];
     }
+    const TElem& operator*() const {
+      return _coll[_idx];
+    }
+
     //! Allow comparison of iterators
     bool operator<(const container_iterator& rhs) const {
       return _idx < rhs._idx;
