@@ -48,7 +48,7 @@ namespace reinforcement_learning {
     TElem& operator*() {
       return _coll[_idx];
     }
-    const TElem& operator*() const {
+    TElem& operator*() const {
       return _coll[_idx];
     }
 
@@ -58,40 +58,41 @@ namespace reinforcement_learning {
     }
 
     //! Allow comparison of iterators
-    bool operator<=(const container_iterator &rhs) const {
+    bool operator<=(const container_iterator& rhs) const {
       return _idx <= rhs._idx;
     }
 
     //! Allow comparison of iterators
-    bool operator>(const container_iterator &rhs) const {
+    bool operator>(const container_iterator& rhs) const {
       return _idx > rhs._idx;
     }
 
     //! Allow comparison of iterators
-    bool operator>=(const container_iterator &rhs) const {
+    bool operator>=(const container_iterator& rhs) const {
       return _idx >= rhs._idx;
     }
     //! Allow distance measurement
-    int64_t operator-(const container_iterator& rhs) const {
-      return static_cast<int64_t>(_idx) - static_cast<int64_t>(rhs._idx);
+    size_t operator-(const container_iterator& rhs) const {
+      return static_cast<size_t>(_idx) - static_cast<size_t>(rhs._idx);
     }
+
     //! Allow distance measurement
-    container_iterator operator-(const int idx) const {
+    container_iterator operator-(const size_t idx) const {
       return { _coll, _idx - idx };
     }
+
     //! Increment the index
-    container_iterator operator+(const int idx) const {
+    container_iterator operator+(const size_t idx) const {
       return { _coll, _idx + idx };
     }
 
     //! add and assign the index
-    container_iterator& operator+=(const int idx) {
+    container_iterator & operator+=(const size_t idx) {
       this->_idx += idx;
       return *this;
     }
-    
     //! subtract and assign operator
-    container_iterator& operator-=(const int idx) {
+    container_iterator& operator-=(const size_t idx) {
       this->_idx -= idx;
       return *this;
     }
@@ -113,7 +114,7 @@ namespace reinforcement_learning {
   */
   template<typename TElem, typename TColl = std::vector<TElem>>
   class const_container_iterator : public std::iterator<
-    std::forward_iterator_tag,
+    std::random_access_iterator_tag,
     TElem> {
   public:
     //! Construct an iterator using container implementation
@@ -145,6 +146,7 @@ namespace reinforcement_learning {
     bool operator<(const const_container_iterator& rhs) const {
       return _idx < rhs._idx;
     }
+
     //! Allow distance measurement
     int64_t operator-(const const_container_iterator& rhs) const {
       return _idx - rhs._idx;
