@@ -150,15 +150,15 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
         flatbuffers::GetRoot<v2::RewardFunctionInfo>(payload);
     std::cout << reward_function_info->type() << std::endl;
     _example_joiner.set_reward_function(reward_function_info->type());
-  }
 
-  // read potential excess padding after last payload read
-  if (!read_padding(all->example_parser->input, _payload_size)) {
-    return false;
-  }
+    // read potential excess padding after last payload read
+    if (!read_padding(all->example_parser->input, _payload_size)) {
+      return false;
+    }
 
-  if (!read_payload_type(all->example_parser->input, payload_type)) {
-    return false;
+    if (!read_payload_type(all->example_parser->input, payload_type)) {
+      return false;
+    }
   }
 
   if (payload_type != MSG_TYPE_EOF) {

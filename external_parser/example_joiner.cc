@@ -115,8 +115,9 @@ example &example_joiner::get_or_create_example_f(void *vw) {
 
 void example_joiner::clean_label_and_prediction(example *ex) {
   _vw->example_parser->lbl_parser.default_label(&ex->l);
-  // TODO depending on what type of reduction is enabled, clean appropriate
-  // prediction
+  if (_vw->example_parser->lbl_parser.label_type == label_type_t::cb) {
+    ex->pred.a_s.clear();
+  }
 }
 
 int example_joiner::process_event(const v2::JoinedEvent &joined_event) {
@@ -219,8 +220,8 @@ int example_joiner::process_interaction(const v2::Event &event,
               << (cb->action_ids() == nullptr ? 0 : cb->action_ids()->size())
               << " model:" << cb->model_id()->c_str()
               << " lm:" << v2::EnumNameLearningModeType(cb->learning_mode())
-              << " deferred:" << cb->deferred_action() << std::endl
-              << "context:" << cb->context()->data() << std::endl;
+              << " deferred:" << cb->deferred_action() << std::endl;
+    // << "context:" << cb->context()->data() << std::endl;
     v2::LearningModeType learning_mode = cb->learning_mode();
 
     metadata_info meta = {"client_time_utc",
@@ -246,18 +247,19 @@ int example_joiner::process_interaction(const v2::Event &event,
     data.probabilityOfDrop = metadata.pass_probability();
     data.skipLearn = cb->deferred_action();
 
-    std::vector<char> line_vec(cb->context()->data(),
-                               cb->context()->data() + cb->context()->size() +
-                                   1);
+    std::string line_vec(reinterpret_cast<const char *>(cb->context()->data()),
+                         cb->context()->size());
+
+    std::cout << line_vec << std::endl;
 
     if (_vw->audit || _vw->hash_inv) {
       VW::template read_line_json<true>(
-          *_vw, examples, &line_vec[0],
+          *_vw, examples, const_cast<char *>(line_vec.c_str()),
           reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
           &_dedup_examples);
     } else {
       VW::template read_line_json<false>(
-          *_vw, examples, &line_vec[0],
+          *_vw, examples, const_cast<char *>(line_vec.c_str()),
           reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
           &_dedup_examples);
     }
@@ -335,6 +337,9 @@ int example_joiner::process_dedup(const v2::Event &event,
     auto examples = v_init<example *>();
     examples.push_back(get_or_create_example());
 
+    std::cout << dedup->ids()->Get(i) << " : "
+              << dedup->values()->Get(i)->c_str() << std::endl;
+
     if (_vw->audit || _vw->hash_inv) {
       VW::template read_line_json<true>(
           *_vw, examples, const_cast<char *>(dedup->values()->Get(i)->c_str()),
@@ -369,11 +374,12 @@ int example_joiner::process_joined(v_array<example *> &examples) {
   bool multiline = true;
   for (auto *event : _batch_grouped_events[id]) {
     auto metadata = event->meta();
-    std::cout << "id:" << metadata->id()->c_str()
-              << " type:" << v2::EnumNamePayloadType(metadata->payload_type())
-              << " payload-size:" << event->payload()->size()
-              << " encoding:" << v2::EnumNameEventEncoding(metadata->encoding())
-              << std::endl;
+    std::cout
+        << "id:" << metadata->id()->c_str() << " type:"
+        << v2::EnumNamePayloadType(metadata->payload_type())
+        // << " payload-size:" << event->payload()->size()
+        // << " encoding:" << v2::EnumNameEventEncoding(metadata->encoding())
+        << std::endl;
 
     if (metadata->payload_type() == v2::PayloadType_Outcome) {
       process_outcome(*event, *metadata);
