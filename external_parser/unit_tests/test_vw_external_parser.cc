@@ -1,7 +1,5 @@
 #define BOOST_TEST_DYN_LINK
 
-#include "io/io_adapter.h"
-#include "parser.h"
 #include "test_common.h"
 
 #include <boost/test/unit_test.hpp>
@@ -15,14 +13,8 @@ BOOST_AUTO_TEST_CASE(cb_simple) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-
-  io_buf *reader_view_of_buffer = new io_buf();
-  delete vw->example_parser->input;
-  vw->example_parser->input = reader_view_of_buffer;
-
   examples.push_back(&VW::get_unused_example(vw));
-  reader_view_of_buffer->add_file(
-      VW::io::create_buffer_view(buffer.data(), buffer.size()));
+  set_buffer_as_vw_input(buffer, vw);
 
   while (vw->example_parser->reader(vw, examples) > 0) {
     // TODO examine example internals here, this is what vw will get before

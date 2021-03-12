@@ -16,6 +16,8 @@ namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 void clear_examples(v_array<example *> &examples, vw *vw);
 
+void set_buffer_as_vw_input(const std::vector<char> &buffer, vw *vw);
+
 std::vector<char> read_file(std::string file_name);
 
 std::string get_test_files_location();

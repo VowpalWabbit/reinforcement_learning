@@ -1,5 +1,8 @@
 #include "test_common.h"
 
+#include "io/io_adapter.h"
+#include "parser.h"
+
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 void clear_examples(v_array<example *> &examples, vw *vw) {
@@ -7,6 +10,15 @@ void clear_examples(v_array<example *> &examples, vw *vw) {
     VW::finish_example(*vw, *ex);
   }
   examples.clear();
+}
+
+void set_buffer_as_vw_input(const std::vector<char> &buffer, vw *vw) {
+  io_buf *reader_view_of_buffer = new io_buf();
+  delete vw->example_parser->input;
+  vw->example_parser->input = reader_view_of_buffer;
+
+  reader_view_of_buffer->add_file(
+      VW::io::create_buffer_view(buffer.data(), buffer.size()));
 }
 
 std::vector<char> read_file(std::string file_name) {
