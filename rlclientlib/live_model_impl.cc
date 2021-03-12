@@ -598,20 +598,10 @@ namespace reinforcement_learning {
   }
 
   int reset_action_order(ranking_response& response) {
-#ifdef __clang__
-    std::vector<action_prob> tmp;
-    std::copy(response.begin(), response.end(), std::back_inserter(tmp));
-    std::sort(tmp.begin(), tmp.end(), [](const action_prob& a, const action_prob& b) {
-      return a.action_id < b.action_id;
-    }
-    );
-    std::copy(tmp.begin(), tmp.end(), response.begin());
-#else
     std::sort(response.begin(), response.end(), [](const action_prob& a, const action_prob& b) {
       return a.action_id < b.action_id;
     }
     );
-#endif
     response.set_chosen_action_id((*(response.begin())).action_id);
 
     return error_code::success;
