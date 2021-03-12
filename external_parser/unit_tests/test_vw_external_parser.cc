@@ -25,8 +25,8 @@ BOOST_AUTO_TEST_CASE(cb_simple) {
       VW::io::create_buffer_view(buffer.data(), buffer.size()));
 
   while (vw->example_parser->reader(vw, examples) > 0) {
-    // examine example internals here, this is what vw will get before calling
-    // learn
+    // TODO examine example internals here, this is what vw will get before
+    // calling learn
     BOOST_CHECK_EQUAL(examples.size(), 4);
 
     // simulate next call to parser->read by clearing up examples

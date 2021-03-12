@@ -12,14 +12,14 @@ BOOST_AUTO_TEST_CASE(example_joiner_test) {
 
   std::string input_files = get_test_files_location();
   auto interaction_buffer = read_file(input_files + "/cb_v2.fb");
-  // needed for memory management
+  // need to keep the fb buffer around in order to process the event
   flatbuffers::DetachedBuffer int_detached_buffer;
   auto joined_cb_event =
       wrap_into_joined_event(interaction_buffer, int_detached_buffer);
 
   joiner.process_event(*joined_cb_event);
 
-  // needed for memory management
+  // need to keep the fb buffer around in order to process the event
   flatbuffers::DetachedBuffer obs_detached_buffer;
   auto observation_buffer = read_file(input_files + "/f-reward_v2.fb");
   joined_cb_event =
@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(example_joiner_test) {
 
   joiner.process_joined(examples);
 
-  // assert examples here
+  // TODO assert examples here
 
   BOOST_CHECK_EQUAL(joiner.processing_batch(), false);
   clear_examples(examples, vw);
