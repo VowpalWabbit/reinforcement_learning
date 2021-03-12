@@ -25,11 +25,11 @@ namespace reinforcement_learning {
     void set_probability(float prob);
   private:
     //! slot entry id
-    std::string id;
+    std::string _id;
     //! action id
-    uint32_t action_id;
+    uint32_t _action_id;
     //! probability associated with the action id
-    float probability;
+    float _probability;
   };
 
   /**
