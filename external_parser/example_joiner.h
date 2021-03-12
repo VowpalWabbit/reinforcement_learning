@@ -92,5 +92,5 @@ private:
 
   vw *_vw;
 
-  RewardCalcType reward_calculation;
+  RewardCalcType _reward_calculation;
 };
