@@ -46,7 +46,6 @@ struct joined_event {
 using RewardCalcType = float (*)(const joined_event &);
 
 namespace RewardFunctions {
-extern float default_reward;
 float average(const joined_event &event);
 float sum(const joined_event &event);
 float min(const joined_event &event);
@@ -60,6 +59,8 @@ public:
   example_joiner(vw *vw); // TODO rule of 5
 
   void set_reward_function(const v2::RewardFunctionType type);
+  void set_default_reward(float default_reward);
+
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their
   // id. The grouped events can be processed when process_joined() is called
@@ -92,5 +93,6 @@ private:
 
   vw *_vw;
 
+  float _default_reward = 0.f;
   RewardCalcType _reward_calculation;
 };
