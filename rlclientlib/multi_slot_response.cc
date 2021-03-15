@@ -4,30 +4,30 @@
 
 namespace reinforcement_learning
 {
-  slot_entry::slot_entry(const std::string& _id, uint32_t _action_id, float _probability)
-    : id(_id)
-    , action_id(_action_id)
-    , probability(_probability) {
+  slot_entry::slot_entry(const std::string& id, uint32_t action_id, float probability)
+    : _id(id)
+    , _action_id(action_id)
+    , _probability(probability) {
   }
 
   const char* slot_entry::get_id() const {
-    return id.c_str();
+    return _id.c_str();
   }
 
   uint32_t slot_entry::get_action_id() const {
-    return action_id;
+    return _action_id;
   }
 
-  void slot_entry::set_action_id(uint32_t id) {
-    action_id = id;
+  void slot_entry::set_action_id(uint32_t action_id) {
+    _action_id = action_id;
   }
 
   void slot_entry::set_probability(float prob) {
-    probability = prob;
+    _probability = prob;
   }
 
   float slot_entry::get_probability() const {
-    return probability;
+    return _probability;
   }
 
   void multi_slot_response::set_event_id(const char* event_id) {
