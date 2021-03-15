@@ -71,7 +71,7 @@ float earliest(const joined_event &event) { return 0.0; }
 } // namespace RewardFunctions
 
 example_joiner::example_joiner(vw *vw)
-    : _vw(vw), _reward_calculation(&RewardFunctions::average) {}
+    : _vw(vw), _reward_calculation(&RewardFunctions::earliest) {}
 
 int example_joiner::process_event(const v2::JoinedEvent &joined_event) {
   auto event = flatbuffers::GetRoot<v2::Event>(joined_event.event()->data());
