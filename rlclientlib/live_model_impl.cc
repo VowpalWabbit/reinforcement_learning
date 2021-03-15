@@ -609,7 +609,7 @@ namespace reinforcement_learning {
 
   int reset_chosen_action_multi_slot(multi_slot_response& response, const std::vector<int>& baseline_actions)
   {
-    size_t index = 0;
+    uint32_t index = 0;
     for (auto &slot : response)
     {
       if (!baseline_actions.empty() && baseline_actions.size() >= index)
