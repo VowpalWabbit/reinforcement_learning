@@ -1,4 +1,4 @@
-## How files in this file were generated
+## How test files were generated
 
 - cb_v2.fb: `./example_gen --kind cb --count 1`
 - f-reward_v2.fb: `./example_gen --kind f-reward --count 1`
