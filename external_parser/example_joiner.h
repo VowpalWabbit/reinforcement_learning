@@ -96,6 +96,7 @@ private:
   // right now holding one dedup dictionary at a time, could be exented to a map
   // of maps holding more than one dedup dictionaries at a time
   std::unordered_map<uint64_t, example *> _dedup_examples;
+  std::unordered_set<uint64_t> _keepers;
   // from event id to all the information required to create a complete
   // (multi)example
   std::unordered_map<std::string, joined_event> _batch_grouped_examples;

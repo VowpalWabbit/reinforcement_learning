@@ -215,12 +215,12 @@ int example_joiner::process_interaction(const v2::Event &event,
     auto cb = process_compression<v2::CbEvent>(
         event.payload()->data(), event.payload()->size(), metadata);
 
-    std::cout << std::endl
-              << "cb: actions:"
-              << (cb->action_ids() == nullptr ? 0 : cb->action_ids()->size())
-              << " model:" << cb->model_id()->c_str()
-              << " lm:" << v2::EnumNameLearningModeType(cb->learning_mode())
-              << " deferred:" << cb->deferred_action() << std::endl;
+    // std::cout << std::endl
+    //           << "cb: actions:"
+    //           << (cb->action_ids() == nullptr ? 0 : cb->action_ids()->size())
+    //           << " model:" << cb->model_id()->c_str()
+    //           << " lm:" << v2::EnumNameLearningModeType(cb->learning_mode())
+    //           << " deferred:" << cb->deferred_action() << std::endl;
     // << "context:" << cb->context()->data() << std::endl;
     v2::LearningModeType learning_mode = cb->learning_mode();
 
@@ -231,11 +231,11 @@ int example_joiner::process_interaction(const v2::Event &event,
                           metadata.encoding(),
                           learning_mode};
 
-    for (size_t j = 0; j < cb->action_ids()->size(); j++) {
-      std::cout << "action:" << cb->action_ids()->Get(j)
-                << " prob:" << cb->probabilities()->Get(j) << std::endl
-                << std::endl;
-    }
+    // for (size_t j = 0; j < cb->action_ids()->size(); j++) {
+    //   std::cout << "action:" << cb->action_ids()->Get(j)
+    //             << " prob:" << cb->probabilities()->Get(j) << std::endl
+    //             << std::endl;
+    // }
 
     DecisionServiceInteraction data;
     data.eventId = metadata.id()->str();
@@ -250,7 +250,7 @@ int example_joiner::process_interaction(const v2::Event &event,
     std::string line_vec(reinterpret_cast<const char *>(cb->context()->data()),
                          cb->context()->size());
 
-    std::cout << line_vec << std::endl;
+    // std::cout << line_vec << std::endl;
 
     if (_vw->audit || _vw->hash_inv) {
       VW::template read_line_json<true>(
@@ -263,6 +263,19 @@ int example_joiner::process_interaction(const v2::Event &event,
           reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
           &_dedup_examples);
     }
+
+    // for (auto* ex : examples)
+    // {
+    //   // std::cout << "example indicies" << std::endl;
+    //   for (auto& i : ex->indices)
+    //   {
+    //     // std::cout << "index: " << i << std::endl;
+    //     for (auto& f : ex->feature_space[i])
+    //     {
+    //       std::cout << f.index() << ":" << f.value() << std::endl;
+    //     }
+    //   }
+    // }
 
     _batch_grouped_examples.emplace(std::make_pair<std::string, joined_event>(
         metadata.id()->str(),
@@ -286,27 +299,27 @@ int example_joiner::process_outcome(const v2::Event &event,
 
   int index = -1;
 
-  std::cout << "outcome: value:";
+  // std::cout << "outcome: value:";
   if (outcome->value_type() == v2::OutcomeValue_literal) {
     o_event.s_value = outcome->value_as_literal()->c_str();
-    std::cout << outcome->value_as_literal()->c_str();
+    // std::cout << outcome->value_as_literal()->c_str();
   } else if (outcome->value_type() == v2::OutcomeValue_numeric) {
     o_event.value = outcome->value_as_numeric()->value();
-    std::cout << outcome->value_as_numeric()->value();
+    // std::cout << outcome->value_as_numeric()->value();
   }
 
-  std::cout << " index:";
+  // std::cout << " index:";
   if (outcome->index_type() == v2::IndexValue_literal) {
-    std::cout << outcome->index_as_literal()->c_str();
+    // std::cout << outcome->index_as_literal()->c_str();
     o_event.s_index = outcome->index_as_literal()->c_str();
     index = std::stoi(outcome->index_as_literal()->c_str());
   } else if (outcome->index_type() == v2::IndexValue_numeric) {
-    std::cout << outcome->index_as_numeric()->index();
+    // std::cout << outcome->index_as_numeric()->index();
     o_event.s_index = outcome->index_as_numeric()->index();
     index = outcome->index_as_numeric()->index();
   }
 
-  std::cout << " action-taken:" << outcome->action_taken() << std::endl;
+  // std::cout << " action-taken:" << outcome->action_taken() << std::endl;
 
   if (_batch_grouped_examples.find(metadata.id()->str()) !=
       _batch_grouped_examples.end()) {
@@ -320,37 +333,45 @@ int example_joiner::process_outcome(const v2::Event &event,
 int example_joiner::process_dedup(const v2::Event &event,
                                   const v2::Metadata &metadata) {
 
-  // new dedup payload, we need to clear the old one
-  if (!_dedup_examples.empty()) {
-    // push examples back into pool for re-use
-    for (auto &item : _dedup_examples) {
-      _example_pool.push_back(item.second);
-    }
-    _dedup_examples.clear();
-  }
-
   auto dedup = process_compression<v2::DedupInfo>(
       event.payload()->data(), event.payload()->size(), metadata);
 
+  _keepers.clear();
   for (size_t i = 0; i < dedup->ids()->size(); i++) {
+
+    _keepers.emplace(dedup->ids()->Get(i));
 
     auto examples = v_init<example *>();
     examples.push_back(get_or_create_example());
 
-    std::cout << dedup->ids()->Get(i) << " : "
-              << dedup->values()->Get(i)->c_str() << std::endl;
+    if (_dedup_examples.find(dedup->ids()->Get(i)) == _dedup_examples.end()) {
 
-    if (_vw->audit || _vw->hash_inv) {
-      VW::template read_line_json<true>(
-          *_vw, examples, const_cast<char *>(dedup->values()->Get(i)->c_str()),
-          get_or_create_example_f, this);
-    } else {
-      VW::template read_line_json<false>(
-          *_vw, examples, const_cast<char *>(dedup->values()->Get(i)->c_str()),
-          get_or_create_example_f, this);
+      if (_vw->audit || _vw->hash_inv) {
+        VW::template read_line_json<true>(
+            *_vw, examples,
+            const_cast<char *>(dedup->values()->Get(i)->c_str()),
+            get_or_create_example_f, this);
+      } else {
+        VW::template read_line_json<false>(
+            *_vw, examples,
+            const_cast<char *>(dedup->values()->Get(i)->c_str()),
+            get_or_create_example_f, this);
+      }
+
+      _dedup_examples.emplace(dedup->ids()->Get(i), examples[0]);
     }
+  }
 
-    _dedup_examples.emplace(dedup->ids()->Get(i), examples[0]);
+  // clear out non-keepers
+  std::vector<uint64_t> non_keepers;
+  for (auto &dedup : _dedup_examples) {
+    if (_keepers.find(dedup.first) == _keepers.end()) {
+      non_keepers.emplace_back(dedup.first);
+    }
+  }
+
+  for (auto id : non_keepers) {
+    _dedup_examples.erase(id);
   }
 
   return 0;
@@ -361,25 +382,17 @@ int example_joiner::process_joined(v_array<example *> &examples) {
     return 0;
   }
 
-  if (!_dedup_examples.empty()) {
-    for (auto &item : _dedup_examples) {
-      // we are potentially re-using dedup examples, we need to make sure that
-      // their labels and predictions are clear for re-use
-      clean_label_and_prediction(item.second);
-    }
-  }
-
   auto &id = _batch_event_order.front();
 
   bool multiline = true;
   for (auto *event : _batch_grouped_events[id]) {
     auto metadata = event->meta();
-    std::cout
-        << "id:" << metadata->id()->c_str() << " type:"
-        << v2::EnumNamePayloadType(metadata->payload_type())
-        // << " payload-size:" << event->payload()->size()
-        // << " encoding:" << v2::EnumNameEventEncoding(metadata->encoding())
-        << std::endl;
+    // std::cout
+    //     << "id:" << metadata->id()->c_str() << " type:"
+    //     << v2::EnumNamePayloadType(metadata->payload_type())
+    //     // << " payload-size:" << event->payload()->size()
+    //     // << " encoding:" << v2::EnumNameEventEncoding(metadata->encoding())
+    //     << std::endl;
 
     if (metadata->payload_type() == v2::PayloadType_Outcome) {
       process_outcome(*event, *metadata);
@@ -408,11 +421,12 @@ int example_joiner::process_joined(v_array<example *> &examples) {
       {1.0f, je.interaction_data.actions[index - 1],
        je.interaction_data.probabilities[index - 1]});
 
-  std::cout << "reward value: " << reward << std::endl;
+  // std::cout << "reward value: " << reward << std::endl;
 
   if (multiline) {
     // add an empty example to signal end-of-multiline
     examples.push_back(&VW::get_unused_example(_vw));
+    _vw->example_parser->lbl_parser.default_label(&examples.back()->l);
   }
 
   _batch_grouped_events.erase(id);
