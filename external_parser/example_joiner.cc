@@ -70,7 +70,8 @@ float median(const joined_event &event) {
 float earliest(const joined_event &event) { return 0.0; }
 } // namespace RewardFunctions
 
-example_joiner::example_joiner(vw *vw) : _vw(vw) {}
+example_joiner::example_joiner(vw *vw)
+    : _vw(vw), _reward_calculation(&RewardFunctions::earliest) {}
 
 int example_joiner::process_event(const v2::JoinedEvent &joined_event) {
   auto event = flatbuffers::GetRoot<v2::Event>(joined_event.event()->data());
@@ -93,26 +94,26 @@ void example_joiner::set_reward_function(const v2::RewardFunctionType type) {
 
   switch (type) {
   case v2::RewardFunctionType_Earliest:
-    reward_calculation = &earliest;
+    _reward_calculation = &earliest;
     break;
   case v2::RewardFunctionType_Average:
-    reward_calculation = &average;
+    _reward_calculation = &average;
     break;
 
   case v2::RewardFunctionType_Sum:
-    reward_calculation = &sum;
+    _reward_calculation = &sum;
     break;
 
   case v2::RewardFunctionType_Min:
-    reward_calculation = &min;
+    _reward_calculation = &min;
     break;
 
   case v2::RewardFunctionType_Max:
-    reward_calculation = &max;
+    _reward_calculation = &max;
     break;
 
   case v2::RewardFunctionType_Median:
-    reward_calculation = &median;
+    _reward_calculation = &median;
     break;
 
   default:
@@ -158,12 +159,11 @@ int example_joiner::process_interaction(const v2::Event &event,
     data.probabilityOfDrop = metadata.pass_probability();
     data.skipLearn = cb->deferred_action();
 
-    std::vector<char> line_vec(cb->context()->data(),
-                               cb->context()->data() + cb->context()->size() +
-                                   1);
+    std::string line_vec(reinterpret_cast<char const *>(cb->context()->data()),
+                         cb->context()->size());
 
     VW::read_line_json<false>(
-        *_vw, examples, &line_vec[0],
+        *_vw, examples, const_cast<char *>(line_vec.c_str()),
         reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
 
     _batch_grouped_examples.emplace(std::make_pair<std::string, joined_event>(
@@ -251,13 +251,13 @@ int example_joiner::process_joined(v_array<example *> &examples) {
   auto &je = _batch_grouped_examples[id];
   if (je.outcome_events.size() > 0) {
     if (je.interaction_metadata.payload_type == v2::PayloadType_CB &&
-      je.interaction_metadata.learning_mode ==
-          v2::LearningModeType_Apprentice) {
+        je.interaction_metadata.learning_mode ==
+            v2::LearningModeType_Apprentice) {
       if (je.interaction_data.actions[0] == 1) {
-        reward = reward_calculation(je);
+        reward = _reward_calculation(je);
       }
     } else {
-      reward = reward_calculation(je);
+      reward = _reward_calculation(je);
     }
   }
 
