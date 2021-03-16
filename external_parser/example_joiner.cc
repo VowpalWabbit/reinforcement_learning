@@ -284,6 +284,7 @@ int example_joiner::process_dedup(const v2::Event &event,
     std::cout << "Decompression coming soon" << std::endl;
   }
 
+  // TODO check id's length equals to values length
   auto dedup = v2::GetDedupInfo(event.payload()->data());
 
   for (size_t i = 0; i < dedup->ids()->size(); i++) {
@@ -291,6 +292,7 @@ int example_joiner::process_dedup(const v2::Event &event,
     auto examples = v_init<example *>();
     examples.push_back(get_or_create_example());
 
+    // TODO check optional fields and act accordingly if missing
     if (_vw->audit || _vw->hash_inv) {
       VW::template read_line_json<true>(
           *_vw, examples, const_cast<char *>(dedup->values()->Get(i)->c_str()),
