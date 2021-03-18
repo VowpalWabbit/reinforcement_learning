@@ -206,10 +206,6 @@ namespace reinforcement_learning {
     }
 
     // clean up examples and push examples back into pool for re-use
-    for (auto a_s : examples[0]->pred.decision_scores)
-    {
-      a_s.delete_v();
-    }
     examples[0]->pred.decision_scores.clear();
     for (auto&& ex : examples) {
       _example_pool.emplace_back(ex);
@@ -258,10 +254,6 @@ namespace reinforcement_learning {
     }
 
     // clean up examples and push examples back into pool for re-use
-    for (auto a_s : examples[0]->pred.decision_scores)
-    {
-      a_s.delete_v();
-    }
     examples[0]->pred.decision_scores.clear();
     for (auto&& ex : examples) {
       _example_pool.emplace_back(ex);
