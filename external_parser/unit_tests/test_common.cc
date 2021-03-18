@@ -18,7 +18,7 @@ void set_buffer_as_vw_input(const std::vector<char> &buffer, vw *vw) {
   vw->example_parser->input = reader_view_of_buffer;
 
   reader_view_of_buffer->add_file(
-      VW::io::create_buffer_view(buffer.data(), buffer.size()));
+    VW::io::create_buffer_view(buffer.data(), buffer.size()));
 }
 
 std::vector<char> read_file(std::string file_name) {
@@ -65,7 +65,9 @@ wrap_into_joined_event(std::vector<char> &buffer,
   // TODO read all the event's from batch and not just the first one
   const auto *payload = event_batch->events()->Get(0)->payload();
   auto vec = fbb.CreateVector(payload->data(), payload->size());
-  auto fb = v2::CreateJoinedEvent(fbb, vec, nullptr);
+
+  v2::TimeStamp ts(2020, 3, 18, 10, 20, 30, 0);
+  auto fb = v2::CreateJoinedEvent(fbb, vec, &ts);
   fbb.Finish(fb);
   detached_buffer = fbb.Release();
   return flatbuffers::GetRoot<v2::JoinedEvent>(detached_buffer.data());
