@@ -94,5 +94,5 @@ private:
   vw *_vw;
 
   float _default_reward = 0.f;
-  RewardCalcType reward_calculation;
+  RewardCalcType _reward_calculation;
 };
