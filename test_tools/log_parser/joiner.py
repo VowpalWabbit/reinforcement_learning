@@ -98,7 +98,7 @@ def mk_bytes_vector(builder, arr):
     return builder.CreateNumpyVector(np.array(list(arr), dtype='b'))
 
 MSG_TYPE_HEADER = 0x55555555
-REWARD_FUNCTION = 0x11111111
+MSG_TYPE_REWARD_FUNCTION = 0x11111111
 MSG_TYPE_REGULAR = 0xFFFFFFFF
 MSG_TYPE_EOF = 0xAAAAAAAA
 
