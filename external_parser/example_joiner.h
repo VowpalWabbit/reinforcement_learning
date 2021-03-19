@@ -34,6 +34,7 @@ struct outcome_event {
   int index;
   std::string s_value;
   float value;
+  time_t enqueued_time_utc;
 };
 
 struct joined_event {
@@ -77,7 +78,7 @@ private:
   int process_interaction(const v2::Event &event, const v2::Metadata &metadata,
                           v_array<example *> &examples);
 
-  int process_outcome(const v2::Event &event, const v2::Metadata &metadata);
+  int process_outcome(const v2::Event &event, const v2::Metadata &metadata, const time_t &enqueued_time_utc);
 
   // from dictionary id to example object
   // right now holding one dedup dictionary at a time, could be exented to a map
@@ -87,7 +88,7 @@ private:
   // (multi)example
   std::unordered_map<std::string, joined_event> _batch_grouped_examples;
   // from event id to all the events that have that event id
-  std::unordered_map<std::string, std::vector<const v2::Event *>>
+  std::unordered_map<std::string, std::vector<const v2::JoinedEvent *>>
       _batch_grouped_events;
   std::queue<std::string> _batch_event_order;
 
