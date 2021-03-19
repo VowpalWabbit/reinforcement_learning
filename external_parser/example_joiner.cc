@@ -3,8 +3,10 @@
 #include "generated/v2/DedupInfo_generated.h"
 #include "generated/v2/Event_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
+#include "generated/v2/Metadata_generated.h"
 
 #include <limits.h>
+#include <time.h>
 
 // VW headers
 #include "example.h"
@@ -69,7 +71,19 @@ float median(const joined_event &event) {
   }
 }
 
-float earliest(const joined_event &event) { return 0.0; }
+float earliest(const joined_event &event) {
+  time_t oldest_valid_observation = std::numeric_limits<time_t>::max();
+  float earliest_reward = 0.f;
+
+  for (const auto &o : event.outcome_events) {
+    if (o.enqueued_time_utc < oldest_valid_observation) {
+      oldest_valid_observation = o.enqueued_time_utc;
+      earliest_reward = o.value;
+    }
+  }
+
+  return earliest_reward;
+}
 } // namespace RewardFunctions
 
 example_joiner::example_joiner(vw *vw)
@@ -120,9 +134,9 @@ int example_joiner::process_event(const v2::JoinedEvent &joined_event) {
     return 0;
   }
   if (_batch_grouped_events.find(id) != _batch_grouped_events.end()) {
-    _batch_grouped_events[id].push_back(event);
+    _batch_grouped_events[id].push_back(&joined_event);
   } else {
-    _batch_grouped_events.insert({id, {event}});
+    _batch_grouped_events.insert({id, {&joined_event}});
     _batch_event_order.emplace(id);
   }
   return 0;
@@ -225,13 +239,15 @@ int example_joiner::process_interaction(const v2::Event &event,
 }
 
 int example_joiner::process_outcome(const v2::Event &event,
-                                    const v2::Metadata &metadata) {
-
+                                    const v2::Metadata &metadata,
+                                    const time_t &enqueued_time_utc) {
   outcome_event o_event;
   o_event.metadata = {"client_time_utc",
                       metadata.app_id() ? metadata.app_id()->str() : "",
-                      metadata.payload_type(), metadata.pass_probability(),
+                      metadata.payload_type(),
+                      metadata.pass_probability(),
                       metadata.encoding()};
+  o_event.enqueued_time_utc = enqueued_time_utc;
 
   auto outcome = v2::GetOutcomeEvent(event.payload()->data());
 
@@ -325,7 +341,22 @@ int example_joiner::process_joined(v_array<example *> &examples) {
   auto &id = _batch_event_order.front();
 
   bool multiline = true;
-  for (auto *event : _batch_grouped_events[id]) {
+  for (auto &joined_event : _batch_grouped_events[id]) {
+    auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
+
+    time_t raw_time;
+    struct tm * enqueued_time;
+    enqueued_time = gmtime(&raw_time);
+    enqueued_time->tm_year = joined_event->timestamp()->year() - 1900;
+    enqueued_time->tm_mon = joined_event->timestamp()->month() - 1;
+    enqueued_time->tm_mday = joined_event->timestamp()->day();
+    enqueued_time->tm_hour = joined_event->timestamp()->hour();
+    enqueued_time->tm_min = joined_event->timestamp()->minute();
+    enqueued_time->tm_sec = joined_event->timestamp()->second();
+
+    time_t enqueued_time_utc = mktime(enqueued_time);
+    std::cout << "enqueued time utc: " << enqueued_time_utc << std::endl;
+
     auto metadata = event->meta();
     std::cout << "id:" << metadata->id()->c_str()
               << " type:" << v2::EnumNamePayloadType(metadata->payload_type())
@@ -338,7 +369,7 @@ int example_joiner::process_joined(v_array<example *> &examples) {
     }
 
     if (metadata->payload_type() == v2::PayloadType_Outcome) {
-      process_outcome(*event, *metadata);
+      process_outcome(*event, *metadata, enqueued_time_utc);
     } else {
       if (metadata->payload_type() == v2::PayloadType_CA) {
         multiline = false;
