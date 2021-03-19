@@ -255,9 +255,9 @@ from reinforcement_learning.messages.flatbuff.v2.MultiSlotEvent import MultiSlot
 from reinforcement_learning.messages.flatbuff.v2.CaEvent import CaEvent
 from reinforcement_learning.messages.flatbuff.v2.DedupInfo import DedupInfo
 
-from reinforcement_learning.messages.flatbuff.v2.FileHeader import *  
-from reinforcement_learning.messages.flatbuff.v2.JoinedEvent import *  
-from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *  
+from reinforcement_learning.messages.flatbuff.v2.FileHeader import *
+from reinforcement_learning.messages.flatbuff.v2.JoinedEvent import *
+from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *
 from reinforcement_learning.messages.flatbuff.v2.RewardFunctionInfo import *
 
 for input_file in sys.argv[1:]:
