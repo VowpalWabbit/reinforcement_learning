@@ -136,7 +136,7 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
     return false;
   }
 
-  if (payload_type == MSG_TYPE_REWARD_FUNCTION) {
+  if (payload_type == REWARD_FUNCTION) {
     // read payload size
     if (!read_payload_size(all->example_parser->input, _payload_size)) {
       return false;
@@ -151,12 +151,8 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
     v2::RewardFunctionType reward_function_type = reward_function_info->type();
     float default_reward = reward_function_info->default_reward();
 
-    std::cout << "reward function type: " << reward_function_type << std::endl;
-    std::cout << "default reward: " << default_reward << std::endl;
-
     _example_joiner.set_reward_function(reward_function_type);
     _example_joiner.set_default_reward(default_reward);
-  }
 
     // read potential excess padding after last payload read
     if (!read_padding(all->example_parser->input, _payload_size)) {

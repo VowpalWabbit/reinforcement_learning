@@ -82,23 +82,16 @@ private:
   int process_interaction(const v2::Event &event, const v2::Metadata &metadata,
                           v_array<example *> &examples);
 
-  int process_outcome(const v2::Event &event, const v2::Metadata &metadata, const time_t &enqueued_time_utc);
-
-  static example &get_or_create_example_f(void *vw);
-
-  example *get_or_create_example();
-
-  void clean_label_and_prediction(example *ex);
+  int process_outcome(const v2::Event &event, const v2::Metadata &metadata,
+                      const time_t &enqueued_time_utc);
 
   template <typename T>
   const T *process_compression(const uint8_t *data, size_t size,
                                const v2::Metadata &metadata);
 
-  static example &get_or_create_example_f(void *vw);
-
   example *get_or_create_example();
 
-  void clean_label_and_prediction(example *ex);
+  static example &get_or_create_example_f(void *vw);
 
   // from dictionary id to example object
   // right now holding one dedup dictionary at a time, could be exented to a map

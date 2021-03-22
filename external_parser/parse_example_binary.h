@@ -9,7 +9,7 @@
 
 const unsigned int MSG_TYPE_HEADER = 0x55555555;
 const unsigned int MSG_TYPE_REGULAR = 0xFFFFFFFF;
-const unsigned int MSG_TYPE_REWARD_FUNCTION = 0x11111111;
+const unsigned int REWARD_FUNCTION = 0x11111111;
 const unsigned int MSG_TYPE_EOF = 0xAAAAAAAA;
 
 namespace VW {
