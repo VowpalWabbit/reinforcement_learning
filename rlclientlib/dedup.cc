@@ -283,7 +283,7 @@ public:
 	logger::i_async_batcher<generic_event>* create_batcher(logger::i_message_sender* sender, utility::watchdog& watchdog,
 																									error_callback_fn* perror_cb, const char* section) override {
 		auto config = utility::get_batcher_config(_config, section);
-		int _dummy = 0;
+
     if(_use_dedup) {
       return new logger::async_batcher<generic_event, dedup_collection_serializer>(
           sender,

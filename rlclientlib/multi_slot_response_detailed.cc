@@ -36,6 +36,7 @@ namespace reinforcement_learning
       RETURN_ERROR_ARG(nullptr, status, slot_index_out_of_bounds_error, "Slot index out of bounds");
     }
     _decision[index] = std::move(slot);
+    return error_code::success;
   }
 
   void multi_slot_response_detailed::clear() {
