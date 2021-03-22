@@ -6,8 +6,10 @@
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
+#include "lru_dedup_cache.h"
 #include "v_array.h"
 
+#include <list>
 #include <queue>
 #include <unordered_map>
 // VW headers
@@ -93,11 +95,11 @@ private:
 
   static example &get_or_create_example_f(void *vw);
 
-  // from dictionary id to example object
-  // right now holding one dedup dictionary at a time, could be exented to a map
-  // of maps holding more than one dedup dictionaries at a time
-  std::unordered_map<uint64_t, example *> _dedup_examples;
-  std::unordered_set<uint64_t> _keepers;
+  void return_example(example *ex);
+
+  static void return_example_f(void *vw, example *ex);
+
+  lru_dedup_cache _dedup_cache;
   // from event id to all the information required to create a complete
   // (multi)example
   std::unordered_map<std::string, joined_event> _batch_grouped_examples;

@@ -92,6 +92,7 @@ example_joiner::example_joiner(vw *vw)
 
 example_joiner::~example_joiner() {
   // cleanup examples
+  _dedup_cache.clear(return_example_f, this);
   for (auto *ex : _example_pool) {
     VW::dealloc_examples(ex, 1);
   }
@@ -116,8 +117,16 @@ example *example_joiner::get_or_create_example() {
   return ex;
 }
 
+void example_joiner::return_example(example *ex) {
+  _example_pool.push_back(ex);
+}
+
 example &example_joiner::get_or_create_example_f(void *vw) {
   return *(((example_joiner *)vw)->get_or_create_example());
+}
+
+void example_joiner::return_example_f(void *vw, example *ex) {
+  ((example_joiner *)vw)->return_example(ex);
 }
 
 int example_joiner::process_event(const v2::JoinedEvent &joined_event) {
@@ -245,12 +254,12 @@ int example_joiner::process_interaction(const v2::Event &event,
       VW::template read_line_json<true>(
           *_vw, examples, const_cast<char *>(line_vec.c_str()),
           reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
-          &_dedup_examples);
+          &_dedup_cache.dedup_examples);
     } else {
       VW::template read_line_json<false>(
           *_vw, examples, const_cast<char *>(line_vec.c_str()),
           reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
-          &_dedup_examples);
+          &_dedup_cache.dedup_examples);
     }
 
     _batch_grouped_examples.emplace(std::make_pair<std::string, joined_event>(
@@ -305,16 +314,13 @@ int example_joiner::process_dedup(const v2::Event &event,
   auto dedup = process_compression<v2::DedupInfo>(
       event.payload()->data(), event.payload()->size(), metadata);
 
-  _keepers.clear();
+  auto examples = v_init<example *>();
   // TODO check optional fields and act accordingly if missing
   for (size_t i = 0; i < dedup->ids()->size(); i++) {
+    auto dedup_id = dedup->ids()->Get(i);
+    if (!_dedup_cache.exists(dedup_id)) {
 
-    _keepers.emplace(dedup->ids()->Get(i));
-
-    auto examples = v_init<example *>();
-    examples.push_back(get_or_create_example());
-
-    if (_dedup_examples.find(dedup->ids()->Get(i)) == _dedup_examples.end()) {
+      examples.push_back(get_or_create_example());
 
       if (_vw->audit || _vw->hash_inv) {
         VW::template read_line_json<true>(
@@ -328,20 +334,17 @@ int example_joiner::process_dedup(const v2::Event &event,
             get_or_create_example_f, this);
       }
 
-      _dedup_examples.emplace(dedup->ids()->Get(i), examples[0]);
+      _dedup_cache.add(dedup_id, examples[0]);
+      examples.clear();
+    } else {
+      _dedup_cache.update(dedup_id);
     }
   }
 
-  // clear out non-keepers
-  std::vector<uint64_t> non_keepers;
-  for (auto &dedup : _dedup_examples) {
-    if (_keepers.find(dedup.first) == _keepers.end()) {
-      non_keepers.emplace_back(dedup.first);
-    }
-  }
-
-  for (auto id : non_keepers) {
-    _dedup_examples.erase(id);
+  if (dedup->ids()->size() > 0) {
+    // location of first item in dedup payload will be the "last" item in the
+    // cache that we care about keeping
+    _dedup_cache.clear_after(dedup->ids()->Get(0), return_example_f, this);
   }
 
   return 0;
@@ -368,7 +371,7 @@ int example_joiner::process_joined(v_array<example *> &examples) {
     enqueued_time->tm_min = joined_event->timestamp()->minute();
     enqueued_time->tm_sec = joined_event->timestamp()->second();
 
-    time_t enqueued_time_utc = mktime(enqueued_time);    
+    time_t enqueued_time_utc = mktime(enqueued_time);
 
     auto metadata = event->meta();
 
