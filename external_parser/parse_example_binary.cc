@@ -136,7 +136,7 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
     return false;
   }
 
-  if (payload_type == REWARD_FUNCTION) {
+  if (payload_type == MSG_TYPE_REWARD_FUNCTION) {
     // read payload size
     if (!read_payload_size(all->example_parser->input, _payload_size)) {
       return false;
