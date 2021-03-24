@@ -176,7 +176,7 @@ class BinLogWriter:
         RewardFunctionInfoAddDefaultReward(builder, default_reward)
         reward_off = RewardFunctionInfoEnd(builder)
         builder.Finish(reward_off)
-        self.write_message(REWARD_FUNCTION, builder.Output())
+        self.write_message(MSG_TYPE_REWARD_FUNCTION, builder.Output())
 
     def write_eof(self):
         self.write_message(MSG_TYPE_EOF, b'')

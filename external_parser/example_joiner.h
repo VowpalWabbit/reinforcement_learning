@@ -77,6 +77,7 @@ public:
   // true if there are still event-groups to be processed from a deserialized
   // batch
   bool processing_batch();
+  float get_reward();
 
 private:
   int process_dedup(const v2::Event &event, const v2::Metadata &metadata);
@@ -114,5 +115,6 @@ private:
   flatbuffers::DetachedBuffer _detached_buffer;
 
   float _default_reward = 0.f;
+  float _reward = _default_reward;
   RewardCalcType _reward_calculation;
 };

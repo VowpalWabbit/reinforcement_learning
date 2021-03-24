@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cstring>
 #include <boost/program_options.hpp>
+#include <random>
 
 #include "config_utility.h"
 #include "live_model.h"
@@ -97,9 +98,17 @@ const auto JSON_SLATES_CONTEXT = R"({"GUser":{"id":"a","major":"eng","hobby":"hi
 
 const auto JSON_CA_CONTEXT = R"({"RobotJoint1":{"friction":78}})";
 
+float get_random_reward() {
+  std::random_device rd;     // only used once to initialise (seed) engine
+  std::mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
+  std::uniform_int_distribution<int> uni(1, 5); // guaranteed unbiased
+  auto random_integer = uni(rng);
+  return random_integer;
+}
 
-int take_action(r::live_model& rl, const char *event_id, int action) {
+int take_action(r::live_model& rl, const char *event_id, int action, bool gen_random_reward) {
   r::api_status status;
+  float reward = gen_random_reward ? get_random_reward() : 1.5f;
 
   switch(action) {
     case CB_ACTION: {// "cb",
@@ -127,7 +136,7 @@ int take_action(r::live_model& rl, const char *event_id, int action) {
       break;
     };
     case F_REWARD: // "float"
-      if( rl.report_outcome(event_id, 1.5, &status) != err::success ) 
+      if( rl.report_outcome(event_id, reward, &status) != err::success )
           std::cout << status.get_error_msg() << std::endl;
       break;
 
@@ -179,13 +188,14 @@ int pseudo_random(int seed) {
   return (int)(val & 0xFFFFFFFF);
 }
 
-int run_config(int action, int count, int initial_seed) {
+int run_config(int action, int count, int initial_seed, bool gen_same_event_id, bool gen_random_reward) {
   u::configuration config;
 
   load_config_from_json(action, config);
 
   r::api_status status;
   r::live_model rl(config);
+
   if( rl.init(&status) != err::success ) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
@@ -195,10 +205,13 @@ int run_config(int action, int count, int initial_seed) {
     char event_id[128];
     if(initial_seed == -1)
       strcpy(event_id, "abcdefghijklm");
+    else if (gen_same_event_id) {
+      sprintf(event_id, "%x", pseudo_random(initial_seed));
+    }
     else
       sprintf(event_id, "%x", pseudo_random(initial_seed + i * 997739));
 
-    int r = take_action(rl, event_id, action);
+    int r = take_action(rl, event_id, action, gen_random_reward);
     if(r)
       return r;
   }
@@ -212,6 +225,8 @@ int main(int argc, char *argv[]) {
   bool gen_all = false;
   int count = 1;
   int seed = 473747277; //much random
+  bool gen_same_event_id = false;
+  bool gen_random_reward = false;
 
   desc.add_options()
     ("help", "Produce help message")
@@ -219,8 +234,9 @@ int main(int argc, char *argv[]) {
     ("dedup", "Enable dedup/zstd")
     ("count", po::value<int>(), "Number of events to produce")
     ("seed", po::value<int>(), "Initial seed used to produce event ids")
-    ("kind", po::value<std::string>(), "which kind of example to generate (cb,ccb,ccb-baseline,slates,ca,(f|s)(s|i)?-reward,action-taken)");
-
+    ("kind", po::value<std::string>(), "which kind of example to generate (cb,ccb,ccb-baseline,slates,ca,(f|s)(s|i)?-reward,action-taken)")
+    ("same_event_id", "Generate event with same event id(for observations)")
+    ("random_reward", "Generate random float reward for observation event");
   po::positional_options_description pd;
   pd.add("kind", 1);
 
@@ -229,6 +245,9 @@ int main(int argc, char *argv[]) {
     store(po::command_line_parser(argc, argv).options(desc).positional(pd).run(), vm);
     po::notify(vm);
     gen_all = vm.count("all");
+    gen_same_event_id = vm.count("same_event_id");
+    gen_random_reward = vm.count("random_reward");
+
     enable_dedup = vm.count("dedup");
     if(vm.count("kind") > 0)
       action_name = vm["kind"].as<std::string>();
@@ -249,7 +268,7 @@ int main(int argc, char *argv[]) {
 
   if(gen_all) {
     for(int i = 0; options[i]; ++i) {
-      if(run_config(i, count, seed))
+      if(run_config(i, count, seed, gen_same_event_id, gen_random_reward))
         return -1;
     }
     return 0;
@@ -269,5 +288,5 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  return run_config(action, count, seed);
+  return run_config(action, count, seed, gen_same_event_id, gen_random_reward);
 }
