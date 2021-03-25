@@ -16,7 +16,9 @@ BOOST_AUTO_TEST_CASE(cb_simple) {
   examples.push_back(&VW::get_unused_example(vw));
   set_buffer_as_vw_input(buffer, vw);
 
+  bool read_payload = false;
   while (vw->example_parser->reader(vw, examples) > 0) {
+    read_payload = true;
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
     BOOST_CHECK_EQUAL(examples[0]->indices[0], 'G');
@@ -31,6 +33,8 @@ BOOST_AUTO_TEST_CASE(cb_simple) {
     clear_examples(examples, vw);
     examples.push_back(&VW::get_unused_example(vw));
   }
+
+  BOOST_CHECK_EQUAL(read_payload, true);
 
   clear_examples(examples, vw);
   VW::finish(*vw);
@@ -48,7 +52,9 @@ BOOST_AUTO_TEST_CASE(cb_dedup_compressed) {
   examples.push_back(&VW::get_unused_example(vw));
   set_buffer_as_vw_input(buffer, vw);
 
+  bool read_payload = false;
   while (vw->example_parser->reader(vw, examples) > 0) {
+    read_payload = true;
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
     BOOST_CHECK_EQUAL(examples[0]->indices[0], 'G');
@@ -63,6 +69,8 @@ BOOST_AUTO_TEST_CASE(cb_dedup_compressed) {
     clear_examples(examples, vw);
     examples.push_back(&VW::get_unused_example(vw));
   }
+
+  BOOST_CHECK_EQUAL(read_payload, true);
 
   clear_examples(examples, vw);
   VW::finish(*vw);

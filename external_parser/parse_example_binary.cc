@@ -159,6 +159,7 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
       return false;
     }
 
+    // ready next payload
     if (!read_payload_type(all->example_parser->input, payload_type)) {
       return false;
     }
