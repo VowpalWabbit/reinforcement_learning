@@ -22,6 +22,7 @@ bool enable_dedup = false;
 static const char *options[] = {
   "cb",
   "ccb",
+  "ccb-baseline",
   "slates",
   "ca",
   "f-reward",
@@ -37,8 +38,10 @@ static const char *options[] = {
 enum options{
   CB_ACTION,
   CCB_ACTION,
+  CCB_BASELINE_ACTION,
   SLATES_ACTION,
   CA_ACTION,
+  // Put interaction actions before F_REWARD
   F_REWARD,
   F_I_REWARD,
   F_S_REWARD,
@@ -75,7 +78,7 @@ void load_config_from_json(int action, u::configuration& config)
     config.set(nm::INTERACTION_USE_COMPRESSION, "true");
   }
 
-  if(action == CCB_ACTION) {
+  if(action == CCB_ACTION || action == CCB_BASELINE_ACTION) {
     config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
   } else if (action == SLATES_ACTION) {
     config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--slates --ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
@@ -129,7 +132,7 @@ int take_action(r::live_model& rl, const char *event_id, int action) {
       break;
 
     case F_I_REWARD: // "float-int",
-      if( rl.report_outcome(event_id, 10, 1.5, &status) != err::success )
+      if( rl.report_outcome(event_id, 1, 1.5, &status) != err::success )
           std::cout << status.get_error_msg() << std::endl;
       break;
     case F_S_REWARD: // "float-string"
@@ -141,7 +144,7 @@ int take_action(r::live_model& rl, const char *event_id, int action) {
           std::cout << status.get_error_msg() << std::endl;
       break;
     case S_I_REWARD: // "string-int-reward",
-        if( rl.report_outcome(event_id, 10, "reward-str", &status) != err::success )
+        if( rl.report_outcome(event_id, 1, "reward-str", &status) != err::success )
           std::cout << status.get_error_msg() << std::endl;
       break;
     case S_S_REWARD: // "string-string-reward",
@@ -152,6 +155,14 @@ int take_action(r::live_model& rl, const char *event_id, int action) {
         if( rl.report_action_taken(event_id, &status) != err::success )
           std::cout << status.get_error_msg() << std::endl;
       break;
+    case CCB_BASELINE_ACTION: {// "ccb",
+      r::multi_slot_response response;
+      std::vector<int> baselines { 1, 0 };
+      if(rl.request_multi_slot_decision(event_id, JSON_CCB_CONTEXT, 0, response, &baselines[0], 2, &status) != err::success)
+          std::cout << status.get_error_msg() << std::endl;
+      break;
+    };
+
     default:
       std::cout << "Invalid action " << action << std::endl;
       return -1;
@@ -208,7 +219,7 @@ int main(int argc, char *argv[]) {
     ("dedup", "Enable dedup/zstd")
     ("count", po::value<int>(), "Number of events to produce")
     ("seed", po::value<int>(), "Initial seed used to produce event ids")
-    ("kind", po::value<std::string>(), "which kind of example to generate (cb,ccb,slates,ca,(f|s)(s|i)?-reward,action-taken)");
+    ("kind", po::value<std::string>(), "which kind of example to generate (cb,ccb,ccb-baseline,slates,ca,(f|s)(s|i)?-reward,action-taken)");
 
   po::positional_options_description pd;
   pd.add("kind", 1);

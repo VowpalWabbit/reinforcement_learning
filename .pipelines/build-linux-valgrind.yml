@@ -19,4 +19,8 @@ steps:
   displayName: Build C++
 - bash: ./.scripts/linux/unit-tests-valgrind.sh
   displayName: Run Unit Tests C++ with Valgrind
+- bash: ./.scripts/linux/build-binary-parser.sh
+  displayName: Build C++ binary parser
+- bash: ./.scripts/linux/unit-tests-binary-parser-valgrind.sh
+  displayName: Run Unit Tests C++ binary parser with Valgrind
 - task: PublishTestResults@2

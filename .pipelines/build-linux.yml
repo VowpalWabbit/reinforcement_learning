@@ -15,4 +15,8 @@ steps:
   displayName: Build C++
 - bash: ./.scripts/linux/test.sh
   displayName: Test C++
+- bash: ./.scripts/linux/build-binary-parser.sh
+  displayName: Build C++ binary parser
+- bash: ./.scripts/linux/test-binary-parser.sh
+  displayName: Test C++ binary parser
 - task: PublishTestResults@2

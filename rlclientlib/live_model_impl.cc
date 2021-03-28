@@ -243,7 +243,7 @@ namespace reinforcement_learning {
 
     RETURN_IF_FAIL(live_model_impl::request_multi_slot_decision_impl(event_id, context_json, slot_ids, action_ids, action_pdfs, model_version, status));
     RETURN_IF_FAIL(populate_multi_slot_response(action_ids, action_pdfs, std::string(event_id), std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs, model_version, slot_ids, status, baseline_actions));
+    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs, model_version, slot_ids, status, baseline_actions, _learning_mode));
 
     if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY)
     {
@@ -285,7 +285,7 @@ namespace reinforcement_learning {
     resp.resize(slot_ids.size());
 
     RETURN_IF_FAIL(populate_multi_slot_response_detailed(action_ids, action_pdfs, std::string(event_id), std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
-    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs, model_version, slot_ids, status, baseline_actions));
+    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs, model_version, slot_ids, status, baseline_actions, _learning_mode));
 
     if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY)
     {
@@ -626,20 +626,10 @@ namespace reinforcement_learning {
   }
 
   int reset_action_order(ranking_response& response) {
-#ifdef __clang__
-    std::vector<action_prob> tmp;
-    std::copy(response.begin(), response.end(), std::back_inserter(tmp));
-    std::sort(tmp.begin(), tmp.end(), [](const action_prob& a, const action_prob& b) {
-      return a.action_id < b.action_id;
-    }
-    );
-    std::copy(tmp.begin(), tmp.end(), response.begin());
-#else
     std::sort(response.begin(), response.end(), [](const action_prob& a, const action_prob& b) {
       return a.action_id < b.action_id;
     }
     );
-#endif
     response.set_chosen_action_id((*(response.begin())).action_id);
 
     return error_code::success;
@@ -647,7 +637,7 @@ namespace reinforcement_learning {
 
   int reset_chosen_action_multi_slot(multi_slot_response& response, const std::vector<int>& baseline_actions)
   {
-    size_t index = 0;
+    uint32_t index = 0;
     for (auto &slot : response)
     {
       if (!baseline_actions.empty() && baseline_actions.size() >= index)

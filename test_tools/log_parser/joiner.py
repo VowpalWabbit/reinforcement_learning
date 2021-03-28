@@ -22,7 +22,8 @@ from reinforcement_learning.messages.flatbuff.v2.JoinedEvent import *
 from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *  
 from reinforcement_learning.messages.flatbuff.v2.Metadata import *  
 from reinforcement_learning.messages.flatbuff.v2.Event import *  
-
+from reinforcement_learning.messages.flatbuff.v2.RewardFunctionInfo import *
+from reinforcement_learning.messages.flatbuff.v2.RewardFunctionType import *
 
 import flatbuffers
 import zstandard as zstd
@@ -77,6 +78,7 @@ def mk_bytes_vector(builder, arr):
     return builder.CreateNumpyVector(np.array(list(arr), dtype='b'))
 
 MSG_TYPE_HEADER = 0x55555555
+REWARD_FUNCTION = 0x11111111
 MSG_TYPE_REGULAR = 0xFFFFFFFF
 MSG_TYPE_EOF = 0xAAAAAAAA
 
@@ -140,6 +142,18 @@ class BinLogWriter:
         builder.Finish(joined_payload_off)
         self.write_message(MSG_TYPE_REGULAR, builder.Output())
 
+    def write_reward_function(self, reward_function_type, default_reward=0.0):
+        print("reward function type: ", reward_function_type)
+        print("default reward: ", default_reward)
+        builder = flatbuffers.Builder(0)
+
+        RewardFunctionInfoStart(builder)
+        RewardFunctionInfoAddType(builder, reward_function_type)
+        RewardFunctionInfoAddDefaultReward(builder, default_reward)
+        reward_off = RewardFunctionInfoEnd(builder)
+        builder.Finish(reward_off)
+        self.write_message(REWARD_FUNCTION, builder.Output())
+
     def write_eof(self):
         self.write_message(MSG_TYPE_EOF, b'')
 
@@ -173,7 +187,8 @@ for msg in observations_file.messages():
 print(f'found {obs_count} observations with {obs_ids} ids')
 
 bin_f = BinLogWriter(result_file)
-bin_f.write_header({ 'eud': '-1', 'joiner': 'joiner.py', 'reward': 'latest'})
+bin_f.write_header({ 'eud': '-1', 'joiner': 'joiner.py'})
+bin_f.write_reward_function(RewardFunctionType.Average, 0.3)
 
 for msg in interactions_file.messages():
     batch = EventBatch.GetRootAsEventBatch(msg, 0)

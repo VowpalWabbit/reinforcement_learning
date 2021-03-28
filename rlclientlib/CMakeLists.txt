@@ -17,7 +17,8 @@ set(RL_FLAT_BUFFER_FILES_V2
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/FileFormat.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiSlotEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiStepEvent.fbs"  
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Event.fbs" )
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Event.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/LearningModeType.fbs" )
 
 build_flatbuffers("${RL_FLAT_BUFFER_FILES_V1}" "" fbgenerator_v1 "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v1/" "" "")
 build_flatbuffers("${RL_FLAT_BUFFER_FILES_V2}" "" fbgenerator_v2 "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v2/" "" "")

@@ -278,7 +278,17 @@ BOOST_AUTO_TEST_CASE(live_model_request_continuous_action)
   u::configuration config;
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::EH_TEST, "true");
-  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--cats 4 --min_value=185 --max_value=23959 --bandwidth 1 --coin --loss_option 1 --json --quiet --epsilon 0.1 --id N/A");
+  float min_value = 185;
+  float max_value = 23959;
+  size_t num_actions = 4;
+  float bandwidth = 1;
+  auto continuous_range = (max_value - min_value);
+  auto unit_range = continuous_range / float(num_actions);
+
+  std::string cmd = "--cats " + std::to_string(num_actions) +
+   " --min_value " + std::to_string(min_value) + " --max_value " + std::to_string(max_value) + " --bandwidth " + std::to_string(bandwidth) +
+   " --coin --loss_option 1 --json --quiet --epsilon 0.1 --id N/A";
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, cmd.c_str());
   // only added for version 2
   config.set(r::name::PROTOCOL_VERSION, "2");
 
@@ -290,8 +300,12 @@ BOOST_AUTO_TEST_CASE(live_model_request_continuous_action)
   r::continuous_action_response response;
 
   BOOST_CHECK_EQUAL(ds.request_continuous_action(JSON_CONTEXT_CONTINUOUS_ACTIONS, response, &status), err::success);
-  BOOST_CHECK_CLOSE(response.get_chosen_action(), 185.123, FLOAT_TOL);
-  BOOST_CHECK_CLOSE(response.get_chosen_action_pdf_value(), 6.09909948e-05, FLOAT_TOL);
+  // expected to fall in first unit range if no model exists
+  BOOST_CHECK_GE(response.get_chosen_action(), min_value);
+  BOOST_CHECK_LE(response.get_chosen_action(), min_value + unit_range);
+  // pdf_value on explore ~= (1 - e) * (1.0 / 2 * b) + e / (continuous_range)
+  // pdf_value on exploit = e / (continuous_range)
+  BOOST_CHECK_CLOSE(response.get_chosen_action_pdf_value(), 4.20627566e-06, FLOAT_TOL);
 
   BOOST_CHECK_EQUAL(status.get_error_code(), 0);
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
@@ -302,7 +316,17 @@ BOOST_AUTO_TEST_CASE(live_model_request_continuous_action_invalid_ctx)
   u::configuration config;
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::EH_TEST, "true");
-  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--cats 4 --min_value=185 --max_value=23959 --bandwidth 1 --coin --loss_option 1 --json --quiet --epsilon 0.1 --id N/A");
+  float min_value = 185;
+  float max_value = 23959;
+  size_t num_actions = 4;
+  float bandwidth = 1;
+  auto continuous_range = (max_value - min_value);
+  auto unit_range = continuous_range / float(num_actions);
+
+  std::string cmd = "--cats " + std::to_string(num_actions) +
+   " --min_value " + std::to_string(min_value) + " --max_value " + std::to_string(max_value) + " --bandwidth " + std::to_string(bandwidth) +
+   " --coin --loss_option 1 --json --quiet --epsilon 0.1 --id N/A";
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, cmd.c_str());
   // only added for version 2
   config.set(r::name::PROTOCOL_VERSION, "2");
 
