@@ -382,14 +382,16 @@ int example_joiner::process_joined(v_array<example *> &examples) {
       process_interaction(*event, *metadata, examples);
     }
   }
-  // call logic that creates the reward
+
   auto &je = _batch_grouped_examples[id];
 
   if (je.outcome_events.size() > 0) {
     if (je.interaction_metadata.payload_type == v2::PayloadType_CB &&
         je.interaction_metadata.learning_mode ==
             v2::LearningModeType_Apprentice) {
-      if (je.interaction_data.actions[0] == 1) {
+      if (je.interaction_data.actions[0] == je.baseline_action) {
+        // TODO: default apprenticeReward should come from config
+        // setting to default reward matches current behavior for now
         _reward = _reward_calculation(je);
       }
     } else {

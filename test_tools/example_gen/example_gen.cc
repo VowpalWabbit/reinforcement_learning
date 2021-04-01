@@ -52,7 +52,7 @@ enum options{
   ACTION_TAKEN,
 };
 
-void load_config_from_json(int action, u::configuration& config)
+void load_config_from_json(int action, u::configuration& config, bool enable_apprentice_mode)
 {
   std::string file_name(options[action]);
   file_name += "_v2.fb";
@@ -62,6 +62,10 @@ void load_config_from_json(int action, u::configuration& config)
   config.set("observation.sender.implementation", "OBSERVATION_FILE_SENDER");
   config.set("decisions.sender.implementation", "INTERACTION_FILE_SENDER");
   config.set("model.source", "NO_MODEL_DATA");
+
+  if (enable_apprentice_mode) {
+    config.set("rank.learning.mode", "APPRENTICE");
+  }
 
   bool is_observation = action >= F_REWARD;
   if(is_observation) {
@@ -188,10 +192,10 @@ int pseudo_random(int seed) {
   return (int)(val & 0xFFFFFFFF);
 }
 
-int run_config(int action, int count, int initial_seed, bool gen_same_event_id, bool gen_random_reward) {
+int run_config(int action, int count, int initial_seed, bool gen_same_event_id, bool gen_random_reward, bool enable_apprentice_mode) {
   u::configuration config;
 
-  load_config_from_json(action, config);
+  load_config_from_json(action, config, enable_apprentice_mode);
 
   r::api_status status;
   r::live_model rl(config);
@@ -227,6 +231,7 @@ int main(int argc, char *argv[]) {
   int seed = 473747277; //much random
   bool gen_same_event_id = false;
   bool gen_random_reward = false;
+  bool enable_apprentice_mode = false;
 
   desc.add_options()
     ("help", "Produce help message")
@@ -236,7 +241,8 @@ int main(int argc, char *argv[]) {
     ("seed", po::value<int>(), "Initial seed used to produce event ids")
     ("kind", po::value<std::string>(), "which kind of example to generate (cb,ccb,ccb-baseline,slates,ca,(f|s)(s|i)?-reward,action-taken)")
     ("same_event_id", "Generate event with same event id(for observations)")
-    ("random_reward", "Generate random float reward for observation event");
+    ("random_reward", "Generate random float reward for observation event")
+    ("apprentice", "Enable apprentice mode for cb event");
   po::positional_options_description pd;
   pd.add("kind", 1);
 
@@ -247,6 +253,7 @@ int main(int argc, char *argv[]) {
     gen_all = vm.count("all");
     gen_same_event_id = vm.count("same_event_id");
     gen_random_reward = vm.count("random_reward");
+    enable_apprentice_mode = vm.count("apprentice");
 
     enable_dedup = vm.count("dedup");
     if(vm.count("kind") > 0)
@@ -268,7 +275,7 @@ int main(int argc, char *argv[]) {
 
   if(gen_all) {
     for(int i = 0; options[i]; ++i) {
-      if(run_config(i, count, seed, gen_same_event_id, gen_random_reward))
+      if(run_config(i, count, seed, gen_same_event_id, gen_random_reward, enable_apprentice_mode))
         return -1;
     }
     return 0;
@@ -288,5 +295,5 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  return run_config(action, count, seed, gen_same_event_id, gen_random_reward);
+  return run_config(action, count, seed, gen_same_event_id, gen_random_reward, enable_apprentice_mode);
 }
