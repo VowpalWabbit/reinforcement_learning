@@ -192,7 +192,7 @@ int pseudo_random(int seed) {
   return (int)(val & 0xFFFFFFFF);
 }
 
-int run_config(int action, int count, int initial_seed, bool gen_same_event_id, bool gen_random_reward, bool enable_apprentice_mode) {
+int run_config(int action, int count, int initial_seed, bool gen_random_reward, bool enable_apprentice_mode) {
   u::configuration config;
 
   load_config_from_json(action, config, enable_apprentice_mode);
@@ -209,9 +209,6 @@ int run_config(int action, int count, int initial_seed, bool gen_same_event_id, 
     char event_id[128];
     if(initial_seed == -1)
       strcpy(event_id, "abcdefghijklm");
-    else if (gen_same_event_id) {
-      sprintf(event_id, "%x", pseudo_random(initial_seed));
-    }
     else
       sprintf(event_id, "%x", pseudo_random(initial_seed + i * 997739));
 
@@ -229,7 +226,6 @@ int main(int argc, char *argv[]) {
   bool gen_all = false;
   int count = 1;
   int seed = 473747277; //much random
-  bool gen_same_event_id = false;
   bool gen_random_reward = false;
   bool enable_apprentice_mode = false;
 
@@ -240,7 +236,6 @@ int main(int argc, char *argv[]) {
     ("count", po::value<int>(), "Number of events to produce")
     ("seed", po::value<int>(), "Initial seed used to produce event ids")
     ("kind", po::value<std::string>(), "which kind of example to generate (cb,ccb,ccb-baseline,slates,ca,(f|s)(s|i)?-reward,action-taken)")
-    ("same_event_id", "Generate event with same event id(for observations)")
     ("random_reward", "Generate random float reward for observation event")
     ("apprentice", "Enable apprentice mode for cb event");
   po::positional_options_description pd;
@@ -251,7 +246,6 @@ int main(int argc, char *argv[]) {
     store(po::command_line_parser(argc, argv).options(desc).positional(pd).run(), vm);
     po::notify(vm);
     gen_all = vm.count("all");
-    gen_same_event_id = vm.count("same_event_id");
     gen_random_reward = vm.count("random_reward");
     enable_apprentice_mode = vm.count("apprentice");
 
@@ -275,7 +269,7 @@ int main(int argc, char *argv[]) {
 
   if(gen_all) {
     for(int i = 0; options[i]; ++i) {
-      if(run_config(i, count, seed, gen_same_event_id, gen_random_reward, enable_apprentice_mode))
+      if(run_config(i, count, seed, gen_random_reward, enable_apprentice_mode))
         return -1;
     }
     return 0;
@@ -295,5 +289,5 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  return run_config(action, count, seed, gen_same_event_id, gen_random_reward, enable_apprentice_mode);
+  return run_config(action, count, seed, gen_random_reward, enable_apprentice_mode);
 }
