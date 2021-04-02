@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <memory>
 
 #include "ranking_response.h"
 
