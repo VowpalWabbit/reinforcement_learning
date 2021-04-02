@@ -16,6 +16,7 @@ set(RL_FLAT_BUFFER_FILES_V2
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CaEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/FileFormat.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiSlotEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiStepEvent.fbs"  
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Event.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/LearningModeType.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiStepEvent.fbs")
@@ -49,6 +50,7 @@ set(PROJECT_SOURCES
   model_mgmt/model_downloader.cc
   model_mgmt/model_mgmt.cc
   model_mgmt/file_model_loader.cc
+  multistep.cc
   generic_event.cc
   ranking_event.cc
   ranking_response.cc
@@ -99,6 +101,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/future_compat.h
   ../include/live_model.h
   ../include/model_mgmt.h
+  ../include/multistep.h
   ../include/object_factory.h
   ../include/personalization.h
   ../include/ranking_response.h

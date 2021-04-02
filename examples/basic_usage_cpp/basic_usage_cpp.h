@@ -22,6 +22,7 @@ int basic_usage_cb();
 int basic_usage_ca();
 int basic_usage_ccb();
 int basic_usage_slates();
+int basic_usage_multistep();
 
 int load_file(const std::string& file_name, std::string& file_data);
 int load_config_from_json(const std::string& file_name, u::configuration& cc);

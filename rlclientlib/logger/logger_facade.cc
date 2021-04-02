@@ -79,18 +79,31 @@ namespace reinforcement_learning {
 
     int interaction_logger_facade::log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode) {
       switch (_version) {
-        case 1: return _v1_cb->log(response.get_event_id(), context, flags, response, status, learning_mode);
-        case 2: {
-          v2::LearningModeType lmt;
-          RETURN_IF_FAIL(get_learning_mode(learning_mode, lmt, status));
-          generic_event::object_list_t actions;
-          generic_event::payload_buffer_t payload;
-          event_content_type content_type;
+      case 1: return _v1_cb->log(response.get_event_id(), context, flags, response, status, learning_mode);
+      case 2: {
+        v2::LearningModeType lmt;
+        RETURN_IF_FAIL(get_learning_mode(learning_mode, lmt, status));
+        generic_event::object_list_t actions;
+        generic_event::payload_buffer_t payload;
+        event_content_type content_type;
 
-          RETURN_IF_FAIL(wrap_log_call(_ext, _serializer_cb, context, actions, payload, content_type, status, flags, lmt, response));
-          return _v2->log(response.get_event_id(), std::move(payload), _serializer_cb.type, content_type, std::move(actions), status);
-        }
-        default: return protocol_not_supported(status);
+        RETURN_IF_FAIL(wrap_log_call(_ext, _serializer_cb, context, actions, payload, content_type, status, flags, lmt, response));
+        return _v2->log(response.get_event_id(), std::move(payload), _serializer_cb.type, content_type, std::move(actions), status);
+      }
+      }
+    }
+    
+    int interaction_logger_facade::log(const char* episode_id, const char* previous_id, const char* context, const ranking_response& response, api_status* status) {
+      switch (_version) {
+      case 2: {
+        generic_event::object_list_t actions;
+        generic_event::payload_buffer_t payload;
+        event_content_type content_type;
+
+        RETURN_IF_FAIL(wrap_log_call(_ext, _multistep_serializer, context, actions, payload, content_type, status, previous_id, response));
+        return _v2->log(episode_id, std::move(payload), _multistep_serializer.type, content_type, std::move(actions), status);
+      }
+      default: return protocol_not_supported(status);
       }
     }
 

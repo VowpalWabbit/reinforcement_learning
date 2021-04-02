@@ -1,6 +1,7 @@
 #pragma once
 #include "learning_mode.h"
 #include "logger/logger_facade.h"
+#include "multistep.h"
 #include "model_mgmt.h"
 #include "model_mgmt/data_callback_fn.h"
 #include "model_mgmt/model_downloader.h"
@@ -65,6 +66,7 @@ namespace reinforcement_learning
     live_model_impl& operator=(const live_model_impl&) = delete;
     live_model_impl& operator=(live_model_impl&&) = delete;
 
+    int request_episodic_decision(const char* event_id, const char* previous_id,  const char* context_json, ranking_response& resp, episode_state& episode, api_status* status = nullptr);
   private:
     // Internal implementation methods
     int init_model(api_status* status);

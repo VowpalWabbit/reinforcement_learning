@@ -235,4 +235,9 @@ namespace reinforcement_learning
     INIT_CHECK();
     return _pimpl->refresh_model(status);
   }
+
+  int live_model::request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, ranking_response& resp, episode_state& episode, api_status* status) {
+    INIT_CHECK();
+    return _pimpl->request_episodic_decision(event_id, previous_id, context_json, resp, episode, status);
+  }
 }
