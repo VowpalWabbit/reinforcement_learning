@@ -21,6 +21,7 @@
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/CaEvent_generated.h"
 #include "generated/v2/MultiSlotEvent_generated.h"
+#include "generated/v2/MultiStepEvent_generated.h"
 #include "generated/v2/DedupInfo_generated.h"
 
 namespace reinforcement_learning {
@@ -161,6 +162,25 @@ namespace reinforcement_learning {
       static generic_event::payload_buffer_t report_action_taken() {
         flatbuffers::FlatBufferBuilder fbb;
         auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_NONE, 0, v2::IndexValue_NONE, 0, true);
+        fbb.Finish(fb);
+        return fbb.Release();
+      }
+    };
+
+    struct multistep_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_MultiStep> {
+      static generic_event::payload_buffer_t event(const char* context, const char* previous_id, const ranking_response& response) {
+        flatbuffers::FlatBufferBuilder fbb;
+        std::vector<uint64_t> action_ids;
+        std::vector<float> probabilities;
+        for (auto const& r : response) {
+          action_ids.push_back(r.action_id + 1);
+          probabilities.push_back(r.probability);
+        }
+        std::vector<unsigned char> _context;
+        std::string context_str(context);
+        copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
+
+        auto fb = v2::CreateMultiStepEventDirect(fbb, response.get_event_id(), previous_id, &action_ids, &_context, &probabilities, response.get_model_id());
         fbb.Finish(fb);
         return fbb.Release();
       }

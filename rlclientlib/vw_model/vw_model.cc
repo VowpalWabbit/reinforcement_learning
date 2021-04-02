@@ -79,6 +79,17 @@ namespace reinforcement_learning { namespace model_management {
     }
   }
 
+  int vw_model::choose_rank_ms(
+    uint64_t rnd_seed,
+    const char* features,
+    const episode_history* history,
+    std::vector<int>& action_ids,
+    std::vector<float>& action_pdf,
+    std::string& model_version,
+    api_status* status) {
+    return choose_rank(rnd_seed, features, action_ids, action_pdf, model_version, status);
+  }
+
   int vw_model::choose_continuous_action(const char* features, float& action, float& pdf_value, std::string& model_version, api_status* status)
   {
     try
