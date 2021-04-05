@@ -359,24 +359,22 @@ int example_joiner::process_joined(v_array<example *> &examples) {
   bool multiline = true;
   for (auto &joined_event : _batch_grouped_events[id]) {
     auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
-
-    time_t raw_time;
-    time(&raw_time);
-    struct tm *enqueued_time;
-    // TODO use gmtime_s? windows tests break when accessing enqueue_time internals
-    enqueued_time = gmtime(&raw_time); 
-    joined_event->timestamp()->year() - 1900;
-    joined_event->timestamp()->month() - 1;
-    joined_event->timestamp()->day();
-    joined_event->timestamp()->hour();
-    joined_event->timestamp()->minute();
-    joined_event->timestamp()->second();
-
-    time_t enqueued_time_utc;// = mktime(enqueued_time);
-
     auto metadata = event->meta();
 
     if (metadata->payload_type() == v2::PayloadType_Outcome) {
+      time_t raw_time;
+      time(&raw_time);
+      struct tm *enqueued_time;
+      // TODO use gmtime_s? windows tests break when accessing enqueue_time internals
+      enqueued_time = gmtime(&raw_time);
+      joined_event->timestamp()->year() - 1900;
+      joined_event->timestamp()->month() - 1;
+      joined_event->timestamp()->day();
+      joined_event->timestamp()->hour();
+      joined_event->timestamp()->minute();
+      joined_event->timestamp()->second();
+
+      time_t enqueued_time_utc;// = mktime(enqueued_time);
       process_outcome(*event, *metadata, enqueued_time_utc);
     } else {
       if (metadata->payload_type() == v2::PayloadType_CA) {

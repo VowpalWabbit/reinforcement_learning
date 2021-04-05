@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_empty_msg_header) {
   BOOST_CHECK_EQUAL(
       bp.advance_to_next_payload_type(vw->example_parser->input, payload_type),
       true);
-  BOOST_CHECK_EQUAL(bp.read_reward_msg(vw->example_parser->input), true);
+  BOOST_CHECK_EQUAL(bp.read_checkpoint_msg(vw->example_parser->input), true);
 
   VW::finish(*vw);
 }
@@ -99,12 +99,12 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
     BOOST_REQUIRE_EQUAL(bp.advance_to_next_payload_type(
                             vw->example_parser->input, payload_type),
                         true);
-    BOOST_REQUIRE_EQUAL(payload_type, MSG_TYPE_REWARD_FUNCTION);
-    BOOST_REQUIRE_EQUAL(bp.read_reward_msg(vw->example_parser->input), true);
+    BOOST_REQUIRE_EQUAL(payload_type, MSG_TYPE_CHECKPOINT);
+    BOOST_REQUIRE_EQUAL(bp.read_checkpoint_msg(vw->example_parser->input), true);
     BOOST_REQUIRE_EQUAL(bp.advance_to_next_payload_type(
                             vw->example_parser->input, payload_type),
                         true);
-    BOOST_REQUIRE_NE(payload_type, MSG_TYPE_REWARD_FUNCTION);
+    BOOST_REQUIRE_NE(payload_type, MSG_TYPE_CHECKPOINT);
     BOOST_REQUIRE_NE(payload_type, MSG_TYPE_EOF);
     BOOST_REQUIRE_NE(payload_type, MSG_TYPE_HEADER);
     BOOST_REQUIRE_NE(payload_type, MSG_TYPE_REGULAR);

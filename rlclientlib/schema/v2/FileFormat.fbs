@@ -22,11 +22,11 @@ table FileHeader {
     properties: [KeyValue];
 }
 
-table RewardFunctionInfo {
-    type: RewardFunctionType;
+table CheckpointInfo {
+    reward_function_type: RewardFunctionType;
     default_reward: float;
 }
 
-root_type RewardFunctionInfo;
-root_type JoinedPayload;
 root_type FileHeader;
+root_type CheckpointInfo;
+root_type JoinedPayload;
