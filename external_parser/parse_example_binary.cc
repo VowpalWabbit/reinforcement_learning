@@ -197,13 +197,11 @@ bool binary_parser::read_checkpoint_msg(io_buf *input) {
 
   // TODO: fb verification: what if verification fails, crash or default to
   // something sensible?
-  auto checkpoint_info =
-      flatbuffers::GetRoot<v2::CheckpointInfo>(_payload);
-  v2::RewardFunctionType reward_function_type = checkpoint_info->reward_function_type();
-  float default_reward = checkpoint_info->default_reward();
-
-  _example_joiner.set_reward_function(reward_function_type);
-  _example_joiner.set_default_reward(default_reward);
+  auto checkpoint_info = flatbuffers::GetRoot<v2::CheckpointInfo>(_payload);
+  _example_joiner.set_reward_function(checkpoint_info->reward_function_type());
+  _example_joiner.set_default_reward(checkpoint_info->default_reward());
+  _example_joiner.set_learning_mode_config(checkpoint_info->learning_mode_config());
+  _example_joiner.set_problem_type_config(checkpoint_info->problem_type_config());
 
   return true;
 }

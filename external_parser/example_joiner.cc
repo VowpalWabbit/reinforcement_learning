@@ -5,6 +5,7 @@
 #include "generated/v2/Metadata_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
 #include "zstd.h"
+#include "io/logger.h"
 
 #include <limits.h>
 #include <time.h>
@@ -149,6 +150,14 @@ void example_joiner::set_default_reward(float default_reward) {
   _default_reward = default_reward;
 }
 
+void example_joiner::set_learning_mode_config(const v2::LearningModeType learning_mode) {
+  _learning_mode_config = learning_mode;
+}
+
+void example_joiner::set_problem_type_config(const v2::ProblemType problem_type) {
+  _problem_type_config = problem_type;
+}
+
 void example_joiner::set_reward_function(const v2::RewardFunctionType type) {
   using namespace RewardFunctions;
 
@@ -229,6 +238,20 @@ int example_joiner::process_interaction(const v2::Event &event,
         event.payload()->data(), event.payload()->size(), metadata);
 
     v2::LearningModeType learning_mode = cb->learning_mode();
+
+    if (learning_mode != _learning_mode_config) {
+      VW::io::logger::log_critical(
+        "Online Trainer learning mode [{}] "
+        "and Interaction event learning mode [{}]"
+        "don't match. Skipping interaction from processing."
+        "EventId: [{}]",
+        EnumNameLearningModeType(_learning_mode_config),
+        EnumNameLearningModeType(learning_mode),
+        metadata.id()->c_str()
+      );
+
+      return 0;
+    }
 
     metadata_info meta = {"client_time_utc",
                           metadata.app_id() ? metadata.app_id()->str() : "",
@@ -377,7 +400,21 @@ int example_joiner::process_joined(v_array<example *> &examples) {
       time_t enqueued_time_utc;// = mktime(enqueued_time);
       process_outcome(*event, *metadata, enqueued_time_utc);
     } else {
-      if (metadata->payload_type() == v2::PayloadType_CA) {
+      v2::PayloadType payload_type = metadata->payload_type();
+
+      if (EnumNamePayloadType(payload_type) != EnumNameProblemType(_problem_type_config)) {
+        VW::io::logger::log_critical(
+          "Online Trainer mode [{}] "
+          "and Interaction event type [{}] "
+          "don't match. Skipping interaction from processing."
+          "EventId: [{}]",
+          EnumNameProblemType(_problem_type_config),
+          EnumNamePayloadType(payload_type),
+          metadata->id()->c_str());
+        continue;
+      }
+
+      if (payload_type == v2::PayloadType_CA) {
         multiline = false;
       }
       process_interaction(*event, *metadata, examples);
