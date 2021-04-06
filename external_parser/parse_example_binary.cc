@@ -160,8 +160,7 @@ bool binary_parser::read_header(io_buf *input) {
 
   _total_size_read += _payload_size;
 
-  // std::vector<char> payload = {payload, payload + _payload_size};
-  // TODO:: deserialize header read_header(payload);
+  // TODO:: consume header
 
   return true;
 }
