@@ -88,6 +88,13 @@ def parse_multislot(payload):
     if not evt.BaselineActionsIsNone():
         print(f'\t\tbaselines: {" ".join([str(b) for b in evt.BaselineActionsAsNumpy()])}')
 
+def parse_multistep(payload):
+    evt = MultiStepEvent.GetRootAsMultiStepEvent(payload, 0)
+
+    print(f'\tmultistep: index: {evt.EventId()}\t actions:{evt.ActionIdsLength()} model:{evt.ModelId()}')
+    print(f'\t\tcontext: {fmt_payload(evt.ContextAsNumpy())}')
+
+
 def parse_continuous_action(payload):
     evt = CaEvent.GetRootAsCaEvent(payload, 0)
 
@@ -120,6 +127,8 @@ def dump_event(event_payload, idx, timestamp=None):
         parse_continuous_action(payload)
     elif m.PayloadType() == PayloadType.DedupInfo:
         parse_dedup_info(payload)
+    elif m.PayloadType() == PayloadType.MultiStep:
+        parse_multistep(payload)      
     else:
         print('unknown payload type')
 
@@ -207,7 +216,7 @@ def dump_joined_log_file(file_name, buf):
 
 def dump_file(f):
     buf = bytearray(open(f, 'rb').read())
-
+#    dump_joined_log_file(f, buf)
     if buf[0:4] == b'VWFB':
         dump_joined_log_file(f, buf)
     else:
@@ -243,6 +252,7 @@ from reinforcement_learning.messages.flatbuff.v2.OutcomeEvent import OutcomeEven
 from reinforcement_learning.messages.flatbuff.v2.MultiSlotEvent import MultiSlotEvent
 from reinforcement_learning.messages.flatbuff.v2.CaEvent import CaEvent
 from reinforcement_learning.messages.flatbuff.v2.DedupInfo import DedupInfo
+from reinforcement_learning.messages.flatbuff.v2.MultiStepEvent import MultiStepEvent
 
 from reinforcement_learning.messages.flatbuff.v2.FileHeader import *  
 from reinforcement_learning.messages.flatbuff.v2.JoinedEvent import *  
