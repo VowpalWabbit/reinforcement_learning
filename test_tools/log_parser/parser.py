@@ -216,7 +216,7 @@ def dump_joined_log_file(file_name, buf):
 
 def dump_file(f):
     buf = bytearray(open(f, 'rb').read())
-#    dump_joined_log_file(f, buf)
+
     if buf[0:4] == b'VWFB':
         dump_joined_log_file(f, buf)
     else:
