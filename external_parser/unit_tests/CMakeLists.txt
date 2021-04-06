@@ -2,9 +2,11 @@ find_package(Boost COMPONENTS unit_test_framework filesystem system program_opti
 
 set(TEST_SOURCES
   test_vw_external_parser.cc
+  test_vw_binary_parser.cc
   test_example_joiner.cc
   main.cc
   test_common.cc
+  test_lru_dedup_cache.cc
 )
 
 add_executable(binary_parser_unit_tests ${TEST_SOURCES})
