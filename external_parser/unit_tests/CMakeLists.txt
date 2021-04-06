@@ -6,6 +6,7 @@ set(TEST_SOURCES
   test_example_joiner.cc
   main.cc
   test_common.cc
+  test_lru_dedup_cache.cc
 )
 
 add_executable(binary_parser_unit_tests ${TEST_SOURCES})
