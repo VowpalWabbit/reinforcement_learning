@@ -2,6 +2,7 @@ find_package(Boost COMPONENTS unit_test_framework filesystem system program_opti
 
 set(TEST_SOURCES
   test_vw_external_parser.cc
+  test_vw_binary_parser.cc
   test_example_joiner.cc
   main.cc
   test_common.cc
