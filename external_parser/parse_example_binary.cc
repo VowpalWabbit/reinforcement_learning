@@ -29,7 +29,7 @@ bool read_payload_type(io_buf *input, unsigned int &payload_type) {
       // when we are trying to fetch the next payload and we find out that there
       // is nothing left to read the file doesn't have to necessarily contain an
       // EOF
-      VW::io::logger::errlog_info("Reached end of file");
+      VW::io::logger::log_info("Reached end of file");
       payload_type = MSG_TYPE_EOF;
       return true;
     }
@@ -131,7 +131,7 @@ bool binary_parser::read_header(io_buf *input) {
   unsigned int payload_type;
   _payload = nullptr;
   if (!read_payload_type(input, payload_type)) {
-    VW::io::logger::errlog_critical(
+    VW::io::logger::log_critical(
         "Failed to read payload while reading header message"
         ", after having read [{}] "
         "bytes from the file",
@@ -267,7 +267,7 @@ bool binary_parser::advance_to_next_payload_type(io_buf *input,
   _total_size_read += padding;
 
   if (!read_payload_type(input, payload_type)) {
-    VW::io::logger::errlog_warn(
+    VW::io::logger::log_warn(
         "Failed to read next payload type from file, after having read "
         "[{}] bytes from the file",
         _total_size_read);
