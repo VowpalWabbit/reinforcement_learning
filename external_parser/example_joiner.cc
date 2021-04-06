@@ -2,8 +2,8 @@
 
 #include "generated/v2/DedupInfo_generated.h"
 #include "generated/v2/Event_generated.h"
-#include "generated/v2/OutcomeEvent_generated.h"
 #include "generated/v2/Metadata_generated.h"
+#include "generated/v2/OutcomeEvent_generated.h"
 
 #include <limits.h>
 #include <time.h>
@@ -244,8 +244,7 @@ int example_joiner::process_outcome(const v2::Event &event,
   outcome_event o_event;
   o_event.metadata = {"client_time_utc",
                       metadata.app_id() ? metadata.app_id()->str() : "",
-                      metadata.payload_type(),
-                      metadata.pass_probability(),
+                      metadata.payload_type(), metadata.pass_probability(),
                       metadata.encoding()};
   o_event.enqueued_time_utc = enqueued_time_utc;
 
@@ -345,7 +344,7 @@ int example_joiner::process_joined(v_array<example *> &examples) {
     auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
 
     time_t raw_time;
-    struct tm * enqueued_time;
+    struct tm *enqueued_time;
     enqueued_time = gmtime(&raw_time);
     enqueued_time->tm_year = joined_event->timestamp()->year() - 1900;
     enqueued_time->tm_mon = joined_event->timestamp()->month() - 1;
