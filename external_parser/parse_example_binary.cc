@@ -25,6 +25,14 @@ bool read_payload_type(io_buf *input, unsigned int &payload_type) {
   auto len = input->buf_read(line, sizeof(unsigned int));
 
   if (len < sizeof(unsigned int) || line == nullptr) {
+    if (len == 0) {
+      // when we are trying to fetch the next payload and we find out that there
+      // is nothing left to read the file doesn't have to necessarily contain an
+      // EOF
+      VW::io::logger::errlog_info("Reached end of file");
+      payload_type = MSG_TYPE_EOF;
+      return true;
+    }
     return false;
   }
 
@@ -79,7 +87,7 @@ bool binary_parser::read_magic(io_buf *input) {
   const uint32_t buffer_length = 4 * sizeof(char);
   // read the 4 magic bytes
   if (!read_payload(input, _payload, buffer_length)) {
-    VW::io::logger::errlog_critical(
+    VW::io::logger::log_critical(
         "Failed to read payload while reading magic, after having read [{}] "
         "bytes from the file",
         _total_size_read);
@@ -91,7 +99,7 @@ bool binary_parser::read_magic(io_buf *input) {
   std::vector<char> buffer = {_payload, _payload + buffer_length};
   const std::vector<char> magic = {'V', 'W', 'F', 'B'};
   if (buffer != magic) {
-    VW::io::logger::errlog_critical("Magic bytes in file are incorrect");
+    VW::io::logger::log_critical("Magic bytes in file are incorrect");
     return false;
   }
   return true;
@@ -101,17 +109,17 @@ bool binary_parser::read_version(io_buf *input) {
   _payload = nullptr;
   const uint32_t buffer_length = 4 * sizeof(char);
   if (!read_payload(input, _payload, buffer_length)) {
-    VW::io::logger::errlog_critical("Failed to read payload while reading file "
-                                    "version, after having read [{}] "
-                                    "bytes from the file",
-                                    _total_size_read);
+    VW::io::logger::log_critical("Failed to read payload while reading file "
+                                 "version, after having read [{}] "
+                                 "bytes from the file",
+                                 _total_size_read);
     return false;
   }
 
   _total_size_read += buffer_length;
 
   if (*_payload != BINARY_PARSER_VERSION) {
-    VW::io::logger::errlog_critical(
+    VW::io::logger::log_critical(
         "File version [{}] does not match the parser version [{}]",
         static_cast<size_t>(*_payload), BINARY_PARSER_VERSION);
     return false;
@@ -134,13 +142,13 @@ bool binary_parser::read_header(io_buf *input) {
   _total_size_read += sizeof(payload_type);
 
   if (payload_type != MSG_TYPE_HEADER) {
-    VW::io::logger::errlog_critical("MSG_TYPE_HEADER missing from file");
+    VW::io::logger::log_critical("MSG_TYPE_HEADER missing from file");
     return false;
   }
 
   // read header size
   if (!read_payload_size(input, _payload_size)) {
-    VW::io::logger::errlog_critical(
+    VW::io::logger::log_critical(
         "Failed to read header message payload size, after having read "
         "[{}] bytes from the file",
         _total_size_read);
@@ -151,7 +159,7 @@ bool binary_parser::read_header(io_buf *input) {
 
   // read the payload
   if (!read_payload(input, _payload, _payload_size)) {
-    VW::io::logger::errlog_critical(
+    VW::io::logger::log_critical(
         "Failed to read header message payload of size [{}], after having read "
         "[{}] bytes from the file",
         _payload_size, _total_size_read);
@@ -168,7 +176,7 @@ bool binary_parser::read_header(io_buf *input) {
 bool binary_parser::read_reward_msg(io_buf *input) {
   _payload = nullptr;
   if (!read_payload_size(input, _payload_size)) {
-    VW::io::logger::errlog_critical(
+    VW::io::logger::log_critical(
         "Failed to read reward message payload size, after having read "
         "[{}] bytes from the file",
         _total_size_read);
@@ -178,7 +186,7 @@ bool binary_parser::read_reward_msg(io_buf *input) {
   _total_size_read += sizeof(_payload_size);
 
   if (!read_payload(input, _payload, _payload_size)) {
-    VW::io::logger::errlog_critical(
+    VW::io::logger::log_critical(
         "Failed to read reward message payload of size [{}], after having read "
         "[{}] bytes from the file",
         _payload_size, _total_size_read);
@@ -204,7 +212,7 @@ bool binary_parser::read_regular_msg(io_buf *input,
                                      v_array<example *> &examples) {
   _payload = nullptr;
   if (!read_payload_size(input, _payload_size)) {
-    VW::io::logger::errlog_critical(
+    VW::io::logger::log_critical(
         "Failed to read regular message payload size, after having read "
         "[{}] bytes from the file",
         _total_size_read);
@@ -214,10 +222,10 @@ bool binary_parser::read_regular_msg(io_buf *input,
   _total_size_read += sizeof(_payload_size);
 
   if (!read_payload(input, _payload, _payload_size)) {
-    VW::io::logger::errlog_critical("Failed to read regular message payload of "
-                                    "size [{}], after having read "
-                                    "[{}] bytes from the file",
-                                    _payload_size, _total_size_read);
+    VW::io::logger::log_critical("Failed to read regular message payload of "
+                                 "size [{}], after having read "
+                                 "[{}] bytes from the file",
+                                 _payload_size, _total_size_read);
     return false;
   }
 
@@ -228,7 +236,7 @@ bool binary_parser::read_regular_msg(io_buf *input,
       flatbuffers::Verifier(reinterpret_cast<const uint8_t *>(_payload),
                             static_cast<size_t>(_payload_size));
   if (!joined_payload->Verify(verifier)) {
-    VW::io::logger::errlog_error(
+    VW::io::logger::log_error(
         "JoinedPayload of size [{}] verification failed after having read [{}] "
         "bytes from the file, skipping JoinedPayload",
         _payload_size, _total_size_read);
@@ -249,7 +257,7 @@ bool binary_parser::advance_to_next_payload_type(io_buf *input,
   // read potential excess padding after last payload read
   uint32_t padding;
   if (!read_padding(input, _payload_size, padding)) {
-    VW::io::logger::errlog_critical(
+    VW::io::logger::log_critical(
         "Failed to read padding of size [{}], after having read "
         "[{}] bytes from the file",
         padding, _total_size_read);
@@ -259,7 +267,7 @@ bool binary_parser::advance_to_next_payload_type(io_buf *input,
   _total_size_read += padding;
 
   if (!read_payload_type(input, payload_type)) {
-    VW::io::logger::errlog_critical(
+    VW::io::logger::errlog_warn(
         "Failed to read next payload type from file, after having read "
         "[{}] bytes from the file",
         _total_size_read);
@@ -322,7 +330,7 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
     }
   }
   if (payload_type != MSG_TYPE_EOF) {
-    VW::io::logger::errlog_critical(
+    VW::io::logger::log_critical(
         "Payload type not recognized [{}], after having read [{}] "
         "bytes from the file",
         payload_type, _total_size_read);
