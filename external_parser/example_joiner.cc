@@ -279,7 +279,6 @@ int example_joiner::process_outcome(const v2::Event &event,
                       metadata.encoding()};
   o_event.enqueued_time_utc = enqueued_time_utc;
 
-  flatbuffers::DetachedBuffer detached_buffer;
   auto outcome = process_compression<v2::OutcomeEvent>(
       event.payload()->data(), event.payload()->size(), metadata);
 
