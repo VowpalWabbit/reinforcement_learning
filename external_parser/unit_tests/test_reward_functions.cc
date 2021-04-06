@@ -8,7 +8,7 @@ namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 float get_float_reward(std::string int_file_name, std::string obs_file_name, v2::RewardFunctionType type) {
   auto vw = VW::initialize("--quiet --binary_parser --cb_explore_adf", nullptr,
                            false, nullptr, nullptr);
-    v_array<example *> examples;
+    v_array<example *> examples = v_init<example*>();
     example_joiner joiner(vw);
     joiner.set_reward_function(type);
 
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_SUITE(reward_functions_with_cb_format_and_float_reward)
       v2::RewardFunctionType_Average
     );
 
-    BOOST_CHECK_EQUAL(reward, (3 + 4 + 5) / 3);
+    BOOST_CHECK_EQUAL(reward, (3.0 + 4 + 5) / 3);
   }
 
   BOOST_AUTO_TEST_CASE(min) {

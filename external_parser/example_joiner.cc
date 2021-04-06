@@ -361,8 +361,10 @@ int example_joiner::process_joined(v_array<example *> &examples) {
     auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
 
     time_t raw_time;
+    time(&raw_time);
     struct tm *enqueued_time;
     enqueued_time = gmtime(&raw_time);
+
     enqueued_time->tm_year = joined_event->timestamp()->year() - 1900;
     enqueued_time->tm_mon = joined_event->timestamp()->month() - 1;
     enqueued_time->tm_mday = joined_event->timestamp()->day();
