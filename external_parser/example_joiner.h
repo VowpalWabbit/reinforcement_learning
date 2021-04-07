@@ -44,6 +44,8 @@ struct joined_event {
   metadata_info interaction_metadata;
   DecisionServiceInteraction interaction_data;
   std::vector<outcome_event> outcome_events;
+  //Default Baseline Action for CB is 1 (rl client recommended actions are 1 indexed in the CB case)
+  static const int baseline_action = 1;
 };
 
 using RewardCalcType = float (*)(const joined_event &);
@@ -77,6 +79,7 @@ public:
   // true if there are still event-groups to be processed from a deserialized
   // batch
   bool processing_batch();
+  float get_reward();
 
 private:
   int process_dedup(const v2::Event &event, const v2::Metadata &metadata);
@@ -114,5 +117,6 @@ private:
   flatbuffers::DetachedBuffer _detached_buffer;
 
   float _default_reward = 0.f;
+  float _reward = _default_reward;
   RewardCalcType _reward_calculation;
 };

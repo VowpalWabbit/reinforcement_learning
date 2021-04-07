@@ -361,8 +361,10 @@ int example_joiner::process_joined(v_array<example *> &examples) {
     auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
 
     time_t raw_time;
+    time(&raw_time);
     struct tm *enqueued_time;
     enqueued_time = gmtime(&raw_time);
+
     enqueued_time->tm_year = joined_event->timestamp()->year() - 1900;
     enqueued_time->tm_mon = joined_event->timestamp()->month() - 1;
     enqueued_time->tm_mday = joined_event->timestamp()->day();
@@ -371,7 +373,6 @@ int example_joiner::process_joined(v_array<example *> &examples) {
     enqueued_time->tm_sec = joined_event->timestamp()->second();
 
     time_t enqueued_time_utc = mktime(enqueued_time);
-
     auto metadata = event->meta();
 
     if (metadata->payload_type() == v2::PayloadType_Outcome) {
@@ -383,18 +384,20 @@ int example_joiner::process_joined(v_array<example *> &examples) {
       process_interaction(*event, *metadata, examples);
     }
   }
-  // call logic that creates the reward
-  float reward = _default_reward;
+
   auto &je = _batch_grouped_examples[id];
+
   if (je.outcome_events.size() > 0) {
     if (je.interaction_metadata.payload_type == v2::PayloadType_CB &&
         je.interaction_metadata.learning_mode ==
             v2::LearningModeType_Apprentice) {
-      if (je.interaction_data.actions[0] == 1) {
-        reward = _reward_calculation(je);
+      if (je.interaction_data.actions[0] == je.baseline_action) {
+        // TODO: default apprenticeReward should come from config
+        // setting to default reward matches current behavior for now
+        _reward = _reward_calculation(je);
       }
     } else {
-      reward = _reward_calculation(je);
+      _reward = _reward_calculation(je);
     }
   }
 
@@ -417,3 +420,4 @@ int example_joiner::process_joined(v_array<example *> &examples) {
 }
 
 bool example_joiner::processing_batch() { return !_batch_event_order.empty(); }
+float example_joiner::get_reward() { return _reward; }

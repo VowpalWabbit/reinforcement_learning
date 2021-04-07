@@ -22,6 +22,6 @@ std::vector<char> read_file(std::string file_name);
 
 std::string get_test_files_location();
 
-const v2::JoinedEvent *
-wrap_into_joined_event(std::vector<char> &buffer,
-                       flatbuffers::DetachedBuffer &detached_buffer);
+std::vector<const v2::JoinedEvent *>
+wrap_into_joined_events(std::vector<char> &buffer,
+                        std::vector<flatbuffers::DetachedBuffer> &detached_buffers);

@@ -15,13 +15,13 @@ from reinforcement_learning.messages.flatbuff.v2.MultiSlotEvent import MultiSlot
 from reinforcement_learning.messages.flatbuff.v2.CaEvent import CaEvent
 from reinforcement_learning.messages.flatbuff.v2.DedupInfo import DedupInfo
 
-from reinforcement_learning.messages.flatbuff.v2.KeyValue import *  
-from reinforcement_learning.messages.flatbuff.v2.TimeStamp import *  
-from reinforcement_learning.messages.flatbuff.v2.FileHeader import *  
-from reinforcement_learning.messages.flatbuff.v2.JoinedEvent import *  
-from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *  
-from reinforcement_learning.messages.flatbuff.v2.Metadata import *  
-from reinforcement_learning.messages.flatbuff.v2.Event import *  
+from reinforcement_learning.messages.flatbuff.v2.KeyValue import *
+from reinforcement_learning.messages.flatbuff.v2.TimeStamp import *
+from reinforcement_learning.messages.flatbuff.v2.FileHeader import *
+from reinforcement_learning.messages.flatbuff.v2.JoinedEvent import *
+from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *
+from reinforcement_learning.messages.flatbuff.v2.Metadata import *
+from reinforcement_learning.messages.flatbuff.v2.Event import *
 from reinforcement_learning.messages.flatbuff.v2.RewardFunctionInfo import *
 from reinforcement_learning.messages.flatbuff.v2.RewardFunctionType import *
 
@@ -32,6 +32,7 @@ import json
 import struct
 from datetime import datetime
 import numpy as np
+import argparse
 
 """
 TODO:
@@ -39,10 +40,29 @@ Incremental join instead of loading all interactions at once
 Respect EUD.
 """
 
+arg_parser = argparse.ArgumentParser()
+
+arg_parser.add_argument(
+    '--reward_function',
+    type=int,
+    choices=[value for name, value in RewardFunctionType.__dict__.items()],
+    help = "reward function type: 0-earliest, 1-avg, 2-median, 3-sum, 4-min, 5-max"
+)
+arg_parser.add_argument('--default_reward', type=float, help="default reward")
+args = arg_parser.parse_args()
+
+reward_function = RewardFunctionType.Earliest
+default_reward = 0
+if args.reward_function:
+    reward_function = args.reward_function
+
+if args.default_reward:
+    default_reward = args.default_reward
+
 class PreambleStreamReader:
     def __init__(self, file_name):
         self.file = open(file_name, 'rb')
-    
+
     def parse_preamble(self):
         buf = self.file.read(8)
         if buf == b'':
@@ -78,14 +98,14 @@ def mk_bytes_vector(builder, arr):
     return builder.CreateNumpyVector(np.array(list(arr), dtype='b'))
 
 MSG_TYPE_HEADER = 0x55555555
-REWARD_FUNCTION = 0x11111111
+MSG_TYPE_REWARD_FUNCTION = 0x11111111
 MSG_TYPE_REGULAR = 0xFFFFFFFF
 MSG_TYPE_EOF = 0xAAAAAAAA
 
 class BinLogWriter:
     def __init__(self, file_name):
         self.file = open(file_name, 'wb')
-    
+
     def write_message(self, kind, payload):
         padding_bytes = len(payload) % 8
         print(f'msg {kind:X} size: {len(payload)} padding {padding_bytes}')
@@ -156,7 +176,7 @@ class BinLogWriter:
         RewardFunctionInfoAddDefaultReward(builder, default_reward)
         reward_off = RewardFunctionInfoEnd(builder)
         builder.Finish(reward_off)
-        self.write_message(REWARD_FUNCTION, builder.Output())
+        self.write_message(MSG_TYPE_REWARD_FUNCTION, builder.Output())
 
     def write_eof(self):
         self.write_message(MSG_TYPE_EOF, b'')
@@ -194,7 +214,7 @@ print(f'found {obs_count} observations with {obs_ids} ids')
 
 bin_f = BinLogWriter(result_file)
 bin_f.write_header({ 'eud': '-1', 'joiner': 'joiner.py'})
-bin_f.write_reward_function(RewardFunctionType.Average, 0.3)
+bin_f.write_reward_function(reward_function, default_reward)
 
 for msg in interactions_file.messages():
     batch = EventBatch.GetRootAsEventBatch(msg, 0)
