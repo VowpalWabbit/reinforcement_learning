@@ -19,7 +19,7 @@ python3 ../../unit_test/extensions/onnx/mnist_data/data_generator.py
 ```sh
 mkdir build
 cd build
-cmake ..
+cmake .. -Drlclientlib_BUILD_ONNXRUNTIME_EXTENSION=On
 make onnx_example -j $(nproc)
 ```
 
