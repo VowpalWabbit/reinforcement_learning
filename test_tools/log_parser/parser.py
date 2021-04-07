@@ -88,6 +88,13 @@ def parse_multislot(payload):
     if not evt.BaselineActionsIsNone():
         print(f'\t\tbaselines: {" ".join([str(b) for b in evt.BaselineActionsAsNumpy()])}')
 
+def parse_multistep(payload):
+    evt = MultiStepEvent.GetRootAsMultiStepEvent(payload, 0)
+
+    print(f'\tmultistep: index: {evt.EventId()}\t actions:{evt.ActionIdsLength()} model:{evt.ModelId()}')
+    print(f'\t\tcontext: {fmt_payload(evt.ContextAsNumpy())}')
+
+
 def parse_continuous_action(payload):
     evt = CaEvent.GetRootAsCaEvent(payload, 0)
 
@@ -120,6 +127,8 @@ def dump_event(event_payload, idx, timestamp=None):
         parse_continuous_action(payload)
     elif m.PayloadType() == PayloadType.DedupInfo:
         parse_dedup_info(payload)
+    elif m.PayloadType() == PayloadType.MultiStep:
+        parse_multistep(payload)      
     else:
         print('unknown payload type')
 
@@ -141,6 +150,7 @@ def dump_preamble_file(file_name, buf):
     dump_event_batch(buf[PREAMBLE_LENGTH : PREAMBLE_LENGTH + preamble["msg_size"]])
 
 MSG_TYPE_HEADER = 0x55555555
+MSG_TYPE_REWARD_FUNCTION = 0x11111111
 MSG_TYPE_REGULAR = 0xFFFFFFFF
 MSG_TYPE_EOF = 0xAAAAAAAA
 
@@ -186,6 +196,12 @@ class JoinedLogStreamReader:
             p = header.Properties(i)
             self.headers[p.Key().decode('utf-8')] = p.Value().decode('utf-8')
 
+    def reward_function_info(self):
+        msg = self.read_message()
+        if msg[0] != MSG_TYPE_REWARD_FUNCTION:
+            raise f'Missing reward function, found message type of {msg[0]} instead'
+        return RewardFunctionInfo.GetRootAsRewardFunctionInfo(msg[1], 0)
+
     def messages(self):
         while True:
             msg = self.read_message()
@@ -198,6 +214,10 @@ def dump_joined_log_file(file_name, buf):
     print(f'parsing joined log:{file_name} header:')
     for k in reader.headers:
         print(f'\t{k} = {reader.headers[k]}')
+
+    reward_function_info = reader.reward_function_info()
+    print(f'reward function type is: {reward_function_info.Type()}')
+    print(f'default reward is: {reward_function_info.DefaultReward()}')
 
     for msg in reader.messages():
         print(f'joined-batch events: {msg.EventsLength()}')
@@ -243,10 +263,11 @@ from reinforcement_learning.messages.flatbuff.v2.OutcomeEvent import OutcomeEven
 from reinforcement_learning.messages.flatbuff.v2.MultiSlotEvent import MultiSlotEvent
 from reinforcement_learning.messages.flatbuff.v2.CaEvent import CaEvent
 from reinforcement_learning.messages.flatbuff.v2.DedupInfo import DedupInfo
+from reinforcement_learning.messages.flatbuff.v2.MultiStepEvent import MultiStepEvent
 
-from reinforcement_learning.messages.flatbuff.v2.FileHeader import *  
-from reinforcement_learning.messages.flatbuff.v2.JoinedEvent import *  
-from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *  
+from reinforcement_learning.messages.flatbuff.v2.FileHeader import *
+from reinforcement_learning.messages.flatbuff.v2.JoinedEvent import *
+from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *
 from reinforcement_learning.messages.flatbuff.v2.RewardFunctionInfo import *
 
 for input_file in sys.argv[1:]:

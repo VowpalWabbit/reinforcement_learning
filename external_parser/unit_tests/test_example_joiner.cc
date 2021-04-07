@@ -9,28 +9,33 @@ BOOST_AUTO_TEST_CASE(example_joiner_test) {
                            false, nullptr, nullptr);
 
   example_joiner joiner(vw);
+  v_array<example *> examples;
 
   std::string input_files = get_test_files_location();
   auto interaction_buffer = read_file(input_files + "/cb_v2.fb");
   // need to keep the fb buffer around in order to process the event
-  flatbuffers::DetachedBuffer int_detached_buffer;
-  auto joined_cb_event =
-      wrap_into_joined_event(interaction_buffer, int_detached_buffer);
+  std::vector<flatbuffers::DetachedBuffer> int_detached_buffers;
 
-  joiner.process_event(*joined_cb_event);
+  auto joined_cb_events =
+      wrap_into_joined_events(interaction_buffer, int_detached_buffers);
+
+  for (auto &je : joined_cb_events) {
+    joiner.process_event(*je);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
 
   // need to keep the fb buffer around in order to process the event
-  flatbuffers::DetachedBuffer obs_detached_buffer;
-  auto observation_buffer = read_file(input_files + "/f-reward_v2.fb");
-  joined_cb_event =
-      wrap_into_joined_event(observation_buffer, obs_detached_buffer);
+  std::vector<flatbuffers::DetachedBuffer> obs_detached_buffers;
 
-  joiner.process_event(*joined_cb_event);
+  auto observation_buffer = read_file(input_files + "/f-reward_v2.fb");
+  joined_cb_events =
+      wrap_into_joined_events(observation_buffer, obs_detached_buffers);
+
+  for (auto &je : joined_cb_events) {
+    joiner.process_event(*je);
+  }
 
   BOOST_CHECK_EQUAL(joiner.processing_batch(), true);
-
-  v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
 
   joiner.process_joined(examples);
 

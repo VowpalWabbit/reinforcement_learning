@@ -6,8 +6,10 @@
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
+#include "lru_dedup_cache.h"
 #include "v_array.h"
 
+#include <list>
 #include <queue>
 #include <unordered_map>
 // VW headers
@@ -42,6 +44,8 @@ struct joined_event {
   metadata_info interaction_metadata;
   DecisionServiceInteraction interaction_data;
   std::vector<outcome_event> outcome_events;
+  //Default Baseline Action for CB is 1 (rl client recommended actions are 1 indexed in the CB case)
+  static const int baseline_action = 1;
 };
 
 using RewardCalcType = float (*)(const joined_event &);
@@ -75,6 +79,7 @@ public:
   // true if there are still event-groups to be processed from a deserialized
   // batch
   bool processing_batch();
+  float get_reward();
 
 private:
   int process_dedup(const v2::Event &event, const v2::Metadata &metadata);
@@ -82,18 +87,22 @@ private:
   int process_interaction(const v2::Event &event, const v2::Metadata &metadata,
                           v_array<example *> &examples);
 
-  int process_outcome(const v2::Event &event, const v2::Metadata &metadata, const time_t &enqueued_time_utc);
+  int process_outcome(const v2::Event &event, const v2::Metadata &metadata,
+                      const time_t &enqueued_time_utc);
 
-  static example &get_or_create_example_f(void *vw);
+  template <typename T>
+  const T *process_compression(const uint8_t *data, size_t size,
+                               const v2::Metadata &metadata);
 
   example *get_or_create_example();
 
-  void clean_label_and_prediction(example *ex);
+  static example &get_or_create_example_f(void *vw);
 
-  // from dictionary id to example object
-  // right now holding one dedup dictionary at a time, could be exented to a map
-  // of maps holding more than one dedup dictionaries at a time
-  std::unordered_map<uint64_t, example *> _dedup_examples;
+  void return_example(example *ex);
+
+  static void return_example_f(void *vw, example *ex);
+
+  lru_dedup_cache _dedup_cache;
   // from event id to all the information required to create a complete
   // (multi)example
   std::unordered_map<std::string, joined_event> _batch_grouped_examples;
@@ -105,7 +114,9 @@ private:
   std::vector<example *> _example_pool;
 
   vw *_vw;
+  flatbuffers::DetachedBuffer _detached_buffer;
 
   float _default_reward = 0.f;
+  float _reward = _default_reward;
   RewardCalcType _reward_calculation;
 };
