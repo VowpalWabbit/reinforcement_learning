@@ -363,16 +363,17 @@ int example_joiner::process_joined(v_array<example *> &examples) {
     time_t raw_time;
     time(&raw_time);
     struct tm *enqueued_time;
-    enqueued_time = gmtime(&raw_time);
+    // TODO use gmtime_s? windows tests break when accessing enqueue_time internals
+    enqueued_time = gmtime(&raw_time); 
+    joined_event->timestamp()->year() - 1900;
+    joined_event->timestamp()->month() - 1;
+    joined_event->timestamp()->day();
+    joined_event->timestamp()->hour();
+    joined_event->timestamp()->minute();
+    joined_event->timestamp()->second();
 
-    enqueued_time->tm_year = joined_event->timestamp()->year() - 1900;
-    enqueued_time->tm_mon = joined_event->timestamp()->month() - 1;
-    enqueued_time->tm_mday = joined_event->timestamp()->day();
-    enqueued_time->tm_hour = joined_event->timestamp()->hour();
-    enqueued_time->tm_min = joined_event->timestamp()->minute();
-    enqueued_time->tm_sec = joined_event->timestamp()->second();
+    time_t enqueued_time_utc;// = mktime(enqueued_time);
 
-    time_t enqueued_time_utc = mktime(enqueued_time);
     auto metadata = event->meta();
 
     if (metadata->payload_type() == v2::PayloadType_Outcome) {

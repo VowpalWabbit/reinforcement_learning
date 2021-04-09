@@ -44,6 +44,7 @@ IF NOT DEFINED VCPKG_INSTALLATION_ROOT (
 
 SET "vcpkgPath=%VCPKG_INSTALLATION_ROOT%\vcpkg.exe"
 SET "VcpkgIntegration=%VCPKG_INSTALLATION_ROOT%\scripts\buildsystems\msbuild\vcpkg.targets"
+SET "VcpkgCmake=%VCPKG_INSTALLATION_ROOT%\scripts\buildsystems\vcpkg.cmake"
 SET "flatcPath=%VCPKG_INSTALLATION_ROOT%\installed\x64-windows\tools\flatbuffers\flatc.exe"
 
 REM The correct way to integrate this is to use msbuild targets and contribute them back to flatbuff, 
@@ -60,6 +61,11 @@ IF NOT DEFINED flatcPath (
 REM Repo-specific paths
 IF NOT DEFINED rlRoot (
     SET rlRoot=%~dp0..
+)
+
+REM Repo-specific paths
+IF NOT DEFINED vwBinaryParserRoot (
+    SET wBinaryParserRoot=%rlRoot%\external_parser
 )
 
 IF NOT DEFINED SkipAzureFactories (

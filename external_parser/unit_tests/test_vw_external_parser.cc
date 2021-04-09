@@ -14,6 +14,7 @@ BOOST_AUTO_TEST_CASE(cb_simple) {
 
   v_array<example *> examples;
   examples.push_back(&VW::get_unused_example(vw));
+  
   set_buffer_as_vw_input(buffer, vw);
 
   bool read_payload = false;
