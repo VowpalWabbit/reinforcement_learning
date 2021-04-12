@@ -32,16 +32,16 @@ steps:
   env:
     nugetPath: $(Build.SourcesDirectory)\.nuget\nuget.exe
   failOnStderr: true
-- script: CALL .scripts/build.cmd
-  displayName: 'Build rl.sln'
-  env:
-    nugetPath: $(Build.SourcesDirectory)\.nuget\nuget.exe
-  failOnStderr: true
-- script: CALL .scripts/test.cmd
-  displayName: 'Run tests'
-  env:
-    nugetPath: $(Build.SourcesDirectory)\.nuget\nuget.exe
-  failOnStderr: false
+# - script: CALL .scripts/build.cmd
+#   displayName: 'Build rl.sln'
+#   env:
+#     nugetPath: $(Build.SourcesDirectory)\.nuget\nuget.exe
+#   failOnStderr: true
+# - script: CALL .scripts/test.cmd
+#   displayName: 'Run tests'
+#   env:
+#     nugetPath: $(Build.SourcesDirectory)\.nuget\nuget.exe
+#   failOnStderr: false
 - script: CALL .scripts/build-vw-binary-parser.cmd
   displayName: 'Build vw_binary_parser'
   env:

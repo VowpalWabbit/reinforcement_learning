@@ -65,7 +65,7 @@ IF NOT DEFINED rlRoot (
 
 REM Repo-specific paths
 IF NOT DEFINED vwBinaryParserRoot (
-    SET "wBinaryParserRoot=%rlRoot%\external_parser"
+    SET vwBinaryParserRoot=%~dp0..\external_parser
 )
 
 ECHO init called set rlRoot to: %rlRoot% set vwBinaryParserRoot to: %vwBinaryParserRoot%
