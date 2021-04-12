@@ -65,7 +65,7 @@ IF NOT DEFINED rlRoot (
 
 REM Repo-specific paths
 IF NOT DEFINED vwBinaryParserRoot (
-    SET wBinaryParserRoot=%rlRoot%\external_parser
+    SET "wBinaryParserRoot=%rlRoot%\external_parser"
 )
 
 IF NOT DEFINED SkipAzureFactories (
