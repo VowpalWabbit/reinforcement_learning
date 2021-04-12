@@ -68,8 +68,6 @@ IF NOT DEFINED vwBinaryParserRoot (
     SET vwBinaryParserRoot=%~dp0..\external_parser
 )
 
-ECHO init called set rlRoot to: %rlRoot% set vwBinaryParserRoot to: %vwBinaryParserRoot%
-
 IF NOT DEFINED SkipAzureFactories (
     SET "SkipAzureFactories=false"
 )
