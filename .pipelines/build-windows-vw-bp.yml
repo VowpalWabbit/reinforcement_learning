@@ -35,4 +35,4 @@ steps:
   failOnStderr: true
 - script: CALL .scripts/test-vw-bp.cmd
   displayName: 'Run tests for vw binary parser'
-  failOnStderr: true
+  failOnStderr: false
