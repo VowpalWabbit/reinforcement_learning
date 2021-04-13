@@ -12,6 +12,12 @@ include(ProcessorCount)
 ProcessorCount(NumProcessors)
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/nprocs.txt ${NumProcessors})
 
+option(STATIC_LINK_BINARY_PARSER "Link VW binary parser executable statically. Off by default." OFF)
+
+if(WIN32 AND (STATIC_LINK_BINARY_PARSER))
+  message(FATAL_ERROR "Unsupported option enabled on Windows build")
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/Modules/")
 find_package(flatbuffers REQUIRED)
 
@@ -28,14 +34,18 @@ set(RL_FLAT_BUFFER_FILES
 
 # set vw cmake flags
 set(BUILD_EXTERNAL_PARSER "Build external parser" ON)
-set(BUILD_FLATBUFFERS OFF CACHE BOOL ")
-set(WARNING_AS_ERROR OFF CACHE BOOL ")
-set(DO_NOT_BUILD_VW_C_WRAPPER OFF CACHE BOOL ")
-set(BUILD_JAVA OFF CACHE BOOL ")
-set(BUILD_PYTHON OFF CACHE BOOL ")
-set(BUILD_EXPERIMENTAL_BINDING OFF CACHE BOOL ")
+set(BUILD_FLATBUFFERS OFF CACHE BOOL "")
+set(WARNING_AS_ERROR OFF CACHE BOOL "")
+set(DO_NOT_BUILD_VW_C_WRAPPER OFF CACHE BOOL "")
+set(BUILD_JAVA OFF CACHE BOOL "")
+set(BUILD_PYTHON OFF CACHE BOOL "")
+set(BUILD_EXPERIMENTAL_BINDING OFF CACHE BOOL "")
 set(WARNINGS OFF CACHE BOOL "")
 set(BUILD_TESTS OFF CACHE BOOL "")
+
+if(STATIC_LINK_BINARY_PARSER)
+  set(STATIC_LINK_VW ON CACHE BOOL "" FORCE)
+endif()
 
 build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgen "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v2/" "" "")
 

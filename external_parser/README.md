@@ -4,6 +4,8 @@
 
 ### Build Linux
 
+**Note**: To statically link set `-DSTATIC_LINK_BINARY_PARSER=ON` during `cmake`
+
 from `external_parser`:
 
 - mkdir build
@@ -23,6 +25,8 @@ vw executable located at: `external_parser/build/vw_binary_parser/vowpalwabbit/v
 cmake build for windows
 
 ### Deps:
+
+**Note**: to link statically then replace `x64-windows` with `x64-windows-static-md` during vcpkg installation and in the cmake `-DVCPKG_TARGET_TRIPLET`
 
 **Note**: vcpkg doesn't play well with nugets in visual studio so if you are trying to build something else in visual studio that uses the below via nugets you might get linking errors
 
