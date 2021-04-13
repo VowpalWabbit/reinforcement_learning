@@ -1,10 +1,6 @@
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost COMPONENTS unit_test_framework filesystem system program_options thread REQUIRED)
 
-if(STATIC_LINK_BINARY_PARSER)
-  set(unix_static_flag -static)
-endif()
-
 set(TEST_SOURCES
   test_vw_external_parser.cc
   test_vw_binary_parser.cc
