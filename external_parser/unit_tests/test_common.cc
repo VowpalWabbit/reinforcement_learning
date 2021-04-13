@@ -64,7 +64,7 @@ wrap_into_joined_events(std::vector<char> &buffer,
 
   std::vector<const v2::JoinedEvent *> event_list {};
 
-  int day = 1;
+  int day = 30;
   v2::TimeStamp ts(2020, 3, day, 10, 20, 30, 0);
 
   for (size_t i = 0; i < event_batch->events()->size(); i++) {
@@ -72,7 +72,7 @@ wrap_into_joined_events(std::vector<char> &buffer,
     auto vec = fbb.CreateVector(payload->data(), payload->size());
 
     if (i < 30) {
-      ts.mutate_day(day + i);
+      ts.mutate_day(day - i);
     }
 
     auto fb = v2::CreateJoinedEvent(fbb, vec, &ts);
