@@ -27,12 +27,12 @@ steps:
     key: 'vcpkg | archives'
     path: $(VCPKG_ARCHIVE_DIR)
   displayName: Cache vcpkg dependencies
-- script: CALL .scripts/restore-vw-binary-parser-deps.cmd
+- script: CALL .scripts/restore-vw-bp-deps.cmd
   displayName: 'Restore dependencies for vw binary parser'
   failOnStderr: true
-- script: CALL .scripts/build-vw-binary-parser.cmd
+- script: CALL .scripts/build-vw-bp.cmd
   displayName: 'Build vw_binary_parser'
   failOnStderr: true
-- script: CALL .scripts/test-vw-binary-parser.cmd
+- script: CALL .scripts/test-vw-bp.cmd
   displayName: 'Run tests for vw binary parser'
   failOnStderr: true
