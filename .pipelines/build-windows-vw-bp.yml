@@ -24,8 +24,10 @@ steps:
     #netShare: # Required when packageFeedSelector == NetShare
 - task: Cache@2
   inputs:
-    key: 'vcpkg | archives'
+    key: vcpkg | archives
     path: $(VCPKG_ARCHIVE_DIR)
+    restoreKeys:
+    - vcpkg | archives
   displayName: Cache vcpkg dependencies
 - script: CALL .scripts/restore-vw-bp-deps.cmd
   displayName: 'Restore dependencies for vw binary parser'
