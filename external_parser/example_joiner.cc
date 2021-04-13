@@ -150,11 +150,11 @@ void example_joiner::set_default_reward(float default_reward) {
   _default_reward = default_reward;
 }
 
-void example_joiner::set_learning_mode_config(const v2::LearningModeType learning_mode) {
+void example_joiner::set_learning_mode_config(const v2::LearningModeType& learning_mode) {
   _learning_mode_config = learning_mode;
 }
 
-void example_joiner::set_problem_type_config(const v2::ProblemType problem_type) {
+void example_joiner::set_problem_type_config(const v2::ProblemType& problem_type) {
   _problem_type_config = problem_type;
 }
 
