@@ -6,7 +6,7 @@ pool:
   demands: Cmd
 
 variables:
-  VCPKG_ARCHIVE_DIR: $(LOCALAPPDATA)\vcpkg\archives\
+  VCPKG_ARCHIVE_DIR: $(LOCALAPPDATA)\vcpkg\archives
   configuration: Release
   platform: x64
 
