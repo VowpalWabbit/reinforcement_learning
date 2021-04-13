@@ -11,6 +11,8 @@ BOOST_AUTO_TEST_CASE(example_joiner_test) {
   example_joiner joiner(vw);
   v_array<example *> examples;
 
+  joiner.set_problem_type_config(v2::ProblemType_CB);
+
   std::string input_files = get_test_files_location();
   auto interaction_buffer = read_file(input_files + "/cb_v2.fb");
   // need to keep the fb buffer around in order to process the event

@@ -62,6 +62,7 @@ arg_parser.add_argument(
     choices=[value for name, value in ProblemType.__dict__.items()],
     help = 'problem type:  0-Unknown, 1-CB, 2-CCB, 3-SLATES, 4-CA'
 )
+arg_parser.add_argument('-c', action='store_true', help='generate corrupt files for binary parser unit tests')
 
 args = arg_parser.parse_args()
 
@@ -262,7 +263,7 @@ for msg in interactions_file.messages():
 
 bin_f.write_eof()
 
-if len(sys.argv) > 1 and str(sys.argv[1]) == '-c':
+if args.c:
     print()
     print("---> Generating corrupt files for testing <---")
     print()
