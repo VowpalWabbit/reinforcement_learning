@@ -128,7 +128,7 @@ def dump_event(event_payload, idx, timestamp=None):
     elif m.PayloadType() == PayloadType.DedupInfo:
         parse_dedup_info(payload)
     elif m.PayloadType() == PayloadType.MultiStep:
-        parse_multistep(payload)      
+        parse_multistep(payload)
     else:
         print('unknown payload type')
 
@@ -268,7 +268,8 @@ from reinforcement_learning.messages.flatbuff.v2.MultiStepEvent import MultiStep
 from reinforcement_learning.messages.flatbuff.v2.FileHeader import *
 from reinforcement_learning.messages.flatbuff.v2.JoinedEvent import *
 from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *
-from reinforcement_learning.messages.flatbuff.v2.RewardFunctionInfo import *
+from reinforcement_learning.messages.flatbuff.v2.CheckpointInfo import *
+from reinforcement_learning.messages.flatbuff.v2.ProblemType import ProblemType
 
 for input_file in sys.argv[1:]:
     dump_file(input_file)

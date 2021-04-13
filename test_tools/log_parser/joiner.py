@@ -22,8 +22,9 @@ from reinforcement_learning.messages.flatbuff.v2.JoinedEvent import *
 from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *
 from reinforcement_learning.messages.flatbuff.v2.Metadata import *
 from reinforcement_learning.messages.flatbuff.v2.Event import *
-from reinforcement_learning.messages.flatbuff.v2.RewardFunctionInfo import *
+from reinforcement_learning.messages.flatbuff.v2.CheckpointInfo import *
 from reinforcement_learning.messages.flatbuff.v2.RewardFunctionType import *
+from reinforcement_learning.messages.flatbuff.v2.ProblemType import *
 
 import flatbuffers
 import zstandard as zstd
@@ -49,15 +50,37 @@ arg_parser.add_argument(
     help = "reward function type: 0-earliest, 1-avg, 2-median, 3-sum, 4-min, 5-max"
 )
 arg_parser.add_argument('--default_reward', type=float, help="default reward")
+arg_parser.add_argument(
+    '--learning_mode_config',
+    type=int,
+    choices=[value for name, value in LearningModeType.__dict__.items()],
+    help = "learning mode type: 0-Online, 1-Apprentice, 2-LoggingOnly"
+)
+arg_parser.add_argument(
+    '--problem_type_config',
+    type=int,
+    choices=[value for name, value in ProblemType.__dict__.items()],
+    help = 'problem type:  0-Unknown, 1-CB, 2-CCB, 3-SLATES, 4-CA'
+)
+
 args = arg_parser.parse_args()
 
-reward_function = RewardFunctionType.Earliest
+reward_function_type = RewardFunctionType.Earliest
 default_reward = 0
+learning_mode_config = LearningModeType.Online
+problem_type_config = ProblemType.UNKNOWN
+
 if args.reward_function:
-    reward_function = args.reward_function
+    reward_function_type = args.reward_function
 
 if args.default_reward:
     default_reward = args.default_reward
+
+if args.learning_mode_config:
+    learning_mode_config = args.learning_mode_config
+
+if args.problem_type_config:
+    problem_type_config = args.problem_type_config
 
 class PreambleStreamReader:
     def __init__(self, file_name):
@@ -98,7 +121,7 @@ def mk_bytes_vector(builder, arr):
     return builder.CreateNumpyVector(np.array(list(arr), dtype='b'))
 
 MSG_TYPE_HEADER = 0x55555555
-MSG_TYPE_REWARD_FUNCTION = 0x11111111
+MSG_TYPE_CHECKPOINT = 0x11111111
 MSG_TYPE_REGULAR = 0xFFFFFFFF
 MSG_TYPE_EOF = 0xAAAAAAAA
 
@@ -166,17 +189,22 @@ class BinLogWriter:
         builder.Finish(joined_payload_off)
         self.write_message(MSG_TYPE_REGULAR, builder.Output())
 
-    def write_reward_function(self, reward_function_type, default_reward=0.0):
+    def write_checkpoint_info(self):
         print("reward function type: ", reward_function_type)
         print("default reward: ", default_reward)
+        print("learning_mode_config: ", learning_mode_config)
+        print("problem_type_config: ", problem_type_config)
         builder = flatbuffers.Builder(0)
 
-        RewardFunctionInfoStart(builder)
-        RewardFunctionInfoAddType(builder, reward_function_type)
-        RewardFunctionInfoAddDefaultReward(builder, default_reward)
-        reward_off = RewardFunctionInfoEnd(builder)
-        builder.Finish(reward_off)
-        self.write_message(MSG_TYPE_REWARD_FUNCTION, builder.Output())
+        CheckpointInfoStart(builder)
+        CheckpointInfoAddRewardFunctionType(builder, reward_function_type)
+        CheckpointInfoAddDefaultReward(builder, default_reward)
+        CheckpointInfoAddLearningModeConfig(builder, learning_mode_config)
+        CheckpointInfoAddProblemTypeConfig(builder, problem_type_config)
+
+        checkpoint_info_off = CheckpointInfoEnd(builder)
+        builder.Finish(checkpoint_info_off)
+        self.write_message(MSG_TYPE_CHECKPOINT, builder.Output())
 
     def write_eof(self):
         self.write_message(MSG_TYPE_EOF, b'')
@@ -214,7 +242,7 @@ print(f'found {obs_count} observations with {obs_ids} ids')
 
 bin_f = BinLogWriter(result_file)
 bin_f.write_header({ 'eud': '-1', 'joiner': 'joiner.py'})
-bin_f.write_reward_function(reward_function, default_reward)
+bin_f.write_checkpoint_info()
 
 for msg in interactions_file.messages():
     batch = EventBatch.GetRootAsEventBatch(msg, 0)
@@ -254,7 +282,7 @@ if len(sys.argv) > 1 and str(sys.argv[1]) == '-c':
     result_file_empty_msg_hdr = 'empty_msg_hdr.log'
     bin_f_eh = BinLogWriter(result_file_empty_msg_hdr)
     bin_f_eh.write_header({})
-    bin_f_eh.write_reward_function(RewardFunctionType.Average, 0.3)
+    bin_f_eh.write_checkpoint_info()
 
     # assuming this should not be missing
     result_file_no_msg_hdr = 'no_msg_hdr.log'
@@ -264,7 +292,7 @@ if len(sys.argv) > 1 and str(sys.argv[1]) == '-c':
     result_file_unknown_msg_type = 'unknown_msg_type.log'
     bin_f_umt = BinLogWriter(result_file_unknown_msg_type)
     bin_f_umt.write_header({ 'eud': '-1', 'joiner': 'joiner.py'})
-    bin_f_umt.write_reward_function(RewardFunctionType.Average, 0.3)
+    bin_f_umt.write_checkpoint_info()
     MSG_TYPE_UNKNOWN = 0x1AAAAAAA
     bin_f_umt.write_message(MSG_TYPE_UNKNOWN, b'')
 
@@ -272,7 +300,7 @@ if len(sys.argv) > 1 and str(sys.argv[1]) == '-c':
 
     bin_bad_payload = BinLogWriter(result_file_bad_payload)
     bin_bad_payload.write_header({ 'eud': '-1', 'joiner': 'joiner.py'})
-    bin_bad_payload.write_reward_function(RewardFunctionType.Average, 0.3)
+    bin_bad_payload.write_checkpoint_info()
 
     mess_with_payload = True
     for msg in interactions_file.messages():
