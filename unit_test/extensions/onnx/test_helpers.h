@@ -191,7 +191,7 @@ std::string encode_tensor_data(const dimensions& dimensions, const tensor_raw& v
   if (roundtrip)
   {
     o::bytes_t dimensions_bytes_back = from_base64(dimensions_base64);
-    o::bytes_t values_bytes_back = from_base64(values_base64));
+    o::bytes_t values_bytes_back = from_base64(values_base64);
 
     BOOST_REQUIRE_EQUAL_COLLECTIONS(values_bytes.cbegin(), values_bytes.cend(), values_bytes_back.cbegin(), values_bytes_back.cend());
 
