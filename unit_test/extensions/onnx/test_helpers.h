@@ -182,16 +182,16 @@ std::string encode_tensor_data(const dimensions& dimensions, const tensor_raw& v
 {
   unsigned char* dimensions_buffer = (unsigned char*)dimensions.data();
   o::bytes_t dimensions_bytes(dimensions_buffer, dimensions_buffer + byte_size(dimensions));
-  auto dimensions_base64 = ws2s(::utility::conversions::to_base64(dimensions_bytes));
+  auto dimensions_base64 = to_base64(dimensions_bytes);
 
   unsigned char* values_buffer = (unsigned char*)values.data();
   o::bytes_t values_bytes(values_buffer, values_buffer + byte_size(values));
-  auto values_base64 = ws2s(::utility::conversions::to_base64(values_bytes));
+  auto values_base64 = to_base64(values_bytes);
 
   if (roundtrip)
   {
-    o::bytes_t dimensions_bytes_back = ::utility::conversions::from_base64(s2ws(dimensions_base64));
-    o::bytes_t values_bytes_back = ::utility::conversions::from_base64(s2ws(values_base64));
+    o::bytes_t dimensions_bytes_back = from_base64(dimensions_base64);
+    o::bytes_t values_bytes_back = from_base64(values_base64));
 
     BOOST_REQUIRE_EQUAL_COLLECTIONS(values_bytes.cbegin(), values_bytes.cend(), values_bytes_back.cbegin(), values_bytes_back.cend());
 
