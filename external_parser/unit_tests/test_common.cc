@@ -37,7 +37,6 @@ std::vector<char> read_file(std::string file_name) {
 std::string get_test_files_location() {
   if (boost::unit_test::framework::master_test_suite().argc <= 1) {
     // set default location of test_files dir
-    // TODO this might not work when windows build is added
     boost::filesystem::path p(__FILE__);
     p.remove_filename();
     return p.string() + "/test_files/";
