@@ -1,5 +1,3 @@
-#define BOOST_TEST_DYN_LINK
-
 #include "parse_example_binary.h"
 #include "test_common.h"
 #include <boost/test/unit_test.hpp>

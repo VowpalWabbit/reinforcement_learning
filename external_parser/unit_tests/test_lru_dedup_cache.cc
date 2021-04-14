@@ -1,5 +1,3 @@
-#define BOOST_TEST_DYN_LINK
-
 #include "lru_dedup_cache.h"
 #include "test_common.h"
 #include <boost/test/unit_test.hpp>
