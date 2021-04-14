@@ -245,8 +245,9 @@ void example_joiner::try_set_label(const joined_event &je, float reward,
   int index = je.interaction_data.actions[0];
   auto action = je.interaction_data.actions[0];
   auto cost = -1.f * _reward;
-  auto probability = je.interaction_data.probabilities[0]; // * (1.f - je.interaction_data.probabilityOfDrop);
-  auto weight = 1.f;// - je.interaction_data.probabilityOfDrop;
+  auto probability = je.interaction_data.probabilities[0] *
+                     (1.f - je.interaction_data.probabilityOfDrop);
+  auto weight = 1.f - je.interaction_data.probabilityOfDrop;
 
   examples[index]->l.cb.costs.push_back({cost, action, probability});
   examples[index]->l.cb.weight = weight;
@@ -277,7 +278,7 @@ int example_joiner::process_interaction(const v2::Event &event,
     data.probabilities = {cb->probabilities()->data(),
                           cb->probabilities()->data() +
                               cb->probabilities()->size()};
-    data.probabilityOfDrop = metadata.pass_probability();
+    data.probabilityOfDrop = 1.f - metadata.pass_probability();
     data.skipLearn = cb->deferred_action();
 
     std::string line_vec(reinterpret_cast<char const *>(cb->context()->data()),
