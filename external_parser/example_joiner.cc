@@ -11,6 +11,7 @@
 
 // VW headers
 #include "example.h"
+#include "io/logger.h"
 #include "parse_example_json.h"
 #include "parser.h"
 #include "v_array.h"
@@ -219,6 +220,38 @@ const T *example_joiner::process_compression(const uint8_t *data, size_t size,
   return payload;
 }
 
+void example_joiner::try_set_label(const joined_event &je, float reward,
+                                   v_array<example *> &examples) {
+  if (je.interaction_data.actions.empty()) {
+    VW::io::logger::log_error("missing actions for event [{}]",
+                              je.interaction_data.eventId);
+    return;
+  }
+
+  if (je.interaction_data.probabilities.empty()) {
+    VW::io::logger::log_error("missing probabilities for event [{}]",
+                              je.interaction_data.eventId);
+    return;
+  }
+
+  if (std::any_of(je.interaction_data.probabilities.begin(),
+                  je.interaction_data.probabilities.end(),
+                  [](float p) { return std::isnan(p); })) {
+    VW::io::logger::log_error(
+        "distribution for event [{}] contains invalid probabilities",
+        je.interaction_data.eventId);
+  }
+
+  int index = je.interaction_data.actions[0];
+  auto action = je.interaction_data.actions[0];
+  auto cost = -1.f * _reward;
+  auto probability = je.interaction_data.probabilities[0]; // * (1.f - je.interaction_data.probabilityOfDrop);
+  auto weight = 1.f;// - je.interaction_data.probabilityOfDrop;
+
+  examples[index]->l.cb.costs.push_back({cost, action, probability});
+  examples[index]->l.cb.weight = weight;
+}
+
 int example_joiner::process_interaction(const v2::Event &event,
                                         const v2::Metadata &metadata,
                                         v_array<example *> &examples) {
@@ -363,8 +396,9 @@ int example_joiner::process_joined(v_array<example *> &examples) {
     time_t raw_time;
     time(&raw_time);
     struct tm *enqueued_time;
-    // TODO use gmtime_s? windows tests break when accessing enqueue_time internals
-    enqueued_time = gmtime(&raw_time); 
+    // TODO use gmtime_s? windows tests break when accessing enqueue_time
+    // internals
+    enqueued_time = gmtime(&raw_time);
     joined_event->timestamp()->year() - 1900;
     joined_event->timestamp()->month() - 1;
     joined_event->timestamp()->day();
@@ -372,7 +406,7 @@ int example_joiner::process_joined(v_array<example *> &examples) {
     joined_event->timestamp()->minute();
     joined_event->timestamp()->second();
 
-    time_t enqueued_time_utc;// = mktime(enqueued_time);
+    time_t enqueued_time_utc; // = mktime(enqueued_time);
 
     auto metadata = event->meta();
 
@@ -402,10 +436,7 @@ int example_joiner::process_joined(v_array<example *> &examples) {
     }
   }
 
-  int index = je.interaction_data.actions[0];
-  examples[index]->l.cb.costs.push_back(
-      {1.0f, je.interaction_data.actions[index - 1],
-       je.interaction_data.probabilities[index - 1]});
+  try_set_label(je, _reward, examples);
 
   if (multiline) {
     // add an empty example to signal end-of-multiline
