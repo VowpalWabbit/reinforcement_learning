@@ -28,17 +28,20 @@ find_path(ONNXRUNTIME_INCLUDE_DIR_ROOT
   PATH_SUFFIXES include
 )
 
-message(ONNXRUNTIME_LIB " ${ONNXRUNTIME_LIB}")
-message(ONNXRUNTIME_IMP_LIB " ${ONNXRUNTIME_IMP_LIB}")
-message(ONNXRUNTIME_INCLUDE_DIR_ROOT " ${ONNXRUNTIME_INCLUDE_DIR_ROOT}")
+# There may be many files names version.h in the search path. So we find the one
+# with the expected preprocessor definition ONNXRUNTIME_VERSION_STRING and then
+# read the version file from that one.
+file(GLOB_RECURSE FOUND_VERSION_FILES "${ONNXRUNTIME_INCLUDE_DIR_ROOT}/**/version.h")
+foreach(VERSION_FILE ${FOUND_VERSION_FILES})
+  file(READ ${VERSION_FILE} VERSION_FILE_CONTENTS)
+  string(FIND "${VERSION_FILE_CONTENTS}" "ONNXRUNTIME_VERSION_STRING" FIND_RESULT)
 
-
-# Dig out the OnnxRuntime version out of the version.h file.
-file(GLOB_RECURSE VERSION_FILE "${ONNXRUNTIME_INCLUDE_DIR_ROOT}/**/version.h")
-message(VERSION_FILE ${VERSION_FILE})
-file(STRINGS ${VERSION_FILE} VERSION_FILE_CONTENTS)
-string(REGEX MATCH "\"(.*)\"" ONNX_VERSION_OUTPUT_UNUSED ${VERSION_FILE_CONTENTS})
-set(ONNXRUNTIME_VERSION ${CMAKE_MATCH_1})
+  if(NOT ${FIND_RESULT} EQUAL -1)
+    string(REGEX MATCH "\"(.*)\"" ONNX_VERSION_OUTPUT_UNUSED ${VERSION_FILE_CONTENTS})
+    set(ONNXRUNTIME_VERSION ${CMAKE_MATCH_1})
+    break()
+  endif ()
+endforeach()
 
 # The ${ONNXRUNTIME_REQUIRED_IMPLIB_VAR_NAME} is intentionally different to the
 # others as the value of this variable is the name of the implib var IF it is
