@@ -60,7 +60,7 @@ def cast(table, tmp_type):
 
 def parse_cb(payload):
     evt = CbEvent.GetRootAsCbEvent(payload, 0)
-    print(f'\tcb: actions:{evt.ActionIdsLength()} model:{evt.ModelId()} lm:{learning_mode_name(evt.LearningMode())} deferred:{evt.DeferredAction()}')
+    print(f'\tcb: actions:{evt.ActionIdsLength()} chosen_action:{evt.ActionIds(0)} model:{evt.ModelId()} lm:{learning_mode_name(evt.LearningMode())} deferred:{evt.DeferredAction()}')
     print(f'\t\tcontext: {fmt_payload(evt.ContextAsNumpy())}')
 
 def parse_outcome(payload):
