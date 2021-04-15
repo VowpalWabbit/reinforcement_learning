@@ -1,3 +1,6 @@
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+find_package(OnnxRuntime REQUIRED)
+
 add_executable(onnx_example
   onnx_example.cc
 )
@@ -16,3 +19,9 @@ add_custom_command(
 )
 
 target_link_libraries(onnx_example PRIVATE rlclientlib-onnx)
+
+add_custom_command(TARGET onnx_example POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  $<TARGET_FILE:onnxruntime>
+  $<TARGET_FILE_DIR:onnx_example>
+)
