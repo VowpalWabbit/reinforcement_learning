@@ -128,7 +128,7 @@ def dump_event(event_payload, idx, timestamp=None):
     elif m.PayloadType() == PayloadType.DedupInfo:
         parse_dedup_info(payload)
     elif m.PayloadType() == PayloadType.MultiStep:
-        parse_multistep(payload)      
+        parse_multistep(payload)
     else:
         print('unknown payload type')
 
@@ -150,7 +150,7 @@ def dump_preamble_file(file_name, buf):
     dump_event_batch(buf[PREAMBLE_LENGTH : PREAMBLE_LENGTH + preamble["msg_size"]])
 
 MSG_TYPE_HEADER = 0x55555555
-MSG_TYPE_REWARD_FUNCTION = 0x11111111
+MSG_TYPE_CHECKPOINT = 0x11111111
 MSG_TYPE_REGULAR = 0xFFFFFFFF
 MSG_TYPE_EOF = 0xAAAAAAAA
 
@@ -196,11 +196,11 @@ class JoinedLogStreamReader:
             p = header.Properties(i)
             self.headers[p.Key().decode('utf-8')] = p.Value().decode('utf-8')
 
-    def reward_function_info(self):
+    def checkpoint_info(self):
         msg = self.read_message()
-        if msg[0] != MSG_TYPE_REWARD_FUNCTION:
-            raise f'Missing reward function, found message type of {msg[0]} instead'
-        return RewardFunctionInfo.GetRootAsRewardFunctionInfo(msg[1], 0)
+        if msg[0] != MSG_TYPE_CHECKPOINT:
+            raise f'Missing checkpoint info, found message type of {msg[0]} instead'
+        return CheckpointInfo.GetRootAsCheckpointInfo(msg[1], 0)
 
     def messages(self):
         while True:
@@ -215,9 +215,11 @@ def dump_joined_log_file(file_name, buf):
     for k in reader.headers:
         print(f'\t{k} = {reader.headers[k]}')
 
-    reward_function_info = reader.reward_function_info()
-    print(f'reward function type is: {reward_function_info.Type()}')
-    print(f'default reward is: {reward_function_info.DefaultReward()}')
+    checkpoint_info = reader.checkpoint_info()
+    print(f'reward function type is: {checkpoint_info.RewardFunctionType()}')
+    print(f'default reward is: {checkpoint_info.DefaultReward()}')
+    print(f'learning mode config is: {checkpoint_info.LearningModeConfig()}')
+    print(f'problem type config is: {checkpoint_info.ProblemTypeConfig()}')
 
     for msg in reader.messages():
         print(f'joined-batch events: {msg.EventsLength()}')
@@ -268,7 +270,8 @@ from reinforcement_learning.messages.flatbuff.v2.MultiStepEvent import MultiStep
 from reinforcement_learning.messages.flatbuff.v2.FileHeader import *
 from reinforcement_learning.messages.flatbuff.v2.JoinedEvent import *
 from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *
-from reinforcement_learning.messages.flatbuff.v2.RewardFunctionInfo import *
+from reinforcement_learning.messages.flatbuff.v2.CheckpointInfo import *
+from reinforcement_learning.messages.flatbuff.v2.ProblemType import *
 
 for input_file in sys.argv[1:]:
     dump_file(input_file)

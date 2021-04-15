@@ -67,6 +67,8 @@ public:
 
   void set_reward_function(const v2::RewardFunctionType type);
   void set_default_reward(float default_reward);
+  void set_learning_mode_config(const v2::LearningModeType& learning_mode);
+  void set_problem_type_config(const v2::ProblemType& problem_type);
 
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their
@@ -119,4 +121,7 @@ private:
   float _default_reward = 0.f;
   float _reward = _default_reward;
   RewardCalcType _reward_calculation;
+
+  v2::LearningModeType _learning_mode_config = v2::LearningModeType_Online;
+  v2::ProblemType _problem_type_config = v2::ProblemType_UNKNOWN;
 };
