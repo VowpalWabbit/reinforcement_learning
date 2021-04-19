@@ -34,7 +34,7 @@ namespace reinforcement_learning { namespace onnx {
       case ORT_LOGGING_LEVEL_VERBOSE:
         loglevel = LEVEL_DEBUG;
       break;
-      
+
       case ORT_LOGGING_LEVEL_INFO:
         loglevel = LEVEL_INFO;
       break;
@@ -73,7 +73,7 @@ namespace reinforcement_learning { namespace onnx {
   int onnx_model::update(const model_management::model_data& data, bool& model_ready, api_status* status) {
     try {
       TRACE_INFO(_trace_logger, utility::concat("Received new model data. With size ", data.data_sz()));
-	  
+
       if (data.data_sz() <= 0)
       {
         RETURN_ERROR_LS(_trace_logger, status, model_update_error) << "Empty model data.";
@@ -82,7 +82,7 @@ namespace reinforcement_learning { namespace onnx {
       std::shared_ptr<Ort::Session> new_session = std::make_shared<Ort::Session>(_env, data.data(), data.data_sz(), _session_options);
 
       // Validate that the model makes sense
-      // Rules: 
+      // Rules:
       // 1. There are N inputs, which are all tensors of floats
       // 2. There is an output with the provided name, which is a tensor of floats
 
@@ -104,7 +104,7 @@ namespace reinforcement_learning { namespace onnx {
       for (output_index = 0; output_index < output_count; output_index++)
       {
         char* output_name = new_session->GetOutputName(output_index, DefaultOnnxAllocator);
-        
+
         if (_output_name == output_name)
         {
           found_output = true;
@@ -122,7 +122,7 @@ namespace reinforcement_learning { namespace onnx {
       {
         RETURN_ERROR_LS(_trace_logger, status, model_update_error) << "Could not find output with name '" << _output_name << "' in model.";
       }
-      
+
       // TODO: Support more output types
       Ort::TypeInfo output_type_info = new_session->GetOutputTypeInfo(output_index);
       if (output_type_info.GetONNXType() != ONNX_TYPE_TENSOR ||
@@ -142,15 +142,15 @@ namespace reinforcement_learning { namespace onnx {
     catch ( ... ) {
       RETURN_ERROR_LS(_trace_logger, status, model_update_error) << "Unknown error";
     }
-    
+
     model_ready = true;
     return error_code::success;
   }
 
-  int onnx_model::choose_rank(uint64_t rnd_seed, 
-    const char* features, 
-    std::vector<int>& action_ids, 
-    std::vector<float>& action_pdf, 
+  int onnx_model::choose_rank(uint64_t rnd_seed,
+    const char* features,
+    std::vector<int>& action_ids,
+    std::vector<float>& action_pdf,
     std::string& model_version,
     api_status* status)
   {
@@ -160,11 +160,11 @@ namespace reinforcement_learning { namespace onnx {
       // Model is not ready
       RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << "No model loaded.";
     }
-    
-    // TODO: Support GPU scoring - it is unfortunate that we cannot simply grab the appropriate allocator 
-    // based on what version of onnxruntime we are loading. 
+
+    // TODO: Support GPU scoring - it is unfortunate that we cannot simply grab the appropriate allocator
+    // based on what version of onnxruntime we are loading.
     Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
-    
+
     onnx_input_builder input_context(_trace_logger);
     if (_use_unstructured_input)
     {
@@ -172,16 +172,16 @@ namespace reinforcement_learning { namespace onnx {
     }
     else
     {
-      // TODO: This is a placeholder for implementing ExampleBuilder APIs. We put this here to ensure that we can make a 
+      // TODO: This is a placeholder for implementing ExampleBuilder APIs. We put this here to ensure that we can make a
       // non-breaking-change in the future that makes structured input the default.
       RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << "Structured input is not yet implemented. See onnx_model.cc.";
     }
-    
+
     Ort::RunOptions run_options{nullptr};
 
     std::vector<const char*> input_names = input_context.input_names();
     std::vector<Ort::Value> inputs;
-    
+
     RETURN_IF_FAIL(input_context.allocate_inputs(inputs, memory_info, status));
 
     // Use the C API to avoid an unneeded throw in the error case
@@ -190,11 +190,14 @@ namespace reinforcement_learning { namespace onnx {
     // This cast-chain is taken from the OnnxRuntime code implementation of the C++ API of Ort::Session::Run().
     auto ort_input_values = reinterpret_cast<const OrtValue**>(const_cast<Ort::Value*>(inputs.data()));
 
+    std::vector<const char*> output_node_names;
+    output_node_names.push_back(_output_name.c_str());
+
     OrtStatus* run_status = OnnxRuntimeCApi.Run(
       local_session->operator OrtSession *(), // Unwrap the underlying C reference to pass to the C API
-      Ort::RunOptions{nullptr}, 
+      Ort::RunOptions{nullptr},
       input_names.data(), ort_input_values, input_context.input_count(),     // Inputs: Names, Values, Count
-      reinterpret_cast<const char* const*>(&_output_name), 1, &onnx_output); // Outputs: Names, Count, Values; note the inconsistency
+    output_node_names.data(), 1, &onnx_output); // Outputs: Names, Count, Values; note the inconsistency
 
     if (run_status)
     {
