@@ -182,11 +182,11 @@ std::string encode_tensor_data(const dimensions& dimensions, const tensor_raw& v
 {
   unsigned char* dimensions_buffer = (unsigned char*)dimensions.data();
   o::bytes_t dimensions_bytes(dimensions_buffer, dimensions_buffer + byte_size(dimensions));
-  auto dimensions_base64 = to_base64(dimensions_bytes);
+  std::string dimensions_base64 = to_base64(dimensions_bytes);
 
   unsigned char* values_buffer = (unsigned char*)values.data();
   o::bytes_t values_bytes(values_buffer, values_buffer + byte_size(values));
-  auto values_base64 = to_base64(values_bytes);
+  std::string values_base64 = to_base64(values_bytes);
 
   if (roundtrip)
   {
