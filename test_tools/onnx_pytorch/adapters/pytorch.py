@@ -46,7 +46,7 @@ class DictToCbTensor(object):
         for k, v in parsed['features'].items():
             features = tensor(v)
             break
-        
+
         if self.problem_type == types.Problem.MultiClass and parsed['cost'] == 0:
             return None
 

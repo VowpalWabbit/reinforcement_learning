@@ -18,7 +18,8 @@ from reinforcement_learning.messages.flatbuff.v2.MultiStepEvent import MultiStep
 from reinforcement_learning.messages.flatbuff.v2.FileHeader import *
 from reinforcement_learning.messages.flatbuff.v2.JoinedEvent import *
 from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *
-from reinforcement_learning.messages.flatbuff.v2.RewardFunctionInfo import *
+from reinforcement_learning.messages.flatbuff.v2.CheckpointInfo import *
+from reinforcement_learning.messages.flatbuff.v2.RewardFunctionType import *
 
 class Base64Tensor:
     @staticmethod
@@ -59,7 +60,7 @@ class CbDictParser:
 
     
 MSG_TYPE_HEADER = 0x55555555
-MSG_TYPE_REWARD_FUNCTION = 0x11111111
+MSG_TYPE_CHECKPOINT = 0x11111111
 MSG_TYPE_REGULAR = 0xFFFFFFFF
 MSG_TYPE_EOF = 0xAAAAAAAA
 # mostly ripped from the flatbuf parser
@@ -105,11 +106,11 @@ class JoinedLogStreamReader:
             p = header.Properties(i)
             self.headers[p.Key().decode('utf-8')] = p.Value().decode('utf-8')
 
-    def reward_function_info(self):
+    def checkpoint_info(self):
         msg = self.read_message()
-        if msg[0] != MSG_TYPE_REWARD_FUNCTION:
-            raise f'Missing reward function, found message type of {msg[0]} instead'
-        return RewardFunctionInfo.GetRootAsRewardFunctionInfo(msg[1], 0)
+        if msg[0] != MSG_TYPE_CHECKPOINT:
+            raise f'Missing checkpoint info, found message type of {msg[0]} instead'
+        return CheckpointInfo.GetRootAsCheckpointInfo(msg[1], 0)
 
     def messages(self):
         while True:
@@ -125,8 +126,8 @@ class VWFlatbufferParser:
     def __init__(self, data):
         self.reader = JoinedLogStreamReader(data)
         self.current_id = None
-        self.reward_fn_info = self.reader.reward_function_info()
-        # prime the function. gross.
+        self.checkpoint_info = self.reader.checkpoint_info()
+        
         self.gen = self.read_event_series()
 
     def __iter__(self):
@@ -167,14 +168,35 @@ class VWFlatbufferParser:
             elif evt.IndexType() == OutcomeValue.numeric:
                 index = self.cast(index, NumericIndex).Index()
 
-        return -1*value, index
+        return value, index
+
+    def apply_reward_fn(self, rewards):
+        reward_fn_type = self.checkpoint_info.RewardFunctionType()
+        if len(rewards) == 0:
+            return self.checkpoint_info.DefaultReward()
+        elif reward_fn_type == RewardFunctionType.Earliest:
+            return rewards[0]
+        elif reward_fn_type == RewardFunctionType.Average:
+            return sum(rewards)/len(rewards)
+        elif reward_fn_type == RewardFunctionType.Median:
+            from statistics import median
+            return median(rewards)
+        elif reward_fn_type == RewardFunctionType.Sum:
+            return sum(rewards)
+        elif reward_fn_type == RewardFunctionType.Min:
+            return min(rewards)
+        elif reward_fn_type == RewardFunctionType.Max:
+            return max(rewards)
+        else:
+            raise Exception("Unknown reward function type")
+        
 
     # reads all events associated with the next event_id
     def read_event_series(self, timestamp=None):
         for msg in self.reader.messages():
             # only support CB for now
             label = None
-            cost = None
+            rewards = []
             current_id = None
             current_payload = None
 
@@ -192,18 +214,19 @@ class VWFlatbufferParser:
 
                 if m.PayloadType() == PayloadType.CB:
                     # ew gross
-                    if label is not None and cost is not None:
+                    if label is not None:
+                        cost = -1*self.apply_reward_fn(rewards)
                         yield current_payload, label, cost
                     current_id = m.Id()
                     current_payload, label = self.parse_cb(event_payload)
                 elif m.PayloadType() == PayloadType.Outcome:
-                    tmpcost, tmplabel = self.parse_outcome(event_payload)
-                    if tmpcost is not None:
-                        cost = tmpcost
+                    tmpreward, tmplabel = self.parse_outcome(event_payload)
+                    if tmpreward is not None:
+                        rewards.append(tmpreward)
                     if tmplabel is not None:
                         label = tmplabel
                 elif m.PayloadType() == PayloadType.DedupInfo:
-                    # not sure what this one is
+                    raise Exception("Not Implemented")
                     continue
                 else:
                     raise Exception('unknown payload type')
