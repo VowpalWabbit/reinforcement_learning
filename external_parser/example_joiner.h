@@ -44,7 +44,8 @@ struct joined_event {
   metadata_info interaction_metadata;
   DecisionServiceInteraction interaction_data;
   std::vector<outcome_event> outcome_events;
-  //Default Baseline Action for CB is 1 (rl client recommended actions are 1 indexed in the CB case)
+  // Default Baseline Action for CB is 1 (rl client recommended actions are 1
+  // indexed in the CB case)
   static const int baseline_action = 1;
 };
 
@@ -95,6 +96,9 @@ private:
   template <typename T>
   const T *process_compression(const uint8_t *data, size_t size,
                                const v2::Metadata &metadata);
+
+  void try_set_label(const joined_event &je, float reward,
+                     v_array<example *> &examples);
 
   example *get_or_create_example();
 
