@@ -1,10 +1,10 @@
 #include "example_joiner.h"
+#include "log_converter.h"
 
 #include "generated/v2/DedupInfo_generated.h"
 #include "generated/v2/Event_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
-#include "io/logger.h"
 #include "zstd.h"
 
 #include <limits.h>
@@ -91,6 +91,10 @@ float earliest(const joined_event &event) {
 
 example_joiner::example_joiner(vw *vw)
     : _vw(vw), _reward_calculation(&RewardFunctions::earliest) {}
+
+example_joiner::example_joiner(vw *vw, bool binary_to_json, std::string outfile_name)
+    : _vw(vw), _reward_calculation(&RewardFunctions::earliest),
+      _binary_to_json(binary_to_json), _outfile_name(outfile_name) {}
 
 example_joiner::~example_joiner() {
   // cleanup examples
@@ -231,7 +235,7 @@ const T *example_joiner::process_compression(const uint8_t *data, size_t size,
   return payload;
 }
 
-void example_joiner::try_set_label(const joined_event &je, float reward,
+void example_joiner::try_set_label(const joined_event &je,
                                    v_array<example *> &examples) {
   if (je.interaction_data.actions.empty()) {
     VW::io::logger::log_error("missing actions for event [{}]",
@@ -293,6 +297,7 @@ int example_joiner::process_interaction(const v2::Event &event,
                           metadata.payload_type(),
                           metadata.pass_probability(),
                           metadata.encoding(),
+                          metadata.id()->str(),
                           learning_mode};
 
     DecisionServiceInteraction data;
@@ -305,8 +310,19 @@ int example_joiner::process_interaction(const v2::Event &event,
     data.probabilityOfDrop = 1.f - metadata.pass_probability();
     data.skipLearn = cb->deferred_action();
 
-    std::string line_vec(reinterpret_cast<char const *>(cb->context()->data()),
-                         cb->context()->size());
+    const char* context = reinterpret_cast<char const *>(cb->context()->data());
+    joined_event je = {
+      enqueued_time_utc,
+      std::move(meta),
+      std::move(data)
+    };
+
+    if (_binary_to_json) {
+      je.context = context;
+      je.model_id = cb->model_id()->data();
+    }
+
+    std::string line_vec(context, cb->context()->size());
 
     if (_vw->audit || _vw->hash_inv) {
       VW::template read_line_json<true>(
@@ -321,8 +337,7 @@ int example_joiner::process_interaction(const v2::Event &event,
     }
 
     _batch_grouped_examples.emplace(std::make_pair<std::string, joined_event>(
-        metadata.id()->str(),
-        {enqueued_time_utc, std::move(meta), std::move(data)}));
+      metadata.id()->str(), std::move(je)));
   }
   return 0;
 }
@@ -334,7 +349,8 @@ int example_joiner::process_outcome(const v2::Event &event,
   o_event.metadata = {timestamp_to_chrono(*metadata.client_time_utc()),
                       metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(), metadata.pass_probability(),
-                      metadata.encoding()};
+                      metadata.encoding(),
+                      metadata.id()->str()};
   o_event.enqueued_time_utc = enqueued_time_utc;
 
   auto outcome = process_compression<v2::OutcomeEvent>(
@@ -355,6 +371,8 @@ int example_joiner::process_outcome(const v2::Event &event,
     o_event.s_index = outcome->index_as_numeric()->index();
     index = outcome->index_as_numeric()->index();
   }
+
+  o_event.action_taken = outcome->action_taken();
 
   if (_batch_grouped_examples.find(metadata.id()->str()) !=
       _batch_grouped_examples.end()) {
@@ -450,17 +468,24 @@ int example_joiner::process_joined(v_array<example *> &examples) {
     if (je.interaction_metadata.payload_type == v2::PayloadType_CB &&
         je.interaction_metadata.learning_mode ==
             v2::LearningModeType_Apprentice) {
+      _original_reward = _reward_calculation(je);
       if (je.interaction_data.actions[0] == je.baseline_action) {
         // TODO: default apprenticeReward should come from config
         // setting to default reward matches current behavior for now
-        _reward = _reward_calculation(je);
+        _reward = _original_reward;
       }
     } else {
       _reward = _reward_calculation(je);
     }
   }
 
-  try_set_label(je, _reward, examples);
+  if (_binary_to_json) {
+    std::ofstream outfile;
+    outfile.open(_outfile_name, std::ofstream::out | std::ofstream::app);
+    log_converter::build_cb_json(outfile, je, _reward, _original_reward);
+  }
+
+  try_set_label(je, examples);
 
   if (multiline) {
     // add an empty example to signal end-of-multiline
@@ -471,9 +496,9 @@ int example_joiner::process_joined(v_array<example *> &examples) {
   _batch_grouped_events.erase(id);
   _batch_event_order.pop();
   _batch_grouped_examples.erase(id);
-
   return 0;
 }
 
 bool example_joiner::processing_batch() { return !_batch_event_order.empty(); }
 float example_joiner::get_reward() { return _reward; }
+float example_joiner::get_original_reward() { return _original_reward; }
