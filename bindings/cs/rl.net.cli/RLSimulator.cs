@@ -283,7 +283,7 @@ namespace Rl.Net.Cli
         }
     }
 
-    internal class RLSimulator
+    internal class RLSimulator : IDisposable
     {
         private RLDriver driver;
 
@@ -322,5 +322,29 @@ namespace Rl.Net.Cli
                 this.driver.OnError -= value;
             }
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            Console.WriteLine("Disponsing rlsim");
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    this.driver?.Dispose();
+                    this.driver = null;
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+        #endregion
     }
 }
