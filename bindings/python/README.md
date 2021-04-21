@@ -13,7 +13,7 @@
 9. `bash ./bindings/python/build_linux/restore.sh`
 10. `mkdir build`
 11. `cd build`
-12. `cmake .. -DBUILD_PYTHON=On -DRL_PY_VERSION=3.6`
+12. `cmake .. -DBUILD_PYTHON=On -DPY_VERSION=3.6`
 13. `make`
 14. `sudo python3.6 -m pip install ../bindings/python/dist/<output-file>.whl`
 
