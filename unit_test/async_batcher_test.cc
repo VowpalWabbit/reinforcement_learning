@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(flush_timeout) {
   config.send_batch_interval_ms = timeout_ms;
   config.send_queue_max_capacity = 8192;
   int dummy = 0;
-  logger::async_batcher<test_undroppable_event> batcher(s, watchdog, dummy, &error_fn, config);
+  logger::async_batcher<test_undroppable_event> batcher(s, watchdog, dummy, &error_fn, nullptr, config);
   batcher.init(nullptr); // Allow periodic_background_proc inside async_batcher to start waiting
   // on a timer before sending any events to it. Else we risk not
   // triggering the batch mechanism and might get triggered by initial
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(flush_batches) {
   config.send_batch_interval_ms = 100000;
   int dummy = 0;
   auto batcher = new logger::async_batcher<test_undroppable_event>
-      (s, watchdog, dummy, &error_fn, config);
+      (s, watchdog, dummy, &error_fn, nullptr, config);
   batcher->init(nullptr); // Allow periodic_background_proc inside async_batcher to start waiting
   // on a timer before sending any events to it.   Else we risk not
   // triggering the batch mechanism and might get triggered by initial
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(flush_after_deletion) {
   utility::async_batcher_config config;
   int dummy = 0;
   auto* batcher = new logger::async_batcher<test_undroppable_event>
-      (s, watchdog, dummy, nullptr, config);
+      (s, watchdog, dummy, nullptr, nullptr, config);
   batcher->init(nullptr); // Allow periodic_background_proc to start waiting
   std::this_thread::sleep_for(std::chrono::milliseconds(20));
   std::string foo("foo");
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(queue_overflow_do_not_drop_event) {
   config.send_queue_max_capacity = queue_max_size;
   config.queue_mode = queue_mode;
   int dummy = 0;
-  auto batcher = new logger::async_batcher<test_droppable_event>(s, watchdog, dummy, &error_fn, config);
+  auto batcher = new logger::async_batcher<test_droppable_event>(s, watchdog, dummy, &error_fn, nullptr, config);
   batcher->init(nullptr); // Allow periodic_background_proc to start waiting
   std::this_thread::sleep_for(std::chrono::milliseconds(20));
   int n = 10;

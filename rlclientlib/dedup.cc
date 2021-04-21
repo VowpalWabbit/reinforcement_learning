@@ -281,7 +281,7 @@ public:
     logger::i_logger_extensions(c), _dedup_state(c, use_compression, use_dedup, time_provider), _use_dedup(use_dedup), _use_compression(use_compression) {}
 
 	logger::i_async_batcher<generic_event>* create_batcher(logger::i_message_sender* sender, utility::watchdog& watchdog,
-																									error_callback_fn* perror_cb, const char* section) override {
+																									error_callback_fn* perror_cb, i_trace* trace, const char* section) override {
 		auto config = utility::get_batcher_config(_config, section);
 
     if(_use_dedup) {
@@ -290,6 +290,7 @@ public:
           watchdog,
           _dedup_state,
           perror_cb,
+		  trace,
           config);
     } else {
       int _dummy = 0;
@@ -298,6 +299,7 @@ public:
           watchdog,
           _dummy,
           perror_cb,
+		  trace,
           config);
     }
 
