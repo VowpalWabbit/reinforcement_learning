@@ -7,6 +7,9 @@ import json
 import struct
 import datetime
 
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
+
 PREAMBLE_LENGTH = 8
 PRETTY_PRINT_JSON=False
 
@@ -145,9 +148,11 @@ def dump_event_batch(buf):
 
 
 def dump_preamble_file(file_name, buf):
-    preamble = parse_preamble(buf)
-    print(f'parsing preamble file {file_name}\n\tpreamble:{preamble}')
-    dump_event_batch(buf[PREAMBLE_LENGTH : PREAMBLE_LENGTH + preamble["msg_size"]])
+    while len(buf) > 8:
+        preamble = parse_preamble(buf)
+        print(f'parsing preamble file {file_name}\n\tpreamble:{preamble}')
+        dump_event_batch(buf[PREAMBLE_LENGTH : PREAMBLE_LENGTH + preamble["msg_size"]])
+        buf = buf[PREAMBLE_LENGTH + preamble["msg_size"]:]
 
 MSG_TYPE_HEADER = 0x55555555
 MSG_TYPE_CHECKPOINT = 0x11111111
