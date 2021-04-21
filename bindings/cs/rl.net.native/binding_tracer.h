@@ -8,6 +8,7 @@ namespace rl_net_native {
     // Inherited via i_trace
     binding_tracer(livemodel_context& _context);
     void log(int log_level, const std::string &msg) override;
+	virtual ~binding_tracer();
   private:
     livemodel_context& context;
   };
