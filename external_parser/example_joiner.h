@@ -5,8 +5,8 @@
 #include "example.h"
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/FileFormat_generated.h"
-#include "generated/v2/Metadata_generated.h"
 #include "lru_dedup_cache.h"
+#include "timestamp_helper.h"
 #include "v_array.h"
 
 #include <list>
@@ -20,9 +20,10 @@
 // clang-format on
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
+namespace rl = reinforcement_learning;
 
 struct metadata_info {
-  std::string client_time_utc;
+  rl::timestamp client_time_utc;
   std::string app_id;
   v2::PayloadType payload_type;
   float pass_probability;
@@ -36,7 +37,7 @@ struct outcome_event {
   int index;
   std::string s_value;
   float value;
-  time_t enqueued_time_utc;
+  rl::timestamp enqueued_time_utc;
 };
 
 struct joined_event {
@@ -68,8 +69,8 @@ public:
 
   void set_reward_function(const v2::RewardFunctionType type);
   void set_default_reward(float default_reward);
-  void set_learning_mode_config(const v2::LearningModeType& learning_mode);
-  void set_problem_type_config(const v2::ProblemType& problem_type);
+  void set_learning_mode_config(const v2::LearningModeType &learning_mode);
+  void set_problem_type_config(const v2::ProblemType &problem_type);
 
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their
@@ -91,7 +92,7 @@ private:
                           v_array<example *> &examples);
 
   int process_outcome(const v2::Event &event, const v2::Metadata &metadata,
-                      const time_t &enqueued_time_utc);
+                      const rl::timestamp &enqueued_time_utc);
 
   template <typename T>
   const T *process_compression(const uint8_t *data, size_t size,

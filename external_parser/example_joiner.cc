@@ -4,8 +4,8 @@
 #include "generated/v2/Event_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
-#include "zstd.h"
 #include "io/logger.h"
+#include "zstd.h"
 
 #include <limits.h>
 #include <time.h>
@@ -75,11 +75,11 @@ float median(const joined_event &event) {
 }
 
 float earliest(const joined_event &event) {
-  time_t oldest_valid_observation = std::numeric_limits<time_t>::max();
+  auto oldest_valid_observation = max_timestamp();
   float earliest_reward = 0.f;
 
   for (const auto &o : event.outcome_events) {
-    if (o.enqueued_time_utc < oldest_valid_observation) {
+    if (first_smaller_than_second(o.enqueued_time_utc, oldest_valid_observation)) {
       oldest_valid_observation = o.enqueued_time_utc;
       earliest_reward = o.value;
     }
@@ -151,11 +151,13 @@ void example_joiner::set_default_reward(float default_reward) {
   _default_reward = default_reward;
 }
 
-void example_joiner::set_learning_mode_config(const v2::LearningModeType& learning_mode) {
+void example_joiner::set_learning_mode_config(
+    const v2::LearningModeType &learning_mode) {
   _learning_mode_config = learning_mode;
 }
 
-void example_joiner::set_problem_type_config(const v2::ProblemType& problem_type) {
+void example_joiner::set_problem_type_config(
+    const v2::ProblemType &problem_type) {
   _problem_type_config = problem_type;
 }
 
@@ -275,19 +277,17 @@ int example_joiner::process_interaction(const v2::Event &event,
 
     if (learning_mode != _learning_mode_config) {
       VW::io::logger::log_critical(
-        "Online Trainer learning mode [{}] "
-        "and Interaction event learning mode [{}]"
-        "don't match. Skipping interaction from processing."
-        "EventId: [{}]",
-        EnumNameLearningModeType(_learning_mode_config),
-        EnumNameLearningModeType(learning_mode),
-        metadata.id()->c_str()
-      );
+          "Online Trainer learning mode [{}] "
+          "and Interaction event learning mode [{}]"
+          "don't match. Skipping interaction from processing."
+          "EventId: [{}]",
+          EnumNameLearningModeType(_learning_mode_config),
+          EnumNameLearningModeType(learning_mode), metadata.id()->c_str());
 
       return 0;
     }
 
-    metadata_info meta = {"client_time_utc",
+    metadata_info meta = {to_timestamp(*metadata.client_time_utc()),
                           metadata.app_id() ? metadata.app_id()->str() : "",
                           metadata.payload_type(),
                           metadata.pass_probability(),
@@ -326,11 +326,11 @@ int example_joiner::process_interaction(const v2::Event &event,
   return 0;
 }
 
-int example_joiner::process_outcome(const v2::Event &event,
-                                    const v2::Metadata &metadata,
-                                    const time_t &enqueued_time_utc) {
+int example_joiner::process_outcome(
+    const v2::Event &event, const v2::Metadata &metadata,
+    const reinforcement_learning::timestamp &enqueued_time_utc) {
   outcome_event o_event;
-  o_event.metadata = {"client_time_utc",
+  o_event.metadata = {to_timestamp(*metadata.client_time_utc()),
                       metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(), metadata.pass_probability(),
                       metadata.encoding()};
@@ -419,32 +419,23 @@ int example_joiner::process_joined(v_array<example *> &examples) {
     auto metadata = event->meta();
 
     if (metadata->payload_type() == v2::PayloadType_Outcome) {
-      time_t raw_time;
-      time(&raw_time);
-      struct tm *enqueued_time;
-      // TODO use gmtime_s? windows tests break when accessing enqueue_time internals
-      enqueued_time = gmtime(&raw_time);
-      joined_event->timestamp()->year() - 1900;
-      joined_event->timestamp()->month() - 1;
-      joined_event->timestamp()->day();
-      joined_event->timestamp()->hour();
-      joined_event->timestamp()->minute();
-      joined_event->timestamp()->second();
 
-      time_t enqueued_time_utc;// = mktime(enqueued_time);
+      rl::timestamp enqueued_time_utc =
+          to_timestamp(*joined_event->timestamp());
+
       process_outcome(*event, *metadata, enqueued_time_utc);
     } else {
       v2::PayloadType payload_type = metadata->payload_type();
 
-      if (EnumNamePayloadType(payload_type) != EnumNameProblemType(_problem_type_config)) {
+      if (EnumNamePayloadType(payload_type) !=
+          EnumNameProblemType(_problem_type_config)) {
         VW::io::logger::log_critical(
-          "Online Trainer mode [{}] "
-          "and Interaction event type [{}] "
-          "don't match. Skipping interaction from processing."
-          "EventId: [{}]",
-          EnumNameProblemType(_problem_type_config),
-          EnumNamePayloadType(payload_type),
-          metadata->id()->c_str());
+            "Online Trainer mode [{}] "
+            "and Interaction event type [{}] "
+            "don't match. Skipping interaction from processing."
+            "EventId: [{}]",
+            EnumNameProblemType(_problem_type_config),
+            EnumNamePayloadType(payload_type), metadata->id()->c_str());
         continue;
       }
 
