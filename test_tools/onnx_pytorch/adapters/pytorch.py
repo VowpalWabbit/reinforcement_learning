@@ -16,22 +16,6 @@ class IterableLogs(IterableDataset):
             if ret:
                 yield ret
 
-# input is a dataframe containing a line of dsjson
-class Logs(Dataset):
-    def __init__(self, df, transform = None):
-        self.df = df['lines']
-        self.df = self.df[self.df.str.startswith('{"RewardValue') == False]
-        if transform:
-            transformed = self.df.apply(lambda l: transform(l))
-            self.df = transformed[transformed.isnull() == False]
-        self.df = self.df.values
-
-    def __len__(self):
-        return len(self.df)
-
-    def __getitem__(self, idx):
-        return self.df[idx]
-
 # input is a dict {'features': dict { key: features }, 'label': label_index, 'cost': cost }
 class DictToCbTensor(object):
     def __init__(self, problem_type = types.Problem.MultiClass):

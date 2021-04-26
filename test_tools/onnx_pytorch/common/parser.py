@@ -117,6 +117,8 @@ class JoinedLogStreamReader:
             msg = self.read_message()
             if msg[0] == MSG_TYPE_EOF:
                 break
+            if msg[0] != MSG_TYPE_REGULAR:
+                raise f'Expected Regular message type, found {msg[0]} instead'
             yield JoinedPayload.GetRootAsJoinedPayload(msg[1], 0)
         return None
 
@@ -133,7 +135,7 @@ class VWFlatbufferParser:
     def __iter__(self):
         return self.gen
 
-    def getString(self, table):
+    def read_as_string(self, table):
         off = table.Pos
         length = flatbuffers.encode.Get(flatbuffers.number_types.UOffsetTFlags.packer_type, table.Bytes, off)
         start = off + flatbuffers.number_types.UOffsetTFlags.bytewidth
@@ -156,7 +158,7 @@ class VWFlatbufferParser:
 
         value = evt.Value()
         if evt.ValueType() == OutcomeValue.literal:
-            value = self.getString(value)
+            value = self.read_as_string(value)
         elif evt.ValueType() == OutcomeValue.numeric:
             value = self.cast(value, NumericOutcome).Value()
 
@@ -164,7 +166,8 @@ class VWFlatbufferParser:
         if evt.ActionTaken() is True:
             index = evt.Index()
             if evt.IndexType() == OutcomeValue.literal:
-                index = self.getString(index)
+                # parse_cb only contains numeric index types, so this should also be a numeric index type
+                raise Exception("literal index types are unsupported")
             elif evt.IndexType() == OutcomeValue.numeric:
                 index = self.cast(index, NumericIndex).Index()
 
