@@ -132,6 +132,7 @@ private:
 
   float _default_reward = 0.f;
   float _reward = _default_reward;
+  // original reward is used to record the observed reward of apprentice mode
   float _original_reward = _default_reward;
   RewardCalcType _reward_calculation;
 

@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(convert_binary_to_dsjson) {
     "\"c\":{\"GUser\":{\"id\":\"a\",\"major\":\"eng\",\"hobby\":\"hiking\"},"
     "\"_multi\":[{\"TAction\":{\"a1\":\"f1\"}},{\"TAction\":{\"a2\":\"f2\"}}]},"
     "\"p\":[0.9000000357627869,0.10000000149011612],\"VWState\":{\"m\":\"N/A\"},"
-    "\"_original_label_cost\":-0.0}\n";
+    "\"_original_label_cost\":-1.5}\n";
 
   BOOST_CHECK_EQUAL(dsjson_stream.str(), expected_joined_dsjson);
   clear_examples(examples, vw);
