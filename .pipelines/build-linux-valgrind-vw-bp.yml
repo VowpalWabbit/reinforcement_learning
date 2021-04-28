@@ -15,8 +15,8 @@ steps:
     sudo apt update -y
     sudo apt install -y valgrind
   displayName: Install Valgrind
-- bash: ./.scripts/linux/build.sh
-  displayName: Build C++
-- bash: ./.scripts/linux/unit-tests-valgrind.sh
-  displayName: Run Unit Tests C++ with Valgrind
+- bash: ./.scripts/linux/build-vw-bp.sh
+  displayName: Build C++ binary parser
+- bash: ./.scripts/linux/unit-tests-vw-bp-valgrind.sh
+  displayName: Run Unit Tests C++ binary parser with Valgrind
 - task: PublishTestResults@2

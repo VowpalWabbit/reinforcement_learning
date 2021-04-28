@@ -37,7 +37,6 @@ std::vector<char> read_file(std::string file_name) {
 std::string get_test_files_location() {
   if (boost::unit_test::framework::master_test_suite().argc <= 1) {
     // set default location of test_files dir
-    // TODO this might not work when windows build is added
     boost::filesystem::path p(__FILE__);
     p.remove_filename();
     return p.string() + "/test_files/";
@@ -47,9 +46,9 @@ std::string get_test_files_location() {
   }
 }
 
-const v2::JoinedEvent *
-wrap_into_joined_event(std::vector<char> &buffer,
-                       flatbuffers::DetachedBuffer &detached_buffer) {
+std::vector<const v2::JoinedEvent *>
+wrap_into_joined_events(std::vector<char> &buffer,
+                        std::vector<flatbuffers::DetachedBuffer> &detached_buffers) {
   flatbuffers::FlatBufferBuilder fbb;
 
   // if file is smaller than preamble size then fail
@@ -62,13 +61,26 @@ wrap_into_joined_event(std::vector<char> &buffer,
 
   BOOST_REQUIRE_GE(event_batch->events()->size(), 1);
 
-  // TODO read all the event's from batch and not just the first one
-  const auto *payload = event_batch->events()->Get(0)->payload();
-  auto vec = fbb.CreateVector(payload->data(), payload->size());
+  std::vector<const v2::JoinedEvent *> event_list {};
 
-  v2::TimeStamp ts(2020, 3, 18, 10, 20, 30, 0);
-  auto fb = v2::CreateJoinedEvent(fbb, vec, &ts);
-  fbb.Finish(fb);
-  detached_buffer = fbb.Release();
-  return flatbuffers::GetRoot<v2::JoinedEvent>(detached_buffer.data());
+  int day = 30;
+  v2::TimeStamp ts(2020, 3, day, 10, 20, 30, 0);
+
+  for (size_t i = 0; i < event_batch->events()->size(); i++) {
+    const auto *payload = event_batch->events()->Get(i)->payload();
+    auto vec = fbb.CreateVector(payload->data(), payload->size());
+
+    if (i < 30) {
+      ts.mutate_day(day - i);
+    }
+
+    auto fb = v2::CreateJoinedEvent(fbb, vec, &ts);
+
+    fbb.Finish(fb);
+    detached_buffers.push_back(fbb.Release());
+    const v2::JoinedEvent *je = flatbuffers::GetRoot<v2::JoinedEvent>(detached_buffers[i].data());
+    event_list.push_back(je);
+  }
+
+  return event_list;
 }

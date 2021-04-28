@@ -5,8 +5,6 @@
 #include "parse_args.h"
 #include "parse_example_binary.h"
 
-static size_t constexpr BINARY_PARSER_VERSION = 1;
-
 namespace VW {
 namespace external {
 

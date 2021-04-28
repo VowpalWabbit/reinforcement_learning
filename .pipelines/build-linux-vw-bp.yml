@@ -11,8 +11,8 @@ container:
 steps:
 - checkout: self
   submodules: true
-- bash: ./.scripts/linux/build.sh
-  displayName: Build C++
-- bash: ./.scripts/linux/test.sh
-  displayName: Test C++
+- bash: ./.scripts/linux/build-vw-bp.sh
+  displayName: Build C++ binary parser
+- bash: ./.scripts/linux/test-vw-bp.sh
+  displayName: Test C++ binary parser
 - task: PublishTestResults@2
