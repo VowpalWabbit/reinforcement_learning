@@ -75,11 +75,12 @@ float median(const joined_event &event) {
 }
 
 float earliest(const joined_event &event) {
-  auto oldest_valid_observation = max_timestamp();
+  auto oldest_valid_observation =
+      std::chrono::time_point<std::chrono::system_clock>::max();
   float earliest_reward = 0.f;
 
   for (const auto &o : event.outcome_events) {
-    if (first_smaller_than_second(o.enqueued_time_utc, oldest_valid_observation)) {
+    if (o.enqueued_time_utc < oldest_valid_observation) {
       oldest_valid_observation = o.enqueued_time_utc;
       earliest_reward = o.value;
     }
@@ -287,7 +288,7 @@ int example_joiner::process_interaction(const v2::Event &event,
       return 0;
     }
 
-    metadata_info meta = {to_timestamp(*metadata.client_time_utc()),
+    metadata_info meta = {timestamp_to_chrono(*metadata.client_time_utc()),
                           metadata.app_id() ? metadata.app_id()->str() : "",
                           metadata.payload_type(),
                           metadata.pass_probability(),
@@ -328,9 +329,10 @@ int example_joiner::process_interaction(const v2::Event &event,
 
 int example_joiner::process_outcome(
     const v2::Event &event, const v2::Metadata &metadata,
-    const reinforcement_learning::timestamp &enqueued_time_utc) {
+    const std::chrono::time_point<std::chrono::system_clock>
+        &enqueued_time_utc) {
   outcome_event o_event;
-  o_event.metadata = {to_timestamp(*metadata.client_time_utc()),
+  o_event.metadata = {timestamp_to_chrono(*metadata.client_time_utc()),
                       metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(), metadata.pass_probability(),
                       metadata.encoding()};
@@ -420,8 +422,7 @@ int example_joiner::process_joined(v_array<example *> &examples) {
 
     if (metadata->payload_type() == v2::PayloadType_Outcome) {
 
-      rl::timestamp enqueued_time_utc =
-          to_timestamp(*joined_event->timestamp());
+      auto enqueued_time_utc = timestamp_to_chrono(*joined_event->timestamp());
 
       process_outcome(*event, *metadata, enqueued_time_utc);
     } else {

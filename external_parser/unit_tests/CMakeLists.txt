@@ -9,6 +9,7 @@ set(TEST_SOURCES
   main.cc
   test_common.cc
   test_lru_dedup_cache.cc
+  test_timestamp_helper.cc
 )
 
 add_executable(binary_parser_unit_tests ${TEST_SOURCES})

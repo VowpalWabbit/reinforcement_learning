@@ -20,10 +20,9 @@
 // clang-format on
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
-namespace rl = reinforcement_learning;
 
 struct metadata_info {
-  rl::timestamp client_time_utc;
+  std::chrono::time_point<std::chrono::system_clock> client_time_utc;
   std::string app_id;
   v2::PayloadType payload_type;
   float pass_probability;
@@ -37,7 +36,7 @@ struct outcome_event {
   int index;
   std::string s_value;
   float value;
-  rl::timestamp enqueued_time_utc;
+  std::chrono::time_point<std::chrono::system_clock> enqueued_time_utc;
 };
 
 struct joined_event {
@@ -92,7 +91,8 @@ private:
                           v_array<example *> &examples);
 
   int process_outcome(const v2::Event &event, const v2::Metadata &metadata,
-                      const rl::timestamp &enqueued_time_utc);
+                      const std::chrono::time_point<std::chrono::system_clock>
+                          &enqueued_time_utc);
 
   template <typename T>
   const T *process_compression(const uint8_t *data, size_t size,

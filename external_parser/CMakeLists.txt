@@ -64,7 +64,7 @@ set(external_parser_sources ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.cc
 )
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/zstd/build/cmake ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser/zstd EXCLUDE_FROM_ALL)
-set(EXTERNAL_PARSER_DIR ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/zstd/lib/ ${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib)
+set(EXTERNAL_PARSER_DIR ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/zstd/lib/ ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date)
 set(EXTERNAL_PARSER_LIBS libzstd_static)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/../ext_libs/vowpal_wabbit ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser)
