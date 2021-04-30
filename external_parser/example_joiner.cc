@@ -75,8 +75,7 @@ float median(const joined_event &event) {
 }
 
 float earliest(const joined_event &event) {
-  auto oldest_valid_observation =
-      std::chrono::time_point<std::chrono::system_clock>::max();
+  auto oldest_valid_observation = TimePoint::max();
   float earliest_reward = 0.f;
 
   for (const auto &o : event.outcome_events) {
@@ -327,10 +326,9 @@ int example_joiner::process_interaction(const v2::Event &event,
   return 0;
 }
 
-int example_joiner::process_outcome(
-    const v2::Event &event, const v2::Metadata &metadata,
-    const std::chrono::time_point<std::chrono::system_clock>
-        &enqueued_time_utc) {
+int example_joiner::process_outcome(const v2::Event &event,
+                                    const v2::Metadata &metadata,
+                                    const TimePoint &enqueued_time_utc) {
   outcome_event o_event;
   o_event.metadata = {timestamp_to_chrono(*metadata.client_time_utc()),
                       metadata.app_id() ? metadata.app_id()->str() : "",
