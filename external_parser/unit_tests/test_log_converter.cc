@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(convert_binary_to_dsjson) {
   std::string expected_joined_dsjson = "{\"_label_cost\":-1.5,"
     "\"_label_probability\":0.9000000357627869,\"_label_Action\":1,"
     "\"_labelIndex\":0,\"o\":[{\"v\":1.5,\"EventId\":\"91f71c8\","
-    "\"ActionTaken\":false}],\"Timestamp\":\"joiner_timestamp\","
+    "\"ActionTaken\":false}],\"Timestamp\":\"2021-04-13 15:08:46.000 UTC\","
     "\"Version\":\"1\",\"EventId\":\"91f71c8\",\"a\":[1,2],"
     "\"c\":{\"GUser\":{\"id\":\"a\",\"major\":\"eng\",\"hobby\":\"hiking\"},"
     "\"_multi\":[{\"TAction\":{\"a1\":\"f1\"}},{\"TAction\":{\"a2\":\"f2\"}}]},"

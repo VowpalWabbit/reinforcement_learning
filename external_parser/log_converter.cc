@@ -1,4 +1,5 @@
 #include "log_converter.h"
+#include "date.h"
 
 namespace log_converter {
 void build_cb_json(std::ofstream &outfile, const joined_event &je,
@@ -40,8 +41,9 @@ void build_cb_json(std::ofstream &outfile, const joined_event &je,
     }
     d.AddMember("o", outcome_arr, allocator);
 
-    //TODO: add timestamp
-    v.SetString(je.joined_event_timestamp.c_str(), allocator);
+    std::string ts_str = date::format("%F %T %Z",
+      date::floor<std::chrono::milliseconds>(je.joined_event_timestamp));
+    v.SetString(ts_str.c_str(), allocator);
     d.AddMember("Timestamp", v, allocator);
 
     d.AddMember("Version", "1", allocator);
