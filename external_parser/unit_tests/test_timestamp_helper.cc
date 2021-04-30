@@ -22,27 +22,9 @@ gmt_now_and_timestamp() {
       tp);
 }
 
-BOOST_AUTO_TEST_CASE(test_exact_timestamp) {
-  auto times = gmt_now_and_timestamp();
-  auto fb_ts = std::get<0>(times);
-  auto initial_chrono_ts = std::get<1>(times);
-
-  auto back_to_chrono = timestamp_to_chrono(fb_ts);
-
-  BOOST_CHECK_EQUAL(back_to_chrono.time_since_epoch().count(),
-                    initial_chrono_ts.time_since_epoch().count());
-
-  // check time comparison operators
-  BOOST_CHECK_EQUAL(back_to_chrono == initial_chrono_ts, true);
-  BOOST_CHECK_EQUAL(back_to_chrono <= initial_chrono_ts, true);
-  BOOST_CHECK_EQUAL(back_to_chrono >= initial_chrono_ts, true);
-  BOOST_CHECK_EQUAL(back_to_chrono < initial_chrono_ts, false);
-  BOOST_CHECK_EQUAL(back_to_chrono > initial_chrono_ts, false);
-}
-
 BOOST_AUTO_TEST_CASE(test_later_than_timestamp) {
-  const auto earlier_timestamp = std::chrono::system_clock::now();
-  std::this_thread::sleep_for(std::chrono::milliseconds(2));
+  const TimePoint earlier_timestamp = std::chrono::system_clock::now();
+  std::this_thread::sleep_for(std::chrono::seconds(1));
   auto times = gmt_now_and_timestamp();
   auto later_fb_timestamp = std::get<0>(times);
 
@@ -61,11 +43,11 @@ BOOST_AUTO_TEST_CASE(test_later_than_timestamp) {
 
 BOOST_AUTO_TEST_CASE(test_earlier_than_timestamp) {
   auto times = gmt_now_and_timestamp();
-  std::this_thread::sleep_for(std::chrono::milliseconds(2));
+  std::this_thread::sleep_for(std::chrono::seconds(1));
   auto earlier_fb_timestamp = std::get<0>(times);
   auto earlier_timestamp = timestamp_to_chrono(earlier_fb_timestamp);
 
-  const auto later_timestamp = std::chrono::system_clock::now();
+  const TimePoint later_timestamp = std::chrono::system_clock::now();
 
   BOOST_CHECK_NE(earlier_timestamp.time_since_epoch().count(),
                  later_timestamp.time_since_epoch().count());
