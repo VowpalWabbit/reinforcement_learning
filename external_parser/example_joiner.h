@@ -47,7 +47,7 @@ struct joined_event {
   metadata_info interaction_metadata;
   DecisionServiceInteraction interaction_data;
   std::vector<outcome_event> outcome_events;
-  const char *context;
+  std::string context;
   std::string model_id;
   // Default Baseline Action for CB is 1 (rl client recommended actions are 1
   // indexed in the CB case)
@@ -140,5 +140,5 @@ private:
   v2::ProblemType _problem_type_config = v2::ProblemType_UNKNOWN;
 
   bool _binary_to_json;
-  std::string _outfile_name;
+  std::ofstream _outfile;
 };

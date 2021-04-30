@@ -56,7 +56,7 @@ void build_cb_json(std::ofstream &outfile, const joined_event &je,
     d.AddMember("a", action_arr, allocator);
 
     rj::Document context;
-    context.Parse(je.context);
+    context.Parse(je.context.c_str());
     d.AddMember("c", context, allocator);
 
     rj::Value p_arr(rj::kArrayType);

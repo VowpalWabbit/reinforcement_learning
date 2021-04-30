@@ -94,13 +94,18 @@ example_joiner::example_joiner(vw *vw)
 
 example_joiner::example_joiner(vw *vw, bool binary_to_json, std::string outfile_name)
     : _vw(vw), _reward_calculation(&RewardFunctions::earliest),
-      _binary_to_json(binary_to_json), _outfile_name(outfile_name) {}
+      _binary_to_json(binary_to_json) {
+  _outfile.open(outfile_name, std::ofstream::out);
+}
 
 example_joiner::~example_joiner() {
   // cleanup examples
   _dedup_cache.clear(return_example_f, this);
   for (auto *ex : _example_pool) {
     VW::dealloc_examples(ex, 1);
+  }
+  if (_binary_to_json) {
+    _outfile.close();
   }
 }
 
@@ -481,9 +486,7 @@ int example_joiner::process_joined(v_array<example *> &examples) {
   }
 
   if (_binary_to_json) {
-    std::ofstream outfile;
-    outfile.open(_outfile_name, std::ofstream::out | std::ofstream::app);
-    log_converter::build_cb_json(outfile, je, _reward, _original_reward);
+    log_converter::build_cb_json(_outfile, je, _reward, _original_reward);
   }
 
   try_set_label(je, examples);

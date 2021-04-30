@@ -17,14 +17,18 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
   if (parsed_options.ext_opts->binary) {
     bool binary_to_json = parsed_options.ext_opts->binary_to_json;
     if (binary_to_json) {
-      std::string infile_name = all->data_filename;
-      std::string outfile_name = infile_name.substr(
-        0, infile_name.find_last_of('.')) + ".dsjson";
+      std::string infile_path = all->data_filename;
+      std::string infile_name = infile_path.substr(
+        0, infile_path.find_last_of('.'));
+      std::string infile_extension = infile_path.substr(
+        infile_path.find_last_of(".") + 1);
 
-      if(remove(outfile_name.c_str()) != 0){
-        VW::io::logger::log_error("outfile clean up failed: [{}]", strerror(errno));
+      if (infile_extension == "dsjson") {
+        throw std::runtime_error("input file for --binary_to_json option should"
+        " be binary format");
       }
 
+      std::string outfile_name = infile_name + ".dsjson";
       return VW::make_unique<binary_parser>(all, binary_to_json, outfile_name);
     }
     return VW::make_unique<binary_parser>(all);
