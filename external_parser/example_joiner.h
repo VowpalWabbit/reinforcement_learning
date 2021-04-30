@@ -40,7 +40,7 @@ struct outcome_event {
 };
 
 struct joined_event {
-  std::string joined_event_timestamp;
+  TimePoint joined_event_timestamp;
   metadata_info interaction_metadata;
   DecisionServiceInteraction interaction_data;
   std::vector<outcome_event> outcome_events;
@@ -88,6 +88,7 @@ private:
   int process_dedup(const v2::Event &event, const v2::Metadata &metadata);
 
   int process_interaction(const v2::Event &event, const v2::Metadata &metadata,
+                          const TimePoint &enqueued_time_utc,
                           v_array<example *> &examples);
 
   int process_outcome(const v2::Event &event, const v2::Metadata &metadata,

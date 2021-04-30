@@ -266,6 +266,7 @@ void example_joiner::try_set_label(const joined_event &je, float reward,
 
 int example_joiner::process_interaction(const v2::Event &event,
                                         const v2::Metadata &metadata,
+                                        const TimePoint &enqueued_time_utc,
                                         v_array<example *> &examples) {
 
   if (metadata.payload_type() == v2::PayloadType_CB) {
@@ -321,7 +322,7 @@ int example_joiner::process_interaction(const v2::Event &event,
 
     _batch_grouped_examples.emplace(std::make_pair<std::string, joined_event>(
         metadata.id()->str(),
-        {"joiner_timestamp", std::move(meta), std::move(data)}));
+        {enqueued_time_utc, std::move(meta), std::move(data)}));
   }
   return 0;
 }
@@ -417,11 +418,9 @@ int example_joiner::process_joined(v_array<example *> &examples) {
   for (auto &joined_event : _batch_grouped_events[id]) {
     auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
     auto metadata = event->meta();
+    auto enqueued_time_utc = timestamp_to_chrono(*joined_event->timestamp());
 
     if (metadata->payload_type() == v2::PayloadType_Outcome) {
-
-      auto enqueued_time_utc = timestamp_to_chrono(*joined_event->timestamp());
-
       process_outcome(*event, *metadata, enqueued_time_utc);
     } else {
       v2::PayloadType payload_type = metadata->payload_type();
@@ -441,7 +440,7 @@ int example_joiner::process_joined(v_array<example *> &examples) {
       if (payload_type == v2::PayloadType_CA) {
         multiline = false;
       }
-      process_interaction(*event, *metadata, examples);
+      process_interaction(*event, *metadata, enqueued_time_utc, examples);
     }
   }
 
