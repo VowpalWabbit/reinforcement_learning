@@ -13,6 +13,7 @@
 #include "vw.h"
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
+constexpr float FLOAT_TOL = 0.0001f;
 
 void clear_examples(v_array<example *> &examples, vw *vw);
 

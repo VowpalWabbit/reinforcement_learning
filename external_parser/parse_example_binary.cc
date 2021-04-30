@@ -173,11 +173,11 @@ bool binary_parser::read_header(io_buf *input) {
   return true;
 }
 
-bool binary_parser::read_reward_msg(io_buf *input) {
+bool binary_parser::read_checkpoint_msg(io_buf *input) {
   _payload = nullptr;
   if (!read_payload_size(input, _payload_size)) {
     VW::io::logger::log_critical(
-        "Failed to read reward message payload size, after having read "
+        "Failed to read checkpoint message payload size, after having read "
         "[{}] bytes from the file",
         _total_size_read);
     return false;
@@ -197,13 +197,11 @@ bool binary_parser::read_reward_msg(io_buf *input) {
 
   // TODO: fb verification: what if verification fails, crash or default to
   // something sensible?
-  auto reward_function_info =
-      flatbuffers::GetRoot<v2::RewardFunctionInfo>(_payload);
-  v2::RewardFunctionType reward_function_type = reward_function_info->type();
-  float default_reward = reward_function_info->default_reward();
-
-  _example_joiner.set_reward_function(reward_function_type);
-  _example_joiner.set_default_reward(default_reward);
+  auto checkpoint_info = flatbuffers::GetRoot<v2::CheckpointInfo>(_payload);
+  _example_joiner.set_reward_function(checkpoint_info->reward_function_type());
+  _example_joiner.set_default_reward(checkpoint_info->default_reward());
+  _example_joiner.set_learning_mode_config(checkpoint_info->learning_mode_config());
+  _example_joiner.set_problem_type_config(checkpoint_info->problem_type_config());
 
   return true;
 }
@@ -308,8 +306,8 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
     return false;
   }
 
-  if (payload_type == MSG_TYPE_REWARD_FUNCTION) {
-    if (!read_reward_msg(all->example_parser->input)) {
+  if (payload_type == MSG_TYPE_CHECKPOINT) {
+    if (!read_checkpoint_msg(all->example_parser->input)) {
       return false;
     }
 

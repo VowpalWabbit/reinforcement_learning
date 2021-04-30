@@ -11,7 +11,7 @@ constexpr size_t BINARY_PARSER_VERSION = 1;
 
 constexpr unsigned int MSG_TYPE_HEADER = 0x55555555;
 constexpr unsigned int MSG_TYPE_REGULAR = 0xFFFFFFFF;
-constexpr unsigned int MSG_TYPE_REWARD_FUNCTION = 0x11111111;
+constexpr unsigned int MSG_TYPE_CHECKPOINT = 0x11111111;
 constexpr unsigned int MSG_TYPE_EOF = 0xAAAAAAAA;
 
 namespace VW {
@@ -25,7 +25,7 @@ public:
   bool read_magic(io_buf *input);
   bool read_version(io_buf *input);
   bool read_header(io_buf *input);
-  bool read_reward_msg(io_buf *input);
+  bool read_checkpoint_msg(io_buf *input);
   bool read_regular_msg(io_buf *input, v_array<example *> &examples);
   bool advance_to_next_payload_type(io_buf *input, unsigned int &payload_type);
 

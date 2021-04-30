@@ -1,4 +1,6 @@
 include "Event.fbs";
+include "LearningModeType.fbs";
+include "ProblemType.fbs";
 
 namespace reinforcement_learning.messages.flatbuff.v2;
 enum RewardFunctionType : ubyte { Earliest, Average, Median, Sum, Min, Max }
@@ -22,11 +24,13 @@ table FileHeader {
     properties: [KeyValue];
 }
 
-table RewardFunctionInfo {
-    type: RewardFunctionType;
+table CheckpointInfo {
+    reward_function_type: RewardFunctionType;
     default_reward: float;
+    learning_mode_config: LearningModeType;
+    problem_type_config: ProblemType;
 }
 
-root_type RewardFunctionInfo;
-root_type JoinedPayload;
 root_type FileHeader;
+root_type CheckpointInfo;
+root_type JoinedPayload;
