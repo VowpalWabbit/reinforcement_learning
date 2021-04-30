@@ -314,7 +314,7 @@ public:
 	}
 private:
 	dedup_state _dedup_state;
-  int _dummy_state;
+  int _dummy_state = 0;
   bool _use_compression;
   bool _use_dedup;
 };

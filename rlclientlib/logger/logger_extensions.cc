@@ -32,7 +32,7 @@ public:
 		return error_code::success;
 	}
 private:
-	int _dummy_state;
+	int _dummy_state = 0;
 };
 
 
