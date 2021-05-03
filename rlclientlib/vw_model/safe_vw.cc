@@ -42,7 +42,6 @@ namespace reinforcement_learning {
   {
     // cleanup examples
     for (auto&& ex : _example_pool) {
-      VW::dealloc_example(_vw->example_parser->lbl_parser.delete_label, *ex);
       ::free_it(ex);
     }
 
