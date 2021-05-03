@@ -278,15 +278,15 @@ bool binary_parser::advance_to_next_payload_type(io_buf *input,
 bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
   if (!_header_read) {
     // TODO change this to handle multiple files if needed?
-    if (!read_magic(all->example_parser->input)) {
+    if (!read_magic(all->example_parser->input.get())) {
       return false;
     }
 
-    if (!read_version(all->example_parser->input)) {
+    if (!read_version(all->example_parser->input.get())) {
       return false;
     }
 
-    if (!read_header(all->example_parser->input)) {
+    if (!read_header(all->example_parser->input.get())) {
       return false;
     }
 
@@ -302,27 +302,27 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
 
   unsigned int payload_type;
 
-  if (!advance_to_next_payload_type(all->example_parser->input, payload_type)) {
+  if (!advance_to_next_payload_type(all->example_parser->input.get(), payload_type)) {
     return false;
   }
 
   if (payload_type == MSG_TYPE_CHECKPOINT) {
-    if (!read_checkpoint_msg(all->example_parser->input)) {
+    if (!read_checkpoint_msg(all->example_parser->input.get())) {
       return false;
     }
 
-    if (!advance_to_next_payload_type(all->example_parser->input,
+    if (!advance_to_next_payload_type(all->example_parser->input.get(),
                                       payload_type)) {
       return false;
     }
   }
 
   while (payload_type == MSG_TYPE_REGULAR) {
-    if (read_regular_msg(all->example_parser->input, examples)) {
+    if (read_regular_msg(all->example_parser->input.get(), examples)) {
       return true;
     }
     // bad payload process the next one
-    if (!advance_to_next_payload_type(all->example_parser->input,
+    if (!advance_to_next_payload_type(all->example_parser->input.get(),
                                       payload_type)) {
       return false;
     }
