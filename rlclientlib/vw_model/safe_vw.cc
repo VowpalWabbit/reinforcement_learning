@@ -42,7 +42,7 @@ namespace reinforcement_learning {
   {
     // cleanup examples
     for (auto&& ex : _example_pool) {
-      ::free_it(ex);
+      VW::dealloc_examples(ex, 1);
     }
 
     // cleanup VW instance
