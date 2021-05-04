@@ -10,6 +10,7 @@
 #include "best_constant.h"
 #include "cb.h"
 #include "constant.h"
+#include "example.h"
 #include "flatbuffers/flatbuffers.h"
 #include "global_data.h"
 #include "io/logger.h"
@@ -204,8 +205,10 @@ bool binary_parser::read_checkpoint_msg(io_buf *input) {
   auto checkpoint_info = flatbuffers::GetRoot<v2::CheckpointInfo>(_payload);
   _example_joiner.set_reward_function(checkpoint_info->reward_function_type());
   _example_joiner.set_default_reward(checkpoint_info->default_reward());
-  _example_joiner.set_learning_mode_config(checkpoint_info->learning_mode_config());
-  _example_joiner.set_problem_type_config(checkpoint_info->problem_type_config());
+  _example_joiner.set_learning_mode_config(
+      checkpoint_info->learning_mode_config());
+  _example_joiner.set_problem_type_config(
+      checkpoint_info->problem_type_config());
 
   return true;
 }
@@ -247,11 +250,29 @@ bool binary_parser::read_regular_msg(io_buf *input,
 
   for (size_t i = 0; i < joined_payload->events()->size(); i++) {
     // process and group events in batch
-    _example_joiner.process_event(*joined_payload->events()->Get(i));
+    if (!_example_joiner.process_event(*joined_payload->events()->Get(i))) {
+      VW::io::logger::log_error("Processing of an event from JoinedPayload "
+                                "failed after having read [{}] "
+                                "bytes from the file, skipping JoinedPayload",
+                                _total_size_read);
+      return false;
+    }
   }
-  _example_joiner.process_joined(examples);
 
-  return true;
+  while (_example_joiner.processing_batch()) {
+    if (_example_joiner.process_joined(examples)) {
+      return true;
+    } else {
+      VW::io::logger::log_error(
+          "Processing of a joined event from a JoinedEvent "
+          "failed after having read [{}] "
+          "bytes from the file, proceeding to next message",
+          _total_size_read);
+    }
+  }
+
+  // nothing form the current batch was processed, need to read next msg
+  return false;
 }
 
 bool binary_parser::advance_to_next_payload_type(io_buf *input,
@@ -297,11 +318,16 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
     _header_read = true;
   }
 
-  // either process next id from an ongoing batch
-  // or read the next batch from file
-  if (_example_joiner.processing_batch()) {
-    _example_joiner.process_joined(examples);
-    return true;
+  while (_example_joiner.processing_batch()) {
+    if (_example_joiner.process_joined(examples)) {
+      return true;
+    } else {
+      VW::io::logger::log_error(
+          "Processing of a joined event from a JoinedEvent "
+          "failed after having read [{}] "
+          "bytes from the file, proceeding to next message",
+          _total_size_read);
+    }
   }
 
   unsigned int payload_type;
@@ -325,12 +351,21 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
     if (read_regular_msg(all->example_parser->input.get(), examples)) {
       return true;
     }
+
+    // cleanup examples since something might have gone wrong and left the
+    // existing example's in a bad state
+    VW::return_multiple_example(*all, examples);
+    // add one new example since all parsers expect to be called with one unused
+    // example
+    examples.push_back(&VW::get_unused_example(all));
+
     // bad payload process the next one
     if (!advance_to_next_payload_type(all->example_parser->input.get(),
                                       payload_type)) {
       return false;
     }
   }
+
   if (payload_type != MSG_TYPE_EOF) {
     VW::io::logger::log_critical(
         "Payload type not recognized [{}], after having read [{}] "
