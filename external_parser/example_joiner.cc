@@ -216,18 +216,17 @@ bool example_joiner::process_compression(const uint8_t *data, size_t size,
   if (metadata.encoding() == v2::EventEncoding_Zstd) {
     size_t buff_size = ZSTD_getFrameContentSize(data, size);
     if (buff_size == ZSTD_CONTENTSIZE_ERROR) {
-      VW::io::logger::log_error(
+      VW::io::logger::log_warn(
           "Received ZSTD_CONTENTSIZE_ERROR while decompressing event with id: "
           "[{}] of type: [{}]",
           metadata.id()->c_str(), metadata.payload_type());
       return false;
     }
     if (buff_size == ZSTD_CONTENTSIZE_UNKNOWN) {
-      VW::io::logger::log_error("Received ZSTD_CONTENTSIZE_UNKNOWN while "
-                                "decompressing event with id: "
-                                "[{}] of type: [{}]",
-                                metadata.id()->c_str(),
-                                metadata.payload_type());
+      VW::io::logger::log_warn("Received ZSTD_CONTENTSIZE_UNKNOWN while "
+                               "decompressing event with id: "
+                               "[{}] of type: [{}]",
+                               metadata.id()->c_str(), metadata.payload_type());
       return false;
     }
 
@@ -236,7 +235,7 @@ bool example_joiner::process_compression(const uint8_t *data, size_t size,
     size_t res = ZSTD_decompress(buff_data.get(), buff_size, data, size);
 
     if (ZSTD_isError(res)) {
-      VW::io::logger::log_error(
+      VW::io::logger::log_warn(
           "Received [{}] error while decompressing event with id: "
           "[{}] of type: [{}]",
           ZSTD_getErrorName(res), metadata.id()->c_str(),
@@ -259,21 +258,21 @@ bool example_joiner::process_compression(const uint8_t *data, size_t size,
 void example_joiner::try_set_label(const joined_event &je,
                                    v_array<example *> &examples) {
   if (je.interaction_data.actions.empty()) {
-    VW::io::logger::log_error("missing actions for event [{}]",
-                              je.interaction_data.eventId);
+    VW::io::logger::log_warn("missing actions for event [{}]",
+                             je.interaction_data.eventId);
     return;
   }
 
   if (je.interaction_data.probabilities.empty()) {
-    VW::io::logger::log_error("missing probabilities for event [{}]",
-                              je.interaction_data.eventId);
+    VW::io::logger::log_warn("missing probabilities for event [{}]",
+                             je.interaction_data.eventId);
     return;
   }
 
   if (std::any_of(je.interaction_data.probabilities.begin(),
                   je.interaction_data.probabilities.end(),
                   [](float p) { return std::isnan(p); })) {
-    VW::io::logger::log_error(
+    VW::io::logger::log_warn(
         "distribution for event [{}] contains invalid probabilities",
         je.interaction_data.eventId);
   }
@@ -316,7 +315,7 @@ bool example_joiner::process_interaction(const v2::Event &event,
 
   if (EnumNamePayloadType(metadata.payload_type()) !=
       EnumNameProblemType(_problem_type_config)) {
-    VW::io::logger::log_critical(
+    VW::io::logger::log_warn(
         "Online Trainer mode [{}] "
         "and Interaction event type [{}] "
         "don't match. Skipping interaction from processing. "
@@ -338,7 +337,7 @@ bool example_joiner::process_interaction(const v2::Event &event,
     v2::LearningModeType learning_mode = cb->learning_mode();
 
     if (learning_mode != _learning_mode_config) {
-      VW::io::logger::log_critical(
+      VW::io::logger::log_warn(
           "Online Trainer learning mode [{}] "
           "and Interaction event learning mode [{}]"
           "don't match. Skipping interaction from processing. "
@@ -384,7 +383,7 @@ bool example_joiner::process_interaction(const v2::Event &event,
             _vw, &_dedup_cache.dedup_examples);
       }
     } catch (VW::vw_exception &e) {
-      VW::io::logger::log_error(
+      VW::io::logger::log_warn(
           "JSON parsing during interaction processing failed "
           "with error: [{}] for event with id: [{}]",
           e.what(), metadata.id()->c_str());
@@ -396,10 +395,10 @@ bool example_joiner::process_interaction(const v2::Event &event,
     return true;
   }
   // for now only CB is supported so log and return false
-  VW::io::logger::log_critical("Interaction event learning mode [{}] not "
-                               "currently supported, skipping interaction "
-                               "EventId: [{}]",
-                               metadata.payload_type(), metadata.id()->c_str());
+  VW::io::logger::log_error("Interaction event learning mode [{}] not "
+                            "currently supported, skipping interaction "
+                            "EventId: [{}]",
+                            metadata.payload_type(), metadata.id()->c_str());
   return false;
 }
 
@@ -432,8 +431,8 @@ bool example_joiner::process_outcome(const v2::Event &event,
   } else if (outcome->value_type() == v2::OutcomeValue_numeric) {
     o_event.value = outcome->value_as_numeric()->value();
   } else {
-    VW::io::logger::log_error("outcome for event [{}] does not have a value",
-                              metadata.id()->str());
+    VW::io::logger::log_warn("outcome for event [{}] does not have a value",
+                             metadata.id()->str());
     invalidate_joined_event(metadata.id()->str());
     return false;
   }
@@ -445,8 +444,8 @@ bool example_joiner::process_outcome(const v2::Event &event,
     o_event.s_index = outcome->index_as_numeric()->index();
     index = outcome->index_as_numeric()->index();
   } else {
-    VW::io::logger::log_error("outcome for event [{}] does not have an index",
-                              metadata.id()->str());
+    VW::io::logger::log_warn("outcome for event [{}] does not have an index",
+                             metadata.id()->str());
     invalidate_joined_event(metadata.id()->str());
     return false;
   }

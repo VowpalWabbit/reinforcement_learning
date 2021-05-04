@@ -42,6 +42,8 @@ struct outcome_event {
   bool action_taken;
 };
 
+// TODO in separate PR move metadat_info, outcome_event, joined_event and reward
+// calculations to their own file
 struct joined_event {
   joined_event(const TimePoint &tp, metadata_info &&mi,
                DecisionServiceInteraction &&id, const std::string &ctx,

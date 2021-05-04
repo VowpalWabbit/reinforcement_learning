@@ -82,11 +82,12 @@ binary_parser::binary_parser(vw *all)
     : _header_read(false), _example_joiner(all), _payload(nullptr),
       _payload_size(0), _total_size_read(0) {}
 
-binary_parser::binary_parser(vw *all, bool binary_to_json, std::string outfile_name)
+binary_parser::binary_parser(vw *all, bool binary_to_json,
+                             std::string outfile_name)
     : _header_read(false), _example_joiner(all, binary_to_json, outfile_name),
       _payload(nullptr), _payload_size(0), _total_size_read(0) {}
 
-binary_parser::~binary_parser(){}
+binary_parser::~binary_parser() {}
 
 bool binary_parser::read_magic(io_buf *input) {
   const uint32_t buffer_length = 4 * sizeof(char);
@@ -217,7 +218,7 @@ bool binary_parser::read_regular_msg(io_buf *input,
                                      v_array<example *> &examples) {
   _payload = nullptr;
   if (!read_payload_size(input, _payload_size)) {
-    VW::io::logger::log_critical(
+    VW::io::logger::log_warn(
         "Failed to read regular message payload size, after having read "
         "[{}] bytes from the file",
         _total_size_read);
@@ -227,10 +228,10 @@ bool binary_parser::read_regular_msg(io_buf *input,
   _total_size_read += sizeof(_payload_size);
 
   if (!read_payload(input, _payload, _payload_size)) {
-    VW::io::logger::log_critical("Failed to read regular message payload of "
-                                 "size [{}], after having read "
-                                 "[{}] bytes from the file",
-                                 _payload_size, _total_size_read);
+    VW::io::logger::log_warn("Failed to read regular message payload of "
+                             "size [{}], after having read "
+                             "[{}] bytes from the file",
+                             _payload_size, _total_size_read);
     return false;
   }
 
@@ -241,7 +242,7 @@ bool binary_parser::read_regular_msg(io_buf *input,
       flatbuffers::Verifier(reinterpret_cast<const uint8_t *>(_payload),
                             static_cast<size_t>(_payload_size));
   if (!joined_payload->Verify(verifier)) {
-    VW::io::logger::log_error(
+    VW::io::logger::log_warn(
         "JoinedPayload of size [{}] verification failed after having read [{}] "
         "bytes from the file, skipping JoinedPayload",
         _payload_size, _total_size_read);
@@ -251,10 +252,10 @@ bool binary_parser::read_regular_msg(io_buf *input,
   for (size_t i = 0; i < joined_payload->events()->size(); i++) {
     // process and group events in batch
     if (!_example_joiner.process_event(*joined_payload->events()->Get(i))) {
-      VW::io::logger::log_error("Processing of an event from JoinedPayload "
-                                "failed after having read [{}] "
-                                "bytes from the file, skipping JoinedPayload",
-                                _total_size_read);
+      VW::io::logger::log_warn("Processing of an event from JoinedPayload "
+                               "failed after having read [{}] "
+                               "bytes from the file, skipping JoinedPayload",
+                               _total_size_read);
       return false;
     }
   }
@@ -263,7 +264,7 @@ bool binary_parser::read_regular_msg(io_buf *input,
     if (_example_joiner.process_joined(examples)) {
       return true;
     } else {
-      VW::io::logger::log_error(
+      VW::io::logger::log_warn(
           "Processing of a joined event from a JoinedEvent "
           "failed after having read [{}] "
           "bytes from the file, proceeding to next message",
@@ -290,7 +291,7 @@ bool binary_parser::advance_to_next_payload_type(io_buf *input,
   _total_size_read += padding;
 
   if (!read_payload_type(input, payload_type)) {
-    VW::io::logger::log_warn(
+    VW::io::logger::log_critical(
         "Failed to read next payload type from file, after having read "
         "[{}] bytes from the file",
         _total_size_read);
@@ -322,7 +323,7 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
     if (_example_joiner.process_joined(examples)) {
       return true;
     } else {
-      VW::io::logger::log_error(
+      VW::io::logger::log_warn(
           "Processing of a joined event from a JoinedEvent "
           "failed after having read [{}] "
           "bytes from the file, proceeding to next message",
@@ -332,7 +333,8 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
 
   unsigned int payload_type;
 
-  if (!advance_to_next_payload_type(all->example_parser->input.get(), payload_type)) {
+  if (!advance_to_next_payload_type(all->example_parser->input.get(),
+                                    payload_type)) {
     return false;
   }
 
