@@ -25,6 +25,7 @@ public:
                              input_options &parsed_options);
   virtual ~parser();
   virtual bool parse_examples(vw *all, v_array<example *> &examples) = 0;
+  virtual void persist_metrics(std::vector<std::tuple<std::string, size_t>>& list_metrics);
 };
 
 } // namespace external

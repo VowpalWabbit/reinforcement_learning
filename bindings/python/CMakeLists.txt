@@ -1,10 +1,10 @@
 if(BUILD_PYTHON)
-  if(NOT DEFINED RL_PY_VERSION)
-    message(SEND_ERROR "RL_PY_VERSION must be defined.")
+  if(NOT DEFINED PY_VERSION)
+    message(SEND_ERROR "PY_VERSION must be defined.")
   endif()
 
   find_package(SWIG REQUIRED)
-  find_package(PythonInterp ${RL_PY_VERSION} REQUIRED)
+  find_package(PythonInterp ${PY_VERSION} REQUIRED)
 
   set(pip_folder ${CMAKE_CURRENT_SOURCE_DIR}/rl_client/)
   add_custom_target(_rl_client ALL)
