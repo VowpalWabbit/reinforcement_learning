@@ -51,9 +51,11 @@ endif()
 build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgen "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v2/" "" "")
 
 set(external_parser_headers ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/i_example_joiner.h
   ${CMAKE_CURRENT_SOURCE_DIR}/example_joiner.h
   ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_external.h
   ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_binary.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/topological_sorter.h
 )
 set(external_parser_sources ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/example_joiner.cc
