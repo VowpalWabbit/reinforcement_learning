@@ -211,7 +211,7 @@ void example_joiner::set_reward_function(const v2::RewardFunctionType type) {
 template <typename T>
 bool example_joiner::process_compression(const uint8_t *data, size_t size,
                                          const v2::Metadata &metadata,
-                                         const T *payload) {
+                                         const T *&payload) {
 
   if (metadata.encoding() == v2::EventEncoding_Zstd) {
     size_t buff_size = ZSTD_getFrameContentSize(data, size);
@@ -424,17 +424,13 @@ bool example_joiner::process_outcome(const v2::Event &event,
     return false;
   }
 
+  // index is currently not used (only CB currently supported)
   int index = -1;
 
   if (outcome->value_type() == v2::OutcomeValue_literal) {
     o_event.s_value = outcome->value_as_literal()->c_str();
   } else if (outcome->value_type() == v2::OutcomeValue_numeric) {
     o_event.value = outcome->value_as_numeric()->value();
-  } else {
-    VW::io::logger::log_warn("outcome for event [{}] does not have a value",
-                             metadata.id()->str());
-    invalidate_joined_event(metadata.id()->str());
-    return false;
   }
 
   if (outcome->index_type() == v2::IndexValue_literal) {
@@ -443,11 +439,6 @@ bool example_joiner::process_outcome(const v2::Event &event,
   } else if (outcome->index_type() == v2::IndexValue_numeric) {
     o_event.s_index = outcome->index_as_numeric()->index();
     index = outcome->index_as_numeric()->index();
-  } else {
-    VW::io::logger::log_warn("outcome for event [{}] does not have an index",
-                             metadata.id()->str());
-    invalidate_joined_event(metadata.id()->str());
-    return false;
   }
 
   o_event.action_taken = outcome->action_taken();
@@ -465,7 +456,7 @@ bool example_joiner::process_dedup(const v2::Event &event,
                                    const v2::Metadata &metadata) {
 
   const v2::DedupInfo *dedup = nullptr;
-  if (process_compression<v2::DedupInfo>(
+  if (!process_compression<v2::DedupInfo>(
           event.payload()->data(), event.payload()->size(), metadata, dedup) ||
       dedup == nullptr) {
     return false;
