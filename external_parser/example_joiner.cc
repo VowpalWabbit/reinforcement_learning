@@ -142,8 +142,23 @@ void example_joiner::return_example_f(void *vw, example *ex) {
 }
 
 bool example_joiner::process_event(const v2::JoinedEvent &joined_event) {
+  if (joined_event.event() == nullptr || joined_event.timestamp() == nullptr) {
+    VW::io::logger::log_error(
+        "JoinedEvent is malformed, can not process JoinedEvent");
+    return false;
+  }
+
   auto event = flatbuffers::GetRoot<v2::Event>(joined_event.event()->data());
+
+  if (event->meta() == nullptr || event->meta()->id() == nullptr ||
+      event->meta()->client_time_utc() == nullptr) {
+    VW::io::logger::log_error(
+        "Event of JoinedEvent is malformed, can not process JoinedEvent");
+    return false;
+  }
+
   std::string id = event->meta()->id()->str();
+
   if (event->meta()->payload_type() == v2::PayloadType_DedupInfo) {
     if (!process_dedup(*event, *event->meta())) {
       // clean everything this batch is ruined without the dedup info
@@ -368,7 +383,7 @@ bool example_joiner::process_interaction(const v2::Event &event,
                      metadata.encoding(), metadata.id()->str(), learning_mode},
                     std::move(data),
                     line_vec,
-                    cb->model_id()->data()};
+                    cb->model_id()->c_str()};
 
     try {
       if (_vw->audit || _vw->hash_inv) {
@@ -521,18 +536,8 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
 
   for (auto &joined_event : _batch_grouped_events[id]) {
     auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
-
     auto metadata = event->meta();
-
-    if (metadata->id() == nullptr || metadata->client_time_utc() == nullptr) {
-
-      VW::io::logger::log_error("Metadata for event in JoinedEvent is "
-                                "malformed, can not process JoinedEvent");
-      continue;
-    }
-
     auto enqueued_time_utc = timestamp_to_chrono(*joined_event->timestamp());
-
     const auto &payload_type = metadata->payload_type();
 
     if (payload_type == v2::PayloadType_Outcome) {
