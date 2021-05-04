@@ -54,15 +54,17 @@ set(external_parser_headers ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.h
   ${CMAKE_CURRENT_SOURCE_DIR}/example_joiner.h
   ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_external.h
   ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_binary.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/timestamp_helper.h
 )
 set(external_parser_sources ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/example_joiner.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_external.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_binary.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/timestamp_helper.cc
 )
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/zstd/build/cmake ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser/zstd EXCLUDE_FROM_ALL)
-set(EXTERNAL_PARSER_DIR ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/zstd/lib/)
+set(EXTERNAL_PARSER_DIR ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/zstd/lib/ ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date)
 set(EXTERNAL_PARSER_LIBS libzstd_static)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/../ext_libs/vowpal_wabbit ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser)
