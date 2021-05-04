@@ -17,15 +17,15 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
   if (parsed_options.ext_opts->binary) {
     bool binary_to_json = parsed_options.ext_opts->binary_to_json;
     if (binary_to_json) {
-      std::string infile_path = all->data_filename;
-      std::string infile_name = infile_path.substr(
+      const auto& infile_path = all->data_filename;
+      const auto& infile_name = infile_path.substr(
         0, infile_path.find_last_of('.'));
-      std::string infile_extension = infile_path.substr(
+      const auto& infile_extension = infile_path.substr(
         infile_path.find_last_of(".") + 1);
 
       if (infile_extension == "dsjson") {
         throw std::runtime_error("input file for --binary_to_json option should"
-        " be binary format");
+        " be binary format, file provided: " + infile_path);
       }
 
       std::string outfile_name = infile_name + ".dsjson";
