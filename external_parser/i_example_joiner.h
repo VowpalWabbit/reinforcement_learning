@@ -58,6 +58,7 @@ float min(const joined_event &event);
 float max(const joined_event &event);
 float median(const joined_event &event);
 float apprentice(const joined_event &event);
+float earliest(const joined_event &event);
 } // namespace RewardFunctions
 
 class i_example_joiner {
