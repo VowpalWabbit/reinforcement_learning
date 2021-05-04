@@ -349,6 +349,13 @@ bool example_joiner::process_interaction(const v2::Event &event,
       return false;
     }
 
+    if (cb->context() == nullptr || cb->action_ids() == nullptr ||
+        cb->probabilities() == nullptr) {
+      VW::io::logger::log_warn("CB payload with event id [{}] is malformed",
+                               metadata.id()->c_str());
+      return false;
+    }
+
     v2::LearningModeType learning_mode = cb->learning_mode();
 
     if (learning_mode != _learning_mode_config) {
@@ -383,7 +390,7 @@ bool example_joiner::process_interaction(const v2::Event &event,
                      metadata.encoding(), metadata.id()->str(), learning_mode},
                     std::move(data),
                     line_vec,
-                    cb->model_id()->c_str()};
+                    cb->model_id() ? cb->model_id()->c_str() : "N/A"};
 
     try {
       if (_vw->audit || _vw->hash_inv) {
