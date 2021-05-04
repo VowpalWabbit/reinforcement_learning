@@ -150,8 +150,7 @@ bool example_joiner::process_event(const v2::JoinedEvent &joined_event) {
 
   auto event = flatbuffers::GetRoot<v2::Event>(joined_event.event()->data());
 
-  if (event->meta() == nullptr || event->meta()->id() == nullptr ||
-      event->meta()->client_time_utc() == nullptr) {
+  if (event->meta() == nullptr || event->meta()->id() == nullptr) {
     VW::io::logger::log_error(
         "Event of JoinedEvent is malformed, can not process JoinedEvent");
     return false;
@@ -384,7 +383,9 @@ bool example_joiner::process_interaction(const v2::Event &event,
     std::string line_vec(context, cb->context()->size());
 
     joined_event je{enqueued_time_utc,
-                    {timestamp_to_chrono(*metadata.client_time_utc()),
+                    {metadata.client_time_utc()
+                         ? timestamp_to_chrono(*metadata.client_time_utc())
+                         : TimePoint(),
                      metadata.app_id() ? metadata.app_id()->str() : "",
                      metadata.payload_type(), metadata.pass_probability(),
                      metadata.encoding(), metadata.id()->str(), learning_mode},
