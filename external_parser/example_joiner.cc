@@ -519,23 +519,6 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   auto &id = _batch_event_order.front();
   bool multiline;
 
-  /**
-   * --- Assumptions ---
-   *
-   * Interactions precede observations
-   *
-   * If an interaction is processed without problems it will create an entry in
-   * _batched_grouped_examples with key the id (event id). If an interaction
-   * was not processed correctly due to an error then the corresponding
-   * outcome(s) will be ignored and we will not learn from that interaction
-   *
-   * If an interaction was processed correctly but any of its outcome(s) failed
-   * to be processed then we do not learn from that interaction
-   *
-   * If metadata is malformed then don't attempt to process event
-   * We can't attempt to invalidate the specific id since we don't know it (it's
-   * in the metadata)
-   */
   for (auto &joined_event : _batch_grouped_events[id]) {
     auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
 

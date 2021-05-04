@@ -92,9 +92,33 @@ public:
   // groups all events interactions with their event observations based on their
   // id. The grouped events can be processed when process_joined() is called
   bool process_event(const v2::JoinedEvent &joined_event);
-  // Takes all grouped events, processes them (e.g. decompression) and populates
-  // the examples array with complete example(s) ready to be used by vw for
-  // training
+
+  /**
+   * Takes all grouped events, processes them (e.g. decompression) and populates
+   * the examples array with complete example(s) ready to be used by vw for
+   * training
+   *
+   * returns false if the interaction can not be used for training due to
+   * malformed or missing data
+   * returns true if examples in example v_array are ready to be used for
+   * training
+   *
+   * --- Assumptions ---
+   *
+   * Interactions precede observations
+   *
+   * If an interaction is processed without problems it will create an entry in
+   * _batched_grouped_examples with key the id (event id). If an interaction
+   * was not processed correctly due to an error then the corresponding
+   * outcome(s) will be ignored and we will not learn from that interaction
+   *
+   * If an interaction was processed correctly but any of its outcome(s) failed
+   * to be processed then we do not learn from that interaction
+   *
+   * If metadata is malformed then don't attempt to process event
+   * We can't attempt to invalidate the specific id since we don't know it (it's
+   * in the metadata)
+   */
   bool process_joined(v_array<example *> &examples);
   // true if there are still event-groups to be processed from a deserialized
   // batch
