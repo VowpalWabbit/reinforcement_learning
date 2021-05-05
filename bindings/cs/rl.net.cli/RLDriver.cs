@@ -30,6 +30,11 @@ namespace Rl.Net.Cli
             get;
         }
 
+        string CcbContext
+        {
+            get;
+        }
+
         string SlatesContext
         {
             get;
@@ -184,7 +189,7 @@ namespace Rl.Net.Cli
             }
             else if (loopKind == LoopKind.CCB)
             {
-                if (!liveModel.TryRequestDecision(step.DecisionContext, runContext.DecisionResponseContainer, runContext.ApiStatusContainer))
+                if (!liveModel.TryRequestDecision(step.CcbContext, runContext.DecisionResponseContainer, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
                 }
@@ -202,7 +207,7 @@ namespace Rl.Net.Cli
             }
             else if (loopKind == LoopKind.CCBv2)
             {
-                if (!liveModel.TryRequestMultiSlotDecisionDetailed(eventId, step.DecisionContext, runContext.MultiSlotResponseDetailedContainer, runContext.ApiStatusContainer))
+                if (!liveModel.TryRequestMultiSlotDecisionDetailed(eventId, step.CcbContext, runContext.MultiSlotResponseDetailedContainer, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
                 }
