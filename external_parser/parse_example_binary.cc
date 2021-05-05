@@ -253,9 +253,9 @@ bool binary_parser::read_regular_msg(io_buf *input,
     // process and group events in batch
     if (!_example_joiner.process_event(*joined_payload->events()->Get(i))) {
       VW::io::logger::log_error("Processing of an event from JoinedPayload "
-                               "failed after having read [{}] "
-                               "bytes from the file, skipping JoinedPayload",
-                               _total_size_read);
+                                "failed after having read [{}] "
+                                "bytes from the file, skipping JoinedPayload",
+                                _total_size_read);
       return false;
     }
   }
@@ -353,13 +353,6 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
     if (read_regular_msg(all->example_parser->input.get(), examples)) {
       return true;
     }
-
-    // cleanup examples since something might have gone wrong and left the
-    // existing example's in a bad state
-    VW::return_multiple_example(*all, examples);
-    // add one new example since all parsers expect to be called with one unused
-    // example
-    examples.push_back(&VW::get_unused_example(all));
 
     // bad payload process the next one
     if (!advance_to_next_payload_type(all->example_parser->input.get(),

@@ -157,8 +157,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_joined_event_payload) {
 BOOST_AUTO_TEST_CASE(test_log_file_with_mismatched_payload_types) {
   std::string input_files = get_test_files_location();
 
-  auto buffer = read_file(
-      input_files + "/incomplete_checkpoint_info.log");
+  auto buffer = read_file(input_files + "/incomplete_checkpoint_info.log");
 
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
@@ -175,6 +174,125 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_mismatched_payload_types) {
 
   // skipped first payload and read the second one
   BOOST_CHECK_EQUAL(total_size_of_examples, 0);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
+BOOST_AUTO_TEST_CASE(test_log_file_with_bad_event_in_joined_event) {
+  std::string input_files = get_test_files_location();
+
+  auto buffer = read_file(input_files + "/bad_event_in_joined_event.log");
+
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+  set_buffer_as_vw_input(buffer, vw);
+  VW::external::binary_parser bp(vw);
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+
+  size_t total_size_of_examples = 0;
+  // file contains 2 regular messages each with one JoinedEvent that holds one
+  // interaction and one observation, first JE has malformed event
+  while (bp.parse_examples(vw, examples)) {
+    BOOST_CHECK_EQUAL(examples.size(), 4);
+    total_size_of_examples += examples.size();
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  // skipped first payload and read the second one
+  BOOST_CHECK_EQUAL(total_size_of_examples, 4);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
+BOOST_AUTO_TEST_CASE(test_log_file_with_dedup_payload_missing) {
+  std::string input_files = get_test_files_location();
+
+  auto buffer = read_file(input_files + "/dedup_payload_missing.log");
+
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+  set_buffer_as_vw_input(buffer, vw);
+  VW::external::binary_parser bp(vw);
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+
+  size_t total_size_of_examples = 0;
+  // file contains 1 regular message with one JoinedEvent that holds one
+  // interaction and one observation, but the dedup payload is missing so the
+  // payload should not be processed
+  while (bp.parse_examples(vw, examples)) {
+    total_size_of_examples += examples.size();
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  // skipped payload
+  BOOST_CHECK_EQUAL(total_size_of_examples, 0);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
+BOOST_AUTO_TEST_CASE(test_log_file_with_interaction_but_no_observation) {
+  std::string input_files = get_test_files_location();
+
+  auto buffer = read_file(input_files + "/interaction_with_no_observation.log");
+
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+  set_buffer_as_vw_input(buffer, vw);
+  VW::external::binary_parser bp(vw);
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+
+  size_t total_size_of_examples = 0;
+  // file contains 1 regular message with 1 JoinedEvent that holds one
+  // interaction with a missing observation, and then another interaction with
+  // its observation
+  while (bp.parse_examples(vw, examples)) {
+    BOOST_CHECK_EQUAL(examples.size(), 4);
+    total_size_of_examples += examples.size();
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  // one interaction processed
+  BOOST_CHECK_EQUAL(total_size_of_examples, 4);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
+BOOST_AUTO_TEST_CASE(test_log_file_with_no_interaction_with_observation) {
+  std::string input_files = get_test_files_location();
+
+  auto buffer =
+      read_file(input_files + "/no_interaction_but_with_observation.log");
+
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+  set_buffer_as_vw_input(buffer, vw);
+  VW::external::binary_parser bp(vw);
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+
+  size_t total_size_of_examples = 0;
+  // file contains 1 regular message with 1 JoinedEvent that holds one
+  // two observations (i.e. missing interaction), and then another interaction
+  // with its observation
+  while (bp.parse_examples(vw, examples)) {
+    BOOST_CHECK_EQUAL(examples.size(), 4);
+    total_size_of_examples += examples.size();
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  // one interaction processed
+  BOOST_CHECK_EQUAL(total_size_of_examples, 4);
 
   clear_examples(examples, vw);
   VW::finish(*vw);

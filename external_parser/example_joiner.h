@@ -100,6 +100,9 @@ public:
    *
    * returns false if the interaction can not be used for training due to
    * malformed or missing data
+   * On returning false, the v_array of examples will be cleaned and prepared
+   * for the potential next parser call
+   *
    * returns true if examples in example v_array are ready to be used for
    * training
    *
@@ -146,6 +149,7 @@ private:
   void clear_batch_info();
   void clear_event_id_batch_info(const std::string &id);
   void invalidate_joined_event(const std::string &id);
+  void clear_vw_examples(v_array<example *> &examples);
 
   example *get_or_create_example();
 

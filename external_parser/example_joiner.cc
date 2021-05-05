@@ -310,6 +310,15 @@ void example_joiner::clear_batch_info() {
   }
 }
 
+void example_joiner::clear_vw_examples(v_array<example *> &examples) {
+  // cleanup examples since something might have gone wrong and left the
+  // existing example's in a bad state
+  VW::return_multiple_example(*_vw, examples);
+  // add one new example since all parsers expect to be called with one unused
+  // example
+  examples.push_back(&VW::get_unused_example(_vw));
+}
+
 void example_joiner::clear_event_id_batch_info(const std::string &id) {
   _batch_grouped_events.erase(id);
   _batch_event_order.pop();
@@ -561,14 +570,23 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
 
   if (_batch_grouped_examples.find(id) == _batch_grouped_examples.end()) {
     // can't learn from this interaction
+    VW::io::logger::log_warn("Events with event id [{}] were processed but "
+                             "none were an interaction, skipping",
+                             id);
     clear_event_id_batch_info(id);
+    clear_vw_examples(examples);
     return false;
   }
 
   auto &je = _batch_grouped_examples[id];
   if (!je.ok) {
     // don't learn from this interaction
+    VW::io::logger::log_warn(
+        "Interaction with event id [{}] has been invalidated due to malformed "
+        "observation, skipping",
+        id);
     clear_event_id_batch_info(id);
+    clear_vw_examples(examples);
     return false;
   }
 
@@ -586,6 +604,13 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     } else {
       _reward = _original_reward;
     }
+  } else {
+    // don't learn from this interaction
+    VW::io::logger::log_warn(
+        "Interaction with event id [{}] has no observations skipping", id);
+    clear_vw_examples(examples);
+    clear_event_id_batch_info(id);
+    return false;
   }
 
   if (_binary_to_json) {
