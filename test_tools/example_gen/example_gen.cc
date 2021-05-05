@@ -22,6 +22,7 @@ bool enable_dedup = false;
 
 static const char *options[] = {
   "cb",
+  "invalid-cb",
   "ccb",
   "ccb-baseline",
   "slates",
@@ -38,6 +39,7 @@ static const char *options[] = {
 
 enum options{
   CB_ACTION,
+  INVALID_CB_ACTION,
   CCB_ACTION,
   CCB_BASELINE_ACTION,
   SLATES_ACTION,
@@ -117,7 +119,14 @@ int take_action(r::live_model& rl, const char *event_id, int action, bool gen_ra
   switch(action) {
     case CB_ACTION: {// "cb",
       r::ranking_response response;
-      if(rl.choose_rank(event_id, JSON_CB_CONTEXT, response, &status))
+      if(rl.choose_rank(event_id, JSON_SLATES_CONTEXT, response, &status))
+          std::cout << status.get_error_msg() << std::endl;
+      break;
+    }
+    case INVALID_CB_ACTION: {// "cb invalid",
+      r::ranking_response response;
+      // call choose rank but with slates context
+      if(rl.choose_rank(event_id, JSON_SLATES_CONTEXT, response, &status))
           std::cout << status.get_error_msg() << std::endl;
       break;
     }
@@ -235,7 +244,7 @@ int main(int argc, char *argv[]) {
     ("dedup", "Enable dedup/zstd")
     ("count", po::value<int>(), "Number of events to produce")
     ("seed", po::value<int>(), "Initial seed used to produce event ids")
-    ("kind", po::value<std::string>(), "which kind of example to generate (cb,ccb,ccb-baseline,slates,ca,(f|s)(s|i)?-reward,action-taken)")
+    ("kind", po::value<std::string>(), "which kind of example to generate (cb,invalid-cb,ccb,ccb-baseline,slates,ca,(f|s)(s|i)?-reward,action-taken)")
     ("random_reward", "Generate random float reward for observation event")
     ("apprentice", "Enable apprentice mode for cb event");
   po::positional_options_description pd;
