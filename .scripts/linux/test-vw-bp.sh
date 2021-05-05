@@ -12,3 +12,7 @@ cd $REPO_DIR/external_parser/build
 
 export CTEST_OUTPUT_ON_FAILURE=1
 make test
+
+cd vw_binary_parser/vowpalwabbit
+
+./vw --help
