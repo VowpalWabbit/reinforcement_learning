@@ -18,5 +18,3 @@ cd vw_binary_parser/vowpalwabbit
 ./vw --extra_metrics metrics.json -d ../../../unit_tests/test_files/cb_simple.log --binary_parser --cb_explore_adf
 
 cat metrics.json
-
-ls -la
