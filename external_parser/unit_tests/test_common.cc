@@ -13,11 +13,10 @@ void clear_examples(v_array<example *> &examples, vw *vw) {
 }
 
 void set_buffer_as_vw_input(const std::vector<char> &buffer, vw *vw) {
-  io_buf *reader_view_of_buffer = new io_buf();
-  delete vw->example_parser->input;
-  vw->example_parser->input = reader_view_of_buffer;
-
-  reader_view_of_buffer->add_file(
+  auto reader_view_of_buffer = VW::make_unique<io_buf>();
+  vw->example_parser->input.reset();
+  vw->example_parser->input = std::move(reader_view_of_buffer);
+  vw->example_parser->input->add_file(
     VW::io::create_buffer_view(buffer.data(), buffer.size()));
 }
 

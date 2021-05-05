@@ -466,6 +466,7 @@ int example_joiner::process_joined(v_array<example *> &examples) {
     // add an empty example to signal end-of-multiline
     examples.push_back(&VW::get_unused_example(_vw));
     _vw->example_parser->lbl_parser.default_label(&examples.back()->l);
+    examples.back()->is_newline = true;
   }
 
   _batch_grouped_events.erase(id);
