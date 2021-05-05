@@ -44,6 +44,8 @@ public:
   // true if there are still event-groups to be processed from a deserialized
   // batch
   virtual bool processing_batch();
+
+  virtual void on_new_batch();
   float get_reward();
 
 private:

@@ -81,4 +81,6 @@ public:
   // true if there are still event-groups to be processed from a deserialized
   // batch
   virtual bool processing_batch() = 0;
+
+  virtual void on_new_batch() = 0;
 };

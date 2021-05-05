@@ -28,6 +28,29 @@ multistep_example_joiner::~multistep_example_joiner() {
 }
 
 int multistep_example_joiner::process_event(const v2::JoinedEvent &joined_event) {
+  auto event = flatbuffers::GetRoot<v2::Event>(joined_event.event()->data());
+  std::string id = event->meta()->id()->str();
+  switch (event->meta()->payload_type()) {
+    case v2::PayloadType_MultiStep:
+    {
+      auto interaction = flatbuffers::GetRoot<v2::MultiStepEvent>(event->payload()->data());
+      _interactions[interaction->event_id()->str()].push_back(interaction);
+      break;
+    }
+    case v2::PayloadType_Outcome:
+    {
+      auto outcome = flatbuffers::GetRoot<v2::OutcomeEvent>(event->payload()->data());
+      const char* id =  outcome->index_type() == v2::IndexValue_literal ? outcome->index_as_literal()->c_str() : nullptr;
+      if (id == nullptr) {
+        _episodic_outcomes.push_back(outcome);
+      } else {
+        _outcomes[std::string(id)].push_back(outcome);
+      }
+      break;    
+    }
+    default:
+      break;
+  }
   return 0;
 }
 
@@ -80,5 +103,9 @@ int multistep_example_joiner::process_joined(v_array<example *> &examples) {
 }
 
 bool multistep_example_joiner::processing_batch() {
-    return false;
+  return _sorted && !_order.empty();
+}
+
+void multistep_example_joiner::on_new_batch() {
+  _sorted = false;
 }

@@ -4,6 +4,7 @@
 
 #include "example.h"
 #include "generated/v2/MultiStepEvent_generated.h"
+#include "generated/v2/OutcomeEvent_generated.h"
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "i_example_joiner.h"
@@ -43,6 +44,9 @@ public:
   // true if there are still event-groups to be processed from a deserialized
   // batch
   virtual bool processing_batch();
+
+  virtual void on_new_batch();
+
 private:
   std::vector<example *> _example_pool;
 
@@ -54,4 +58,12 @@ private:
 
   v2::LearningModeType _learning_mode_config = v2::LearningModeType_Online;
   v2::ProblemType _problem_type_config = v2::ProblemType_UNKNOWN;
+
+  std::unordered_map<std::string, std::vector<const v2::MultiStepEvent *>> _interactions;
+  std::unordered_map<std::string, std::vector<const v2::OutcomeEvent *>> _outcomes;
+  std::vector<const v2::OutcomeEvent *> _episodic_outcomes;
+
+  std::queue<std::string> _order;
+
+  bool _sorted = false;
 };
