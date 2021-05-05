@@ -5,7 +5,7 @@
 BOOST_AUTO_TEST_CASE(test_log_file_with_bad_magic) {
   std::string input_files = get_test_files_location();
 
-  auto buffer = read_file(input_files + "/bad_magic.log");
+  auto buffer = read_file(input_files + "/invalid_joined_logs/bad_magic.log");
 
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_magic) {
 BOOST_AUTO_TEST_CASE(test_log_file_with_bad_version) {
   std::string input_files = get_test_files_location();
 
-  auto buffer = read_file(input_files + "/bad_version.log");
+  auto buffer = read_file(input_files + "/invalid_joined_logs/bad_version.log");
 
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_version) {
 BOOST_AUTO_TEST_CASE(test_log_file_with_empty_msg_header) {
   std::string input_files = get_test_files_location();
 
-  auto buffer = read_file(input_files + "/empty_msg_hdr.log");
+  auto buffer = read_file(input_files + "/invalid_joined_logs/empty_msg_hdr.log");
 
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_empty_msg_header) {
 BOOST_AUTO_TEST_CASE(test_log_file_with_no_msg_header) {
   std::string input_files = get_test_files_location();
 
-  auto buffer = read_file(input_files + "/no_msg_hdr.log");
+  auto buffer = read_file(input_files + "/invalid_joined_logs/no_msg_hdr.log");
 
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
   // so that we know that parse_examples returns false for the correct reason in
   // this test
   {
-    auto buffer = read_file(input_files + "/unknown_msg_type.log");
+    auto buffer = read_file(input_files + "/invalid_joined_logs/unknown_msg_type.log");
 
     auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet",
                              nullptr, false, nullptr, nullptr);
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
   }
   // now actually check the parser returns false because of unknown MSG_TYPE
   {
-    auto buffer = read_file(input_files + "/unknown_msg_type.log");
+    auto buffer = read_file(input_files + "/invalid_joined_logs/unknown_msg_type.log");
 
     auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet",
                              nullptr, false, nullptr, nullptr);
@@ -124,10 +124,10 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(test_log_file_with_bad_joined_event_payload) {
+BOOST_AUTO_TEST_CASE(test_log_file_with_corrupt_joined_event_payload) {
   std::string input_files = get_test_files_location();
 
-  auto buffer = read_file(input_files + "/bad_joined_payload.log");
+  auto buffer = read_file(input_files + "/invalid_joined_logs/corrupt_joined_payload.log");
 
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_joined_event_payload) {
 BOOST_AUTO_TEST_CASE(test_log_file_with_mismatched_payload_types) {
   std::string input_files = get_test_files_location();
 
-  auto buffer = read_file(input_files + "/incomplete_checkpoint_info.log");
+  auto buffer = read_file(input_files + "/invalid_joined_logs/incomplete_checkpoint_info.log");
 
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_mismatched_payload_types) {
 BOOST_AUTO_TEST_CASE(test_log_file_with_bad_event_in_joined_event) {
   std::string input_files = get_test_files_location();
 
-  auto buffer = read_file(input_files + "/bad_event_in_joined_event.log");
+  auto buffer = read_file(input_files + "/invalid_joined_logs/bad_event_in_joined_event.log");
 
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_event_in_joined_event) {
 BOOST_AUTO_TEST_CASE(test_log_file_with_dedup_payload_missing) {
   std::string input_files = get_test_files_location();
 
-  auto buffer = read_file(input_files + "/dedup_payload_missing.log");
+  auto buffer = read_file(input_files + "/invalid_joined_logs/dedup_payload_missing.log");
 
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_dedup_payload_missing) {
 BOOST_AUTO_TEST_CASE(test_log_file_with_interaction_but_no_observation) {
   std::string input_files = get_test_files_location();
 
-  auto buffer = read_file(input_files + "/interaction_with_no_observation.log");
+  auto buffer = read_file(input_files + "/invalid_joined_logs/interaction_with_no_observation.log");
 
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_no_interaction_with_observation) {
   std::string input_files = get_test_files_location();
 
   auto buffer =
-      read_file(input_files + "/no_interaction_but_with_observation.log");
+      read_file(input_files + "/invalid_joined_logs/no_interaction_but_with_observation.log");
 
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
@@ -293,6 +293,36 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_no_interaction_with_observation) {
 
   // one interaction processed
   BOOST_CHECK_EQUAL(total_size_of_examples, 4);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
+BOOST_AUTO_TEST_CASE(test_log_file_with_invalid_cb_context) {
+  std::string input_files = get_test_files_location();
+
+  auto buffer = read_file(input_files + "/invalid_joined_logs/invalid_cb_context.log");
+
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+  set_buffer_as_vw_input(buffer, vw);
+  VW::external::binary_parser bp(vw);
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+
+  size_t total_size_of_examples = 0;
+  // file contains 1 regular message with 2 JoinedEvent that has two
+  // interactions with their corresponding observations but both cb json
+  // context's are wrong (i.e. it is a ccb context and so the json parser will
+  // throw) and as a result we won't process anything
+  while (bp.parse_examples(vw, examples)) {
+    total_size_of_examples += examples.size();
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  // no interactions processed
+  BOOST_CHECK_EQUAL(total_size_of_examples, 0);
 
   clear_examples(examples, vw);
   VW::finish(*vw);

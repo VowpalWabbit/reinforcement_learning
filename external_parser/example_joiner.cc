@@ -549,7 +549,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   }
 
   auto &id = _batch_event_order.front();
-  bool multiline;
+  bool multiline = false;
 
   for (auto &joined_event : _batch_grouped_events[id]) {
     auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
@@ -571,7 +571,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   if (_batch_grouped_examples.find(id) == _batch_grouped_examples.end()) {
     // can't learn from this interaction
     VW::io::logger::log_warn("Events with event id [{}] were processed but "
-                             "none were an interaction, skipping",
+                             "no valid interaction found. Skipping..",
                              id);
     clear_event_id_batch_info(id);
     clear_vw_examples(examples);
@@ -583,7 +583,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     // don't learn from this interaction
     VW::io::logger::log_warn(
         "Interaction with event id [{}] has been invalidated due to malformed "
-        "observation, skipping",
+        "observation. Skipping...",
         id);
     clear_event_id_batch_info(id);
     clear_vw_examples(examples);
@@ -607,7 +607,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   } else {
     // don't learn from this interaction
     VW::io::logger::log_warn(
-        "Interaction with event id [{}] has no observations skipping", id);
+        "Interaction with event id [{}] has no observations. Skipping...", id);
     clear_vw_examples(examples);
     clear_event_id_batch_info(id);
     return false;

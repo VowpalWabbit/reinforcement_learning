@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 BOOST_AUTO_TEST_CASE(convert_binary_to_dsjson) {
-  std::string infile_name = get_test_files_location() + "cb_simple.log";
+  std::string infile_name = get_test_files_location() + "/valid_joined_logs/cb_simple.log";
   auto vw = VW::initialize("--cb_explore_adf -d " + infile_name +
                            " --binary_parser --quiet --binary_to_json",
                            nullptr, false, nullptr, nullptr);
@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE(convert_binary_to_dsjson) {
   }
 
   std::ostringstream dsjson_stream;
-  std::string outfile_name = get_test_files_location() + "cb_simple.dsjson";
+  std::string outfile_name = get_test_files_location() + "/valid_joined_logs/cb_simple.dsjson";
   std::ifstream dsjson_output(outfile_name);
   dsjson_stream << dsjson_output.rdbuf();
 
