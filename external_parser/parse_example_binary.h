@@ -20,6 +20,7 @@ namespace external {
 class binary_parser : public parser {
 public:
   binary_parser(vw *all);
+  binary_parser(vw *all, bool binary_to_json, std::string outfile_name);
   ~binary_parser();
   bool parse_examples(vw *all, v_array<example *> &examples) override;
   bool read_magic(io_buf *input);

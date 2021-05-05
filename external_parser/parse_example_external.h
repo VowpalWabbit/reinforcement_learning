@@ -13,6 +13,7 @@ namespace external {
 struct parser_options {
   bool is_enabled();
   bool binary;
+  bool binary_to_json;
 };
 
 int parse_examples(vw *all, v_array<example *> &examples);

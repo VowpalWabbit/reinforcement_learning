@@ -81,7 +81,11 @@ binary_parser::binary_parser(vw *all)
     : _header_read(false), _example_joiner(all), _payload(nullptr),
       _payload_size(0), _total_size_read(0) {}
 
-binary_parser::~binary_parser(){};
+binary_parser::binary_parser(vw *all, bool binary_to_json, std::string outfile_name)
+    : _header_read(false), _example_joiner(all, binary_to_json, outfile_name),
+      _payload(nullptr), _payload_size(0), _total_size_read(0) {}
+
+binary_parser::~binary_parser(){}
 
 bool binary_parser::read_magic(io_buf *input) {
   const uint32_t buffer_length = 4 * sizeof(char);
