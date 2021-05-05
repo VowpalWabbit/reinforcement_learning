@@ -23,6 +23,7 @@
 **/packages
 
 build
+ext_deps
 /rlclientlib/generated
 /external_parser/generated
 /.vscode

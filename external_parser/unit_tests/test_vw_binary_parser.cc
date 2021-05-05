@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_magic) {
   set_buffer_as_vw_input(buffer, vw);
 
   VW::external::binary_parser bp(vw);
-  BOOST_CHECK_EQUAL(bp.read_magic(vw->example_parser->input), false);
+  BOOST_CHECK_EQUAL(bp.read_magic(vw->example_parser->input.get()), false);
 
   VW::finish(*vw);
 }
@@ -28,8 +28,8 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_version) {
   set_buffer_as_vw_input(buffer, vw);
 
   VW::external::binary_parser bp(vw);
-  BOOST_CHECK_EQUAL(bp.read_magic(vw->example_parser->input), true);
-  BOOST_CHECK_EQUAL(bp.read_version(vw->example_parser->input), false);
+  BOOST_CHECK_EQUAL(bp.read_magic(vw->example_parser->input.get()), true);
+  BOOST_CHECK_EQUAL(bp.read_version(vw->example_parser->input.get()), false);
 
   VW::finish(*vw);
 }
@@ -44,14 +44,14 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_empty_msg_header) {
   set_buffer_as_vw_input(buffer, vw);
 
   VW::external::binary_parser bp(vw);
-  BOOST_CHECK_EQUAL(bp.read_magic(vw->example_parser->input), true);
-  BOOST_CHECK_EQUAL(bp.read_version(vw->example_parser->input), true);
-  BOOST_CHECK_EQUAL(bp.read_header(vw->example_parser->input), true);
+  BOOST_CHECK_EQUAL(bp.read_magic(vw->example_parser->input.get()), true);
+  BOOST_CHECK_EQUAL(bp.read_version(vw->example_parser->input.get()), true);
+  BOOST_CHECK_EQUAL(bp.read_header(vw->example_parser->input.get()), true);
   unsigned int payload_type;
   BOOST_CHECK_EQUAL(
-      bp.advance_to_next_payload_type(vw->example_parser->input, payload_type),
+      bp.advance_to_next_payload_type(vw->example_parser->input.get(), payload_type),
       true);
-  BOOST_CHECK_EQUAL(bp.read_checkpoint_msg(vw->example_parser->input), true);
+  BOOST_CHECK_EQUAL(bp.read_checkpoint_msg(vw->example_parser->input.get()), true);
 
   VW::finish(*vw);
 }
@@ -66,9 +66,9 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_no_msg_header) {
   set_buffer_as_vw_input(buffer, vw);
 
   VW::external::binary_parser bp(vw);
-  BOOST_CHECK_EQUAL(bp.read_magic(vw->example_parser->input), true);
-  BOOST_CHECK_EQUAL(bp.read_version(vw->example_parser->input), true);
-  BOOST_CHECK_EQUAL(bp.read_header(vw->example_parser->input), false);
+  BOOST_CHECK_EQUAL(bp.read_magic(vw->example_parser->input.get()), true);
+  BOOST_CHECK_EQUAL(bp.read_version(vw->example_parser->input.get()), true);
+  BOOST_CHECK_EQUAL(bp.read_header(vw->example_parser->input.get()), false);
 
   VW::finish(*vw);
 }
@@ -90,17 +90,17 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
     VW::external::binary_parser bp(vw);
     v_array<example *> examples;
 
-    BOOST_REQUIRE_EQUAL(bp.read_magic(vw->example_parser->input), true);
-    BOOST_REQUIRE_EQUAL(bp.read_version(vw->example_parser->input), true);
-    BOOST_REQUIRE_EQUAL(bp.read_header(vw->example_parser->input), true);
+    BOOST_REQUIRE_EQUAL(bp.read_magic(vw->example_parser->input.get()), true);
+    BOOST_REQUIRE_EQUAL(bp.read_version(vw->example_parser->input.get()), true);
+    BOOST_REQUIRE_EQUAL(bp.read_header(vw->example_parser->input.get()), true);
     unsigned int payload_type;
     BOOST_REQUIRE_EQUAL(bp.advance_to_next_payload_type(
-                            vw->example_parser->input, payload_type),
+                            vw->example_parser->input.get(), payload_type),
                         true);
     BOOST_REQUIRE_EQUAL(payload_type, MSG_TYPE_CHECKPOINT);
-    BOOST_REQUIRE_EQUAL(bp.read_checkpoint_msg(vw->example_parser->input), true);
+    BOOST_REQUIRE_EQUAL(bp.read_checkpoint_msg(vw->example_parser->input.get()), true);
     BOOST_REQUIRE_EQUAL(bp.advance_to_next_payload_type(
-                            vw->example_parser->input, payload_type),
+                            vw->example_parser->input.get(), payload_type),
                         true);
     BOOST_REQUIRE_NE(payload_type, MSG_TYPE_CHECKPOINT);
     BOOST_REQUIRE_NE(payload_type, MSG_TYPE_EOF);

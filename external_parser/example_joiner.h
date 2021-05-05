@@ -12,6 +12,7 @@
 #include <list>
 #include <queue>
 #include <unordered_map>
+#include <fstream>
 // VW headers
 // vw.h has to come before json_utils.h
 // clang-format off
@@ -27,6 +28,7 @@ struct metadata_info {
   v2::PayloadType payload_type;
   float pass_probability;
   v2::EventEncoding event_encoding;
+  std::string event_id;
   v2::LearningModeType learning_mode;
 };
 
@@ -37,6 +39,7 @@ struct outcome_event {
   std::string s_value;
   float value;
   TimePoint enqueued_time_utc;
+  bool action_taken;
 };
 
 struct joined_event {
@@ -44,6 +47,8 @@ struct joined_event {
   metadata_info interaction_metadata;
   DecisionServiceInteraction interaction_data;
   std::vector<outcome_event> outcome_events;
+  std::string context;
+  std::string model_id;
   // Default Baseline Action for CB is 1 (rl client recommended actions are 1
   // indexed in the CB case)
   static const int baseline_action = 1;
@@ -63,6 +68,7 @@ float apprentice(const joined_event &event);
 class example_joiner {
 public:
   example_joiner(vw *vw); // TODO rule of 5
+  example_joiner(vw *vw, bool binary_to_json, std::string outfile_name);
 
   ~example_joiner();
 
@@ -82,7 +88,9 @@ public:
   // true if there are still event-groups to be processed from a deserialized
   // batch
   bool processing_batch();
+
   float get_reward();
+  float get_original_reward();
 
 private:
   int process_dedup(const v2::Event &event, const v2::Metadata &metadata);
@@ -98,8 +106,7 @@ private:
   const T *process_compression(const uint8_t *data, size_t size,
                                const v2::Metadata &metadata);
 
-  void try_set_label(const joined_event &je, float reward,
-                     v_array<example *> &examples);
+  void try_set_label(const joined_event &je, v_array<example *> &examples);
 
   example *get_or_create_example();
 
@@ -125,8 +132,13 @@ private:
 
   float _default_reward = 0.f;
   float _reward = _default_reward;
+  // original reward is used to record the observed reward of apprentice mode
+  float _original_reward = _default_reward;
   RewardCalcType _reward_calculation;
 
   v2::LearningModeType _learning_mode_config = v2::LearningModeType_Online;
   v2::ProblemType _problem_type_config = v2::ProblemType_UNKNOWN;
+
+  bool _binary_to_json;
+  std::ofstream _outfile;
 };
