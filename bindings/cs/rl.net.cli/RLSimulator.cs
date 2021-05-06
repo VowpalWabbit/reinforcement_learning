@@ -151,7 +151,8 @@ namespace Rl.Net.Cli
         {
             internal static readonly (Topic topic, int slot_id)[] ActionSet = new[] { (Topic.HerbGarden, 0), (Topic.MachineLearning, 0), (Topic.Soccer, 1), (Topic.SpaceExploration, 1) };
 
-            private static readonly string ActionsJson = string.Join(",", ActionSet.Select(action => $"{{ \"TAction\": {{ \"topic\": \"{action.topic}\" }}, \"_slot_id\": {action.slot_id} }}"));
+            private static readonly string ActionsJsonWithSlotId = string.Join(",", ActionSet.Select(action => $"{{ \"TAction\": {{ \"topic\": \"{action.topic}\" }}, \"_slot_id\": {action.slot_id} }}"));
+            private static readonly string ActionsJsonWithoutSlotId  = string.Join(",", ActionSet.Select(action => $"{{ \"TAction\": {{ \"topic\": \"{action.topic}\" }} }}"));
             private string SlotsJson => string.Join(",", Enumerable.Range(0, SlotCount).Select(slotId => $"{{ \"slot_id\": \"__{slotId}\" }}"));
 
             public StatisticsCalculator<Person, int> StatisticsCalculator
@@ -215,8 +216,9 @@ namespace Rl.Net.Cli
                 set;
             }
 
-            public string DecisionContext => $"{{ { this.Person.FeaturesJson }, \"_multi\": [{ ActionsJson }] }}";
-            public string SlatesContext => $"{{ { this.Person.FeaturesJson }, \"_multi\":[{ActionsJson}], \"_slots\": [{SlotsJson}] }}";
+            public string DecisionContext => $"{{ { this.Person.FeaturesJson }, \"_multi\": [{ ActionsJsonWithoutSlotId }] }}";
+            public string CcbContext => $"{{ { this.Person.FeaturesJson }, \"_multi\": [{ ActionsJsonWithSlotId }] }}";
+            public string SlatesContext => $"{{ { this.Person.FeaturesJson }, \"_multi\":[{ActionsJsonWithSlotId}], \"_slots\": [{SlotsJson}] }}";
             public string ContinuousActionContext => $"{{ { this.RobotJoint.FeaturesJson } }}";
 
             private float? outcomeCache;

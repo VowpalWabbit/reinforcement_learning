@@ -31,6 +31,7 @@ namespace Rl.Net.Cli
             }
 
             public string DecisionContext { get; set; }
+            public string CcbContext { get; set; }
             public string SlatesContext { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
             public string ContinuousActionContext { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 

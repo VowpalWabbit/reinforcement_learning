@@ -38,6 +38,7 @@ namespace Rl.Net.Cli
             [JsonIgnore]
             public string DecisionContext => this.Context.ToString(Formatting.None);
 
+            public string CcbContext { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
             public string SlatesContext { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
             public string ContinuousActionContext { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
