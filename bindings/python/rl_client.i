@@ -98,6 +98,10 @@ namespace reinforcement_learning {
 
       void refresh_model();
 
+      // episodic
+      reinforcement_learning::python::ranking_response request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, reinforcement_learning::python::episode_state& episode);
+      void report_outcome(const char* episode_id, const char* event_id, float outcome);
+
       %pythoncode %{
         def choose_rank(self, context, event_id = None, deferred = False):
             if event_id == None:

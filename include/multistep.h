@@ -34,7 +34,7 @@ namespace reinforcement_learning {
 
   class episode_state {
   public:
-    episode_state(const char* episode_id);
+    explicit episode_state(const char* episode_id);
 
     episode_state(const episode_state& other) = default;
     episode_state& operator=(const episode_state& other) = default;
