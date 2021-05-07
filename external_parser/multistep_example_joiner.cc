@@ -29,12 +29,13 @@ multistep_example_joiner::~multistep_example_joiner() {
 
 int multistep_example_joiner::process_event(const v2::JoinedEvent &joined_event) {
   auto event = flatbuffers::GetRoot<v2::Event>(joined_event.event()->data());
-  std::string id = event->meta()->id()->str();
-  switch (event->meta()->payload_type()) {
+  const v2::Metadata& meta = *event->meta();
+  std::string id = meta.id()->str();
+  switch (meta.payload_type()) {
     case v2::PayloadType_MultiStep:
     {
       auto interaction = flatbuffers::GetRoot<v2::MultiStepEvent>(event->payload()->data());
-      _interactions[interaction->event_id()->str()].push_back(interaction);
+      _interactions[interaction->event_id()->str()].push_back({meta, *interaction});
       break;
     }
     case v2::PayloadType_Outcome:
@@ -42,9 +43,9 @@ int multistep_example_joiner::process_event(const v2::JoinedEvent &joined_event)
       auto outcome = flatbuffers::GetRoot<v2::OutcomeEvent>(event->payload()->data());
       const char* id =  outcome->index_type() == v2::IndexValue_literal ? outcome->index_as_literal()->c_str() : nullptr;
       if (id == nullptr) {
-        _episodic_outcomes.push_back(outcome);
+        _episodic_outcomes.push_back({meta, *outcome});
       } else {
-        _outcomes[std::string(id)].push_back(outcome);
+        _outcomes[std::string(id)].push_back({meta, *outcome});
       }
       break;    
     }
@@ -98,7 +99,66 @@ void multistep_example_joiner::set_reward_function(const v2::RewardFunctionType 
   }
 }
 
+void multistep_example_joiner::populate_order() {
+  for (const auto it: _interactions) {
+    _order.push(it.first);
+  }
+}
+
+int multistep_example_joiner::process_interaction(const v2::Parsed<v2::MultiStepEvent> &event,
+                                        v_array<example *> &examples) {
+
+    metadata_info meta = {"client_time_utc",
+                          event.meta.app_id() ? metadata.app_id()->str() : "",
+                          event.meta.payload_type(),
+                          event.meta.pass_probability(),
+                          event.meta.encoding(),
+                          v2::LearningModeType::LearningModeType_Online};
+
+    DecisionServiceInteraction data;
+    data.eventId = metadata.id()->str();
+    data.actions = {cb->action_ids()->data(),
+                    cb->action_ids()->data() + cb->action_ids()->size()};
+    data.probabilities = {cb->probabilities()->data(),
+                          cb->probabilities()->data() +
+                          cb->probabilities()->size()};
+    data.probabilityOfDrop = 1.f - metadata.pass_probability();
+    data.skipLearn = cb->deferred_action();
+
+    std::string line_vec(reinterpret_cast<char const *>(cb->context()->data()),
+                         cb->context()->size());
+
+    if (_vw->audit || _vw->hash_inv) {
+      VW::template read_line_json<true>(
+          *_vw, examples, const_cast<char *>(line_vec.c_str()),
+          reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
+          &_dedup_cache.dedup_examples);
+    } else {
+      VW::template read_line_json<false>(
+          *_vw, examples, const_cast<char *>(line_vec.c_str()),
+          reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
+          &_dedup_cache.dedup_examples);
+    }
+
+    _batch_grouped_examples.emplace(std::make_pair<std::string, joined_event>(
+        metadata.id()->str(),
+        {"joiner_timestamp", std::move(meta), std::move(data)}));
+  }
+  return 0;
+}
+
 int multistep_example_joiner::process_joined(v_array<example *> &examples) {
+  if (!_sorted) {
+    populate_order();
+  }
+  const auto& id = _order.front();
+  const auto& interactions = _interactions[id];
+  if (id.size() != 1) {
+    return -1;
+  }
+  const auto& interaction = interactions[0];
+  const auto outcomes = _outcomes[0];
+  _order.pop();
   return 0;
 }
 
@@ -107,5 +167,8 @@ bool multistep_example_joiner::processing_batch() {
 }
 
 void multistep_example_joiner::on_new_batch() {
+  _interactions.clear();
+  _outcomes.clear();
+  _episodic_outcomes.clear();
   _sorted = false;
 }

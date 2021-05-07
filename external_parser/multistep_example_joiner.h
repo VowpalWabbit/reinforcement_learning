@@ -48,6 +48,16 @@ public:
   virtual void on_new_batch();
 
 private:
+  void populate_order();
+
+private:
+  template<typename event_t>
+  struct Parsed {
+    const v2::Metadata& meta;
+    const event_t& event;
+  };
+
+private:
   std::vector<example *> _example_pool;
 
   vw *_vw;
@@ -59,9 +69,9 @@ private:
   v2::LearningModeType _learning_mode_config = v2::LearningModeType_Online;
   v2::ProblemType _problem_type_config = v2::ProblemType_UNKNOWN;
 
-  std::unordered_map<std::string, std::vector<const v2::MultiStepEvent *>> _interactions;
-  std::unordered_map<std::string, std::vector<const v2::OutcomeEvent *>> _outcomes;
-  std::vector<const v2::OutcomeEvent *> _episodic_outcomes;
+  std::unordered_map<std::string, std::vector<Parsed<v2::MultiStepEvent>>> _interactions;
+  std::unordered_map<std::string, std::vector<Parsed<v2::OutcomeEvent>>> _outcomes;
+  std::vector<Parsed<v2::OutcomeEvent>> _episodic_outcomes;
 
   std::queue<std::string> _order;
 
