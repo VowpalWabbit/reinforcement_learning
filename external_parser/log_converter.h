@@ -9,7 +9,6 @@
 
 #include "example_joiner.h"
 #include "io/logger.h"
-#include "FileFormat_generated.h"
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
