@@ -48,14 +48,16 @@ public:
   virtual void on_new_batch();
 
 private:
-  void populate_order();
-
-private:
   template<typename event_t>
   struct Parsed {
     const v2::Metadata& meta;
     const event_t& event;
   };
+
+
+private:
+  void populate_order();
+  int process_interaction(const Parsed<v2::MultiStepEvent> &event_meta, v_array<example *> &examples);
 
 private:
   std::vector<example *> _example_pool;

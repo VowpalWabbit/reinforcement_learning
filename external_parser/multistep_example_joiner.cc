@@ -105,44 +105,38 @@ void multistep_example_joiner::populate_order() {
   }
 }
 
-int multistep_example_joiner::process_interaction(const v2::Parsed<v2::MultiStepEvent> &event,
+int multistep_example_joiner::process_interaction(const multistep_example_joiner::Parsed<v2::MultiStepEvent> &event_meta,
                                         v_array<example *> &examples) {
+  const auto& metadata = event_meta.meta;
+  const auto& event = event_meta.event;
+  metadata_info meta = {"client_time_utc",
+                        metadata.app_id() ? metadata.app_id()->str() : "",
+                        metadata.payload_type(),
+                        metadata.pass_probability(),
+                        metadata.encoding(),
+                        v2::LearningModeType::LearningModeType_Online};
 
-    metadata_info meta = {"client_time_utc",
-                          event.meta.app_id() ? metadata.app_id()->str() : "",
-                          event.meta.payload_type(),
-                          event.meta.pass_probability(),
-                          event.meta.encoding(),
-                          v2::LearningModeType::LearningModeType_Online};
+  DecisionServiceInteraction data;
+  data.eventId = event.event_id()->str();
+  data.actions = {event.action_ids()->data(),
+                  event.action_ids()->data() + event.action_ids()->size()};
+  data.probabilities = {event.probabilities()->data(),
+                        event.probabilities()->data() +
+                        event.probabilities()->size()};
+  data.probabilityOfDrop = 1.f - metadata.pass_probability();
+  data.skipLearn = false;//cb->deferred_action();
 
-    DecisionServiceInteraction data;
-    data.eventId = metadata.id()->str();
-    data.actions = {cb->action_ids()->data(),
-                    cb->action_ids()->data() + cb->action_ids()->size()};
-    data.probabilities = {cb->probabilities()->data(),
-                          cb->probabilities()->data() +
-                          cb->probabilities()->size()};
-    data.probabilityOfDrop = 1.f - metadata.pass_probability();
-    data.skipLearn = cb->deferred_action();
+  std::string line_vec(reinterpret_cast<char const *>(event.context()->data()),
+                        event.context()->size());
 
-    std::string line_vec(reinterpret_cast<char const *>(cb->context()->data()),
-                         cb->context()->size());
-
-    if (_vw->audit || _vw->hash_inv) {
-      VW::template read_line_json<true>(
-          *_vw, examples, const_cast<char *>(line_vec.c_str()),
-          reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
-          &_dedup_cache.dedup_examples);
-    } else {
-      VW::template read_line_json<false>(
-          *_vw, examples, const_cast<char *>(line_vec.c_str()),
-          reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
-          &_dedup_cache.dedup_examples);
-    }
-
-    _batch_grouped_examples.emplace(std::make_pair<std::string, joined_event>(
-        metadata.id()->str(),
-        {"joiner_timestamp", std::move(meta), std::move(data)}));
+  if (_vw->audit || _vw->hash_inv) {
+    VW::template read_line_json<true>(
+        *_vw, examples, const_cast<char *>(line_vec.c_str()),
+        reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
+  } else {
+    VW::template read_line_json<false>(
+        *_vw, examples, const_cast<char *>(line_vec.c_str()),
+        reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
   }
   return 0;
 }
@@ -158,6 +152,7 @@ int multistep_example_joiner::process_joined(v_array<example *> &examples) {
   }
   const auto& interaction = interactions[0];
   const auto outcomes = _outcomes[0];
+  process_interaction(interaction, examples);
   _order.pop();
   return 0;
 }
