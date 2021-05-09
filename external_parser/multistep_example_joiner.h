@@ -57,7 +57,8 @@ private:
 
 private:
   void populate_order();
-  int process_interaction(const Parsed<v2::MultiStepEvent> &event_meta, v_array<example *> &examples);
+  outcome_event process_outcome(const Parsed<v2::OutcomeEvent> &event_meta);
+  joined_event process_interaction(const Parsed<v2::MultiStepEvent> &event_meta, v_array<example *> &examples);
 
 private:
   std::vector<example *> _example_pool;

@@ -105,8 +105,27 @@ void multistep_example_joiner::populate_order() {
   }
 }
 
-int multistep_example_joiner::process_interaction(const multistep_example_joiner::Parsed<v2::MultiStepEvent> &event_meta,
-                                        v_array<example *> &examples) {
+outcome_event multistep_example_joiner::process_outcome(const multistep_example_joiner::Parsed<v2::OutcomeEvent> &event_meta) {
+  const auto& metadata = event_meta.meta;
+  const auto& event = event_meta.event;
+  outcome_event o_event;
+  o_event.metadata = {"client_time_utc",
+                      metadata.app_id() ? metadata.app_id()->str() : "",
+                      metadata.payload_type(), metadata.pass_probability(),
+                      metadata.encoding()};
+
+  if (event.value_type() == v2::OutcomeValue_literal) {
+    o_event.s_value = event.value_as_literal()->c_str();
+  } else if (event.value_type() == v2::OutcomeValue_numeric) {
+    o_event.value = event.value_as_numeric()->value();
+  }
+
+  return o_event;
+}
+
+joined_event multistep_example_joiner::process_interaction(
+    const multistep_example_joiner::Parsed<v2::MultiStepEvent> &event_meta,
+    v_array<example *> &examples) {
   const auto& metadata = event_meta.meta;
   const auto& event = event_meta.event;
   metadata_info meta = {"client_time_utc",
@@ -138,7 +157,40 @@ int multistep_example_joiner::process_interaction(const multistep_example_joiner
         *_vw, examples, const_cast<char *>(line_vec.c_str()),
         reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
   }
-  return 0;
+  return {"joiner_timestamp", std::move(meta), std::move(data)};
+}
+
+void try_set_label(const joined_event &je, float reward,
+                                   v_array<example *> &examples) {
+  if (je.interaction_data.actions.empty()) {
+    VW::io::logger::log_error("missing actions for event [{}]",
+                              je.interaction_data.eventId);
+    return;
+  }
+
+  if (je.interaction_data.probabilities.empty()) {
+    VW::io::logger::log_error("missing probabilities for event [{}]",
+                              je.interaction_data.eventId);
+    return;
+  }
+
+  if (std::any_of(je.interaction_data.probabilities.begin(),
+                  je.interaction_data.probabilities.end(),
+                  [](float p) { return std::isnan(p); })) {
+    VW::io::logger::log_error(
+        "distribution for event [{}] contains invalid probabilities",
+        je.interaction_data.eventId);
+  }
+
+  int index = je.interaction_data.actions[0];
+  auto action = je.interaction_data.actions[0];
+  auto cost = -1.f * reward;
+  auto probability = je.interaction_data.probabilities[0] *
+                     (1.f - je.interaction_data.probabilityOfDrop);
+  auto weight = 1.f - je.interaction_data.probabilityOfDrop;
+
+  examples[index]->l.cb.costs.push_back({cost, action, probability});
+  examples[index]->l.cb.weight = weight;
 }
 
 int multistep_example_joiner::process_joined(v_array<example *> &examples) {
@@ -146,13 +198,23 @@ int multistep_example_joiner::process_joined(v_array<example *> &examples) {
     populate_order();
   }
   const auto& id = _order.front();
+
   const auto& interactions = _interactions[id];
   if (id.size() != 1) {
     return -1;
   }
   const auto& interaction = interactions[0];
-  const auto outcomes = _outcomes[0];
-  process_interaction(interaction, examples);
+  auto joined = process_interaction(interaction, examples);
+
+  const auto outcomes = _outcomes[id];
+  for (const auto& o: outcomes) {
+    joined.outcome_events.push_back(process_outcome(o));
+  }
+  for (const auto& o: _episodic_outcomes) {
+    joined.outcome_events.push_back(process_outcome(o));
+  }
+  const auto reward = _reward_calculation(joined);
+  try_set_label(joined, reward, examples);
   _order.pop();
   return 0;
 }
