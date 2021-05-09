@@ -17,6 +17,7 @@
 #include "parse_example_binary.h"
 
 #include "example_joiner.h"
+#include "multistep_example_joiner.h"
 
 // TODO need to check if errors will be detected from stderr/stdout/other and
 // use appropriate logger
@@ -79,8 +80,16 @@ bool read_padding(io_buf *input, uint32_t previous_payload_size,
 
 namespace VW {
 namespace external {
+
+i_example_joiner* create_example_joiner(vw* all, const parser_options& opts) {
+  if (opts.multistep) {
+    return new multistep_example_joiner(all);
+  }
+  return new example_joiner(all);
+}
+
 binary_parser::binary_parser(vw *all, const parser_options& opts)
-    : _header_read(false), _example_joiner(make_unique<example_joiner>(all)), _payload(nullptr),
+    : _header_read(false), _example_joiner(create_example_joiner(all, opts)), _payload(nullptr),
       _payload_size(0), _total_size_read(0) {}
 
 binary_parser::~binary_parser(){};
