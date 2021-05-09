@@ -266,7 +266,6 @@ int example_joiner::process_interaction(const v2::Event &event,
                                         const v2::Metadata &metadata,
                                         v_array<example *> &examples) {
 
-  std::cout << "Here" << std::endl;
   if (metadata.payload_type() == v2::PayloadType_CB) {
 
     auto cb = process_compression<v2::CbEvent>(

@@ -28,7 +28,6 @@ void parser::set_parse_args(VW::config::option_group_definition &in_options,
                 "version: " +
                 std::to_string(BINARY_PARSER_VERSION)))
     .add(VW::config::make_option("multistep", parsed_options.ext_opts->multistep)
-      .default_value(false)
       .help("multistep binary joiner"));
 }
 

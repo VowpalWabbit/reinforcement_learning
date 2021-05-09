@@ -30,7 +30,6 @@ multistep_example_joiner::~multistep_example_joiner() {
 int multistep_example_joiner::process_event(const v2::JoinedEvent &joined_event) {
   auto event = flatbuffers::GetRoot<v2::Event>(joined_event.event()->data());
   const v2::Metadata& meta = *event->meta();
-  std::string id = meta.id()->str();
   switch (meta.payload_type()) {
     case v2::PayloadType_MultiStep:
     {
@@ -200,7 +199,7 @@ int multistep_example_joiner::process_joined(v_array<example *> &examples) {
   const auto& id = _order.front();
 
   const auto& interactions = _interactions[id];
-  if (id.size() != 1) {
+  if (interactions.size() != 1) {
     return -1;
   }
   const auto& interaction = interactions[0];
