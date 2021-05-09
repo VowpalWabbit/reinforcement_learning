@@ -10,7 +10,7 @@ template<
     typename key_sec_t=int>
 class topological_sorter {
 public:
-    using iterator = std::vector<primary_key_t&>::const_iterator;
+    using iterator = std::vector<primary_key_t*>::const_iterator;
 
 public:
     topological_sorter() = default;
@@ -21,7 +21,7 @@ public:
     topological_sorter(topological_sorter&&) = default;
     topological_sorter& operator=(topological_sorter&&) = default;
 
-    void add(const primary_key_t& primary, const secondary_key_t& secondary, const primary_key_t& previous) {
+    void add(const primary_key_t* primary, const secondary_key_t& secondary, const primary_key_t& previous) {
         _vertices.push_back(primary);
     }
 
@@ -34,6 +34,6 @@ public:
     }    
 
 private:
-    std::vector<primary_key_t&> _vertices;
+    std::vector<primary_key_t*> _vertices;
     
 };

@@ -99,6 +99,7 @@ void multistep_example_joiner::set_reward_function(const v2::RewardFunctionType 
 }
 
 void multistep_example_joiner::populate_order() {
+  //TODO: topological sort
   for (const auto it: _interactions) {
     _order.push(it.first);
   }
