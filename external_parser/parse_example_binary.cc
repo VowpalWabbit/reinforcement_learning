@@ -16,6 +16,8 @@
 #include "memory.h"
 #include "parse_example_binary.h"
 
+#include "example_joiner.h"
+
 // TODO need to check if errors will be detected from stderr/stdout/other and
 // use appropriate logger
 
@@ -77,8 +79,8 @@ bool read_padding(io_buf *input, uint32_t previous_payload_size,
 
 namespace VW {
 namespace external {
-binary_parser::binary_parser(vw *all)
-    : _header_read(false), _example_joiner(all), _payload(nullptr),
+binary_parser::binary_parser(vw *all, const parser_options& opts)
+    : _header_read(false), _example_joiner(make_unique<example_joiner>(all)), _payload(nullptr),
       _payload_size(0), _total_size_read(0) {}
 
 binary_parser::~binary_parser(){};
@@ -198,10 +200,10 @@ bool binary_parser::read_checkpoint_msg(io_buf *input) {
   // TODO: fb verification: what if verification fails, crash or default to
   // something sensible?
   auto checkpoint_info = flatbuffers::GetRoot<v2::CheckpointInfo>(_payload);
-  _example_joiner.set_reward_function(checkpoint_info->reward_function_type());
-  _example_joiner.set_default_reward(checkpoint_info->default_reward());
-  _example_joiner.set_learning_mode_config(checkpoint_info->learning_mode_config());
-  _example_joiner.set_problem_type_config(checkpoint_info->problem_type_config());
+  _example_joiner->set_reward_function(checkpoint_info->reward_function_type());
+  _example_joiner->set_default_reward(checkpoint_info->default_reward());
+  _example_joiner->set_learning_mode_config(checkpoint_info->learning_mode_config());
+  _example_joiner->set_problem_type_config(checkpoint_info->problem_type_config());
 
   return true;
 }
@@ -243,9 +245,9 @@ bool binary_parser::read_regular_msg(io_buf *input,
 
   for (size_t i = 0; i < joined_payload->events()->size(); i++) {
     // process and group events in batch
-    _example_joiner.process_event(*joined_payload->events()->Get(i));
+    _example_joiner->process_event(*joined_payload->events()->Get(i));
   }
-  _example_joiner.process_joined(examples);
+  _example_joiner->process_joined(examples);
 
   return true;
 }
@@ -295,8 +297,8 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
 
   // either process next id from an ongoing batch
   // or read the next batch from file
-  if (_example_joiner.processing_batch()) {
-    _example_joiner.process_joined(examples);
+  if (_example_joiner->processing_batch()) {
+    _example_joiner->process_joined(examples);
     return true;
   }
 

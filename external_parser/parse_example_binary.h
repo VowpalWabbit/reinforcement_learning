@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "example_joiner.h"
+#include "i_example_joiner.h"
 #include "parse_example_external.h"
 
 constexpr size_t BINARY_PARSER_VERSION = 1;
@@ -19,7 +19,7 @@ namespace external {
 
 class binary_parser : public parser {
 public:
-  binary_parser(vw *all);
+  binary_parser(vw *all, const parser_options& opts);
   ~binary_parser();
   bool parse_examples(vw *all, v_array<example *> &examples) override;
   bool read_magic(io_buf *input);
@@ -31,7 +31,7 @@ public:
 
 private:
   bool _header_read;
-  example_joiner _example_joiner;
+  std::unique_ptr<i_example_joiner> _example_joiner;
   char *_payload;
   uint32_t _payload_size;
   uint64_t _total_size_read;

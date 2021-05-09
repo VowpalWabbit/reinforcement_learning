@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_magic) {
 
   set_buffer_as_vw_input(buffer, vw);
 
-  VW::external::binary_parser bp(vw);
+  VW::external::binary_parser bp(vw, {true, false});
   BOOST_CHECK_EQUAL(bp.read_magic(vw->example_parser->input), false);
 
   VW::finish(*vw);
@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_version) {
                            false, nullptr, nullptr);
   set_buffer_as_vw_input(buffer, vw);
 
-  VW::external::binary_parser bp(vw);
+  VW::external::binary_parser bp(vw, {true, false});
   BOOST_CHECK_EQUAL(bp.read_magic(vw->example_parser->input), true);
   BOOST_CHECK_EQUAL(bp.read_version(vw->example_parser->input), false);
 
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_empty_msg_header) {
                            false, nullptr, nullptr);
   set_buffer_as_vw_input(buffer, vw);
 
-  VW::external::binary_parser bp(vw);
+  VW::external::binary_parser bp(vw, {true, false});
   BOOST_CHECK_EQUAL(bp.read_magic(vw->example_parser->input), true);
   BOOST_CHECK_EQUAL(bp.read_version(vw->example_parser->input), true);
   BOOST_CHECK_EQUAL(bp.read_header(vw->example_parser->input), true);
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_no_msg_header) {
                            false, nullptr, nullptr);
   set_buffer_as_vw_input(buffer, vw);
 
-  VW::external::binary_parser bp(vw);
+  VW::external::binary_parser bp(vw, {true, false});
   BOOST_CHECK_EQUAL(bp.read_magic(vw->example_parser->input), true);
   BOOST_CHECK_EQUAL(bp.read_version(vw->example_parser->input), true);
   BOOST_CHECK_EQUAL(bp.read_header(vw->example_parser->input), false);
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
                              nullptr, false, nullptr, nullptr);
     set_buffer_as_vw_input(buffer, vw);
 
-    VW::external::binary_parser bp(vw);
+    VW::external::binary_parser bp(vw, {true, false});
     v_array<example *> examples;
 
     BOOST_REQUIRE_EQUAL(bp.read_magic(vw->example_parser->input), true);
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
     auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet",
                              nullptr, false, nullptr, nullptr);
     set_buffer_as_vw_input(buffer, vw);
-    VW::external::binary_parser bp(vw);
+    VW::external::binary_parser bp(vw, {true, false});
     v_array<example *> examples;
     BOOST_CHECK_EQUAL(bp.parse_examples(vw, examples), false);
     VW::finish(*vw);
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_joined_event_payload) {
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
   set_buffer_as_vw_input(buffer, vw);
-  VW::external::binary_parser bp(vw);
+  VW::external::binary_parser bp(vw, {true, false});
   v_array<example *> examples;
   examples.push_back(&VW::get_unused_example(vw));
 
