@@ -4,7 +4,7 @@
 
 #include "example.h"
 #include "lru_dedup_cache.h"
-#include "reward.h"
+#include "i_joiner.h"
 #include "v_array.h"
 
 #include <fstream>
@@ -12,22 +12,22 @@
 #include <queue>
 #include <unordered_map>
 
-class example_joiner {
+class example_joiner : public i_joiner {
 public:
   example_joiner(vw *vw); // TODO rule of 5
   example_joiner(vw *vw, bool binary_to_json, std::string outfile_name);
 
-  ~example_joiner();
+  virtual ~example_joiner();
 
-  void set_reward_function(const v2::RewardFunctionType type);
-  void set_default_reward(float default_reward);
-  void set_learning_mode_config(const v2::LearningModeType &learning_mode);
-  void set_problem_type_config(const v2::ProblemType &problem_type);
+  virtual void set_reward_function(const v2::RewardFunctionType type);
+  virtual void set_default_reward(float default_reward);
+  virtual void set_learning_mode_config(const v2::LearningModeType &learning_mode);
+  virtual void set_problem_type_config(const v2::ProblemType &problem_type);
 
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their
   // id. The grouped events can be processed when process_joined() is called
-  bool process_event(const v2::JoinedEvent &joined_event);
+  virtual bool process_event(const v2::JoinedEvent &joined_event);
 
   /**
    * Takes all grouped events, processes them (e.g. decompression) and populates
@@ -58,10 +58,12 @@ public:
    * We can't attempt to invalidate the specific id since we don't know it (it's
    * in the metadata)
    */
-  bool process_joined(v_array<example *> &examples);
+  virtual bool process_joined(v_array<example *> &examples);
   // true if there are still event-groups to be processed from a deserialized
   // batch
-  bool processing_batch();
+  virtual bool processing_batch();
+
+  virtual void on_new_batch();
 
   float get_reward();
   float get_original_reward();
