@@ -19,15 +19,15 @@ public:
 
   virtual ~example_joiner();
 
-  virtual void set_reward_function(const v2::RewardFunctionType type);
-  virtual void set_default_reward(float default_reward);
-  virtual void set_learning_mode_config(const v2::LearningModeType &learning_mode);
-  virtual void set_problem_type_config(const v2::ProblemType &problem_type);
+  void set_reward_function(const v2::RewardFunctionType type) override;
+  void set_default_reward(float default_reward) override;
+  void set_learning_mode_config(const v2::LearningModeType &learning_mode) override;
+  void set_problem_type_config(const v2::ProblemType &problem_type) override;
 
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their
   // id. The grouped events can be processed when process_joined() is called
-  virtual bool process_event(const v2::JoinedEvent &joined_event);
+  bool process_event(const v2::JoinedEvent &joined_event) override;
 
   /**
    * Takes all grouped events, processes them (e.g. decompression) and populates
@@ -58,12 +58,12 @@ public:
    * We can't attempt to invalidate the specific id since we don't know it (it's
    * in the metadata)
    */
-  virtual bool process_joined(v_array<example *> &examples);
+  bool process_joined(v_array<example *> &examples) override;
   // true if there are still event-groups to be processed from a deserialized
   // batch
-  virtual bool processing_batch();
+  bool processing_batch() override;
 
-  virtual void on_new_batch();
+  void on_new_batch() override;
 
   float get_reward();
   float get_original_reward();
