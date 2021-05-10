@@ -56,6 +56,7 @@ set(external_parser_headers ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.h
   ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_binary.h
   ${CMAKE_CURRENT_SOURCE_DIR}/timestamp_helper.h
   ${CMAKE_CURRENT_SOURCE_DIR}/log_converter.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/reward.h
 )
 set(external_parser_sources ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/example_joiner.cc
