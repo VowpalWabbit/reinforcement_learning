@@ -21,8 +21,8 @@ public:
 
   void set_reward_function(const v2::RewardFunctionType type) override;
   void set_default_reward(float default_reward) override;
-  void set_learning_mode_config(const v2::LearningModeType &learning_mode) override;
-  void set_problem_type_config(const v2::ProblemType &problem_type) override;
+  void set_learning_mode_config(v2::LearningModeType learning_mode) override;
+  void set_problem_type_config(v2::ProblemType problem_type) override;
 
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their

@@ -8,7 +8,7 @@
 #include "example_joiner.h"
 
 #include <memory>
-#include <stdio.h>
+#include <cstdio>
 
 
 namespace VW {
