@@ -5,7 +5,6 @@
 #include "example.h"
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/FileFormat_generated.h"
-#include "generated/v2/Metadata_generated.h"
 #include "lru_dedup_cache.h"
 #include "i_example_joiner.h"
 #include "v_array.h"
@@ -52,10 +51,11 @@ private:
   int process_dedup(const v2::Event &event, const v2::Metadata &metadata);
 
   int process_interaction(const v2::Event &event, const v2::Metadata &metadata,
+                          const TimePoint &enqueued_time_utc,
                           v_array<example *> &examples);
 
   int process_outcome(const v2::Event &event, const v2::Metadata &metadata,
-                      const time_t &enqueued_time_utc);
+                      const TimePoint &enqueued_time_utc);
 
   template <typename T>
   const T *process_compression(const uint8_t *data, size_t size,

@@ -6,6 +6,7 @@
 
 #include "configuration.h"
 #include "live_model.h"
+#include "multistep.h"
 
 namespace reinforcement_learning {
   namespace python {
@@ -24,6 +25,21 @@ namespace reinforcement_learning {
       size_t chosen_action_id;
       std::vector<int> action_ids;
       std::vector<float> probabilities;
+    };
+
+    // TODO: Expose history API.
+    class episode_state {
+      public:
+        episode_state(const char* episode_id) : _impl(episode_id) {}
+
+        const char* get_episode_id() const {
+          return _impl.get_episode_id();
+        }
+
+      private:
+        reinforcement_learning::episode_state _impl;
+
+        friend class live_model;
     };
 
 #ifndef SWIG
@@ -61,6 +77,10 @@ namespace reinforcement_learning {
       void report_outcome(const char* event_id, float outcome);
 
       void refresh_model();
+
+      // episodic
+      reinforcement_learning::python::ranking_response request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, reinforcement_learning::python::episode_state& episode);
+      void report_outcome(const char* episode_id, const char* event_id, float outcome);
 
       private:
         reinforcement_learning::live_model _impl;

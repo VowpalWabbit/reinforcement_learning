@@ -264,10 +264,9 @@ int basic_usage_multistep() {
   r::episode_state episode1("my_episode_id_1");
   r::episode_state episode2("my_episode_id_2");
 
-  r::ranking_response response1;
   {
     const std::string context1 = R"({"shared":{"F1": 1.0}, "_multi": [{"AF1": 2.0}, {"AF1": 3.0}]})";
-
+    r::ranking_response response1;
     if (rl.request_episodic_decision("event1", nullptr, context1.c_str(), response1, episode1, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;
       return -1;
@@ -276,7 +275,7 @@ int basic_usage_multistep() {
 
   {
     const std::string context1 = R"({"shared":{"F2": 1.0}, "_multi": [{"AF2": 2.0}, {"AF2": 3.0}]})";
-
+    r::ranking_response response1;
     if (rl.request_episodic_decision("event1", nullptr, context1.c_str(), response1, episode2, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;
       return -1;

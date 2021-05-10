@@ -7,6 +7,7 @@
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "lru_dedup_cache.h"
+#include "timestamp_helper.h"
 #include "v_array.h"
 
 #include <list>
@@ -22,7 +23,7 @@
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 struct metadata_info {
-  std::string client_time_utc;
+  TimePoint client_time_utc;
   std::string app_id;
   v2::PayloadType payload_type;
   float pass_probability;
@@ -36,7 +37,7 @@ struct outcome_event {
   int index;
   std::string s_value;
   float value;
-  time_t enqueued_time_utc;
+  TimePoint enqueued_time_utc;
 };
 
 struct joined_event {

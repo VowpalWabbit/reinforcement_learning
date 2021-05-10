@@ -31,6 +31,10 @@ void parser::set_parse_args(VW::config::option_group_definition &in_options,
       .help("multistep binary joiner"));
 }
 
+void parser::persist_metrics(std::vector<std::tuple<std::string, size_t>>& metrics) {
+  metrics.emplace_back("external_parser", 1);
+}
+
 parser::~parser() {}
 
 int parse_examples(vw *all, v_array<example *> &examples) {

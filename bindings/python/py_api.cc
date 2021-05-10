@@ -135,5 +135,21 @@ namespace reinforcement_learning {
       _impl.refresh_model(&status);
       check_api_status(status);
     }
+
+    ranking_response live_model::request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, reinforcement_learning::python::episode_state& episode) {
+      reinforcement_learning::ranking_response response_impl;
+      reinforcement_learning::api_status status;
+
+      _impl.request_episodic_decision(event_id, previous_id, context_json, response_impl, episode._impl, &status);
+      check_api_status(status);
+
+      return convert_ranking_response(response_impl);
+    }
+
+    void live_model::report_outcome(const char* episode_id, const char* event_id, float outcome) {
+      reinforcement_learning::api_status status;
+      _impl.report_outcome(episode_id, event_id, outcome, &status);
+      check_api_status(status);
+    }
   }
 }
