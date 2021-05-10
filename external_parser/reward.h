@@ -5,7 +5,11 @@
 
 #include "timestamp_helper.h"
 // VW headers
+// vw.h has to come before json_utils.h
+// clang-format off
+#include "vw.h"
 #include "json_utils.h"
+// clang-format on
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
