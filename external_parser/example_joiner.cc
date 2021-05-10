@@ -108,12 +108,12 @@ void example_joiner::set_default_reward(float default_reward) {
 }
 
 void example_joiner::set_learning_mode_config(
-    const v2::LearningModeType &learning_mode) {
+    v2::LearningModeType learning_mode) {
   _learning_mode_config = learning_mode;
 }
 
 void example_joiner::set_problem_type_config(
-    const v2::ProblemType &problem_type) {
+    v2::ProblemType problem_type) {
   _problem_type_config = problem_type;
 }
 
@@ -559,3 +559,4 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
 bool example_joiner::processing_batch() { return !_batch_event_order.empty(); }
 float example_joiner::get_reward() { return _reward; }
 float example_joiner::get_original_reward() { return _original_reward; }
+void example_joiner::on_new_batch() {}

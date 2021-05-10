@@ -4,8 +4,12 @@
 
 #include "parse_args.h"
 #include "parse_example_binary.h"
-#include <stdio.h>
 #include "io/logger.h"
+#include "example_joiner.h"
+
+#include <memory>
+#include <cstdio>
+
 
 namespace VW {
 namespace external {
@@ -16,6 +20,7 @@ std::unique_ptr<parser>
 parser::get_external_parser(vw *all, const input_options &parsed_options) {
   if (parsed_options.ext_opts->binary) {
     bool binary_to_json = parsed_options.ext_opts->binary_to_json;
+    std::unique_ptr<i_joiner> joiner(nullptr);
     if (binary_to_json) {
       const auto& infile_path = all->data_filename;
       const auto& infile_name = infile_path.substr(
@@ -29,9 +34,11 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
       }
 
       std::string outfile_name = infile_name + ".dsjson";
-      return VW::make_unique<binary_parser>(all, binary_to_json, outfile_name);
+      joiner = VW::make_unique<example_joiner>(all, binary_to_json, outfile_name);
+    } else {
+      joiner = VW::make_unique<example_joiner>(all);
     }
-    return VW::make_unique<binary_parser>(all);
+    return VW::make_unique<binary_parser>(std::move(joiner));
   }
   throw std::runtime_error("external parser type not recognised");
 }
