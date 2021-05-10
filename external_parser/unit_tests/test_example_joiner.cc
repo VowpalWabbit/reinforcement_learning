@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cb) {
   joiner.set_problem_type_config(v2::ProblemType_CB);
 
   std::string input_files = get_test_files_location();
-  auto interaction_buffer = read_file(input_files + "/cb_v2.fb");
+  auto interaction_buffer = read_file(input_files + "/fb_events/cb_v2.fb");
   // need to keep the fb buffer around in order to process the event
   std::vector<flatbuffers::DetachedBuffer> int_detached_buffers;
 
@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cb) {
   // need to keep the fb buffer around in order to process the event
   std::vector<flatbuffers::DetachedBuffer> obs_detached_buffers;
 
-  auto observation_buffer = read_file(input_files + "/f-reward_v2.fb");
+  auto observation_buffer = read_file(input_files + "/fb_events/f-reward_v2.fb");
   joined_cb_events =
       wrap_into_joined_events(observation_buffer, obs_detached_buffers);
 

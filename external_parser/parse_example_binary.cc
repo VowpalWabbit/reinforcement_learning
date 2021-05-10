@@ -10,6 +10,7 @@
 #include "best_constant.h"
 #include "cb.h"
 #include "constant.h"
+#include "example.h"
 #include "flatbuffers/flatbuffers.h"
 #include "global_data.h"
 #include "io/logger.h"
@@ -81,11 +82,12 @@ binary_parser::binary_parser(vw *all)
     : _header_read(false), _example_joiner(all), _payload(nullptr),
       _payload_size(0), _total_size_read(0) {}
 
-binary_parser::binary_parser(vw *all, bool binary_to_json, std::string outfile_name)
+binary_parser::binary_parser(vw *all, bool binary_to_json,
+                             std::string outfile_name)
     : _header_read(false), _example_joiner(all, binary_to_json, outfile_name),
       _payload(nullptr), _payload_size(0), _total_size_read(0) {}
 
-binary_parser::~binary_parser(){}
+binary_parser::~binary_parser() {}
 
 bool binary_parser::read_magic(io_buf *input) {
   const uint32_t buffer_length = 4 * sizeof(char);
@@ -204,8 +206,10 @@ bool binary_parser::read_checkpoint_msg(io_buf *input) {
   auto checkpoint_info = flatbuffers::GetRoot<v2::CheckpointInfo>(_payload);
   _example_joiner.set_reward_function(checkpoint_info->reward_function_type());
   _example_joiner.set_default_reward(checkpoint_info->default_reward());
-  _example_joiner.set_learning_mode_config(checkpoint_info->learning_mode_config());
-  _example_joiner.set_problem_type_config(checkpoint_info->problem_type_config());
+  _example_joiner.set_learning_mode_config(
+      checkpoint_info->learning_mode_config());
+  _example_joiner.set_problem_type_config(
+      checkpoint_info->problem_type_config());
 
   return true;
 }
@@ -214,7 +218,7 @@ bool binary_parser::read_regular_msg(io_buf *input,
                                      v_array<example *> &examples) {
   _payload = nullptr;
   if (!read_payload_size(input, _payload_size)) {
-    VW::io::logger::log_critical(
+    VW::io::logger::log_warn(
         "Failed to read regular message payload size, after having read "
         "[{}] bytes from the file",
         _total_size_read);
@@ -224,10 +228,10 @@ bool binary_parser::read_regular_msg(io_buf *input,
   _total_size_read += sizeof(_payload_size);
 
   if (!read_payload(input, _payload, _payload_size)) {
-    VW::io::logger::log_critical("Failed to read regular message payload of "
-                                 "size [{}], after having read "
-                                 "[{}] bytes from the file",
-                                 _payload_size, _total_size_read);
+    VW::io::logger::log_warn("Failed to read regular message payload of "
+                             "size [{}], after having read "
+                             "[{}] bytes from the file",
+                             _payload_size, _total_size_read);
     return false;
   }
 
@@ -238,7 +242,7 @@ bool binary_parser::read_regular_msg(io_buf *input,
       flatbuffers::Verifier(reinterpret_cast<const uint8_t *>(_payload),
                             static_cast<size_t>(_payload_size));
   if (!joined_payload->Verify(verifier)) {
-    VW::io::logger::log_error(
+    VW::io::logger::log_warn(
         "JoinedPayload of size [{}] verification failed after having read [{}] "
         "bytes from the file, skipping JoinedPayload",
         _payload_size, _total_size_read);
@@ -247,11 +251,29 @@ bool binary_parser::read_regular_msg(io_buf *input,
 
   for (size_t i = 0; i < joined_payload->events()->size(); i++) {
     // process and group events in batch
-    _example_joiner.process_event(*joined_payload->events()->Get(i));
+    if (!_example_joiner.process_event(*joined_payload->events()->Get(i))) {
+      VW::io::logger::log_error("Processing of an event from JoinedPayload "
+                                "failed after having read [{}] "
+                                "bytes from the file, skipping JoinedPayload",
+                                _total_size_read);
+      return false;
+    }
   }
-  _example_joiner.process_joined(examples);
 
-  return true;
+  while (_example_joiner.processing_batch()) {
+    if (_example_joiner.process_joined(examples)) {
+      return true;
+    } else {
+      VW::io::logger::log_warn(
+          "Processing of a joined event from a JoinedEvent "
+          "failed after having read [{}] "
+          "bytes from the file, proceeding to next message",
+          _total_size_read);
+    }
+  }
+
+  // nothing form the current batch was processed, need to read next msg
+  return false;
 }
 
 bool binary_parser::advance_to_next_payload_type(io_buf *input,
@@ -269,7 +291,7 @@ bool binary_parser::advance_to_next_payload_type(io_buf *input,
   _total_size_read += padding;
 
   if (!read_payload_type(input, payload_type)) {
-    VW::io::logger::log_warn(
+    VW::io::logger::log_critical(
         "Failed to read next payload type from file, after having read "
         "[{}] bytes from the file",
         _total_size_read);
@@ -297,16 +319,22 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
     _header_read = true;
   }
 
-  // either process next id from an ongoing batch
-  // or read the next batch from file
-  if (_example_joiner.processing_batch()) {
-    _example_joiner.process_joined(examples);
-    return true;
+  while (_example_joiner.processing_batch()) {
+    if (_example_joiner.process_joined(examples)) {
+      return true;
+    } else {
+      VW::io::logger::log_warn(
+          "Processing of a joined event from a JoinedEvent "
+          "failed after having read [{}] "
+          "bytes from the file, proceeding to next message",
+          _total_size_read);
+    }
   }
 
   unsigned int payload_type;
 
-  if (!advance_to_next_payload_type(all->example_parser->input.get(), payload_type)) {
+  if (!advance_to_next_payload_type(all->example_parser->input.get(),
+                                    payload_type)) {
     return false;
   }
 
@@ -325,12 +353,14 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
     if (read_regular_msg(all->example_parser->input.get(), examples)) {
       return true;
     }
+
     // bad payload process the next one
     if (!advance_to_next_payload_type(all->example_parser->input.get(),
                                       payload_type)) {
       return false;
     }
   }
+
   if (payload_type != MSG_TYPE_EOF) {
     VW::io::logger::log_critical(
         "Payload type not recognized [{}], after having read [{}] "

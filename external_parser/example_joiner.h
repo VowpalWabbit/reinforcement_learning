@@ -9,10 +9,10 @@
 #include "timestamp_helper.h"
 #include "v_array.h"
 
+#include <fstream>
 #include <list>
 #include <queue>
 #include <unordered_map>
-#include <fstream>
 // VW headers
 // vw.h has to come before json_utils.h
 // clang-format off
@@ -42,13 +42,24 @@ struct outcome_event {
   bool action_taken;
 };
 
+// TODO in separate PR move metadat_info, outcome_event, joined_event and reward
+// calculations to their own file
 struct joined_event {
+  joined_event(const TimePoint &tp, metadata_info &&mi,
+               DecisionServiceInteraction &&id, const std::string &ctx,
+               const std::string &mid)
+      : joined_event_timestamp(tp), interaction_metadata(std::move(mi)),
+        interaction_data(std::move(id)), outcome_events({}), context(ctx),
+        model_id(mid), ok(true) {}
+  joined_event() : ok(true) {}
+
   TimePoint joined_event_timestamp;
   metadata_info interaction_metadata;
   DecisionServiceInteraction interaction_data;
   std::vector<outcome_event> outcome_events;
   std::string context;
   std::string model_id;
+  bool ok; // ok till proved otherwise
   // Default Baseline Action for CB is 1 (rl client recommended actions are 1
   // indexed in the CB case)
   static const int baseline_action = 1;
@@ -80,11 +91,38 @@ public:
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their
   // id. The grouped events can be processed when process_joined() is called
-  int process_event(const v2::JoinedEvent &joined_event);
-  // Takes all grouped events, processes them (e.g. decompression) and populates
-  // the examples array with complete example(s) ready to be used by vw for
-  // training
-  int process_joined(v_array<example *> &examples);
+  bool process_event(const v2::JoinedEvent &joined_event);
+
+  /**
+   * Takes all grouped events, processes them (e.g. decompression) and populates
+   * the examples array with complete example(s) ready to be used by vw for
+   * training
+   *
+   * returns false if the interaction can not be used for training due to
+   * malformed or missing data
+   * On returning false, the v_array of examples will be cleaned and prepared
+   * for the potential next parser call
+   *
+   * returns true if examples in example v_array are ready to be used for
+   * training
+   *
+   * --- Assumptions ---
+   *
+   * Interactions precede observations
+   *
+   * If an interaction is processed without problems it will create an entry in
+   * _batched_grouped_examples with key the id (event id). If an interaction
+   * was not processed correctly due to an error then the corresponding
+   * outcome(s) will be ignored and we will not learn from that interaction
+   *
+   * If an interaction was processed correctly but any of its outcome(s) failed
+   * to be processed then we do not learn from that interaction
+   *
+   * If metadata is malformed then don't attempt to process event
+   * We can't attempt to invalidate the specific id since we don't know it (it's
+   * in the metadata)
+   */
+  bool process_joined(v_array<example *> &examples);
   // true if there are still event-groups to be processed from a deserialized
   // batch
   bool processing_batch();
@@ -93,20 +131,25 @@ public:
   float get_original_reward();
 
 private:
-  int process_dedup(const v2::Event &event, const v2::Metadata &metadata);
+  bool process_dedup(const v2::Event &event, const v2::Metadata &metadata);
 
-  int process_interaction(const v2::Event &event, const v2::Metadata &metadata,
-                          const TimePoint &enqueued_time_utc,
-                          v_array<example *> &examples);
+  bool process_interaction(const v2::Event &event, const v2::Metadata &metadata,
+                           const TimePoint &enqueued_time_utc,
+                           v_array<example *> &examples);
 
-  int process_outcome(const v2::Event &event, const v2::Metadata &metadata,
-                      const TimePoint &enqueued_time_utc);
+  bool process_outcome(const v2::Event &event, const v2::Metadata &metadata,
+                       const TimePoint &enqueued_time_utc);
 
   template <typename T>
-  const T *process_compression(const uint8_t *data, size_t size,
-                               const v2::Metadata &metadata);
+  bool process_compression(const uint8_t *data, size_t size,
+                           const v2::Metadata &metadata, const T *&payload);
 
   void try_set_label(const joined_event &je, v_array<example *> &examples);
+
+  void clear_batch_info();
+  void clear_event_id_batch_info(const std::string &id);
+  void invalidate_joined_event(const std::string &id);
+  void clear_vw_examples(v_array<example *> &examples);
 
   example *get_or_create_example();
 
