@@ -79,9 +79,9 @@ bool read_padding(io_buf *input, uint32_t previous_payload_size,
 
 namespace VW {
 namespace external {
-binary_parser::binary_parser(i_joiner* joiner)
+binary_parser::binary_parser(std::unique_ptr<i_joiner>&& joiner)
     : _header_read(false)
-    , _example_joiner(joiner)
+    , _example_joiner(std::move(joiner))
     , _payload(nullptr)
     , _payload_size(0)
     , _total_size_read(0) {}

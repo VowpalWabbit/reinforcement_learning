@@ -19,7 +19,7 @@ namespace external {
 
 class binary_parser : public parser {
 public:
-  binary_parser(i_joiner* joiner);  //taking ownership of joiner
+  binary_parser(std::unique_ptr<i_joiner>&& joiner);  //taking ownership of joiner
   ~binary_parser();
   bool parse_examples(vw *all, v_array<example *> &examples) override;
   bool read_magic(io_buf *input);

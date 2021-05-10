@@ -34,11 +34,11 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
       }
 
       std::string outfile_name = infile_name + ".dsjson";
-      joiner.reset(new example_joiner(all, binary_to_json, outfile_name));
+      joiner = VW::make_unique<example_joiner>(all, binary_to_json, outfile_name);
     } else {
-      joiner.reset(new example_joiner(all));
+      joiner = VW::make_unique<example_joiner>(all);
     }
-    return VW::make_unique<binary_parser>(joiner.release());
+    return VW::make_unique<binary_parser>(std::move(joiner));
   }
   throw std::runtime_error("external parser type not recognised");
 }
