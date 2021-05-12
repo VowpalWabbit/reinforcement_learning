@@ -112,8 +112,7 @@ void example_joiner::set_learning_mode_config(
   _learning_mode_config = learning_mode;
 }
 
-void example_joiner::set_problem_type_config(
-    v2::ProblemType problem_type) {
+void example_joiner::set_problem_type_config(v2::ProblemType problem_type) {
   _problem_type_config = problem_type;
 }
 
@@ -196,7 +195,7 @@ bool example_joiner::process_compression(const uint8_t *data, size_t size,
 }
 
 void example_joiner::try_set_label(const joined_event &je,
-                                   v_array<example *> &examples) {
+                                   v_array<example *> &examples, float reward) {
   if (je.interaction_data.actions.empty()) {
     VW::io::logger::log_warn("missing actions for event [{}]",
                              je.interaction_data.eventId);
@@ -219,7 +218,7 @@ void example_joiner::try_set_label(const joined_event &je,
 
   int index = je.interaction_data.actions[0];
   auto action = je.interaction_data.actions[0];
-  auto cost = -1.f * _reward;
+  auto cost = -1.f * reward;
   auto probability = je.interaction_data.probabilities[0] *
                      (1.f - je.interaction_data.probabilityOfDrop);
   auto weight = 1.f - je.interaction_data.probabilityOfDrop;
@@ -234,7 +233,6 @@ void example_joiner::clear_batch_info() {
   while (!_batch_event_order.empty()) {
     _batch_event_order.pop();
   }
-  _reward = _default_reward;
 }
 
 void example_joiner::clear_vw_examples(v_array<example *> &examples) {
@@ -250,7 +248,6 @@ void example_joiner::clear_event_id_batch_info(const std::string &id) {
   _batch_grouped_events.erase(id);
   _batch_event_order.pop();
   _batch_grouped_examples.erase(id);
-  _reward = _default_reward;
 }
 
 void example_joiner::invalidate_joined_event(const std::string &id) {
@@ -478,6 +475,9 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
 
   auto &id = _batch_event_order.front();
   bool multiline = false;
+  float reward = _default_reward;
+  // original reward is used to record the observed reward of apprentice mode
+  float original_reward = _default_reward;
 
   for (auto &joined_event : _batch_grouped_events[id]) {
     auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
@@ -519,7 +519,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   }
 
   if (je.outcome_events.size() > 0) {
-    _original_reward = _reward_calculation(je);
+    original_reward = _reward_calculation(je);
 
     if (je.interaction_metadata.payload_type == v2::PayloadType_CB &&
         je.interaction_metadata.learning_mode ==
@@ -527,18 +527,18 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
       if (je.interaction_data.actions[0] == je.baseline_action) {
         // TODO: default apprenticeReward should come from config
         // setting to default reward matches current behavior for now
-        _reward = _original_reward;
+        reward = original_reward;
       }
     } else {
-      _reward = _original_reward;
+      reward = original_reward;
     }
   }
 
   if (_binary_to_json) {
-    log_converter::build_cb_json(_outfile, je, _reward, _original_reward);
+    log_converter::build_cb_json(_outfile, je, reward, original_reward);
   }
 
-  try_set_label(je, examples);
+  try_set_label(je, examples, reward);
 
   if (multiline) {
     // add an empty example to signal end-of-multiline

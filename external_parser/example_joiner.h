@@ -3,8 +3,8 @@
 #include "err_constants.h"
 
 #include "example.h"
-#include "lru_dedup_cache.h"
 #include "i_joiner.h"
+#include "lru_dedup_cache.h"
 #include "v_array.h"
 
 #include <fstream>
@@ -79,7 +79,8 @@ private:
   bool process_compression(const uint8_t *data, size_t size,
                            const v2::Metadata &metadata, const T *&payload);
 
-  void try_set_label(const joined_event &je, v_array<example *> &examples);
+  void try_set_label(const joined_event &je, v_array<example *> &examples,
+                     float reward);
 
   void clear_batch_info();
   void clear_event_id_batch_info(const std::string &id);
@@ -109,9 +110,6 @@ private:
   flatbuffers::DetachedBuffer _detached_buffer;
 
   float _default_reward = 0.f;
-  float _reward = _default_reward;
-  // original reward is used to record the observed reward of apprentice mode
-  float _original_reward = _default_reward;
   reward::RewardFunctionType _reward_calculation;
 
   v2::LearningModeType _learning_mode_config = v2::LearningModeType_Online;
