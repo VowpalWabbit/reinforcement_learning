@@ -65,9 +65,6 @@ public:
 
   void on_new_batch() override;
 
-  float get_reward();
-  float get_original_reward();
-
 private:
   bool process_dedup(const v2::Event &event, const v2::Metadata &metadata);
 

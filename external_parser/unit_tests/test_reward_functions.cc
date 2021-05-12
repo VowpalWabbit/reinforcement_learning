@@ -38,7 +38,14 @@ float get_float_reward(std::string int_file_name, std::string obs_file_name, v2:
 
   joiner.process_joined(examples);
 
-  float reward = joiner.get_reward();
+  // works with CB for now
+  float reward = 0.0f;
+  for (auto *example : examples) {
+    if (example->l.cb.costs.size() > 0) {
+      // found label
+      reward = -1.0 * example->l.cb.costs[0].cost;
+    }
+  }
 
   clear_examples(examples, vw);
   VW::finish(*vw);
@@ -47,79 +54,79 @@ float get_float_reward(std::string int_file_name, std::string obs_file_name, v2:
 
 BOOST_AUTO_TEST_SUITE(reward_functions_with_cb_format_and_float_reward)
 
-  // 3 rewards in f-reward_3obs_v2.fb are: 5, 4, 3 and timestamps are in descending order added in test_common.cc
-  BOOST_AUTO_TEST_CASE(earliest) {
-    float reward = get_float_reward(
+// 3 rewards in f-reward_3obs_v2.fb are: 5, 4, 3 and timestamps are in descending order added in test_common.cc
+BOOST_AUTO_TEST_CASE(earliest) {
+  float reward = get_float_reward(
       "cb_v2.fb",
       "f-reward_3obs_v2.fb",
       v2::RewardFunctionType_Earliest
     );
 
-    BOOST_CHECK_EQUAL(reward, 3);
-  }
+  BOOST_CHECK_EQUAL(reward, 3);
+}
 
-  BOOST_AUTO_TEST_CASE(average) {
-    float reward = get_float_reward(
+BOOST_AUTO_TEST_CASE(average) {
+  float reward = get_float_reward(
       "cb_v2.fb",
       "f-reward_3obs_v2.fb",
       v2::RewardFunctionType_Average
     );
 
-    BOOST_CHECK_EQUAL(reward, (3.0 + 4 + 5) / 3);
-  }
+  BOOST_CHECK_EQUAL(reward, (3.0 + 4 + 5) / 3);
+}
 
-  BOOST_AUTO_TEST_CASE(min) {
-    float reward = get_float_reward(
+BOOST_AUTO_TEST_CASE(min) {
+  float reward = get_float_reward(
       "cb_v2.fb",
       "f-reward_3obs_v2.fb",
       v2::RewardFunctionType_Min
     );
 
-    BOOST_CHECK_EQUAL(reward, 3);
-  }
+  BOOST_CHECK_EQUAL(reward, 3);
+}
 
-  BOOST_AUTO_TEST_CASE(max) {
-    float reward = get_float_reward(
+BOOST_AUTO_TEST_CASE(max) {
+  float reward = get_float_reward(
       "cb_v2.fb",
       "f-reward_3obs_v2.fb",
       v2::RewardFunctionType_Max
     );
 
-    BOOST_CHECK_EQUAL(reward, 5);
-  }
+  BOOST_CHECK_EQUAL(reward, 5);
+}
 
-  BOOST_AUTO_TEST_CASE(median) {
-    float reward = get_float_reward(
+BOOST_AUTO_TEST_CASE(median) {
+  float reward = get_float_reward(
       "cb_v2.fb",
       "f-reward_3obs_v2.fb",
       v2::RewardFunctionType_Median
     );
 
-    BOOST_CHECK_EQUAL(reward, 4);
-  }
+  BOOST_CHECK_EQUAL(reward, 4);
+}
 
-  BOOST_AUTO_TEST_CASE(sum) {
-    float reward = get_float_reward(
+BOOST_AUTO_TEST_CASE(sum) {
+  float reward = get_float_reward(
       "cb_v2.fb",
       "f-reward_3obs_v2.fb",
       v2::RewardFunctionType_Sum
     );
 
-    BOOST_CHECK_EQUAL(reward, 3 + 4 + 5);
-  }
+  BOOST_CHECK_EQUAL(reward, 3 + 4 + 5);
+}
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(reward_functions_with_cb_format_and_appentice_mode)
-  BOOST_AUTO_TEST_CASE(apprentice_with_first_action_matching_baseline_action_returns_real_reward) {
-    // 3 rewards in f-reward_3obs_v2.fb are: 5, 4, 3
-    float reward = get_float_reward(
+BOOST_AUTO_TEST_CASE(apprentice_with_first_action_matching_baseline_action_returns_real_reward) {
+  // 3 rewards in f-reward_3obs_v2.fb are: 5, 4, 3
+  float reward = get_float_reward(
       "cb_apprentice_match_baseline_v2.fb",
       "f-reward_3obs_v2.fb",
       v2::RewardFunctionType_Sum,
       v2::LearningModeType_Apprentice
     );
-    BOOST_CHECK_EQUAL(reward, 3 + 4 + 5);
-  }
+  BOOST_CHECK_EQUAL(reward, 3 + 4 + 5);
+}
 
 // TODO: add test case for first action not matching basesline returns default reward
 BOOST_AUTO_TEST_SUITE_END()

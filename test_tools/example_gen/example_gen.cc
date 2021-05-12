@@ -119,7 +119,7 @@ int take_action(r::live_model& rl, const char *event_id, int action, bool gen_ra
   switch(action) {
     case CB_ACTION: {// "cb",
       r::ranking_response response;
-      if(rl.choose_rank(event_id, JSON_SLATES_CONTEXT, response, &status))
+      if(rl.choose_rank(event_id, JSON_CB_CONTEXT, response, &status))
           std::cout << status.get_error_msg() << std::endl;
       break;
     }

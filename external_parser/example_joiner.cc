@@ -234,6 +234,7 @@ void example_joiner::clear_batch_info() {
   while (!_batch_event_order.empty()) {
     _batch_event_order.pop();
   }
+  _reward = _default_reward;
 }
 
 void example_joiner::clear_vw_examples(v_array<example *> &examples) {
@@ -249,6 +250,7 @@ void example_joiner::clear_event_id_batch_info(const std::string &id) {
   _batch_grouped_events.erase(id);
   _batch_event_order.pop();
   _batch_grouped_examples.erase(id);
+  _reward = _default_reward;
 }
 
 void example_joiner::invalidate_joined_event(const std::string &id) {
@@ -530,13 +532,6 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     } else {
       _reward = _original_reward;
     }
-  } else {
-    // don't learn from this interaction
-    VW::io::logger::log_warn(
-        "Interaction with event id [{}] has no observations. Skipping...", id);
-    clear_vw_examples(examples);
-    clear_event_id_batch_info(id);
-    return false;
   }
 
   if (_binary_to_json) {
@@ -557,6 +552,4 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
 }
 
 bool example_joiner::processing_batch() { return !_batch_event_order.empty(); }
-float example_joiner::get_reward() { return _reward; }
-float example_joiner::get_original_reward() { return _original_reward; }
 void example_joiner::on_new_batch() {}
