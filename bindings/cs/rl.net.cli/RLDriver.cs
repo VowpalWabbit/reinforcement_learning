@@ -90,7 +90,7 @@ namespace Rl.Net.Cli
         bool TryQueueOutcomeEvent(RunContext runContext, string eventId, string slotId, TOutcome outcome);
     }
 
-    public class RLDriver : IOutcomeReporter<float>, IOutcomeReporter<string>
+    public class RLDriver : IOutcomeReporter<float>, IOutcomeReporter<string>, IDisposable
     {
         private LiveModel liveModel;
         private LoopKind loopKind;
@@ -255,5 +255,30 @@ namespace Rl.Net.Cli
                 localHandler(this, errorStatus);
             }
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    this.liveModel?.Dispose();
+                    this.liveModel = null;
+                }
+
+                disposedValue = true;
+            }
+        }
+
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+        }
+        #endregion
     }
 }

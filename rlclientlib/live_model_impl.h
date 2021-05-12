@@ -59,6 +59,7 @@ namespace reinforcement_learning
       model_factory_t* m_factory,
       sender_factory_t* sender_factory,
       time_provider_factory_t* time_provider_factory);
+	~live_model_impl();
 
     live_model_impl(const live_model_impl&) = delete;
     live_model_impl(live_model_impl&&) = delete;

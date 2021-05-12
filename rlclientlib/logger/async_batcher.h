@@ -13,6 +13,8 @@
 #include "message_sender.h"
 #include "utility/config_helper.h"
 #include "utility/object_pool.h"
+#include "trace_logger.h"
+#include "str_util.h"
 
 namespace reinforcement_learning {
   class error_callback_fn;
@@ -30,6 +32,7 @@ namespace reinforcement_learning { namespace logger {
     virtual int append(TEvent& evt, api_status* status = nullptr) = 0;
 
     virtual int run_iteration(api_status* status) = 0;
+	virtual void flush() = 0; //TODO surface errors
   };
 
   // This class takes uses a queue and a background thread to accumulate events, and send them by batch asynchronously.
@@ -46,20 +49,22 @@ namespace reinforcement_learning { namespace logger {
 
     int run_iteration(api_status* status) override;
 
+	void flush() override; //flush all batches
+
   private:
     int fill_buffer(std::shared_ptr<utility::data_buffer>& retbuffer,
       size_t& remaining, 
       api_status* status);
 
-    void flush(); //flush all batches
 
   public:
     async_batcher(i_message_sender* sender,
                   utility::watchdog& watchdog,
                   shared_state_t& shared_state,
                   error_callback_fn* perror_cb,
+                  i_trace *tracer,
                   const utility::async_batcher_config& config);
-    ~async_batcher();
+	virtual ~async_batcher();
 
   private:
     std::unique_ptr<i_message_sender> _sender;
@@ -67,6 +72,7 @@ namespace reinforcement_learning { namespace logger {
     event_queue<TEvent> _queue;       // A queue to accumulate batch of events.
     size_t _send_high_water_mark;
     error_callback_fn* _perror_cb;
+    i_trace *_trace;
     shared_state_t& _shared_state;
 
     utility::periodic_background_proc<async_batcher> _periodic_background_proc;
@@ -122,6 +128,7 @@ namespace reinforcement_learning { namespace logger {
     TEvent evt;
     TSerializer<TEvent> collection_serializer(*buffer.get(), _batch_content_encoding, _shared_state);
 
+    int event_count = 0;
     while (remaining > 0 && collection_serializer.size() < _send_high_water_mark) {
       if (_queue.pop(&evt)) {
         if (queue_mode_enum::BLOCK == _queue_mode) {
@@ -129,10 +136,14 @@ namespace reinforcement_learning { namespace logger {
         }
         RETURN_IF_FAIL(collection_serializer.add(evt, status));
         --remaining;
+        ++event_count;
       }
     }
-
     RETURN_IF_FAIL(collection_serializer.finalize(status));
+
+    TRACE_INFO(_trace, utility::concat("async_batcher.fill_buffer: created batch with ",
+		event_count, " events and ",
+		collection_serializer.size(), " bytes"));
 
     return error_code::success;
   }
@@ -140,9 +151,9 @@ namespace reinforcement_learning { namespace logger {
   template<typename TEvent, template<typename> class TSerializer>
   void async_batcher<TEvent, TSerializer>::flush() {
     const auto queue_size = _queue.size();
-
     // Early exit if queue is empty.
     if (queue_size == 0) {
+      TRACE_INFO(_trace, "async_batcher.flush: empty queue");
       return;
     }
 
@@ -157,7 +168,7 @@ namespace reinforcement_learning { namespace logger {
         ERROR_CALLBACK(_perror_cb, status);
       }
 
-      if (_sender->send(TSerializer<TEvent>::message_id(), buffer, &status) != error_code::success) {
+	  if (_sender->send(TSerializer<TEvent>::message_id(), buffer, &status) != error_code::success) {
         ERROR_CALLBACK(_perror_cb, status);
       }
     }
@@ -169,11 +180,13 @@ namespace reinforcement_learning { namespace logger {
     utility::watchdog& watchdog,
     typename TSerializer<TEvent>::shared_state_t& shared_state,
     error_callback_fn* perror_cb,
+    i_trace *trace,
     const utility::async_batcher_config& config)
     : _sender(sender)
     , _queue(config.send_queue_max_capacity)
     , _send_high_water_mark(config.send_high_water_mark)
     , _perror_cb(perror_cb)
+    , _trace(trace)
     , _shared_state(shared_state)
     , _periodic_background_proc(static_cast<int>(config.send_batch_interval_ms), watchdog, "Async batcher thread", perror_cb)
     , _pass_prob(0.5)
@@ -185,8 +198,5 @@ namespace reinforcement_learning { namespace logger {
   async_batcher<TEvent, TSerializer>::~async_batcher() {
     // Stop the background procedure the queue before exiting
     _periodic_background_proc.stop();
-    if (_queue.size() > 0) {
-      flush();
-    }
   }
 }}

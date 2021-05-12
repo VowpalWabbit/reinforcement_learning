@@ -29,6 +29,8 @@ namespace reinforcement_learning { namespace logger {
 
     int init(api_status* status);
 
+	void flush();
+
   protected:
     int append(TEvent&& item, api_status* status);
     int append(TEvent& item, api_status* status);
@@ -53,6 +55,13 @@ namespace reinforcement_learning { namespace logger {
     RETURN_IF_FAIL(_batcher->init(status));
     _initialized = true;
     return error_code::success;
+  }
+
+
+  template<typename TEvent>
+  void event_logger<TEvent>::flush()
+  {
+	  _batcher->flush();
   }
 
   template<typename TEvent>
