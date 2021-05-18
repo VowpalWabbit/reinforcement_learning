@@ -31,7 +31,6 @@ bool read_payload_type(io_buf *input, unsigned int &payload_type) {
       // when we are trying to fetch the next payload and we find out that there
       // is nothing left to read the file doesn't have to necessarily contain an
       // EOF
-      VW::io::logger::log_info("Reached end of file");
       payload_type = MSG_TYPE_EOF;
       return true;
     }
