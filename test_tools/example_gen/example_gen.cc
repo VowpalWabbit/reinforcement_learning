@@ -34,6 +34,7 @@ static const char *options[] = {
   "si-reward",
   "ss-reward",
   "action-taken",
+  "cb-loop",
   nullptr
 };
 
@@ -52,6 +53,7 @@ enum options{
   S_I_REWARD,
   S_S_REWARD,
   ACTION_TAKEN,
+  CB_LOOP
 };
 
 void load_config_from_json(int action, u::configuration& config, bool enable_apprentice_mode)
@@ -96,6 +98,36 @@ void load_config_from_json(int action, u::configuration& config, bool enable_app
   }
 }
 
+bool load_config_from_provided_json(const std::string& config_file, u::configuration& config)
+{
+  std::string config_str;
+	  // Load contents of config file into a string
+    std::ifstream fs;
+    fs.open(config_file);
+    if (!fs.good()) {
+      std::cout << "could load config file: " << config_file << std::endl;
+      return false;
+    }
+    std::stringstream buffer;
+    buffer << fs.rdbuf();
+    config_str = buffer.str();
+    
+	  if(cfg::create_from_json(config_str, config) != reinforcement_learning::error_code::success)
+    {
+      std::cout << "could not create configuration from config file: " << config_file << std::endl;
+      return false;
+    }
+    
+    // yes could be set in the config file but cli overrides that
+    if (enable_dedup) {
+      std::cout << "enabling dedup" << std::endl;
+      config.set(nm::INTERACTION_USE_DEDUP, "true");
+      config.set(nm::INTERACTION_USE_COMPRESSION, "true");
+    }
+
+    return true;
+}
+
 const auto JSON_CB_CONTEXT = R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"}},{"TAction":{"a2":"f2"}}]})";
 
 const auto JSON_CCB_CONTEXT = R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"}},{"TAction":{"a2":"f2"}}],"_slots":[{"Slot":{"a1":"f1"}},{"Slot":{"a1":"f1"}}]})";
@@ -104,17 +136,15 @@ const auto JSON_SLATES_CONTEXT = R"({"GUser":{"id":"a","major":"eng","hobby":"hi
 
 const auto JSON_CA_CONTEXT = R"({"RobotJoint1":{"friction":78}})";
 
-float get_random_reward() {
-  std::random_device rd;     // only used once to initialise (seed) engine
-  std::mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
-  std::uniform_int_distribution<int> uni(1, 5); // guaranteed unbiased
+float get_random_number(std::mt19937& rng, int min = 1) {
+  std::uniform_int_distribution<int> uni(min, 5); // guaranteed unbiased
   auto random_integer = uni(rng);
   return random_integer;
 }
 
-int take_action(r::live_model& rl, const char *event_id, int action, bool gen_random_reward) {
+int take_action(r::live_model& rl, const char *event_id, int action, bool gen_random_reward, std::mt19937& rng) {
   r::api_status status;
-  float reward = gen_random_reward ? get_random_reward() : 1.5f;
+  float reward = gen_random_reward ? get_random_number(rng) : 1.5f;
 
   switch(action) {
     case CB_ACTION: {// "cb",
@@ -152,7 +182,6 @@ int take_action(r::live_model& rl, const char *event_id, int action, bool gen_ra
       if( rl.report_outcome(event_id, reward, &status) != err::success )
           std::cout << status.get_error_msg() << std::endl;
       break;
-
     case F_I_REWARD: // "float-int",
       if( rl.report_outcome(event_id, 1, 1.5, &status) != err::success )
           std::cout << status.get_error_msg() << std::endl;
@@ -184,6 +213,22 @@ int take_action(r::live_model& rl, const char *event_id, int action, bool gen_ra
           std::cout << status.get_error_msg() << std::endl;
       break;
     };
+    case CB_LOOP: { // "cb action and random number of float rewards"
+      r::ranking_response response;
+      std::cout << "choose rank for event: " << event_id << std::endl;
+      if(rl.choose_rank(event_id, JSON_CB_CONTEXT, response, &status))
+          std::cout << status.get_error_msg() << std::endl;
+
+      size_t num_of_rewards = get_random_number(rng);
+      for (size_t i = 0; i < num_of_rewards; i++)
+      {
+        float reward = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
+        std::cout << "report outcome: " << reward << " for event: " << event_id << std::endl;
+        if( rl.report_outcome(event_id, reward, &status) != err::success )
+            std::cout << status.get_error_msg() << std::endl;
+      }
+      break;
+    };
 
     default:
       std::cout << "Invalid action " << action << std::endl;
@@ -201,10 +246,20 @@ int pseudo_random(int seed) {
   return (int)(val & 0xFFFFFFFF);
 }
 
-int run_config(int action, int count, int initial_seed, bool gen_random_reward, bool enable_apprentice_mode) {
+int run_config(int action, int count, int initial_seed, bool gen_random_reward, bool enable_apprentice_mode, std::string config_file, std::mt19937& rng) {
   u::configuration config;
 
-  load_config_from_json(action, config, enable_apprentice_mode);
+  if (config_file.empty())
+  {
+    load_config_from_json(action, config, enable_apprentice_mode);
+  }
+  else
+  {
+    if (!load_config_from_provided_json(config_file, config))
+    {
+      return -1;
+    }
+  }
 
   r::api_status status;
   r::live_model rl(config);
@@ -221,7 +276,7 @@ int run_config(int action, int count, int initial_seed, bool gen_random_reward, 
     else
       sprintf(event_id, "%x", pseudo_random(initial_seed + i * 997739));
 
-    int r = take_action(rl, event_id, action, gen_random_reward);
+    int r = take_action(rl, event_id, action, gen_random_reward, rng);
     if(r)
       return r;
   }
@@ -232,6 +287,7 @@ int run_config(int action, int count, int initial_seed, bool gen_random_reward, 
 int main(int argc, char *argv[]) {
   po::options_description desc("example-gen");
   std::string action_name;
+  std::string config_file;
   bool gen_all = false;
   int count = 1;
   int seed = 473747277; //much random
@@ -244,8 +300,9 @@ int main(int argc, char *argv[]) {
     ("dedup", "Enable dedup/zstd")
     ("count", po::value<int>(), "Number of events to produce")
     ("seed", po::value<int>(), "Initial seed used to produce event ids")
-    ("kind", po::value<std::string>(), "which kind of example to generate (cb,invalid-cb,ccb,ccb-baseline,slates,ca,(f|s)(s|i)?-reward,action-taken)")
+    ("kind", po::value<std::string>(), "which kind of example to generate (cb,invalid-cb,ccb,ccb-baseline,slates,ca,cb-loop,(f|s)(s|i)?-reward,action-taken)")
     ("random_reward", "Generate random float reward for observation event")
+    ("config_file", po::value<std::string>(), "json config file for rlclinetlib")
     ("apprentice", "Enable apprentice mode for cb event");
   po::positional_options_description pd;
   pd.add("kind", 1);
@@ -265,11 +322,16 @@ int main(int argc, char *argv[]) {
       count = vm["count"].as<int>();
     if(vm.count("seed") > 0)
       seed = vm["seed"].as<int>();
+    if(vm.count("config_file") > 0)
+      config_file = vm["config_file"].as<std::string>();
   } catch(std::exception& e) {
     std::cout << e.what() << std::endl;
     std::cout << desc << std::endl;
     return 0;
   }
+
+  std::random_device rd;     // only used once to initialise (seed) engine
+  std::mt19937 rng(seed);    // random-number engine used (Mersenne-Twister in this case)
 
   if(vm.count("help") > 0 || (action_name.empty() && !gen_all)) {
     std::cout << desc << std::endl;
@@ -278,7 +340,7 @@ int main(int argc, char *argv[]) {
 
   if(gen_all) {
     for(int i = 0; options[i]; ++i) {
-      if(run_config(i, count, seed, gen_random_reward, enable_apprentice_mode))
+      if(run_config(i, count, seed, gen_random_reward, enable_apprentice_mode, config_file, rng))
         return -1;
     }
     return 0;
@@ -298,5 +360,5 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  return run_config(action, count, seed, gen_random_reward, enable_apprentice_mode);
+  return run_config(action, count, seed, gen_random_reward, enable_apprentice_mode, config_file, rng);
 }
