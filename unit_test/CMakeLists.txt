@@ -55,4 +55,25 @@ target_link_libraries(rltest
     Boost::system
 )
 
-add_test(rltest rltest)
+#add_test(rltest rltest)
+
+# Based on https://eb2.co/blog/2015/06/driving-boost.test-with-cmake/
+
+# Read the sources, and identify tests
+
+set(FOUND_TESTS "")
+foreach(SOURCE_FILE_NAME IN LISTS TEST_SOURCES)
+  file(READ "${SOURCE_FILE_NAME}" SOURCE_FILE_CONTENTS)
+  string(REGEX MATCHALL "BOOST_AUTO_TEST_CASE\\( *([A-Za-z_0-9]+) *\\)" 
+         FOUND_TESTS_DELTA ${SOURCE_FILE_CONTENTS})
+  list(APPEND FOUND_TESTS ${FOUND_TESTS_DELTA})
+endforeach()
+
+foreach(HIT ${FOUND_TESTS})
+  string(REGEX REPLACE ".*\\( *([A-Za-z_0-9]+) *\\).*" "\\1" TEST_NAME ${HIT})
+   
+  add_test(NAME "rltest.${TEST_NAME}" 
+    COMMAND $<TARGET_FILE:rltest>
+    --run_test=${TEST_NAME} --catch_system_error=yes)
+endforeach()
+   
