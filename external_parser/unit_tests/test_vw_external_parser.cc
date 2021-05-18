@@ -91,31 +91,14 @@ BOOST_AUTO_TEST_CASE(compare_dsjson_with_fb_models) {
     auto full_file_name =
         input_files + "/valid_joined_logs/average_reward_100_interactions.fb";
 
-    auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet -f " + fb_model +
-                                 " -d " + full_file_name,
+    auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet -f " +
+                                 fb_model + " -d " + full_file_name,
                              nullptr, false, nullptr, nullptr);
 
-    v_array<example *> examples;
-    examples.push_back(&VW::get_unused_example(vw));
-    multi_ex multi_exs;
-    bool read_payload = false;
-    while (vw->example_parser->reader(vw, examples) > 0) {
-      read_payload = true;
-      // simulate next call to parser->read by clearing up examples
-      // and preparing one unused example
-      VW::setup_examples(*vw, examples);
-      for (auto *ex : examples) {
-        multi_exs.push_back(ex);
-      }
-      vw->learn(multi_exs);
-      multi_exs.clear();
-      clear_examples(examples, vw);
-      examples.push_back(&VW::get_unused_example(vw));
-    }
+    VW::start_parser(*vw);
+    VW::LEARNER::generic_driver(*vw);
+    VW::end_parser(*vw);
 
-    BOOST_CHECK_EQUAL(read_payload, true);
-
-    clear_examples(examples, vw);
     VW::finish(*vw);
   }
 
@@ -128,27 +111,10 @@ BOOST_AUTO_TEST_CASE(compare_dsjson_with_fb_models) {
                                  dsjson_model + " -d " + full_file_name,
                              nullptr, false, nullptr, nullptr);
 
-    v_array<example *> examples;
-    examples.push_back(&VW::get_unused_example(vw));
-    multi_ex multi_exs;
-    bool read_payload = false;
-    while (vw->example_parser->reader(vw, examples) > 0) {
-      read_payload = true;
-      // simulate next call to parser->read by clearing up examples
-      // and preparing one unused example
-      VW::setup_examples(*vw, examples);
-      for (auto *ex : examples) {
-        multi_exs.push_back(ex);
-      }
-      vw->learn(multi_exs);
-      multi_exs.clear();
-      clear_examples(examples, vw);
-      examples.push_back(&VW::get_unused_example(vw));
-    }
+    VW::start_parser(*vw);
+    VW::LEARNER::generic_driver(*vw);
+    VW::end_parser(*vw);
 
-    BOOST_CHECK_EQUAL(read_payload, true);
-
-    clear_examples(examples, vw);
     VW::finish(*vw);
   }
 
