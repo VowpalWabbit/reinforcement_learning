@@ -32,6 +32,12 @@ if (vw_USE_AZURE_FACTORIES)
     mock_http_client.cc
     http_client_test.cc
   )
+
+  if (WIN32)
+    list(APPEND TEST_SOURCES
+      model_mgmt_test_azure_win32.cc
+    )
+  endif()
 endif()
 
 # If compiling on windows add the stdafx file
