@@ -24,6 +24,6 @@ if (rlclientlib_BUILD_DOTNET)
   add_test(
     NAME rl.net.cli.test
     COMMAND
-     ${DOTNET_COMMAND} test $<TARGET_FILE_DIR:rl.net.native>/rl.net.cli.test.dll --Platform:x64 --InIsolation --logger:console;verbosity=default 
+     ${DOTNET_COMMAND} test $<TARGET_FILE_DIR:rl.net.native>/rl.net.cli.test.dll --Platform:x64 --InIsolation "--logger:console;verbosity=default"
     )
 endif()
