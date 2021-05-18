@@ -22,7 +22,11 @@ if (vw_USE_AZURE_FACTORIES)
 endif()
 
 find_package(OpenSSL REQUIRED)
-find_package(Boost COMPONENTS unit_test_framework system program_options thread REQUIRED) # Boost::uuid too, but that cannot be "found" here
+
+# We also require Boost::uuid, but that is a header-only dependency and is unable to be found
+# using find_package as a component, which means it is possible to have a successfully configured
+# build that will nonetheless not work due to missing dependencies.
+find_package(Boost COMPONENTS unit_test_framework system program_options thread REQUIRED) 
 
 # On MacOS, Boost::thread needs to be linked separately.
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

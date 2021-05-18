@@ -17,8 +17,7 @@ if(WIN32)
 
   if (rlclientlib_BUILD_DOTNET)
     cmake_minimum_required(VERSION 3.14)
-    # set(CMAKE_DOTNET_TARGET_FRAMEWORK_VERSION  "v4.5.2" CACHE INTERNAL ".NET Framework SDK version to target.")
-
+    
     # The MSBuild system does not get properly enlightened to C++/CLI projects (for chaining dependencies) when
     # set up through CMake (TODO: How to fix this?). This makes it so native dependencies of the underlying VW
     # native library do not get passed through the project reference properly. The fix is to do the same as on
