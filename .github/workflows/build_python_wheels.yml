@@ -48,7 +48,7 @@ jobs:
         - { version: 3.8 }
         - { version: 3.9 }
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Download Wheel
         uses: actions/download-artifact@v1
         with:
@@ -59,7 +59,27 @@ jobs:
           export wheel_files=(wheel_${{ matrix.config.version }}/*)
           export wheel_file="${wheel_files[0]}"
           echo Installing ${wheel_file}...
-          pip install -r requirements.txt
           pip install pytest
           pip install ${wheel_file}
           python -m pytest ./python/tests/
+  docs:
+    needs: build
+    container:
+      image: python:3.8
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download Wheel
+        uses: actions/download-artifact@v1
+        with:
+          name: wheel_3.8
+      - name: Build docs
+        run: |
+          pip install sphinx numpydoc
+          cd bindings/python/docs
+          make html
+      - name: Upload built docs
+        uses: actions/upload-artifact@v1
+        with:
+          name: python_docs
+          path: bindings/python/docs/build/
