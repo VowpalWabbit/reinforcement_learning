@@ -258,6 +258,29 @@ void example_joiner::invalidate_joined_event(const std::string &id) {
   }
 }
 
+bool example_joiner::is_je_learnable(joined_event &je) {
+  bool deferred_action = je.interaction_data.skipLearn;
+
+  if (!deferred_action) {
+    return true;
+  }
+
+  bool outcome_activated = std::any_of(
+    je.outcome_events.begin(),
+    je.outcome_events.end(),
+    [](const outcome_event &o) {
+      return o.action_taken == true;
+    }
+  );
+
+  if (outcome_activated) {
+    je.interaction_data.skipLearn = false;
+    return true;
+  } else {
+    return false;
+  }
+}
+
 bool example_joiner::process_interaction(const v2::Event &event,
                                          const v2::Metadata &metadata,
                                          const TimePoint &enqueued_time_utc,
@@ -518,6 +541,13 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     clear_event_id_batch_info(id);
     clear_vw_examples(examples);
     return false;
+  }
+
+  if (!is_je_learnable(je)) {
+    // TODO: add metrics for number of skipped events
+    clear_event_id_batch_info(id);
+    clear_vw_examples(examples);
+    return true;
   }
 
   if (je.outcome_events.size() > 0) {
