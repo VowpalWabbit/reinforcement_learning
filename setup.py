@@ -104,13 +104,13 @@ class CMakeBuild(build_ext):
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
-    name="rlclient_py",
+    name="rl_client",
     version = '0.1.3',
     url = 'https://github.com/VowpalWabbit/reinforcement_learning',
     description = 'Python binding for reinforcement learning client library',
     long_description="",
     license = 'MIT',
-    ext_modules=[CMakeExtension("rlclient_py")],
+    ext_modules=[CMakeExtension("rl_client")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
 )
