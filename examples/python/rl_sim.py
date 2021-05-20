@@ -4,8 +4,8 @@ import time
 
 import rl_client
 
-class my_error_callback(rl_client.error_callback):
-  def on_error(self, error_code, error_message):
+
+def on_error(self, error_code, error_message):
     print("Background error:")
     print(error_message)
 
@@ -37,8 +37,7 @@ class rl_sim:
         self._options = args
 
         self.config = load_config_from_json(self._options.json_config)
-        self._rl_client = rl_client.live_model(self.config, my_error_callback())
-        self._rl_client.init()
+        self._rl_client = rl_client.live_model(self.config, on_error)
 
         tp1 = {'HerbGarden': 0.3, "MachineLearning": 0.2 }
         tp2 = {'HerbGarden': 0.1, "MachineLearning": 0.4 }
@@ -64,16 +63,16 @@ class rl_sim:
                 action_features = '"_multi":[' + ','.join('{"a":{"topic":"'+action+'"}}' for action in self._actions) + ']'
                 context = '{' + shared_features + ',' + action_features + '}'
 
-                model_id, chosen_action_id, actions_probabilities, event_id = self._rl_client.choose_rank(context)
+                response = self._rl_client.choose_rank(context)
 
-                stats[person._id][chosen_action_id][1] += 1
+                stats[person._id][response.chosen_action_id][1] += 1
                 ctr[1] += 1
 
-                outcome = person.get_outcome(self._actions[chosen_action_id])
+                outcome = person.get_outcome(self._actions[response.chosen_action_id])
                 if outcome != 0:
-                    self._rl_client.report_outcome(event_id, outcome)
+                    self._rl_client.report_outcome(response.event_id, outcome)
                     ctr[0] += 1
-                    stats[person._id][chosen_action_id][0] += 1
+                    stats[person._id][response.chosen_action_id][0] += 1
 
                 print('Round: {}, ctr: {:.1%}'.format(round, ctr[0]/ctr[1]), stats)
 
