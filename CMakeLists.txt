@@ -1,4 +1,12 @@
 cmake_minimum_required(VERSION 3.5)
+
+if(WIN32)
+  # Due to needing to configure the CMAKE platform, this needs to be included before the
+  # top-level project() declaration.
+  include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/platforms/win32.cmake)
+  message(STATUS "WinSDK Version: ${CMAKE_SYSTEM_VERSION}")
+endif()
+
 project(reinforcement_learning)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -28,7 +36,11 @@ if(RL_STATIC_DEPS)
 endif()
 
 find_package(OpenSSL REQUIRED)
-find_package(Boost COMPONENTS unit_test_framework system program_options thread REQUIRED)
+
+# We also require Boost::uuid, but that is a header-only dependency and is unable to be found
+# using find_package as a component, which means it is possible to have a successfully configured
+# build that will nonetheless not work due to missing dependencies.
+find_package(Boost COMPONENTS unit_test_framework system program_options thread REQUIRED) 
 
 # On MacOS, Boost::thread needs to be linked separately.
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -58,5 +70,9 @@ add_subdirectory(test_tools/example_gen)
 
 # enable_testing should be run after ext_libs so that the vw unit tests arent turned on.
 enable_testing()
+
+# Since bindings will add tests, if appropriate, it needs to be included after enable_testing().
+add_subdirectory(bindings)
+
 add_subdirectory(unit_test)
 add_subdirectory(unit_test/extensions)

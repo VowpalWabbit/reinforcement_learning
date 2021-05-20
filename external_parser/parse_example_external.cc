@@ -56,7 +56,7 @@ void parser::set_parse_args(VW::config::option_group_definition &in_options,
       .help("convert binary joined log into dsjson format"));
 }
 
-void parser::persist_metrics(std::vector<std::tuple<std::string, size_t>>& metrics) {
+void parser::persist_metrics(std::vector<std::pair<std::string, size_t>>& metrics) {
   metrics.emplace_back("external_parser", 1);
 }
 
