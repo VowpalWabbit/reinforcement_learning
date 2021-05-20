@@ -6,4 +6,4 @@ set -x
 brew update
 brew upgrade
 
-brew install cmake boost cpprestsdk flatbuffers openssl
+brew install cmake boost cpprestsdk flatbuffers@1.10.0 openssl
