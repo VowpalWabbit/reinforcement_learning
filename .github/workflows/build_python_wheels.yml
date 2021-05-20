@@ -81,7 +81,7 @@ jobs:
           name: wheel_3.8
       - name: Build docs
         run: |
-          export wheel_files=(wheel_${{ matrix.config.version }}/*)
+          export wheel_files=(wheel_3.8/*)
           export wheel_file="${wheel_files[0]}"
           echo Installing ${wheel_file}...
           pip install ${wheel_file}
