@@ -1,20 +1,22 @@
 Migration Guide
 ===============
 
+This document is intended for users who are migrating from the old version of these bindings.
+
 1. Naming changes
 -----------------
 
 To conform with PEP 8 the following renames have been completed.
 
-- live_model -> :meth:`rl_client.LiveModel`
-- ranking_response -> :meth:`rl_client.RankingResponse`
-- configuration -> :meth:`rl_client.Configuration`
-- rl_exception -> :meth:`rl_client.RLException`
+- `rl_client.live_model` -> :meth:`rl_client.LiveModel`
+- `rl_client.ranking_response` -> :meth:`rl_client.RankingResponse`
+- `rl_client.configuration` -> :meth:`rl_client.Configuration`
+- `rl_client.rl_exception` -> :meth:`rl_client.RLException`
 
 2. Error Callback
 -----------------
 
-The error callback no longer needs to be a class that inherits from `rl_client.error_callback`. Now it should simply be a function which has a signature of `int, string`, and can include closure values.
+The error callback no longer needs to be a class that inherits from `rl_client.error_callback`. Now it should simply be a function which has a signature of `void(int, string)`, and can include closure values.
 
 .. code-block:: python
 

@@ -42,7 +42,6 @@ jobs:
     strategy:
       matrix:
         config:
-        - { version: 3.5 }
         - { version: 3.6 }
         - { version: 3.7 }
         - { version: 3.8 }
@@ -59,9 +58,8 @@ jobs:
           export wheel_files=(wheel_${{ matrix.config.version }}/*)
           export wheel_file="${wheel_files[0]}"
           echo Installing ${wheel_file}...
-          pip install pytest
           pip install ${wheel_file}
-          python -m pytest ./python/tests/
+          python ./bindings/python/test/unit_test.py
   docs:
     needs: build
     container:
@@ -75,7 +73,7 @@ jobs:
           name: wheel_3.8
       - name: Build docs
         run: |
-          pip install sphinx numpydoc
+          pip install sphinx
           cd bindings/python/docs
           make html
       - name: Upload built docs

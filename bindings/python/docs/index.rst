@@ -1,5 +1,5 @@
-python_example Documentation
-============================
+rl_client Documentation
+=======================
 
 Contents:
 
@@ -7,5 +7,6 @@ Contents:
    :maxdepth: 2
 
    rl_client
+   constants
    migration_guide
 
