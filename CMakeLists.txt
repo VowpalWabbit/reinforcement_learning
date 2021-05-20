@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 option(BUILD_PYTHON "Build the Python bindings" OFF)
 option(USE_ZSTD "Whether to enable usage of zstandard compression" ON)
-option(RL_STATIC_DEPS "Only use static dependencies" ON)
+option(RL_STATIC_DEPS "Only use static dependencies" OFF)
 
 option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" ON)
 
