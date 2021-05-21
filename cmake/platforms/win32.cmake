@@ -14,6 +14,7 @@ if(WIN32)
 
   # TODO: Enable building .NET bindings via CMake on Linux 
   option(rlclientlib_BUILD_DOTNET "Build .NET bindings" ON)
+  option(rlclientlib_DOTNET_USE_MSPROJECT "[Experimental] Use import_external_msproject to build .NET csproj files." OFF)
 
   if (rlclientlib_BUILD_DOTNET)
     cmake_minimum_required(VERSION 3.14)
@@ -23,7 +24,12 @@ if(WIN32)
     # native library do not get passed through the project reference properly. The fix is to do the same as on
     # windows and redirect all targets to the same place.
     SET(rlclientlib_win32_CMAKE_RUNTIME_OUTPUT_DIRECTORY_backup ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-    SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/binaries/")
+
+    if (rlclientlib_DOTNET_USE_MSPROJECT)
+      SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/binaries/x64")
+    else()
+      SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/binaries/")
+    endif()
   endif()
 else()
   message(FATAL_ERROR "Loading Win32-specific configuration under a non-Win32 build.")

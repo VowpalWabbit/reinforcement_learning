@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <OutputPath>$(SolutionDir)$(Platform)\$(Configuration)</OutputPath>
+    <BinaryOutputBase Condition="'$(BinaryOutputBase)'==''">$(SolutionDir).</BinaryOutputBase>
+    <OutputPath>$(BinaryOutputBase)\$(Platform)\$(Configuration)</OutputPath>
     <IsPackable>false</IsPackable>
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
@@ -14,6 +15,10 @@
   </PropertyGroup>
 
   <Import Project="$(PackagingIntegration)" Condition="Exists('$(PackagingIntegration)')" />
+
+  <ItemGroup>
+    <Content Include="test_data/model.vw" CopyToOutputDirectory="Always" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
