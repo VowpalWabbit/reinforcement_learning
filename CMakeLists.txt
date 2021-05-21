@@ -60,5 +60,3 @@ add_subdirectory(bindings)
 
 add_subdirectory(unit_test)
 add_subdirectory(unit_test/extensions)
-
-add_custom_target(launch_vs COMMAND devenv ${CMAKE_CACHEFILE_DIR}/reinforcement_learning.sln)
