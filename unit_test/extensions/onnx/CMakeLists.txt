@@ -46,4 +46,6 @@ add_custom_command(TARGET rltest-onnx POST_BUILD
   $<TARGET_FILE_DIR:rltest-onnx>
 )
 
-add_test(rltest-onnx rltest-onnx WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_test(NAME rltest-onnx 
+  COMMAND $<TARGET_FILE:rltest-onnx> 
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
