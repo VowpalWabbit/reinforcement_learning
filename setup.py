@@ -3,7 +3,7 @@ import os
 import sys
 import subprocess
 
-from setuptools import setup, Extension
+from setuptools import setup, Extension, Distribution
 from setuptools.command.build_ext import build_ext
 
 # Convert distutils Windows platform specifiers to CMake -A arguments
@@ -13,6 +13,17 @@ PLAT_TO_CMAKE = {
     "win-arm32": "ARM",
     "win-arm64": "ARM64",
 }
+
+class CMakeDistribution(Distribution):
+    global_options = Distribution.global_options
+
+    global_options += [
+        ('cmake-options=', None, 'Additional semicolon-separated cmake setup options list')
+    ]
+
+    def __init__(self, attrs=None):
+        self.cmake_options = None
+        Distribution.__init__(self, attrs)
 
 # A CMakeExtension needs a sourcedir instead of a file list.
 # The name must be the _single_ output extension from the CMake build.
@@ -47,6 +58,11 @@ class CMakeBuild(build_ext):
             "-DRL_BUILD_PYTHON=On",
             "-DRL_STATIC_DEPS=On"
         ]
+
+        if self.distribution.cmake_options is not None:
+            argslist = self.distribution.cmake_options.split(';')
+            cmake_args += argslist
+
         build_args = []
 
         if self.compiler.compiler_type != "msvc":
@@ -113,4 +129,5 @@ setup(
     ext_modules=[CMakeExtension("rl_client")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
+    distclass=CMakeDistribution
 )
