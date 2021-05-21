@@ -37,7 +37,7 @@ class rl_sim:
         self._options = args
 
         self.config = load_config_from_json(self._options.json_config)
-        self._rl_client = rl_client.live_model(self.config, on_error)
+        self._rl_client = rl_client.LiveModel(self.config, on_error)
 
         tp1 = {'HerbGarden': 0.3, "MachineLearning": 0.2 }
         tp2 = {'HerbGarden': 0.1, "MachineLearning": 0.4 }

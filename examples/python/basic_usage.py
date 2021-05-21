@@ -13,8 +13,7 @@ def load_config_from_json(file_name):
 
 def main():
     config = load_config_from_json("client.json")
-    model = rl_client.live_model(config, on_error)
-    model.init()
+    model = rl_client.LiveModel(config, on_error)
 
     event_id = str(uuid.uuid4())
     context = '{"User":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"N1":{"F1":"V1"},"N2":{"F2":"V2"}},{"N3":{"F1":"V3"}}]}'
