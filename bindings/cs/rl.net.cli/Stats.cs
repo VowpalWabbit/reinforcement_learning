@@ -83,16 +83,15 @@ namespace Rl.Net.Cli
         {
             min = (double)json["Min"];
             max = (double)json["Max"];
-            actualMin = (double)json["ObservedMin"];
-            actualMax = (double)json["ObservedMax"];
+            actualMin = min;
+            actualMax = max;
 
-            int bins = (int)json["Bins"];
-            this.counts = new int[bins];
-            int idx = 0;
+            List<int> lst = new List<int>();
             foreach (var elem in json["Counts"])
             {
-                this.counts[idx++] = (int)elem;
+                lst.Add((int)elem);
             }
+            this.counts = lst.ToArray();
             this.count = this.counts.Sum();
         }
 
@@ -224,19 +223,21 @@ namespace Rl.Net.Cli
 
         public HashedDistanceHistogram(JObject json)
         {
-            notFound = (int)json["MissCount"];
-            entries = (int)json["Entries"];
-            int bins = json["Hist"].Count();
-            counts = new int[bins];
-            foundHashes = new int[bins];
             int unique = (int)json["UniqueActions"];
-            //silly hack
             this.uniqueActions = new HashSet<int>(Enumerable.Range(0, unique));
 
-            int idx = 0;
-            foreach (var elem in json["Hist"])
+            if (json.ContainsKey("Hist") && json.ContainsKey("Entries"))
             {
-                this.counts[idx++] = (int)elem;
+                entries = (int)json["Entries"];
+                int bins = json["Hist"].Count();
+                counts = new int[bins];
+                foundHashes = new int[bins];
+
+                int idx = 0;
+                foreach (var elem in json["Hist"])
+                {
+                    this.counts[idx++] = (int)elem;
+                }
             }
 
         }
@@ -291,6 +292,11 @@ namespace Rl.Net.Cli
 
         public int Sample(Random rand)
         {
+            if(entries == 0)
+            {
+                return -1;
+            }
+
             int draw = rand.Next(entries);
             int d = draw;
             int idx = 0;

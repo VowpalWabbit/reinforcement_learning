@@ -125,7 +125,6 @@ namespace Rl.Net.Cli
             {
                 float? outcome = rand.NextDouble() <= pObs ? 1f : (float?)null;
                 bool activation = outcome.HasValue || rand.NextDouble() <= pAct;
-                Console.WriteLine($"has outcome? {outcome.HasValue} activated? {activation}");
 
                 yield return new StatsStepContext()
                 {
