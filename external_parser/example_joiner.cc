@@ -246,7 +246,9 @@ void example_joiner::clear_vw_examples(v_array<example *> &examples) {
 
 void example_joiner::clear_event_id_batch_info(const std::string &id) {
   _batch_grouped_events.erase(id);
-  _batch_event_order.pop();
+  if (!_batch_event_order.empty() && _batch_event_order.front() == id) {
+    _batch_event_order.pop();
+  }
   _batch_grouped_examples.erase(id);
 }
 
@@ -473,7 +475,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     return true;
   }
 
-  auto &id = _batch_event_order.front();
+  auto id = _batch_event_order.front();
   bool multiline = false;
   float reward = _default_reward;
   // original reward is used to record the observed reward of apprentice mode
