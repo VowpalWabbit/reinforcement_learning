@@ -1,7 +1,5 @@
 #pragma once
 
-#include "err_constants.h"
-
 #include "example.h"
 #include "generated/v2/MultiStepEvent_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
