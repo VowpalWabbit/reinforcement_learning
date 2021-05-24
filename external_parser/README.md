@@ -1,5 +1,43 @@
 # Parser and reward calculator for joined binary schema v2 files
 
+## File format
+
+### payload types
+
+payload types indicated by the below integers
+
+- `MSG_TYPE_HEADER = 0x55555555`
+- `MSG_TYPE_REGULAR = 0xFFFFFFFF`
+- `MSG_TYPE_CHECKPOINT = 0x11111111`
+- `MSG_TYPE_EOF = 0xAAAAAAAA`
+
+ ### flatbuffer payloads
+ 
+ for all flatbuffer payloads see `rlclientlib/schema/v2`
+
+### The parser expects to see the below format
+
+- 4 bytes containing magic `'V','W','F','B'`
+- 4 bytes containing version (right now version is `1`)
+- 4 bytes containing the payload type of the header i.e. `MSG_TYPE_HEADER`
+- 4 bytes containing the payload (i.e. header) size
+- `<size>` bytes containing the actual header payload
+
+any further payloads will expected to have the form of:
+
+- 4 bytes containing the payload type which can be any of the payload types listed above
+- 4 bytes containing the size of the payload to follow
+- `<size>` bytes containing the actual payload
+
+A file can contain only one header but multiple `MSG_TYPE_CHECKPOINT` and `MSG_TYPE_REGULAR` messages. `MSG_TYPE_EOF` isn't mandatory but if it is encountered the parser will stop processing the file
+
+`MSG_TYPE_CHECKPOINT` will be expected to be followed by the size of the payload and then a payload of type `CheckpointInfo` (see `FileFormat.fbs`)
+
+`MSG_TYPE_REGULAR` will be expected to be followed by the size of the payload and then a payload of type `JoinedPayload` (see `FileFormat.fbs`)
+
+**Note**: everything is expected to by 8-byte aligned so if any payload is not, padding is expected in between payloads and will be skipped
+
+
 ## Linux
 
 ### Build Linux
