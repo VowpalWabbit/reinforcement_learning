@@ -29,6 +29,12 @@ any further payloads will expected to have the form of:
 - 4 bytes containing the size of the payload to follow
 - `<size>` bytes containing the actual payload
 
+A file can contain only one header but multiple `MSG_TYPE_CHECKPOINT` and `MSG_TYPE_REGULAR` messages. `MSG_TYPE_EOF` isn't mandatory but if it is encountered the parser will stop processing the file
+
+`MSG_TYPE_CHECKPOINT` will be expected to be followed by the size of the payload and then a payload of type `CheckpointInfo` (see `FileFormat.fbs`)
+
+`MSG_TYPE_REGULAR` will be expected to be followed by the size of the payload and then a payload of type `JoinedPayload` (see `FileFormat.fbs`)
+
 **Note**: everything is expected to by 8-byte aligned so if any payload is not, padding is expected in between payloads and will be skipped
 
 
