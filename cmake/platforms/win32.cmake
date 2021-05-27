@@ -31,7 +31,7 @@ if(WIN32)
       SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/binaries/")
     endif()
 
-    add_custom_target(launch_vs COMMAND set BinaryOutputBase="${CMAKE_BINARY_DIR}/binaries" && start "${CMAKE_CACHEFILE_DIR}/reinforcement_learning.sln")
+    add_custom_target(launch_vs COMMAND set "BinaryOutputBase=${CMAKE_BINARY_DIR}/binaries" && start "${CMAKE_CACHEFILE_DIR}/reinforcement_learning.sln")
   else()
     add_custom_target(launch_vs COMMAND start "${CMAKE_CACHEFILE_DIR}/reinforcement_learning.sln")
   endif()
