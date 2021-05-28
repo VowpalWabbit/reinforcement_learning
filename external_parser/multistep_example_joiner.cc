@@ -102,6 +102,7 @@ void multistep_example_joiner::populate_order() {
   for (const auto it: _interactions) {
     _order.push(it.first);
   }
+  _sorted = true;
 }
 
 outcome_event multistep_example_joiner::process_outcome(const multistep_example_joiner::Parsed<v2::OutcomeEvent> &event_meta) {
@@ -189,8 +190,7 @@ void try_set_label(const joined_event &je, float reward,
   int index = je.interaction_data.actions[0];
   auto action = je.interaction_data.actions[0];
   auto cost = -1.f * reward;
-  auto probability = je.interaction_data.probabilities[0] *
-                     (1.f - je.interaction_data.probabilityOfDrop);
+  auto probability = je.interaction_data.probabilities[0];
   auto weight = 1.f - je.interaction_data.probabilityOfDrop;
 
   examples[index]->l.cb.costs.push_back({cost, action, probability});
@@ -219,8 +219,14 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
   }
   const auto reward = _reward_calculation(joined);
   try_set_label(joined, reward, examples);
+  
+  // add an empty example to signal end-of-multiline
+  examples.push_back(&VW::get_unused_example(_vw));
+  _vw->example_parser->lbl_parser.default_label(&examples.back()->l);
+  examples.back()->is_newline = true;
+
   _order.pop();
-  return 0;
+  return true;
 }
 
 bool multistep_example_joiner::processing_batch() {
@@ -232,4 +238,9 @@ void multistep_example_joiner::on_new_batch() {
   _outcomes.clear();
   _episodic_outcomes.clear();
   _sorted = false;
+}
+
+void multistep_example_joiner::on_batch_read() {
+  populate_order();
+  _sorted = true;
 }

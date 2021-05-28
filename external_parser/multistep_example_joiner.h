@@ -36,6 +36,7 @@ public:
   bool processing_batch() override;
 
   void on_new_batch() override;
+  void on_batch_read() override;
 
 private:
   template<typename event_t>
