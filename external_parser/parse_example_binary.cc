@@ -259,6 +259,8 @@ bool binary_parser::read_regular_msg(io_buf *input,
     }
   }
 
+  _example_joiner->on_batch_read();
+
   while (_example_joiner->processing_batch()) {
     if (_example_joiner->process_joined(examples)) {
       return true;
