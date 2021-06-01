@@ -270,7 +270,7 @@ namespace reinforcement_learning { namespace logger {
     flatbuffers::FlatBufferBuilder _builder;
     buffer_t& _buffer;
     const char* _content_encoding;
-	const char* _app_id;
+    const char* _app_id;
     flatbuffers::Offset<v2::BatchMetadata> _batch_metadata_offset;
   };
 
@@ -296,7 +296,7 @@ namespace reinforcement_learning { namespace logger {
         builder,
         evt.get_id(),
         &client_ts,
-		app_id,
+        app_id,
         evt.get_payload_type(),
         evt.get_pass_prob(),
         evt.get_encoding());

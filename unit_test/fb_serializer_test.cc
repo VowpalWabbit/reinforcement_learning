@@ -118,7 +118,6 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_content_encoding) {
   fb_collection_serializer<generic_event> collection_serializer(db, value::CONTENT_ENCODING_DEDUP, "app_id");
   const char* event_id("event_id");
   const timestamp ts;
-
   cb_serializer serializer;
   ranking_response rr(event_id);
   rr.set_model_id("model_id");
@@ -143,7 +142,6 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_metadata) {
   fb_collection_serializer<generic_event> collection_serializer(db, value::CONTENT_ENCODING_DEDUP, "app_id");
   const char* event_id("event_id");
   const timestamp ts;
-
   cb_serializer serializer;
   ranking_response rr(event_id);
   rr.set_model_id("model_id");
@@ -164,5 +162,6 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_metadata) {
   for (size_t i = 0; i < events.size(); ++i)	{
     const auto& event = *events[(flatbuffers::uoffset_t)i];
 	const auto& payload = event.payload();
+	//Todo
   }
 }

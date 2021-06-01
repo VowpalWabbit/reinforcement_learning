@@ -76,7 +76,7 @@ namespace reinforcement_learning { namespace logger {
     std::mutex _m;
     utility::object_pool<utility::data_buffer> _buffer_pool;
     const char* _batch_content_encoding;
-	const char* _app_id;
+    const char* _app_id;
   };
 
   template<typename TEvent, template<typename> class TSerializer>
@@ -180,7 +180,7 @@ namespace reinforcement_learning { namespace logger {
     , _pass_prob(0.5)
     , _queue_mode(config.queue_mode)
     , _batch_content_encoding(config.batch_content_encoding)
-	, _app_id(config.app_id)
+    , _app_id(config.app_id)
   {}
 
   template<typename TEvent, template<typename> class TSerializer>
