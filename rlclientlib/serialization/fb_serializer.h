@@ -33,7 +33,7 @@ namespace reinforcement_learning { namespace logger {
     }
 
     static int serialize(ranking_event& evt, flatbuffers::FlatBufferBuilder& builder,
-                         flatbuffers::Offset<fb_event_t>& ret_val, api_status* status) {
+                         flatbuffers::Offset<fb_event_t>& ret_val, const char* app_id, api_status* status) {
       const auto event_id_offset = builder.CreateString(evt.get_event_id());
       const auto action_ids_vector_offset = builder.CreateVector(evt.get_action_ids());
       const auto probabilities_vector_offset = builder.CreateVector(evt.get_probabilities());
@@ -94,7 +94,7 @@ namespace reinforcement_learning { namespace logger {
     }
 
     static int serialize(decision_ranking_event& evt, flatbuffers::FlatBufferBuilder& builder,
-                         flatbuffers::Offset<fb_event_t>& ret_val, api_status* status) {
+                         flatbuffers::Offset<fb_event_t>& ret_val, const char* app_id, api_status* status) {
       const auto context_offset = builder.CreateVector(evt.get_context());
       const auto model_id_offset = builder.CreateString(evt.get_model_id());
 
@@ -142,7 +142,7 @@ namespace reinforcement_learning { namespace logger {
     }
 
     static int serialize(multi_slot_decision_event& evt, flatbuffers::FlatBufferBuilder& builder,
-                         flatbuffers::Offset<fb_event_t>& ret_val, api_status* status) {
+                         flatbuffers::Offset<fb_event_t>& ret_val, const char* app_id, api_status* status) {
       const auto event_id_offset = builder.CreateString(evt.get_event_id());
       const auto context_offset = builder.CreateVector(evt.get_context());
       const auto model_id_offset = builder.CreateString(evt.get_model_id());
@@ -177,7 +177,7 @@ namespace reinforcement_learning { namespace logger {
     }
 
     static int serialize(outcome_event& evt, flatbuffers::FlatBufferBuilder& builder,
-                         flatbuffers::Offset<fb_event_t>& retval, api_status* status) {
+                         flatbuffers::Offset<fb_event_t>& retval, const char* app_id, api_status* status) {
       const auto event_id = builder.CreateString(evt.get_event_id());
 	    const auto &ts = evt.get_client_time_gmt();
 	    TimeStamp client_ts(ts.year, ts.month, ts.day, ts.hour,
@@ -219,21 +219,21 @@ namespace reinforcement_learning { namespace logger {
 
     static int message_id() { return message_type::UNKNOWN; }
 
-    fb_collection_serializer(buffer_t& buffer, const char* content_encoding)
-      : _allocator(buffer), _builder(buffer.body_capacity(), &_allocator), _buffer(buffer), _content_encoding(content_encoding) {}
+    fb_collection_serializer(buffer_t& buffer, const char* content_encoding, const char* app_id)
+      : _allocator(buffer), _builder(buffer.body_capacity(), &_allocator), _buffer(buffer), _content_encoding(content_encoding), _app_id(app_id) {}
 
-    fb_collection_serializer(buffer_t& buffer, const char* content_encoding, int /*dummy*/) : fb_collection_serializer(buffer, content_encoding) {}
+    fb_collection_serializer(buffer_t& buffer, const char* content_encoding, int /*dummy*/, const char* app_id) : fb_collection_serializer(buffer, content_encoding, app_id) {}
 
     int add(event_t& evt, api_status* status = nullptr) {
       flatbuffers::Offset<typename serializer_t::fb_event_t> offset;
-      RETURN_IF_FAIL(serializer_t::serialize(evt, _builder, offset, status));
+      RETURN_IF_FAIL(serializer_t::serialize(evt, _builder, offset, _app_id, status));
       _event_offsets.push_back(offset);
       return error_code::success;
     }
 
     int prepend(event_t& evt, api_status* status = nullptr) {
       flatbuffers::Offset<typename serializer_t::fb_event_t> offset;
-      RETURN_IF_FAIL(serializer_t::serialize(evt, _builder, offset, status));
+      RETURN_IF_FAIL(serializer_t::serialize(evt, _builder, offset, _app_id, status));
       _event_offsets.insert(_event_offsets.begin(), offset);
       return error_code::success;
     }
@@ -270,6 +270,7 @@ namespace reinforcement_learning { namespace logger {
     flatbuffers::FlatBufferBuilder _builder;
     buffer_t& _buffer;
     const char* _content_encoding;
+	const char* _app_id;
     flatbuffers::Offset<v2::BatchMetadata> _batch_metadata_offset;
   };
 
@@ -284,7 +285,7 @@ namespace reinforcement_learning { namespace logger {
     }
 
     static int serialize(generic_event& evt, flatbuffers::FlatBufferBuilder& outter_builder,
-      flatbuffers::Offset<fb_event_t>& ret_val, api_status* status) {
+      flatbuffers::Offset<fb_event_t>& ret_val, const char* app_id, api_status* status) {
 
       flatbuffers::FlatBufferBuilder builder;
 
@@ -292,11 +293,11 @@ namespace reinforcement_learning { namespace logger {
       v2::TimeStamp client_ts(ts.year, ts.month, ts.day, ts.hour,
         ts.minute, ts.second, ts.sub_second);
       const auto meta_offset = v2::CreateMetadataDirect(
-        builder, 
-        evt.get_id(), 
-        &client_ts, 
-        nullptr, //FIXME app-id
-        evt.get_payload_type(), 
+        builder,
+        evt.get_id(),
+        &client_ts,
+		app_id,
+        evt.get_payload_type(),
         evt.get_pass_prob(),
         evt.get_encoding());
 

@@ -89,14 +89,14 @@ namespace reinforcement_learning { namespace logger {
 
     static int message_id() { return 0; }
 
-    json_collection_serializer(buffer_t& buffer, const char* content_encoding)
+    json_collection_serializer(buffer_t& buffer, const char* content_encoding, const char* app_id)
       : _buffer(buffer),
       _streambuf{&_buffer},
       _ostream{&_streambuf} {
       _ostream << std::unitbuf;
     }
 
-    json_collection_serializer(buffer_t& buffer, const char* content_encoding, int /*dummy*/) : json_collection_serializer(buffer, content_encoding) {}
+    json_collection_serializer(buffer_t& buffer, const char* content_encoding, int /*dummy*/, const char* app_id) : json_collection_serializer(buffer, content_encoding, app_id) {}
 
     int add(event_t& evt, api_status* status=nullptr) {
       RETURN_IF_FAIL(serializer_t::serialize(evt, _ostream, status));
