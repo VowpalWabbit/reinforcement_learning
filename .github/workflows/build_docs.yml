@@ -48,7 +48,7 @@ jobs:
         run: |
           /opt/python/cp38-cp38/bin/pip install sphinx
           cd bindings/python/docs
-          make html
+          make html SPHINXBUILD=/opt/python/cp38-cp38/bin/sphinx-build
       - name: Upload built docs
         uses: actions/upload-artifact@v1
         with:
