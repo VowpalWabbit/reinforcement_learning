@@ -1,10 +1,9 @@
 #include "example_joiner.h"
 #include "log_converter.h"
 
-#include "generated/v2/CbEvent_generated.h"
+#include "event_processors/event.h"
 #include "generated/v2/DedupInfo_generated.h"
 #include "generated/v2/Event_generated.h"
-#include "generated/v2/Metadata_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
 #include "zstd.h"
 
@@ -12,7 +11,6 @@
 #include <time.h>
 
 // VW headers
-#include "io/logger.h"
 #include "parse_example_json.h"
 #include "parser.h"
 
@@ -284,15 +282,14 @@ bool example_joiner::process_interaction(const v2::Event &event,
       return false;
     }
 
-    if (cb->context() == nullptr || cb->action_ids() == nullptr ||
-        cb->probabilities() == nullptr) {
+    if (check_stuff::event_processor<v2::CbEvent>::is_valid(*cb)) {
       VW::io::logger::log_warn("CB payload with event id [{}] is malformed",
                                metadata.id()->c_str());
       return false;
     }
 
-    v2::LearningModeType learning_mode = cb->learning_mode();
-
+    auto learning_mode =
+        check_stuff::event_processor<v2::CbEvent>::get_learning_mode(*cb);
     if (learning_mode != _learning_mode_config) {
       VW::io::logger::log_warn(
           "Online Trainer learning mode [{}] "
@@ -305,39 +302,22 @@ bool example_joiner::process_interaction(const v2::Event &event,
       return false;
     }
 
-    DecisionServiceInteraction data;
-    data.eventId = metadata.id()->str();
-    data.actions = {cb->action_ids()->data(),
-                    cb->action_ids()->data() + cb->action_ids()->size()};
-    data.probabilities = {cb->probabilities()->data(),
-                          cb->probabilities()->data() +
-                              cb->probabilities()->size()};
-    data.probabilityOfDrop = 1.f - metadata.pass_probability();
-    data.skipLearn = cb->deferred_action();
+    std::string line_vec =
+        check_stuff::event_processor<v2::CbEvent>::get_context(*cb);
 
-    const char *context = reinterpret_cast<char const *>(cb->context()->data());
-    std::string line_vec(context, cb->context()->size());
-
-    joined_event je{enqueued_time_utc,
-                    {metadata.client_time_utc()
-                         ? timestamp_to_chrono(*metadata.client_time_utc())
-                         : TimePoint(),
-                     metadata.app_id() ? metadata.app_id()->str() : "",
-                     metadata.payload_type(), metadata.pass_probability(),
-                     metadata.encoding(), metadata.id()->str(), learning_mode},
-                    std::move(data),
-                    line_vec,
-                    cb->model_id() ? cb->model_id()->c_str() : "N/A"};
+    joined_event je =
+        check_stuff::event_processor<v2::CbEvent>::fill_in_joined_event(
+            *cb, metadata, enqueued_time_utc, std::string(line_vec));
 
     try {
       if (_vw->audit || _vw->hash_inv) {
         VW::template read_line_json<true>(
-            *_vw, examples, const_cast<char *>(line_vec.c_str()),
+            *_vw, examples, const_cast<char *>(std::string(line_vec).c_str()),
             reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example),
             _vw, &_dedup_cache.dedup_examples);
       } else {
         VW::template read_line_json<false>(
-            *_vw, examples, const_cast<char *>(line_vec.c_str()),
+            *_vw, examples, const_cast<char *>(std::string(line_vec).c_str()),
             reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example),
             _vw, &_dedup_cache.dedup_examples);
       }
