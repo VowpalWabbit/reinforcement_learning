@@ -165,6 +165,6 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_metadata) {
     const auto& payload = serialized_event.payload();
     const v2::Event *event = flatbuffers::GetRoot<v2::Event>(payload);
     //const auto& metadata = *(event->meta());
-	//BOOST_CHECK_EQUAL(metadata.app_id()->c_str(), "app_id");
+    //BOOST_CHECK_EQUAL(metadata.app_id()->c_str(), "app_id");
   }
 }
