@@ -109,11 +109,8 @@ private:
   vw *_vw;
   flatbuffers::DetachedBuffer _detached_buffer;
 
-  float _default_reward = 0.f;
   reward::RewardFunctionType _reward_calculation;
-
-  v2::LearningModeType _learning_mode_config = v2::LearningModeType_Online;
-  v2::ProblemType _problem_type_config = v2::ProblemType_UNKNOWN;
+  loop_info _loop_info;
 
   bool _binary_to_json;
   std::ofstream _outfile;

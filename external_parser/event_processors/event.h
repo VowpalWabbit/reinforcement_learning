@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../reward.h"
+#include "../loop.h"
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "io/logger.h"
@@ -28,7 +28,7 @@ template <> struct event_processor<v2::CbEvent> {
   static joined_event fill_in_joined_event(const v2::CbEvent &evt,
                                            const v2::Metadata &metadata,
                                            const TimePoint &enqueued_time_utc,
-                                           std::string &&line_vec) {
+                                           const std::string &line_vec) {
 
     DecisionServiceInteraction data;
     data.eventId = metadata.id()->str();
@@ -48,7 +48,7 @@ template <> struct event_processor<v2::CbEvent> {
              metadata.payload_type(), metadata.pass_probability(),
              metadata.encoding(), metadata.id()->str(), evt.learning_mode()},
             std::move(data),
-            std::move(line_vec),
+            std::string(line_vec),
             std::string(evt.model_id() ? evt.model_id()->c_str() : "N/A")};
   }
 };

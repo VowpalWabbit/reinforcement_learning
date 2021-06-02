@@ -102,16 +102,16 @@ bool example_joiner::process_event(const v2::JoinedEvent &joined_event) {
 }
 
 void example_joiner::set_default_reward(float default_reward) {
-  _default_reward = default_reward;
+  _loop_info.default_reward = default_reward;
 }
 
 void example_joiner::set_learning_mode_config(
     v2::LearningModeType learning_mode) {
-  _learning_mode_config = learning_mode;
+  _loop_info.learning_mode_config = learning_mode;
 }
 
 void example_joiner::set_problem_type_config(v2::ProblemType problem_type) {
-  _problem_type_config = problem_type;
+  _loop_info.problem_type_config = problem_type;
 }
 
 void example_joiner::set_reward_function(const v2::RewardFunctionType type) {
@@ -262,13 +262,13 @@ bool example_joiner::process_interaction(const v2::Event &event,
                                          v_array<example *> &examples) {
 
   if (EnumNamePayloadType(metadata.payload_type()) !=
-      EnumNameProblemType(_problem_type_config)) {
+      EnumNameProblemType(_loop_info.problem_type_config)) {
     VW::io::logger::log_warn(
         "Online Trainer mode [{}] "
         "and Interaction event type [{}] "
         "don't match. Skipping interaction from processing. "
         "EventId: [{}]",
-        EnumNameProblemType(_problem_type_config),
+        EnumNameProblemType(_loop_info.problem_type_config),
         EnumNamePayloadType(metadata.payload_type()), metadata.id()->c_str());
     return false;
   }
@@ -290,13 +290,13 @@ bool example_joiner::process_interaction(const v2::Event &event,
 
     auto learning_mode =
         check_stuff::event_processor<v2::CbEvent>::get_learning_mode(*cb);
-    if (learning_mode != _learning_mode_config) {
+    if (learning_mode != _loop_info.learning_mode_config) {
       VW::io::logger::log_warn(
           "Online Trainer learning mode [{}] "
           "and Interaction event learning mode [{}]"
           "don't match. Skipping interaction from processing. "
           "EventId: [{}]",
-          EnumNameLearningModeType(_learning_mode_config),
+          EnumNameLearningModeType(_loop_info.learning_mode_config),
           EnumNameLearningModeType(learning_mode), metadata.id()->c_str());
 
       return false;
@@ -307,17 +307,17 @@ bool example_joiner::process_interaction(const v2::Event &event,
 
     joined_event je =
         check_stuff::event_processor<v2::CbEvent>::fill_in_joined_event(
-            *cb, metadata, enqueued_time_utc, std::string(line_vec));
+            *cb, metadata, enqueued_time_utc, line_vec);
 
     try {
       if (_vw->audit || _vw->hash_inv) {
         VW::template read_line_json<true>(
-            *_vw, examples, const_cast<char *>(std::string(line_vec).c_str()),
+            *_vw, examples, const_cast<char *>(line_vec.c_str()),
             reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example),
             _vw, &_dedup_cache.dedup_examples);
       } else {
         VW::template read_line_json<false>(
-            *_vw, examples, const_cast<char *>(std::string(line_vec).c_str()),
+            *_vw, examples, const_cast<char *>(line_vec.c_str()),
             reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example),
             _vw, &_dedup_cache.dedup_examples);
       }
@@ -457,9 +457,9 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
 
   auto id = _batch_event_order.front();
   bool multiline = false;
-  float reward = _default_reward;
+  float reward = _loop_info.default_reward;
   // original reward is used to record the observed reward of apprentice mode
-  float original_reward = _default_reward;
+  float original_reward = _loop_info.default_reward;
 
   for (auto &joined_event : _batch_grouped_events[id]) {
     auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
