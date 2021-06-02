@@ -44,4 +44,6 @@ public:
   virtual bool processing_batch() = 0;
 
   virtual void on_new_batch() = 0;
+
+  virtual void on_batch_read() = 0;
 };
