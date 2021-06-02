@@ -5,7 +5,7 @@
 #include "generated/v2/OutcomeEvent_generated.h"
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
-#include "i_joiner.h"
+#include "joiners/i_joiner.h"
 #include "v_array.h"
 
 #include <list>

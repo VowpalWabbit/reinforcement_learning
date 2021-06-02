@@ -1,4 +1,4 @@
-#include "multistep_example_joiner.h"
+#include "joiners/multistep_example_joiner.h"
 
 #include "generated/v2/DedupInfo_generated.h"
 #include "generated/v2/Event_generated.h"
@@ -162,7 +162,7 @@ joined_event multistep_example_joiner::process_interaction(
         *_vw, examples, const_cast<char *>(line_vec.c_str()),
         reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
   }
-  return joined_event(event_meta.timestamp, std::move(meta), std::move(data), line_vec, event.model_id() ? event.model_id()->c_str() : "N/A");
+  return joined_event(TimePoint(event_meta.timestamp), std::move(meta), std::move(data), std::string(line_vec), std::string(event.model_id() ? event.model_id()->c_str() : "N/A"));
 }
 
 void try_set_label(const joined_event &je, float reward,

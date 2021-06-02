@@ -1,4 +1,4 @@
-#include "example_joiner.h"
+#include "joiners/example_joiner.h"
 #include "parse_example_binary.h"
 #include "test_common.h"
 #include <boost/test/unit_test.hpp>

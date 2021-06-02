@@ -16,7 +16,7 @@
 #include "io/logger.h"
 #include "memory.h"
 #include "parse_example_binary.h"
-#include "example_joiner.h"
+#include "joiners/example_joiner.h"
 
 // TODO need to check if errors will be detected from stderr/stdout/other and
 // use appropriate logger

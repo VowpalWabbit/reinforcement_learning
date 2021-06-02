@@ -3,7 +3,7 @@
 #include "error_constants.h"
 
 #include "example.h"
-#include "i_joiner.h"
+#include "joiners/i_joiner.h"
 #include "lru_dedup_cache.h"
 #include "v_array.h"
 

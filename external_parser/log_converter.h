@@ -7,7 +7,7 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 
-#include "example_joiner.h"
+#include "joiners/example_joiner.h"
 #include "io/logger.h"
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;

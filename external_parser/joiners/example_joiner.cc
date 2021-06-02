@@ -1,4 +1,4 @@
-#include "example_joiner.h"
+#include "joiners/example_joiner.h"
 #include "log_converter.h"
 
 #include "event_processors/event.h"
