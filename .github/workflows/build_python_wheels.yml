@@ -66,27 +66,3 @@ jobs:
           echo Installing ${wheel_file}...
           pip install ${wheel_file}
           python ./bindings/python/test/unit_test.py
-  docs:
-    needs: build
-    container:
-      image: python:3.8
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-      - name: Download Wheel
-        uses: actions/download-artifact@v1
-        with:
-          name: wheel_3.8
-      - name: Build docs
-        run: |
-          pip install ./wheel_3.8/rl_client-0.1.3-cp38-cp38-manylinux_2_12_x86_64.manylinux2010_x86_64.whl
-          pip install sphinx
-          cd bindings/python/docs
-          make html
-      - name: Upload built docs
-        uses: actions/upload-artifact@v1
-        with:
-          name: python_docs
-          path: bindings/python/docs/build/
