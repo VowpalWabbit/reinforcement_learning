@@ -21,7 +21,6 @@ void should_not_add_examples(std::string test_file) {
 
   clear_examples(examples, vw);
   VW::finish(*vw);
-
 }
 
 void should_add_examples(std::string test_file) {

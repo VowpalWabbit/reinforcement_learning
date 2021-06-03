@@ -90,6 +90,7 @@ private:
   void clear_vw_examples(v_array<example *> &examples);
 
   bool is_je_learnable(joined_event &je);
+  bool should_calculate_reward(joined_event &je);
 
   example *get_or_create_example();
 

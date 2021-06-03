@@ -281,6 +281,16 @@ bool example_joiner::is_je_learnable(joined_event &je) {
   }
 }
 
+bool example_joiner::should_calculate_reward(joined_event &je) {
+  return je.outcome_events.size() > 0 && std::any_of(
+    je.outcome_events.begin(),
+    je.outcome_events.end(),
+    [](const outcome_event &o) {
+      return o.action_taken != true;
+    }
+  );
+}
+
 bool example_joiner::process_interaction(const v2::Event &event,
                                          const v2::Metadata &metadata,
                                          const TimePoint &enqueued_time_utc,
@@ -543,14 +553,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
-  if (!is_je_learnable(je)) {
-    // TODO: add metrics for number of skipped events
-    clear_event_id_batch_info(id);
-    clear_vw_examples(examples);
-    return true;
-  }
-
-  if (je.outcome_events.size() > 0) {
+  if (should_calculate_reward(je)) {
     original_reward = _reward_calculation(je);
 
     if (je.interaction_metadata.payload_type == v2::PayloadType_CB &&
@@ -566,8 +569,17 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     }
   }
 
+  bool skip_learn = !is_je_learnable(je);
+
   if (_binary_to_json) {
-    log_converter::build_cb_json(_outfile, je, reward, original_reward);
+    log_converter::build_cb_json(_outfile, je, reward, original_reward, skip_learn);
+  }
+
+  if (skip_learn) {
+    // TODO: add metrics for number of skipped events
+    clear_event_id_batch_info(id);
+    clear_vw_examples(examples);
+    return true;
   }
 
   try_set_label(je, examples, reward);

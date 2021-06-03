@@ -14,5 +14,5 @@ namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 namespace log_converter {
 void build_cb_json(std::ofstream &outfile, const joined_event &je, float reward,
-                   float original_reward);
+                   float original_reward, bool skip_learn = false);
 } // namespace log_converter
