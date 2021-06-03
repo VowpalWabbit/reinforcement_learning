@@ -1,10 +1,12 @@
 #pragma once
 
+#include "event_processors/joined_event.h"
+#include "event_processors/loop.h"
 #include "example.h"
-#include "generated/v2/MultiStepEvent_generated.h"
-#include "generated/v2/OutcomeEvent_generated.h"
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
+#include "generated/v2/MultiStepEvent_generated.h"
+#include "generated/v2/OutcomeEvent_generated.h"
 #include "joiners/i_joiner.h"
 #include "v_array.h"
 
@@ -39,20 +41,19 @@ public:
   void on_batch_read() override;
 
 private:
-  template<typename event_t>
-  struct Parsed {
+  template <typename event_t> struct Parsed {
     const TimePoint timestamp;
-    const v2::Metadata& meta;
-    const event_t& event;
+    const v2::Metadata &meta;
+    const event_t &event;
   };
-
 
 private:
   void populate_order();
-  outcome_event process_outcome(const Parsed<v2::OutcomeEvent> &event_meta);
-  joined_event process_interaction(
-    const Parsed<v2::MultiStepEvent> &event_meta,
-    v_array<example *> &examples);
+  joined_event::outcome_event
+  process_outcome(const Parsed<v2::OutcomeEvent> &event_meta);
+  joined_event::joined_event
+  process_interaction(const Parsed<v2::MultiStepEvent> &event_meta,
+                      v_array<example *> &examples);
 
 private:
   std::vector<example *> _example_pool;
@@ -60,14 +61,13 @@ private:
   vw *_vw;
   flatbuffers::DetachedBuffer _detached_buffer;
 
-  float _default_reward = 0.f;
-  reward::RewardFunctionType  _reward_calculation;
+  reward::RewardFunctionType _reward_calculation;
+  loop::loop_info _loop_info;
 
-  v2::LearningModeType _learning_mode_config = v2::LearningModeType_Online;
-  v2::ProblemType _problem_type_config = v2::ProblemType_UNKNOWN;
-
-  std::unordered_map<std::string, std::vector<Parsed<v2::MultiStepEvent>>> _interactions;
-  std::unordered_map<std::string, std::vector<Parsed<v2::OutcomeEvent>>> _outcomes;
+  std::unordered_map<std::string, std::vector<Parsed<v2::MultiStepEvent>>>
+      _interactions;
+  std::unordered_map<std::string, std::vector<Parsed<v2::OutcomeEvent>>>
+      _outcomes;
   std::vector<Parsed<v2::OutcomeEvent>> _episodic_outcomes;
 
   std::queue<std::string> _order;

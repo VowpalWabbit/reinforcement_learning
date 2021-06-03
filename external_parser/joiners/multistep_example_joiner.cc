@@ -56,15 +56,15 @@ bool multistep_example_joiner::process_event(const v2::JoinedEvent &joined_event
 }
 
 void multistep_example_joiner::set_default_reward(float default_reward) {
-  _default_reward = default_reward;
+  _loop_info.default_reward = default_reward;
 }
 
 void multistep_example_joiner::set_learning_mode_config(v2::LearningModeType learning_mode) {
-  _learning_mode_config = learning_mode;
+  _loop_info.learning_mode_config = learning_mode;
 }
 
 void multistep_example_joiner::set_problem_type_config(v2::ProblemType problem_type) {
-  _problem_type_config = problem_type;
+  _loop_info.problem_type_config = problem_type;
 }
 
 void multistep_example_joiner::set_reward_function(const v2::RewardFunctionType type) {
@@ -105,10 +105,10 @@ void multistep_example_joiner::populate_order() {
   _sorted = true;
 }
 
-outcome_event multistep_example_joiner::process_outcome(const multistep_example_joiner::Parsed<v2::OutcomeEvent> &event_meta) {
+joined_event::outcome_event multistep_example_joiner::process_outcome(const multistep_example_joiner::Parsed<v2::OutcomeEvent> &event_meta) {
   const auto& metadata = event_meta.meta;
   const auto& event = event_meta.event;
-  outcome_event o_event;
+  joined_event::outcome_event o_event;
   o_event.metadata = {timestamp_to_chrono(*metadata.client_time_utc()),
                       metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(),
@@ -125,12 +125,12 @@ outcome_event multistep_example_joiner::process_outcome(const multistep_example_
   return o_event;
 }
 
-joined_event multistep_example_joiner::process_interaction(
+joined_event::joined_event multistep_example_joiner::process_interaction(
     const multistep_example_joiner::Parsed<v2::MultiStepEvent> &event_meta,
     v_array<example *> &examples) {
   const auto& metadata = event_meta.meta;
   const auto& event = event_meta.event;
-  metadata_info meta = {metadata.client_time_utc()
+  joined_event::metadata_info meta = {metadata.client_time_utc()
                          ? timestamp_to_chrono(*metadata.client_time_utc())
                          : TimePoint(),
                         metadata.app_id() ? metadata.app_id()->str() : "",
@@ -162,10 +162,10 @@ joined_event multistep_example_joiner::process_interaction(
         *_vw, examples, const_cast<char *>(line_vec.c_str()),
         reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
   }
-  return joined_event(TimePoint(event_meta.timestamp), std::move(meta), std::move(data), std::string(line_vec), std::string(event.model_id() ? event.model_id()->c_str() : "N/A"));
+  return joined_event::joined_event(TimePoint(event_meta.timestamp), std::move(meta), std::move(data), std::string(line_vec), std::string(event.model_id() ? event.model_id()->c_str() : "N/A"));
 }
 
-void try_set_label(const joined_event &je, float reward,
+void try_set_label(const joined_event::joined_event &je, float reward,
                                    v_array<example *> &examples) {
   if (je.interaction_data.actions.empty()) {
     VW::io::logger::log_error("missing actions for event [{}]",

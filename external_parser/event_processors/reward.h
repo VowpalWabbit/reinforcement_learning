@@ -1,14 +1,14 @@
 #pragma once
 
-#include "loop.h"
+#include "joined_event.h"
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 namespace reward {
 
-using RewardFunctionType = float (*)(const joined_event &);
+using RewardFunctionType = float (*)(const joined_event::joined_event &);
 
-inline float average(const joined_event &event) {
+inline float average(const joined_event::joined_event &event) {
   float sum = 0.f;
   for (const auto &o : event.outcome_events) {
     sum += o.value;
@@ -17,7 +17,7 @@ inline float average(const joined_event &event) {
   return sum / event.outcome_events.size();
 }
 
-inline float sum(const joined_event &event) {
+inline float sum(const joined_event::joined_event &event) {
   float sum = 0.f;
   for (const auto &o : event.outcome_events) {
     sum += o.value;
@@ -26,7 +26,7 @@ inline float sum(const joined_event &event) {
   return sum;
 }
 
-inline float min(const joined_event &event) {
+inline float min(const joined_event::joined_event &event) {
   float min_reward = std::numeric_limits<float>::max();
   for (const auto &o : event.outcome_events) {
     if (o.value < min_reward) {
@@ -36,7 +36,7 @@ inline float min(const joined_event &event) {
   return min_reward;
 }
 
-inline float max(const joined_event &event) {
+inline float max(const joined_event::joined_event &event) {
   float max_reward = std::numeric_limits<float>::min();
   for (const auto &o : event.outcome_events) {
     if (o.value > max_reward) {
@@ -46,7 +46,7 @@ inline float max(const joined_event &event) {
   return max_reward;
 }
 
-inline float median(const joined_event &event) {
+inline float median(const joined_event::joined_event &event) {
   std::vector<float> values;
   for (const auto &o : event.outcome_events) {
     values.push_back(o.value);
@@ -64,7 +64,7 @@ inline float median(const joined_event &event) {
   }
 }
 
-inline float earliest(const joined_event &event) {
+inline float earliest(const joined_event::joined_event &event) {
   auto oldest_valid_observation = TimePoint::max();
   float earliest_reward = 0.f;
 

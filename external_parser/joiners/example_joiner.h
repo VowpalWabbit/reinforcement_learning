@@ -2,6 +2,8 @@
 
 #include "error_constants.h"
 
+#include "event_processors/joined_event.h"
+#include "event_processors/loop.h"
 #include "example.h"
 #include "joiners/i_joiner.h"
 #include "lru_dedup_cache.h"
@@ -81,8 +83,8 @@ private:
   bool process_compression(const uint8_t *data, size_t size,
                            const v2::Metadata &metadata, const T *&payload);
 
-  void try_set_label(const joined_event &je, v_array<example *> &examples,
-                     float reward);
+  void try_set_label(const joined_event::joined_event &je,
+                     v_array<example *> &examples, float reward);
 
   void clear_batch_info();
   void clear_event_id_batch_info(const std::string &id);
@@ -100,7 +102,8 @@ private:
   lru_dedup_cache _dedup_cache;
   // from event id to all the information required to create a complete
   // (multi)example
-  std::unordered_map<std::string, joined_event> _batch_grouped_examples;
+  std::unordered_map<std::string, joined_event::joined_event>
+      _batch_grouped_examples;
   // from event id to all the events that have that event id
   std::unordered_map<std::string, std::vector<const v2::JoinedEvent *>>
       _batch_grouped_events;
@@ -112,7 +115,7 @@ private:
   flatbuffers::DetachedBuffer _detached_buffer;
 
   reward::RewardFunctionType _reward_calculation;
-  loop_info _loop_info;
+  loop::loop_info _loop_info;
 
   bool _binary_to_json;
   std::ofstream _outfile;

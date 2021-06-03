@@ -2,7 +2,7 @@
 #include "date.h"
 
 namespace log_converter {
-void build_cb_json(std::ofstream &outfile, const joined_event &je,
+void build_cb_json(std::ofstream &outfile, const joined_event::joined_event &je,
                    float reward, float original_reward) {
   namespace rj = rapidjson;
 

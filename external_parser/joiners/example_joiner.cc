@@ -1,7 +1,7 @@
 #include "joiners/example_joiner.h"
 #include "log_converter.h"
 
-#include "event_processors/fb_events.h"
+#include "event_processors/typed_events.h"
 #include "generated/v2/DedupInfo_generated.h"
 #include "generated/v2/Event_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
@@ -192,37 +192,12 @@ bool example_joiner::process_compression(const uint8_t *data, size_t size,
   return true;
 }
 
-void example_joiner::try_set_label(const joined_event &je,
+void example_joiner::try_set_label(const joined_event::joined_event &je,
                                    v_array<example *> &examples, float reward) {
-  if (je.interaction_data.actions.empty()) {
-    VW::io::logger::log_warn("missing actions for event [{}]",
-                             je.interaction_data.eventId);
-    return;
+
+  if (_loop_info.problem_type_config == v2::ProblemType_CB) {
+    typed_event::fill_in_cb_label(je, examples, reward);
   }
-
-  if (je.interaction_data.probabilities.empty()) {
-    VW::io::logger::log_warn("missing probabilities for event [{}]",
-                             je.interaction_data.eventId);
-    return;
-  }
-
-  if (std::any_of(je.interaction_data.probabilities.begin(),
-                  je.interaction_data.probabilities.end(),
-                  [](float p) { return std::isnan(p); })) {
-    VW::io::logger::log_warn(
-        "distribution for event [{}] contains invalid probabilities",
-        je.interaction_data.eventId);
-  }
-
-  int index = je.interaction_data.actions[0];
-  auto action = je.interaction_data.actions[0];
-  auto cost = -1.f * reward;
-  auto probability = je.interaction_data.probabilities[0] *
-                     (1.f - je.interaction_data.probabilityOfDrop);
-  auto weight = 1.f - je.interaction_data.probabilityOfDrop;
-
-  examples[index]->l.cb.costs.push_back({cost, action, probability});
-  examples[index]->l.cb.weight = weight;
 }
 
 void example_joiner::clear_batch_info() {
@@ -273,6 +248,9 @@ bool example_joiner::process_interaction(const v2::Event &event,
     return false;
   }
 
+  std::string line_vec;
+  joined_event::joined_event je;
+
   if (metadata.payload_type() == v2::PayloadType_CB) {
 
     const v2::CbEvent *cb = nullptr;
@@ -282,69 +260,58 @@ bool example_joiner::process_interaction(const v2::Event &event,
       return false;
     }
 
-    if (check_stuff::event_processor<v2::CbEvent>::is_valid(*cb)) {
-      VW::io::logger::log_warn("CB payload with event id [{}] is malformed",
+    if (typed_event::event_processor<v2::CbEvent>::is_valid(*cb, _loop_info)) {
+      VW::io::logger::log_warn("CB payload with event id [{}] is malformed. "
+                               "Skipping interaction from processing.",
                                metadata.id()->c_str());
       return false;
     }
 
-    auto learning_mode =
-        check_stuff::event_processor<v2::CbEvent>::get_learning_mode(*cb);
-    if (learning_mode != _loop_info.learning_mode_config) {
-      VW::io::logger::log_warn(
-          "Online Trainer learning mode [{}] "
-          "and Interaction event learning mode [{}]"
-          "don't match. Skipping interaction from processing. "
-          "EventId: [{}]",
-          EnumNameLearningModeType(_loop_info.learning_mode_config),
-          EnumNameLearningModeType(learning_mode), metadata.id()->c_str());
+    line_vec =
+        std::move(typed_event::event_processor<v2::CbEvent>::get_context(*cb));
 
-      return false;
-    }
-
-    std::string line_vec =
-        check_stuff::event_processor<v2::CbEvent>::get_context(*cb);
-
-    joined_event je =
-        check_stuff::event_processor<v2::CbEvent>::fill_in_joined_event(
-            *cb, metadata, enqueued_time_utc, line_vec);
-
-    try {
-      if (_vw->audit || _vw->hash_inv) {
-        VW::template read_line_json<true>(
-            *_vw, examples, const_cast<char *>(line_vec.c_str()),
-            reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example),
-            _vw, &_dedup_cache.dedup_examples);
-      } else {
-        VW::template read_line_json<false>(
-            *_vw, examples, const_cast<char *>(line_vec.c_str()),
-            reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example),
-            _vw, &_dedup_cache.dedup_examples);
-      }
-    } catch (VW::vw_exception &e) {
-      VW::io::logger::log_warn(
-          "JSON parsing during interaction processing failed "
-          "with error: [{}] for event with id: [{}]",
-          e.what(), metadata.id()->c_str());
-      return false;
-    }
-
-    _batch_grouped_examples.emplace(std::make_pair<std::string, joined_event>(
-        metadata.id()->str(), std::move(je)));
-    return true;
+    je = std::move(
+        typed_event::event_processor<v2::CbEvent>::fill_in_joined_event(
+            *cb, metadata, enqueued_time_utc, line_vec));
+  } else {
+    // for now only CB is supported so log and return false
+    VW::io::logger::log_error("Interaction event learning mode [{}] not "
+                              "currently supported, skipping interaction "
+                              "EventId: [{}]",
+                              metadata.payload_type(), metadata.id()->c_str());
+    return false;
   }
-  // for now only CB is supported so log and return false
-  VW::io::logger::log_error("Interaction event learning mode [{}] not "
-                            "currently supported, skipping interaction "
-                            "EventId: [{}]",
-                            metadata.payload_type(), metadata.id()->c_str());
-  return false;
+
+  try {
+    if (_vw->audit || _vw->hash_inv) {
+      VW::template read_line_json<true>(
+          *_vw, examples, const_cast<char *>(line_vec.c_str()),
+          reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
+          &_dedup_cache.dedup_examples);
+    } else {
+      VW::template read_line_json<false>(
+          *_vw, examples, const_cast<char *>(line_vec.c_str()),
+          reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
+          &_dedup_cache.dedup_examples);
+    }
+  } catch (VW::vw_exception &e) {
+    VW::io::logger::log_warn(
+        "JSON parsing during interaction processing failed "
+        "with error: [{}] for event with id: [{}]",
+        e.what(), metadata.id()->c_str());
+    return false;
+  }
+
+  _batch_grouped_examples.emplace(
+      std::make_pair<std::string, joined_event::joined_event>(
+          metadata.id()->str(), std::move(je)));
+  return true;
 }
 
 bool example_joiner::process_outcome(const v2::Event &event,
                                      const v2::Metadata &metadata,
                                      const TimePoint &enqueued_time_utc) {
-  outcome_event o_event;
+  joined_event::outcome_event o_event;
   o_event.metadata = {timestamp_to_chrono(*metadata.client_time_utc()),
                       metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(),
@@ -517,7 +484,9 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   }
 
   if (_binary_to_json) {
-    log_converter::build_cb_json(_outfile, je, reward, original_reward);
+    if (_loop_info.problem_type_config == v2::ProblemType_CB) {
+      log_converter::build_cb_json(_outfile, je, reward, original_reward);
+    }
   }
 
   try_set_label(je, examples, reward);
