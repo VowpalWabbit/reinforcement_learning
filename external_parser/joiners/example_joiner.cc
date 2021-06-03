@@ -263,7 +263,9 @@ bool example_joiner::process_outcome(const v2::Event &event,
                                      const v2::Metadata &metadata,
                                      const TimePoint &enqueued_time_utc) {
   joined_event::outcome_event o_event;
-  o_event.metadata = {timestamp_to_chrono(*metadata.client_time_utc()),
+  o_event.metadata = {metadata.client_time_utc()
+                          ? timestamp_to_chrono(*metadata.client_time_utc())
+                          : TimePoint(),
                       metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(),
                       metadata.pass_probability(),
