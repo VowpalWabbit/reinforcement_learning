@@ -79,10 +79,6 @@ private:
   bool process_outcome(const v2::Event &event, const v2::Metadata &metadata,
                        const TimePoint &enqueued_time_utc);
 
-  // template <typename T>
-  // bool process_compression(const uint8_t *data, size_t size,
-  //                          const v2::Metadata &metadata, const T *&payload);
-
   void try_set_label(const joined_event::joined_event &je,
                      v_array<example *> &examples, float reward);
 
