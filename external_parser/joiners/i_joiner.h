@@ -7,7 +7,7 @@
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "lru_dedup_cache.h"
-#include "reward.h"
+#include "event_processors/reward.h"
 #include "v_array.h"
 
 #include <list>

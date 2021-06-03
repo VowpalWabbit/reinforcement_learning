@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../loop.h"
+#include "loop.h"
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "io/logger.h"
