@@ -6,13 +6,13 @@
 #include "io/logger.h"
 #include "joined_event.h"
 #include "loop.h"
+#include "zstd.h"
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 namespace typed_event {
 template <typename T> struct event_processor;
 template <> struct event_processor<v2::CbEvent> {
-
   static bool is_valid(const v2::CbEvent &evt,
                        const loop::loop_info &loop_info) {
     if (!(evt.context() == nullptr || evt.action_ids() == nullptr ||
@@ -44,7 +44,7 @@ template <> struct event_processor<v2::CbEvent> {
   static joined_event::joined_event
   fill_in_joined_event(const v2::CbEvent &evt, const v2::Metadata &metadata,
                        const TimePoint &enqueued_time_utc,
-                       const std::string &line_vec) {
+                       std::string &&line_vec) {
 
     DecisionServiceInteraction data;
     data.eventId = metadata.id()->str();
@@ -64,7 +64,7 @@ template <> struct event_processor<v2::CbEvent> {
              metadata.payload_type(), metadata.pass_probability(),
              metadata.encoding(), metadata.id()->str(), evt.learning_mode()},
             std::move(data),
-            std::string(line_vec),
+            std::move(line_vec),
             std::string(evt.model_id() ? evt.model_id()->c_str() : "N/A")};
   }
 };
@@ -101,5 +101,52 @@ static void fill_in_cb_label(const joined_event::joined_event &je,
 
   examples[index]->l.cb.costs.push_back({cost, action, probability});
   examples[index]->l.cb.weight = weight;
+}
+
+template <typename T>
+bool process_compression(const uint8_t *data, size_t size,
+                         const v2::Metadata &metadata, const T *&payload,
+                         flatbuffers::DetachedBuffer &detached_buffer) {
+
+  if (metadata.encoding() == v2::EventEncoding_Zstd) {
+    size_t buff_size = ZSTD_getFrameContentSize(data, size);
+    if (buff_size == ZSTD_CONTENTSIZE_ERROR) {
+      VW::io::logger::log_warn("Received ZSTD_CONTENTSIZE_ERROR while "
+                               "decompressing event with id: "
+                               "[{}] of type: [{}]",
+                               metadata.id()->c_str(), metadata.payload_type());
+      return false;
+    }
+    if (buff_size == ZSTD_CONTENTSIZE_UNKNOWN) {
+      VW::io::logger::log_warn("Received ZSTD_CONTENTSIZE_UNKNOWN while "
+                               "decompressing event with id: "
+                               "[{}] of type: [{}]",
+                               metadata.id()->c_str(), metadata.payload_type());
+      return false;
+    }
+
+    std::unique_ptr<uint8_t[]> buff_data(
+        flatbuffers::DefaultAllocator().allocate(buff_size));
+    size_t res = ZSTD_decompress(buff_data.get(), buff_size, data, size);
+
+    if (ZSTD_isError(res)) {
+      VW::io::logger::log_warn(
+          "Received [{}] error while decompressing event with id: "
+          "[{}] of type: [{}]",
+          ZSTD_getErrorName(res), metadata.id()->c_str(),
+          metadata.payload_type());
+      return false;
+    }
+
+    auto data_ptr = buff_data.release();
+
+    detached_buffer =
+        flatbuffers::DetachedBuffer(nullptr, false, data_ptr, 0, data_ptr, res);
+    payload = flatbuffers::GetRoot<T>(detached_buffer.data());
+
+  } else {
+    payload = flatbuffers::GetRoot<T>(data);
+  }
+  return true;
 }
 } // namespace typed_event

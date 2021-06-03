@@ -145,53 +145,6 @@ void example_joiner::set_reward_function(const v2::RewardFunctionType type) {
   }
 }
 
-template <typename T>
-bool example_joiner::process_compression(const uint8_t *data, size_t size,
-                                         const v2::Metadata &metadata,
-                                         const T *&payload) {
-
-  if (metadata.encoding() == v2::EventEncoding_Zstd) {
-    size_t buff_size = ZSTD_getFrameContentSize(data, size);
-    if (buff_size == ZSTD_CONTENTSIZE_ERROR) {
-      VW::io::logger::log_warn(
-          "Received ZSTD_CONTENTSIZE_ERROR while decompressing event with id: "
-          "[{}] of type: [{}]",
-          metadata.id()->c_str(), metadata.payload_type());
-      return false;
-    }
-    if (buff_size == ZSTD_CONTENTSIZE_UNKNOWN) {
-      VW::io::logger::log_warn("Received ZSTD_CONTENTSIZE_UNKNOWN while "
-                               "decompressing event with id: "
-                               "[{}] of type: [{}]",
-                               metadata.id()->c_str(), metadata.payload_type());
-      return false;
-    }
-
-    std::unique_ptr<uint8_t[]> buff_data(
-        flatbuffers::DefaultAllocator().allocate(buff_size));
-    size_t res = ZSTD_decompress(buff_data.get(), buff_size, data, size);
-
-    if (ZSTD_isError(res)) {
-      VW::io::logger::log_warn(
-          "Received [{}] error while decompressing event with id: "
-          "[{}] of type: [{}]",
-          ZSTD_getErrorName(res), metadata.id()->c_str(),
-          metadata.payload_type());
-      return false;
-    }
-
-    auto data_ptr = buff_data.release();
-
-    _detached_buffer =
-        flatbuffers::DetachedBuffer(nullptr, false, data_ptr, 0, data_ptr, res);
-    payload = flatbuffers::GetRoot<T>(_detached_buffer.data());
-
-  } else {
-    payload = flatbuffers::GetRoot<T>(data);
-  }
-  return true;
-}
-
 void example_joiner::try_set_label(const joined_event::joined_event &je,
                                    v_array<example *> &examples, float reward) {
 
@@ -248,14 +201,14 @@ bool example_joiner::process_interaction(const v2::Event &event,
     return false;
   }
 
-  std::string line_vec;
   joined_event::joined_event je;
 
   if (metadata.payload_type() == v2::PayloadType_CB) {
 
     const v2::CbEvent *cb = nullptr;
-    if (!process_compression<v2::CbEvent>(
-            event.payload()->data(), event.payload()->size(), metadata, cb) ||
+    if (!typed_event::process_compression<v2::CbEvent>(
+            event.payload()->data(), event.payload()->size(), metadata, cb,
+            _detached_buffer) ||
         cb == nullptr) {
       return false;
     }
@@ -267,12 +220,10 @@ bool example_joiner::process_interaction(const v2::Event &event,
       return false;
     }
 
-    line_vec =
-        std::move(typed_event::event_processor<v2::CbEvent>::get_context(*cb));
-
     je = std::move(
         typed_event::event_processor<v2::CbEvent>::fill_in_joined_event(
-            *cb, metadata, enqueued_time_utc, line_vec));
+            *cb, metadata, enqueued_time_utc,
+            typed_event::event_processor<v2::CbEvent>::get_context(*cb)));
   } else {
     // for now only CB is supported so log and return false
     VW::io::logger::log_error("Interaction event learning mode [{}] not "
@@ -285,12 +236,12 @@ bool example_joiner::process_interaction(const v2::Event &event,
   try {
     if (_vw->audit || _vw->hash_inv) {
       VW::template read_line_json<true>(
-          *_vw, examples, const_cast<char *>(line_vec.c_str()),
+          *_vw, examples, const_cast<char *>(std::string(je.context).c_str()),
           reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
           &_dedup_cache.dedup_examples);
     } else {
       VW::template read_line_json<false>(
-          *_vw, examples, const_cast<char *>(line_vec.c_str()),
+          *_vw, examples, const_cast<char *>(std::string(je.context).c_str()),
           reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
           &_dedup_cache.dedup_examples);
     }
@@ -321,9 +272,9 @@ bool example_joiner::process_outcome(const v2::Event &event,
   o_event.enqueued_time_utc = enqueued_time_utc;
 
   const v2::OutcomeEvent *outcome = nullptr;
-  if (!process_compression<v2::OutcomeEvent>(event.payload()->data(),
-                                             event.payload()->size(), metadata,
-                                             outcome) ||
+  if (!typed_event::process_compression<v2::OutcomeEvent>(
+          event.payload()->data(), event.payload()->size(), metadata, outcome,
+          _detached_buffer) ||
       outcome == nullptr) {
     // invalidate joined_event so that we don't learn from it
     invalidate_joined_event(metadata.id()->str());
@@ -362,8 +313,9 @@ bool example_joiner::process_dedup(const v2::Event &event,
                                    const v2::Metadata &metadata) {
 
   const v2::DedupInfo *dedup = nullptr;
-  if (!process_compression<v2::DedupInfo>(
-          event.payload()->data(), event.payload()->size(), metadata, dedup) ||
+  if (!typed_event::process_compression<v2::DedupInfo>(
+          event.payload()->data(), event.payload()->size(), metadata, dedup,
+          _detached_buffer) ||
       dedup == nullptr) {
     return false;
   }
