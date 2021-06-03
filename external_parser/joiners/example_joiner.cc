@@ -1,7 +1,7 @@
 #include "joiners/example_joiner.h"
 #include "log_converter.h"
 
-#include "event_processors/event.h"
+#include "event_processors/fb_events.h"
 #include "generated/v2/DedupInfo_generated.h"
 #include "generated/v2/Event_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
