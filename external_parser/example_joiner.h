@@ -65,6 +65,8 @@ public:
 
   void on_new_batch() override;
 
+  void on_batch_read() override;
+
 private:
   bool process_dedup(const v2::Event &event, const v2::Metadata &metadata);
 
