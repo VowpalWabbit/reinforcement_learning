@@ -39,6 +39,7 @@ set(RL_FLAT_BUFFER_FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/Event.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/LearningModeType.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/ProblemType.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/MultiStepEvent.fbs"   
   )
 
 # set vw cmake flags
@@ -59,6 +60,7 @@ build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgen "" "${CMAKE_CURRENT_SOURCE_
 set(external_parser_headers ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.h
   ${CMAKE_CURRENT_SOURCE_DIR}/i_joiner.h
   ${CMAKE_CURRENT_SOURCE_DIR}/example_joiner.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/multistep_example_joiner.h
   ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_external.h
   ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_binary.h
   ${CMAKE_CURRENT_SOURCE_DIR}/timestamp_helper.h
@@ -67,6 +69,7 @@ set(external_parser_headers ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.h
 )
 set(external_parser_sources ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/example_joiner.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/multistep_example_joiner.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_external.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_binary.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/timestamp_helper.cc
