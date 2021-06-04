@@ -557,3 +557,4 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
 
 bool example_joiner::processing_batch() { return !_batch_event_order.empty(); }
 void example_joiner::on_new_batch() {}
+void example_joiner::on_batch_read() {}
