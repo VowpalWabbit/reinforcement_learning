@@ -233,15 +233,17 @@ bool example_joiner::process_interaction(const v2::Event &event,
     return false;
   }
 
+  auto line_vec = je.context;
+
   try {
     if (_vw->audit || _vw->hash_inv) {
       VW::template read_line_json<true>(
-          *_vw, examples, const_cast<char *>(std::string(je.context).c_str()),
+          *_vw, examples, const_cast<char *>(line_vec.c_str()),
           reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
           &_dedup_cache.dedup_examples);
     } else {
       VW::template read_line_json<false>(
-          *_vw, examples, const_cast<char *>(std::string(je.context).c_str()),
+          *_vw, examples, const_cast<char *>(line_vec.c_str()),
           reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
           &_dedup_cache.dedup_examples);
     }
