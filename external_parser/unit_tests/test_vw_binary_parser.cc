@@ -327,11 +327,18 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_invalid_cb_context) {
 
   auto buffer =
       read_file(input_files + "/invalid_joined_logs/invalid_cb_context.log");
+  
+  std::cout << "got buffer of data" << std::endl;
+
+  std::cout << "buffer size: " << buffer.size() << std::endl;
 
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
+  std::cout << "vw initialized" << std::endl;
   set_buffer_as_vw_input(buffer, vw);
+  std::cout << "buffer set as vw input" << std::endl;
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
+  std::cout << "bp initialized" << std::endl;
   v_array<example *> examples;
   examples.push_back(&VW::get_unused_example(vw));
 
@@ -346,9 +353,13 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_invalid_cb_context) {
     examples.push_back(&VW::get_unused_example(vw));
   }
 
+  std::cout << "total size of examples: " << total_size_of_examples << std::endl;
+
   // no interactions processed
   BOOST_CHECK_EQUAL(total_size_of_examples, 0);
+  std::cout << "clear" << std::endl;
 
   clear_examples(examples, vw);
+  std::cout << "vw finish" << std::endl;
   VW::finish(*vw);
 }
