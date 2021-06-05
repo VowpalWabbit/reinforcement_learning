@@ -15,8 +15,8 @@ template <typename T> struct event_processor;
 template <> struct event_processor<v2::CbEvent> {
   static bool is_valid(const v2::CbEvent &evt,
                        const loop::loop_info &loop_info) {
-    if (!(evt.context() == nullptr || evt.action_ids() == nullptr ||
-          evt.probabilities() == nullptr)) {
+    if (evt.context() == nullptr || evt.action_ids() == nullptr ||
+        evt.probabilities() == nullptr) {
       return false;
     }
 

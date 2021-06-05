@@ -213,7 +213,7 @@ bool example_joiner::process_interaction(const v2::Event &event,
       return false;
     }
 
-    if (typed_event::event_processor<v2::CbEvent>::is_valid(*cb, _loop_info)) {
+    if (!typed_event::event_processor<v2::CbEvent>::is_valid(*cb, _loop_info)) {
       VW::io::logger::log_warn("CB payload with event id [{}] is malformed. "
                                "Skipping interaction from processing.",
                                metadata.id()->c_str());
