@@ -220,10 +220,10 @@ bool example_joiner::process_interaction(const v2::Event &event,
       return false;
     }
 
+    auto line_vec = typed_event::event_processor<v2::CbEvent>::get_context(*cb);
     je = std::move(
         typed_event::event_processor<v2::CbEvent>::fill_in_joined_event(
-            *cb, metadata, enqueued_time_utc,
-            typed_event::event_processor<v2::CbEvent>::get_context(*cb)));
+            *cb, metadata, enqueued_time_utc, std::move(line_vec)));
   } else {
     // for now only CB is supported so log and return false
     VW::io::logger::log_error("Interaction event learning mode [{}] not "
