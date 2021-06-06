@@ -220,10 +220,10 @@ bool example_joiner::process_interaction(const v2::Event &event,
       return false;
     }
 
-    auto line_vec = typed_event::event_processor<v2::CbEvent>::get_context(*cb);
     je = std::move(
         typed_event::event_processor<v2::CbEvent>::fill_in_joined_event(
-            *cb, metadata, enqueued_time_utc, std::move(line_vec)));
+            *cb, metadata, enqueued_time_utc,
+            typed_event::event_processor<v2::CbEvent>::get_context(*cb)));
   } else {
     // for now only CB is supported so log and return false
     VW::io::logger::log_error("Interaction event learning mode [{}] not "
@@ -233,17 +233,15 @@ bool example_joiner::process_interaction(const v2::Event &event,
     return false;
   }
 
-  auto line_vec = je.context;
-
   try {
     if (_vw->audit || _vw->hash_inv) {
       VW::template read_line_json<true>(
-          *_vw, examples, const_cast<char *>(line_vec.c_str()),
+          *_vw, examples, const_cast<char *>(std::string(je.context).c_str()),
           reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
           &_dedup_cache.dedup_examples);
     } else {
       VW::template read_line_json<false>(
-          *_vw, examples, const_cast<char *>(line_vec.c_str()),
+          *_vw, examples, const_cast<char *>(std::string(je.context).c_str()),
           reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
           &_dedup_cache.dedup_examples);
     }

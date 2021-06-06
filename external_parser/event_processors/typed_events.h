@@ -48,11 +48,16 @@ template <> struct event_processor<v2::CbEvent> {
 
     DecisionServiceInteraction data;
     data.eventId = metadata.id()->str();
-    data.actions = {evt.action_ids()->data(),
-                    evt.action_ids()->data() + evt.action_ids()->size()};
-    data.probabilities = {evt.probabilities()->data(),
-                          evt.probabilities()->data() +
-                              evt.probabilities()->size()};
+    data.actions.reserve(evt.action_ids()->size());
+    for (flatbuffers::uoffset_t i = 0; i < evt.action_ids()->size(); i++) {
+      data.actions.emplace_back(evt.action_ids()->Get(i));
+    }
+
+    data.probabilities.reserve(evt.probabilities()->size());
+    for (flatbuffers::uoffset_t i = 0; i < evt.probabilities()->size(); i++) {
+      data.probabilities.emplace_back(evt.probabilities()->Get(i));
+    }
+
     data.probabilityOfDrop = 1.f - metadata.pass_probability();
     data.skipLearn = evt.deferred_action();
 

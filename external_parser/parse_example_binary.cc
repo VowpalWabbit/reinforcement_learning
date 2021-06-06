@@ -248,7 +248,7 @@ bool binary_parser::read_regular_msg(io_buf *input,
   }
   _example_joiner->on_new_batch();
 
-  for (size_t i = 0; i < joined_payload->events()->size(); i++) {
+  for (flatbuffers::uoffset_t i = 0; i < joined_payload->events()->size(); i++) {
     // process and group events in batch
     if (!_example_joiner->process_event(*joined_payload->events()->Get(i))) {
       VW::io::logger::log_error("Processing of an event from JoinedPayload "
