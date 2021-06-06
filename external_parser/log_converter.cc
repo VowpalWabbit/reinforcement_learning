@@ -3,7 +3,7 @@
 
 namespace log_converter {
 void build_cb_json(std::ofstream &outfile, const joined_event::joined_event &je,
-                   float reward, float original_reward) {
+                   float reward, float original_reward, bool skip_learn) {
   namespace rj = rapidjson;
 
   float cost = -1.f * reward;
@@ -27,11 +27,17 @@ void build_cb_json(std::ofstream &outfile, const joined_event::joined_event &je,
 
     d.AddMember("_labelIndex", actions[0] - 1, allocator);
 
+    if (skip_learn) {
+      d.AddMember("_skipLearn", skip_learn, allocator);
+    }
+
     rj::Value v;
     rj::Value outcome_arr(rj::kArrayType);
     for (auto &o : je.outcome_events) {
       rj::Value outcome(rj::kObjectType);
-      outcome.AddMember("v", o.value, allocator);
+      if (!o.action_taken) {
+        outcome.AddMember("v", o.value, allocator);
+      }
 
       v.SetString(o.metadata.event_id.c_str(), allocator);
       outcome.AddMember("EventId", v, allocator);

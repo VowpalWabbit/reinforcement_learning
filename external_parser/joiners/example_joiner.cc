@@ -184,6 +184,32 @@ void example_joiner::invalidate_joined_event(const std::string &id) {
   }
 }
 
+bool example_joiner::is_joined_event_learnable(joined_event::joined_event &je) {
+  bool deferred_action = je.interaction_data.skipLearn;
+
+  if (!deferred_action) {
+    return true;
+  }
+
+  bool outcome_activated = std::any_of(
+      je.outcome_events.begin(), je.outcome_events.end(),
+      [](const joined_event::outcome_event &o) { return o.action_taken == true; });
+
+  if (outcome_activated) {
+    je.interaction_data.skipLearn = false;
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool example_joiner::should_calculate_reward(joined_event::joined_event &je) {
+  return je.outcome_events.size() > 0 &&
+         std::any_of(
+             je.outcome_events.begin(), je.outcome_events.end(),
+             [](const joined_event::outcome_event &o) { return o.action_taken != true; });
+}
+
 bool example_joiner::process_interaction(const v2::Event &event,
                                          const v2::Metadata &metadata,
                                          const TimePoint &enqueued_time_utc,
@@ -421,7 +447,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
-  if (je.outcome_events.size() > 0) {
+  if (should_calculate_reward(je)) {
     original_reward = _reward_calculation(je);
 
     if (je.interaction_metadata.payload_type == v2::PayloadType_CB &&
@@ -437,10 +463,19 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     }
   }
 
+  bool skip_learn = !is_joined_event_learnable(je);
+
   if (_binary_to_json) {
     if (_loop_info.problem_type_config == v2::ProblemType_CB) {
-      log_converter::build_cb_json(_outfile, je, reward, original_reward);
+      log_converter::build_cb_json(_outfile, je, reward, original_reward,
+                                   skip_learn);
     }
+  }
+
+  if (skip_learn) {
+    clear_event_id_batch_info(id);
+    clear_vw_examples(examples);
+    return true;
   }
 
   try_set_label(je, examples, reward);

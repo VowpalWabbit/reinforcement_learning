@@ -87,6 +87,9 @@ private:
   void invalidate_joined_event(const std::string &id);
   void clear_vw_examples(v_array<example *> &examples);
 
+  bool is_joined_event_learnable(joined_event::joined_event &je);
+  bool should_calculate_reward(joined_event::joined_event &je);
+
   example *get_or_create_example();
 
   static example &get_or_create_example_f(void *vw);
