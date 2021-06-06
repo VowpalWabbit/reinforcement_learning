@@ -248,9 +248,9 @@ bool binary_parser::read_regular_msg(io_buf *input,
   }
   _example_joiner->on_new_batch();
 
-  for (flatbuffers::uoffset_t i = 0; i < joined_payload->events()->size(); i++) {
+  for (const auto* event : *joined_payload->events()) {
     // process and group events in batch
-    if (!_example_joiner->process_event(*joined_payload->events()->Get(i))) {
+    if (!_example_joiner->process_event(*event)) {
       VW::io::logger::log_error("Processing of an event from JoinedPayload "
                                 "failed after having read [{}] "
                                 "bytes from the file, skipping JoinedPayload",
