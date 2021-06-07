@@ -5,8 +5,8 @@
 #include "parse_args.h"
 #include "parse_example_binary.h"
 #include "io/logger.h"
-#include "example_joiner.h"
-#include "multistep_example_joiner.h"
+#include "joiners/example_joiner.h"
+#include "joiners/multistep_example_joiner.h"
 
 #include <memory>
 #include <cstdio>

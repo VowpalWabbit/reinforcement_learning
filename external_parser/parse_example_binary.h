@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "i_joiner.h"
+#include "joiners/i_joiner.h"
 #include "parse_example_external.h"
 
 constexpr size_t BINARY_PARSER_VERSION = 1;

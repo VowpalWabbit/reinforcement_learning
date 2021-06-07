@@ -7,7 +7,7 @@
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "lru_dedup_cache.h"
-#include "timestamp_helper.h"
+#include "event_processors/reward.h"
 #include "v_array.h"
 
 #include <list>
@@ -18,7 +18,6 @@
 // clang-format off
 #include "vw.h"
 #include "json_utils.h"
-#include "reward.h"
 // clang-format on
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
@@ -35,11 +34,11 @@ public:
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their
   // id. The grouped events can be processed when process_joined() is called
-  virtual bool process_event(const v2::JoinedEvent& joined_event) = 0;
+  virtual bool process_event(const v2::JoinedEvent &joined_event) = 0;
   // Takes all grouped events, processes them (e.g. decompression) and populates
   // the examples array with complete example(s) ready to be used by vw for
   // training
-  virtual bool process_joined(v_array<example*>& examples) = 0;
+  virtual bool process_joined(v_array<example *> &examples) = 0;
   // true if there are still event-groups to be processed from a deserialized
   // batch
   virtual bool processing_batch() = 0;
