@@ -2,8 +2,10 @@
 
 #include "error_constants.h"
 
+#include "event_processors/joined_event.h"
+#include "event_processors/loop.h"
 #include "example.h"
-#include "i_joiner.h"
+#include "joiners/i_joiner.h"
 #include "lru_dedup_cache.h"
 #include "v_array.h"
 
@@ -77,20 +79,16 @@ private:
   bool process_outcome(const v2::Event &event, const v2::Metadata &metadata,
                        const TimePoint &enqueued_time_utc);
 
-  template <typename T>
-  bool process_compression(const uint8_t *data, size_t size,
-                           const v2::Metadata &metadata, const T *&payload);
-
-  void try_set_label(const joined_event &je, v_array<example *> &examples,
-                     float reward);
+  void try_set_label(const joined_event::joined_event &je,
+                     v_array<example *> &examples, float reward);
 
   void clear_batch_info();
   void clear_event_id_batch_info(const std::string &id);
   void invalidate_joined_event(const std::string &id);
   void clear_vw_examples(v_array<example *> &examples);
 
-  bool is_joined_event_learnable(joined_event &je);
-  bool should_calculate_reward(joined_event &je);
+  bool is_joined_event_learnable(joined_event::joined_event &je);
+  bool should_calculate_reward(joined_event::joined_event &je);
 
   example *get_or_create_example();
 
@@ -103,7 +101,8 @@ private:
   lru_dedup_cache _dedup_cache;
   // from event id to all the information required to create a complete
   // (multi)example
-  std::unordered_map<std::string, joined_event> _batch_grouped_examples;
+  std::unordered_map<std::string, joined_event::joined_event>
+      _batch_grouped_examples;
   // from event id to all the events that have that event id
   std::unordered_map<std::string, std::vector<const v2::JoinedEvent *>>
       _batch_grouped_events;
@@ -114,11 +113,8 @@ private:
   vw *_vw;
   flatbuffers::DetachedBuffer _detached_buffer;
 
-  float _default_reward = 0.f;
   reward::RewardFunctionType _reward_calculation;
-
-  v2::LearningModeType _learning_mode_config = v2::LearningModeType_Online;
-  v2::ProblemType _problem_type_config = v2::ProblemType_UNKNOWN;
+  loop::loop_info _loop_info;
 
   bool _binary_to_json;
   std::ofstream _outfile;
