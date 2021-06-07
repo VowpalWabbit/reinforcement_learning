@@ -145,14 +145,6 @@ void example_joiner::set_reward_function(const v2::RewardFunctionType type) {
   }
 }
 
-void example_joiner::try_set_label(const joined_event::joined_event &je,
-                                   v_array<example *> &examples, float reward) {
-
-  if (_loop_info.problem_type_config == v2::ProblemType_CB) {
-    typed_event::fill_in_cb_label(je, examples, reward);
-  }
-}
-
 void example_joiner::clear_batch_info() {
   _batch_grouped_events.clear();
   _batch_grouped_examples.clear();
@@ -182,32 +174,6 @@ void example_joiner::invalidate_joined_event(const std::string &id) {
   if (_batch_grouped_examples.find(id) != _batch_grouped_examples.end()) {
     _batch_grouped_examples[id].ok = false;
   }
-}
-
-bool example_joiner::is_joined_event_learnable(joined_event::joined_event &je) {
-  bool deferred_action = je.interaction_data.skipLearn;
-
-  if (!deferred_action) {
-    return true;
-  }
-
-  bool outcome_activated = std::any_of(
-      je.outcome_events.begin(), je.outcome_events.end(),
-      [](const joined_event::outcome_event &o) { return o.action_taken == true; });
-
-  if (outcome_activated) {
-    je.interaction_data.skipLearn = false;
-    return true;
-  } else {
-    return false;
-  }
-}
-
-bool example_joiner::should_calculate_reward(joined_event::joined_event &je) {
-  return je.outcome_events.size() > 0 &&
-         std::any_of(
-             je.outcome_events.begin(), je.outcome_events.end(),
-             [](const joined_event::outcome_event &o) { return o.action_taken != true; });
 }
 
 bool example_joiner::process_interaction(const v2::Event &event,
@@ -250,7 +216,31 @@ bool example_joiner::process_interaction(const v2::Event &event,
         typed_event::event_processor<v2::CbEvent>::fill_in_joined_event(
             *cb, metadata, enqueued_time_utc,
             typed_event::event_processor<v2::CbEvent>::get_context(*cb)));
-  } else {
+  } else if (metadata.payload_type() == v2::PayloadType_CCB) {
+
+    const v2::MultiSlotEvent *ccb = nullptr;
+    if (!typed_event::process_compression<v2::MultiSlotEvent>(
+            event.payload()->data(), event.payload()->size(), metadata, ccb,
+            _detached_buffer) ||
+        ccb == nullptr) {
+      return false;
+    }
+
+    if (!typed_event::event_processor<v2::MultiSlotEvent>::is_valid(
+            *ccb, _loop_info)) {
+      VW::io::logger::log_warn("CCB payload with event id [{}] is malformed. "
+                               "Skipping interaction from processing.",
+                               metadata.id()->c_str());
+      return false;
+    }
+    je = std::move(
+        typed_event::event_processor<v2::MultiSlotEvent>::fill_in_joined_event(
+            *ccb, metadata, enqueued_time_utc,
+            typed_event::event_processor<v2::MultiSlotEvent>::get_context(
+                *ccb)));
+  }
+
+  else {
     // for now only CB is supported so log and return false
     VW::io::logger::log_error("Interaction event learning mode [{}] not "
                               "currently supported, skipping interaction "
@@ -447,13 +437,15 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
-  if (should_calculate_reward(je)) {
+  if (je.should_calculate_reward()) {
     original_reward = _reward_calculation(je);
 
+    // TODO maybe move this into joined_event too?
     if (je.interaction_metadata.payload_type == v2::PayloadType_CB &&
         je.interaction_metadata.learning_mode ==
             v2::LearningModeType_Apprentice) {
-      if (je.interaction_data.actions[0] == je.baseline_action) {
+      if (je.should_learn_from_apprentice()) {
+        // je.interaction_data.actions[0] == je.baseline_action
         // TODO: default apprenticeReward should come from config
         // setting to default reward matches current behavior for now
         reward = original_reward;
@@ -463,7 +455,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     }
   }
 
-  bool skip_learn = !is_joined_event_learnable(je);
+  bool skip_learn = !je.is_joined_event_learnable();
 
   if (_binary_to_json) {
     if (_loop_info.problem_type_config == v2::ProblemType_CB) {
@@ -478,7 +470,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     return true;
   }
 
-  try_set_label(je, examples, reward);
+  je.fill_in_label(examples, reward);
 
   if (multiline) {
     // add an empty example to signal end-of-multiline

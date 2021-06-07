@@ -8,8 +8,12 @@ void build_cb_json(std::ofstream &outfile, const joined_event::joined_event &je,
 
   float cost = -1.f * reward;
   float original_cost = -1.f * original_reward;
-  std::vector<float> probabilities = je.interaction_data.probabilities;
-  std::vector<unsigned> actions = je.interaction_data.actions;
+  const auto &interaction_data =
+      reinterpret_cast<const joined_event::cb_joined_event *>(
+          je.get_hold_of_typed_data())
+          ->interaction_data;
+  const auto& probabilities = interaction_data.probabilities;
+  const auto& actions = interaction_data.actions;
 
   try {
     rj::Document d;
@@ -54,7 +58,7 @@ void build_cb_json(std::ofstream &outfile, const joined_event::joined_event &je,
 
     d.AddMember("Version", "1", allocator);
 
-    v.SetString(je.interaction_data.eventId.c_str(), allocator);
+    v.SetString(interaction_data.eventId.c_str(), allocator);
     d.AddMember("EventId", v, allocator);
 
     rj::Value action_arr(rj::kArrayType);
@@ -92,9 +96,8 @@ void build_cb_json(std::ofstream &outfile, const joined_event::joined_event &je,
   catch (const std::exception& e) {
     VW::io::logger::log_error(
       "convert events: [{}] from binary to json format failed: [{}].",
-      je.interaction_data.eventId, e.what()
+      interaction_data.eventId, e.what()
     );
   }
 }
-}
-
+} // namespace log_converter
