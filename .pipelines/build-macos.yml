@@ -1,5 +1,9 @@
-pr:
+trigger:
 - master
+- 'releases/**'
+
+pr:
+- '*'
 
 pool:
   vmImage: 'macOS-10.14'
