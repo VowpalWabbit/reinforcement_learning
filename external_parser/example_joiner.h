@@ -65,6 +65,8 @@ public:
 
   void on_new_batch() override;
 
+  void on_batch_read() override;
+
 private:
   bool process_dedup(const v2::Event &event, const v2::Metadata &metadata);
 
@@ -86,6 +88,9 @@ private:
   void clear_event_id_batch_info(const std::string &id);
   void invalidate_joined_event(const std::string &id);
   void clear_vw_examples(v_array<example *> &examples);
+
+  bool is_joined_event_learnable(joined_event &je);
+  bool should_calculate_reward(joined_event &je);
 
   example *get_or_create_example();
 
