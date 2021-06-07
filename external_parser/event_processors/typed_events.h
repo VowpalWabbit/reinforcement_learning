@@ -12,6 +12,8 @@ namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 namespace typed_event {
 template <typename T> struct event_processor;
 template <> struct event_processor<v2::MultiSlotEvent> {
+  // TODO fill in below properly
+
   static bool is_valid(const v2::MultiSlotEvent &, const loop::loop_info &) {
     return true;
   }
