@@ -258,7 +258,7 @@ void example_joiner::invalidate_joined_event(const std::string &id) {
   }
 }
 
-bool example_joiner::is_je_learnable(joined_event &je) {
+bool example_joiner::is_joined_event_learnable(joined_event &je) {
   bool deferred_action = je.interaction_data.skipLearn;
 
   if (!deferred_action) {
@@ -569,14 +569,13 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     }
   }
 
-  bool skip_learn = !is_je_learnable(je);
+  bool skip_learn = !is_joined_event_learnable(je);
 
   if (_binary_to_json) {
     log_converter::build_cb_json(_outfile, je, reward, original_reward, skip_learn);
   }
 
   if (skip_learn) {
-    // TODO: add metrics for number of skipped events
     clear_event_id_batch_info(id);
     clear_vw_examples(examples);
     return true;
