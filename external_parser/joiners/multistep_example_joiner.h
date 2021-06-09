@@ -9,6 +9,7 @@
 #include "generated/v2/OutcomeEvent_generated.h"
 #include "joiners/i_joiner.h"
 #include "v_array.h"
+#include "metrics/metrics.h"
 
 #include <list>
 #include <queue>
@@ -39,6 +40,7 @@ public:
 
   void on_new_batch() override;
   void on_batch_read() override;
+  metrics::joiner_metrics get_metrics() override;
 
 private:
   template <typename event_t> struct Parsed {
@@ -73,4 +75,6 @@ private:
   std::queue<std::string> _order;
 
   bool _sorted = false;
+
+  metrics::joiner_metrics _joiner_metrics;
 };

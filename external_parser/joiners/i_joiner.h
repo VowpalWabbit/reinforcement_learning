@@ -7,6 +7,7 @@
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "lru_dedup_cache.h"
+#include "metrics/metrics.h"
 #include "event_processors/reward.h"
 #include "v_array.h"
 
@@ -46,4 +47,6 @@ public:
   virtual void on_new_batch() = 0;
 
   virtual void on_batch_read() = 0;
+
+  virtual metrics::joiner_metrics get_metrics() = 0;
 };
