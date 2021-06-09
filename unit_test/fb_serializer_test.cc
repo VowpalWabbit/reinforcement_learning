@@ -162,10 +162,9 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_metadata) {
  const auto& events = *(event_batch->events());
 
  for (size_t i = 0; i < events.size(); ++i) {
-  const auto& serialized_event = *events[(flatbuffers::uoffset_t)i];
-  const auto& payload = serialized_event.payload();
-  const v2::Event *event = flatbuffers::GetRoot<v2::Event>(payload);
-  //const auto& metadata = *(event->meta());
-  //BOOST_CHECK_EQUAL(metadata.app_id()->c_str(), "app_id");
+  const auto* serialized_event = events.Get(i); 
+  const v2::Event *event = flatbuffers::GetRoot<v2::Event>(serialized_event->payload()->data());
+  const auto& metadata = *(event->meta());
+  BOOST_CHECK_EQUAL(metadata.app_id()->c_str(), "app_id");
  }
 }
