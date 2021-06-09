@@ -55,7 +55,6 @@ async_batcher_config get_batcher_config(const configuration &config, const char 
   res.send_queue_max_capacity = get_int(config, section, name::SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024;
   res.queue_mode = to_queue_mode_enum(get_str(config, section, name::QUEUE_MODE, value::QUEUE_MODE_DROP));
   res.batch_content_encoding = config.get_bool(section, name::USE_DEDUP, false) ? value::CONTENT_ENCODING_DEDUP : value::CONTENT_ENCODING_IDENTITY;
-  res.app_id = get_str(config, section, name::APP_ID, nullptr);
   return res;
 }
 

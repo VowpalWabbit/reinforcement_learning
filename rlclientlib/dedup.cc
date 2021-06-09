@@ -152,7 +152,7 @@ float dedup_state::get_ewma_value() const {
 
 void dedup_state::update_ewma(float value)
 {
-  //This is racy, but update only reads and modifies a single value, so it won't lead to data corruption
+  //This is racy, but update only reads and modifies a single value, so it won't lead to data corruption 
   _ewma.update(value);
 }
 
@@ -221,7 +221,7 @@ int action_dict_builder::finalize(generic_event& evt, api_status* status)
   //compress the payload
   event_content_type content_type;
   size_t old_size = payload.size();
-  RETURN_IF_FAIL(_state.compress(payload, content_type, status));
+  RETURN_IF_FAIL(_state.compress(payload, content_type, status));    
   size_t new_size = payload.size();
 
   //update compression ratio estimator
@@ -246,8 +246,8 @@ struct dedup_collection_serializer
 
   static int message_id() { return logger::message_type::fb_generic_event_collection; }
 
-  dedup_collection_serializer(buffer_t& buffer, const char* content_encoding, shared_state_t& state, const char* app_id)
-      : _dummy(0), _ser(buffer, content_encoding, _dummy, app_id), _state(state), _builder(state) {}
+  dedup_collection_serializer(buffer_t& buffer, const char* content_encoding, shared_state_t& state)
+      : _dummy(0), _ser(buffer, content_encoding, _dummy), _state(state), _builder(state) {}
 
   int add(event_t& evt, api_status* status = nullptr)
   {

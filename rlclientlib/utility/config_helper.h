@@ -22,7 +22,6 @@ namespace utility {
     // bool use_compression;
     // bool use_dedup;
     const char *batch_content_encoding;
-    const char *app_id;
   };
 
   async_batcher_config get_batcher_config(const configuration& config, const char* section);
