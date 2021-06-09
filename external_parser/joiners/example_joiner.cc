@@ -440,10 +440,16 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   if (je.should_calculate_reward()) {
     original_reward = _reward_calculation(je);
 
-    if (je.should_calculate_apprentice_reward()) {
-      // TODO: default apprenticeReward should come from config
-      // setting to default reward matches current behavior for now
-      reward = original_reward;
+    // TODO maybe move this into joined_event too?
+    if (je.interaction_metadata.payload_type == v2::PayloadType_CB &&
+        je.interaction_metadata.learning_mode ==
+            v2::LearningModeType_Apprentice) {
+      if (je.should_learn_from_apprentice()) {
+        // je.interaction_data.actions[0] == je.baseline_action
+        // TODO: default apprenticeReward should come from config
+        // setting to default reward matches current behavior for now
+        reward = original_reward;
+      }
     } else {
       reward = original_reward;
     }
