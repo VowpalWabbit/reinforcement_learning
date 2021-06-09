@@ -38,6 +38,7 @@ struct outcome_event {
 };
 
 struct typed_joined_event {
+  virtual ~typed_joined_event() = default;
   virtual bool is_skip_learn() const = 0;
   virtual void set_skip_learn(bool sl) = 0;
   virtual bool should_learn_from_apprentice() const = 0;
@@ -50,6 +51,8 @@ struct cb_joined_event : public typed_joined_event {
   // Default Baseline Action for CB is 1 (rl client recommended actions are 1
   // indexed in the CB case)
   static const int baseline_action = 1;
+
+  ~cb_joined_event() = default;
 
   bool is_skip_learn() const override { return interaction_data.skipLearn; }
 
@@ -98,6 +101,8 @@ struct cb_joined_event : public typed_joined_event {
 struct ccb_joined_event : public typed_joined_event {
   std::vector<DecisionServiceInteraction> interaction_data;
   static const std::vector<int> baseline_actions;
+
+  ~ccb_joined_event() = default;
   // TODO fill in
   bool is_skip_learn() const override { return false; }
   void set_skip_learn(bool) override {}
