@@ -41,7 +41,7 @@ struct typed_joined_event {
   virtual ~typed_joined_event() = default;
   virtual bool is_skip_learn() const = 0;
   virtual void set_skip_learn(bool sl) = 0;
-  virtual bool should_learn_from_apprentice() const = 0;
+  virtual bool should_calculate_apprentice_reward() const = 0;
   virtual void fill_in_label(v_array<example *> &examples,
                              float reward) const = 0;
 };
@@ -58,7 +58,7 @@ struct cb_joined_event : public typed_joined_event {
 
   void set_skip_learn(bool sl) override { interaction_data.skipLearn = sl; }
 
-  bool should_learn_from_apprentice() const override {
+  bool should_calculate_apprentice_reward() const override {
     return (!interaction_data.actions.empty() &&
             interaction_data.actions[0] == baseline_action);
   }
@@ -106,7 +106,7 @@ struct ccb_joined_event : public typed_joined_event {
   // TODO fill in
   bool is_skip_learn() const override { return false; }
   void set_skip_learn(bool) override {}
-  bool should_learn_from_apprentice() const override { return false; }
+  bool should_calculate_apprentice_reward() const override { return false; }
   void fill_in_label(v_array<example *> &examples,
                      float reward) const override {
 
@@ -141,8 +141,11 @@ struct joined_event {
     return typed_data.get();
   }
 
-  bool should_learn_from_apprentice() const {
-    return typed_data->should_learn_from_apprentice();
+  bool should_calculate_apprentice_reward() const {
+    if (interaction_metadata.learning_mode != v2::LearningModeType_Apprentice) {
+      return false;
+    }
+    return typed_data->should_calculate_apprentice_reward();
   }
 
   void fill_in_label(v_array<example *> &examples, float reward) const {
