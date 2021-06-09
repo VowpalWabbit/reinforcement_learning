@@ -45,6 +45,14 @@ namespace Rl.Net.Cli
             get;
         }
 
+        ActionFlags DecisionFlags
+        {
+            get;
+        }
+        bool IsStepActivated {
+            get;
+        }
+
         TOutcome GetOutcome(long actionIndex, IEnumerable<ActionProbability> actionDistribution);
         TOutcome GetOutcome(int[] actionIndexes, float[] probabilities);
         TOutcome GetSlatesOutcome(int[] actionIndexes, float[] probabilities);
@@ -90,7 +98,7 @@ namespace Rl.Net.Cli
         bool TryQueueOutcomeEvent(RunContext runContext, string eventId, string slotId, TOutcome outcome);
     }
 
-    public class RLDriver : IOutcomeReporter<float>, IOutcomeReporter<string>
+    public class RLDriver : IOutcomeReporter<float>, IOutcomeReporter<float?>, IOutcomeReporter<string>
     {
         private LiveModel liveModel;
         private LoopKind loopKind;
@@ -151,6 +159,16 @@ namespace Rl.Net.Cli
         bool IOutcomeReporter<string>.TryQueueOutcomeEvent(RunContext runContext, string eventId, string slotId, string outcome)
         {
             return this.liveModel.TryQueueOutcomeEvent(eventId, slotId, outcome, runContext.ApiStatusContainer);
+        }
+
+        bool IOutcomeReporter<float?>.TryQueueOutcomeEvent(RunContext runContext, string eventId, float? outcome)
+        {
+            return this.liveModel.TryQueueOutcomeEvent(eventId, outcome.Value, runContext.ApiStatusContainer);
+        }
+
+        bool IOutcomeReporter<float?>.TryQueueOutcomeEvent(RunContext runContext, string eventId, string slotId, float? outcome)
+        {
+            return this.liveModel.TryQueueOutcomeEvent(eventId, slotId, outcome.Value, runContext.ApiStatusContainer);
         }
 
         private void Step<TOutcome>(RunContext runContext, IOutcomeReporter<TOutcome> outcomeReporter, IStepContext<TOutcome> step)
@@ -223,7 +241,8 @@ namespace Rl.Net.Cli
             }
             else
             {
-                if (!liveModel.TryChooseRank(eventId, step.DecisionContext, runContext.ResponseContainer, runContext.ApiStatusContainer))
+                var flags = step.DecisionFlags;
+                if (!liveModel.TryChooseRank(eventId, step.DecisionContext, flags, runContext.ResponseContainer, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
                 }
@@ -232,6 +251,14 @@ namespace Rl.Net.Cli
                 if (!runContext.ResponseContainer.TryGetChosenAction(out actionIndex, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
+                }
+
+                if(flags.HasFlag(ActionFlags.Deferred) && step.IsStepActivated)
+                {
+                    if (!this.liveModel.TryQueueActionTakenEvent(eventId, runContext.ApiStatusContainer))
+                    {
+                        this.SafeRaiseError(runContext.ApiStatusContainer);
+                    }
                 }
 
                 outcome = step.GetOutcome(actionIndex, runContext.ResponseContainer.AsEnumerable());

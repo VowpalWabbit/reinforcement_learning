@@ -59,7 +59,6 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/nprocs.txt ${NumProcessors})
 
 include(ext_libs/ext_libs.cmake)
 
-add_subdirectory(doc EXCLUDE_FROM_ALL)
 add_subdirectory(rlclientlib)
 add_subdirectory(rlclientlib/extensions)
 add_subdirectory(examples)
