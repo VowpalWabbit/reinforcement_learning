@@ -43,7 +43,7 @@ namespace reinforcement_learning {
     , _v2(_version == 2 ? new generic_event_logger(
       time_provider,
       ext.create_batcher(sender, watchdog, perror_cb, INTERACTION_SECTION),
-	  c.get(name::APP_ID, "")) : nullptr) {
+      c.get(name::APP_ID, "")) : nullptr) {
     }
 
     int interaction_logger_facade::init(api_status* status) {
@@ -171,7 +171,7 @@ namespace reinforcement_learning {
     , _v2(_version == 2 ? new generic_event_logger(
       time_provider,
       create_legacy_async_batcher<generic_event>(c, sender, watchdog, perror_cb, OBSERVATION_SECTION, _serializer_shared_state),
-	  c.get(name::APP_ID, "")) : nullptr) {		
+      c.get(name::APP_ID, "")) : nullptr) {		
     }
 
     int observation_logger_facade::init(api_status* status) {

@@ -56,6 +56,6 @@ namespace reinforcement_learning {
     object_list_t _objects;
     float _pass_prob = 1.0;
     event_content_type _content_type;
-	std::string _app_id;
+    std::string _app_id;
   };
 }

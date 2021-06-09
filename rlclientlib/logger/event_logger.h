@@ -50,9 +50,9 @@ namespace reinforcement_learning { namespace logger {
 
   template<typename TEvent>
   event_logger<TEvent>::event_logger(i_time_provider* time_provider, i_async_batcher<TEvent>* batcher, const char* app_id):
-	  _time_provider(time_provider),
-	  _batcher(batcher),
-	  _app_id(app_id)
+    _time_provider(time_provider),
+    _batcher(batcher),
+    _app_id(app_id)
   {
   }
 
@@ -127,7 +127,7 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
   class generic_event_logger : public event_logger<generic_event> {
   public:
     generic_event_logger(i_time_provider* time_provider, i_async_batcher<generic_event>* batcher, const char* app_id)
-      : event_logger(time_provider, batcher, app_id)		
+      : event_logger(time_provider, batcher, app_id)
     {}
 
     int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, api_status* status);
