@@ -232,7 +232,8 @@ int action_dict_builder::finalize(generic_event& evt, api_status* status)
     now,
     generic_event::payload_type_t::PayloadType_DedupInfo,
     std::move(payload),
-    content_type);
+    content_type, 
+    evt.get_app_id());
 
   return error_code::success;
 }
@@ -324,7 +325,7 @@ logger::i_logger_extensions* create_dedup_logger_extension(const utility::config
 	if(config.get_int(name::PROTOCOL_VERSION, 1) != 2)
     return nullptr;
   const bool use_compression = config.get_bool(section, name::USE_COMPRESSION, false);
-  const bool use_dedup = config.get_bool(section, name::USE_DEDUP, false);
+  const bool use_dedup = config.get_bool(section, name::USE_DEDUP, false);  
 
   if(!use_compression && !use_dedup)
     return nullptr;
