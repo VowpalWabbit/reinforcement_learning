@@ -1,9 +1,8 @@
 #pragma once
 
-#include "example.h"
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/Metadata_generated.h"
-#include "io/logger.h"
+#include "generated/v2/MultiSlotEvent_generated.h"
 #include "joined_event.h"
 #include "loop.h"
 #include "zstd.h"
@@ -12,6 +11,60 @@ namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 namespace typed_event {
 template <typename T> struct event_processor;
+template <> struct event_processor<v2::MultiSlotEvent> {
+  // TODO fill in below properly
+
+  static bool is_valid(const v2::MultiSlotEvent &, const loop::loop_info &) {
+    return true;
+  }
+
+  static v2::LearningModeType get_learning_mode(const v2::MultiSlotEvent &evt) {
+    return evt.learning_mode();
+  }
+
+  static std::string get_context(const v2::MultiSlotEvent &evt) {
+    return {reinterpret_cast<char const *>(evt.context()->data()),
+            evt.context()->size()};
+  }
+
+  static joined_event::joined_event fill_in_joined_event(
+      const v2::MultiSlotEvent &evt, const v2::Metadata &metadata,
+      const TimePoint &enqueued_time_utc, std::string &&line_vec) {
+
+    auto ccb_data = VW::make_unique<joined_event::ccb_joined_event>();
+    for (auto *slot_event : *evt.slots()) {
+
+      DecisionServiceInteraction data;
+      data.eventId = slot_event->id() == nullptr ? metadata.id()->str()
+                                                 : slot_event->id()->str();
+      data.actions.reserve(slot_event->action_ids()->size());
+      for (const auto &a : *slot_event->action_ids()) {
+        data.actions.emplace_back(a);
+      }
+
+      data.probabilities.reserve(slot_event->probabilities()->size());
+      for (const auto &prob : *slot_event->probabilities()) {
+        data.probabilities.emplace_back(prob);
+      }
+
+      data.probabilityOfDrop = 1.f - metadata.pass_probability();
+      data.skipLearn = evt.deferred_action();
+      ccb_data->interaction_data.emplace_back(std::move(data));
+    }
+
+    return {TimePoint(enqueued_time_utc),
+            {metadata.client_time_utc()
+                 ? timestamp_to_chrono(*metadata.client_time_utc())
+                 : TimePoint(),
+             metadata.app_id() ? metadata.app_id()->str() : "",
+             metadata.payload_type(), metadata.pass_probability(),
+             metadata.encoding(), metadata.id()->str(), evt.learning_mode()},
+            std::move(line_vec),
+            std::string(evt.model_id() ? evt.model_id()->c_str() : "N/A"),
+            std::move(ccb_data)};
+  }
+};
+
 template <> struct event_processor<v2::CbEvent> {
   static bool is_valid(const v2::CbEvent &evt,
                        const loop::loop_info &loop_info) {
@@ -46,20 +99,23 @@ template <> struct event_processor<v2::CbEvent> {
                        const TimePoint &enqueued_time_utc,
                        std::string &&line_vec) {
 
-    DecisionServiceInteraction data;
-    data.eventId = metadata.id()->str();
-    data.actions.reserve(evt.action_ids()->size());
+    auto cb_data = VW::make_unique<joined_event::cb_joined_event>();
+
+    cb_data->interaction_data.eventId = metadata.id()->str();
+    cb_data->interaction_data.actions.reserve(evt.action_ids()->size());
     for (const auto &a : *evt.action_ids()) {
-      data.actions.emplace_back(a);
+      cb_data->interaction_data.actions.emplace_back(a);
     }
 
-    data.probabilities.reserve(evt.probabilities()->size());
+    cb_data->interaction_data.probabilities.reserve(
+        evt.probabilities()->size());
     for (const auto &prob : *evt.probabilities()) {
-      data.probabilities.emplace_back(prob);
+      cb_data->interaction_data.probabilities.emplace_back(prob);
     }
 
-    data.probabilityOfDrop = 1.f - metadata.pass_probability();
-    data.skipLearn = evt.deferred_action();
+    cb_data->interaction_data.probabilityOfDrop =
+        1.f - metadata.pass_probability();
+    cb_data->interaction_data.skipLearn = evt.deferred_action();
 
     return {TimePoint(enqueued_time_utc),
             {metadata.client_time_utc()
@@ -68,45 +124,11 @@ template <> struct event_processor<v2::CbEvent> {
              metadata.app_id() ? metadata.app_id()->str() : "",
              metadata.payload_type(), metadata.pass_probability(),
              metadata.encoding(), metadata.id()->str(), evt.learning_mode()},
-            std::move(data),
             std::move(line_vec),
-            std::string(evt.model_id() ? evt.model_id()->c_str() : "N/A")};
+            std::string(evt.model_id() ? evt.model_id()->c_str() : "N/A"),
+            std::move(cb_data)};
   }
 };
-
-// this doesn't actually depend on the template type
-static void fill_in_cb_label(const joined_event::joined_event &je,
-                             v_array<example *> &examples, float reward) {
-  if (je.interaction_data.actions.empty()) {
-    VW::io::logger::log_warn("missing actions for event [{}]",
-                             je.interaction_data.eventId);
-    return;
-  }
-
-  if (je.interaction_data.probabilities.empty()) {
-    VW::io::logger::log_warn("missing probabilities for event [{}]",
-                             je.interaction_data.eventId);
-    return;
-  }
-
-  if (std::any_of(je.interaction_data.probabilities.begin(),
-                  je.interaction_data.probabilities.end(),
-                  [](float p) { return std::isnan(p); })) {
-    VW::io::logger::log_warn(
-        "distribution for event [{}] contains invalid probabilities",
-        je.interaction_data.eventId);
-  }
-
-  int index = je.interaction_data.actions[0];
-  auto action = je.interaction_data.actions[0];
-  auto cost = -1.f * reward;
-  auto probability = je.interaction_data.probabilities[0] *
-                     (1.f - je.interaction_data.probabilityOfDrop);
-  auto weight = 1.f - je.interaction_data.probabilityOfDrop;
-
-  examples[index]->l.cb.costs.push_back({cost, action, probability});
-  examples[index]->l.cb.weight = weight;
-}
 
 template <typename T>
 bool process_compression(const uint8_t *data, size_t size,
