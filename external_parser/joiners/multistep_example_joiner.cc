@@ -173,7 +173,8 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
 
 void try_set_label(const joined_event::joined_event &je, float reward,
                                    v_array<example *> &examples) {
-  je.fill_in_label(examples, reward);
+  je.fill_in_label(examples);
+  je.set_cost(examples, reward);
 }
 
 bool multistep_example_joiner::process_joined(v_array<example *> &examples) {

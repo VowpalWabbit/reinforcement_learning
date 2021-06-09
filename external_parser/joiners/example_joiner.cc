@@ -299,9 +299,6 @@ bool example_joiner::process_outcome(const v2::Event &event,
     return false;
   }
 
-  // index is currently not used (only CB currently supported)
-  int index = -1;
-
   if (outcome->value_type() == v2::OutcomeValue_literal) {
     o_event.s_value = outcome->value_as_literal()->c_str();
   } else if (outcome->value_type() == v2::OutcomeValue_numeric) {
@@ -310,10 +307,8 @@ bool example_joiner::process_outcome(const v2::Event &event,
 
   if (outcome->index_type() == v2::IndexValue_literal) {
     o_event.s_index = outcome->index_as_literal()->c_str();
-    index = std::stoi(outcome->index_as_literal()->c_str());
   } else if (outcome->index_type() == v2::IndexValue_numeric) {
     o_event.s_index = outcome->index_as_numeric()->index();
-    index = outcome->index_as_numeric()->index();
   }
 
   o_event.action_taken = outcome->action_taken();
@@ -470,7 +465,11 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     return true;
   }
 
-  je.fill_in_label(examples, reward);
+  je.fill_in_label(examples);
+  je.set_cost(examples, reward);
+  // if problem type == ccb or slates
+  // for each reward calculated for each slot
+  // je.set_cost(examples, reward, slot_index)
 
   if (multiline) {
     // add an empty example to signal end-of-multiline

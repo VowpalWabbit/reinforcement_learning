@@ -42,8 +42,9 @@ struct typed_joined_event {
   virtual bool is_skip_learn() const = 0;
   virtual void set_skip_learn(bool sl) = 0;
   virtual bool should_calculate_apprentice_reward() const = 0;
-  virtual void fill_in_label(v_array<example *> &examples,
-                             float reward) const = 0;
+  virtual void fill_in_label(v_array<example *> &examples) const = 0;
+  virtual void set_cost(v_array<example *> &examples, float reward,
+                        size_t index = 0) const = 0;
 };
 
 struct cb_joined_event : public typed_joined_event {
@@ -63,8 +64,7 @@ struct cb_joined_event : public typed_joined_event {
             interaction_data.actions[0] == baseline_action);
   }
 
-  void fill_in_label(v_array<example *> &examples,
-                     float reward) const override {
+  void fill_in_label(v_array<example *> &examples) const override {
 
     if (interaction_data.actions.empty()) {
       VW::io::logger::log_warn("missing actions for event [{}]",
@@ -88,13 +88,27 @@ struct cb_joined_event : public typed_joined_event {
 
     int index = interaction_data.actions[0];
     auto action = interaction_data.actions[0];
-    auto cost = -1.f * reward;
     auto probability = interaction_data.probabilities[0] *
                        (1.f - interaction_data.probabilityOfDrop);
     auto weight = 1.f - interaction_data.probabilityOfDrop;
 
-    examples[index]->l.cb.costs.push_back({cost, action, probability});
+    examples[index]->l.cb.costs.push_back({0.f, action, probability});
     examples[index]->l.cb.weight = weight;
+  }
+
+  void set_cost(v_array<example *> &examples, float reward,
+                size_t index = 0) const override {
+    if (interaction_data.actions.empty()) {
+      return;
+    }
+    index = interaction_data.actions[0];
+    if (examples.size() <= index) {
+      VW::io::logger::log_warn(
+          "trying to set index [{}] when there are [{}] examples", index,
+          examples.size());
+      return;
+    }
+    examples[index]->l.cb.costs[0].cost = -1.f * reward;
   }
 };
 
@@ -107,16 +121,59 @@ struct ccb_joined_event : public typed_joined_event {
   bool is_skip_learn() const override { return false; }
   void set_skip_learn(bool) override {}
   bool should_calculate_apprentice_reward() const override { return false; }
-  void fill_in_label(v_array<example *> &examples,
-                     float reward) const override {
+  void fill_in_label(v_array<example *> &examples) const override {
 
-    // if label is ok
+    // index to interaction_data vector which holds per-slot info
+    size_t slot_index = 0;
+
     for (auto *ex : examples) {
       if (ex->l.conditional_contextual_bandit.type == CCB::example_type::slot) {
         auto &ld = ex->l.conditional_contextual_bandit;
-        // TODO fill in with all the info from interaction data vector
+        if (interaction_data.size() > slot_index) {
+          const auto &slot_data = interaction_data[slot_index];
+          if ((slot_data.actions.size() != 0) &&
+              (slot_data.probabilities.size() != 0)) {
+            auto outcome = new CCB::conditional_contextual_bandit_outcome();
+            // outcome->cost = TODO assing reward for slot;
+
+            if (slot_data.actions.size() != slot_data.probabilities.size()) {
+              VW::io::logger::log_warn(
+                  "actions and probabilities for event [{}] don't have the "
+                  "same size. Actions [{}], probabilities [{}]",
+                  slot_data.eventId, slot_data.actions.size(),
+                  slot_data.probabilities.size());
+              continue;
+            }
+
+            for (size_t i = 0; i < slot_data.actions.size(); i++) {
+              outcome->probabilities.push_back(
+                  {slot_data.actions[i], slot_data.probabilities[i]});
+            }
+            ld.outcome = outcome;
+          }
+        }
+        // process next slot from interaction_data vector
+        slot_index++;
       }
     }
+  }
+
+  void set_cost(v_array<example *> &examples, float reward,
+                size_t index = 0) const override {
+    if (examples.size() <= index) {
+      VW::io::logger::log_warn(
+          "trying to set index [{}] when there are [{}] examples", index,
+          examples.size());
+      return;
+    }
+    if (examples[index]->l.conditional_contextual_bandit.type !=
+        CCB::example_type::slot) {
+      VW::io::logger::log_warn(
+          "trying to set index [{}] on a CCB non-slot example", index);
+      return;
+    }
+    examples[index]->l.conditional_contextual_bandit.outcome->cost =
+        -1.f * reward;
   }
 };
 
@@ -145,8 +202,13 @@ struct joined_event {
     return typed_data->should_calculate_apprentice_reward();
   }
 
-  void fill_in_label(v_array<example *> &examples, float reward) const {
-    typed_data->fill_in_label(examples, reward);
+  void fill_in_label(v_array<example *> &examples) const {
+    typed_data->fill_in_label(examples);
+  }
+
+  void set_cost(v_array<example *> &examples, float reward,
+                size_t index = 0) const {
+    typed_data->set_cost(examples, reward, index);
   }
 
   bool is_joined_event_learnable() {
