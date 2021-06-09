@@ -128,7 +128,7 @@ struct ccb_joined_event : public typed_joined_event {
 
     for (auto *ex : examples) {
       if (ex->l.conditional_contextual_bandit.type == CCB::example_type::slot) {
-        auto &ld = ex->l.conditional_contextual_bandit;
+        auto &slot_label = ex->l.conditional_contextual_bandit;
         if (interaction_data.size() > slot_index) {
           const auto &slot_data = interaction_data[slot_index];
           if ((slot_data.actions.size() != 0) &&
@@ -149,7 +149,7 @@ struct ccb_joined_event : public typed_joined_event {
               outcome->probabilities.push_back(
                   {slot_data.actions[i], slot_data.probabilities[i]});
             }
-            ld.outcome = outcome;
+            slot_label.outcome = outcome;
           }
         }
         // process next slot from interaction_data vector
