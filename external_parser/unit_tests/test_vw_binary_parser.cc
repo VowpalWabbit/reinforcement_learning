@@ -1,4 +1,4 @@
-#include "example_joiner.h"
+#include "joiners/example_joiner.h"
 #include "parse_example_binary.h"
 #include "test_common.h"
 #include <boost/test/unit_test.hpp>
@@ -327,7 +327,6 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_invalid_cb_context) {
 
   auto buffer =
       read_file(input_files + "/invalid_joined_logs/invalid_cb_context.log");
-
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
   set_buffer_as_vw_input(buffer, vw);

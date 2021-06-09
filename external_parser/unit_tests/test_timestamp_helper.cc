@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
-#include "timestamp_helper.h"
+#include "event_processors/timestamp_helper.h"
 
 #include <thread>
 
