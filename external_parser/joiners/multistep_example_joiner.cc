@@ -5,6 +5,7 @@
 #include "generated/v2/Metadata_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
 #include "io/logger.h"
+#include "event_processors/typed_events.h"
 
 #include <limits.h>
 #include <time.h>
@@ -140,15 +141,16 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
                         metadata.id()->str(),
                         v2::LearningModeType::LearningModeType_Online};
 
-  DecisionServiceInteraction data;
-  data.eventId = event.event_id()->str();
-  data.actions = {event.action_ids()->data(),
+  auto cb_data = VW::make_unique<joined_event::cb_joined_event>();
+  
+  cb_data->interaction_data.eventId = event.event_id()->str();
+  cb_data->interaction_data.actions = {event.action_ids()->data(),
                   event.action_ids()->data() + event.action_ids()->size()};
-  data.probabilities = {event.probabilities()->data(),
+  cb_data->interaction_data.probabilities = {event.probabilities()->data(),
                         event.probabilities()->data() +
                         event.probabilities()->size()};
-  data.probabilityOfDrop = 1.f - metadata.pass_probability();
-  data.skipLearn = false;//cb->deferred_action();
+  cb_data->interaction_data.probabilityOfDrop = 1.f - metadata.pass_probability();
+  cb_data->interaction_data.skipLearn = false;//cb->deferred_action();
 
   std::string line_vec(reinterpret_cast<char const *>(event.context()->data()),
                         event.context()->size());
@@ -162,39 +164,16 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
         *_vw, examples, const_cast<char *>(line_vec.c_str()),
         reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
   }
-  return joined_event::joined_event(TimePoint(event_meta.timestamp), std::move(meta), std::move(data), std::string(line_vec), std::string(event.model_id() ? event.model_id()->c_str() : "N/A"));
+
+  return joined_event::joined_event(
+      TimePoint(event_meta.timestamp), std::move(meta), std::string(line_vec),
+      std::string(event.model_id() ? event.model_id()->c_str() : "N/A"),
+      std::move(cb_data));
 }
 
 void try_set_label(const joined_event::joined_event &je, float reward,
                                    v_array<example *> &examples) {
-  if (je.interaction_data.actions.empty()) {
-    VW::io::logger::log_error("missing actions for event [{}]",
-                              je.interaction_data.eventId);
-    return;
-  }
-
-  if (je.interaction_data.probabilities.empty()) {
-    VW::io::logger::log_error("missing probabilities for event [{}]",
-                              je.interaction_data.eventId);
-    return;
-  }
-
-  if (std::any_of(je.interaction_data.probabilities.begin(),
-                  je.interaction_data.probabilities.end(),
-                  [](float p) { return std::isnan(p); })) {
-    VW::io::logger::log_error(
-        "distribution for event [{}] contains invalid probabilities",
-        je.interaction_data.eventId);
-  }
-
-  int index = je.interaction_data.actions[0];
-  auto action = je.interaction_data.actions[0];
-  auto cost = -1.f * reward;
-  auto probability = je.interaction_data.probabilities[0];
-  auto weight = 1.f - je.interaction_data.probabilityOfDrop;
-
-  examples[index]->l.cb.costs.push_back({cost, action, probability});
-  examples[index]->l.cb.weight = weight;
+  je.fill_in_label(examples, reward);
 }
 
 bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
