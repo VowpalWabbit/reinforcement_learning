@@ -295,7 +295,7 @@ namespace reinforcement_learning { namespace logger {
         builder, 
         evt.get_id(), 
         &client_ts, 
-        nullptr, //FIXME app-id
+        evt.get_app_id(),
         evt.get_payload_type(), 
         evt.get_pass_prob(),
         evt.get_encoding());
