@@ -6,6 +6,7 @@
 #include "event_processors/loop.h"
 #include "example.h"
 #include "joiners/i_joiner.h"
+#include "metrics/metrics.h"
 #include "lru_dedup_cache.h"
 #include "v_array.h"
 
@@ -69,6 +70,8 @@ public:
 
   void on_batch_read() override;
 
+  metrics::joiner_metrics get_metrics() override;
+
 private:
   bool process_dedup(const v2::Event &event, const v2::Metadata &metadata);
 
@@ -109,6 +112,7 @@ private:
 
   reward::RewardFunctionType _reward_calculation;
   loop::loop_info _loop_info;
+  metrics::joiner_metrics _joiner_metrics;
 
   bool _binary_to_json;
   std::ofstream _outfile;

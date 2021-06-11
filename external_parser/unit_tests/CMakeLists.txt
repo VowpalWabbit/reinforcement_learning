@@ -12,6 +12,7 @@ set(TEST_SOURCES
   test_timestamp_helper.cc
   test_log_converter.cc
   test_skip_learn.cc
+  test_metrics.cc
 )
 
 add_executable(binary_parser_unit_tests ${TEST_SOURCES})

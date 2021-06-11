@@ -302,6 +302,16 @@ bool binary_parser::advance_to_next_payload_type(io_buf *input,
   return true;
 }
 
+void binary_parser::persist_metrics(std::vector<std::pair<std::string, size_t>>& list_metrics) {
+  metrics::joiner_metrics joiner_metrics = _example_joiner->get_metrics();
+
+  list_metrics.emplace_back("number_of_learned_events",
+    joiner_metrics.number_of_learned_events);
+
+  list_metrics.emplace_back("number_of_skipped_events",
+    joiner_metrics.number_of_skipped_events);
+}
+
 bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
   if (!_header_read) {
     // TODO change this to handle multiple files if needed?

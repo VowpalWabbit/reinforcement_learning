@@ -48,7 +48,7 @@ bool multistep_example_joiner::process_event(const v2::JoinedEvent &joined_event
       } else {
         _outcomes[std::string(id)].push_back({enqueued_time_utc, meta, *outcome});
       }
-      break;    
+      break;
     }
     default:
       break;
@@ -198,7 +198,7 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
   }
   const auto reward = _reward_calculation(joined);
   try_set_label(joined, reward, examples);
-  
+
   // add an empty example to signal end-of-multiline
   examples.push_back(&VW::get_unused_example(_vw));
   _vw->example_parser->lbl_parser.default_label(&examples.back()->l);
@@ -222,4 +222,9 @@ void multistep_example_joiner::on_new_batch() {
 void multistep_example_joiner::on_batch_read() {
   populate_order();
   _sorted = true;
+}
+
+metrics::joiner_metrics multistep_example_joiner::get_metrics()
+{
+  return _joiner_metrics;
 }
