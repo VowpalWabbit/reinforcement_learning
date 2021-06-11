@@ -465,6 +465,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   }
 
   if (skip_learn) {
+    _joiner_metrics.number_of_skipped_events++;
     clear_event_id_batch_info(id);
     clear_vw_examples(examples);
     return true;

@@ -49,9 +49,10 @@ void should_match_expected_metrics(std::string infile_name,
 }
 
 BOOST_AUTO_TEST_CASE(metrics_increase_with_events_should_be_tracked) {
-  std::string infile_name = "valid_joined_logs/cb_simple.log";
+  std::string infile_name = "valid_joined_logs/average_reward_100_interactions.fb";
   std::map<std::string, int> expected_metrics = {
-    {"number_of_learned_events", 1}
+    {"number_of_learned_events", 100},
+    {"number_of_skipped_events", 0}
   };
   should_match_expected_metrics(infile_name, expected_metrics);
 }
@@ -59,7 +60,8 @@ BOOST_AUTO_TEST_CASE(metrics_increase_with_events_should_be_tracked) {
 BOOST_AUTO_TEST_CASE(metrics_not_increase_with_events_should_not_be_tracked) {
   std::string infile_name = "skip_learn/cb_deferred_action_without_activation.fb";
   std::map<std::string, int> expected_metrics = {
-    {"number_of_learned_events", 0}
+    {"number_of_learned_events", 0},
+    {"number_of_skipped_events", 1}
   };
   should_match_expected_metrics(infile_name, expected_metrics);
 }

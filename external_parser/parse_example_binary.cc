@@ -307,6 +307,9 @@ void binary_parser::persist_metrics(std::vector<std::pair<std::string, size_t>>&
 
   list_metrics.emplace_back("number_of_learned_events",
     joiner_metrics.number_of_learned_events);
+
+  list_metrics.emplace_back("number_of_skipped_events",
+    joiner_metrics.number_of_skipped_events);
 }
 
 bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
