@@ -460,6 +460,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   }
 
   if (skip_learn) {
+    _joiner_metrics.number_of_skipped_events++;
     clear_event_id_batch_info(id);
     clear_vw_examples(examples);
     return true;
@@ -470,6 +471,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   // if problem type == ccb or slates
   // for each reward calculated for each slot
   // je.set_cost(examples, reward, slot_index)
+  _joiner_metrics.number_of_learned_events++;
 
   if (multiline) {
     // add an empty example to signal end-of-multiline
@@ -485,3 +487,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
 bool example_joiner::processing_batch() { return !_batch_event_order.empty(); }
 void example_joiner::on_new_batch() {}
 void example_joiner::on_batch_read() {}
+
+metrics::joiner_metrics example_joiner::get_metrics() {
+  return _joiner_metrics;
+}

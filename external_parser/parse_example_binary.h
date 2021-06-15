@@ -28,6 +28,7 @@ public:
   bool read_checkpoint_msg(io_buf *input);
   bool read_regular_msg(io_buf *input, v_array<example *> &examples);
   bool advance_to_next_payload_type(io_buf *input, unsigned int &payload_type);
+  void persist_metrics(std::vector<std::pair<std::string, size_t>>& list_metrics) override;
 
 private:
   bool _header_read;
