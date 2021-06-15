@@ -12,9 +12,21 @@ namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 namespace typed_event {
 template <typename T> struct event_processor;
 template <> struct event_processor<v2::MultiSlotEvent> {
-  // TODO fill in below properly
+  static bool is_valid(const v2::MultiSlotEvent &evt,
+                       const loop::loop_info &loop_info) {
+    if (evt.context() == nullptr || evt.slots() == nullptr) {
+      return false;
+    }
 
-  static bool is_valid(const v2::MultiSlotEvent &, const loop::loop_info &) {
+    if (evt.learning_mode() != loop_info.learning_mode_config) {
+      VW::io::logger::log_warn(
+          "Online Trainer learning mode [{}] "
+          "and Interaction event learning mode [{}]"
+          "don't match.",
+          EnumNameLearningModeType(loop_info.learning_mode_config),
+          EnumNameLearningModeType(evt.learning_mode()));
+      return false;
+    }
     return true;
   }
 
