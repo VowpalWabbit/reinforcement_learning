@@ -89,7 +89,7 @@ struct cb_joined_event : public typed_joined_event {
     int index = interaction_data.actions[0];
     auto action = interaction_data.actions[0];
     auto probability = interaction_data.probabilities[0];
-    auto weight = 1 / (1.f - interaction_data.probabilityOfDrop);
+    auto weight = 1.f / (1.f - interaction_data.probabilityOfDrop);
 
     examples[index]->l.cb.costs.push_back({0.f, action, probability});
     examples[index]->l.cb.weight = weight;
