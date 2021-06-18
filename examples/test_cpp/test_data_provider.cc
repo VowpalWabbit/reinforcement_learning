@@ -22,7 +22,7 @@ test_data_provider::test_data_provider(const std::string& experiment_name, size_
   }
 }
 
-// TODO: stringstream is the slowest way to concat strings
+// TODO: stringstream is the slowest way to concat strings.
 std::string test_data_provider::create_event_id(size_t thread_id, size_t example_id) const {
   std::ostringstream oss;
   oss << _experiment_name << "-" << thread_id << "-" << example_id;

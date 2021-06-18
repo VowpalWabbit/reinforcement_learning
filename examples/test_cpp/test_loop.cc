@@ -4,6 +4,7 @@
 #include <iostream>
 #include <thread>
 
+#include "options.h"
 #include "config_utility.h"
 #include "constants.h"
 #include "data_buffer.h"
@@ -18,7 +19,8 @@ namespace po = boost::program_options;
 namespace chrono = std::chrono;
 
 test_loop::test_loop(size_t index, const boost::program_options::variables_map& vm)
-  : threads(vm["threads"].as<size_t>())
+  : loop_kind(get_loop_kind(vm))
+  , threads(vm["threads"].as<size_t>())
   , experiment_name(generate_experiment_name(vm["experiment_name"].as<std::string>(), threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>(), vm["slots"].as<size_t>(), index))
   , json_config(vm["json_config"].as<std::string>())
   , test_inputs(experiment_name, threads, vm["features"].as<size_t>(), vm["actions"].as<size_t>(), vm["slots"].as<size_t>(), vm.count("float_outcome") > 0, vm["reward_period"].as<size_t>())
@@ -30,7 +32,7 @@ test_loop::test_loop(size_t index, const boost::program_options::variables_map& 
   }
 }
 
-void _on_error(const reinforcement_learning::api_status& status, void* nothing) {
+void _on_error(const r::api_status& status, void* nothing) {
   std::cerr << status.get_error_msg() << std::endl;
 }
 
@@ -74,21 +76,41 @@ std::string test_loop::generate_experiment_name(const std::string& experiment_na
   return experiment_name_base + "-t" + std::to_string(threads) + "-x" + std::to_string(features) + "-a" + std::to_string(actions) + "-s" + std::to_string(slots) + "-i" + std::to_string(index);
 }
 
-void test_loop::run(bool is_ccb) const {
+LoopKind test_loop::get_loop_kind(const boost::program_options::variables_map& vm) const {
+  if (vm["slots"].as<size_t>() > 0)
+    return LoopKind::CCB;
+  return LoopKind::CB;
+}
+
+void test_loop::run() const {
+  void (test_loop::*loop)(size_t) const;
+  switch (loop_kind) {
+    case LoopKind::CB: {
+      loop = &test_loop::cb_loop;
+      break;
+    }
+    case LoopKind::CCB: {
+      loop = &test_loop::ccb_loop;
+      break;
+    }
+    case LoopKind::MULTISTEP: {
+      loop = &test_loop::multistep_loop;
+      break;
+    }
+  }
+
   std::vector<std::thread> _threads;
   for (size_t i = 0; i < threads; ++i) {
-    _threads.push_back(is_ccb ? std::thread(&test_loop::ccb_loop, this, i) : std::thread(&test_loop::cb_loop, this, i));
+    _threads.push_back(std::thread(loop, this, i));
   }
   for (size_t i = 0; i < threads; ++i) {
     _threads[i].join();
   }
 }
 
-using namespace reinforcement_learning;
-using namespace reinforcement_learning::logger;
-
 // TODO: why do we need this warmup?
 void test_loop::cb_loop(size_t thread_id) const {
+  puts("cb_loop");
   r::ranking_response response;
   r::api_status status;
   std::cout << "Warmup..." << std::endl;
@@ -102,8 +124,8 @@ void test_loop::cb_loop(size_t thread_id) const {
     }
 
     r::utility::data_buffer buffer;
-    fb_collection_serializer<ranking_event> serializer(buffer, r::value::CONTENT_ENCODING_IDENTITY);
-    auto choose_rank_event = r::ranking_event::choose_rank(warmup_id.c_str(), test_inputs.get_context(0, 0), r::action_flags::DEFAULT, response, timestamp{});
+    r::logger::fb_collection_serializer<r::ranking_event> serializer(buffer, r::value::CONTENT_ENCODING_IDENTITY);
+    auto choose_rank_event = r::ranking_event::choose_rank(warmup_id.c_str(), test_inputs.get_context(0, 0), r::action_flags::DEFAULT, response, r::timestamp{});
     serializer.add(choose_rank_event);
     serializer.finalize(nullptr);
     choose_rank_size = buffer.body_filled_size();
@@ -152,6 +174,7 @@ std::vector<const char*> to_const_char(const std::vector<std::string>& ids) {
 }
 
 void test_loop::ccb_loop(size_t thread_id) const {
+  puts("ccb_loop");
   r::decision_response response;
   r::api_status status;
   std::cout << "Warmup..." << std::endl;
@@ -167,10 +190,10 @@ void test_loop::ccb_loop(size_t thread_id) const {
     }
 
     r::utility::data_buffer buffer;
-    fb_collection_serializer<decision_ranking_event> serializer(buffer, r::value::CONTENT_ENCODING_IDENTITY);
+    r::logger::fb_collection_serializer<r::decision_ranking_event> serializer(buffer, r::value::CONTENT_ENCODING_IDENTITY);
     const std::vector<std::vector<uint32_t>> blank_action_ids(response.size());
     const std::vector<std::vector<float>> blank_pdf(response.size());
-    auto decision_event = r::decision_ranking_event::request_decision(event_ids_c, context.c_str(), r::action_flags::DEFAULT, blank_action_ids, blank_pdf, "model", timestamp{});
+    auto decision_event = r::decision_ranking_event::request_decision(event_ids_c, context.c_str(), r::action_flags::DEFAULT, blank_action_ids, blank_pdf, "model", r::timestamp{});
     serializer.add(decision_event);
     serializer.finalize(nullptr);
     choose_rank_size = buffer.body_filled_size();
@@ -210,4 +233,8 @@ void test_loop::ccb_loop(size_t thread_id) const {
 
   const auto choose_rank_perf = (chrono::duration_cast<chrono::microseconds>(choose_rank_end - choose_rank_start).count()) / controller->get_iteration();
   logger << thread_id << ": Choose_rank: " << choose_rank_perf << " microseconds" << std::endl;
+}
+
+void test_loop::multistep_loop(size_t thread_id) const {
+  puts("multistep");
 }
