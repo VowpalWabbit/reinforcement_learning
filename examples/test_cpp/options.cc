@@ -26,6 +26,7 @@ po::variables_map process_cmd_line(const int argc, char** argv) {
     ("instances,i", po::value<size_t>()->default_value(1), "Number of test loop instances")
     ("reward_period,r", po::value<size_t>()->default_value(0), "Ratio period (0 - no reward, otherwise - every $reward_period interaction is receiving reward)")
     ("slots,q", po::value<size_t>()->default_value(0), "Number of slots (ccb simulation is running if > 0)")
+    ("episode_length,m", po::value<size_t>()->default_value(0), "Length of an episode (running multistep if > 0)")
     ;
 
   po::variables_map vm;

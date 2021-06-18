@@ -25,7 +25,7 @@ private:
     reinforcement_learning::utility::configuration& config,
     reinforcement_learning::api_status* status) const;
   std::string generate_experiment_name(const std::string& experiment_name_base,
-	  size_t threads, size_t features, size_t actions, size_t slots, size_t index) const;
+	  size_t threads, size_t features, size_t actions, size_t slots, size_t episode_length, size_t index) const;
   LoopKind get_loop_kind(const boost::program_options::variables_map& vm) const;
 
   void cb_loop(size_t thread_id) const;
@@ -36,6 +36,7 @@ private:
   const LoopKind loop_kind;
   const size_t threads;
   const size_t sleep_interval;
+  const size_t episode_length;
   const std::string experiment_name;
   const std::string json_config;
   test_data_provider test_inputs;
