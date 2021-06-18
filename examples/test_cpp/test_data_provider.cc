@@ -1,9 +1,9 @@
 #include "test_data_provider.h"
 
+#include <sstream>
+
 #include "data_buffer.h"
 #include "ranking_event.h"
-
-#include <sstream>
 #include "serialization/json_serializer.h"
 
 test_data_provider::test_data_provider(const std::string& experiment_name, size_t threads, size_t features, size_t actions, size_t _slots, bool _is_float_outcome, size_t _reward_period)
@@ -22,6 +22,7 @@ test_data_provider::test_data_provider(const std::string& experiment_name, size_
   }
 }
 
+// TODO: stringstream is the slowest way to concat strings
 std::string test_data_provider::create_event_id(size_t thread_id, size_t example_id) const {
   std::ostringstream oss;
   oss << _experiment_name << "-" << thread_id << "-" << example_id;

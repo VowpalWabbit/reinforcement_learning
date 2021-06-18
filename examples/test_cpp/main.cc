@@ -11,14 +11,14 @@ bool is_help(const po::variables_map& vm) {
 po::variables_map process_cmd_line(const int argc, char** argv) {
   po::options_description desc("Options");
   desc.add_options()
-    ("help", "produce help message")
+    ("help,h", "produce help message")
     ("json_config,j", po::value<std::string>()->
       default_value("client.json"), "JSON file with config information for hosted RL loop")
     ("threads,t", po::value<size_t>()->default_value(1), "Number of threads per instance")
     ("examples,n", po::value<size_t>()->default_value(10), "Number of examples per thread")
 	  ("features,x", po::value<size_t>()->default_value(10), "Features count")
     ("actions,a", po::value<size_t>()->default_value(2), "Number of actions")
-    ("experiment_name,e", po::value<std::string>()->required(), "experiment name")
+    ("experiment_name,e", po::value<std::string>()->required(), "(REQUIRED) experiment name")
     ("float_outcome,f", "if outcome is float (otherwise - json)")
     ("sleep,s", po::value<size_t>()->default_value(0), "Milliseconds to sleep between loop iterations")
     ("duration,d", po::value<size_t>(), "Duration of experiment (in ms). Alternative to n")
