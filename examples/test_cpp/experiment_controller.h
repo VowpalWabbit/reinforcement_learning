@@ -11,7 +11,7 @@ public:
   void restart();
   void iterate();
 
-  void progress_bar();
+  void show_progress_bar() const;
   size_t get_iteration() const;
 
   bool is_running() const;

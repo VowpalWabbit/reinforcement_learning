@@ -1,10 +1,11 @@
 #pragma once
-#include "live_model.h"
-#include "ranking_response.h"
 
 #include <fstream>
 #include <string>
 #include <vector>
+
+#include "live_model.h"
+#include "ranking_response.h"
 
 class test_data_provider {
 public:

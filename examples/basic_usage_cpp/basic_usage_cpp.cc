@@ -14,10 +14,10 @@
  */
 
 int main() {
-//  return basic_usage_cb();
-// return basic_usage_ca();
-//  return basic_usage_ccb();
-//  return basic_usage_slates();
+  // return basic_usage_cb();
+  // return basic_usage_ca();
+  // return basic_usage_ccb();
+  // return basic_usage_slates();
   return basic_usage_multistep();
 }
 
