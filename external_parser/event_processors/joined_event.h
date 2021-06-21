@@ -115,6 +115,7 @@ struct cb_joined_event : public typed_joined_event {
 struct ccb_joined_event : public typed_joined_event {
   std::vector<DecisionServiceInteraction> interaction_data;
   static const std::vector<int> baseline_actions;
+  std::map<std::string, int> slot_id_to_index_map;
 
   ~ccb_joined_event() = default;
   // TODO fill in
@@ -159,21 +160,37 @@ struct ccb_joined_event : public typed_joined_event {
   }
 
   void set_cost(v_array<example *> &examples, float reward,
-                size_t index = 0) const override {
-    if (examples.size() <= index) {
+                size_t slot_index = 0) const override {
+    if (examples.size() <= slot_index) {
       VW::io::logger::log_warn(
-          "trying to set index [{}] when there are [{}] examples", index,
+          "trying to set index [{}] when there are [{}] examples", slot_index,
           examples.size());
       return;
     }
-    if (examples[index]->l.conditional_contextual_bandit.type !=
-        CCB::example_type::slot) {
-      VW::io::logger::log_warn(
-          "trying to set index [{}] on a CCB non-slot example", index);
-      return;
+
+    size_t index = 0;
+    for (auto &example : examples) {
+      if (example->l.conditional_contextual_bandit.type !=
+          CCB::example_type::slot) {
+        index++;
+        continue;
+      }
     }
-    examples[index]->l.conditional_contextual_bandit.outcome->cost =
+
+    size_t example_index = index + slot_index;
+    if (example_index >= examples.size()) {
+      VW::io::logger::log_error(
+        "slot index is out of examples range");
+    }
+
+    if (examples[example_index]->l.conditional_contextual_bandit.type ==
+      CCB::example_type::slot) {
+      examples[example_index]->l.conditional_contextual_bandit.outcome->cost =
         -1.f * reward;
+    } else {
+      VW::io::logger::log_warn(
+        "trying to set index [{}] on a CCB non-slot example", index);
+    }
   }
 };
 
@@ -235,6 +252,21 @@ struct joined_event {
            std::any_of(
                outcome_events.begin(), outcome_events.end(),
                [](const outcome_event &o) { return o.action_taken != true; });
+  }
+
+  void convert_outcome_slot_id_to_index() {
+    const auto &ccb = reinterpret_cast<const ccb_joined_event *>(get_hold_of_typed_data());
+    const auto &id_map = ccb->slot_id_to_index_map;
+
+    // TODO: convert s_index to index
+    for (auto &outcome : outcome_events) {
+      if (!outcome.s_index.empty()) {
+        auto it = id_map.find(outcome.s_index);
+        if (it != id_map.end()) {
+
+        }
+      }
+    }
   }
 };
 } // namespace joined_event

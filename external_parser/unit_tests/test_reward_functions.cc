@@ -3,17 +3,30 @@
 #include <boost/test/unit_test.hpp>
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
-float get_float_reward(std::string int_file_name, std::string obs_file_name, v2::RewardFunctionType type, v2::LearningModeType learning_mode=v2::LearningModeType_Online) {
-  auto vw = VW::initialize("--quiet --binary_parser --cb_explore_adf", nullptr,
-                           false, nullptr, nullptr);
+std::vector<float> get_float_rewards(
+  std::string int_file_name,
+  std::string obs_file_name,
+  v2::RewardFunctionType reward_function_type,
+  v2::LearningModeType learning_mode=v2::LearningModeType_Online,
+  v2::ProblemType problem_type=v2::ProblemType_CB
+) {
+  std::string command;
+  switch (problem_type) {
+    case v2::ProblemType_CB:
+      command = "--quiet --binary_parser --cb_explore_adf";
+      break;
+    case v2::ProblemType_CCB:
+      command = "--quiet --binary_parser --ccb_explore_adf";
+      break;
+  }
+
+  auto vw = VW::initialize(command, nullptr, false, nullptr, nullptr);
   v_array<example *> examples = v_init<example*>();
   example_joiner joiner(vw);
-  joiner.set_problem_type_config(v2::ProblemType_CB);
-  joiner.set_reward_function(type);
 
-  if (learning_mode != v2::LearningModeType_Online) {
-    joiner.set_learning_mode_config(learning_mode);
-  }
+  joiner.set_problem_type_config(problem_type);
+  joiner.set_learning_mode_config(learning_mode);
+  joiner.set_reward_function(reward_function_type);
 
   std::string input_files = get_test_files_location();
   auto interaction_buffer = read_file(input_files + "/reward_functions/" + int_file_name);
@@ -38,95 +51,227 @@ float get_float_reward(std::string int_file_name, std::string obs_file_name, v2:
 
   joiner.process_joined(examples);
 
-  // works with CB for now
-  float reward = 0.0f;
-  for (auto *example : examples) {
-    if (example->l.cb.costs.size() > 0) {
-      // found label
-      reward = -1.0 * example->l.cb.costs[0].cost;
+  std::vector<float> rewards;
+
+  switch (problem_type) {
+    case v2::ProblemType_CB:
+    {
+      for (auto *example : examples) {
+        if (!CB::ec_is_example_header(*example) && example->l.cb.costs.size() > 0) {
+          rewards.push_back(-1.0 * example->l.cb.costs[0].cost);
+        }
+      }
     }
+      break;
+    case v2::ProblemType_CCB:
+      {
+        // learn/predict isn't called in the unit test but cleanup examples expects
+        // shared pred to be set
+        examples[0]->pred.decision_scores = {v_init<ACTION_SCORE::action_score>()};
+        examples[0]->pred.decision_scores[0].push_back({0, 0.f});
+
+        for (auto *example : examples) {
+          if (example->l.conditional_contextual_bandit.type ==
+            CCB::example_type::slot) {
+            rewards.push_back(-1.0 * example->l.conditional_contextual_bandit.outcome->cost);
+          }
+        }
+      }
+      break;
   }
+
 
   clear_examples(examples, vw);
   VW::finish(*vw);
-  return reward;
+  return rewards;
 }
 
 BOOST_AUTO_TEST_SUITE(reward_functions_with_cb_format_and_float_reward)
 
-// 3 rewards in f-reward_3obs_v2.fb are: 5, 4, 3 and timestamps are in descending order added in test_common.cc
+// 3 rewards in f-reward_3obs_v2.fb are: 5, 4, 3 and timestamps are in
+// descending order added in test_common.cc
 BOOST_AUTO_TEST_CASE(earliest) {
-  float reward = get_float_reward(
-      "cb_v2.fb",
-      "f-reward_3obs_v2.fb",
-      v2::RewardFunctionType_Earliest
-    );
+  auto rewards = get_float_rewards(
+    "cb/cb_v2.fb",
+    "cb/f-reward_3obs_v2.fb",
+    v2::RewardFunctionType_Earliest
+  );
 
-  BOOST_CHECK_EQUAL(reward, 3);
+  BOOST_CHECK_EQUAL(rewards.size(), 1);
+  BOOST_CHECK_EQUAL(rewards.front(), 3);
 }
 
 BOOST_AUTO_TEST_CASE(average) {
-  float reward = get_float_reward(
-      "cb_v2.fb",
-      "f-reward_3obs_v2.fb",
-      v2::RewardFunctionType_Average
-    );
+  auto rewards = get_float_rewards(
+    "cb/cb_v2.fb",
+    "cb/f-reward_3obs_v2.fb",
+    v2::RewardFunctionType_Average
+  );
 
-  BOOST_CHECK_EQUAL(reward, (3.0 + 4 + 5) / 3);
+  BOOST_CHECK_EQUAL(rewards.size(), 1);
+  BOOST_CHECK_EQUAL(rewards.front(), (3.0 + 4 + 5) / 3);
 }
 
 BOOST_AUTO_TEST_CASE(min) {
-  float reward = get_float_reward(
-      "cb_v2.fb",
-      "f-reward_3obs_v2.fb",
-      v2::RewardFunctionType_Min
-    );
+  auto rewards = get_float_rewards(
+    "cb/cb_v2.fb",
+    "cb/f-reward_3obs_v2.fb",
+    v2::RewardFunctionType_Min
+  );
 
-  BOOST_CHECK_EQUAL(reward, 3);
+  BOOST_CHECK_EQUAL(rewards.size(), 1);
+  BOOST_CHECK_EQUAL(rewards.front(), 3);
 }
 
 BOOST_AUTO_TEST_CASE(max) {
-  float reward = get_float_reward(
-      "cb_v2.fb",
-      "f-reward_3obs_v2.fb",
-      v2::RewardFunctionType_Max
-    );
+  auto rewards = get_float_rewards(
+    "cb/cb_v2.fb",
+    "cb/f-reward_3obs_v2.fb",
+    v2::RewardFunctionType_Max
+  );
 
-  BOOST_CHECK_EQUAL(reward, 5);
+  BOOST_CHECK_EQUAL(rewards.size(), 1);
+  BOOST_CHECK_EQUAL(rewards.front(), 5);
 }
 
 BOOST_AUTO_TEST_CASE(median) {
-  float reward = get_float_reward(
-      "cb_v2.fb",
-      "f-reward_3obs_v2.fb",
-      v2::RewardFunctionType_Median
-    );
+  auto rewards = get_float_rewards(
+    "cb/cb_v2.fb",
+    "cb/f-reward_3obs_v2.fb",
+    v2::RewardFunctionType_Median
+  );
 
-  BOOST_CHECK_EQUAL(reward, 4);
+  BOOST_CHECK_EQUAL(rewards.size(), 1);
+  BOOST_CHECK_EQUAL(rewards.front(), 4);
 }
 
 BOOST_AUTO_TEST_CASE(sum) {
-  float reward = get_float_reward(
-      "cb_v2.fb",
-      "f-reward_3obs_v2.fb",
-      v2::RewardFunctionType_Sum
-    );
+  auto rewards = get_float_rewards(
+    "cb/cb_v2.fb",
+    "cb/f-reward_3obs_v2.fb",
+    v2::RewardFunctionType_Sum
+  );
 
-  BOOST_CHECK_EQUAL(reward, 3 + 4 + 5);
+  BOOST_CHECK_EQUAL(rewards.size(), 1);
+  BOOST_CHECK_EQUAL(rewards.front(), 3 + 4 + 5);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(reward_functions_with_cb_format_and_appentice_mode)
 BOOST_AUTO_TEST_CASE(apprentice_with_first_action_matching_baseline_action_returns_real_reward) {
   // 3 rewards in f-reward_3obs_v2.fb are: 5, 4, 3
-  float reward = get_float_reward(
-      "cb_apprentice_match_baseline_v2.fb",
-      "f-reward_3obs_v2.fb",
-      v2::RewardFunctionType_Sum,
-      v2::LearningModeType_Apprentice
-    );
-  BOOST_CHECK_EQUAL(reward, 3 + 4 + 5);
+  auto rewards = get_float_rewards(
+    "cb/cb_apprentice_match_baseline_v2.fb",
+    "cb/f-reward_3obs_v2.fb",
+    v2::RewardFunctionType_Sum,
+    v2::LearningModeType_Apprentice
+  );
+
+  BOOST_CHECK_EQUAL(rewards.size(), 1);
+  BOOST_CHECK_EQUAL(rewards.front(), 3 + 4 + 5);
 }
 
 // TODO: add test case for first action not matching basesline returns default reward
 BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(reward_functions_with_ccb_format_with_slot_index)
+// fi-reward-v2.fb contains outcomes events for two slots:
+// for slot 0, rewards are: 2, 5, 2, 4
+// for slot 1, rewards are: 2, 2, 5, 1
+// test_common.cc added outcome event timestamps in descending order
+BOOST_AUTO_TEST_CASE(earliest)
+{
+  auto rewards = get_float_rewards(
+    "ccb/ccb_v2.fb",
+    "ccb/fi-reward_v2.fb",
+    v2::RewardFunctionType_Earliest,
+    v2::LearningModeType_Online,
+    v2::ProblemType_CCB
+  );
+
+  BOOST_CHECK_EQUAL(rewards.size(), 2);
+  BOOST_CHECK_EQUAL(rewards.at(0), 4);
+  BOOST_CHECK_EQUAL(rewards.at(1), 1);
+}
+
+BOOST_AUTO_TEST_CASE(average)
+{
+  auto rewards = get_float_rewards(
+    "ccb/ccb_v2.fb",
+    "ccb/fi-reward_v2.fb",
+    v2::RewardFunctionType_Average,
+    v2::LearningModeType_Online,
+    v2::ProblemType_CCB
+  );
+
+  BOOST_CHECK_EQUAL(rewards.size(), 2);
+  BOOST_CHECK_EQUAL(rewards.at(0), (2.0 + 5.0 + 2.0 + 4.0) / 4);
+  BOOST_CHECK_EQUAL(rewards.at(1), (2.0 + 2.0 + 5.0 + 1.0) / 4);
+}
+
+BOOST_AUTO_TEST_CASE(min)
+{
+  auto rewards = get_float_rewards(
+    "ccb/ccb_v2.fb",
+    "ccb/fi-reward_v2.fb",
+    v2::RewardFunctionType_Min,
+    v2::LearningModeType_Online,
+    v2::ProblemType_CCB
+  );
+
+  BOOST_CHECK_EQUAL(rewards.size(), 2);
+  BOOST_CHECK_EQUAL(rewards.at(0), 2.0);
+  BOOST_CHECK_EQUAL(rewards.at(1), 1.0);
+}
+
+BOOST_AUTO_TEST_CASE(max)
+{
+  auto rewards = get_float_rewards(
+    "ccb/ccb_v2.fb",
+    "ccb/fi-reward_v2.fb",
+    v2::RewardFunctionType_Max,
+    v2::LearningModeType_Online,
+    v2::ProblemType_CCB
+  );
+
+  BOOST_CHECK_EQUAL(rewards.size(), 2);
+  BOOST_CHECK_EQUAL(rewards.at(0), 5.0);
+  BOOST_CHECK_EQUAL(rewards.at(1), 5.0);
+}
+
+BOOST_AUTO_TEST_CASE(median)
+{
+  auto rewards = get_float_rewards(
+    "ccb/ccb_v2.fb",
+    "ccb/fi-reward_v2.fb",
+    v2::RewardFunctionType_Median,
+    v2::LearningModeType_Online,
+    v2::ProblemType_CCB
+  );
+
+  BOOST_CHECK_EQUAL(rewards.size(), 2);
+  BOOST_CHECK_EQUAL(rewards.at(0), (2.0 + 4.0) / 2);
+  BOOST_CHECK_EQUAL(rewards.at(1), (2.0 + 2.0) / 2);
+}
+
+BOOST_AUTO_TEST_CASE(sum)
+{
+  auto rewards = get_float_rewards(
+    "ccb/ccb_v2.fb",
+    "ccb/fi-reward_v2.fb",
+    v2::RewardFunctionType_Sum,
+    v2::LearningModeType_Online,
+    v2::ProblemType_CCB
+  );
+
+  BOOST_CHECK_EQUAL(rewards.size(), 2);
+  BOOST_CHECK_EQUAL(rewards.at(0), 2 + 5 + 2 + 4);
+  BOOST_CHECK_EQUAL(rewards.at(1), 2 + 2 + 5 + 1);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
+// BOOST_AUTO_TEST_SUITE(reward_functions_with_ccb_format_and_appentice_mode)
+
+// BOOST_AUTO_TEST_SUITE_END()

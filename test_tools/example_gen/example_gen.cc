@@ -184,8 +184,21 @@ int take_action(r::live_model& rl, const char *event_id, int action, unsigned in
           std::cout << status.get_error_msg() << std::endl;
       break;
     case F_I_REWARD: // "float-int",
-      if( rl.report_outcome(event_id, 1, 1.5, &status) != err::success )
-          std::cout << status.get_error_msg() << std::endl;
+      {
+        size_t num_of_rewards = 4;
+        for (size_t i = 0; i < num_of_rewards; i++)
+        {
+          float reward_0 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
+          float reward_1 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
+
+          if (rl.report_outcome(event_id, 0, reward_0, &status) != err::success) {
+            std::cout << status.get_error_msg() << std::endl;
+          }
+          if( rl.report_outcome(event_id, 1, reward_1, &status) != err::success ) {
+            std::cout << status.get_error_msg() << std::endl;
+          }
+        }
+      }
       break;
     case F_S_REWARD: // "float-string"
       if( rl.report_outcome(event_id, "index_id", 1.5, &status) != err::success )

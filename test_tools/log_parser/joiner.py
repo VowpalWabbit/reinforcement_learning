@@ -382,7 +382,7 @@ if args.c:
                         empty_payload=empty_payload_while_writing)
                     mess_with_payload_while_writing = False # only mess with the first payload
                     empty_payload_while_writing = False # only mess with the first payload
-            
+
             if not multiple_batches:
                 # make two batches here
                 print(f'batch with {len(events_to_serialize)} events')

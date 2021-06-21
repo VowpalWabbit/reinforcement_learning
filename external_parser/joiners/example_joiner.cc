@@ -226,7 +226,6 @@ bool example_joiner::process_interaction(const v2::Event &event,
             *cb, metadata, enqueued_time_utc,
             typed_event::event_processor<v2::CbEvent>::get_context(*cb)));
   } else if (metadata.payload_type() == v2::PayloadType_CCB) {
-
     const v2::MultiSlotEvent *ccb = nullptr;
     if (!typed_event::process_compression<v2::MultiSlotEvent>(
             event.payload()->data(), event.payload()->size(), metadata, ccb,
@@ -319,7 +318,7 @@ bool example_joiner::process_outcome(const v2::Event &event,
   if (outcome->index_type() == v2::IndexValue_literal) {
     o_event.s_index = outcome->index_as_literal()->c_str();
   } else if (outcome->index_type() == v2::IndexValue_numeric) {
-    o_event.s_index = outcome->index_as_numeric()->index();
+    o_event.index = outcome->index_as_numeric()->index();
   }
 
   o_event.action_taken = outcome->action_taken();
@@ -400,9 +399,6 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
 
   auto id = _batch_event_order.front();
   bool multiline = false;
-  float reward = _loop_info.default_reward;
-  // original reward is used to record the observed reward of apprentice mode
-  float original_reward = _loop_info.default_reward;
 
   for (auto &joined_event : _batch_grouped_events[id]) {
     auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
@@ -443,28 +439,34 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
-  if (je.should_calculate_reward()) {
-    original_reward = _reward_calculation(je);
+  je.fill_in_label(examples);
 
-    // TODO maybe move this into joined_event too?
-    if (je.interaction_metadata.payload_type == v2::PayloadType_CB &&
-        je.interaction_metadata.learning_mode ==
-            v2::LearningModeType_Apprentice) {
-      if (je.should_calculate_apprentice_reward()) {
-        // je.interaction_data.actions[0] == je.baseline_action
-        // TODO: default apprenticeReward should come from config
-        // setting to default reward matches current behavior for now
+  if (je.interaction_metadata.payload_type == v2::PayloadType_CB) {
+    float reward = _loop_info.default_reward;
+    // original reward is used to record the observed reward of apprentice mode
+    float original_reward = _loop_info.default_reward;
+
+    if (je.should_calculate_reward()) {
+      original_reward = _reward_calculation(je.outcome_events);
+
+      if (je.interaction_metadata.learning_mode ==
+        v2::LearningModeType_Apprentice) {
+        if (je.should_calculate_apprentice_reward()) {
+          // je.interaction_data.actions[0] == je.baseline_action
+          // TODO: default apprenticeReward should come from config
+          // setting to default reward matches current behavior for now
+          reward = original_reward;
+        }
+      } else {
         reward = original_reward;
       }
-    } else {
-      reward = original_reward;
     }
-  }
 
-  bool skip_learn = !je.is_joined_event_learnable();
+    je.set_cost(examples, reward);
 
-  if (_binary_to_json) {
-    if (_loop_info.problem_type_config == v2::ProblemType_CB) {
+    bool skip_learn = !je.is_joined_event_learnable();
+
+    if (_binary_to_json) {
       log_converter::build_cb_json(_outfile, je, reward, original_reward,
                                    skip_learn);
 
@@ -472,20 +474,32 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
       clear_vw_examples(examples);
       return true;
     }
+
+    if (skip_learn) {
+      _joiner_metrics.number_of_skipped_events++;
+      clear_event_id_batch_info(id);
+      clear_vw_examples(examples);
+      return true;
+    }
+  } else if (je.interaction_metadata.payload_type == v2::PayloadType_CCB) {
+    // je.convert_outcome_slot_id_to_index();
+    std::map<int, std::vector<joined_event::outcome_event>> outcomes_map;
+    for (auto &o : je.outcome_events) {
+      if (outcomes_map.find(o.index) == outcomes_map.end()) {
+        outcomes_map.insert({o.index, {}});
+      }
+
+      outcomes_map[o.index].emplace_back(o);
+    }
+
+    for (auto &slot : outcomes_map) {
+      float reward = _reward_calculation(slot.second);
+
+      //TODO: for slots without outcome events, set default reward?
+      je.set_cost(examples, reward, slot.first);
+    }
   }
 
-  if (skip_learn) {
-    _joiner_metrics.number_of_skipped_events++;
-    clear_event_id_batch_info(id);
-    clear_vw_examples(examples);
-    return true;
-  }
-
-  je.fill_in_label(examples);
-  je.set_cost(examples, reward);
-  // if problem type == ccb or slates
-  // for each reward calculated for each slot
-  // je.set_cost(examples, reward, slot_index)
   _joiner_metrics.number_of_learned_events++;
 
   if (multiline) {
