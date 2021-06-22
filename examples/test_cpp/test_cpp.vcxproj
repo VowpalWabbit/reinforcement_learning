@@ -156,6 +156,7 @@
   <ItemGroup>
     <ClCompile Include="experiment_controller.cc" />
     <ClCompile Include="main.cc" />
+    <ClCompile Include="options.cc" />
     <ClCompile Include="test_data_provider.cc" />
     <ClCompile Include="test_loop.cc" />
   </ItemGroup>
