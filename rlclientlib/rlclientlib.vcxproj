@@ -327,7 +327,6 @@ $(flatcPath) -o "$(SolutionDir)rlclientlib\generated\v2" --cpp "$(SolutionDir)rl
     <None Include="schema\v2\CbEvent.fbs" />
     <None Include="schema\v2\CaEvent.fbs" />
     <None Include="schema\v2\MultiSlotEvent.fbs" />
-    <None Include="schema\v2\MultiStepEvent.fbs" />
     <None Include="schema\v2\Event.fbs" />
     <None Include="schema\v2\LearningModeType.fbs" />
     <None Include="schema\v2\MultiStepEvent.fbs" />
