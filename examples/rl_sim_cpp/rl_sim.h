@@ -131,6 +131,7 @@ public:
     int ca_loop();
     int ccb_loop();
     int slates_loop();
+    int multistep_loop();
 
     /**
      * @brief Get the action features as a json string
@@ -153,7 +154,8 @@ public:
       CB,
       CCB,
       Slates,
-      CA
+      CA,
+      Multistep
     };
 
     boost::program_options::variables_map _options;

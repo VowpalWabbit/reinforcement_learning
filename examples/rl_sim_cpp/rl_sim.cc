@@ -7,6 +7,7 @@
 #include "person.h"
 #include "simulation_stats.h"
 #include "constants.h"
+#include "multistep.h"
 
 using namespace std;
 
@@ -22,6 +23,7 @@ int rl_sim::loop() {
     case CA: return ca_loop();
     case CCB: return ccb_loop();
     case Slates: return slates_loop();
+    case Multistep : return multistep_loop();
     default:
       std::cout << "Invalid loop kind:" << _loop_kind << std::endl;
       return -1;
@@ -72,6 +74,68 @@ int rl_sim::cb_loop() {
 
   return 0;
 }
+
+std::string create_episode_id(size_t episode_id) {
+  std::ostringstream oss;
+  oss << "episode" << "-" << episode_id;
+  return oss.str();
+}
+
+int rl_sim::multistep_loop() {
+  r::ranking_response response;
+  simulation_stats<size_t> stats;
+
+  const size_t episode_length = 2;
+  size_t episode_indx = 0;
+  while (_run_loop) {
+    const std::string episode_id = create_episode_id(episode_indx++);
+    r::api_status status;
+    r::episode_state episode(episode_id.c_str());
+
+    std::string previous_id;
+    float episodic_outcome = 0;
+
+    for (size_t i = 0; i < episode_length; ++i) {
+      auto& p = pick_a_random_person();
+      const auto context_features = p.get_features();
+      const auto action_features = get_action_features();
+      const auto context_json = create_context_json(context_features, action_features);
+      const auto req_id = create_event_id();
+      
+      r::ranking_response response1;
+      if (_rl->request_episodic_decision(req_id.c_str(), i == 0 ? nullptr : previous_id.c_str(),
+        context_json.c_str(), response, episode, &status) != err::success) {
+        std::cout << status.get_error_msg() << std::endl;
+        return -1;
+      }
+      
+      size_t chosen_action;
+      if (response.get_chosen_action_id(chosen_action) != err::success) {
+        std::cout << status.get_error_msg() << std::endl;
+        continue;
+      }
+
+      const auto outcome_per_step = p.get_outcome(_topics[chosen_action]);
+      stats.record(p.id(), chosen_action, outcome_per_step);
+
+      std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", outcome, " << outcome_per_step
+        << ", dist, " << get_dist_str(response) << ", " << stats.get_stats(p.id(), chosen_action) << std::endl;
+
+      episodic_outcome += outcome_per_step;
+      previous_id = req_id;
+    }
+
+    if (_rl->report_outcome(episode.get_episode_id(), episodic_outcome, &status) != err::success) {
+      std::cout << status.get_error_msg() << std::endl;
+      continue;
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+  }
+
+  return 0;
+}
+
 
 int rl_sim::ca_loop(){
   r::continuous_action_response response;
@@ -441,12 +505,14 @@ std::string rl_sim::create_event_id() {
 
 
 rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm)), _loop_kind(CB) {
-  if(_options["ccb"].as<bool>())
+  if (_options["ccb"].as<bool>())
     _loop_kind = CCB;
-  else if(_options["slates"].as<bool>())
+  else if (_options["slates"].as<bool>())
     _loop_kind = Slates;
-  else if(_options["ca"].as<bool>())
+  else if (_options["ca"].as<bool>())
     _loop_kind = CA;
+  else if (_options["multistep"].as<bool>())
+    _loop_kind = Multistep;
 }
 
 std::string get_dist_str(const reinforcement_learning::ranking_response& response) {
