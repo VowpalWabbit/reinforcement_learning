@@ -16,7 +16,7 @@
 #include "io/logger.h"
 #include "memory.h"
 #include "parse_example_binary.h"
-#include "example_joiner.h"
+#include "joiners/example_joiner.h"
 
 // TODO need to check if errors will be detected from stderr/stdout/other and
 // use appropriate logger
@@ -248,9 +248,9 @@ bool binary_parser::read_regular_msg(io_buf *input,
   }
   _example_joiner->on_new_batch();
 
-  for (size_t i = 0; i < joined_payload->events()->size(); i++) {
+  for (const auto* event : *joined_payload->events()) {
     // process and group events in batch
-    if (!_example_joiner->process_event(*joined_payload->events()->Get(i))) {
+    if (!_example_joiner->process_event(*event)) {
       VW::io::logger::log_error("Processing of an event from JoinedPayload "
                                 "failed after having read [{}] "
                                 "bytes from the file, skipping JoinedPayload",
@@ -258,6 +258,8 @@ bool binary_parser::read_regular_msg(io_buf *input,
       return false;
     }
   }
+
+  _example_joiner->on_batch_read();
 
   while (_example_joiner->processing_batch()) {
     if (_example_joiner->process_joined(examples)) {
@@ -298,6 +300,16 @@ bool binary_parser::advance_to_next_payload_type(io_buf *input,
   }
   _total_size_read += sizeof(payload_type);
   return true;
+}
+
+void binary_parser::persist_metrics(std::vector<std::pair<std::string, size_t>>& list_metrics) {
+  metrics::joiner_metrics joiner_metrics = _example_joiner->get_metrics();
+
+  list_metrics.emplace_back("number_of_learned_events",
+    joiner_metrics.number_of_learned_events);
+
+  list_metrics.emplace_back("number_of_skipped_events",
+    joiner_metrics.number_of_skipped_events);
 }
 
 bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {

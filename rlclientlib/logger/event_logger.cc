@@ -32,7 +32,7 @@ namespace reinforcement_learning { namespace logger {
 
   int generic_event_logger::log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, generic_event::object_list_t&& objects, api_status* status) {
     const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
-    return append(generic_event(event_id, now, type, std::move(payload), content_type, std::move(objects)), status);
+    return append(generic_event(event_id, now, type, std::move(payload), content_type, std::move(objects), _app_id), status);
   }
 
 }}

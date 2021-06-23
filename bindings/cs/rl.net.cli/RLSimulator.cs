@@ -220,6 +220,9 @@ namespace Rl.Net.Cli
             public string CcbContext => $"{{ { this.Person.FeaturesJson }, \"_multi\": [{ ActionsJsonWithSlotId }] }}";
             public string SlatesContext => $"{{ { this.Person.FeaturesJson }, \"_multi\":[{ActionsJsonWithSlotId}], \"_slots\": [{SlotsJson}] }}";
             public string ContinuousActionContext => $"{{ { this.RobotJoint.FeaturesJson } }}";
+            public ActionFlags DecisionFlags => ActionFlags.Default;
+            public bool IsStepActivated => throw new NotImplementedException();
+
 
             private float? outcomeCache;
             private IEnumerable<ActionProbability> actionDistributionCache;

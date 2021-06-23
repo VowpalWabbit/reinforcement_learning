@@ -30,15 +30,17 @@ void set_buffer_as_vw_input(const std::vector<char> &buffer, vw *vw) {
 }
 
 std::vector<char> read_file(std::string file_name) {
-  std::ifstream file(file_name, std::ios::binary | std::ios::ate);
-  std::streamsize size = file.tellg();
+  std::ifstream file;
+  file.open(file_name, std::ios::binary | std::ios::ate);
+  BOOST_REQUIRE_EQUAL(file.is_open(), true);
+  std::streamsize ssize = file.tellg();
   file.seekg(0);
 
   // if we can't read the file then fail
-  BOOST_REQUIRE_GT(size, 0);
+  BOOST_REQUIRE_GT(ssize, 0);
 
-  std::vector<char> buffer(size);
-  file.read(buffer.data(), size);
+  std::vector<char> buffer(ssize);
+  file.read(buffer.data(), ssize);
   file.close();
   return buffer;
 }

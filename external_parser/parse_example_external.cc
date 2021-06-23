@@ -5,7 +5,8 @@
 #include "parse_args.h"
 #include "parse_example_binary.h"
 #include "io/logger.h"
-#include "example_joiner.h"
+#include "joiners/example_joiner.h"
+#include "joiners/multistep_example_joiner.h"
 
 #include <memory>
 #include <cstdio>
@@ -38,6 +39,9 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
     } else {
       joiner = VW::make_unique<example_joiner>(all);
     }
+    if (parsed_options.ext_opts->multistep) {
+      joiner = VW::make_unique<multistep_example_joiner>(all);
+    }
     return VW::make_unique<binary_parser>(std::move(joiner));
   }
   throw std::runtime_error("external parser type not recognised");
@@ -46,14 +50,18 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
 void parser::set_parse_args(VW::config::option_group_definition &in_options,
                             input_options &parsed_options) {
   parsed_options.ext_opts = VW::make_unique<parser_options>();
-  in_options.add(
+  in_options
+    .add(
       VW::config::make_option("binary_parser", parsed_options.ext_opts->binary)
-          .help("data file will be interpreted using the binary parser "
-                "version: " +
-                std::to_string(BINARY_PARSER_VERSION)));
-  in_options.add(
-    VW::config::make_option("binary_to_json", parsed_options.ext_opts->binary_to_json)
-      .help("convert binary joined log into dsjson format"));
+        .help("data file will be interpreted using the binary parser "
+              "version: " +
+              std::to_string(BINARY_PARSER_VERSION)))
+    .add(
+      VW::config::make_option("binary_to_json", parsed_options.ext_opts->binary_to_json)
+        .help("convert binary joined log into dsjson format"))
+    .add(
+      VW::config::make_option("multistep", parsed_options.ext_opts->multistep)
+        .help("multistep binary joiner"));
 }
 
 void parser::persist_metrics(std::vector<std::pair<std::string, size_t>>& metrics) {
