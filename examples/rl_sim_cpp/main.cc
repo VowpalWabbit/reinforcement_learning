@@ -37,7 +37,10 @@ po::variables_map process_cmd_line(const int argc, char** argv) {
     ("slates", po::value<bool>()->
       default_value(false), "Run in slates mode")
     ("ca", po::value<bool>()->
-      default_value(false), "Run in continuous actions mode");
+      default_value(false), "Run in continuous actions mode")
+    ("multistep", po::value<bool>()->
+      default_value(false), "Run in multistep mode")
+    ;
 
   po::variables_map vm;
   store(parse_command_line(argc, argv, desc), vm);
