@@ -121,6 +121,7 @@ bool binary_parser::read_version(io_buf *input) {
   }
 
   _total_size_read += buffer_length;
+  _payload_size = 0; //this is used but the padding code, make it do the right thing.
 
   if (*_payload != BINARY_PARSER_VERSION) {
     VW::io::logger::log_critical(
@@ -132,23 +133,7 @@ bool binary_parser::read_version(io_buf *input) {
 }
 
 bool binary_parser::read_header(io_buf *input) {
-  unsigned int payload_type;
   _payload = nullptr;
-  if (!read_payload_type(input, payload_type)) {
-    VW::io::logger::log_critical(
-        "Failed to read payload while reading header message"
-        ", after having read [{}] "
-        "bytes from the file",
-        _total_size_read);
-    return false;
-  }
-
-  _total_size_read += sizeof(payload_type);
-
-  if (payload_type != MSG_TYPE_HEADER) {
-    VW::io::logger::log_critical("MSG_TYPE_HEADER missing from file");
-    return false;
-  }
 
   // read header size
   if (!read_payload_size(input, _payload_size)) {
@@ -313,23 +298,6 @@ void binary_parser::persist_metrics(std::vector<std::pair<std::string, size_t>>&
 }
 
 bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
-  if (!_header_read) {
-    // TODO change this to handle multiple files if needed?
-    if (!read_magic(all->example_parser->input.get())) {
-      return false;
-    }
-
-    if (!read_version(all->example_parser->input.get())) {
-      return false;
-    }
-
-    if (!read_header(all->example_parser->input.get())) {
-      return false;
-    }
-
-    _header_read = true;
-  }
-
   while (_example_joiner->processing_batch()) {
     if (_example_joiner->process_joined(examples)) {
       return true;
@@ -343,41 +311,43 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
   }
 
   unsigned int payload_type;
-
-  if (!advance_to_next_payload_type(all->example_parser->input.get(),
-                                    payload_type)) {
-    return false;
-  }
-
-  if (payload_type == MSG_TYPE_CHECKPOINT) {
-    if (!read_checkpoint_msg(all->example_parser->input.get())) {
+  while(true) {
+    if (!advance_to_next_payload_type(all->example_parser->input.get(), payload_type)) {
       return false;
     }
 
-    if (!advance_to_next_payload_type(all->example_parser->input.get(),
-                                      payload_type)) {
-      return false;
-    }
-  }
-
-  while (payload_type == MSG_TYPE_REGULAR) {
-    if (read_regular_msg(all->example_parser->input.get(), examples)) {
-      return true;
-    }
-
-    // bad payload process the next one
-    if (!advance_to_next_payload_type(all->example_parser->input.get(),
-                                      payload_type)) {
-      return false;
-    }
-  }
-
-  if (payload_type != MSG_TYPE_EOF) {
+    switch(payload_type) {
+      case MSG_TYPE_FILEMAGIC:
+        if (!read_version(all->example_parser->input.get())) {
+          return false;
+        }
+        break;
+      case MSG_TYPE_HEADER:
+        if (!read_header(all->example_parser->input.get())) {
+          return false;
+        }
+        break;
+      case MSG_TYPE_CHECKPOINT:
+        if (!read_checkpoint_msg(all->example_parser->input.get())) {
+          return false;
+        }
+        break;
+      case MSG_TYPE_REGULAR:
+        if (read_regular_msg(all->example_parser->input.get(), examples)) {
+          return true;
+        }
+        break;
+      case MSG_TYPE_EOF:
+        return false;
+      default:
     VW::io::logger::log_critical(
-        "Payload type not recognized [{}], after having read [{}] "
+        "Payload type not recognized [0x{:x}], after having read [{}] "
         "bytes from the file",
         payload_type, _total_size_read);
+        return false;
+      }
   }
+
   return false;
 }
 } // namespace external

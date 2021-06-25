@@ -9,6 +9,7 @@
 
 constexpr size_t BINARY_PARSER_VERSION = 1;
 
+constexpr unsigned int MSG_TYPE_FILEMAGIC = 0x42465756; //'VWFB'
 constexpr unsigned int MSG_TYPE_HEADER = 0x55555555;
 constexpr unsigned int MSG_TYPE_REGULAR = 0xFFFFFFFF;
 constexpr unsigned int MSG_TYPE_CHECKPOINT = 0x11111111;
