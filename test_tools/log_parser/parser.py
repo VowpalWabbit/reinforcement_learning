@@ -179,6 +179,8 @@ class JoinedLogStreamReader:
         return data
 
     def read_message(self):
+        if len(self.buf) <= self.offset:
+            return None
         kind = struct.unpack('I', self.read(4))[0]
         length = struct.unpack('I', self.read(4))[0]
         payload = self.read(length)
@@ -189,7 +191,7 @@ class JoinedLogStreamReader:
     def read_file_header(self):
         msg = self.read_message()
         if msg[0] != MSG_TYPE_HEADER:
-            raise f'Missing file header, found message of type {msg[0]} instead'
+            raise Exception(f'Missing file header, found message of type {msg[0]:X} instead')
 
         header = FileHeader.GetRootAsFileHeader(msg[1], 0)
         for i in range(header.PropertiesLength()):
@@ -199,13 +201,13 @@ class JoinedLogStreamReader:
     def checkpoint_info(self):
         msg = self.read_message()
         if msg[0] != MSG_TYPE_CHECKPOINT:
-            raise f'Missing checkpoint info, found message type of {msg[0]} instead'
+            raise Exception(f'Missing checkpoint info, found message type of {msg[0]:X} instead')
         return CheckpointInfo.GetRootAsCheckpointInfo(msg[1], 0)
 
     def messages(self):
         while True:
             msg = self.read_message()
-            if msg[0] == MSG_TYPE_EOF:
+            if msg == None or msg[0] == MSG_TYPE_EOF:
                 break
             yield JoinedPayload.GetRootAsJoinedPayload(msg[1], 0)
 
