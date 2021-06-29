@@ -26,7 +26,7 @@ public:
   bool read_version(io_buf *input);
   bool read_header(io_buf *input);
   bool read_checkpoint_msg(io_buf *input);
-  bool read_regular_msg(io_buf *input, v_array<example *> &examples);
+  bool read_regular_msg(io_buf *input, v_array<example *> &examples, bool &ignore_msg);
   bool advance_to_next_payload_type(io_buf *input, unsigned int &payload_type);
   void persist_metrics(std::vector<std::pair<std::string, size_t>>& list_metrics) override;
 

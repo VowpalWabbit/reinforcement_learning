@@ -173,3 +173,56 @@ BOOST_AUTO_TEST_CASE(compare_dsjson_with_fb_models) {
                                 buffer_dsjson_model.begin(),
                                 buffer_dsjson_model.end());
 }
+
+
+BOOST_AUTO_TEST_CASE(rrcr_ignore_examples_before_checkpoint) {
+  std::string input_files = get_test_files_location();
+
+  auto buffer = read_file(input_files + "/valid_joined_logs/rrcr.fb");
+
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+
+  set_buffer_as_vw_input(buffer, vw);
+
+  int count = 0;
+  while (vw->example_parser->reader(vw, examples) > 0) {
+    ++count;
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  BOOST_CHECK_EQUAL(count, 1);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
+BOOST_AUTO_TEST_CASE(rcrfrmr_file_magic_and_header_in_the_middle_works) {
+  std::string input_files = get_test_files_location();
+
+  auto buffer = read_file(input_files + "/valid_joined_logs/rcrfrmr.fb");
+
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+
+  set_buffer_as_vw_input(buffer, vw);
+
+  int count = 0;
+  while (vw->example_parser->reader(vw, examples) > 0) {
+    ++count;
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  BOOST_CHECK_EQUAL(count, 3);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}

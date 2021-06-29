@@ -177,8 +177,9 @@ bool binary_parser::read_checkpoint_msg(io_buf *input) {
 }
 
 bool binary_parser::read_regular_msg(io_buf *input,
-                                     v_array<example *> &examples) {
+                                     v_array<example *> &examples, bool &ignore_msg) {
   _payload = nullptr;
+  ignore_msg = false;
 
   if (!read_payload_size(input, _payload_size)) {
     VW::io::logger::log_warn(
@@ -204,6 +205,7 @@ bool binary_parser::read_regular_msg(io_buf *input,
         VW::io::logger::log_warn("Read regular message before any checkpoint data "
                              "after having read [{}] bytes from the file. Events will be ignored.",
                              _total_size_read);
+    ignore_msg = true;
     return true;
   }
 
@@ -320,11 +322,15 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
           return false;
         }
         break;
-      case MSG_TYPE_REGULAR:
-        if (read_regular_msg(all->example_parser->input.get(), examples)) {
-          return true;
+      case MSG_TYPE_REGULAR: {
+        bool ignore_msg = false;
+        if (read_regular_msg(all->example_parser->input.get(), examples, ignore_msg)) {
+          if(!ignore_msg) {
+            return true;
+          }
         }
         break;
+      }
       case MSG_TYPE_EOF:
         return false;
       default:
