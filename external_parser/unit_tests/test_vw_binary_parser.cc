@@ -44,15 +44,25 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_empty_msg_header) {
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
   set_buffer_as_vw_input(buffer, vw);
+  unsigned int payload_type;
 
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
-  BOOST_CHECK_EQUAL(bp.read_magic(vw->example_parser->input.get()), true);
+  BOOST_CHECK_EQUAL(bp.advance_to_next_payload_type(
+                      vw->example_parser->input.get(), payload_type),
+                  true);
+  BOOST_CHECK_EQUAL(payload_type, MSG_TYPE_FILEMAGIC);
   BOOST_CHECK_EQUAL(bp.read_version(vw->example_parser->input.get()), true);
+
+  BOOST_CHECK_EQUAL(bp.advance_to_next_payload_type(
+                      vw->example_parser->input.get(), payload_type),
+                  true);
+  BOOST_CHECK_EQUAL(payload_type, MSG_TYPE_HEADER);
   BOOST_CHECK_EQUAL(bp.read_header(vw->example_parser->input.get()), true);
-  unsigned int payload_type;
+
   BOOST_CHECK_EQUAL(bp.advance_to_next_payload_type(
                         vw->example_parser->input.get(), payload_type),
                     true);
+  BOOST_CHECK_EQUAL(payload_type, MSG_TYPE_CHECKPOINT);
   BOOST_CHECK_EQUAL(bp.read_checkpoint_msg(vw->example_parser->input.get()),
                     true);
 
@@ -93,11 +103,20 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
 
     VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
     v_array<example *> examples;
-
-    BOOST_REQUIRE_EQUAL(bp.read_magic(vw->example_parser->input.get()), true);
-    BOOST_REQUIRE_EQUAL(bp.read_version(vw->example_parser->input.get()), true);
-    BOOST_REQUIRE_EQUAL(bp.read_header(vw->example_parser->input.get()), true);
     unsigned int payload_type;
+
+    BOOST_CHECK_EQUAL(bp.advance_to_next_payload_type(
+                        vw->example_parser->input.get(), payload_type),
+                    true);
+    BOOST_CHECK_EQUAL(payload_type, MSG_TYPE_FILEMAGIC);
+    BOOST_REQUIRE_EQUAL(bp.read_version(vw->example_parser->input.get()), true);
+
+    BOOST_CHECK_EQUAL(bp.advance_to_next_payload_type(
+                        vw->example_parser->input.get(), payload_type),
+                    true);
+    BOOST_CHECK_EQUAL(payload_type, MSG_TYPE_HEADER);
+    BOOST_REQUIRE_EQUAL(bp.read_header(vw->example_parser->input.get()), true);
+
     BOOST_REQUIRE_EQUAL(bp.advance_to_next_payload_type(
                             vw->example_parser->input.get(), payload_type),
                         true);
