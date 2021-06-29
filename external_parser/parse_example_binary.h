@@ -23,7 +23,6 @@ public:
   binary_parser(std::unique_ptr<i_joiner>&& joiner);  //taking ownership of joiner
   ~binary_parser();
   bool parse_examples(vw *all, v_array<example *> &examples) override;
-  bool read_magic(io_buf *input);
   bool read_version(io_buf *input);
   bool read_header(io_buf *input);
   bool read_checkpoint_msg(io_buf *input);

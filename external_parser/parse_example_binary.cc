@@ -87,28 +87,6 @@ binary_parser::binary_parser(std::unique_ptr<i_joiner>&& joiner)
 
 binary_parser::~binary_parser() {}
 
-bool binary_parser::read_magic(io_buf *input) {
-  const uint32_t buffer_length = 4 * sizeof(char);
-  // read the 4 magic bytes
-  if (!read_payload(input, _payload, buffer_length)) {
-    VW::io::logger::log_critical(
-        "Failed to read payload while reading magic, after having read [{}] "
-        "bytes from the file",
-        _total_size_read);
-    return false;
-  }
-
-  _total_size_read += buffer_length;
-
-  std::vector<char> buffer = {_payload, _payload + buffer_length};
-  const std::vector<char> magic = {'V', 'W', 'F', 'B'};
-  if (buffer != magic) {
-    VW::io::logger::log_critical("Magic bytes in file are incorrect");
-    return false;
-  }
-  return true;
-}
-
 bool binary_parser::read_version(io_buf *input) {
   _payload = nullptr;
   const uint32_t buffer_length = 4 * sizeof(char);

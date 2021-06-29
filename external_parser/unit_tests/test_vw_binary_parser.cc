@@ -12,10 +12,12 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_magic) {
                            false, nullptr, nullptr);
 
   set_buffer_as_vw_input(buffer, vw);
-
+  unsigned int payload_type;
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
-  BOOST_CHECK_EQUAL(bp.read_magic(vw->example_parser->input.get()), false);
-
+  BOOST_CHECK_EQUAL(bp.advance_to_next_payload_type(
+                      vw->example_parser->input.get(), payload_type),
+                  true);
+  BOOST_CHECK_NE(payload_type, MSG_TYPE_FILEMAGIC);
   VW::finish(*vw);
 }
 
@@ -27,9 +29,14 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_version) {
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
   set_buffer_as_vw_input(buffer, vw);
+  unsigned int payload_type;
 
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
-  BOOST_CHECK_EQUAL(bp.read_magic(vw->example_parser->input.get()), true);
+  BOOST_CHECK_EQUAL(bp.advance_to_next_payload_type(
+                      vw->example_parser->input.get(), payload_type),
+                  true);
+  BOOST_CHECK_EQUAL(payload_type, MSG_TYPE_FILEMAGIC);
+  
   BOOST_CHECK_EQUAL(bp.read_version(vw->example_parser->input.get()), false);
 
   VW::finish(*vw);
@@ -77,9 +84,13 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_no_msg_header) {
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
   set_buffer_as_vw_input(buffer, vw);
+  unsigned int payload_type;
 
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
-  BOOST_CHECK_EQUAL(bp.read_magic(vw->example_parser->input.get()), true);
+  BOOST_CHECK_EQUAL(bp.advance_to_next_payload_type(
+                      vw->example_parser->input.get(), payload_type),
+                  true);
+  BOOST_CHECK_EQUAL(payload_type, MSG_TYPE_FILEMAGIC);
   BOOST_CHECK_EQUAL(bp.read_version(vw->example_parser->input.get()), true);
   BOOST_CHECK_EQUAL(bp.read_header(vw->example_parser->input.get()), false);
 
