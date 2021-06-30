@@ -26,6 +26,7 @@ public:
   void set_default_reward(float default_reward) override;
   void set_learning_mode_config(v2::LearningModeType learning_mode) override;
   void set_problem_type_config(v2::ProblemType problem_type) override;
+  bool joiner_ready() override;
 
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their
@@ -116,4 +117,5 @@ private:
 
   bool _binary_to_json;
   std::ofstream _outfile;
+  bool _joiner_ready;
 };
