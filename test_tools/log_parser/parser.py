@@ -145,9 +145,11 @@ def dump_event_batch(buf):
 
 
 def dump_preamble_file(file_name, buf):
-    preamble = parse_preamble(buf)
-    print(f'parsing preamble file {file_name}\n\tpreamble:{preamble}')
-    dump_event_batch(buf[PREAMBLE_LENGTH : PREAMBLE_LENGTH + preamble["msg_size"]])
+    while len(buf) > 8:
+        preamble = parse_preamble(buf)
+        print(f'parsing preamble file {file_name}\n\tpreamble:{preamble}')
+        dump_event_batch(buf[PREAMBLE_LENGTH : PREAMBLE_LENGTH + preamble["msg_size"]])
+        buf = buf[PREAMBLE_LENGTH + preamble["msg_size"]:]
 
 
 MSG_TYPE_FILEMAGIC = 0x42465756

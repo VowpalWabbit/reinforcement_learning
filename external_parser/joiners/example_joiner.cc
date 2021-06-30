@@ -482,7 +482,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
       return true;
     }
   } else if (je.interaction_metadata.payload_type == v2::PayloadType_CCB) {
-    // je.convert_outcome_slot_id_to_index();
+    je.convert_outcome_slot_id_to_index();
     std::map<int, std::vector<joined_event::outcome_event>> outcomes_map;
     for (auto &o : je.outcome_events) {
       if (outcomes_map.find(o.index) == outcomes_map.end()) {

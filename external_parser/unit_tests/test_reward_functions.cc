@@ -80,7 +80,6 @@ std::vector<float> get_float_rewards(
       break;
   }
 
-
   clear_examples(examples, vw);
   VW::finish(*vw);
   return rewards;
@@ -175,7 +174,7 @@ BOOST_AUTO_TEST_CASE(apprentice_with_first_action_matching_baseline_action_retur
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(reward_functions_with_ccb_format_with_slot_index)
-// fi-reward-v2.fb contains outcomes events for two slots:
+// fi-reward-v2.fb contains outcome events for two slots:
 // for slot 0, rewards are: 2, 5, 2, 4
 // for slot 1, rewards are: 2, 2, 5, 1
 // test_common.cc added outcome event timestamps in descending order
@@ -271,7 +270,50 @@ BOOST_AUTO_TEST_CASE(sum)
 
 BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_AUTO_TEST_SUITE(reward_functions_with_ccb_format_with_slot_id)
+// ccb-with-slot-id contains 1 interaction with 2 slots with _id equals to
+// slot_0 and slot_1
+// fs-reward-v2.fb contains outcome events with slot id for two slots:
+// for slot_0, rewards are: 2, 5, 2, 4
+// for slot_1, rewards are: 2, 2, 5, 1
+// test_common.cc added outcome event timestamps in descending order
 
-// BOOST_AUTO_TEST_SUITE(reward_functions_with_ccb_format_and_appentice_mode)
+BOOST_AUTO_TEST_CASE(median)
+{
+  auto rewards = get_float_rewards(
+    "ccb/ccb-with-slot-id_v2.fb",
+    "ccb/fs-reward_v2.fb",
+    v2::RewardFunctionType_Median,
+    v2::LearningModeType_Online,
+    v2::ProblemType_CCB
+  );
 
-// BOOST_AUTO_TEST_SUITE_END()
+  BOOST_CHECK_EQUAL(rewards.size(), 2);
+  BOOST_CHECK_EQUAL(rewards.at(0), (2.0 + 4.0) / 2);
+  BOOST_CHECK_EQUAL(rewards.at(1), (2.0 + 2.0) / 2);
+}
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(reward_functions_with_ccb_format_with_mixed_slot_index_and_slot_id)
+// ccb-with-slot-id contains 1 interaction with 2 slots with _id equals to
+// slot_0 and slot_1
+// fmix-reward-v2.fb contains outcome events with mixed slot index and slot id for two slots:
+// with first slot: (0, 2.0), ("slot_0", 2.0), (0, 5.0), ("slot_0", 2.0)
+// with second slot: (1, 2.0), ("slot_1", 5.0), (1, 4.0), ("slot_1", 1.0)
+// test_common.cc added outcome event timestamps in descending order
+
+BOOST_AUTO_TEST_CASE(median)
+{
+  auto rewards = get_float_rewards(
+    "ccb/ccb-with-slot-id_v2.fb",
+    "ccb/fmix-reward_v2.fb",
+    v2::RewardFunctionType_Median,
+    v2::LearningModeType_Online,
+    v2::ProblemType_CCB
+  );
+
+  BOOST_CHECK_EQUAL(rewards.size(), 2);
+  BOOST_CHECK_EQUAL(rewards.at(0), (2.0 + 2.0) / 2);
+  BOOST_CHECK_EQUAL(rewards.at(1), (2.0 + 4.0) / 2);
+}
+BOOST_AUTO_TEST_SUITE_END()
