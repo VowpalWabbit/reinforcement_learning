@@ -299,11 +299,7 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
   }
 
   unsigned int payload_type;
-  while(true) {
-    if (!advance_to_next_payload_type(all->example_parser->input.get(), payload_type)) {
-      return false;
-    }
-
+  while (advance_to_next_payload_type(all->example_parser->input.get(), payload_type)) {
     switch(payload_type) {
       case MSG_TYPE_FILEMAGIC:
         if (!read_version(all->example_parser->input.get())) {
