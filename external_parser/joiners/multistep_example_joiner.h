@@ -33,6 +33,8 @@ public:
   void set_default_reward(float default_reward) override;
   void set_learning_mode_config(v2::LearningModeType learning_mode) override;
   void set_problem_type_config(v2::ProblemType problem_type) override;
+  bool joiner_ready() override;
+
 
   bool process_event(const v2::JoinedEvent &joined_event) override;
   bool process_joined(v_array<example *> &examples) override;
@@ -77,4 +79,5 @@ private:
   bool _sorted = false;
 
   metrics::joiner_metrics _joiner_metrics;
+  bool _joiner_ready;
 };

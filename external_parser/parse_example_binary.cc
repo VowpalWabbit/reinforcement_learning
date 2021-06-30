@@ -79,8 +79,7 @@ bool read_padding(io_buf *input, uint32_t previous_payload_size,
 namespace VW {
 namespace external {
 binary_parser::binary_parser(std::unique_ptr<i_joiner>&& joiner)
-    : _got_checkpoint_info(false)
-    , _example_joiner(std::move(joiner))
+    : _example_joiner(std::move(joiner))
     , _payload(nullptr)
     , _payload_size(0)
     , _total_size_read(0) {}
@@ -172,7 +171,6 @@ bool binary_parser::read_checkpoint_msg(io_buf *input) {
   _example_joiner->set_problem_type_config(
       checkpoint_info->problem_type_config());
 
-  _got_checkpoint_info = true;
   return true;
 }
 
@@ -201,7 +199,7 @@ bool binary_parser::read_regular_msg(io_buf *input,
 
   _total_size_read += _payload_size;
 
-  if(!_got_checkpoint_info) {
+  if(!_example_joiner->joiner_ready()) {
         VW::io::logger::log_warn("Read regular message before any checkpoint data "
                              "after having read [{}] bytes from the file. Events will be ignored.",
                              _total_size_read);

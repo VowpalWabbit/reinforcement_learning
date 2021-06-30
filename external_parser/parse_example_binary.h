@@ -31,7 +31,6 @@ public:
   void persist_metrics(std::vector<std::pair<std::string, size_t>>& list_metrics) override;
 
 private:
-  bool _got_checkpoint_info;
   std::unique_ptr<i_joiner> _example_joiner;
   char *_payload;
   uint32_t _payload_size;
