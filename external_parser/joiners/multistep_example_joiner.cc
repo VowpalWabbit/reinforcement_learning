@@ -19,7 +19,7 @@
 
 
 multistep_example_joiner::multistep_example_joiner(vw *vw)
-    : _vw(vw), _reward_calculation(&reward::earliest) {}
+    : _vw(vw), _reward_calculation(&reward::earliest), _joiner_ready(false) {}
 
 multistep_example_joiner::~multistep_example_joiner() {
   // cleanup examples
@@ -66,6 +66,11 @@ void multistep_example_joiner::set_learning_mode_config(v2::LearningModeType lea
 
 void multistep_example_joiner::set_problem_type_config(v2::ProblemType problem_type) {
   _loop_info.problem_type_config = problem_type;
+  _joiner_ready = true;
+}
+
+bool multistep_example_joiner::joiner_ready() {
+  return _joiner_ready;
 }
 
 void multistep_example_joiner::set_reward_function(const v2::RewardFunctionType type) {

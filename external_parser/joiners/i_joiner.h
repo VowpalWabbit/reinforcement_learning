@@ -32,6 +32,15 @@ public:
   virtual void set_learning_mode_config(v2::LearningModeType learning_mode) = 0;
   virtual void set_problem_type_config(v2::ProblemType problem_type) = 0;
 
+  /**
+   * @brief Tells whether config was provided such that it can start joining examples.
+   * TODO This method is naive with respect to whether the config provided was both enough and valid.
+   * 
+   * @return true if the joiner is ready, false otherwise.
+   */
+  virtual bool joiner_ready() = 0;
+
+
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their
   // id. The grouped events can be processed when process_joined() is called

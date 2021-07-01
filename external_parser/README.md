@@ -2,40 +2,69 @@
 
 ## File format
 
-### payload types
+The file format constitute of a sequence of messages writen one after the other. All messages have the same format:
 
-payload types indicated by the below integers
+- 4 bytes - message type
+- 4 bytes - payload size or inline payload.
+- <size> bytes - payload content _(optional)_
+- padding bytes - size % 8 bytes to ensure message alignment _(optional)_
 
+The size of all message must be aligned to 8 bytes. Paddings bytes are inserted at the end and should not be included in the payload size.
+Padding bytes should be zero but is not enforced.
+
+### Message types
+
+Each message has an unique indentifier, those are the ones currently recognized:
+
+- `MSG_TYPE_FILEMAGIC = 0x42465756 //'VWFB'`
 - `MSG_TYPE_HEADER = 0x55555555`
 - `MSG_TYPE_REGULAR = 0xFFFFFFFF`
 - `MSG_TYPE_CHECKPOINT = 0x11111111`
 - `MSG_TYPE_EOF = 0xAAAAAAAA`
 
- ### flatbuffer payloads
+### Message payloads
  
- for all flatbuffer payloads see `rlclientlib/schema/v2`
+For all flatbuffer payloads see `rlclientlib/schema/v2`
 
-### The parser expects to see the below format
+### File Magic message
 
-- 4 bytes containing magic `'V','W','F','B'`
-- 4 bytes containing version (right now version is `1`)
-- 4 bytes containing the payload type of the header i.e. `MSG_TYPE_HEADER`
-- 4 bytes containing the payload (i.e. header) size
-- `<size>` bytes containing the actual header payload
+The payload is inline and it's the file format version.
 
-any further payloads will expected to have the form of:
+The only value accepted is `1`.
 
-- 4 bytes containing the payload type which can be any of the payload types listed above
-- 4 bytes containing the size of the payload to follow
-- `<size>` bytes containing the actual payload
+This message should be the first on a file, making it easy to recognize files following its format by their 4 bytes watermark.
 
-A file can contain only one header but multiple `MSG_TYPE_CHECKPOINT` and `MSG_TYPE_REGULAR` messages. `MSG_TYPE_EOF` isn't mandatory but if it is encountered the parser will stop processing the file
+### Header message
 
-`MSG_TYPE_CHECKPOINT` will be expected to be followed by the size of the payload and then a payload of type `CheckpointInfo` (see `FileFormat.fbs`)
+Payload is a flatbuffer message of type `FileHeader` (see `FileFormat.fbs`) .
 
-`MSG_TYPE_REGULAR` will be expected to be followed by the size of the payload and then a payload of type `JoinedPayload` (see `FileFormat.fbs`)
+This message contains informational data about this file. It should include provenance
+details such as how it was generated, the version and parameters of the program used, generation
+time and other information that helps troubleshooting.
 
-**Note**: everything is expected to by 8-byte aligned so if any payload is not, padding is expected in between payloads and will be skipped
+### Checkpoint message
+
+Payload is a flatbuffer message of type `CheckpointInfo` (see `FileFormat.fbs`).
+
+This message includes information on how to join events comming after it.
+Checkpoint messages are the recomended point to split larger files at as they contain all info
+required to process the stream that follows them.
+
+### Regular message
+
+Payload is a flatbuffer message of type `JoinedPayload` (see `FileFormat.fbs`).
+
+This message include multiple events, sharing one or more event-ids that should be processed together. 
+
+### Recomended message ordering
+
+The recomended ordering of messages in a file is the following:
+
+- 1 file magic message
+- 1 file header message
+N times:
+- 1 checkpoint message
+- M regular messages
 
 
 ## Linux

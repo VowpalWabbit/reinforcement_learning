@@ -15,7 +15,7 @@
 #include "parser.h"
 
 example_joiner::example_joiner(vw *vw)
-    : _vw(vw), _reward_calculation(&reward::earliest), _binary_to_json(false) {}
+    : _vw(vw), _reward_calculation(&reward::earliest), _binary_to_json(false), _joiner_ready(false) {}
 
 example_joiner::example_joiner(vw *vw, bool binary_to_json,
                                std::string outfile_name)
@@ -112,6 +112,11 @@ void example_joiner::set_learning_mode_config(
 
 void example_joiner::set_problem_type_config(v2::ProblemType problem_type) {
   _loop_info.problem_type_config = problem_type;
+  _joiner_ready = true;
+}
+
+bool example_joiner::joiner_ready() {
+  return _joiner_ready;
 }
 
 void example_joiner::set_reward_function(const v2::RewardFunctionType type) {
