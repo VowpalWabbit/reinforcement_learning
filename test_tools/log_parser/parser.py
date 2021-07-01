@@ -149,6 +149,8 @@ def dump_preamble_file(file_name, buf):
     print(f'parsing preamble file {file_name}\n\tpreamble:{preamble}')
     dump_event_batch(buf[PREAMBLE_LENGTH : PREAMBLE_LENGTH + preamble["msg_size"]])
 
+
+MSG_TYPE_FILEMAGIC = 0x42465756
 MSG_TYPE_HEADER = 0x55555555
 MSG_TYPE_CHECKPOINT = 0x11111111
 MSG_TYPE_REGULAR = 0xFFFFFFFF
@@ -158,18 +160,6 @@ class JoinedLogStreamReader:
     def __init__(self, buf):
         self.buf = buf
         self.offset = 0
-        self.headers = dict()
-        self.parse_header()
-        self.read_file_header()
-
-    def parse_header(self):
-        if self.buf[0:4] != b'VWFB':
-            raise Exception("Invalid file magic")
-
-        self.version = struct.unpack('I', self.buf[4:8])[0]
-        if self.version != 1:
-            raise Exception(f'Unsuported file version {self.version}')
-        self.offset = 8
 
     def read(self, size):
         if size == 0:
@@ -183,56 +173,68 @@ class JoinedLogStreamReader:
             return None
         kind = struct.unpack('I', self.read(4))[0]
         length = struct.unpack('I', self.read(4))[0]
+        # FILEMAGIC has inline payload, special case it here
+        if kind == MSG_TYPE_FILEMAGIC:
+            return (kind, length)
+
         payload = self.read(length)
         #discard padding
         self.read(length % 8)
         return (kind, payload)
-
-    def read_file_header(self):
-        msg = self.read_message()
-        if msg[0] != MSG_TYPE_HEADER:
-            raise Exception(f'Missing file header, found message of type {msg[0]:X} instead')
-
-        header = FileHeader.GetRootAsFileHeader(msg[1], 0)
-        for i in range(header.PropertiesLength()):
-            p = header.Properties(i)
-            self.headers[p.Key().decode('utf-8')] = p.Value().decode('utf-8')
-
-    def checkpoint_info(self):
-        msg = self.read_message()
-        if msg[0] != MSG_TYPE_CHECKPOINT:
-            raise Exception(f'Missing checkpoint info, found message type of {msg[0]:X} instead')
-        return CheckpointInfo.GetRootAsCheckpointInfo(msg[1], 0)
 
     def messages(self):
         while True:
             msg = self.read_message()
             if msg == None or msg[0] == MSG_TYPE_EOF:
                 break
-            yield JoinedPayload.GetRootAsJoinedPayload(msg[1], 0)
+            if msg[0] == MSG_TYPE_REGULAR:
+                yield (msg[0], JoinedPayload.GetRootAsJoinedPayload(msg[1], 0))
+            elif msg[0] == MSG_TYPE_CHECKPOINT:
+                yield (msg[0], CheckpointInfo.GetRootAsCheckpointInfo(msg[1], 0))
+            elif msg[0] == MSG_TYPE_HEADER:
+                yield (msg[0], FileHeader.GetRootAsFileHeader(msg[1], 0))
+            else:
+                yield (msg[0], msg[1])
 
 def dump_joined_log_file(file_name, buf):
+    print(f'Parsig binary-log file:{file_name}')
+
     reader = JoinedLogStreamReader(buf)
-    print(f'parsing joined log:{file_name} header:')
-    for k in reader.headers:
-        print(f'\t{k} = {reader.headers[k]}')
-
-    checkpoint_info = reader.checkpoint_info()
-    print(f'reward function type is: {checkpoint_info.RewardFunctionType()}')
-    print(f'default reward is: {checkpoint_info.DefaultReward()}')
-    print(f'learning mode config is: {checkpoint_info.LearningModeConfig()}')
-    print(f'problem type config is: {checkpoint_info.ProblemTypeConfig()}')
-
     for msg in reader.messages():
-        print(f'joined-batch events: {msg.EventsLength()}')
-        for i in range(msg.EventsLength()):
-            joined_event = msg.Events(i)
-            dump_event(joined_event.EventAsNumpy(), i, joined_event.Timestamp())
+        if msg[0] == MSG_TYPE_REGULAR:
+            msg = msg[1]
+            print(f'joined-batch events: {msg.EventsLength()}')
+            for i in range(msg.EventsLength()):
+                joined_event = msg.Events(i)
+                dump_event(joined_event.EventAsNumpy(), i, joined_event.Timestamp())
+        elif msg[0] == MSG_TYPE_CHECKPOINT:
+            checkpoint_info = msg[1]
+            print('Parsing checkpoint info:')
+            print(f'\treward function type is: {checkpoint_info.RewardFunctionType()}')
+            print(f'\tdefault reward is: {checkpoint_info.DefaultReward()}')
+            print(f'\tlearning mode config is: {checkpoint_info.LearningModeConfig()}')
+            print(f'\tproblem type config is: {checkpoint_info.ProblemTypeConfig()}')            
+        elif msg[0] == MSG_TYPE_HEADER:
+            print(f'Parsing File Header:')
+            header = msg[1]
+            for i in range(header.PropertiesLength()):
+                p = header.Properties(i)
+                key = p.Key().decode('utf-8')
+                value = p.Value().decode('utf-8')
+                print('\t{key} :: {value}')
+        elif msg[0] == MSG_TYPE_FILEMAGIC:
+            print(f' File Version: {msg[1]}')
+        else:
+            print(f'unknown message type: {msg[0]}')
+
+def is_binary_log_msg(buf):
+    msg_id = struct.unpack('I', buf)[0]
+    return msg_id == MSG_TYPE_FILEMAGIC or msg_id == MSG_TYPE_HEADER or msg_id == MSG_TYPE_CHECKPOINT or msg_id == MSG_TYPE_REGULAR or msg_id == MSG_TYPE_EOF
 
 def dump_file(f):
     buf = bytearray(open(f, 'rb').read())
 
-    if buf[0:4] == b'VWFB':
+    if is_binary_log_msg(buf[0:4]):
         dump_joined_log_file(f, buf)
     else:
         dump_preamble_file(f, buf)
