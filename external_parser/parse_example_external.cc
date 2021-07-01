@@ -4,6 +4,7 @@
 
 #include "parse_args.h"
 #include "parse_example_binary.h"
+#include "parse_example_converter.h"
 #include "io/logger.h"
 #include "joiners/example_joiner.h"
 #include "joiners/multistep_example_joiner.h"
@@ -36,6 +37,9 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
 
       std::string outfile_name = infile_name + ".dsjson";
       joiner = VW::make_unique<example_joiner>(all, binary_to_json, outfile_name);
+
+      return VW::make_unique<binary_json_converter>(std::move(joiner));
+
     } else {
       joiner = VW::make_unique<example_joiner>(all);
     }
