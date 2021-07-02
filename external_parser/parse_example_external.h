@@ -15,6 +15,10 @@ struct parser_options {
   bool binary;
   bool binary_to_json;
   bool multistep;
+  float default_reward;
+  std::string problem_type;
+  std::string reward_function;
+  std::string learning_mode;
 };
 
 int parse_examples(vw *all, v_array<example *> &examples);

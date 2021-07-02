@@ -15,7 +15,7 @@
 #include "parser.h"
 
 example_joiner::example_joiner(vw *vw)
-    : _vw(vw), _reward_calculation(&reward::earliest), _binary_to_json(false), _joiner_ready(false) {}
+    : _vw(vw), _reward_calculation(&reward::earliest), _binary_to_json(false) {}
 
 example_joiner::example_joiner(vw *vw, bool binary_to_json,
                                std::string outfile_name)
@@ -101,52 +101,56 @@ bool example_joiner::process_event(const v2::JoinedEvent &joined_event) {
   return true;
 }
 
-void example_joiner::set_default_reward(float default_reward) {
-  _loop_info.default_reward = default_reward;
+void example_joiner::set_default_reward(float default_reward, bool sticky) {
+  _loop_info.default_reward.set(default_reward, sticky);
 }
 
 void example_joiner::set_learning_mode_config(
-    v2::LearningModeType learning_mode) {
-  _loop_info.learning_mode_config = learning_mode;
+    v2::LearningModeType learning_mode, bool sticky) {
+  _loop_info.learning_mode_config.set(learning_mode, sticky);
 }
 
-void example_joiner::set_problem_type_config(v2::ProblemType problem_type) {
-  _loop_info.problem_type_config = problem_type;
-  _joiner_ready = true;
+void example_joiner::set_problem_type_config(v2::ProblemType problem_type, bool sticky) {
+  _loop_info.problem_type_config.set(problem_type, sticky);
 }
 
 bool example_joiner::joiner_ready() {
-  return _joiner_ready;
+  return _loop_info.is_configured() && _reward_calculation.is_valid();
 }
 
-void example_joiner::set_reward_function(const v2::RewardFunctionType type) {
+void example_joiner::set_reward_function(const v2::RewardFunctionType type, bool sticky) {
 
+  reward::RewardFunctionType reward_calculation = nullptr;
   switch (type) {
   case v2::RewardFunctionType_Earliest:
-    _reward_calculation = &reward::earliest;
+    reward_calculation = &reward::earliest;
     break;
   case v2::RewardFunctionType_Average:
-    _reward_calculation = &reward::average;
+    reward_calculation = &reward::average;
     break;
 
   case v2::RewardFunctionType_Sum:
-    _reward_calculation = &reward::sum;
+    reward_calculation = &reward::sum;
     break;
 
   case v2::RewardFunctionType_Min:
-    _reward_calculation = &reward::min;
+    reward_calculation = &reward::min;
     break;
 
   case v2::RewardFunctionType_Max:
-    _reward_calculation = &reward::max;
+    reward_calculation = &reward::max;
     break;
 
   case v2::RewardFunctionType_Median:
-    _reward_calculation = &reward::median;
+    reward_calculation = &reward::median;
     break;
 
   default:
     break;
+  }
+  
+  if(reward_calculation) {
+    _reward_calculation.set(reward_calculation, sticky);
   }
 }
 
