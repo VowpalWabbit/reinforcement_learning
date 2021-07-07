@@ -482,21 +482,31 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
       return true;
     }
   } else if (je.interaction_metadata.payload_type == v2::PayloadType_CCB) {
+    float default_reward = _loop_info.default_reward;
     je.convert_outcome_slot_id_to_index();
     std::map<int, std::vector<joined_event::outcome_event>> outcomes_map;
     for (auto &o : je.outcome_events) {
-      if (outcomes_map.find(o.index) == outcomes_map.end()) {
-        outcomes_map.insert({o.index, {}});
-      }
+      if (o.s_index.empty()) {
+        if (outcomes_map.find(o.index) == outcomes_map.end()) {
+          outcomes_map.insert({o.index, {}});
+        }
 
-      outcomes_map[o.index].emplace_back(o);
+        outcomes_map[o.index].emplace_back(o);
+      }
     }
 
     for (auto &slot : outcomes_map) {
       float reward = _reward_calculation(slot.second);
-
-      //TODO: for slots without outcome events, set default reward?
       je.set_cost(examples, reward, slot.first);
+    }
+
+    const auto &ccb = reinterpret_cast<const joined_event::ccb_joined_event *>(
+      je.get_hold_of_typed_data());
+
+    for (size_t i = 0; i < ccb->interaction_data.size(); i++) {
+      if (!outcomes_map.count(i)) {
+        je.set_cost(examples, default_reward, i);
+      }
     }
   }
 

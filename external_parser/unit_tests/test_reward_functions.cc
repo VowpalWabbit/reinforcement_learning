@@ -3,12 +3,15 @@
 #include <boost/test/unit_test.hpp>
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
+const int DEFAULT_REWARD = -1000;
+
 std::vector<float> get_float_rewards(
   std::string int_file_name,
   std::string obs_file_name,
   v2::RewardFunctionType reward_function_type,
   v2::LearningModeType learning_mode=v2::LearningModeType_Online,
-  v2::ProblemType problem_type=v2::ProblemType_CB
+  v2::ProblemType problem_type=v2::ProblemType_CB,
+  float default_reward=DEFAULT_REWARD
 ) {
   std::string command;
   switch (problem_type) {
@@ -27,6 +30,7 @@ std::vector<float> get_float_rewards(
   joiner.set_problem_type_config(problem_type);
   joiner.set_learning_mode_config(learning_mode);
   joiner.set_reward_function(reward_function_type);
+  joiner.set_default_reward(default_reward);
 
   std::string input_files = get_test_files_location();
   auto interaction_buffer = read_file(input_files + "/reward_functions/" + int_file_name);
@@ -292,6 +296,22 @@ BOOST_AUTO_TEST_CASE(median)
   BOOST_CHECK_EQUAL(rewards.at(0), (2.0 + 4.0) / 2);
   BOOST_CHECK_EQUAL(rewards.at(1), (2.0 + 2.0) / 2);
 }
+
+BOOST_AUTO_TEST_CASE(set_default_reward_if_slot_has_no_outcome_events)
+{
+  auto rewards = get_float_rewards(
+    "ccb/ccb_v2.fb",
+    "ccb/fs-reward_v2.fb",
+    v2::RewardFunctionType_Earliest,
+    v2::LearningModeType_Online,
+    v2::ProblemType_CCB
+  );
+
+  BOOST_CHECK_EQUAL(rewards.size(), 2);
+  BOOST_CHECK_EQUAL(rewards.at(0), DEFAULT_REWARD);
+  BOOST_CHECK_EQUAL(rewards.at(1), DEFAULT_REWARD);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(reward_functions_with_ccb_format_with_mixed_slot_index_and_slot_id)

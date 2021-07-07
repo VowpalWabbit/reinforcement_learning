@@ -258,11 +258,20 @@ struct joined_event {
     const auto &ccb = reinterpret_cast<const ccb_joined_event *>(get_hold_of_typed_data());
     const auto &id_map = ccb->slot_id_to_index_map;
 
-    for (auto &outcome : outcome_events) {
-      if (!outcome.s_index.empty()) {
-        auto it = id_map.find(outcome.s_index);
-        if (it != id_map.end()) {
-          outcome.index = it->second;
+    if (id_map.size() > 0) {
+      for (auto &outcome : outcome_events) {
+        if (!outcome.s_index.empty()) {
+          auto iterator = id_map.find(outcome.s_index);
+          if (iterator != id_map.end()) {
+            outcome.index = iterator->second;
+            outcome.s_index = "";
+          } else {
+            VW::io::logger::log_warn(
+              "CCB outcome event with slot id: [{}] "
+              "has no matching interaction slot event.",
+              outcome.s_index
+            );
+          }
         }
       }
     }

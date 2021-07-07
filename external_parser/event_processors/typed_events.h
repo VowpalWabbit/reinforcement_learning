@@ -50,8 +50,10 @@ template <> struct event_processor<v2::MultiSlotEvent> {
       data.eventId = slot_event->id() == nullptr ? metadata.id()->str()
                                                  : slot_event->id()->str();
 
-      ccb_data->slot_id_to_index_map.insert(
-        std::pair<std::string, int>(data.eventId, slot_index));
+      if (slot_event->id() != nullptr) {
+        ccb_data->slot_id_to_index_map.insert(
+          std::pair<std::string, int>(slot_event->id()->str(), slot_index));
+      }
 
       data.actions.reserve(slot_event->action_ids()->size());
       for (const auto &a : *slot_event->action_ids()) {
