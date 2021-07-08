@@ -232,7 +232,8 @@ int action_dict_builder::finalize(generic_event& evt, api_status* status)
     now,
     generic_event::payload_type_t::PayloadType_DedupInfo,
     std::move(payload),
-    content_type);
+    content_type, 
+    evt.get_app_id());
 
   return error_code::success;
 }

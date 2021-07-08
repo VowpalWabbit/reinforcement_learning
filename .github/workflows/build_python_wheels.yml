@@ -1,0 +1,67 @@
+name: Linux / Python
+
+on:
+  push:
+    branches:
+      - master
+      - 'releases/**'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    container:
+      image: vowpalwabbit/rlclientlib-manylinux2010-build:latest
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config:
+        - { version: 3.6, base_path: /opt/python/cp36-cp36m/ }
+        - { version: 3.7, base_path: /opt/python/cp37-cp37m/ }
+        - { version: 3.8, base_path: /opt/python/cp38-cp38/ }
+        - { version: 3.9, base_path: /opt/python/cp39-cp39/ }
+    steps:
+      # v1 must be used because newer versions require a node.js version that will not run on this old image.
+      - uses: actions/checkout@v1
+      - name: Clone submodules
+        shell: bash
+        run: git submodule update --init --recursive
+      - name: Build wheel
+        shell: bash
+        run: |
+          ${{ matrix.config.base_path }}bin/pip wheel . -w wheel_output/ --verbose
+          auditwheel repair wheel_output/*whl -w audit_output/
+      - name: Upload built wheel
+        uses: actions/upload-artifact@v1
+        with:
+          name: wheel_${{ matrix.config.version }}
+          path: audit_output/
+  test:
+    needs: build
+    container:
+      image: python:${{ matrix.config.version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config:
+        - { version: 3.6 }
+        - { version: 3.7 }
+        - { version: 3.8 }
+        - { version: 3.9 }
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Download Wheel
+        uses: actions/download-artifact@v1
+        with:
+          name: wheel_${{ matrix.config.version }}
+      - name: Test wheel
+        shell: bash
+        run: |
+          export wheel_files=(wheel_${{ matrix.config.version }}/*)
+          export wheel_file="${wheel_files[0]}"
+          echo Installing ${wheel_file}...
+          pip install ${wheel_file}
+          python ./bindings/python/test/unit_test.py

@@ -6,31 +6,42 @@
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 void clear_examples(v_array<example *> &examples, vw *vw) {
-  for (auto *ex : examples) {
-    VW::finish_example(*vw, *ex);
+  if (vw->l->is_multiline) {
+    multi_ex multi_exs;
+    for (auto *ex : examples) {
+      multi_exs.push_back(ex);
+    }
+    vw->finish_example(multi_exs);
+    multi_exs.clear();
+  } else {
+    for (auto *ex : examples) {
+      VW::finish_example(*vw, *ex);
+    }
   }
   examples.clear();
 }
 
 void set_buffer_as_vw_input(const std::vector<char> &buffer, vw *vw) {
-  io_buf *reader_view_of_buffer = new io_buf();
-  delete vw->example_parser->input;
-  vw->example_parser->input = reader_view_of_buffer;
-
-  reader_view_of_buffer->add_file(
-    VW::io::create_buffer_view(buffer.data(), buffer.size()));
+  auto reader_view_of_buffer = VW::make_unique<io_buf>();
+  vw->example_parser->input.reset();
+  vw->example_parser->input = std::move(reader_view_of_buffer);
+  vw->example_parser->input->add_file(
+      VW::io::create_buffer_view(buffer.data(), buffer.size()));
 }
 
 std::vector<char> read_file(std::string file_name) {
-  std::ifstream file(file_name, std::ios::binary | std::ios::ate);
-  std::streamsize size = file.tellg();
+  std::ifstream file;
+  file.open(file_name, std::ios::binary | std::ios::ate);
+  BOOST_REQUIRE_EQUAL(file.is_open(), true);
+  std::streamsize ssize = file.tellg();
   file.seekg(0);
 
   // if we can't read the file then fail
-  BOOST_REQUIRE_GT(size, 0);
+  BOOST_REQUIRE_GT(ssize, 0);
 
-  std::vector<char> buffer(size);
-  file.read(buffer.data(), size);
+  std::vector<char> buffer(ssize);
+  file.read(buffer.data(), ssize);
+  file.close();
   return buffer;
 }
 
@@ -46,9 +57,9 @@ std::string get_test_files_location() {
   }
 }
 
-std::vector<const v2::JoinedEvent *>
-wrap_into_joined_events(std::vector<char> &buffer,
-                        std::vector<flatbuffers::DetachedBuffer> &detached_buffers) {
+std::vector<const v2::JoinedEvent *> wrap_into_joined_events(
+    std::vector<char> &buffer,
+    std::vector<flatbuffers::DetachedBuffer> &detached_buffers) {
   flatbuffers::FlatBufferBuilder fbb;
 
   // if file is smaller than preamble size then fail
@@ -61,7 +72,7 @@ wrap_into_joined_events(std::vector<char> &buffer,
 
   BOOST_REQUIRE_GE(event_batch->events()->size(), 1);
 
-  std::vector<const v2::JoinedEvent *> event_list {};
+  std::vector<const v2::JoinedEvent *> event_list{};
 
   int day = 30;
   v2::TimeStamp ts(2020, 3, day, 10, 20, 30, 0);
@@ -78,7 +89,8 @@ wrap_into_joined_events(std::vector<char> &buffer,
 
     fbb.Finish(fb);
     detached_buffers.push_back(fbb.Release());
-    const v2::JoinedEvent *je = flatbuffers::GetRoot<v2::JoinedEvent>(detached_buffers[i].data());
+    const v2::JoinedEvent *je =
+        flatbuffers::GetRoot<v2::JoinedEvent>(detached_buffers[i].data());
     event_list.push_back(je);
   }
 

@@ -13,6 +13,12 @@ namespace external {
 struct parser_options {
   bool is_enabled();
   bool binary;
+  bool binary_to_json;
+  bool multistep;
+  float default_reward;
+  std::string problem_type;
+  std::string reward_function;
+  std::string learning_mode;
 };
 
 int parse_examples(vw *all, v_array<example *> &examples);
@@ -25,7 +31,7 @@ public:
                              input_options &parsed_options);
   virtual ~parser();
   virtual bool parse_examples(vw *all, v_array<example *> &examples) = 0;
-  virtual void persist_metrics(std::vector<std::tuple<std::string, size_t>>& list_metrics);
+  virtual void persist_metrics(std::vector<std::pair<std::string, size_t>>& list_metrics);
 };
 
 } // namespace external
