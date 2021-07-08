@@ -22,11 +22,15 @@ public:
 
   virtual ~example_joiner();
 
-  void set_reward_function(const v2::RewardFunctionType type) override;
-  void set_default_reward(float default_reward) override;
-  void set_learning_mode_config(v2::LearningModeType learning_mode) override;
-  void set_problem_type_config(v2::ProblemType problem_type) override;
+  void set_reward_function(const v2::RewardFunctionType type, bool sticky = false) override;
+  void set_default_reward(float default_reward, bool sticky = false) override;
+  void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky = false) override;
+  void set_problem_type_config(v2::ProblemType problem_type, bool sticky = false) override;
   bool joiner_ready() override;
+
+  float default_reward() const { return _loop_info.default_reward; }
+  v2::LearningModeType learning_mode_config() const { return _loop_info.learning_mode_config; }
+  v2::ProblemType problem_type_config() const { return _loop_info.problem_type_config; }
 
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their
@@ -111,11 +115,10 @@ private:
   vw *_vw;
   flatbuffers::DetachedBuffer _detached_buffer;
 
-  reward::RewardFunctionType _reward_calculation;
+  loop::sticky_value<reward::RewardFunctionType> _reward_calculation;
   loop::loop_info _loop_info;
   metrics::joiner_metrics _joiner_metrics;
 
   bool _binary_to_json;
   std::ofstream _outfile;
-  bool _joiner_ready;
 };

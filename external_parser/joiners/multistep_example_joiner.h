@@ -29,10 +29,10 @@ public:
 
   virtual ~multistep_example_joiner();
 
-  void set_reward_function(const v2::RewardFunctionType type) override;
-  void set_default_reward(float default_reward) override;
-  void set_learning_mode_config(v2::LearningModeType learning_mode) override;
-  void set_problem_type_config(v2::ProblemType problem_type) override;
+  void set_reward_function(const v2::RewardFunctionType type, bool sticky) override;
+  void set_default_reward(float default_reward, bool sticky) override;
+  void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky) override;
+  void set_problem_type_config(v2::ProblemType problem_type, bool sticky) override;
   bool joiner_ready() override;
 
 
@@ -65,7 +65,7 @@ private:
   vw *_vw;
   flatbuffers::DetachedBuffer _detached_buffer;
 
-  reward::RewardFunctionType _reward_calculation;
+  loop::sticky_value<reward::RewardFunctionType> _reward_calculation;
   loop::loop_info _loop_info;
 
   std::unordered_map<std::string, std::vector<Parsed<v2::MultiStepEvent>>>
@@ -79,5 +79,4 @@ private:
   bool _sorted = false;
 
   metrics::joiner_metrics _joiner_metrics;
-  bool _joiner_ready;
 };

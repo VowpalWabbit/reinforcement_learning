@@ -27,10 +27,10 @@ class i_joiner {
 public:
   virtual ~i_joiner() = default;
 
-  virtual void set_reward_function(const v2::RewardFunctionType type) = 0;
-  virtual void set_default_reward(float default_reward) = 0;
-  virtual void set_learning_mode_config(v2::LearningModeType learning_mode) = 0;
-  virtual void set_problem_type_config(v2::ProblemType problem_type) = 0;
+  virtual void set_reward_function(const v2::RewardFunctionType type, bool sticky = false) = 0;
+  virtual void set_default_reward(float default_reward, bool sticky = false) = 0;
+  virtual void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky = false) = 0;
+  virtual void set_problem_type_config(v2::ProblemType problem_type, bool sticky = false) = 0;
 
   /**
    * @brief Tells whether config was provided such that it can start joining examples.
