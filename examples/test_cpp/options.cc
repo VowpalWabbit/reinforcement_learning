@@ -17,7 +17,7 @@ po::variables_map process_cmd_line(const int argc, char** argv) {
       default_value("client.json"), "JSON file with config information for hosted RL loop")
     ("threads,t", po::value<size_t>()->default_value(1), "Number of threads per instance")
     ("examples,n", po::value<size_t>()->default_value(10), "Number of examples per thread")
-	("features,x", po::value<size_t>()->default_value(10), "Features count")
+    ("features,x", po::value<size_t>()->default_value(10), "Features count")
     ("actions,a", po::value<size_t>()->default_value(2), "Number of actions")
     ("experiment_name,e", po::value<std::string>()->required(), "(REQUIRED) experiment name")
     ("float_outcome,f", "if outcome is float (otherwise - json)")
