@@ -31,6 +31,7 @@ static const char *options[] = {
   "ca",
   "f-reward",
   "fi-reward",
+  "fi-out-of-bound-reward",
   "fs-reward",
   "fmix-reward",
   "s-reward",
@@ -52,6 +53,7 @@ enum options{
   // Put interaction actions before F_REWARD
   F_REWARD,
   F_I_REWARD,
+  F_I_OUT_OF_BOUND_REWARD,
   F_S_REWARD,
   F_MIX_REWARD,
   S_REWARD,
@@ -212,6 +214,11 @@ int take_action(r::live_model& rl, const char *event_id, int action, unsigned in
         }
       }
       break;
+    case F_I_OUT_OF_BOUND_REWARD:
+      if (rl.report_outcome(event_id, 1000, 1.5, &status) != err::success) {
+        std::cout << status.get_error_msg() << std::endl;
+      }
+      break;
     case F_S_REWARD: // "float-string"
       {
         size_t num_of_rewards = 4;
@@ -364,7 +371,7 @@ int main(int argc, char *argv[]) {
     ("dedup", "Enable dedup/zstd")
     ("count", po::value<int>(), "Number of events to produce")
     ("seed", po::value<int>(), "Initial seed used to produce event ids")
-    ("kind", po::value<std::string>(), "which kind of example to generate (cb,invalid-cb,ccb,ccb-with-slot-id,ccb-baseline,slates,ca,cb-loop,(f|s)(s|i|mix)?-reward,action-taken)")
+    ("kind", po::value<std::string>(), "which kind of example to generate (cb,invalid-cb,ccb,ccb-with-slot-id,ccb-baseline,slates,ca,cb-loop,(f|s)(s|i|mix|i-out-of-bound)?-reward,action-taken)")
     ("random_reward", "Generate random float reward for observation event")
     ("config_file", po::value<std::string>(), "json config file for rlclinetlib")
     ("apprentice", "Enable apprentice mode for cb event")

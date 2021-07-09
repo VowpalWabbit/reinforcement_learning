@@ -43,6 +43,7 @@ Residing under `reward_functions`
 - fi-reward_v2.fb: `./example_gen --kind fi-reward --random_reward`
 - fs-reward_v2.fb: `./example_gen --kind fs-reward --random_reward`
 - fmix-reward_v2.fb: `./example_gen --kind fmix-reward --random_reward`
+- fi-out-of-bound-reward_v2.fb: `./example_gen --kind fi-out-of-bound-reward`
 
 ### skip learn test files
 

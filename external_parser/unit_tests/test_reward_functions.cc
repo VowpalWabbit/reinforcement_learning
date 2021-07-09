@@ -272,6 +272,22 @@ BOOST_AUTO_TEST_CASE(sum)
   BOOST_CHECK_EQUAL(rewards.at(1), 2 + 2 + 5 + 1);
 }
 
+BOOST_AUTO_TEST_CASE(set_default_reward_to_slot_with_no_matching_outcomes)
+{
+  // This test case is for outcome event slot index out of bound
+  auto rewards = get_float_rewards(
+    "ccb/ccb_v2.fb",
+    "ccb/fi-out-of-bound-reward_v2.fb",
+    v2::RewardFunctionType_Earliest,
+    v2::LearningModeType_Online,
+    v2::ProblemType_CCB
+  );
+
+  BOOST_CHECK_EQUAL(rewards.size(), 2);
+  BOOST_CHECK_EQUAL(rewards.at(0), DEFAULT_REWARD);
+  BOOST_CHECK_EQUAL(rewards.at(1), DEFAULT_REWARD);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(reward_functions_with_ccb_format_with_slot_id)
@@ -299,6 +315,8 @@ BOOST_AUTO_TEST_CASE(median)
 
 BOOST_AUTO_TEST_CASE(set_default_reward_if_slot_has_no_outcome_events)
 {
+  // This test case is for outcome slot id does not match interaction
+  // slot id
   auto rewards = get_float_rewards(
     "ccb/ccb_v2.fb",
     "ccb/fs-reward_v2.fb",
