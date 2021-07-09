@@ -22,6 +22,8 @@
 # Ignore the packages folder
 **/packages
 
+client.json
+
 build
 ext_deps
 /rlclientlib/generated
@@ -32,3 +34,5 @@ ext_deps
 /test_tools/log_parser/reinforcement_learning/
 _build
 .idea
+dist/
+rl_client.egg-info/

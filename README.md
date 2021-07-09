@@ -175,6 +175,5 @@ cmake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\sc
 
 ## Make targets
 - `doc` - Python and C++ docs
-- `_rl_client` - Python bindings
 - `rlclientlib` - rlclient library
 - `rltest` - unit tests
