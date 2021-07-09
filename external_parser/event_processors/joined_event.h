@@ -160,14 +160,7 @@ struct ccb_joined_event : public typed_joined_event {
   }
 
   void set_cost(v_array<example *> &examples, float reward,
-                size_t slot_index = 0) const override {
-    if (examples.size() <= slot_index) {
-      VW::io::logger::log_warn(
-          "trying to set index [{}] when there are [{}] examples", slot_index,
-          examples.size());
-      return;
-    }
-
+                size_t slot_offset = 0) const override {
     size_t index = 0;
     for (auto &example : examples) {
       if (example->l.conditional_contextual_bandit.type !=
@@ -177,19 +170,20 @@ struct ccb_joined_event : public typed_joined_event {
       }
     }
 
-    size_t example_index = index + slot_index;
-    if (example_index >= examples.size()) {
+    size_t slot_example_index = index + slot_offset;
+    if (slot_example_index >= examples.size()) {
       VW::io::logger::log_error(
         "slot index is out of examples range");
+      return;
     }
 
-    if (examples[example_index]->l.conditional_contextual_bandit.type ==
+    if (examples[slot_example_index]->l.conditional_contextual_bandit.type ==
       CCB::example_type::slot) {
-      examples[example_index]->l.conditional_contextual_bandit.outcome->cost =
+      examples[slot_example_index]->l.conditional_contextual_bandit.outcome->cost =
         -1.f * reward;
     } else {
       VW::io::logger::log_warn(
-        "trying to set index [{}] on a CCB non-slot example", index);
+        "trying to set cost on a CCB non-slot example, index: [{}]", slot_example_index);
     }
   }
 };
