@@ -65,7 +65,7 @@ namespace reinforcement_learning { namespace model_management {
     return model_type_t::CB;
   }
 
-  int pdf_model::choose_rank_ms(
+  int pdf_model::choose_rank_multistep(
     uint64_t rnd_seed,
     const char* features,
     const episode_history* history,
