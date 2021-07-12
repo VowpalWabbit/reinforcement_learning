@@ -67,6 +67,7 @@ namespace reinforcement_learning
     live_model_impl& operator=(live_model_impl&&) = delete;
 
     int request_episodic_decision(const char* event_id, const char* previous_id,  const char* context_json, ranking_response& resp, episode_state& episode, api_status* status = nullptr);
+
   private:
     // Internal implementation methods
     int init_model(api_status* status);
