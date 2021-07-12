@@ -174,6 +174,8 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_joiner_ready) {
   joiner.set_problem_type_config(v2::ProblemType_CB);
 
   BOOST_CHECK_EQUAL(joiner.joiner_ready(), true);
+
+  VW::finish(*vw);
 }
 
 BOOST_AUTO_TEST_CASE(example_joiner_test_stickyness) {
@@ -197,4 +199,6 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_stickyness) {
 
   joiner.set_problem_type_config(v2::ProblemType_CB, true);
   BOOST_CHECK_EQUAL(joiner.problem_type_config(), v2::ProblemType_SLATES);
+
+  VW::finish(*vw);
 }

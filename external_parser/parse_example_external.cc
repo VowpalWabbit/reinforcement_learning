@@ -28,7 +28,7 @@ std::array<std::pair<const char *, v2::ProblemType>, 4> const problem_types = {{
 
 bool str_to_problem_type(const std::string &str, v2::ProblemType &type) {
   for(auto p : problem_types) {
-    if(!strcasecmp(p.first, str.c_str())) {
+    if(!_stricmp(p.first, str.c_str())) {
       type = p.second;
       return true;
     }
@@ -48,7 +48,7 @@ std::array<std::pair<const char *, v2::RewardFunctionType>, 6> const reward_func
 
 bool str_to_reward_function(const std::string &str, v2::RewardFunctionType &reward_function) {
   for(auto p : reward_functions) {
-    if(!strcasecmp(p.first, str.c_str())) {
+    if(!_stricmp(p.first, str.c_str())) {
       reward_function = p.second;
       return true;
     }
@@ -65,7 +65,7 @@ std::array<std::pair<const char *, v2::LearningModeType>, 3> const learning_mode
 
 bool str_to_learning_mode(const std::string &str, v2::LearningModeType &mode) {
   for(auto p : learning_modes) {
-    if(!strcasecmp(p.first, str.c_str())) {
+    if(!_stricmp(p.first, str.c_str())) {
       mode = p.second;
       return true;
     }
