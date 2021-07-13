@@ -23,7 +23,7 @@ namespace reinforcement_learning { namespace model_management {
     int request_multi_slot_decision(const char *event_id, const std::vector<std::string>& slot_ids, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status = nullptr) override;
     model_type_t model_type() const override;
 
-    int choose_rank_ms(uint64_t rnd_seed, const char* features, const episode_history* history, std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) override;
+    int choose_rank_multistep(uint64_t rnd_seed, const char* features, const episode_history* history, std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) override;
   private:
     const std::string _initial_command_line;
 	const std::string _upgrade_to_CCB_vw_commandline_options{ "--ccb_explore_adf --json --quiet" };

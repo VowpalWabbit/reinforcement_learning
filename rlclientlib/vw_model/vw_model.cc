@@ -22,7 +22,7 @@ namespace reinforcement_learning { namespace model_management {
       {
         std::unique_ptr<safe_vw> init_vw(new safe_vw(data.data(), data.data_sz()));
 
-        std::unique_ptr<safe_vw_factory> factory;		  
+        std::unique_ptr<safe_vw_factory> factory;
         if (init_vw->is_CB_to_CCB_model_upgrade(_initial_command_line))
         {
           factory.reset(new safe_vw_factory(std::move(data), _upgrade_to_CCB_vw_commandline_options));
@@ -79,7 +79,7 @@ namespace reinforcement_learning { namespace model_management {
     }
   }
 
-  int vw_model::choose_rank_ms(
+  int vw_model::choose_rank_multistep(
     uint64_t rnd_seed,
     const char* features,
     const episode_history* history,

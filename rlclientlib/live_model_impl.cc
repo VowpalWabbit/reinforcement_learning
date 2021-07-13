@@ -53,7 +53,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(init_loggers(status));
 
     if (_protocol_version == 1) {
-      if(_configuration.get_bool("interaction", name::USE_COMPRESSION, false) || 
+      if(_configuration.get_bool("interaction", name::USE_COMPRESSION, false) ||
         _configuration.get_bool("interaction", name::USE_DEDUP, false) ||
         _configuration.get_bool("observation", name::USE_COMPRESSION, false)) {
         RETURN_ERROR_LS(_trace_logger.get(), status, content_encoding_error);
@@ -600,7 +600,7 @@ namespace reinforcement_learning {
     const int depth = history != nullptr ? history->get_depth() : 0;
     const std::string context_patched = R"({"episode":{"depth":)" + std::to_string(depth) + "}," + std::string(context_json + 1);
 
-    RETURN_IF_FAIL(_model->choose_rank_ms(seed, context_patched.c_str(), history, action_ids, action_pdf, model_version, status));
+    RETURN_IF_FAIL(_model->choose_rank_multistep(seed, context_patched.c_str(), history, action_ids, action_pdf, model_version, status));
     RETURN_IF_FAIL(sample_and_populate_response(seed, action_ids, action_pdf, std::move(model_version), resp, _trace_logger.get(), status));
 
     resp.set_event_id(event_id);

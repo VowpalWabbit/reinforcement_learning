@@ -37,6 +37,7 @@ namespace reinforcement_learning
     _initialized = other._initialized;
     return *this;
   }
+
   int live_model::init(api_status* status) {
     if (_initialized)
       return error_code::success;
