@@ -4,6 +4,7 @@
 #include "config_utility.h"
 #include "constants.h"
 #include "live_model.h"
+#include "multistep.h"
 
 #include <exception>
 #include <memory>
@@ -134,8 +135,10 @@ PYBIND11_MODULE(rl_client, m) {
         Container class for all configuration values. Generally is constructed from client.json file read from disk
     )pbdoc")
       .def(py::init<>())
-      .def("get", &rl::utility::configuration::get, py::arg("name"),
-           py::arg("defval"), R"pbdoc(
+      .def("get", &rl::utility::configuration::get,
+           py::arg("name"),
+           py::arg("defval"),
+           R"pbdoc(
         Get a config value or default.
 
         :param name: Name of configuration value to get
@@ -161,7 +164,8 @@ PYBIND11_MODULE(rl_client, m) {
              THROW_IF_FAIL(live_model->init(&status));
              return live_model;
            }),
-           py::arg("config"), py::arg("callback"))
+           py::arg("config"),
+           py::arg("callback"))
       .def(
           "choose_rank",
           [](rl::live_model &lm, const char *context, const char *event_id,
@@ -174,7 +178,9 @@ PYBIND11_MODULE(rl_client, m) {
                 lm.choose_rank(event_id, context, flags, response, &status));
             return response;
           },
-          py::arg("context"), py::arg("event_id"), py::arg("deferred") = false,
+          py::arg("context"),
+          py::arg("event_id"),
+          py::arg("deferred") = false,
           R"pbdoc(
         Request prediction for given context and use the given event_id
 
@@ -184,17 +190,31 @@ PYBIND11_MODULE(rl_client, m) {
           "choose_rank",
           [](rl::live_model &lm, const char *context, bool deferred) {
             rl::ranking_response response;
+            rl::api_status status;
             unsigned int flags = deferred ? rl::action_flags::DEFERRED
                                           : rl::action_flags::DEFAULT;
-            rl::api_status status;
             THROW_IF_FAIL(lm.choose_rank(context, flags, response, &status));
             return response;
           },
-          py::arg("context"), py::arg("deferred") = false, R"pbdoc(
+          py::arg("context"),
+          py::arg("deferred") = false,
+          R"pbdoc(
         Request prediction for given context and let an event id be generated
 
         :rtype: :class:`rl_client.RankingResponse`
     )pbdoc")
+      .def(
+          "request_episodic_decision",
+          [](rl::live_model &lm, const char* event_id, const char* previous_id, const char* context, rl::episode_state& episode) {
+            rl::ranking_response response;
+            rl::api_status status;
+            THROW_IF_FAIL(lm.request_episodic_decision(event_id, previous_id, context, response, episode, &status));
+            return response;
+          },
+          py::arg("event_id"),
+          py::arg("previous_id"),
+          py::arg("context"),
+          py::arg("episode"))
       .def(
           "report_action_taken",
           [](rl::live_model &lm, const char *event_id) {
@@ -208,14 +228,25 @@ PYBIND11_MODULE(rl_client, m) {
             rl::api_status status;
             THROW_IF_FAIL(lm.report_outcome(event_id, outcome, &status));
           },
-          py::arg("event_id"), py::arg("outcome"))
+          py::arg("event_id"),
+          py::arg("outcome"))
       .def(
           "report_outcome",
           [](rl::live_model &lm, const char *event_id, float outcome) {
             rl::api_status status;
             THROW_IF_FAIL(lm.report_outcome(event_id, outcome, &status));
           },
-          py::arg("event_id"), py::arg("outcome"))
+          py::arg("event_id"),
+          py::arg("outcome"))
+      .def(
+          "report_outcome",
+          [](rl::live_model &lm, const char *episode_id, const char *event_id, float outcome) {
+            rl::api_status status;
+            THROW_IF_FAIL(lm.report_outcome(episode_id, event_id, outcome, &status));
+          },
+          py::arg("episode_id"),
+          py::arg("event_id"),
+          py::arg("outcome"))
       .def("refresh_model", [](rl::live_model &lm) {
         rl::api_status status;
         THROW_IF_FAIL(lm.refresh_model(&status));
@@ -266,6 +297,15 @@ PYBIND11_MODULE(rl_client, m) {
 
             :rtype: list[(int,float)]
     )pbdoc");
+
+  // TODO: Expose episode history API.
+  py::class_<rl::episode_state>(m, "EpisodeState")
+      .def(py::init<const char *>())
+      .def_property_readonly(
+          "episode_id",
+          [](const rl::episode_state &episode) {
+            return episode.get_episode_id();
+          });
 
   m.def(
       "create_config_from_json",
