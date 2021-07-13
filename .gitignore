@@ -22,8 +22,6 @@
 # Ignore the packages folder
 **/packages
 
-client.json
-
 build
 ext_deps
 /rlclientlib/generated
