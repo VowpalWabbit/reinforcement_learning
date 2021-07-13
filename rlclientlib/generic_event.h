@@ -20,8 +20,8 @@ namespace reinforcement_learning {
     using object_list_t = std::vector<object_id_t>;
 
     generic_event() = default;
-    generic_event(const char* id, const timestamp& ts, payload_type_t type, payload_buffer_t&& payload, event_content_type content_type, object_list_t &&objects, float pass_prob = 1.f);
-    generic_event(const char* id, const timestamp& ts, payload_type_t type, payload_buffer_t&& payload, event_content_type content_type, float pass_prob = 1.f);
+    generic_event(const char* id, const timestamp& ts, payload_type_t type, payload_buffer_t&& payload, event_content_type content_type, object_list_t &&objects, const char* app_id, float pass_prob = 1.f);
+    generic_event(const char* id, const timestamp& ts, payload_type_t type, payload_buffer_t&& payload, event_content_type content_type, const char* app_id, float pass_prob = 1.f);
 
     generic_event(const generic_event&) = delete;
     generic_event& operator=(const generic_event&) = delete;
@@ -37,6 +37,8 @@ namespace reinforcement_learning {
     const object_list_t& get_object_list() const;
 
     const char* get_id() const;
+
+    const char* get_app_id() const;
 
     payload_type_t get_payload_type() const;
 
@@ -54,5 +56,6 @@ namespace reinforcement_learning {
     object_list_t _objects;
     float _pass_prob = 1.0;
     event_content_type _content_type;
+    std::string _app_id;
   };
 }

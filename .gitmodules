@@ -6,3 +6,7 @@
 	path = ext_libs/zstd
 	url = https://github.com/facebook/zstd.git
 	branch = master
+[submodule "ext_libs/pybind11"]
+	path = ext_libs/pybind11
+	url = ../../pybind/pybind11
+	branch = stable
