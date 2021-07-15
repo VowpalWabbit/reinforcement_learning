@@ -32,9 +32,18 @@ Residing under `invalid_joined_logs`
 
 Residing under `reward_functions`
 
+#### cb format
 - cb_v2.fb: `./example_gen --kind cb --count 1 --seed -1`
 - cb_apprentice_match_baseline_v2.fb: `./example_gen --kind cb --seed -1 --apprentice`
 - f-reward_3obs_v2.fb: `./example_gen --kind f-reward --count 3 --seed -1 --random_reward`
+
+#### ccb format
+- ccb_v2.fb: `./example_gen --kind ccb --count 1`
+- ccb-with-slot-id_v2.fb: `./example_gen --kind ccb-with-slot-id`
+- fi-reward_v2.fb: `./example_gen --kind fi-reward --random_reward`
+- fs-reward_v2.fb: `./example_gen --kind fs-reward --random_reward`
+- fmix-reward_v2.fb: `./example_gen --kind fmix-reward --random_reward`
+- fi-out-of-bound-reward_v2.fb: `./example_gen --kind fi-out-of-bound-reward`
 
 ### skip learn test files
 

@@ -153,7 +153,7 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
                         v2::LearningModeType::LearningModeType_Online};
 
   auto cb_data = VW::make_unique<joined_event::cb_joined_event>();
-  
+
   cb_data->interaction_data.eventId = event.event_id()->str();
   cb_data->interaction_data.actions = {event.action_ids()->data(),
                   event.action_ids()->data() + event.action_ids()->size()};
@@ -208,7 +208,7 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
   for (const auto& o: _episodic_outcomes) {
     joined.outcome_events.push_back(process_outcome(o));
   }
-  const auto reward = _reward_calculation(joined);
+  const auto reward = _reward_calculation(joined.outcome_events);
   try_set_label(joined, reward, examples);
 
   // add an empty example to signal end-of-multiline
