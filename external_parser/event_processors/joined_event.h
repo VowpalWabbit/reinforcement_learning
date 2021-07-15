@@ -1,9 +1,6 @@
 #pragma once
 
-// FileFormat_generated.h used for the payload type and encoding enum's
-#include "generated/v2/FileFormat_generated.h"
-
-#include "event_processors/timestamp_helper.h"
+#include "reward.h"
 // VW headers
 // vw.h has to come before json_utils.h
 // clang-format off
@@ -17,26 +14,6 @@ namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 namespace joined_event {
 
-struct metadata_info {
-  TimePoint client_time_utc;
-  std::string app_id;
-  v2::PayloadType payload_type;
-  float pass_probability;
-  v2::EventEncoding event_encoding;
-  std::string event_id;
-  v2::LearningModeType learning_mode;
-};
-
-struct outcome_event {
-  metadata_info metadata;
-  std::string s_index;
-  int index;
-  std::string s_value;
-  float value;
-  TimePoint enqueued_time_utc;
-  bool action_taken;
-};
-
 struct typed_joined_event {
   virtual ~typed_joined_event() = default;
   virtual bool is_skip_learn() const = 0;
@@ -45,6 +22,13 @@ struct typed_joined_event {
   virtual void fill_in_label(v_array<example *> &examples) const = 0;
   virtual void set_cost(v_array<example *> &examples, float reward,
                         size_t index = 0) const = 0;
+  virtual void
+  calc_and_set_cost(v_array<example *> &examples, float default_reward,
+                    reward::RewardFunctionType reward_function,
+                    const metadata::event_metadata_info &interaction_metadata,
+                    // TODO outcome_events should also idealy be const here but
+                    // we currently need it for ccb calculation
+                    std::vector<reward::outcome_event> &outcome_events) = 0;
 };
 
 struct cb_joined_event : public typed_joined_event {
@@ -52,6 +36,8 @@ struct cb_joined_event : public typed_joined_event {
   // Default Baseline Action for CB is 1 (rl client recommended actions are 1
   // indexed in the CB case)
   static const int baseline_action = 1;
+  float reward = 0.0f;
+  float original_reward = 0.0f;
 
   ~cb_joined_event() = default;
 
@@ -109,6 +95,43 @@ struct cb_joined_event : public typed_joined_event {
       return;
     }
     examples[index]->l.cb.costs[0].cost = -1.f * reward;
+  }
+
+  bool should_calculate_reward(
+      const std::vector<reward::outcome_event> &outcome_events) {
+    return outcome_events.size() > 0 &&
+           std::any_of(outcome_events.begin(), outcome_events.end(),
+                       [](const reward::outcome_event &o) {
+                         return o.action_taken != true;
+                       });
+  }
+
+  void calc_and_set_cost(
+      v_array<example *> &examples, float default_reward,
+      reward::RewardFunctionType reward_function,
+      const metadata::event_metadata_info &interaction_metadata,
+      std::vector<reward::outcome_event> &outcome_events) override {
+    reward = default_reward;
+    // original reward is used to record the observed reward of apprentice mode
+    original_reward = default_reward;
+
+    if (should_calculate_reward(outcome_events)) {
+      original_reward = reward_function(outcome_events);
+
+      if (interaction_metadata.learning_mode ==
+          v2::LearningModeType_Apprentice) {
+        if (should_calculate_apprentice_reward()) {
+          // je.interaction_data.actions[0] == je.baseline_action
+          // TODO: default apprenticeReward should come from config
+          // setting to default reward matches current behavior for now
+          reward = original_reward;
+        }
+      } else {
+        reward = original_reward;
+      }
+    }
+
+    set_cost(examples, reward);
   }
 };
 
@@ -172,25 +195,71 @@ struct ccb_joined_event : public typed_joined_event {
 
     size_t slot_example_index = index + slot_offset;
     if (slot_example_index >= examples.size()) {
-      VW::io::logger::log_error(
-        "slot index is out of examples range");
+      VW::io::logger::log_error("slot index is out of examples range");
       return;
     }
 
     if (examples[slot_example_index]->l.conditional_contextual_bandit.type ==
-      CCB::example_type::slot) {
-      examples[slot_example_index]->l.conditional_contextual_bandit.outcome->cost =
-        -1.f * reward;
+        CCB::example_type::slot) {
+      examples[slot_example_index]
+          ->l.conditional_contextual_bandit.outcome->cost = -1.f * reward;
     } else {
       VW::io::logger::log_warn(
-        "trying to set cost on a CCB non-slot example, index: [{}]", slot_example_index);
+          "trying to set cost on a CCB non-slot example, index: [{}]",
+          slot_example_index);
+    }
+  }
+
+  void calc_and_set_cost(
+      v_array<example *> &examples, float default_reward,
+      reward::RewardFunctionType reward_function,
+      const metadata::event_metadata_info &,
+      std::vector<reward::outcome_event> &outcome_events) override {
+
+    if (slot_id_to_index_map.size() > 0) {
+      for (auto &outcome : outcome_events) {
+        if (!outcome.s_index.empty()) {
+          auto iterator = slot_id_to_index_map.find(outcome.s_index);
+          if (iterator != slot_id_to_index_map.end()) {
+            outcome.index = iterator->second;
+            outcome.s_index = "";
+          } else {
+            VW::io::logger::log_warn("CCB outcome event with slot id: [{}] "
+                                     "has no matching interaction slot event.",
+                                     outcome.s_index);
+          }
+        }
+      }
+    }
+
+    std::map<int, std::vector<reward::outcome_event>> outcomes_map;
+    for (auto &o : outcome_events) {
+      if (o.s_index.empty()) {
+        if (outcomes_map.find(o.index) == outcomes_map.end()) {
+          outcomes_map.insert({o.index, {}});
+        }
+
+        outcomes_map[o.index].emplace_back(o);
+      }
+    }
+
+    for (auto &slot : outcomes_map) {
+      float reward = reward_function(slot.second);
+      set_cost(examples, reward, slot.first);
+    }
+
+    for (size_t i = 0; i < interaction_data.size(); i++) {
+      if (!outcomes_map.count(i)) {
+        set_cost(examples, default_reward, i);
+      }
     }
   }
 };
 
 struct joined_event {
-  joined_event(TimePoint &&tp, metadata_info &&mi, std::string &&ctx,
-               std::string &&mid, std::unique_ptr<typed_joined_event> &&data)
+  joined_event(TimePoint &&tp, metadata::event_metadata_info &&mi,
+               std::string &&ctx, std::string &&mid,
+               std::unique_ptr<typed_joined_event> &&data)
       : joined_event_timestamp(std::move(tp)),
         interaction_metadata(std::move(mi)), context(std::move(ctx)),
         model_id(std::move(mid)), typed_data(std::move(data)),
@@ -198,11 +267,11 @@ struct joined_event {
   joined_event() : ok(true) {}
 
   TimePoint joined_event_timestamp;
-  metadata_info interaction_metadata;
+  metadata::event_metadata_info interaction_metadata;
   std::string context;
   std::string model_id;
   std::unique_ptr<typed_joined_event> typed_data;
-  std::vector<outcome_event> outcome_events;
+  std::vector<reward::outcome_event> outcome_events;
   bool ok; // ok till proved otherwise
 
   const typed_joined_event *get_hold_of_typed_data() const {
@@ -222,7 +291,7 @@ struct joined_event {
     typed_data->set_cost(examples, reward, index);
   }
 
-  bool is_joined_event_learnable() {
+  bool is_joined_event_learnable() const {
     bool deferred_action = typed_data->is_skip_learn();
 
     if (!deferred_action) {
@@ -231,7 +300,7 @@ struct joined_event {
 
     bool outcome_activated = std::any_of(
         outcome_events.begin(), outcome_events.end(),
-        [](const outcome_event &o) { return o.action_taken == true; });
+        [](const reward::outcome_event &o) { return o.action_taken == true; });
 
     if (outcome_activated) {
       typed_data->set_skip_learn(false);
@@ -241,34 +310,10 @@ struct joined_event {
     }
   }
 
-  bool should_calculate_reward() {
-    return outcome_events.size() > 0 &&
-           std::any_of(
-               outcome_events.begin(), outcome_events.end(),
-               [](const outcome_event &o) { return o.action_taken != true; });
-  }
-
-  void convert_outcome_slot_id_to_index() {
-    const auto &ccb = reinterpret_cast<const ccb_joined_event *>(get_hold_of_typed_data());
-    const auto &id_map = ccb->slot_id_to_index_map;
-
-    if (id_map.size() > 0) {
-      for (auto &outcome : outcome_events) {
-        if (!outcome.s_index.empty()) {
-          auto iterator = id_map.find(outcome.s_index);
-          if (iterator != id_map.end()) {
-            outcome.index = iterator->second;
-            outcome.s_index = "";
-          } else {
-            VW::io::logger::log_warn(
-              "CCB outcome event with slot id: [{}] "
-              "has no matching interaction slot event.",
-              outcome.s_index
-            );
-          }
-        }
-      }
-    }
+  void calc_and_set_reward(v_array<example *> &examples, float default_reward,
+                           reward::RewardFunctionType reward_function) {
+    typed_data->calc_and_set_cost(examples, default_reward, reward_function,
+                                  interaction_metadata, outcome_events);
   }
 };
 } // namespace joined_event
