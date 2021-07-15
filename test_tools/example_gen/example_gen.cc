@@ -39,6 +39,7 @@ static const char *options[] = {
   "ss-reward",
   "action-taken",
   "cb-loop",
+  "ccb-loop",
   nullptr
 };
 
@@ -60,7 +61,8 @@ enum options{
   S_I_REWARD,
   S_S_REWARD,
   ACTION_TAKEN,
-  CB_LOOP
+  CB_LOOP,
+  CCB_LOOP
 };
 
 void load_config_from_json(int action, u::configuration& config, bool enable_apprentice_mode)
@@ -94,7 +96,7 @@ void load_config_from_json(int action, u::configuration& config, bool enable_app
     config.set(nm::INTERACTION_USE_COMPRESSION, "true");
   }
 
-  if(action == CCB_ACTION || action == CCB_BASELINE_ACTION || action == CCB_WITH_SLOT_ID_ACTION) {
+  if(action == CCB_ACTION || action == CCB_BASELINE_ACTION || action == CCB_WITH_SLOT_ID_ACTION || action == CCB_LOOP) {
     config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
   } else if (action == SLATES_ACTION) {
     config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--slates --ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
@@ -296,6 +298,101 @@ int take_action(r::live_model& rl, const char *event_id, int action, unsigned in
       }
       break;
     };
+    case CCB_LOOP: { // "ccb action and random number of float rewards and mix of slot ids / non slot ids / float / string rewards"
+      // randomly decide to send either ccb with slot id's provided or random slot id's
+      // the ccb interactions that are non-random are the ones we can use to send observations for the slot id using the slot-id string
+      size_t rand_number = get_random_number(rng, /*min*/ 0);
+      if (rand_number % 2)
+      {
+        r::multi_slot_response response;
+        if(rl.request_multi_slot_decision(event_id, JSON_CCB_CONTEXT, action_flag, response, &status) != err::success)
+            std::cout << status.get_error_msg() << std::endl;
+      }
+      else
+      {
+        r::multi_slot_response response;
+        if(rl.request_multi_slot_decision(event_id, JSON_CCB_WITH_SLOT_ID_CONTEXT, action_flag, response, &status) != err::success)
+            std::cout << status.get_error_msg() << std::endl;
+      }
+
+      // use random number to decide whether these rewards should be int-only, string-only, mix-int-string or out-of-bounds
+      rand_number = get_random_number(rng,  /*min*/ 0); // max rnd number is 5
+      switch (rand_number) {
+        case 1: { // fi-reward
+          size_t num_of_rewards = get_random_number(rng, /*min*/ 2);
+          for (size_t i = 0; i < num_of_rewards; i++)
+          {
+            float reward_0 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
+            float reward_1 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
+
+            if (rl.report_outcome(event_id, 0, reward_0, &status) != err::success) {
+              std::cout << status.get_error_msg() << std::endl;
+            }
+            if( rl.report_outcome(event_id, 1, reward_1, &status) != err::success ) {
+              std::cout << status.get_error_msg() << std::endl;
+            }
+          }
+          break;
+        };
+
+        case 2: { // fs-reward
+          size_t num_of_rewards = get_random_number(rng, /*min*/ 2);
+          for (size_t i = 0; i < num_of_rewards; i++)
+          {
+            float reward_0 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
+            float reward_1 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
+
+            if (rl.report_outcome(event_id, "slot_0", reward_0, &status) != err::success) {
+              std::cout << status.get_error_msg() << std::endl;
+            }
+            if( rl.report_outcome(event_id, "slot_1", reward_1, &status) != err::success ) {
+              std::cout << status.get_error_msg() << std::endl;
+            }
+          }
+          break;
+        };
+
+        case 3: { // fmix-reward
+          std::vector<std::string> slot_ids {"slot_0", "slot_1"};
+          size_t num_of_rewards = 2;
+
+          for (size_t i = 0; i < slot_ids.size(); i++) {
+            for (size_t j = 0; j < num_of_rewards; j++) {
+              float reward_0 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
+              float reward_1 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
+
+              if (rl.report_outcome(event_id, i, reward_0, &status) != err::success) {
+                std::cout << status.get_error_msg() << std::endl;
+              }
+
+              if (rl.report_outcome(event_id, slot_ids[i].c_str(), reward_1, &status) != err::success) {
+                std::cout << status.get_error_msg() << std::endl;
+              }
+            }
+          }
+          break;
+        };
+
+        case 4: { // fi-out-of-bound
+          if (rl.report_outcome(event_id, 1000, 1.5, &status) != err::success) {
+            std::cout << status.get_error_msg() << std::endl;
+          }
+          break;
+        };
+
+        default:
+        {
+          break;
+        };
+
+      }
+      float reward = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
+      std::cout << "report outcome: " << reward << " for event: " << event_id << std::endl;
+      if( rl.report_outcome(event_id, reward, &status) != err::success )
+          std::cout << status.get_error_msg() << std::endl;
+    
+      break;
+    };
 
     default:
       std::cout << "Invalid action " << action << std::endl;
@@ -371,7 +468,7 @@ int main(int argc, char *argv[]) {
     ("dedup", "Enable dedup/zstd")
     ("count", po::value<int>(), "Number of events to produce")
     ("seed", po::value<int>(), "Initial seed used to produce event ids")
-    ("kind", po::value<std::string>(), "which kind of example to generate (cb,invalid-cb,ccb,ccb-with-slot-id,ccb-baseline,slates,ca,cb-loop,(f|s)(s|i|mix|i-out-of-bound)?-reward,action-taken)")
+    ("kind", po::value<std::string>(), "which kind of example to generate (cb,invalid-cb,ccb,ccb-with-slot-id,ccb-baseline,slates,ca,cb-loop,ccb-loop,(f|s)(s|i|mix|i-out-of-bound)?-reward,action-taken)")
     ("random_reward", "Generate random float reward for observation event")
     ("config_file", po::value<std::string>(), "json config file for rlclinetlib")
     ("apprentice", "Enable apprentice mode for cb event")
