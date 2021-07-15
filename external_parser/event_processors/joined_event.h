@@ -121,7 +121,6 @@ struct cb_joined_event : public typed_joined_event {
       if (interaction_metadata.learning_mode ==
           v2::LearningModeType_Apprentice) {
         if (should_calculate_apprentice_reward()) {
-          // je.interaction_data.actions[0] == je.baseline_action
           // TODO: default apprenticeReward should come from config
           // setting to default reward matches current behavior for now
           reward = original_reward;
