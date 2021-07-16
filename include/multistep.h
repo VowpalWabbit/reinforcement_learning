@@ -24,12 +24,14 @@ namespace reinforcement_learning {
     episode_history(episode_history&& other) = default;
     episode_history& operator=(episode_history&& other) = default;
 
-    int get_depth() const;
+    void update(const char* event_id, const char* previous_event_id, const char* context, const ranking_response& resp);
+    std::string get_context(const char* previous_event_id, const char* context) const;
 
   private:
-    const episode_history* const _previous {nullptr};
+    int get_depth(const char* id) const;
 
-    int _depth{ 0 };
+  private:
+    std::map<std::string, int> _depths;
   };
 
   class episode_state {
@@ -43,14 +45,14 @@ namespace reinforcement_learning {
     episode_state& operator=(episode_state&& other) = default;
 
     const char* get_episode_id() const;
-    const episode_history* get_history(const char* previous_event_id) const;
+    const episode_history& get_history() const;
 
-    int update(const char* previous_event_id, const char* context, const ranking_response& response, api_status* error = nullptr);
+    int update(const char* event_id, const char* previous_event_id, const char* context, const ranking_response& response, api_status* error = nullptr);
 
   private:
     const std::string _episode_id;
-
-    std::map<std::string, std::unique_ptr<episode_history>> _history;
+    
+    episode_history _history;
   };
 
 }

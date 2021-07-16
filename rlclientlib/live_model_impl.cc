@@ -596,16 +596,15 @@ namespace reinforcement_learning {
     std::string model_version;
 
     //todo:fix
-    const auto history = episode.get_history(previous_id);
-    const int depth = history != nullptr ? history->get_depth() : 0;
-    const std::string context_patched = R"({"episode":{"depth":)" + std::to_string(depth) + "}," + std::string(context_json + 1);
+    const auto history = episode.get_history();
+    const std::string context_patched = history.get_context(previous_id, context_json);
 
-    RETURN_IF_FAIL(_model->choose_rank_multistep(seed, context_patched.c_str(), history, action_ids, action_pdf, model_version, status));
+    RETURN_IF_FAIL(_model->choose_rank_multistep(seed, context_patched.c_str(), &history, action_ids, action_pdf, model_version, status));
     RETURN_IF_FAIL(sample_and_populate_response(seed, action_ids, action_pdf, std::move(model_version), resp, _trace_logger.get(), status));
 
     resp.set_event_id(event_id);
 
-    RETURN_IF_FAIL(episode.update(previous_id, context_json, resp, status));
+    RETURN_IF_FAIL(episode.update(event_id, previous_id, context_json, resp, status));
     RETURN_IF_FAIL(_interaction_logger->log(episode.get_episode_id(), previous_id, context_patched.c_str(), resp, status));
     return error_code::success;
   }
