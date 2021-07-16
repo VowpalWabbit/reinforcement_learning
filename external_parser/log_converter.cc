@@ -2,35 +2,42 @@
 #include "date.h"
 
 namespace log_converter {
-void build_cb_json(std::ofstream &outfile, const joined_event::joined_event &je,
-                   float reward, float original_reward, bool skip_learn) {
+void build_cb_json(std::ofstream &outfile,
+                   const joined_event::joined_event &je) {
   namespace rj = rapidjson;
 
-  float cost = -1.f * reward;
-  float original_cost = -1.f * original_reward;
+  float cost = -1.f * reinterpret_cast<const joined_event::cb_joined_event *>(
+                          je.get_hold_of_typed_data())
+                          ->reward;
+  float original_cost =
+      -1.f * reinterpret_cast<const joined_event::cb_joined_event *>(
+                 je.get_hold_of_typed_data())
+                 ->original_reward;
   const auto &interaction_data =
       reinterpret_cast<const joined_event::cb_joined_event *>(
           je.get_hold_of_typed_data())
           ->interaction_data;
-  const auto& probabilities = interaction_data.probabilities;
-  const auto& actions = interaction_data.actions;
+  const auto &probabilities = interaction_data.probabilities;
+  const auto &actions = interaction_data.actions;
 
   try {
     rj::Document d;
     d.SetObject();
-    rj::Document::AllocatorType& allocator = d.GetAllocator();
+    rj::Document::AllocatorType &allocator = d.GetAllocator();
 
     d.AddMember("_label_cost", cost, allocator);
 
-    float label_p = probabilities.size() > 0
-      ? probabilities[0] * je.interaction_metadata.pass_probability
-      : 0.f;
+    float label_p =
+        probabilities.size() > 0
+            ? probabilities[0] * je.interaction_metadata.pass_probability
+            : 0.f;
     d.AddMember("_label_probability", label_p, allocator);
 
     d.AddMember("_label_Action", actions[0], allocator);
 
     d.AddMember("_labelIndex", actions[0] - 1, allocator);
 
+    bool skip_learn = !je.is_joined_event_learnable();
     if (skip_learn) {
       d.AddMember("_skipLearn", skip_learn, allocator);
     }
@@ -51,8 +58,9 @@ void build_cb_json(std::ofstream &outfile, const joined_event::joined_event &je,
     }
     d.AddMember("o", outcome_arr, allocator);
 
-    std::string ts_str = date::format("%F %T %Z",
-      date::floor<std::chrono::milliseconds>(je.joined_event_timestamp));
+    std::string ts_str = date::format(
+        "%F %T %Z",
+        date::floor<std::chrono::milliseconds>(je.joined_event_timestamp));
     v.SetString(ts_str.c_str(), allocator);
     d.AddMember("Timestamp", v, allocator);
 
@@ -92,12 +100,10 @@ void build_cb_json(std::ofstream &outfile, const joined_event::joined_event &je,
     d.Accept(writer);
 
     outfile << sb.GetString() << std::endl;
-  }
-  catch (const std::exception& e) {
+  } catch (const std::exception &e) {
     VW::io::logger::log_error(
-      "convert events: [{}] from binary to json format failed: [{}].",
-      interaction_data.eventId, e.what()
-    );
+        "convert events: [{}] from binary to json format failed: [{}].",
+        interaction_data.eventId, e.what());
   }
 }
 } // namespace log_converter

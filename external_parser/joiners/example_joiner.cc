@@ -110,7 +110,8 @@ void example_joiner::set_learning_mode_config(
   _loop_info.learning_mode_config.set(learning_mode, sticky);
 }
 
-void example_joiner::set_problem_type_config(v2::ProblemType problem_type, bool sticky) {
+void example_joiner::set_problem_type_config(v2::ProblemType problem_type,
+                                             bool sticky) {
   _loop_info.problem_type_config.set(problem_type, sticky);
 }
 
@@ -118,7 +119,8 @@ bool example_joiner::joiner_ready() {
   return _loop_info.is_configured() && _reward_calculation.is_valid();
 }
 
-void example_joiner::set_reward_function(const v2::RewardFunctionType type, bool sticky) {
+void example_joiner::set_reward_function(const v2::RewardFunctionType type,
+                                         bool sticky) {
 
   reward::RewardFunctionType reward_calculation = nullptr;
   switch (type) {
@@ -148,8 +150,8 @@ void example_joiner::set_reward_function(const v2::RewardFunctionType type, bool
   default:
     break;
   }
-  
-  if(reward_calculation) {
+
+  if (reward_calculation) {
     _reward_calculation.set(reward_calculation, sticky);
   }
 }
@@ -288,7 +290,7 @@ bool example_joiner::process_interaction(const v2::Event &event,
 bool example_joiner::process_outcome(const v2::Event &event,
                                      const v2::Metadata &metadata,
                                      const TimePoint &enqueued_time_utc) {
-  joined_event::outcome_event o_event;
+  reward::outcome_event o_event;
   o_event.metadata = {metadata.client_time_utc()
                           ? timestamp_to_chrono(*metadata.client_time_utc())
                           : TimePoint(),
@@ -442,72 +444,26 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   je.fill_in_label(examples);
 
   if (je.interaction_metadata.payload_type == v2::PayloadType_CB) {
-    float reward = _loop_info.default_reward;
-    // original reward is used to record the observed reward of apprentice mode
-    float original_reward = _loop_info.default_reward;
-
-    if (je.should_calculate_reward()) {
-      original_reward = _reward_calculation(je.outcome_events);
-
-      if (je.interaction_metadata.learning_mode ==
-        v2::LearningModeType_Apprentice) {
-        if (je.should_calculate_apprentice_reward()) {
-          // je.interaction_data.actions[0] == je.baseline_action
-          // TODO: default apprenticeReward should come from config
-          // setting to default reward matches current behavior for now
-          reward = original_reward;
-        }
-      } else {
-        reward = original_reward;
-      }
-    }
-
-    je.set_cost(examples, reward);
-
-    bool skip_learn = !je.is_joined_event_learnable();
+    je.calc_and_set_reward(examples, _loop_info.default_reward,
+                           _reward_calculation.value());
 
     if (_binary_to_json) {
-      log_converter::build_cb_json(_outfile, je, reward, original_reward,
-                                   skip_learn);
+      log_converter::build_cb_json(_outfile, je);
 
       clear_event_id_batch_info(id);
       clear_vw_examples(examples);
       return true;
     }
 
-    if (skip_learn) {
+    if (!je.is_joined_event_learnable()) {
       _joiner_metrics.number_of_skipped_events++;
       clear_event_id_batch_info(id);
       clear_vw_examples(examples);
       return true;
     }
   } else if (je.interaction_metadata.payload_type == v2::PayloadType_CCB) {
-    float default_reward = _loop_info.default_reward;
-    je.convert_outcome_slot_id_to_index();
-    std::map<int, std::vector<joined_event::outcome_event>> outcomes_map;
-    for (auto &o : je.outcome_events) {
-      if (o.s_index.empty()) {
-        if (outcomes_map.find(o.index) == outcomes_map.end()) {
-          outcomes_map.insert({o.index, {}});
-        }
-
-        outcomes_map[o.index].emplace_back(o);
-      }
-    }
-
-    for (auto &slot : outcomes_map) {
-      float reward = _reward_calculation(slot.second);
-      je.set_cost(examples, reward, slot.first);
-    }
-
-    const auto &ccb = reinterpret_cast<const joined_event::ccb_joined_event *>(
-      je.get_hold_of_typed_data());
-
-    for (size_t i = 0; i < ccb->interaction_data.size(); i++) {
-      if (!outcomes_map.count(i)) {
-        je.set_cost(examples, default_reward, i);
-      }
-    }
+    je.calc_and_set_reward(examples, _loop_info.default_reward,
+                           _reward_calculation.value());
   }
 
   _joiner_metrics.number_of_learned_events++;

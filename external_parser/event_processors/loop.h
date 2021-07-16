@@ -9,9 +9,9 @@ namespace loop {
 
 template<typename T>
 class sticky_value {
-  T _value;
   bool _sticky; // once a value is set to sticky, it cannot be changed by further calls to set
   bool _set;
+  T _value;
 public:
   sticky_value() : _sticky(false), _set(false), _value() {}
   explicit sticky_value(T value) : _sticky(false), _set(true), _value(value) {}

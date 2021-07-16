@@ -1,14 +1,24 @@
 #pragma once
 
-#include "joined_event.h"
-
-namespace v2 = reinforcement_learning::messages::flatbuff::v2;
+#include "metadata.h"
 
 namespace reward {
+  
+struct outcome_event {
+  metadata::event_metadata_info metadata;
+  std::string s_index;
+  int index;
+  std::string s_value;
+  float value;
+  TimePoint enqueued_time_utc;
+  bool action_taken;
+};
 
-using RewardFunctionType = float (*)(const std::vector<joined_event::outcome_event> &);
+using RewardFunctionType =
+    float (*)(const std::vector<outcome_event> &);
 
-inline float average(const std::vector<joined_event::outcome_event> &outcome_events) {
+inline float
+average(const std::vector<outcome_event> &outcome_events) {
   float sum = 0.f;
   for (const auto &o : outcome_events) {
     sum += o.value;
@@ -17,7 +27,8 @@ inline float average(const std::vector<joined_event::outcome_event> &outcome_eve
   return sum / outcome_events.size();
 }
 
-inline float sum(const std::vector<joined_event::outcome_event> &outcome_events) {
+inline float
+sum(const std::vector<outcome_event> &outcome_events) {
   float sum = 0.f;
   for (const auto &o : outcome_events) {
     sum += o.value;
@@ -26,7 +37,8 @@ inline float sum(const std::vector<joined_event::outcome_event> &outcome_events)
   return sum;
 }
 
-inline float min(const std::vector<joined_event::outcome_event> &outcome_events) {
+inline float
+min(const std::vector<outcome_event> &outcome_events) {
   float min_reward = std::numeric_limits<float>::max();
   for (const auto &o : outcome_events) {
     if (o.value < min_reward) {
@@ -36,7 +48,8 @@ inline float min(const std::vector<joined_event::outcome_event> &outcome_events)
   return min_reward;
 }
 
-inline float max(const std::vector<joined_event::outcome_event> &outcome_events) {
+inline float
+max(const std::vector<outcome_event> &outcome_events) {
   float max_reward = std::numeric_limits<float>::min();
   for (const auto &o : outcome_events) {
     if (o.value > max_reward) {
@@ -46,7 +59,8 @@ inline float max(const std::vector<joined_event::outcome_event> &outcome_events)
   return max_reward;
 }
 
-inline float median(const std::vector<joined_event::outcome_event> &outcome_events) {
+inline float
+median(const std::vector<outcome_event> &outcome_events) {
   std::vector<float> values;
   for (const auto &o : outcome_events) {
     values.push_back(o.value);
@@ -64,7 +78,8 @@ inline float median(const std::vector<joined_event::outcome_event> &outcome_even
   }
 }
 
-inline float earliest(const std::vector<joined_event::outcome_event> &outcome_events) {
+inline float
+earliest(const std::vector<outcome_event> &outcome_events) {
   auto oldest_valid_observation = TimePoint::max();
   float earliest_reward = 0.f;
 
