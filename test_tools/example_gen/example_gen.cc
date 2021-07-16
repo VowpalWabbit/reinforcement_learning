@@ -302,6 +302,7 @@ int take_action(r::live_model& rl, const char *event_id, int action, unsigned in
       // randomly decide to send either ccb with slot id's provided or random slot id's
       // the ccb interactions that are non-random are the ones we can use to send observations for the slot id using the slot-id string
       size_t rand_number = get_random_number(rng, /*min*/ 0);
+      std::cout << "request multi-slot decision for event: " << event_id << std::endl;
       if (rand_number % 2)
       {
         r::multi_slot_response response;
@@ -325,9 +326,11 @@ int take_action(r::live_model& rl, const char *event_id, int action, unsigned in
             float reward_0 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
             float reward_1 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
 
+            std::cout << "report outcome: " << reward_0 << " for event: " << event_id << " for slot index: " << 0 << std::endl;
             if (rl.report_outcome(event_id, 0, reward_0, &status) != err::success) {
               std::cout << status.get_error_msg() << std::endl;
             }
+            std::cout << "report outcome: " << reward_1 << " for event: " << event_id << " for slot index: " << 1 << std::endl;
             if( rl.report_outcome(event_id, 1, reward_1, &status) != err::success ) {
               std::cout << status.get_error_msg() << std::endl;
             }
@@ -342,9 +345,11 @@ int take_action(r::live_model& rl, const char *event_id, int action, unsigned in
             float reward_0 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
             float reward_1 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
 
+            std::cout << "report outcome: " << reward_0 << " for event: " << event_id << " for slot string index: slot_0" << std::endl;
             if (rl.report_outcome(event_id, "slot_0", reward_0, &status) != err::success) {
               std::cout << status.get_error_msg() << std::endl;
             }
+            std::cout << "report outcome: " << reward_1 << " for event: " << event_id << " for slot string index: slot_1" << std::endl;
             if( rl.report_outcome(event_id, "slot_1", reward_1, &status) != err::success ) {
               std::cout << status.get_error_msg() << std::endl;
             }
@@ -361,10 +366,11 @@ int take_action(r::live_model& rl, const char *event_id, int action, unsigned in
               float reward_0 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
               float reward_1 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
 
+              std::cout << "report outcome: " << reward_0 << " for event: " << event_id << " for slot index: " << i << std::endl;
               if (rl.report_outcome(event_id, i, reward_0, &status) != err::success) {
                 std::cout << status.get_error_msg() << std::endl;
               }
-
+              std::cout << "report outcome: " << reward_1 << " for event: " << event_id << " for slot string index: " << slot_ids[i].c_str() << std::endl;
               if (rl.report_outcome(event_id, slot_ids[i].c_str(), reward_1, &status) != err::success) {
                 std::cout << status.get_error_msg() << std::endl;
               }
@@ -374,6 +380,7 @@ int take_action(r::live_model& rl, const char *event_id, int action, unsigned in
         };
 
         case 4: { // fi-out-of-bound
+          std::cout << "report outcome: " << 1.5 << " for event: " << event_id << " for slot at out of bound index: 1000" << std::endl;
           if (rl.report_outcome(event_id, 1000, 1.5, &status) != err::success) {
             std::cout << status.get_error_msg() << std::endl;
           }
@@ -382,15 +389,11 @@ int take_action(r::live_model& rl, const char *event_id, int action, unsigned in
 
         default:
         {
+          // sometimes don't send an outcome
           break;
         };
 
       }
-      float reward = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
-      std::cout << "report outcome: " << reward << " for event: " << event_id << std::endl;
-      if( rl.report_outcome(event_id, reward, &status) != err::success )
-          std::cout << status.get_error_msg() << std::endl;
-    
       break;
     };
 
