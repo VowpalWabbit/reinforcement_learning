@@ -3,8 +3,11 @@
 #include "metadata.h"
 
 namespace reward {
-  
+
 struct outcome_event {
+  outcome_event()
+      : metadata({}), s_index(""), index(-1), s_value(""), value(0),
+        enqueued_time_utc(TimePoint()), action_taken(false) {}
   metadata::event_metadata_info metadata;
   std::string s_index;
   int index;

@@ -194,7 +194,10 @@ struct ccb_joined_event : public typed_joined_event {
 
     size_t slot_example_index = index + slot_offset;
     if (slot_example_index >= examples.size()) {
-      VW::io::logger::log_error("slot index is out of examples range");
+      VW::io::logger::log_error("slot example index [{}] for slot offset [{}] "
+                                "is out of example's range [{}]",
+                                slot_example_index, slot_offset,
+                                examples.size());
       return;
     }
 
@@ -212,7 +215,7 @@ struct ccb_joined_event : public typed_joined_event {
   void calc_and_set_cost(
       v_array<example *> &examples, float default_reward,
       reward::RewardFunctionType reward_function,
-      const metadata::event_metadata_info &,
+      const metadata::event_metadata_info &metadata_info,
       std::vector<reward::outcome_event> &outcome_events) override {
 
     if (slot_id_to_index_map.size() > 0) {
@@ -243,6 +246,15 @@ struct ccb_joined_event : public typed_joined_event {
     }
 
     for (auto &slot : outcomes_map) {
+      if (slot.first == -1) {
+        VW::io::logger::log_warn(
+            "CCB outcome event for event: [{}] "
+            "has slot index and slot id missing. This is an activation which "
+            "is not currently supported so it will be ignored.",
+            metadata_info.event_id);
+        continue;
+      }
+
       float reward = reward_function(slot.second);
       set_cost(examples, reward, slot.first);
     }

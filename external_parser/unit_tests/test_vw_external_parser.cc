@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(cb_dedup_compressed) {
   VW::finish(*vw);
 }
 
-BOOST_AUTO_TEST_CASE(compare_dsjson_with_fb_models) {
+BOOST_AUTO_TEST_CASE(cb_compare_dsjson_with_fb_models) {
   std::string input_files = get_test_files_location();
 
   std::string fb_model = input_files + "/test_outputs/m_average_fb.model";
@@ -174,6 +174,56 @@ BOOST_AUTO_TEST_CASE(compare_dsjson_with_fb_models) {
                                 buffer_dsjson_model.end());
 }
 
+BOOST_AUTO_TEST_CASE(ccb_compare_dsjson_with_fb_models) {
+  std::string input_files = get_test_files_location();
+
+  std::string fb_model = input_files + "/test_outputs/ccb_m_sum_fb.model";
+  std::string dsjson_model =
+      input_files + "/test_outputs/ccb_m_sum_dsjson.model";
+
+  std::remove(fb_model.c_str());
+  std::remove(dsjson_model.c_str());
+
+  {
+    // run with flatbuffer joined logs
+    auto full_file_name =
+        input_files + "/valid_joined_logs/ccb_sum_reward_100_interactions.fb";
+
+    auto vw = VW::initialize("--ccb_explore_adf --binary_parser --quiet -f " +
+                                 fb_model + " -d " + full_file_name,
+                             nullptr, false, nullptr, nullptr);
+
+    VW::start_parser(*vw);
+    VW::LEARNER::generic_driver(*vw);
+    VW::end_parser(*vw);
+
+    VW::finish(*vw);
+  }
+
+  {
+    // run with json joined logs
+    auto full_file_name =
+        input_files + "/valid_joined_logs/ccb_sum_reward_100_interactions.json";
+
+    auto vw = VW::initialize("--ccb_explore_adf --dsjson --quiet -f " +
+                                 dsjson_model + " -d " + full_file_name,
+                             nullptr, false, nullptr, nullptr);
+
+    VW::start_parser(*vw);
+    VW::LEARNER::generic_driver(*vw);
+    VW::end_parser(*vw);
+
+    VW::finish(*vw);
+  }
+
+  // read the models and compare
+  auto buffer_fb_model = read_file(fb_model);
+  auto buffer_dsjson_model = read_file(dsjson_model);
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
+                                buffer_dsjson_model.begin(),
+                                buffer_dsjson_model.end());
+}
 
 BOOST_AUTO_TEST_CASE(rrcr_ignore_examples_before_checkpoint) {
   std::string input_files = get_test_files_location();
