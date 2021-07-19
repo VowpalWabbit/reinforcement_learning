@@ -123,25 +123,22 @@ BOOST_AUTO_TEST_CASE(cb_dedup_compressed) {
   VW::finish(*vw);
 }
 
-BOOST_AUTO_TEST_CASE(compare_dsjson_with_fb_models) {
-  std::string input_files = get_test_files_location();
-
-  std::string fb_model = input_files + "/test_outputs/m_average_fb.model";
-  std::string dsjson_model =
-      input_files + "/test_outputs/m_average_dsjson.model";
+void generate_dsjson_and_fb_models(const std::string &model_name,
+                                   const std::string &vw_args,
+                                   const std::string &file_name) {
+  std::string fb_model = model_name + ".fb";
+  std::string dsjson_model = model_name + ".json";
 
   std::remove(fb_model.c_str());
   std::remove(dsjson_model.c_str());
 
+  std::string fb_file = file_name + ".fb";
+  std::string dsjson_file = file_name + ".json";
+
   {
-    // run with flatbuffer joined logs
-    auto full_file_name =
-        input_files + "/valid_joined_logs/average_reward_100_interactions.fb";
-
-    auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet -f " +
-                                 fb_model + " -d " + full_file_name,
+    auto vw = VW::initialize(vw_args + " --binary_parser --quiet -f " + fb_model +
+                                 " -d " + fb_file,
                              nullptr, false, nullptr, nullptr);
-
     VW::start_parser(*vw);
     VW::LEARNER::generic_driver(*vw);
     VW::end_parser(*vw);
@@ -150,30 +147,54 @@ BOOST_AUTO_TEST_CASE(compare_dsjson_with_fb_models) {
   }
 
   {
-    // run with json joined logs
-    auto full_file_name =
-        input_files + "/valid_joined_logs/average_reward_100_interactions.json";
-
-    auto vw = VW::initialize("--cb_explore_adf --dsjson --quiet -f " +
-                                 dsjson_model + " -d " + full_file_name,
+    auto vw = VW::initialize(vw_args + " --dsjson --quiet -f " + dsjson_model + " -d " +
+                                 dsjson_file,
                              nullptr, false, nullptr, nullptr);
-
     VW::start_parser(*vw);
     VW::LEARNER::generic_driver(*vw);
     VW::end_parser(*vw);
 
     VW::finish(*vw);
   }
+}
+
+BOOST_AUTO_TEST_CASE(cb_compare_dsjson_with_fb_models) {
+  std::string input_files = get_test_files_location();
+
+  std::string model_name = input_files + "/test_outputs/m_average";
+
+  std::string file_name =
+      input_files + "/valid_joined_logs/average_reward_100_interactions";
+
+  generate_dsjson_and_fb_models(model_name, "--cb_explore_adf ", file_name);
 
   // read the models and compare
-  auto buffer_fb_model = read_file(fb_model);
-  auto buffer_dsjson_model = read_file(dsjson_model);
+  auto buffer_fb_model = read_file(model_name + ".fb");
+  auto buffer_dsjson_model = read_file(model_name + ".json");
 
   BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
                                 buffer_dsjson_model.begin(),
                                 buffer_dsjson_model.end());
 }
 
+BOOST_AUTO_TEST_CASE(ccb_compare_dsjson_with_fb_models) {
+  std::string input_files = get_test_files_location();
+
+  std::string model_name = input_files + "/test_outputs/ccb_m_sum";
+
+  std::string file_name =
+      input_files + "/valid_joined_logs/ccb_sum_reward_100_interactions";
+
+  generate_dsjson_and_fb_models(model_name, "--ccb_explore_adf ", file_name);
+
+  // read the models and compare
+  auto buffer_fb_model = read_file(model_name + ".fb");
+  auto buffer_dsjson_model = read_file(model_name + ".json");
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
+                                buffer_dsjson_model.begin(),
+                                buffer_dsjson_model.end());
+}
 
 BOOST_AUTO_TEST_CASE(rrcr_ignore_examples_before_checkpoint) {
   std::string input_files = get_test_files_location();
