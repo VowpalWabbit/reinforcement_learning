@@ -474,7 +474,7 @@ int main(int argc, char *argv[]) {
     ("kind", po::value<std::string>(), "which kind of example to generate (cb,invalid-cb,ccb,ccb-with-slot-id,ccb-baseline,slates,ca,cb-loop,ccb-loop,(f|s)(s|i|mix|i-out-of-bound)?-reward,action-taken)")
     ("random_reward", "Generate random float reward for observation event")
     ("config_file", po::value<std::string>(), "json config file for rlclinetlib")
-    ("apprentice", "Enable apprentice mode for cb event")
+    ("apprentice", "Enable apprentice mode")
     ("deferred_action_count",  po::value<int>(), "Number of deferred action for interaction events. Set the deferred_action flag to true for first deferred_action_count number of actions");
 
   po::positional_options_description pd;

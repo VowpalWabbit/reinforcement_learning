@@ -18,7 +18,7 @@ struct typed_joined_event {
   virtual ~typed_joined_event() = default;
   virtual bool is_skip_learn() const = 0;
   virtual void set_skip_learn(bool sl) = 0;
-  virtual bool should_calculate_apprentice_reward() const = 0;
+  virtual void set_apprentice_reward() = 0;
   virtual void fill_in_label(v_array<example *> &examples) const = 0;
   virtual void set_cost(v_array<example *> &examples, float reward,
                         size_t index = 0) const = 0;
@@ -35,7 +35,7 @@ struct cb_joined_event : public typed_joined_event {
   DecisionServiceInteraction interaction_data;
   // Default Baseline Action for CB is 1 (rl client recommended actions are 1
   // indexed in the CB case)
-  static const int baseline_action = 1;
+  static const unsigned CB_BASELINE_ACTION = 1;
   float reward = 0.0f;
   float original_reward = 0.0f;
 
@@ -45,9 +45,14 @@ struct cb_joined_event : public typed_joined_event {
 
   void set_skip_learn(bool sl) override { interaction_data.skipLearn = sl; }
 
-  bool should_calculate_apprentice_reward() const override {
-    return (!interaction_data.actions.empty() &&
-            interaction_data.actions[0] == baseline_action);
+  void set_apprentice_reward() override {
+    if (!interaction_data.actions.empty() &&
+        interaction_data.actions[0] == CB_BASELINE_ACTION)
+    {
+      // TODO: default apprenticeReward should come from config
+      // setting to default reward matches current behavior for now
+      reward = original_reward;
+    }
   }
 
   void fill_in_label(v_array<example *> &examples) const override {
@@ -118,13 +123,8 @@ struct cb_joined_event : public typed_joined_event {
     if (should_calculate_reward(outcome_events)) {
       original_reward = reward_function(outcome_events);
 
-      if (interaction_metadata.learning_mode ==
-          v2::LearningModeType_Apprentice) {
-        if (should_calculate_apprentice_reward()) {
-          // TODO: default apprenticeReward should come from config
-          // setting to default reward matches current behavior for now
-          reward = original_reward;
-        }
+      if (interaction_metadata.learning_mode == v2::LearningModeType_Apprentice) {
+        set_apprentice_reward();
       } else {
         reward = original_reward;
       }
@@ -136,14 +136,25 @@ struct cb_joined_event : public typed_joined_event {
 
 struct ccb_joined_event : public typed_joined_event {
   std::vector<DecisionServiceInteraction> interaction_data;
-  static const std::vector<int> baseline_actions;
+  std::vector<unsigned> baseline_actions;
   std::map<std::string, int> slot_id_to_index_map;
+
+  std::vector<float> rewards;
+  std::vector<float> original_rewards;
 
   ~ccb_joined_event() = default;
   // TODO fill in
   bool is_skip_learn() const override { return false; }
   void set_skip_learn(bool) override {}
-  bool should_calculate_apprentice_reward() const override { return false; }
+  void set_apprentice_reward() override {
+    for (size_t i = 0; i < interaction_data.size(); i++) {
+      if (!interaction_data[i].actions.empty() &&
+        interaction_data[i].actions[0] == baseline_actions[i]) {
+        rewards[i] = original_rewards[i];
+      }
+    }
+  }
+
   void fill_in_label(v_array<example *> &examples) const override {
 
     // index to interaction_data vector which holds per-slot info
@@ -157,7 +168,6 @@ struct ccb_joined_event : public typed_joined_event {
           if ((slot_data.actions.size() != 0) &&
               (slot_data.probabilities.size() != 0)) {
             auto outcome = new CCB::conditional_contextual_bandit_outcome();
-            // outcome->cost = TODO assing reward for slot;
 
             if (slot_data.actions.size() != slot_data.probabilities.size()) {
               VW::io::logger::log_warn(
@@ -217,6 +227,19 @@ struct ccb_joined_event : public typed_joined_event {
       reward::RewardFunctionType reward_function,
       const metadata::event_metadata_info &metadata_info,
       std::vector<reward::outcome_event> &outcome_events) override {
+    size_t num_of_slots = interaction_data.size();
+
+    if (metadata_info.learning_mode == v2::LearningModeType_Apprentice &&
+      num_of_slots != baseline_actions.size()
+    ) {
+      VW::io::logger::log_error (
+        "slot size [{}] and baseline action size [{}] do not match for event: [{}]",
+        num_of_slots,
+        baseline_actions.size(),
+        metadata_info.event_id
+      );
+      return;
+    }
 
     if (slot_id_to_index_map.size() > 0) {
       for (auto &outcome : outcome_events) {
@@ -245,22 +268,23 @@ struct ccb_joined_event : public typed_joined_event {
       }
     }
 
-    for (auto &slot : outcomes_map) {
-      if (slot.first == -1) {
-        VW::io::logger::log_warn("CCB outcome event for event: [{}] "
-                                 "has slot index and slot id missing. One or "
-                                 "the other should be specified.",
-                                 metadata_info.event_id);
-        continue;
+    rewards = std::vector<float>(num_of_slots, default_reward);
+    original_rewards = std::vector<float>(num_of_slots, default_reward);
+
+    for (size_t i = 0; i < num_of_slots; i++) {
+      if (outcomes_map.find(i) != outcomes_map.end()) {
+        original_rewards[i] = reward_function(outcomes_map[i]);
       }
-      float reward = reward_function(slot.second);
-      set_cost(examples, reward, slot.first);
     }
 
-    for (size_t i = 0; i < interaction_data.size(); i++) {
-      if (!outcomes_map.count(i)) {
-        set_cost(examples, default_reward, i);
-      }
+    if (metadata_info.learning_mode == v2::LearningModeType_Apprentice) {
+      set_apprentice_reward();
+    } else {
+      rewards.assign(original_rewards.begin(), original_rewards.end());
+    }
+
+    for (size_t i = 0; i <= num_of_slots; i++) {
+      set_cost(examples, rewards[i], i);
     }
   }
 };
@@ -287,8 +311,8 @@ struct joined_event {
     return typed_data.get();
   }
 
-  bool should_calculate_apprentice_reward() const {
-    return typed_data->should_calculate_apprentice_reward();
+  void set_apprentice_reward() const {
+    return typed_data->set_apprentice_reward();
   }
 
   void fill_in_label(v_array<example *> &examples) const {

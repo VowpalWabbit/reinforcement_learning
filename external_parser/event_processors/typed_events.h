@@ -71,6 +71,11 @@ template <> struct event_processor<v2::MultiSlotEvent> {
       slot_index++;
     }
 
+    ccb_data->baseline_actions.assign(
+      evt.baseline_actions()->begin(),
+      evt.baseline_actions()->end()
+    );
+
     return {TimePoint(enqueued_time_utc),
             {metadata.client_time_utc()
                  ? timestamp_to_chrono(*metadata.client_time_utc())
