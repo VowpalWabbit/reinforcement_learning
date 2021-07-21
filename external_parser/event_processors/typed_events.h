@@ -66,7 +66,7 @@ template <> struct event_processor<v2::MultiSlotEvent> {
                        const TimePoint &enqueued_time_utc,
                        std::string &&line_vec) {
     auto ccb_data = VW::make_unique<joined_event::ccb_joined_event>();
-    ccb_data->set_metrics(metrics);
+
     if (metrics) {
       calculate_metrics(metrics, metadata, enqueued_time_utc);
     }
@@ -147,10 +147,13 @@ template <> struct event_processor<v2::CbEvent> {
                        std::string &&line_vec) {
 
     auto cb_data = VW::make_unique<joined_event::cb_joined_event>();
-    cb_data->set_metrics(metrics);
 
     if (metrics) {
       calculate_metrics(metrics, metadata, enqueued_time_utc);
+      if (evt.action_ids()->size() == 0)
+      {
+        metrics->NumberOfEventsZeroActions++;
+      }
     }
 
     cb_data->interaction_data.eventId = metadata.id()->str();
