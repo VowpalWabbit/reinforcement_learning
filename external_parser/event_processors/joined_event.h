@@ -31,10 +31,10 @@ struct typed_joined_event {
                     // we currently need it for ccb calculation
                     std::vector<reward::outcome_event> &outcome_events) = 0;
   virtual void set_metrics(dsjson_metrics* metrics) {
-    _joiner_metrics = metrics;
+    _metrics = metrics;
   }
 
-  dsjson_metrics* _joiner_metrics;
+  dsjson_metrics* _metrics;
 };
 
 struct cb_joined_event : public typed_joined_event {
@@ -61,9 +61,9 @@ struct cb_joined_event : public typed_joined_event {
     if (interaction_data.actions.empty()) {
       VW::io::logger::log_warn("missing actions for event [{}]",
                                interaction_data.eventId);
-      if (_joiner_metrics)
+      if (_metrics)
       {
-        _joiner_metrics->NumberOfEventsZeroActions++;
+        _metrics->NumberOfEventsZeroActions++;
       }
       return;
     }

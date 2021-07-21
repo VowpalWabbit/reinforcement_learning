@@ -8,7 +8,7 @@ using namespace rapidjson;
 void should_match_expected_metrics(std::string infile_name,
   std::map<std::string, int> expected_metrics) {
   std::string infile = get_test_files_location() + infile_name;
-  std::string outfile = get_test_files_location() + "metrics_spec.json";
+  std::string outfile = get_test_files_location() + "/test_outputs/metrics_spec.json";
 
   remove(outfile.c_str());
 

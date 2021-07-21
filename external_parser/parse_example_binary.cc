@@ -298,39 +298,39 @@ bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
   unsigned int payload_type;
   while (advance_to_next_payload_type(all->example_parser->input.get(), payload_type)) {
     switch(payload_type) {
-    case MSG_TYPE_FILEMAGIC:
-      if (!read_version(all->example_parser->input.get())) {
-        return false;
-      }
-      break;
-    case MSG_TYPE_HEADER:
-      if (!read_header(all->example_parser->input.get())) {
-        return false;
-      }
-      break;
-    case MSG_TYPE_CHECKPOINT:
-      if (!read_checkpoint_msg(all->example_parser->input.get())) {
-        return false;
-      }
-      break;
-    case MSG_TYPE_REGULAR: {
-      bool ignore_msg = false;
-      if (read_regular_msg(all->example_parser->input.get(), examples, ignore_msg)) {
-          if(!ignore_msg) {
-          return true;
+      case MSG_TYPE_FILEMAGIC:
+        if (!read_version(all->example_parser->input.get())) {
+          return false;
         }
+        break;
+      case MSG_TYPE_HEADER:
+        if (!read_header(all->example_parser->input.get())) {
+          return false;
+        }
+        break;
+      case MSG_TYPE_CHECKPOINT:
+        if (!read_checkpoint_msg(all->example_parser->input.get())) {
+          return false;
+        }
+        break;
+      case MSG_TYPE_REGULAR: {
+        bool ignore_msg = false;
+        if (read_regular_msg(all->example_parser->input.get(), examples, ignore_msg)) {
+          if(!ignore_msg) {
+            return true;
+          }
+        }
+        break;
       }
-      break;
-    }
-    case MSG_TYPE_EOF:
-      return false;
-    default:
-      VW::io::logger::log_critical(
-          "Payload type not recognized [0x{:x}], after having read [{}] "
-          "bytes from the file",
-          payload_type, _total_size_read);
-      return false;
-    }
+      case MSG_TYPE_EOF:
+        return false;
+      default:
+    VW::io::logger::log_critical(
+        "Payload type not recognized [0x{:x}], after having read [{}] "
+        "bytes from the file",
+        payload_type, _total_size_read);
+        return false;
+      }
   }
 
   return false;
