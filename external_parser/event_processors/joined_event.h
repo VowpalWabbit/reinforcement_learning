@@ -1,6 +1,5 @@
 #pragma once
 
-#include "metrics/metrics.h"
 #include "reward.h"
 // VW headers
 // vw.h has to come before json_utils.h
