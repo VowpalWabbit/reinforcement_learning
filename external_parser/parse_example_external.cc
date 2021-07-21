@@ -131,6 +131,10 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
       joiner->set_reward_function(reward_function, true);
     }
 
+    if (all->options->was_supplied("extra_metrics")) {
+      all->example_parser->metrics = VW::make_unique<dsjson_metrics>();
+    }
+    
     return VW::make_unique<binary_parser>(std::move(joiner));
   }
   throw std::runtime_error("external parser type not recognised");

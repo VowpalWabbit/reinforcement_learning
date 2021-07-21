@@ -9,6 +9,27 @@
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
+// helper method
+static void calculate_metrics(dsjson_metrics *metrics,
+                              const v2::Metadata &metadata,
+                              const TimePoint &enqueued_time_utc) {
+  if (metrics->FirstEventId.empty()) {
+    metrics->FirstEventId = metadata.id()->str();
+  } else {
+    metrics->LastEventId = metadata.id()->str();
+  }
+
+  // TODO does this potentially need to check and set client time utc if
+  // that option is on?
+  if (metrics->FirstEventTime.empty()) {
+    metrics->FirstEventTime = date::format(
+        "%FT%TZ", date::floor<std::chrono::microseconds>(enqueued_time_utc));
+  } else {
+    metrics->LastEventTime = date::format(
+        "%FT%TZ", date::floor<std::chrono::microseconds>(enqueued_time_utc));
+  }
+}
+
 namespace typed_event {
 template <typename T> struct event_processor;
 template <> struct event_processor<v2::MultiSlotEvent> {
@@ -39,10 +60,16 @@ template <> struct event_processor<v2::MultiSlotEvent> {
             evt.context()->size()};
   }
 
-  static joined_event::joined_event fill_in_joined_event(
-      const v2::MultiSlotEvent &evt, const v2::Metadata &metadata,
-      const TimePoint &enqueued_time_utc, std::string &&line_vec) {
+  static joined_event::joined_event
+  fill_in_joined_event(dsjson_metrics *metrics, const v2::MultiSlotEvent &evt,
+                       const v2::Metadata &metadata,
+                       const TimePoint &enqueued_time_utc,
+                       std::string &&line_vec) {
     auto ccb_data = VW::make_unique<joined_event::ccb_joined_event>();
+    ccb_data->set_metrics(metrics);
+    if (metrics) {
+      calculate_metrics(metrics, metadata, enqueued_time_utc);
+    }
 
     size_t slot_index = 0;
     for (auto *slot_event : *evt.slots()) {
@@ -52,7 +79,7 @@ template <> struct event_processor<v2::MultiSlotEvent> {
 
       if (slot_event->id() != nullptr) {
         ccb_data->slot_id_to_index_map.insert(
-          std::pair<std::string, int>(slot_event->id()->str(), slot_index));
+            std::pair<std::string, int>(slot_event->id()->str(), slot_index));
       }
 
       data.actions.reserve(slot_event->action_ids()->size());
@@ -114,11 +141,17 @@ template <> struct event_processor<v2::CbEvent> {
   }
 
   static joined_event::joined_event
-  fill_in_joined_event(const v2::CbEvent &evt, const v2::Metadata &metadata,
+  fill_in_joined_event(dsjson_metrics *metrics, const v2::CbEvent &evt,
+                       const v2::Metadata &metadata,
                        const TimePoint &enqueued_time_utc,
                        std::string &&line_vec) {
 
     auto cb_data = VW::make_unique<joined_event::cb_joined_event>();
+    cb_data->set_metrics(metrics);
+
+    if (metrics) {
+      calculate_metrics(metrics, metadata, enqueued_time_utc);
+    }
 
     cb_data->interaction_data.eventId = metadata.id()->str();
     cb_data->interaction_data.actions.reserve(evt.action_ids()->size());

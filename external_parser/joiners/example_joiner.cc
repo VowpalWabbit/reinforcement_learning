@@ -225,7 +225,8 @@ bool example_joiner::process_interaction(const v2::Event &event,
 
     je = std::move(
         typed_event::event_processor<v2::CbEvent>::fill_in_joined_event(
-            *cb, metadata, enqueued_time_utc,
+            _vw->example_parser->metrics.get(), *cb, metadata,
+            enqueued_time_utc,
             typed_event::event_processor<v2::CbEvent>::get_context(*cb)));
   } else if (metadata.payload_type() == v2::PayloadType_CCB) {
     const v2::MultiSlotEvent *ccb = nullptr;
@@ -245,7 +246,8 @@ bool example_joiner::process_interaction(const v2::Event &event,
     }
     je = std::move(
         typed_event::event_processor<v2::MultiSlotEvent>::fill_in_joined_event(
-            *ccb, metadata, enqueued_time_utc,
+            _vw->example_parser->metrics.get(), *ccb, metadata,
+            enqueued_time_utc,
             typed_event::event_processor<v2::MultiSlotEvent>::get_context(
                 *ccb)));
   }
@@ -456,17 +458,17 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     }
 
     if (!je.is_joined_event_learnable()) {
-      _joiner_metrics.number_of_skipped_events++;
+      if (_vw->example_parser->metrics) {
+        _vw->example_parser->metrics->NumberOfSkippedEvents++;
+      }
       clear_event_id_batch_info(id);
       clear_vw_examples(examples);
-      return true;
+      return false;
     }
   } else if (je.interaction_metadata.payload_type == v2::PayloadType_CCB) {
     je.calc_and_set_reward(examples, _loop_info.default_reward,
                            _reward_calculation.value());
   }
-
-  _joiner_metrics.number_of_learned_events++;
 
   if (multiline) {
     // add an empty example to signal end-of-multiline

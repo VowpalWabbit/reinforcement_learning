@@ -59,8 +59,8 @@ void build_cb_json(std::ofstream &outfile,
     d.AddMember("o", outcome_arr, allocator);
 
     std::string ts_str = date::format(
-        "%F %T %Z",
-        date::floor<std::chrono::milliseconds>(je.joined_event_timestamp));
+        "%FT%TZ",
+        date::floor<std::chrono::microseconds>(je.joined_event_timestamp));
     v.SetString(ts_str.c_str(), allocator);
     d.AddMember("Timestamp", v, allocator);
 

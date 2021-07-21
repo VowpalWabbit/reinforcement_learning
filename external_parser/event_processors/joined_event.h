@@ -1,5 +1,6 @@
 #pragma once
 
+#include "metrics/metrics.h"
 #include "reward.h"
 // VW headers
 // vw.h has to come before json_utils.h
@@ -29,6 +30,11 @@ struct typed_joined_event {
                     // TODO outcome_events should also idealy be const here but
                     // we currently need it for ccb calculation
                     std::vector<reward::outcome_event> &outcome_events) = 0;
+  virtual void set_metrics(dsjson_metrics* metrics) {
+    _joiner_metrics = metrics;
+  }
+
+  dsjson_metrics* _joiner_metrics;
 };
 
 struct cb_joined_event : public typed_joined_event {
@@ -55,6 +61,10 @@ struct cb_joined_event : public typed_joined_event {
     if (interaction_data.actions.empty()) {
       VW::io::logger::log_warn("missing actions for event [{}]",
                                interaction_data.eventId);
+      if (_joiner_metrics)
+      {
+        _joiner_metrics->NumberOfEventsZeroActions++;
+      }
       return;
     }
 
@@ -87,6 +97,7 @@ struct cb_joined_event : public typed_joined_event {
     if (interaction_data.actions.empty()) {
       return;
     }
+
     index = interaction_data.actions[0];
     if (examples.size() <= index) {
       VW::io::logger::log_warn(
