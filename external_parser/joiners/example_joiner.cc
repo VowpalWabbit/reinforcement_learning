@@ -427,12 +427,14 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   // without having to duplicate the cleanup code
   bool clear_examples = false;
   auto clear_event_id_on_exit = VW::scope_exit([&] {
-    if (_vw->example_parser->metrics && je) {
-      je->calculate_metrics(_vw->example_parser->metrics.get());
-    }
-    if (_binary_to_json &&
-        je->interaction_metadata.payload_type == v2::PayloadType_CB) {
-      log_converter::build_cb_json(_outfile, *je);
+    if (je) {
+      if (_vw->example_parser->metrics) {
+        je->calculate_metrics(_vw->example_parser->metrics.get());
+      }
+      if (_binary_to_json &&
+          je->interaction_metadata.payload_type == v2::PayloadType_CB) {
+        log_converter::build_cb_json(_outfile, *je);
+      }
     }
 
     clear_event_id_batch_info(id);
