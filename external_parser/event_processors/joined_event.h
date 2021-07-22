@@ -248,14 +248,12 @@ struct ccb_joined_event : public typed_joined_event {
 
     for (auto &slot : outcomes_map) {
       if (slot.first == -1) {
-        VW::io::logger::log_warn(
-            "CCB outcome event for event: [{}] "
-            "has slot index and slot id missing. This is an activation which "
-            "is not currently supported so it will be ignored.",
-            metadata_info.event_id);
+        VW::io::logger::log_warn("CCB outcome event for event: [{}] "
+                                 "has slot index and slot id missing. One or "
+                                 "the other should be specified.",
+                                 metadata_info.event_id);
         continue;
       }
-
       float reward = reward_function(slot.second);
       set_cost(examples, reward, slot.first);
     }
