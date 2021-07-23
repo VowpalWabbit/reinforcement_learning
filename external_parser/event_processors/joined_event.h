@@ -29,6 +29,8 @@ struct typed_joined_event {
                     // TODO outcome_events should also idealy be const here but
                     // we currently need it for ccb calculation
                     std::vector<reward::outcome_event> &outcome_events) = 0;
+  
+  virtual void calculate_metrics(dsjson_metrics*) {}
 };
 
 struct cb_joined_event : public typed_joined_event {
@@ -92,6 +94,7 @@ struct cb_joined_event : public typed_joined_event {
     if (interaction_data.actions.empty()) {
       return;
     }
+
     index = interaction_data.actions[0];
     if (examples.size() <= index) {
       VW::io::logger::log_warn(
@@ -131,6 +134,16 @@ struct cb_joined_event : public typed_joined_event {
     }
 
     set_cost(examples, reward);
+  }
+
+  void calculate_metrics(dsjson_metrics* metrics) override {
+    if (metrics)
+    {
+      if (interaction_data.actions.size() == 0)
+      {
+        metrics->NumberOfEventsZeroActions++;
+      }
+    }
   }
 };
 
@@ -347,6 +360,30 @@ struct joined_event {
                            reward::RewardFunctionType reward_function) {
     typed_data->calc_and_set_cost(examples, default_reward, reward_function,
                                   interaction_metadata, outcome_events);
+  }
+
+  void calculate_metrics(dsjson_metrics *metrics) {
+    if (!metrics || !is_joined_event_learnable()) {
+      return;
+    }
+
+    if (metrics->FirstEventId.empty()) {
+      metrics->FirstEventId = interaction_metadata.event_id;
+    } else {
+      metrics->LastEventId = interaction_metadata.event_id;
+    }
+
+    // TODO does this potentially need to check and set client time utc if
+    // that option is on?
+    if (metrics->FirstEventTime.empty()) {
+      metrics->FirstEventTime = date::format(
+          "%FT%TZ",
+          date::floor<std::chrono::microseconds>(joined_event_timestamp));
+    } else {
+      metrics->LastEventTime = date::format(
+          "%FT%TZ",
+          date::floor<std::chrono::microseconds>(joined_event_timestamp));
+    }
   }
 };
 } // namespace joined_event

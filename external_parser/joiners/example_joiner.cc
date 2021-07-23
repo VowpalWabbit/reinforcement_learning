@@ -420,11 +420,23 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     }
   }
 
+  joined_event::joined_event *je = nullptr;
+
   // this scope exit guard will execute when this method returns
   // that way we can guarantee clean-up no matter where the return happens
   // without having to duplicate the cleanup code
   bool clear_examples = false;
   auto clear_event_id_on_exit = VW::scope_exit([&] {
+    if (je) {
+      if (_vw->example_parser->metrics) {
+        je->calculate_metrics(_vw->example_parser->metrics.get());
+      }
+      if (_binary_to_json &&
+          je->interaction_metadata.payload_type == v2::PayloadType_CB) {
+        log_converter::build_cb_json(_outfile, *je);
+      }
+    }
+
     clear_event_id_batch_info(id);
     if (clear_examples) {
       clear_vw_examples(examples);
@@ -440,8 +452,8 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
-  auto &je = _batch_grouped_examples[id];
-  if (!je.ok) {
+  je = &_batch_grouped_examples[id];
+  if (!je->ok) {
     // don't learn from this interaction
     VW::io::logger::log_warn(
         "Interaction with event id [{}] has been invalidated due to malformed "
@@ -451,30 +463,28 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
-  je.fill_in_label(examples);
+  je->fill_in_label(examples);
 
-  if (je.interaction_metadata.payload_type == v2::PayloadType_CB) {
-    je.calc_and_set_reward(examples, _loop_info.default_reward,
-                           _reward_calculation.value());
+  if (je->interaction_metadata.payload_type == v2::PayloadType_CB) {
+    je->calc_and_set_reward(examples, _loop_info.default_reward,
+                            _reward_calculation.value());
 
-    if (_binary_to_json) {
-      log_converter::build_cb_json(_outfile, je);
-
+    if (!je->is_joined_event_learnable()) {
+      if (_vw->example_parser->metrics) {
+        _vw->example_parser->metrics->NumberOfSkippedEvents++;
+      }
       clear_examples = true;
-      return true;
+      return false;
     }
-
-    if (!je.is_joined_event_learnable()) {
-      _joiner_metrics.number_of_skipped_events++;
-      clear_examples = true;
-      return true;
-    }
-  } else if (je.interaction_metadata.payload_type == v2::PayloadType_CCB) {
-    je.calc_and_set_reward(examples, _loop_info.default_reward,
-                           _reward_calculation.value());
+  } else if (je->interaction_metadata.payload_type == v2::PayloadType_CCB) {
+    je->calc_and_set_reward(examples, _loop_info.default_reward,
+                            _reward_calculation.value());
   }
 
-  _joiner_metrics.number_of_learned_events++;
+  if (_binary_to_json) {
+    clear_examples = true;
+    return true;
+  }
 
   if (multiline) {
     // add an empty example to signal end-of-multiline

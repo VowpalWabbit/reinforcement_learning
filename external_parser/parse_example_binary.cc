@@ -14,9 +14,9 @@
 #include "flatbuffers/flatbuffers.h"
 #include "global_data.h"
 #include "io/logger.h"
+#include "joiners/example_joiner.h"
 #include "memory.h"
 #include "parse_example_binary.h"
-#include "joiners/example_joiner.h"
 
 // TODO need to check if errors will be detected from stderr/stdout/other and
 // use appropriate logger
@@ -201,8 +201,8 @@ bool binary_parser::read_regular_msg(io_buf *input,
 
   if(!_example_joiner->joiner_ready()) {
         VW::io::logger::log_warn("Read regular message before any checkpoint data "
-                             "after having read [{}] bytes from the file. Events will be ignored.",
-                             _total_size_read);
+        "after having read [{}] bytes from the file. Events will be ignored.",
+        _total_size_read);
     ignore_msg = true;
     return true;
   }
@@ -275,14 +275,11 @@ bool binary_parser::advance_to_next_payload_type(io_buf *input,
   return true;
 }
 
-void binary_parser::persist_metrics(std::vector<std::pair<std::string, size_t>>& list_metrics) {
-  metrics::joiner_metrics joiner_metrics = _example_joiner->get_metrics();
-
-  list_metrics.emplace_back("number_of_learned_events",
-    joiner_metrics.number_of_learned_events);
-
-  list_metrics.emplace_back("number_of_skipped_events",
-    joiner_metrics.number_of_skipped_events);
+void binary_parser::persist_metrics(
+    std::vector<std::pair<std::string, size_t>> &) {
+  // metrics::joiner_metrics joiner_metrics = _example_joiner->get_metrics();
+  // this isn't currently needed but leaving it here since we might want to
+  // persist more metrics in the future
 }
 
 bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
