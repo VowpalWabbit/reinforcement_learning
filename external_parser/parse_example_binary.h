@@ -27,10 +27,12 @@ public:
   bool read_header(io_buf *input);
   bool read_checkpoint_msg(io_buf *input);
   bool read_regular_msg(io_buf *input, v_array<example *> &examples, bool &ignore_msg);
+  bool skip_over_unknown_payload(io_buf *input);
   bool advance_to_next_payload_type(io_buf *input, unsigned int &payload_type);
   void persist_metrics(std::vector<std::pair<std::string, size_t>>& list_metrics) override;
 
 private:
+  bool process_next_in_batch(v_array<example *> &examples);
   std::unique_ptr<i_joiner> _example_joiner;
   char *_payload;
   uint32_t _payload_size;

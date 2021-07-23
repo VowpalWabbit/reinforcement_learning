@@ -296,6 +296,20 @@ int take_action(r::live_model& rl, const char *event_id, int action, unsigned in
         if( rl.report_outcome(event_id, reward, &status) != err::success )
             std::cout << status.get_error_msg() << std::endl;
       }
+
+      if (action_flag == r::action_flags::DEFERRED)
+      {
+        size_t rand_num = get_random_number(rng, 0 /*min*/);
+        if (rand_num % 2)
+        {
+          // send activation
+          std::cout << "sending activation for event_id: " << event_id << std::endl;
+          if (rl.report_action_taken(event_id, &status) != err::success ) {
+            std::cout << status.get_error_msg() << std::endl;
+          }
+        }
+      }
+
       break;
     };
     case CCB_LOOP: { // "ccb action and random number of float rewards and mix of slot ids / non slot ids / float / string rewards"

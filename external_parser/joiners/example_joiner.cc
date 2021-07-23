@@ -396,6 +396,8 @@ bool example_joiner::process_dedup(const v2::Event &event,
 }
 
 bool example_joiner::process_joined(v_array<example *> &examples) {
+  _current_je_is_skip_learn = false;
+
   if (_batch_event_order.empty()) {
     return true;
   }
@@ -470,6 +472,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
                             _reward_calculation.value());
 
     if (!je->is_joined_event_learnable()) {
+      _current_je_is_skip_learn = true;
       if (_vw->example_parser->metrics) {
         _vw->example_parser->metrics->NumberOfSkippedEvents++;
       }
@@ -497,6 +500,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
 }
 
 bool example_joiner::processing_batch() { return !_batch_event_order.empty(); }
+bool example_joiner::current_event_is_skip_learn() {return _current_je_is_skip_learn;}
 void example_joiner::on_new_batch() {}
 void example_joiner::on_batch_read() {}
 
