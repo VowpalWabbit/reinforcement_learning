@@ -111,10 +111,30 @@ BOOST_AUTO_TEST_CASE(metrics_not_increase_with_events_should_not_be_tracked) {
       "cb_deferred_action_without_activation_metrics_spec.json";
 
   std::map<std::string, int> expected_int_metrics = {
-      {"total_learn_calls", 0}, {"number_skipped_events", 1}};
+      {"total_predict_calls", 0},
+      {"total_learn_calls", 0},
+      {"sfm_count_learn_example_with_shared", 0},
+      {"cbea_labeled_ex", 0},
+      {"cbea_predict_in_learn", 0},
+      {"cbea_label_first_action", 0},
+      {"cbea_label_not_first", 0},
+      {"cbea_non_zero_cost", 0},
+      {"total_log_calls", 130},
+      {"number_skipped_events", 1},
+      {"number_events_zero_actions", 0},
+      {"line_parse_error", 0}};
 
-  std::map<std::string, float> expected_float_metrics = {};
-  std::map<std::string, std::string> expected_string_metrics = {};
+  std::map<std::string, float> expected_float_metrics = {
+      {"cbea_sum_cost", 0},
+      {"cbea_sum_cost_baseline", 0},
+  };
+
+  std::map<std::string, std::string> expected_string_metrics = {
+      {"first_event_id", ""},
+      {"first_event_time", ""},
+      {"last_event_id", ""},
+      {"last_event_time", ""}};
+
   should_match_expected_metrics(infile_name, outfile_name, expected_int_metrics,
                                 expected_float_metrics,
                                 expected_string_metrics);
