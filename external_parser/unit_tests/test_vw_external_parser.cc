@@ -136,8 +136,8 @@ void generate_dsjson_and_fb_models(const std::string &model_name,
   std::string dsjson_file = file_name + ".json";
 
   {
-    auto vw = VW::initialize(vw_args + " --binary_parser --quiet -f " + fb_model +
-                                 " -d " + fb_file,
+    auto vw = VW::initialize(vw_args + " --binary_parser --quiet -f " +
+                                 fb_model + " -d " + fb_file,
                              nullptr, false, nullptr, nullptr);
     VW::start_parser(*vw);
     VW::LEARNER::generic_driver(*vw);
@@ -147,8 +147,8 @@ void generate_dsjson_and_fb_models(const std::string &model_name,
   }
 
   {
-    auto vw = VW::initialize(vw_args + " --dsjson --quiet -f " + dsjson_model + " -d " +
-                                 dsjson_file,
+    auto vw = VW::initialize(vw_args + " --dsjson --quiet -f " + dsjson_model +
+                                 " -d " + dsjson_file,
                              nullptr, false, nullptr, nullptr);
     VW::start_parser(*vw);
     VW::LEARNER::generic_driver(*vw);
@@ -243,6 +243,66 @@ BOOST_AUTO_TEST_CASE(rcrfrmr_file_magic_and_header_in_the_middle_works) {
   }
 
   BOOST_CHECK_EQUAL(count, 3);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
+BOOST_AUTO_TEST_CASE(cb_apprentice_mode) {
+  std::string input_files = get_test_files_location();
+
+  // this datafile contains 5 joined events. One joined event (the third joined
+  // event)'s interaction does not match the baseline action and so the reward
+  // will be the default reward The rest of the interactions match the baseline
+  // action so the reward will not be the default reward
+  auto buffer =
+      read_file(input_files + "/valid_joined_logs/cb_apprentice_5.log");
+
+  size_t event_without_baseline = 3;
+
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+
+  set_buffer_as_vw_input(buffer, vw);
+
+  size_t joined_events_count = 0;
+  while (vw->example_parser->reader(vw, examples) > 0) {
+    joined_events_count++;
+    if (joined_events_count == event_without_baseline) {
+      // non-baseline action, find the label and check that cost is -0.0 (i.e.
+      // -1*default_reward)
+      v_array<CB::cb_class> costs;
+      for (auto *ex : examples) {
+        if (ex->l.cb.costs.size() > 0 &&
+            ex->l.cb.costs[0].probability != -1.f /*shared example*/) {
+          // if cost has already been set and we have 2 costs then that's bad
+          BOOST_CHECK_EQUAL(costs.size(), 0);
+          // copy label's costs for examination
+          costs = ex->l.cb.costs;
+        }
+      }
+      // check this has actually been set
+      BOOST_CHECK_EQUAL(costs.size(), 1);
+      // check default cost
+      BOOST_CHECK_EQUAL(costs[0].cost, -0.f);
+    } else {
+      // 1st example is the example with cost in the baseline case (since
+      // baseline is 1)
+      BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
+      BOOST_CHECK_CLOSE(examples[1]->l.cb.costs[0].cost, -1.5f, FLOAT_TOL);
+    }
+
+    // simulate next call to parser->read by clearing up examples
+    // and preparing one unused example
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  // this file contains 5 joined events
+  BOOST_CHECK_EQUAL(joined_events_count, 5);
 
   clear_examples(examples, vw);
   VW::finish(*vw);
