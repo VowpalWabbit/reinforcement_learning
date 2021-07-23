@@ -283,7 +283,7 @@ struct ccb_joined_event : public typed_joined_event {
       rewards.assign(original_rewards.begin(), original_rewards.end());
     }
 
-    for (size_t i = 0; i <= num_of_slots; i++) {
+    for (size_t i = 0; i < num_of_slots; i++) {
       set_cost(examples, rewards[i], i);
     }
   }
