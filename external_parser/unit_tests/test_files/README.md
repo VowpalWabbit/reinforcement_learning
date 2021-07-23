@@ -45,6 +45,9 @@ Residing under `reward_functions`
 #### ccb format
 - ccb_v2.fb: `./example_gen --kind ccb --count 1`
 - ccb-with-slot-id_v2.fb: `./example_gen --kind ccb-with-slot-id`
+- ccb-apprentice-baseline-match_v2.fb: `./example_gen --kind ccb-baseline --apprentice` (in example_gen.cc change baseline_actions to {0, 1})
+- ccb-apprentice-baseline-not-match_v2.fb: `./example_gen --kind ccb-baseline --apprentice` (in example_gen.cc change baseline_actions to {1, 0})
+
 - fi-reward_v2.fb: `./example_gen --kind fi-reward --random_reward`
 - fs-reward_v2.fb: `./example_gen --kind fs-reward --random_reward`
 - fmix-reward_v2.fb: `./example_gen --kind fmix-reward --random_reward`
