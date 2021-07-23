@@ -232,7 +232,6 @@ bool binary_parser::read_regular_msg(io_buf *input,
     return true;
   }
 
-
   auto joined_payload = flatbuffers::GetRoot<v2::JoinedPayload>(_payload);
   auto verifier =
       flatbuffers::Verifier(reinterpret_cast<const uint8_t *>(_payload),
@@ -313,51 +312,57 @@ void binary_parser::persist_metrics(
 }
 
 bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
-  if (process_next_in_batch(examples))
-  {
+  if (process_next_in_batch(examples)) {
     return true;
   }
 
   unsigned int payload_type;
-  while (advance_to_next_payload_type(all->example_parser->input.get(), payload_type)) {
-    switch(payload_type) {
-      case MSG_TYPE_FILEMAGIC:
-        if (!read_version(all->example_parser->input.get())) {
-          return false;
-        }
-        break;
-      case MSG_TYPE_HEADER:
-        if (!read_header(all->example_parser->input.get())) {
-          return false;
-        }
-        break;
-      case MSG_TYPE_CHECKPOINT:
-        if (!read_checkpoint_msg(all->example_parser->input.get())) {
-          return false;
-        }
-        break;
-      case MSG_TYPE_REGULAR: {
-        bool ignore_msg = false;
-        if (read_regular_msg(all->example_parser->input.get(), examples, ignore_msg)) {
-          if(!ignore_msg) {
-            return true;
-          }
-        }
-        break;
-      }
-      case MSG_TYPE_EOF:
+  while (advance_to_next_payload_type(all->example_parser->input.get(),
+                                      payload_type)) {
+    switch (payload_type) {
+    case MSG_TYPE_FILEMAGIC: {
+      if (!read_version(all->example_parser->input.get())) {
         return false;
-      default:
-    VW::io::logger::log_warn(
-        "Payload type not recognized [0x{:x}], after having read [{}] "
-        "bytes from the file, attempting to skip payload",
-        payload_type, _total_size_read);
-        if (!skip_over_unknown_payload(all->example_parser->input.get()))
-        {
-          return false;
-        }
-        continue;
       }
+      break;
+    }
+    case MSG_TYPE_HEADER: {
+      if (!read_header(all->example_parser->input.get())) {
+        return false;
+      }
+      break;
+    }
+    case MSG_TYPE_CHECKPOINT: {
+      if (!read_checkpoint_msg(all->example_parser->input.get())) {
+        return false;
+      }
+      break;
+    }
+    case MSG_TYPE_REGULAR: {
+      bool ignore_msg = false;
+      if (read_regular_msg(all->example_parser->input.get(), examples,
+                           ignore_msg)) {
+        if (!ignore_msg) {
+          return true;
+        }
+      }
+      break;
+    }
+    case MSG_TYPE_EOF: {
+      return false;
+    }
+
+    default: {
+      VW::io::logger::log_warn(
+          "Payload type not recognized [0x{:x}], after having read [{}] "
+          "bytes from the file, attempting to skip payload",
+          payload_type, _total_size_read);
+      if (!skip_over_unknown_payload(all->example_parser->input.get())) {
+        return false;
+      }
+      continue;
+    }
+    }
   }
 
   return false;
