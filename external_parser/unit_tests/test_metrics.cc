@@ -78,8 +78,6 @@ BOOST_AUTO_TEST_CASE(metrics_increase_with_events_should_be_tracked) {
       {"cbea_non_zero_cost", 100},
       {"cbea_min_actions", 2},
       {"cbea_max_actions", 2},
-      // {"total_log_calls", 0}, # to be uncommented when skip learn is fixed on
-      // next PR
       {"number_skipped_events", 0},
       {"number_events_zero_actions", 0},
       {"line_parse_error", 0}};
@@ -119,7 +117,6 @@ BOOST_AUTO_TEST_CASE(metrics_not_increase_with_events_should_not_be_tracked) {
       {"cbea_label_first_action", 0},
       {"cbea_label_not_first", 0},
       {"cbea_non_zero_cost", 0},
-      {"total_log_calls", 130},
       {"number_skipped_events", 1},
       {"number_events_zero_actions", 0},
       {"line_parse_error", 0}};
