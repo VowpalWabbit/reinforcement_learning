@@ -292,7 +292,7 @@ BOOST_AUTO_TEST_CASE(cb_apprentice_mode) {
       // 1st example is the example with cost in the baseline case (since
       // baseline is 1)
       BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
-      BOOST_CHECK_NE(examples[1]->l.cb.costs[0].cost, -0.f);
+      BOOST_CHECK_CLOSE(examples[1]->l.cb.costs[0].cost, -1.5f, FLOAT_TOL);
     }
 
     // simulate next call to parser->read by clearing up examples
