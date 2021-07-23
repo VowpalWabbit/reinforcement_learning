@@ -173,8 +173,6 @@ BOOST_AUTO_TEST_CASE(apprentice_with_first_action_matching_baseline_action_retur
   BOOST_CHECK_EQUAL(rewards.size(), 1);
   BOOST_CHECK_EQUAL(rewards.front(), 3 + 4 + 5);
 }
-
-// TODO: add test case for first action not matching basesline returns default reward
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(reward_functions_with_ccb_format_with_slot_index)
