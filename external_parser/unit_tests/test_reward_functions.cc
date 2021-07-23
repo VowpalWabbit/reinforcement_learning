@@ -355,3 +355,40 @@ BOOST_AUTO_TEST_CASE(median)
   BOOST_CHECK_EQUAL(rewards.at(1), (2.0 + 4.0) / 2);
 }
 BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(ccb_reward_with_apprentice_mode)
+// actions for slot 0: [0, 1], actions for slot 1: [1]
+// fi-reward-v2.fb contains outcome events for two slots:
+// for slot 0, rewards are: 2, 5, 2, 4
+// for slot 1, rewards are: 2, 2, 5, 1
+BOOST_AUTO_TEST_CASE(first_action_matching_baseline_action_returns_real_reward)
+{ // baseline actions: [0, 1] (set in example_gen.cc)
+  auto rewards = get_float_rewards(
+    "ccb/ccb-apprentice-baseline-match_v2.fb",
+    "ccb/fi-reward_v2.fb",
+    v2::RewardFunctionType_Sum,
+    v2::LearningModeType_Apprentice,
+    v2::ProblemType_CCB
+  );
+
+  BOOST_CHECK_EQUAL(rewards.size(), 2);
+  BOOST_CHECK_EQUAL(rewards.at(0), 2 + 5 + 2 + 4);
+  BOOST_CHECK_EQUAL(rewards.at(1), 2 + 2 + 5 + 1);
+}
+
+BOOST_AUTO_TEST_CASE(first_action_not_matching_baseline_action_returns_default_reward)
+{ // baseline actions: [1, 0] (set in example_gen.cc)
+  auto rewards = get_float_rewards(
+    "ccb/ccb-apprentice-baseline-not-match_v2.fb",
+    "ccb/fi-reward_v2.fb",
+    v2::RewardFunctionType_Sum,
+    v2::LearningModeType_Apprentice,
+    v2::ProblemType_CCB
+  );
+
+  BOOST_CHECK_EQUAL(rewards.size(), 2);
+  BOOST_CHECK_EQUAL(rewards.at(0), DEFAULT_REWARD);
+  BOOST_CHECK_EQUAL(rewards.at(1), DEFAULT_REWARD);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
