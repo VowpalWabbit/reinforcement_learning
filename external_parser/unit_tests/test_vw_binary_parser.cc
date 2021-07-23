@@ -106,14 +106,13 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
   // this test
   {
     auto buffer =
-        read_file(input_files + "/invalid_joined_logs/unknown_msg_type.log");
+        read_file(input_files + "/invalid_joined_logs/one_invalid_msg_type.log");
 
     auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet",
                              nullptr, false, nullptr, nullptr);
     set_buffer_as_vw_input(buffer, vw);
 
     VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
-    v_array<example *> examples;
     unsigned int payload_type;
 
     BOOST_CHECK_EQUAL(bp.advance_to_next_payload_type(
@@ -134,6 +133,8 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
     BOOST_REQUIRE_EQUAL(payload_type, MSG_TYPE_CHECKPOINT);
     BOOST_REQUIRE_EQUAL(bp.read_checkpoint_msg(vw->example_parser->input.get()),
                         true);
+
+    // unknown header message
     BOOST_REQUIRE_EQUAL(bp.advance_to_next_payload_type(
                             vw->example_parser->input.get(), payload_type),
                         true);
@@ -141,19 +142,47 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
     BOOST_REQUIRE_NE(payload_type, MSG_TYPE_EOF);
     BOOST_REQUIRE_NE(payload_type, MSG_TYPE_HEADER);
     BOOST_REQUIRE_NE(payload_type, MSG_TYPE_REGULAR);
+
+    BOOST_REQUIRE_EQUAL(bp.skip_over_unknown_payload(vw->example_parser->input.get()), true);
+
+    // regular message type
+    BOOST_REQUIRE_EQUAL(bp.advance_to_next_payload_type(
+                            vw->example_parser->input.get(), payload_type),
+                        true);
+    BOOST_REQUIRE_EQUAL(payload_type, MSG_TYPE_REGULAR);
+    v_array<example *> examples;
+    examples.push_back(&VW::get_unused_example(vw));
+    bool ignore_msg = false;
+    BOOST_REQUIRE_EQUAL(bp.read_regular_msg(vw->example_parser->input.get(), examples, ignore_msg),
+                        true);
+    BOOST_REQUIRE_EQUAL(ignore_msg, false);
+
+    BOOST_REQUIRE_EQUAL(examples.size(), 4);
+    clear_examples(examples, vw);
     VW::finish(*vw);
   }
-  // now actually check the parser returns false because of unknown MSG_TYPE
+  // now actually check the parser makes it to the end without failing
   {
     auto buffer =
-        read_file(input_files + "/invalid_joined_logs/unknown_msg_type.log");
+        read_file(input_files + "/invalid_joined_logs/one_invalid_msg_type.log");
 
     auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet",
                              nullptr, false, nullptr, nullptr);
     set_buffer_as_vw_input(buffer, vw);
     VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
     v_array<example *> examples;
-    BOOST_CHECK_EQUAL(bp.parse_examples(vw, examples), false);
+    examples.push_back(&VW::get_unused_example(vw));
+
+    size_t total_examples_read = 0;
+
+    while (bp.parse_examples(vw, examples)) {
+      total_examples_read++;
+      clear_examples(examples, vw);
+      examples.push_back(&VW::get_unused_example(vw));
+    }
+
+    BOOST_CHECK_EQUAL(total_examples_read, 1);
+    clear_examples(examples, vw);
     VW::finish(*vw);
   }
 }

@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(metrics_increase_with_events_should_be_tracked) {
                                 expected_string_metrics);
 }
 
-BOOST_AUTO_TEST_CASE(metrics_not_increase_with_events_should_not_be_tracked) {
+BOOST_AUTO_TEST_CASE(check_metrics_deferred_actions_without_activations) {
   std::string infile_name =
       "skip_learn/cb_deferred_action_without_activation.fb";
   std::string outfile_name =
@@ -131,6 +131,45 @@ BOOST_AUTO_TEST_CASE(metrics_not_increase_with_events_should_not_be_tracked) {
       {"first_event_time", ""},
       {"last_event_id", ""},
       {"last_event_time", ""}};
+
+  should_match_expected_metrics(infile_name, outfile_name, expected_int_metrics,
+                                expected_float_metrics,
+                                expected_string_metrics);
+}
+
+BOOST_AUTO_TEST_CASE(check_metrics_deferred_actions_with_activations_and_apprentice) {
+  std::string infile_name =
+      "valid_joined_logs/cb_deferred_actions_w_activations_and_apprentice_10.fb";
+  std::string outfile_name =
+      "cb_deferred_actions_w_activations_and_apprentice_10_metrics_spec.json";
+
+  std::map<std::string, int> expected_int_metrics = {
+      {"total_predict_calls", 7},
+      {"total_learn_calls", 7},
+      {"sfm_count_learn_example_with_shared", 7},
+      {"cbea_labeled_ex", 7},
+      {"cbea_predict_in_learn", 0},
+      {"cbea_label_first_action", 3},
+      {"cbea_label_not_first", 4},
+      // 3 instead of expected 7 since it's apprentice mode plus skip learn
+      {"cbea_non_zero_cost", 3},
+      {"number_skipped_events", 3},
+      {"number_events_zero_actions", 0},
+      {"line_parse_error", 0},
+      {"cbea_min_actions", 2},
+      {"cbea_max_actions", 2}};
+
+  std::map<std::string, float> expected_float_metrics = {
+      {"cbea_sum_cost", -9.0},         {"cbea_sum_cost_baseline", -9.0},
+      {"cbea_avg_feat_per_event", 8.0}, {"cbea_avg_actions_per_event", 2.0},
+      {"cbea_avg_ns_per_event", 6.0},   {"cbea_avg_feat_per_action", 4.0},
+      {"cbea_avg_ns_per_action", 3.0}};
+
+  std::map<std::string, std::string> expected_string_metrics = {
+      {"first_event_id", "e28a9ae6"},
+      {"first_event_time", "2021-07-23T13:35:30.000000Z"},
+      {"last_event_id", "db81aacf"},
+      {"last_event_time", "2021-07-23T13:35:30.000000Z"}};
 
   should_match_expected_metrics(infile_name, outfile_name, expected_int_metrics,
                                 expected_float_metrics,
