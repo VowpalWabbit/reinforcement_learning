@@ -270,7 +270,7 @@ struct ccb_joined_event : public typed_joined_event {
 
     std::map<int, std::vector<reward::outcome_event>> outcomes_map;
     for (auto &o : outcome_events) {
-      if (o.s_index.empty()) {
+      if (o.s_index.empty() && o.index != -1) {
         if (outcomes_map.find(o.index) == outcomes_map.end()) {
           outcomes_map.insert({o.index, {}});
         }

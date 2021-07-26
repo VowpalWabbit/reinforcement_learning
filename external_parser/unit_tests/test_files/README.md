@@ -58,23 +58,46 @@ Residing under `reward_functions`
 
 Residing under `skip_learn`
 
-- cb_deferred_action_without_activation.fb:
+#### cb format
+- deferred_action_without_activation.fb:
   - Generate cb_v2.fb with deferred action: `./example_gen --kind cb --deferred_action_count 1`
   - Generate regular f-reward_v2.fb: `./example_gen --kind f-reward`
   - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 1`. Then rename the merged.log file.
-- cb_deferred_action_with_activation.fb:
+- deferred_action_with_activation.fb:
   - Generate cb_v2.fb with deferred action: `./example_gen --kind cb --deferred_action_count 1`
   - Generate action-taken_v2.fb: `./example_gen --kind action-taken`
   - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 1`. Then rename the merged.log file.
--cb_mixed_deferred_action_events.fb:
+- mixed_deferred_action_events.fb:
   - Generate cb_v2.fb with 2 events first event has deferred_action equals to true: `./example_gen --kind cb --count 2 --deferred_action_count 1`
   - Generated regular f-reward_v2.fb: `./example_gen --kind f-reward --count 2`
   - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 1`. Then rename the merged.log file.
-- cb_deferred_action_without_activation_deduped.fb:
+- deferred_action_without_activation_deduped.fb:
   - Generate cb_v2.fb with deferred action: `./example_gen --kind cb --deferred_action_count 1 --dedup`
   - Generate regular f-reward_v2.fb: `./example_gen --kind f-reward --dedup`
   - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 1`. Then rename the merged.log file.
-- cb_deferred_action_with_activation_deduped.fb:
+- deferred_action_with_activation_deduped.fb:
   - Generate cb_v2.fb with deferred action: `./example_gen --kind cb --deferred_action_count 1 --dedup`
   - Generate action-taken_v2.fb: `./example_gen --kind action-taken --dedup`
   - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 1`. Then rename the merged.log file.
+
+#### ccb format
+- deferred_action_without_activation.fb:
+  - Generate ccb_v2.fb with deferred action: `./example_gen --kind ccb --deferred_action_count 1`
+  - Generate regular fi-reward_v2.fb: `./example_gen --kind fi-reward --random_reward`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 2`. Then rename the merged.log file.
+- deferred_action_with_activation.fb:
+  - Generate ccb_v2.fb with deferred action: `./example_gen --kind ccb --deferred_action_count 1`
+  - Generate action-taken_v2.fb: `./example_gen --kind action-taken`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 2`. Then rename the merged.log file.
+- mixed_deferred_action_events.fb:
+  - Generate ccb_v2.fb with 2 events first event has deferred_action equals to true: `./example_gen --kind ccb --count 2 --deferred_action_count 1`
+  - Generated regular fi-reward_v2.fb: `./example_gen --kind fi-reward --count 2`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 2`. Then rename the merged.log file.
+- deferred_action_without_activation_deduped.fb:
+  - Generate ccb_v2.fb with deferred action: `./example_gen --kind ccb --deferred_action_count 1 --dedup`
+  - Generate regular fi-reward_v2.fb: `./example_gen --kind fi-reward --dedup`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 2`. Then rename the merged.log file.
+- deferred_action_with_activation_deduped.fb:
+  - Generate ccb_v2.fb with deferred action: `./example_gen --kind ccb --deferred_action_count 1 --dedup`
+  - Generate action-taken_v2.fb: `./example_gen --kind action-taken --dedup`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 2`. Then rename the merged.log file.
