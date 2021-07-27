@@ -467,21 +467,17 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
 
   je->fill_in_label(examples);
 
-  if (je->interaction_metadata.payload_type == v2::PayloadType_CB) {
-    je->calc_and_set_reward(examples, _loop_info.default_reward,
-                            _reward_calculation.value());
+  je->calc_and_set_reward(examples, _loop_info.default_reward,
+                          _reward_calculation.value());
 
-    if (!je->is_joined_event_learnable()) {
-      _current_je_is_skip_learn = true;
-      if (_vw->example_parser->metrics) {
-        _vw->example_parser->metrics->NumberOfSkippedEvents++;
-      }
-      clear_examples = true;
-      return false;
+  if (!je->is_joined_event_learnable()) {
+    if (_vw->example_parser->metrics) { //TODO: Check if this is valid for ccb
+      _vw->example_parser->metrics->NumberOfSkippedEvents++;
     }
-  } else if (je->interaction_metadata.payload_type == v2::PayloadType_CCB) {
-    je->calc_and_set_reward(examples, _loop_info.default_reward,
-                            _reward_calculation.value());
+
+    _current_je_is_skip_learn = true;
+    clear_examples = true;
+    return false;
   }
 
   if (_binary_to_json) {

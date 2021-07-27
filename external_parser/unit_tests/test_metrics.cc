@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(metrics_increase_with_events_should_be_tracked) {
 
 BOOST_AUTO_TEST_CASE(check_metrics_deferred_actions_without_activations) {
   std::string infile_name =
-      "skip_learn/cb_deferred_action_without_activation.fb";
+      "skip_learn/cb/deferred_action_without_activation.fb";
   std::string outfile_name =
       "cb_deferred_action_without_activation_metrics_spec.json";
 

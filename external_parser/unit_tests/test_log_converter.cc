@@ -47,8 +47,8 @@ BOOST_AUTO_TEST_CASE(convert_binary_to_dsjson) {
 }
 
 BOOST_AUTO_TEST_CASE(convert_inactive_event_without_activation) {
-  std::string infile_path = "/skip_learn/cb_deferred_action_without_activation.fb";
-  std::string outfile_path = "/skip_learn/cb_deferred_action_without_activation.dsjson";
+  std::string infile_path = "/skip_learn/cb/deferred_action_without_activation.fb";
+  std::string outfile_path = "/skip_learn/cb/deferred_action_without_activation.dsjson";
 
   std::string converted_json = get_json_event(infile_path, outfile_path);
   std::string expected_joined_json = "{\"_label_cost\":-1.5,"
@@ -65,8 +65,8 @@ BOOST_AUTO_TEST_CASE(convert_inactive_event_without_activation) {
 }
 
 BOOST_AUTO_TEST_CASE(convert_inactive_event_with_activation) {
-  std::string infile_path = "/skip_learn/cb_deferred_action_with_activation.fb";
-  std::string outfile_path = "/skip_learn/cb_deferred_action_with_activation.dsjson";
+  std::string infile_path = "/skip_learn/cb/deferred_action_with_activation.fb";
+  std::string outfile_path = "/skip_learn/cb/deferred_action_with_activation.dsjson";
 
   std::string converted_json = get_json_event(infile_path, outfile_path);
   std::string expected_joined_json = "{\"_label_cost\":-0.0,"
