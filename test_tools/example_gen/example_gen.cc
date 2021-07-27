@@ -67,7 +67,7 @@ enum options{
   CCB_BASELINE_ACTION_LOOP
 };
 
-void load_config_from_json(int action, u::configuration& config, bool enable_apprentice_mode)
+void load_config_from_json(int action, u::configuration& config, bool enable_apprentice_mode, float epsilon = 0.0f)
 {
   std::string file_name(options[action]);
 
@@ -110,9 +110,11 @@ void load_config_from_json(int action, u::configuration& config, bool enable_app
   }
 
   if(action == CCB_ACTION || action == CCB_BASELINE_ACTION || action == CCB_WITH_SLOT_ID_ACTION || action == CCB_LOOP || action == CCB_BASELINE_ACTION_LOOP) {
-    config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
+    std::string args = "--ccb_explore_adf --json --quiet --epsilon " + std::to_string(epsilon) + " --first_only --id N/A";
+    config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, args.c_str());
   } else if (action == SLATES_ACTION) {
-    config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--slates --ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
+    std::string args = "--slates --ccb_explore_adf --json --quiet --epsilon " + std::to_string(epsilon) + " --first_only --id N/A";
+    config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, args.c_str());
   }
   else if (action == CA_ACTION)
   {
@@ -467,12 +469,12 @@ int pseudo_random(int seed) {
   return (int)(val & 0xFFFFFFFF);
 }
 
-int run_config(int action, int count, int initial_seed, bool gen_random_reward, bool enable_apprentice_mode, int deferred_action_count, std::string config_file, std::mt19937& rng) {
+int run_config(int action, int count, int initial_seed, bool gen_random_reward, bool enable_apprentice_mode, int deferred_action_count, std::string config_file, std::mt19937& rng, float epsilon = 0.0f) {
   u::configuration config;
 
   if (config_file.empty())
   {
-    load_config_from_json(action, config, enable_apprentice_mode);
+    load_config_from_json(action, config, enable_apprentice_mode, epsilon);
   }
   else
   {
@@ -518,6 +520,7 @@ int main(int argc, char *argv[]) {
   bool gen_random_reward = false;
   bool enable_apprentice_mode = false;
   int deferred_action_count = 0;
+  float epsilon = 0.f;
 
   desc.add_options()
     ("help", "Produce help message")
@@ -525,6 +528,7 @@ int main(int argc, char *argv[]) {
     ("dedup", "Enable dedup/zstd")
     ("count", po::value<int>(), "Number of events to produce")
     ("seed", po::value<int>(), "Initial seed used to produce event ids")
+    ("epsilon", po::value<float>(), "epsilon to be used in command line args for VW")
     ("kind", po::value<std::string>(), "which kind of example to generate (cb,invalid-cb,ccb,ccb-with-slot-id,ccb-baseline,slates,ca,cb-loop,ccb-loop,ccb-baseline-loop,(f|s)(s|i|mix|i-out-of-bound)?-reward,action-taken)")
     ("random_reward", "Generate random float reward for observation event")
     ("config_file", po::value<std::string>(), "json config file for rlclinetlib")
@@ -554,6 +558,8 @@ int main(int argc, char *argv[]) {
       count = vm["count"].as<int>();
     if(vm.count("seed") > 0)
       seed = vm["seed"].as<int>();
+    if(vm.count("epsilon") > 0)
+      epsilon = vm["epsilon"].as<float>();
     if(vm.count("config_file") > 0)
       config_file = vm["config_file"].as<std::string>();
     if(vm.count("deferred_action_count") > 0)
@@ -582,7 +588,7 @@ int main(int argc, char *argv[]) {
 
   if(gen_all) {
     for(int i = 0; options[i]; ++i) {
-      if(run_config(i, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file, rng))
+      if(run_config(i, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file, rng, epsilon))
         return -1;
     }
     return 0;
@@ -602,5 +608,5 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  return run_config(action, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file, rng);
+  return run_config(action, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file, rng, epsilon);
 }
