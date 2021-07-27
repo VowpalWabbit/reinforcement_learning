@@ -29,7 +29,7 @@ struct typed_joined_event {
                     // TODO outcome_events should also idealy be const here but
                     // we currently need it for ccb calculation
                     std::vector<reward::outcome_event> &outcome_events) = 0;
-  
+
   virtual void calculate_metrics(dsjson_metrics*) {}
 };
 
@@ -137,12 +137,8 @@ struct cb_joined_event : public typed_joined_event {
   }
 
   void calculate_metrics(dsjson_metrics* metrics) override {
-    if (metrics)
-    {
-      if (interaction_data.actions.size() == 0)
-      {
-        metrics->NumberOfEventsZeroActions++;
-      }
+    if (metrics && interaction_data.actions.size() == 0) {
+      metrics->NumberOfEventsZeroActions++;
     }
   }
 };
@@ -155,10 +151,13 @@ struct ccb_joined_event : public typed_joined_event {
   std::vector<float> rewards;
   std::vector<float> original_rewards;
 
+  bool skip_learn;
+
   ~ccb_joined_event() = default;
   // TODO fill in
-  bool is_skip_learn() const override { return false; }
-  void set_skip_learn(bool) override {}
+  bool is_skip_learn() const override { return skip_learn; }
+  void set_skip_learn(bool sl) override { skip_learn = sl; }
+
   void set_apprentice_reward() override {
     for (size_t i = 0; i < interaction_data.size(); i++) {
       if (!interaction_data[i].actions.empty() &&
@@ -169,7 +168,6 @@ struct ccb_joined_event : public typed_joined_event {
   }
 
   void fill_in_label(v_array<example *> &examples) const override {
-
     // index to interaction_data vector which holds per-slot info
     size_t slot_index = 0;
 
@@ -272,7 +270,7 @@ struct ccb_joined_event : public typed_joined_event {
 
     std::map<int, std::vector<reward::outcome_event>> outcomes_map;
     for (auto &o : outcome_events) {
-      if (o.s_index.empty()) {
+      if (o.s_index.empty() && o.index != -1) {
         if (outcomes_map.find(o.index) == outcomes_map.end()) {
           outcomes_map.insert({o.index, {}});
         }
