@@ -2,11 +2,21 @@
 #include <boost/test/unit_test.hpp>
 #include <stdio.h>
 
-std::string get_json_event(std::string infile_path, std::string outfile_path) {
+std::string get_json_event(std::string infile_path, std::string outfile_path,
+    v2::ProblemType problem_type=v2::ProblemType_CB) {
   std::string infile_name = get_test_files_location() + infile_path;
-  auto vw = VW::initialize("--cb_explore_adf -d " + infile_name +
-                           " --binary_parser --quiet --binary_to_json",
-                           nullptr, false, nullptr, nullptr);
+  std::string command;
+
+  switch (problem_type) {
+    case v2::ProblemType_CB:
+      command = "--quiet --binary_to_json --binary_parser --cb_explore_adf -d " + infile_name;
+      break;
+    case v2::ProblemType_CCB:
+      command = "--quiet --binary_to_json --binary_parser --ccb_explore_adf -d " + infile_name;
+      break;
+  }
+
+  auto vw = VW::initialize(command, nullptr, false, nullptr, nullptr);
 
   v_array<example *> examples;
   examples.push_back(&VW::get_unused_example(vw));
@@ -28,9 +38,10 @@ std::string get_json_event(std::string infile_path, std::string outfile_path) {
   return dsjson_stream.str();
 }
 
+BOOST_AUTO_TEST_SUITE(log_converter_cb_format)
 BOOST_AUTO_TEST_CASE(convert_binary_to_dsjson) {
-  std::string infile_path = "/valid_joined_logs/cb_simple.log";
-  std::string outfile_path = "/valid_joined_logs/cb_simple.dsjson";
+  std::string infile_path = "valid_joined_logs/cb_simple.log";
+  std::string outfile_path = "valid_joined_logs/cb_simple.dsjson";
 
   std::string converted_json = get_json_event(infile_path, outfile_path);
   std::string expected_joined_json = "{\"_label_cost\":-1.5,"
@@ -47,8 +58,8 @@ BOOST_AUTO_TEST_CASE(convert_binary_to_dsjson) {
 }
 
 BOOST_AUTO_TEST_CASE(convert_inactive_event_without_activation) {
-  std::string infile_path = "/skip_learn/cb/deferred_action_without_activation.fb";
-  std::string outfile_path = "/skip_learn/cb/deferred_action_without_activation.dsjson";
+  std::string infile_path = "skip_learn/cb/deferred_action_without_activation.fb";
+  std::string outfile_path = "skip_learn/cb/deferred_action_without_activation.dsjson";
 
   std::string converted_json = get_json_event(infile_path, outfile_path);
   std::string expected_joined_json = "{\"_label_cost\":-1.5,"
@@ -65,8 +76,8 @@ BOOST_AUTO_TEST_CASE(convert_inactive_event_without_activation) {
 }
 
 BOOST_AUTO_TEST_CASE(convert_inactive_event_with_activation) {
-  std::string infile_path = "/skip_learn/cb/deferred_action_with_activation.fb";
-  std::string outfile_path = "/skip_learn/cb/deferred_action_with_activation.dsjson";
+  std::string infile_path = "skip_learn/cb/deferred_action_with_activation.fb";
+  std::string outfile_path = "skip_learn/cb/deferred_action_with_activation.dsjson";
 
   std::string converted_json = get_json_event(infile_path, outfile_path);
   std::string expected_joined_json = "{\"_label_cost\":-0.0,"
@@ -80,3 +91,46 @@ BOOST_AUTO_TEST_CASE(convert_inactive_event_with_activation) {
 
   BOOST_CHECK_EQUAL(converted_json, expected_joined_json);
 }
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(log_converter_ccb_format)
+BOOST_AUTO_TEST_CASE(ccb_payload_with_slot_index) {
+  std::string infile_path = "valid_joined_logs/ccb_simple.log";
+  std::string outfile_path = "valid_joined_logs/ccb_simple.dsjson";
+
+  std::string converted_json = get_json_event(infile_path, outfile_path, v2::ProblemType_CCB);
+  std::string expected_joined_json = "{\"Timestamp\":\"2021-06-09T12:08:00.000000Z\","
+    "\"Version\":\"1\",\"EventId\":\"91f71c8\",\"c\":{\"GUser\":{\"id\":\"a\","
+    "\"major\":\"eng\",\"hobby\":\"hiking\"},\"_multi\":[{\"TAction\":{\"a1\":\"f1\"}},"
+    "{\"TAction\":{\"a2\":\"f2\"}}],\"_slots\":[{\"Slot\":{\"a1\":\"f1\"}},"
+    "{\"Slot\":{\"a1\":\"f1\"}}]},\"_outcomes\":[{\"_label_cost\":-0.0,"
+    "\"_id\":\"4a3de951-e9e6-487b-8891-547c9a3fb2480\",\"_a\":[0,1],"
+    "\"_p\":[1,0],\"_original_label_cost\":-0.0},"
+    "{\"_label_cost\":-1.5,\"_id\":\"4f064c85-a04b-4f3f-bc0e-43aef8ad96530\","
+    "\"_a\":[1],\"_p\":[1],\"_o\":[{\"v\":1.5,\"EventId\":\"91f71c8\","
+    "\"Index\":\"1\",\"ActionTaken\":false}],\"_original_label_cost\":-1.5}],"
+    "\"VWState\":{\"m\":\"N/A\"}}\n";
+  BOOST_CHECK_EQUAL(converted_json, expected_joined_json);
+}
+
+BOOST_AUTO_TEST_CASE(ccb_payload_with_slot_id) {
+  std::string infile_path = "valid_joined_logs/ccb_w_slot_id.log";
+  std::string outfile_path = "valid_joined_logs/ccb_w_slot_id.dsjson";
+
+  std::string converted_json = get_json_event(infile_path, outfile_path, v2::ProblemType_CCB);
+  std::string expected_json = "{\"Timestamp\":\"2021-08-06T18:29:49.000000Z\","
+    "\"Version\":\"1\",\"EventId\":\"91f71c8\",\"c\":{\"GUser\":{\"id\":\"a\","
+    "\"major\":\"eng\",\"hobby\":\"hiking\"},\"_multi\":[{\"TAction\":"
+    "{\"a1\":\"f1\"}},{\"TAction\":{\"a2\":\"f2\"}}],\"_slots\":[{\"Slot\":"
+    "{\"a1\":\"f1\"}, \"_id\": \"slot_0\"},{\"Slot\":{\"a1\":\"f1\"}, \"_id\":"
+    "\"slot_1\"}]},\"_outcomes\":[{\"_label_cost\":-1.5,\"_id\":\"slot_0\","
+    "\"_a\":[0,1],\"_p\":[1,0],\"_o\":[{\"v\":1.5,\"EventId\":\"91f71c8\","
+    "\"Index\":\"slot_0\",\"ActionTaken\":false}],\"_original_label_cost\":-1.5},"
+    "{\"_label_cost\":-1.5,\"_id\":\"slot_1\",\"_a\":[1],\"_p\":[1],\"_o\":["
+    "{\"v\":1.5,\"EventId\":\"91f71c8\",\"Index\":\"slot_1\",\"ActionTaken\":false}],"
+    "\"_original_label_cost\":-1.5}],\"VWState\":{\"m\":\"N/A\"}}\n";
+
+  BOOST_CHECK_EQUAL(converted_json, expected_json);
+}
+
+BOOST_AUTO_TEST_SUITE_END()

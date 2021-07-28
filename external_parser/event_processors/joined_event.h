@@ -161,8 +161,10 @@ struct ccb_joined_event : public typed_joined_event {
 
   std::vector<float> rewards;
   std::vector<float> original_rewards;
+  std::map<int, std::vector<reward::outcome_event>> outcomes_map;
 
   bool skip_learn;
+  float probability_of_drop {0.f};
 
   ~ccb_joined_event() = default;
   // TODO fill in
@@ -274,11 +276,11 @@ struct ccb_joined_event : public typed_joined_event {
 
     if (slot_id_to_index_map.size() > 0) {
       for (auto &outcome : outcome_events) {
-        if (!outcome.s_index.empty()) {
+        if (outcome.index_type == v2::IndexValue_literal &&
+            !outcome.s_index.empty()) {
           auto iterator = slot_id_to_index_map.find(outcome.s_index);
           if (iterator != slot_id_to_index_map.end()) {
             outcome.index = iterator->second;
-            outcome.s_index = "";
           } else {
             VW::io::logger::log_warn("CCB outcome event with slot id: [{}] "
                                      "has no matching interaction slot event.",
@@ -288,9 +290,8 @@ struct ccb_joined_event : public typed_joined_event {
       }
     }
 
-    std::map<int, std::vector<reward::outcome_event>> outcomes_map;
     for (auto &o : outcome_events) {
-      if (o.s_index.empty() && o.index != -1) {
+      if (o.index != -1) {
         if (outcomes_map.find(o.index) == outcomes_map.end()) {
           outcomes_map.insert({o.index, {}});
         }

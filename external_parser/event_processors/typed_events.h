@@ -68,7 +68,6 @@ template <> struct event_processor<v2::MultiSlotEvent> {
         data.probabilities.emplace_back(prob);
       }
 
-      data.probabilityOfDrop = 1.f - metadata.pass_probability();
       ccb_data->interaction_data.emplace_back(std::move(data));
       slot_index++;
     }
@@ -79,6 +78,7 @@ template <> struct event_processor<v2::MultiSlotEvent> {
     );
 
     ccb_data->skip_learn = evt.deferred_action();
+    ccb_data->probability_of_drop = 1.f - metadata.pass_probability();
 
     return {TimePoint(enqueued_time_utc),
             {metadata.client_time_utc()

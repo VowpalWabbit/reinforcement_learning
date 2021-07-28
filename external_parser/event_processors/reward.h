@@ -1,6 +1,7 @@
 #pragma once
 
 #include "metadata.h"
+#include "generated/v2/OutcomeEvent_generated.h"
 
 namespace reward {
 
@@ -9,6 +10,7 @@ struct outcome_event {
       : metadata({}), s_index(""), index(-1), s_value(""), value(0),
         enqueued_time_utc(TimePoint()), action_taken(false) {}
   metadata::event_metadata_info metadata;
+  v2::IndexValue index_type;
   std::string s_index;
   int index;
   std::string s_value;
