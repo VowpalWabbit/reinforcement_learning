@@ -460,3 +460,62 @@ BOOST_AUTO_TEST_CASE(ccb_apprentice_mode) {
   clear_examples(examples, vw);
   VW::finish(*vw);
 }
+
+BOOST_AUTO_TEST_CASE(ccb_skip_learn_w_activations_and_apprentice) {
+  std::string input_files = get_test_files_location();
+
+  // this datafile contains 20 joined events with the 5 first interactions being
+  // deferred actions but 2 of those 5 have activations reported (event_id's:
+  // [75d50657, 4f402f75])
+
+  auto buffer = read_file(
+      input_files + "/valid_joined_logs/"
+                    "ccb_deferred_actions_w_activations_and_apprentice_20.fb");
+
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+
+  set_buffer_as_vw_input(buffer, vw);
+
+  size_t joined_events_count = 0;
+  while (vw->example_parser->reader(vw, examples) > 0) {
+    joined_events_count++;
+
+    // simulate next call to parser->read by clearing up examples
+    // and preparing one unused example
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  // this file contains 20 joined events 5 deferred but 2 of those activated
+  BOOST_CHECK_EQUAL(joined_events_count, 17);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
+BOOST_AUTO_TEST_CASE(
+    ccb_compare_dsjson_with_fb_models_deferred_actions_w_activations_and_apprentice) {
+  std::string input_files = get_test_files_location();
+
+  std::string model_name =
+      input_files +
+      "/test_outputs/deferred_actions_w_activations_and_apprentice";
+
+  std::string file_name =
+      input_files +
+      "/valid_joined_logs/ccb_deferred_actions_w_activations_and_apprentice_20";
+
+  generate_dsjson_and_fb_models(model_name, "--ccb_explore_adf ", file_name);
+
+  // read the models and compare
+  auto buffer_fb_model = read_file(model_name + ".fb");
+  auto buffer_dsjson_model = read_file(model_name + ".json");
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
+                                buffer_dsjson_model.begin(),
+                                buffer_dsjson_model.end());
+}
