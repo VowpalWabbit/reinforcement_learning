@@ -427,6 +427,19 @@ int take_action(r::live_model& rl, const char *event_id, int action, unsigned in
 
       send_ccb_outcome(rng, gen_random_reward, event_id, rl, status);
 
+      if (action_flag == r::action_flags::DEFERRED)
+      {
+        size_t rand_num = get_random_number(rng, 0 /*min*/);
+        if (rand_num % 2)
+        {
+          // send activation
+          std::cout << "sending activation for event_id: " << event_id << std::endl;
+          if (rl.report_action_taken(event_id, &status) != err::success ) {
+            std::cout << status.get_error_msg() << std::endl;
+          }
+        }
+      }
+
       break;
     };
     case CCB_BASELINE_ACTION_LOOP: { // "ccb action and random number of float rewards and mix of slot ids / non slot ids / float / string rewards"
@@ -449,6 +462,19 @@ int take_action(r::live_model& rl, const char *event_id, int action, unsigned in
       }
 
       send_ccb_outcome(rng, gen_random_reward, event_id, rl, status);
+
+      if (action_flag == r::action_flags::DEFERRED)
+      {
+        size_t rand_num = get_random_number(rng, 0 /*min*/);
+        if (rand_num % 2)
+        {
+          // send activation
+          std::cout << "sending activation for event_id: " << event_id << std::endl;
+          if (rl.report_action_taken(event_id, &status) != err::success ) {
+            std::cout << status.get_error_msg() << std::endl;
+          }
+        }
+      }
 
       break;
     };
@@ -549,7 +575,7 @@ int main(int argc, char *argv[]) {
 
     std::vector<std::string> deferrable_interactions {
       "cb", "invalid-cb", "ccb", "ccb-baseline", "slates", "ca", "cb-loop",
-      "ccb-with-slot-id"
+      "ccb-with-slot-id", "ccb-loop", "ccb-baseline-loop"
     };
 
     if(vm.count("kind") > 0)
