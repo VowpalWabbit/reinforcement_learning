@@ -13,6 +13,7 @@
 // VW headers
 #include "parse_example_json.h"
 #include "parser.h"
+#include "scope_exit.h"
 
 example_joiner::example_joiner(vw *vw)
     : _vw(vw), _reward_calculation(&reward::earliest), _binary_to_json(false) {}
@@ -110,7 +111,8 @@ void example_joiner::set_learning_mode_config(
   _loop_info.learning_mode_config.set(learning_mode, sticky);
 }
 
-void example_joiner::set_problem_type_config(v2::ProblemType problem_type, bool sticky) {
+void example_joiner::set_problem_type_config(v2::ProblemType problem_type,
+                                             bool sticky) {
   _loop_info.problem_type_config.set(problem_type, sticky);
 }
 
@@ -118,7 +120,8 @@ bool example_joiner::joiner_ready() {
   return _loop_info.is_configured() && _reward_calculation.is_valid();
 }
 
-void example_joiner::set_reward_function(const v2::RewardFunctionType type, bool sticky) {
+void example_joiner::set_reward_function(const v2::RewardFunctionType type,
+                                         bool sticky) {
 
   reward::RewardFunctionType reward_calculation = nullptr;
   switch (type) {
@@ -148,8 +151,8 @@ void example_joiner::set_reward_function(const v2::RewardFunctionType type, bool
   default:
     break;
   }
-  
-  if(reward_calculation) {
+
+  if (reward_calculation) {
     _reward_calculation.set(reward_calculation, sticky);
   }
 }
@@ -226,7 +229,6 @@ bool example_joiner::process_interaction(const v2::Event &event,
             *cb, metadata, enqueued_time_utc,
             typed_event::event_processor<v2::CbEvent>::get_context(*cb)));
   } else if (metadata.payload_type() == v2::PayloadType_CCB) {
-
     const v2::MultiSlotEvent *ccb = nullptr;
     if (!typed_event::process_compression<v2::MultiSlotEvent>(
             event.payload()->data(), event.payload()->size(), metadata, ccb,
@@ -289,7 +291,7 @@ bool example_joiner::process_interaction(const v2::Event &event,
 bool example_joiner::process_outcome(const v2::Event &event,
                                      const v2::Metadata &metadata,
                                      const TimePoint &enqueued_time_utc) {
-  joined_event::outcome_event o_event;
+  reward::outcome_event o_event;
   o_event.metadata = {metadata.client_time_utc()
                           ? timestamp_to_chrono(*metadata.client_time_utc())
                           : TimePoint(),
@@ -319,7 +321,7 @@ bool example_joiner::process_outcome(const v2::Event &event,
   if (outcome->index_type() == v2::IndexValue_literal) {
     o_event.s_index = outcome->index_as_literal()->c_str();
   } else if (outcome->index_type() == v2::IndexValue_numeric) {
-    o_event.s_index = outcome->index_as_numeric()->index();
+    o_event.index = outcome->index_as_numeric()->index();
   }
 
   o_event.action_taken = outcome->action_taken();
@@ -394,15 +396,14 @@ bool example_joiner::process_dedup(const v2::Event &event,
 }
 
 bool example_joiner::process_joined(v_array<example *> &examples) {
+  _current_je_is_skip_learn = false;
+
   if (_batch_event_order.empty()) {
     return true;
   }
 
   auto id = _batch_event_order.front();
   bool multiline = false;
-  float reward = _loop_info.default_reward;
-  // original reward is used to record the observed reward of apprentice mode
-  float original_reward = _loop_info.default_reward;
 
   for (auto &joined_event : _batch_grouped_events[id]) {
     auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
@@ -421,72 +422,68 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     }
   }
 
+  joined_event::joined_event *je = nullptr;
+
+  // this scope exit guard will execute when this method returns
+  // that way we can guarantee clean-up no matter where the return happens
+  // without having to duplicate the cleanup code
+  bool clear_examples = false;
+  auto clear_event_id_on_exit = VW::scope_exit([&] {
+    if (je) {
+      if (_vw->example_parser->metrics) {
+        je->calculate_metrics(_vw->example_parser->metrics.get());
+      }
+      if (_binary_to_json &&
+          je->interaction_metadata.payload_type == v2::PayloadType_CB) {
+        log_converter::build_cb_json(_outfile, *je);
+      }
+    }
+
+    clear_event_id_batch_info(id);
+    if (clear_examples) {
+      clear_vw_examples(examples);
+    }
+  });
+
   if (_batch_grouped_examples.find(id) == _batch_grouped_examples.end()) {
     // can't learn from this interaction
     VW::io::logger::log_warn("Events with event id [{}] were processed but "
                              "no valid interaction found. Skipping..",
                              id);
-    clear_event_id_batch_info(id);
-    clear_vw_examples(examples);
+    clear_examples = true;
     return false;
   }
 
-  auto &je = _batch_grouped_examples[id];
-  if (!je.ok) {
+  je = &_batch_grouped_examples[id];
+  if (!je->ok) {
     // don't learn from this interaction
     VW::io::logger::log_warn(
         "Interaction with event id [{}] has been invalidated due to malformed "
         "observation. Skipping...",
         id);
-    clear_event_id_batch_info(id);
-    clear_vw_examples(examples);
+    clear_examples = true;
     return false;
   }
 
-  if (je.should_calculate_reward()) {
-    original_reward = _reward_calculation(je);
+  je->fill_in_label(examples);
 
-    // TODO maybe move this into joined_event too?
-    if (je.interaction_metadata.payload_type == v2::PayloadType_CB &&
-        je.interaction_metadata.learning_mode ==
-            v2::LearningModeType_Apprentice) {
-      if (je.should_calculate_apprentice_reward()) {
-        // je.interaction_data.actions[0] == je.baseline_action
-        // TODO: default apprenticeReward should come from config
-        // setting to default reward matches current behavior for now
-        reward = original_reward;
-      }
-    } else {
-      reward = original_reward;
+  je->calc_and_set_reward(examples, _loop_info.default_reward,
+                          _reward_calculation.value());
+
+  if (!je->is_joined_event_learnable()) {
+    if (_vw->example_parser->metrics) { //TODO: Check if this is valid for ccb
+      _vw->example_parser->metrics->NumberOfSkippedEvents++;
     }
-  }
 
-  bool skip_learn = !je.is_joined_event_learnable();
+    _current_je_is_skip_learn = true;
+    clear_examples = true;
+    return false;
+  }
 
   if (_binary_to_json) {
-    if (_loop_info.problem_type_config == v2::ProblemType_CB) {
-      log_converter::build_cb_json(_outfile, je, reward, original_reward,
-                                   skip_learn);
-
-      clear_event_id_batch_info(id);
-      clear_vw_examples(examples);
-      return true;
-    }
-  }
-
-  if (skip_learn) {
-    _joiner_metrics.number_of_skipped_events++;
-    clear_event_id_batch_info(id);
-    clear_vw_examples(examples);
+    clear_examples = true;
     return true;
   }
-
-  je.fill_in_label(examples);
-  je.set_cost(examples, reward);
-  // if problem type == ccb or slates
-  // for each reward calculated for each slot
-  // je.set_cost(examples, reward, slot_index)
-  _joiner_metrics.number_of_learned_events++;
 
   if (multiline) {
     // add an empty example to signal end-of-multiline
@@ -495,11 +492,11 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     examples.back()->is_newline = true;
   }
 
-  clear_event_id_batch_info(id);
   return true;
 }
 
 bool example_joiner::processing_batch() { return !_batch_event_order.empty(); }
+bool example_joiner::current_event_is_skip_learn() {return _current_je_is_skip_learn;}
 void example_joiner::on_new_batch() {}
 void example_joiner::on_batch_read() {}
 

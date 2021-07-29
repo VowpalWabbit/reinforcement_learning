@@ -125,6 +125,7 @@ MSG_TYPE_HEADER = 0x55555555
 MSG_TYPE_CHECKPOINT = 0x11111111
 MSG_TYPE_REGULAR = 0xFFFFFFFF
 MSG_TYPE_EOF = 0xAAAAAAAA
+MSG_TYPE_UNKNOWN = 0x1AAAAAAA
 
 class BinLogWriter:
     def __init__(self, file_name):
@@ -166,7 +167,7 @@ class BinLogWriter:
             builder.Finish(header_off)
             self.write_message(MSG_TYPE_HEADER, builder.Output())
 
-    def write_join_msg(self, events, mess_with_payload = False, empty_payload = False):
+    def write_join_msg(self, events, mess_with_payload = False, empty_payload = False, one_invalid_msg_type = False):
         builder = flatbuffers.Builder(0)
 
         evt_offsets = []
@@ -191,7 +192,11 @@ class BinLogWriter:
         joined_payload_off = JoinedPayloadEnd(builder)
 
         builder.Finish(joined_payload_off)
-        self.write_message(MSG_TYPE_REGULAR, builder.Output())
+        if one_invalid_msg_type:
+            one_invalid_msg_type = False
+            self.write_message(MSG_TYPE_UNKNOWN, builder.Output())
+        else:
+            self.write_message(MSG_TYPE_REGULAR, builder.Output())
 
     def write_checkpoint_info(self):
         print("reward function type: ", reward_function_type)
@@ -297,20 +302,20 @@ if args.c:
     bin_f_umt = BinLogWriter(result_file_unknown_msg_type)
     bin_f_umt.write_header({ 'eud': '-1', 'joiner': 'joiner.py'})
     bin_f_umt.write_checkpoint_info()
-    MSG_TYPE_UNKNOWN = 0x1AAAAAAA
     bin_f_umt.write_message(MSG_TYPE_UNKNOWN, b'')
 
     # string: name, string: i_file, string: o_file, bool: multiple_batches, bool: mess_with_payload, bool: mess_with_payload_while_writing,
-    #    bool: empty_payload_while_writing, bool: no_interaction, bool: no_observation)
+    #    bool: empty_payload_while_writing, bool: no_interaction, bool: no_observation, bool: first regular msg type replaced with invalid msg type)
     bad_file_combinations = [
-        ('corrupt_joined_payload.log', 'cb_v2_size_2.fb', 'f-reward_v2_size_2.fb', True, False, True, False, False, False),
-        ('bad_event_in_joined_event.log', 'cb_v2_size_2.fb', 'f-reward_v2_size_2.fb', True, True, False, False, False, False),
-        ('dedup_payload_missing.log', 'cb_v2_dedup.fb', 'f-reward_v2_size_2.fb', False, False, False, True, False, False),
-        ('interaction_with_no_observation.log', 'cb_v2_size_2.fb', 'f-reward_v2_size_2.fb', False, False, False, False, False, True),
-        ('no_interaction_but_with_observation.log', 'cb_v2_size_2.fb', 'f-reward_v2_size_2.fb', True, False, False, False, True, False)
+        ('corrupt_joined_payload.log', 'cb_v2_size_2.fb', 'f-reward_v2_size_2.fb', True, False, True, False, False, False, False),
+        ('bad_event_in_joined_event.log', 'cb_v2_size_2.fb', 'f-reward_v2_size_2.fb', True, True, False, False, False, False, False),
+        ('dedup_payload_missing.log', 'cb_v2_dedup.fb', 'f-reward_v2_size_2.fb', False, False, False, True, False, False, False),
+        ('interaction_with_no_observation.log', 'cb_v2_size_2.fb', 'f-reward_v2_size_2.fb', False, False, False, False, False, True, False),
+        ('no_interaction_but_with_observation.log', 'cb_v2_size_2.fb', 'f-reward_v2_size_2.fb', True, False, False, False, True, False, False),
+        ('one_invalid_msg_type.log', 'cb_v2_size_2.fb', 'f-reward_v2_size_2.fb', True, False, False, False, False, False, True)
     ]
 
-    for f_name, interaction_file_name, observations_file_name, multiple_batches, mwp, mwpww, epww, ni, no in bad_file_combinations:
+    for f_name, interaction_file_name, observations_file_name, multiple_batches, mwp, mwpww, epww, ni, no, imt in bad_file_combinations:
         print("---------")
         print(f'generating {f_name} using interactions file {interaction_file_name}, observations file {observations_file_name}')
         print("---------")
@@ -345,6 +350,7 @@ if args.c:
         empty_payload_while_writing = epww
         no_interaction = ni
         no_observation = no
+        one_invalid_msg_type_while_writing = imt
 
         for msg in interactions_file.messages():
             batch = EventBatch.GetRootAsEventBatch(msg, 0)
@@ -379,17 +385,19 @@ if args.c:
                     print(f'batch with {len(events_to_serialize)} events')
                     print(f'joining iters with {batch.Metadata().ContentEncoding()}')
                     bin_bad_payload.write_join_msg(events_to_serialize, mess_with_payload=mess_with_payload_while_writing,
-                        empty_payload=empty_payload_while_writing)
+                        empty_payload=empty_payload_while_writing, one_invalid_msg_type=one_invalid_msg_type_while_writing)
                     mess_with_payload_while_writing = False # only mess with the first payload
                     empty_payload_while_writing = False # only mess with the first payload
-            
+                    one_invalid_msg_type_while_writing = False # only mess with the first payload
+
             if not multiple_batches:
                 # make two batches here
                 print(f'batch with {len(events_to_serialize)} events')
                 print(f'joining iters with {batch.Metadata().ContentEncoding()}')
                 bin_bad_payload.write_join_msg(events_to_serialize, mess_with_payload=mess_with_payload_while_writing,
-                    empty_payload=empty_payload_while_writing)
+                    empty_payload=empty_payload_while_writing, one_invalid_msg_type=one_invalid_msg_type_while_writing)
                 mess_with_payload_while_writing = False # only mess with the first payload
                 empty_payload_while_writing = False # only mess with the first payload
+                one_invalid_msg_type_while_writing = False # only mess with the first payload
 
         bin_bad_payload.write_eof()

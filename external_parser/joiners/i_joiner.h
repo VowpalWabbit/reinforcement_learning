@@ -53,6 +53,11 @@ public:
   // batch
   virtual bool processing_batch() = 0;
 
+  // to be called after process_joined
+  // returns true if the event that was just processed is a skip_learn event
+  // otherwise returns false
+  virtual bool current_event_is_skip_learn() {return false;}
+
   virtual void on_new_batch() = 0;
 
   virtual void on_batch_read() = 0;
