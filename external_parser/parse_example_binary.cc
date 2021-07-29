@@ -306,9 +306,7 @@ bool binary_parser::advance_to_next_payload_type(io_buf *input,
 
 void binary_parser::persist_metrics(
     std::vector<std::pair<std::string, size_t>> &) {
-  // metrics::joiner_metrics joiner_metrics = _example_joiner->get_metrics();
-  // this isn't currently needed but leaving it here since we might want to
-  // persist more metrics in the future
+  _example_joiner->persist_metrics();
 }
 
 bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
