@@ -2,7 +2,7 @@
 #include "date.h"
 #include <rapidjson/reader.h>
 #include <rapidjson/writer.h>
-
+#include <rapidjson/ostreamwrapper.h>
 
 namespace log_converter {
 namespace rj = rapidjson;
@@ -48,6 +48,9 @@ void build_cb_json(std::ofstream &outfile,
   try {
     rj::StringBuffer out_buffer;
     rj::Writer<rj::StringBuffer> writer(out_buffer);
+
+    // rj::OStreamWrapper osw(outfile);
+    // rj::Writer<rj::OStreamWrapper> writer(osw);
 
     int memberCount = 0;
     writer.StartObject();
@@ -135,12 +138,16 @@ void build_cb_json(std::ofstream &outfile,
     ++memberCount;
 
     writer.Key("c");
-    CopyFilter<rj::Writer<rj::StringBuffer> > filter(writer);
-    rj::StringStream is(je.context.c_str());
-    rj::  Reader reader;
-    if (!reader.Parse<rj::kParseNumbersAsStringsFlag>(is, filter)) {
-      throw new std::exception(); //fail, fixme
-    }
+    // FIXME: while this is significantly faster, we need to edit the context string and 
+    // strip all line endinds as DSJSON requires one line per document
+    writer.RawValue(je.context.c_str(), je.context.length(), rj::kObjectType);
+
+    // CopyFilter<rj::Writer<rj::StringBuffer> > filter(writer);
+    // rj::StringStream is(je.context.c_str());
+    // rj::  Reader reader;
+    // if (!reader.Parse<rj::kParseNumbersAsStringsFlag>(is, filter)) {
+    //   throw new std::exception(); //fail, fixme
+    // }
     ++memberCount;
 
     writer.Key("p", strlen("p"), true);
@@ -166,6 +173,7 @@ void build_cb_json(std::ofstream &outfile,
     writer.EndObject(memberCount);
 
     outfile << out_buffer.GetString() << std::endl;
+    // outfile.write("\n", 1); //don't use "<< std::endl" at that triggers a fflush
   } catch (const std::exception &e) {
     VW::io::logger::log_error(
         "convert events: [{}] from binary to json format failed: [{}].",
