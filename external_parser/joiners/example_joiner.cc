@@ -260,26 +260,28 @@ bool example_joiner::process_interaction(const v2::Event &event,
     return false;
   }
 
-  std::string context(je.context);
 
-  try {
-    if (_vw->audit || _vw->hash_inv) {
-      VW::template read_line_json<true>(
-          *_vw, examples, const_cast<char *>(context.c_str()),
-          reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
-          &_dedup_cache.dedup_examples);
-    } else {
-      VW::template read_line_json<false>(
-          *_vw, examples, const_cast<char *>(context.c_str()),
-          reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
-          &_dedup_cache.dedup_examples);
+  if(!_binary_to_json) {
+    std::string context(je.context);
+    try {
+      if (_vw->audit || _vw->hash_inv) {
+        VW::template read_line_json<true>(
+            *_vw, examples, const_cast<char *>(context.c_str()),
+            reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
+            &_dedup_cache.dedup_examples);
+      } else {
+        VW::template read_line_json<false>(
+            *_vw, examples, const_cast<char *>(context.c_str()),
+            reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
+            &_dedup_cache.dedup_examples);
+      }
+    } catch (VW::vw_exception &e) {
+      VW::io::logger::log_warn(
+          "JSON parsing during interaction processing failed "
+          "with error: [{}] for event with id: [{}]",
+          e.what(), metadata.id()->c_str());
+      return false;
     }
-  } catch (VW::vw_exception &e) {
-    VW::io::logger::log_warn(
-        "JSON parsing during interaction processing failed "
-        "with error: [{}] for event with id: [{}]",
-        e.what(), metadata.id()->c_str());
-    return false;
   }
 
   _batch_grouped_examples.emplace(
@@ -480,6 +482,10 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
         id);
     clear_examples = true;
     return false;
+  }
+
+  if(_binary_to_json) {
+    return true;
   }
 
   je->fill_in_label(examples);
