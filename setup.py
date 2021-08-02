@@ -14,16 +14,22 @@ PLAT_TO_CMAKE = {
     "win-arm64": "ARM64",
 }
 
+
 class CMakeDistribution(Distribution):
     global_options = Distribution.global_options
 
     global_options += [
-        ('cmake-options=', None, 'Additional semicolon-separated cmake setup options list')
+        (
+            "cmake-options=",
+            None,
+            "Additional semicolon-separated cmake setup options list",
+        )
     ]
 
     def __init__(self, attrs=None):
         self.cmake_options = None
         Distribution.__init__(self, attrs)
+
 
 # A CMakeExtension needs a sourcedir instead of a file list.
 # The name must be the _single_ output extension from the CMake build.
@@ -56,11 +62,11 @@ class CMakeBuild(build_ext):
             "-DPYTHON_EXECUTABLE={}".format(sys.executable),
             "-DCMAKE_BUILD_TYPE={}".format(cfg),  # not used on MSVC, but no harm
             "-DRL_BUILD_PYTHON=On",
-            "-DRL_STATIC_DEPS=On"
+            "-DRL_STATIC_DEPS=On",
         ]
 
         if self.distribution.cmake_options is not None:
-            argslist = self.distribution.cmake_options.split(';')
+            argslist = self.distribution.cmake_options.split(";")
             cmake_args += argslist
 
         build_args = []
@@ -112,6 +118,10 @@ class CMakeBuild(build_ext):
         subprocess.check_call(
             ["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp
         )
+
+        if self.compiler.compiler_type == "msvc":
+            self.build_temp += "/bindings/python"
+
         subprocess.check_call(
             ["cmake", "--build", "."] + build_args, cwd=self.build_temp
         )
@@ -121,13 +131,13 @@ class CMakeBuild(build_ext):
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
     name="rl_client",
-    version = '0.1.3',
-    url = 'https://github.com/VowpalWabbit/reinforcement_learning',
-    description = 'Python binding for reinforcement learning client library',
+    version="0.1.3",
+    url="https://github.com/VowpalWabbit/reinforcement_learning",
+    description="Python binding for reinforcement learning client library",
     long_description="",
-    license = 'MIT',
+    license="MIT",
     ext_modules=[CMakeExtension("rl_client")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
-    distclass=CMakeDistribution
+    distclass=CMakeDistribution,
 )
