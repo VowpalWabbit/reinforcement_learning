@@ -83,7 +83,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(SkipAzureFactories)'!='true'">
     <ClCompile>
-      <PreprocessorDefinitions>USE_AZURE_FACTORIES;$(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_AZURE_FACTORIES;FLATBUFFERS_SPAN_MINIMAL;$(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

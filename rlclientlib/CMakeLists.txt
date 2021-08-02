@@ -170,6 +170,8 @@ if(USE_ZSTD)
   target_include_directories(rlclientlib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/zstd/lib/)
 endif()
 
+target_compile_definitions(rlclientlib PRIVATE FLATBUFFERS_SPAN_MINIMAL)
+
 target_include_directories( rlclientlib
                             PUBLIC
                             ${CMAKE_CURRENT_SOURCE_DIR}/../include
