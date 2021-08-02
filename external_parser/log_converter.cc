@@ -31,7 +31,7 @@ struct CopyFilter {
 };
  
 void build_cb_json(std::ofstream &outfile,
-                   const joined_event::joined_event &je) {
+                   joined_event::joined_event &je) {
   float cost = -1.f * reinterpret_cast<const joined_event::cb_joined_event *>(
                           je.get_hold_of_typed_data())
                           ->reward;
@@ -48,9 +48,6 @@ void build_cb_json(std::ofstream &outfile,
   try {
     rj::StringBuffer out_buffer;
     rj::Writer<rj::StringBuffer> writer(out_buffer);
-
-    // rj::OStreamWrapper osw(outfile);
-    // rj::Writer<rj::OStreamWrapper> writer(osw);
 
     int memberCount = 0;
     writer.StartObject();
@@ -138,16 +135,9 @@ void build_cb_json(std::ofstream &outfile,
     ++memberCount;
 
     writer.Key("c");
-    // FIXME: while this is significantly faster, we need to edit the context string and 
-    // strip all line endinds as DSJSON requires one line per document
+    std::replace(je.context.begin(), je.context.end(), '\n', ' ');
     writer.RawValue(je.context.c_str(), je.context.length(), rj::kObjectType);
 
-    // CopyFilter<rj::Writer<rj::StringBuffer> > filter(writer);
-    // rj::StringStream is(je.context.c_str());
-    // rj::  Reader reader;
-    // if (!reader.Parse<rj::kParseNumbersAsStringsFlag>(is, filter)) {
-    //   throw new std::exception(); //fail, fixme
-    // }
     ++memberCount;
 
     writer.Key("p", strlen("p"), true);
