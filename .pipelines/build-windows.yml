@@ -8,7 +8,7 @@ pr:
 pool:
   name: Hosted VS2017
   demands: Cmd
-  vmImage: 20210719.0
+  vmImage: 'windows-2016:20210719.0'
 
 variables:
   VCPKG_ARCHIVE_DIR: $(LOCALAPPDATA)\vcpkg\archives
