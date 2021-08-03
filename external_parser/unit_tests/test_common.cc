@@ -14,7 +14,7 @@ bool is_big_endian(void) {
   return b_int.c[0] == 1;
 }
 
-uint32_t ntohl(std::uint32_t net_l)
+uint32_t from_network_order(std::uint32_t net_l)
 {
   if (is_big_endian()) {
     return net_l;
@@ -85,7 +85,7 @@ std::string get_test_files_location() {
 
 uint32_t get_payload_size(std::vector<char> &buffer) {
   std::vector<char> size_buffer = {buffer.begin() + 4, buffer.begin() + 8};
-  return endian::ntohl(*reinterpret_cast<const uint32_t *>(size_buffer.data()));
+  return endian::from_network_order(*reinterpret_cast<const uint32_t *>(size_buffer.data()));
 }
 
 std::vector<const v2::JoinedEvent *> wrap_into_joined_events(
