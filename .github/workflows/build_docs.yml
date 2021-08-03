@@ -105,7 +105,7 @@ jobs:
           git add --all
           git config --local user.email "WoboWabbit@hunch.net"
           git config --local user.name "WoboWabbit"
-          git commit -m "Update documentation for commit: VowpalWabbit/reinforcement_learning@${{ github.sha }}"
+          git commit -m "Update documentation for commit: VowpalWabbit/reinforcement_learning@${{ github.sha }}"  || echo "Nothing to update"
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
