@@ -83,6 +83,8 @@ public:
 
   metrics::joiner_metrics get_metrics() override;
 
+  void persist_metrics() override;
+
 private:
   bool process_dedup(const v2::Event &event, const v2::Metadata &metadata);
 
