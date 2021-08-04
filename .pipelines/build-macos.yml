@@ -11,14 +11,10 @@ pool:
 steps:
 - checkout: self
   submodules: true
-  continueOnError: true
 - bash: .scripts/macos/restore.sh
   displayName: 'Restore dependencies'
-  continueOnError: true
 - bash: .scripts/macos/build.sh
   displayName: 'Build'
-  continueOnError: true
 - bash: .scripts/macos/test.sh
   displayName: 'Run tests'
-  continueOnError: true
 - task: PublishTestResults@2

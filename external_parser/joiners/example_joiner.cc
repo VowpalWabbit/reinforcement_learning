@@ -431,8 +431,25 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   auto clear_event_id_on_exit = VW::scope_exit([&] {
     if (je) {
       if (_vw->example_parser->metrics) {
-        je->calculate_metrics(_vw->example_parser->metrics.get());
+        if (!je->is_joined_event_learnable()) {
+          _joiner_metrics.number_of_skipped_events++;
+        } else {
+          // TODO does this potentially need to check and set client time utc if
+          // that option is on?
+          if (_joiner_metrics.first_event_id.empty()) {
+            _joiner_metrics.first_event_id =
+                std::move(je->interaction_metadata.event_id);
+            _joiner_metrics.first_event_timestamp =
+                std::move(je->joined_event_timestamp);
+          } else {
+            _joiner_metrics.last_event_id =
+                std::move(je->interaction_metadata.event_id);
+            _joiner_metrics.last_event_timestamp =
+                std::move(je->joined_event_timestamp);
+          }
+        }
       }
+
       if (_binary_to_json &&
           je->interaction_metadata.payload_type == v2::PayloadType_CB) {
         log_converter::build_cb_json(_outfile, *je);
@@ -471,10 +488,6 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
                           _reward_calculation.value());
 
   if (!je->is_joined_event_learnable()) {
-    if (_vw->example_parser->metrics) { //TODO: Check if this is valid for ccb
-      _vw->example_parser->metrics->NumberOfSkippedEvents++;
-    }
-
     _current_je_is_skip_learn = true;
     clear_examples = true;
     return false;
@@ -495,8 +508,34 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   return true;
 }
 
+void example_joiner::persist_metrics() {
+  if (_vw->example_parser->metrics) {
+    _vw->example_parser->metrics->NumberOfSkippedEvents =
+        _joiner_metrics.number_of_skipped_events;
+
+    if (!_joiner_metrics.first_event_id.empty()) {
+      _vw->example_parser->metrics->FirstEventId =
+          std::move(_joiner_metrics.first_event_id);
+
+      _vw->example_parser->metrics->FirstEventTime = std::move(
+          date::format("%FT%TZ", date::floor<std::chrono::microseconds>(
+                                     _joiner_metrics.first_event_timestamp)));
+    }
+    if (!_joiner_metrics.last_event_id.empty()) {
+      _vw->example_parser->metrics->LastEventId =
+          std::move(_joiner_metrics.last_event_id);
+
+      _vw->example_parser->metrics->LastEventTime = std::move(
+          date::format("%FT%TZ", date::floor<std::chrono::microseconds>(
+                                     _joiner_metrics.last_event_timestamp)));
+    }
+  }
+}
+
 bool example_joiner::processing_batch() { return !_batch_event_order.empty(); }
-bool example_joiner::current_event_is_skip_learn() {return _current_je_is_skip_learn;}
+bool example_joiner::current_event_is_skip_learn() {
+  return _current_je_is_skip_learn;
+}
 void example_joiner::on_new_batch() {}
 void example_joiner::on_batch_read() {}
 

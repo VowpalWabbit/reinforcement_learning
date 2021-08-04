@@ -62,5 +62,7 @@ public:
 
   virtual void on_batch_read() = 0;
 
+  virtual void persist_metrics() {}
+
   virtual metrics::joiner_metrics get_metrics() = 0;
 };
