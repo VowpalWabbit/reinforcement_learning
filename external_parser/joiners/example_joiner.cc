@@ -301,7 +301,8 @@ bool example_joiner::process_outcome(const v2::Event &event,
                       metadata.payload_type(),
                       metadata.pass_probability(),
                       metadata.encoding(),
-                      metadata.id()->str()};
+                      metadata.id()->str(),
+                      v2::LearningModeType_Online }; //Online is the default value, we should not leave this uninitialized
   o_event.enqueued_time_utc = enqueued_time_utc;
 
   const v2::OutcomeEvent *outcome = nullptr;
@@ -484,14 +485,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
-  if(_binary_to_json) {
-    return true;
-  }
-
-  je->fill_in_label(examples);
-
-  je->calc_and_set_reward(examples, _loop_info.default_reward,
-                          _reward_calculation.value());
+  je->calc_reward(_loop_info.default_reward, _reward_calculation.value());
 
   if (!je->is_joined_event_learnable()) {
     _current_je_is_skip_learn = true;
@@ -503,6 +497,10 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     clear_examples = true;
     return true;
   }
+
+  je->fill_in_label(examples);
+  je->set_reward_from_data(examples);
+
 
   if (multiline) {
     // add an empty example to signal end-of-multiline
