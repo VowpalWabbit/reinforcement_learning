@@ -300,6 +300,17 @@ struct ccb_joined_event : public typed_joined_event {
   }
 };
 
+// MOVE TO VW
+struct DecisionServiceInteraction_CA
+{
+  std::string eventId;
+  std::string timestamp;
+  unsigned action;
+  float pdf_value;
+  float probabilityOfDrop = 0.f;
+  bool skipLearn{false};
+};
+
 struct ca_joined_event : public typed_joined_event {
   DecisionServiceInteraction_CA interaction_data;
   // Default Baseline Action for CB is 1 (rl client recommended actions are 1
