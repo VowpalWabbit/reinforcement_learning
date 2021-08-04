@@ -249,8 +249,28 @@ bool example_joiner::process_interaction(const v2::Event &event,
             *ccb, metadata, enqueued_time_utc,
             typed_event::event_processor<v2::MultiSlotEvent>::get_context(
                 *ccb)));
-  }
+  } else if (metadata.payload_type() == v2::PayloadType_CA) {
+    const v2::CaEvent *ca = nullptr;
+    if (!typed_event::process_compression<v2::CaEvent>(
+            event.payload()->data(), event.payload()->size(), metadata, ca,
+            _detached_buffer) ||
+        ca == nullptr) {
+      return false;
+    }
 
+    if (!typed_event::event_processor<v2::CaEvent>::is_valid(
+            *ca, _loop_info)) {
+      VW::io::logger::log_warn("CA payload with event id [{}] is malformed. "
+                               "Skipping interaction from processing.",
+                               metadata.id()->c_str());
+      return false;
+    }
+    je = std::move(
+        typed_event::event_processor<v2::CaEvent>::fill_in_joined_event(
+            *ca, metadata, enqueued_time_utc,
+            typed_event::event_processor<v2::CaEvent>::get_context(
+                *ca)));
+  }
   else {
     // for now only CB is supported so log and return false
     VW::io::logger::log_error("Interaction event learning mode [{}] not "

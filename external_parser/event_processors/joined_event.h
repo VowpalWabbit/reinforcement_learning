@@ -300,6 +300,98 @@ struct ccb_joined_event : public typed_joined_event {
   }
 };
 
+struct ca_joined_event : public typed_joined_event {
+  DecisionServiceInteraction_CA interaction_data;
+  // Default Baseline Action for CB is 1 (rl client recommended actions are 1
+  // indexed in the CB case)
+  float reward = 0.0f;
+  float original_reward = 0.0f;
+
+  ~ca_joined_event() = default;
+
+  bool is_skip_learn() const override { return interaction_data.skipLearn; }
+
+  void set_skip_learn(bool sl) override { interaction_data.skipLearn = sl; }
+
+  // TODO: Add learning_mode to CaEvent
+  void set_apprentice_reward() override {
+    /*if (!interaction_data.actions.empty() &&
+        interaction_data.actions[0] == CB_BASELINE_ACTION)
+    {
+      // TODO: default apprenticeReward should come from config
+      // setting to default reward matches current behavior for now
+      reward = original_reward;
+    }*/
+  }
+
+  void fill_in_label(v_array<example *> &examples) const override {
+
+    if (std::isnan(interaction_data.action)) {
+      VW::io::logger::log_warn("missing action for event [{}]",
+                               interaction_data.eventId);
+      return;
+    }
+
+    if (std::isnan(interaction_data.pdf_value)) {
+      VW::io::logger::log_warn("missing pdf_value for event [{}]",
+                               interaction_data.eventId);
+      return;
+    }
+
+    example* ex = examples[0];
+    ex->l.cb_cont.costs.push_back({interaction_data.action, 0.f, interaction_data.pdf_value});
+  }
+
+  void set_cost(v_array<example *> &examples, float reward,
+                size_t index = 0) const override {
+    if (std::isnan(interaction_data.action)) {
+      return;
+    }
+
+    examples[0]->l.cb_cont.costs[0].cost = -1.f * reward;
+  }
+
+  bool should_calculate_reward(
+      const std::vector<reward::outcome_event> &outcome_events) {
+    return outcome_events.size() > 0 &&
+           std::any_of(outcome_events.begin(), outcome_events.end(),
+                       [](const reward::outcome_event &o) {
+                         return o.action_taken != true;
+                       });
+      return false;
+  }
+
+  void calc_and_set_cost(
+      v_array<example *> &examples, float default_reward,
+      reward::RewardFunctionType reward_function,
+      const metadata::event_metadata_info &interaction_metadata,
+      std::vector<reward::outcome_event> &outcome_events) override {
+    reward = default_reward;
+    // original reward is used to record the observed reward of apprentice mode
+    original_reward = default_reward;
+
+    if (should_calculate_reward(outcome_events)) {
+      reward = reward_function(outcome_events);
+      // TODO: Add learning_mode to CaEvent
+      /*original_reward = reward_function(outcome_events);
+
+      if (interaction_metadata.learning_mode == v2::LearningModeType_Apprentice) {
+        set_apprentice_reward();
+      } else {
+        reward = original_reward;
+      }*/
+    }
+
+    set_cost(examples, reward);
+  }
+
+  void calculate_metrics(dsjson_metrics* metrics) override {
+    if (metrics && std::isnan(interaction_data.action)) {
+      metrics->NumberOfEventsZeroActions++;
+    }
+  }
+};
+
 struct joined_event {
   joined_event(TimePoint &&tp, metadata::event_metadata_info &&mi,
                std::string &&ctx, std::string &&mid,
