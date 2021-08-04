@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(vw_binary_parser)
-cmake_policy(SET CMP0074 NEW)
+set(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
 
 set(CMAKE_CXX_STANDARD 11)
 
