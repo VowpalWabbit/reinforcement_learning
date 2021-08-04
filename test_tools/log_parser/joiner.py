@@ -41,6 +41,16 @@ Incremental join instead of loading all interactions at once
 Respect EUD.
 """
 
+# 
+fb_api_version = 1
+if flatbuffers.Builder.EndVector.__code__.co_argcount == 1:
+    fb_api_version = 2
+
+def end_vector_shim(builder, len):
+    if fb_api_version == 2:
+        return builder.EndVector()
+    return builder.EndVector(len)
+
 arg_parser = argparse.ArgumentParser()
 
 arg_parser.add_argument(
@@ -62,6 +72,27 @@ arg_parser.add_argument(
     choices=[value for name, value in ProblemType.__dict__.items()],
     help = 'problem type:  0-Unknown, 1-CB, 2-CCB, 3-SLATES, 4-CA'
 )
+arg_parser.add_argument(
+    '--observations',
+    type=str,
+    help = 'observations file (defaults to observatins.fb '
+)
+arg_parser.add_argument(
+    '--interactions',
+    type=str,
+    help = 'interaction file (defaults to interactions.fb)'
+)
+arg_parser.add_argument(
+    '--output',
+    type=str,
+    help = 'output file (defaults to merged.log)'
+)
+arg_parser.add_argument(
+    '--verbose',
+    type=bool,
+    help = 'verbose output of each message parsed (default to off)'
+)
+
 arg_parser.add_argument('-c', action='store_true', help='generate corrupt files for binary parser unit tests')
 
 args = arg_parser.parse_args()
@@ -70,6 +101,11 @@ reward_function_type = RewardFunctionType.Earliest
 default_reward = 0
 learning_mode_config = LearningModeType.Online
 problem_type_config = ProblemType.UNKNOWN
+interaction_file_name = 'interactions.fb'
+observations_file_name = 'observations.fb'
+result_file = 'merged.log'
+verbose = False
+
 
 if args.reward_function:
     reward_function_type = args.reward_function
@@ -82,6 +118,18 @@ if args.learning_mode_config:
 
 if args.problem_type_config:
     problem_type_config = args.problem_type_config
+
+if args.observations:
+    observations_file_name = args.observations
+
+if args.interactions:
+    interaction_file_name = args.interactions
+
+if args.output:
+    result_file = args.output
+
+if args.verbose:
+    verbose = args.verbose
 
 class PreambleStreamReader:
     def __init__(self, file_name):
@@ -116,7 +164,8 @@ def mk_offsets_vector(builder, arr, startFun):
     startFun(builder, len(arr))
     for i in reversed(range(len(arr))):
         builder.PrependUOffsetTRelative(arr[i])
-    return builder.EndVector(len(arr))
+    
+    return end_vector_shim(builder, len(arr))
 
 def mk_bytes_vector(builder, arr):
     return builder.CreateNumpyVector(np.array(list(arr), dtype='b'))
@@ -133,7 +182,8 @@ class BinLogWriter:
 
     def write_message(self, kind, payload):
         padding_bytes = len(payload) % 8
-        print(f'msg {kind:X} size: {len(payload)} padding {padding_bytes}')
+        if verbose:
+            print(f'msg {kind:X} size: {len(payload)} padding {padding_bytes}')
 
         self.file.write(struct.pack('I', kind))
         self.file.write(struct.pack('I', len(payload)))
@@ -199,10 +249,11 @@ class BinLogWriter:
             self.write_message(MSG_TYPE_REGULAR, builder.Output())
 
     def write_checkpoint_info(self):
-        print("reward function type: ", reward_function_type)
-        print("default reward: ", default_reward)
-        print("learning_mode_config: ", learning_mode_config)
-        print("problem_type_config: ", problem_type_config)
+        if verbose:
+            print("reward function type: ", reward_function_type)
+            print("default reward: ", default_reward)
+            print("learning_mode_config: ", learning_mode_config)
+            print("problem_type_config: ", problem_type_config)
         builder = flatbuffers.Builder(0)
 
         CheckpointInfoStart(builder)
@@ -218,12 +269,9 @@ class BinLogWriter:
     def write_eof(self):
         self.write_message(MSG_TYPE_EOF, b'')
 
-interaction_file_name = 'cb_v2.fb'
-observations_file_name = 'f-reward_v2.fb'
 interactions_file = PreambleStreamReader(interaction_file_name)
 observations_file = PreambleStreamReader(observations_file_name)
 
-result_file = 'merged.log'
 
 def get_event_id(ser_evt):
     evt = Event.GetRootAsEvent(ser_evt.PayloadAsNumpy(), 0)
@@ -247,7 +295,8 @@ for msg in observations_file.messages():
         observations[evt_id].append(ser_evt.PayloadAsNumpy())
         obs_count +=1
 
-print(f'found {obs_count} observations with {obs_ids} ids')
+if verbose:
+    print(f'found {obs_count} observations with {obs_ids} ids')
 
 bin_f = BinLogWriter(result_file)
 bin_f.write_header({ 'eud': '-1', 'joiner': 'joiner.py'})
@@ -265,8 +314,9 @@ for msg in interactions_file.messages():
             for obs in observations[evt_id]:
                 events_to_serialize.append(obs)
 
-    print(f'batch with {len(events_to_serialize)} events')
-    print(f'joining iters with {batch.Metadata().ContentEncoding()}')
+    if verbose:
+        print(f'batch with {len(events_to_serialize)} events')
+        print(f'joining iters with {batch.Metadata().ContentEncoding()}')
     bin_f.write_join_msg(events_to_serialize)
 
 bin_f.write_eof()
