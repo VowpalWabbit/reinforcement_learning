@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
+cmake_policy(SET CMP0074 OLD)
 
 if(WIN32)
   # Due to needing to configure the CMAKE platform, this needs to be included before the
