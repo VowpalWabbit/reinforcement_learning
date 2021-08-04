@@ -359,29 +359,5 @@ struct joined_event {
     typed_data->calc_and_set_cost(examples, default_reward, reward_function,
                                   interaction_metadata, outcome_events);
   }
-
-  void calculate_metrics(dsjson_metrics *metrics) {
-    if (!metrics || !is_joined_event_learnable()) {
-      return;
-    }
-
-    if (metrics->FirstEventId.empty()) {
-      metrics->FirstEventId = interaction_metadata.event_id;
-    } else {
-      metrics->LastEventId = interaction_metadata.event_id;
-    }
-
-    // TODO does this potentially need to check and set client time utc if
-    // that option is on?
-    if (metrics->FirstEventTime.empty()) {
-      metrics->FirstEventTime = date::format(
-          "%FT%TZ",
-          date::floor<std::chrono::microseconds>(joined_event_timestamp));
-    } else {
-      metrics->LastEventTime = date::format(
-          "%FT%TZ",
-          date::floor<std::chrono::microseconds>(joined_event_timestamp));
-    }
-  }
 };
 } // namespace joined_event
