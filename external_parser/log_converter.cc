@@ -1,11 +1,14 @@
 #include "log_converter.h"
 #include "date.h"
+#include <rapidjson/reader.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/ostreamwrapper.h>
 
 namespace log_converter {
+namespace rj = rapidjson;
+ 
 void build_cb_json(std::ofstream &outfile,
-                   const joined_event::joined_event &je) {
-  namespace rj = rapidjson;
-
+                   joined_event::joined_event &je) {
   float cost = -1.f * reinterpret_cast<const joined_event::cb_joined_event *>(
                           je.get_hold_of_typed_data())
                           ->reward;
@@ -19,87 +22,100 @@ void build_cb_json(std::ofstream &outfile,
           ->interaction_data;
   const auto &probabilities = interaction_data.probabilities;
   const auto &actions = interaction_data.actions;
-
   try {
-    rj::Document d;
-    d.SetObject();
-    rj::Document::AllocatorType &allocator = d.GetAllocator();
+    rj::StringBuffer out_buffer;
+    rj::Writer<rj::StringBuffer> writer(out_buffer);
 
-    d.AddMember("_label_cost", cost, allocator);
+    writer.StartObject();
+
+    writer.Key("_label_cost", strlen("_label_cost"), true);
+    writer.Double(cost);
 
     float label_p =
         probabilities.size() > 0
             ? probabilities[0] * je.interaction_metadata.pass_probability
             : 0.f;
-    d.AddMember("_label_probability", label_p, allocator);
+    writer.Key("_label_probability", strlen("_label_probability"), true);
+    writer.Double(label_p);
 
-    d.AddMember("_label_Action", actions[0], allocator);
+    writer.Key("_label_Action", strlen("_label_Action"), true);
+    writer.Uint(actions[0]);
 
-    d.AddMember("_labelIndex", actions[0] - 1, allocator);
+    writer.Key("_labelIndex", strlen("_labelIndex"), true);
+    writer.Uint(actions[0] - 1);
 
     bool skip_learn = !je.is_joined_event_learnable();
     if (skip_learn) {
-      d.AddMember("_skipLearn", skip_learn, allocator);
+      writer.Key("_skipLearn", strlen("_skipLearn"), true);
+      writer.Bool(skip_learn);
     }
 
-    rj::Value v;
-    rj::Value outcome_arr(rj::kArrayType);
+    writer.Key("o", strlen("o"), true);
+
+    writer.StartArray();
     for (auto &o : je.outcome_events) {
-      rj::Value outcome(rj::kObjectType);
+      writer.StartObject();
       if (!o.action_taken) {
-        outcome.AddMember("v", o.value, allocator);
+        writer.Key("v", strlen("v"), true);
+        writer.Double(o.value);
       }
+      writer.Key("EventId", strlen("EventId"), true);
+      writer.String(o.metadata.event_id.c_str(), o.metadata.event_id.length(), true);
 
-      v.SetString(o.metadata.event_id.c_str(), allocator);
-      outcome.AddMember("EventId", v, allocator);
+      writer.Key("ActionTaken", strlen("ActionTaken"), true);
+      writer.Bool(o.action_taken);
 
-      outcome.AddMember("ActionTaken", o.action_taken, allocator);
-      outcome_arr.PushBack(outcome, allocator);
+      writer.EndObject();
     }
-    d.AddMember("o", outcome_arr, allocator);
+
+    writer.EndArray();
 
     std::string ts_str = date::format(
         "%FT%TZ",
         date::floor<std::chrono::microseconds>(je.joined_event_timestamp));
-    v.SetString(ts_str.c_str(), allocator);
-    d.AddMember("Timestamp", v, allocator);
 
-    d.AddMember("Version", "1", allocator);
+    writer.Key("Timestamp", strlen("Timestamp"), true);
+    writer.String(ts_str.c_str(), ts_str.length(), true);
 
-    v.SetString(interaction_data.eventId.c_str(), allocator);
-    d.AddMember("EventId", v, allocator);
+    writer.Key("Version", strlen("Version"), true);
+    writer.String("1", strlen("1"), true);
 
-    rj::Value action_arr(rj::kArrayType);
+    writer.Key("EventId", strlen("EventId"), true);
+    writer.String(interaction_data.eventId.c_str(), interaction_data.eventId.length(), true);
+
+    writer.Key("a", strlen("a"), true);
+    writer.StartArray();
+
     for (auto &action_id : actions) {
-      action_arr.PushBack(action_id, allocator);
+      writer.Uint(action_id);
     }
-    d.AddMember("a", action_arr, allocator);
 
-    rj::Document context;
-    context.Parse(je.context.c_str());
-    d.AddMember("c", context, allocator);
+    writer.EndArray();
 
-    rj::Value p_arr(rj::kArrayType);
+    writer.Key("c");
+    std::replace(je.context.begin(), je.context.end(), '\n', ' ');
+    writer.RawValue(je.context.c_str(), je.context.length(), rj::kObjectType);
+
+    writer.Key("p", strlen("p"), true);
+    writer.StartArray();
     for (auto &p : probabilities) {
-      p_arr.PushBack(p, allocator);
+      writer.Double(p);
     }
-    d.AddMember("p", p_arr, allocator);
 
-    rj::Value vwState;
-    vwState.SetObject();
-    {
-      v.SetString(je.model_id.c_str(), allocator);
-      vwState.AddMember("m", v, allocator);
-    }
-    d.AddMember("VWState", vwState, allocator);
+    writer.EndArray();
 
-    d.AddMember("_original_label_cost", original_cost, allocator);
+    writer.Key("VWState", strlen("VWState"), true);
+    writer.StartObject();
+    writer.Key("m", strlen("m"), true);
+    writer.String(je.model_id.c_str(), je.model_id.length(), true);
+    writer.EndObject();
 
-    rj::StringBuffer sb;
-    rj::Writer<rj::StringBuffer> writer(sb);
-    d.Accept(writer);
+    writer.Key("_original_label_cost", strlen("_original_label_cost"), true);
+    writer.Double(original_cost);
 
-    outfile << sb.GetString() << std::endl;
+    writer.EndObject();
+
+    outfile << out_buffer.GetString() << std::endl;
   } catch (const std::exception &e) {
     VW::io::logger::log_error(
         "convert events: [{}] from binary to json format failed: [{}].",
