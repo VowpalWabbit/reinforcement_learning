@@ -76,6 +76,35 @@ bool str_to_learning_mode(const std::string &str, v2::LearningModeType &mode) {
 
 bool parser_options::is_enabled() { return binary; }
 
+void apply_cli_overrides(std::unique_ptr<i_joiner>& joiner, vw *all, const input_options &parsed_options)
+{
+  if(all->options->was_supplied("default_reward")) {
+    joiner->set_default_reward(parsed_options.ext_opts->default_reward, true);
+  }
+
+  if(all->options->was_supplied("problem_type")) {
+    v2::ProblemType problem_type;
+    if(!str_to_problem_type(parsed_options.ext_opts->problem_type, problem_type)) {
+      throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.ext_opts->problem_type);
+    }
+    joiner->set_problem_type_config(problem_type, true);
+  }
+  if(all->options->was_supplied("learning_mode")) {
+    v2::LearningModeType learning_mode;
+    if(!str_to_learning_mode(parsed_options.ext_opts->learning_mode, learning_mode)) {
+      throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.ext_opts->learning_mode);
+    }
+    joiner->set_learning_mode_config(learning_mode, true);
+  }
+  if(all->options->was_supplied("reward_function")) {
+    v2::RewardFunctionType reward_function;
+    if(!str_to_reward_function(parsed_options.ext_opts->reward_function, reward_function)) {
+      throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.ext_opts->reward_function);
+    }
+    joiner->set_reward_function(reward_function, true);
+  }
+}
+
 std::unique_ptr<parser>
 parser::get_external_parser(vw *all, const input_options &parsed_options) {
   if (parsed_options.ext_opts->binary) {
@@ -95,6 +124,7 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
 
       std::string outfile_name = infile_name + ".dsjson";
       joiner = VW::make_unique<example_joiner>(all, binary_to_json, outfile_name);
+      apply_cli_overrides(joiner, all, parsed_options);
 
       return VW::make_unique<binary_json_converter>(std::move(joiner));
 
@@ -105,31 +135,7 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
       joiner = VW::make_unique<multistep_example_joiner>(all);
     }
 
-    if(all->options->was_supplied("default_reward")) {
-      joiner->set_default_reward(parsed_options.ext_opts->default_reward, true);
-    }
-
-    if(all->options->was_supplied("problem_type")) {
-      v2::ProblemType problem_type;
-      if(!str_to_problem_type(parsed_options.ext_opts->problem_type, problem_type)) {
-        throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.ext_opts->problem_type);
-      }
-      joiner->set_problem_type_config(problem_type, true);
-    }
-    if(all->options->was_supplied("learning_mode")) {
-      v2::LearningModeType learning_mode;
-      if(!str_to_learning_mode(parsed_options.ext_opts->learning_mode, learning_mode)) {
-        throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.ext_opts->learning_mode);
-      }
-      joiner->set_learning_mode_config(learning_mode, true);
-    }
-    if(all->options->was_supplied("reward_function")) {
-      v2::RewardFunctionType reward_function;
-      if(!str_to_reward_function(parsed_options.ext_opts->reward_function, reward_function)) {
-        throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.ext_opts->reward_function);
-      }
-      joiner->set_reward_function(reward_function, true);
-    }
+    apply_cli_overrides(joiner, all, parsed_options);
 
     if (all->options->was_supplied("extra_metrics")) {
       all->example_parser->metrics = VW::make_unique<dsjson_metrics>();
