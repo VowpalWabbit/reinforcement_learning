@@ -56,45 +56,56 @@ bool multistep_example_joiner::process_event(const v2::JoinedEvent &joined_event
   return true;
 }
 
-void multistep_example_joiner::set_default_reward(float default_reward) {
-  _loop_info.default_reward = default_reward;
+void multistep_example_joiner::set_default_reward(float default_reward, bool sticky) {
+  _loop_info.default_reward.set(default_reward, sticky);
 }
 
-void multistep_example_joiner::set_learning_mode_config(v2::LearningModeType learning_mode) {
-  _loop_info.learning_mode_config = learning_mode;
+void multistep_example_joiner::set_learning_mode_config(
+    v2::LearningModeType learning_mode, bool sticky) {
+  _loop_info.learning_mode_config.set(learning_mode, sticky);
 }
 
-void multistep_example_joiner::set_problem_type_config(v2::ProblemType problem_type) {
-  _loop_info.problem_type_config = problem_type;
+void multistep_example_joiner::set_problem_type_config(v2::ProblemType problem_type, bool sticky) {
+  _loop_info.problem_type_config.set(problem_type, sticky);
 }
 
-void multistep_example_joiner::set_reward_function(const v2::RewardFunctionType type) {
+bool multistep_example_joiner::joiner_ready() {
+  return _loop_info.is_configured() && _reward_calculation.is_valid();
+}
+
+void multistep_example_joiner::set_reward_function(const v2::RewardFunctionType type, bool sticky) {
+
+  reward::RewardFunctionType reward_calculation = nullptr;
   switch (type) {
   case v2::RewardFunctionType_Earliest:
-    _reward_calculation = &reward::earliest;
+    reward_calculation = &reward::earliest;
     break;
   case v2::RewardFunctionType_Average:
-    _reward_calculation = &reward::average;
+    reward_calculation = &reward::average;
     break;
 
   case v2::RewardFunctionType_Sum:
-    _reward_calculation = &reward::sum;
+    reward_calculation = &reward::sum;
     break;
 
   case v2::RewardFunctionType_Min:
-    _reward_calculation = &reward::min;
+    reward_calculation = &reward::min;
     break;
 
   case v2::RewardFunctionType_Max:
-    _reward_calculation = &reward::max;
+    reward_calculation = &reward::max;
     break;
 
   case v2::RewardFunctionType_Median:
-    _reward_calculation = &reward::median;
+    reward_calculation = &reward::median;
     break;
 
   default:
     break;
+  }
+  
+  if(reward_calculation) {
+    _reward_calculation.set(reward_calculation, sticky);
   }
 }
 
@@ -106,10 +117,10 @@ void multistep_example_joiner::populate_order() {
   _sorted = true;
 }
 
-joined_event::outcome_event multistep_example_joiner::process_outcome(const multistep_example_joiner::Parsed<v2::OutcomeEvent> &event_meta) {
+reward::outcome_event multistep_example_joiner::process_outcome(const multistep_example_joiner::Parsed<v2::OutcomeEvent> &event_meta) {
   const auto& metadata = event_meta.meta;
   const auto& event = event_meta.event;
-  joined_event::outcome_event o_event;
+  reward::outcome_event o_event;
   o_event.metadata = {timestamp_to_chrono(*metadata.client_time_utc()),
                       metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(),
@@ -131,7 +142,7 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
     v_array<example *> &examples) {
   const auto& metadata = event_meta.meta;
   const auto& event = event_meta.event;
-  joined_event::metadata_info meta = {metadata.client_time_utc()
+  metadata::event_metadata_info meta = {metadata.client_time_utc()
                          ? timestamp_to_chrono(*metadata.client_time_utc())
                          : TimePoint(),
                         metadata.app_id() ? metadata.app_id()->str() : "",
@@ -142,7 +153,7 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
                         v2::LearningModeType::LearningModeType_Online};
 
   auto cb_data = VW::make_unique<joined_event::cb_joined_event>();
-  
+
   cb_data->interaction_data.eventId = event.event_id()->str();
   cb_data->interaction_data.actions = {event.action_ids()->data(),
                   event.action_ids()->data() + event.action_ids()->size()};
@@ -197,7 +208,7 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
   for (const auto& o: _episodic_outcomes) {
     joined.outcome_events.push_back(process_outcome(o));
   }
-  const auto reward = _reward_calculation(joined);
+  const auto reward = _reward_calculation(joined.outcome_events);
   try_set_label(joined, reward, examples);
 
   // add an empty example to signal end-of-multiline

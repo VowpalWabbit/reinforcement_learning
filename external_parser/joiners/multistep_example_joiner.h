@@ -29,10 +29,12 @@ public:
 
   virtual ~multistep_example_joiner();
 
-  void set_reward_function(const v2::RewardFunctionType type) override;
-  void set_default_reward(float default_reward) override;
-  void set_learning_mode_config(v2::LearningModeType learning_mode) override;
-  void set_problem_type_config(v2::ProblemType problem_type) override;
+  void set_reward_function(const v2::RewardFunctionType type, bool sticky) override;
+  void set_default_reward(float default_reward, bool sticky) override;
+  void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky) override;
+  void set_problem_type_config(v2::ProblemType problem_type, bool sticky) override;
+  bool joiner_ready() override;
+
 
   bool process_event(const v2::JoinedEvent &joined_event) override;
   bool process_joined(v_array<example *> &examples) override;
@@ -51,7 +53,7 @@ private:
 
 private:
   void populate_order();
-  joined_event::outcome_event
+  reward::outcome_event
   process_outcome(const Parsed<v2::OutcomeEvent> &event_meta);
   joined_event::joined_event
   process_interaction(const Parsed<v2::MultiStepEvent> &event_meta,
@@ -63,7 +65,7 @@ private:
   vw *_vw;
   flatbuffers::DetachedBuffer _detached_buffer;
 
-  reward::RewardFunctionType _reward_calculation;
+  loop::sticky_value<reward::RewardFunctionType> _reward_calculation;
   loop::loop_info _loop_info;
 
   std::unordered_map<std::string, std::vector<Parsed<v2::MultiStepEvent>>>

@@ -39,16 +39,24 @@ template <> struct event_processor<v2::MultiSlotEvent> {
             evt.context()->size()};
   }
 
-  static joined_event::joined_event fill_in_joined_event(
-      const v2::MultiSlotEvent &evt, const v2::Metadata &metadata,
-      const TimePoint &enqueued_time_utc, std::string &&line_vec) {
-
+  static joined_event::joined_event
+  fill_in_joined_event(const v2::MultiSlotEvent &evt,
+                       const v2::Metadata &metadata,
+                       const TimePoint &enqueued_time_utc,
+                       std::string &&line_vec) {
     auto ccb_data = VW::make_unique<joined_event::ccb_joined_event>();
-    for (auto *slot_event : *evt.slots()) {
 
+    size_t slot_index = 0;
+    for (auto *slot_event : *evt.slots()) {
       DecisionServiceInteraction data;
       data.eventId = slot_event->id() == nullptr ? metadata.id()->str()
                                                  : slot_event->id()->str();
+
+      if (slot_event->id() != nullptr) {
+        ccb_data->slot_id_to_index_map.insert(
+            std::pair<std::string, int>(slot_event->id()->str(), slot_index));
+      }
+
       data.actions.reserve(slot_event->action_ids()->size());
       for (const auto &a : *slot_event->action_ids()) {
         data.actions.emplace_back(a);
@@ -60,9 +68,16 @@ template <> struct event_processor<v2::MultiSlotEvent> {
       }
 
       data.probabilityOfDrop = 1.f - metadata.pass_probability();
-      data.skipLearn = evt.deferred_action();
       ccb_data->interaction_data.emplace_back(std::move(data));
+      slot_index++;
     }
+
+    ccb_data->baseline_actions.assign(
+      evt.baseline_actions()->begin(),
+      evt.baseline_actions()->end()
+    );
+
+    ccb_data->skip_learn = evt.deferred_action();
 
     return {TimePoint(enqueued_time_utc),
             {metadata.client_time_utc()
@@ -107,7 +122,8 @@ template <> struct event_processor<v2::CbEvent> {
   }
 
   static joined_event::joined_event
-  fill_in_joined_event(const v2::CbEvent &evt, const v2::Metadata &metadata,
+  fill_in_joined_event(const v2::CbEvent &evt,
+                       const v2::Metadata &metadata,
                        const TimePoint &enqueued_time_utc,
                        std::string &&line_vec) {
 

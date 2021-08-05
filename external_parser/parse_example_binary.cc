@@ -14,9 +14,9 @@
 #include "flatbuffers/flatbuffers.h"
 #include "global_data.h"
 #include "io/logger.h"
+#include "joiners/example_joiner.h"
 #include "memory.h"
 #include "parse_example_binary.h"
-#include "joiners/example_joiner.h"
 
 // TODO need to check if errors will be detected from stderr/stdout/other and
 // use appropriate logger
@@ -79,35 +79,12 @@ bool read_padding(io_buf *input, uint32_t previous_payload_size,
 namespace VW {
 namespace external {
 binary_parser::binary_parser(std::unique_ptr<i_joiner>&& joiner)
-    : _header_read(false)
-    , _example_joiner(std::move(joiner))
+    : _example_joiner(std::move(joiner))
     , _payload(nullptr)
     , _payload_size(0)
     , _total_size_read(0) {}
 
 binary_parser::~binary_parser() {}
-
-bool binary_parser::read_magic(io_buf *input) {
-  const uint32_t buffer_length = 4 * sizeof(char);
-  // read the 4 magic bytes
-  if (!read_payload(input, _payload, buffer_length)) {
-    VW::io::logger::log_critical(
-        "Failed to read payload while reading magic, after having read [{}] "
-        "bytes from the file",
-        _total_size_read);
-    return false;
-  }
-
-  _total_size_read += buffer_length;
-
-  std::vector<char> buffer = {_payload, _payload + buffer_length};
-  const std::vector<char> magic = {'V', 'W', 'F', 'B'};
-  if (buffer != magic) {
-    VW::io::logger::log_critical("Magic bytes in file are incorrect");
-    return false;
-  }
-  return true;
-}
 
 bool binary_parser::read_version(io_buf *input) {
   _payload = nullptr;
@@ -121,6 +98,7 @@ bool binary_parser::read_version(io_buf *input) {
   }
 
   _total_size_read += buffer_length;
+  _payload_size = 0; //this is used but the padding code, make it do the right thing.
 
   if (*_payload != BINARY_PARSER_VERSION) {
     VW::io::logger::log_critical(
@@ -132,23 +110,7 @@ bool binary_parser::read_version(io_buf *input) {
 }
 
 bool binary_parser::read_header(io_buf *input) {
-  unsigned int payload_type;
   _payload = nullptr;
-  if (!read_payload_type(input, payload_type)) {
-    VW::io::logger::log_critical(
-        "Failed to read payload while reading header message"
-        ", after having read [{}] "
-        "bytes from the file",
-        _total_size_read);
-    return false;
-  }
-
-  _total_size_read += sizeof(payload_type);
-
-  if (payload_type != MSG_TYPE_HEADER) {
-    VW::io::logger::log_critical("MSG_TYPE_HEADER missing from file");
-    return false;
-  }
 
   // read header size
   if (!read_payload_size(input, _payload_size)) {
@@ -173,6 +135,31 @@ bool binary_parser::read_header(io_buf *input) {
   _total_size_read += _payload_size;
 
   // TODO:: consume header
+
+  return true;
+}
+
+bool binary_parser::skip_over_unknown_payload(io_buf *input) {
+  _payload = nullptr;
+  if (!read_payload_size(input, _payload_size)) {
+    VW::io::logger::log_critical(
+        "Failed to read unknown message payload size, after having read "
+        "[{}] bytes from the file",
+        _total_size_read);
+    return false;
+  }
+
+  _total_size_read += sizeof(_payload_size);
+
+  if (!read_payload(input, _payload, _payload_size)) {
+    VW::io::logger::log_critical(
+        "Failed to read unknown message payload of size [{}], after having read "
+        "[{}] bytes from the file",
+        _payload_size, _total_size_read);
+    return false;
+  }
+
+  _total_size_read += _payload_size;
 
   return true;
 }
@@ -213,8 +200,10 @@ bool binary_parser::read_checkpoint_msg(io_buf *input) {
 }
 
 bool binary_parser::read_regular_msg(io_buf *input,
-                                     v_array<example *> &examples) {
+                                     v_array<example *> &examples, bool &ignore_msg) {
   _payload = nullptr;
+  ignore_msg = false;
+
   if (!read_payload_size(input, _payload_size)) {
     VW::io::logger::log_warn(
         "Failed to read regular message payload size, after having read "
@@ -234,6 +223,14 @@ bool binary_parser::read_regular_msg(io_buf *input,
   }
 
   _total_size_read += _payload_size;
+
+  if(!_example_joiner->joiner_ready()) {
+        VW::io::logger::log_warn("Read regular message before any checkpoint data "
+        "after having read [{}] bytes from the file. Events will be ignored.",
+        _total_size_read);
+    ignore_msg = true;
+    return true;
+  }
 
   auto joined_payload = flatbuffers::GetRoot<v2::JoinedPayload>(_payload);
   auto verifier =
@@ -261,16 +258,21 @@ bool binary_parser::read_regular_msg(io_buf *input,
 
   _example_joiner->on_batch_read();
 
+  return process_next_in_batch(examples);
+}
+
+bool binary_parser::process_next_in_batch(v_array<example *> &examples) {
   while (_example_joiner->processing_batch()) {
     if (_example_joiner->process_joined(examples)) {
       return true;
-    } else {
+    } else if (!_example_joiner->current_event_is_skip_learn()) {
       VW::io::logger::log_warn(
           "Processing of a joined event from a JoinedEvent "
           "failed after having read [{}] "
           "bytes from the file, proceeding to next message",
           _total_size_read);
     }
+    // else skip learn event, just process next event
   }
 
   // nothing form the current batch was processed, need to read next msg
@@ -302,82 +304,65 @@ bool binary_parser::advance_to_next_payload_type(io_buf *input,
   return true;
 }
 
-void binary_parser::persist_metrics(std::vector<std::pair<std::string, size_t>>& list_metrics) {
-  metrics::joiner_metrics joiner_metrics = _example_joiner->get_metrics();
-
-  list_metrics.emplace_back("number_of_learned_events",
-    joiner_metrics.number_of_learned_events);
-
-  list_metrics.emplace_back("number_of_skipped_events",
-    joiner_metrics.number_of_skipped_events);
+void binary_parser::persist_metrics(
+    std::vector<std::pair<std::string, size_t>> &) {
+  _example_joiner->persist_metrics();
 }
 
 bool binary_parser::parse_examples(vw *all, v_array<example *> &examples) {
-  if (!_header_read) {
-    // TODO change this to handle multiple files if needed?
-    if (!read_magic(all->example_parser->input.get())) {
-      return false;
-    }
-
-    if (!read_version(all->example_parser->input.get())) {
-      return false;
-    }
-
-    if (!read_header(all->example_parser->input.get())) {
-      return false;
-    }
-
-    _header_read = true;
-  }
-
-  while (_example_joiner->processing_batch()) {
-    if (_example_joiner->process_joined(examples)) {
-      return true;
-    } else {
-      VW::io::logger::log_warn(
-          "Processing of a joined event from a JoinedEvent "
-          "failed after having read [{}] "
-          "bytes from the file, proceeding to next message",
-          _total_size_read);
-    }
+  if (process_next_in_batch(examples)) {
+    return true;
   }
 
   unsigned int payload_type;
-
-  if (!advance_to_next_payload_type(all->example_parser->input.get(),
-                                    payload_type)) {
-    return false;
-  }
-
-  if (payload_type == MSG_TYPE_CHECKPOINT) {
-    if (!read_checkpoint_msg(all->example_parser->input.get())) {
-      return false;
-    }
-
-    if (!advance_to_next_payload_type(all->example_parser->input.get(),
+  while (advance_to_next_payload_type(all->example_parser->input.get(),
                                       payload_type)) {
+    switch (payload_type) {
+    case MSG_TYPE_FILEMAGIC: {
+      if (!read_version(all->example_parser->input.get())) {
+        return false;
+      }
+      break;
+    }
+    case MSG_TYPE_HEADER: {
+      if (!read_header(all->example_parser->input.get())) {
+        return false;
+      }
+      break;
+    }
+    case MSG_TYPE_CHECKPOINT: {
+      if (!read_checkpoint_msg(all->example_parser->input.get())) {
+        return false;
+      }
+      break;
+    }
+    case MSG_TYPE_REGULAR: {
+      bool ignore_msg = false;
+      if (read_regular_msg(all->example_parser->input.get(), examples,
+                           ignore_msg)) {
+        if (!ignore_msg) {
+          return true;
+        }
+      }
+      break;
+    }
+    case MSG_TYPE_EOF: {
       return false;
     }
-  }
 
-  while (payload_type == MSG_TYPE_REGULAR) {
-    if (read_regular_msg(all->example_parser->input.get(), examples)) {
-      return true;
+    default: {
+      VW::io::logger::log_warn(
+          "Payload type not recognized [0x{:x}], after having read [{}] "
+          "bytes from the file, attempting to skip payload",
+          payload_type, _total_size_read);
+      if (!skip_over_unknown_payload(all->example_parser->input.get())) {
+        return false;
+      }
+      continue;
     }
-
-    // bad payload process the next one
-    if (!advance_to_next_payload_type(all->example_parser->input.get(),
-                                      payload_type)) {
-      return false;
     }
   }
 
-  if (payload_type != MSG_TYPE_EOF) {
-    VW::io::logger::log_critical(
-        "Payload type not recognized [{}], after having read [{}] "
-        "bytes from the file",
-        payload_type, _total_size_read);
-  }
   return false;
 }
 } // namespace external
