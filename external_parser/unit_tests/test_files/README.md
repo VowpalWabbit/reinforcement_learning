@@ -7,6 +7,8 @@
 - fb_events/f-reward_v2_size_2.fb: `./example_gen --kind f-reward --count 2`
 - fb_events/invalid-cb_v2_size_2.fb: `./example_gen --kind invalid-cb --count 2`
 - fb_events/ccb_v2.fb: `./example_gen --kind ccb --count 1`
+- fb_events/ca_v2.fb: `./example_gen --kind ca --count 1`
+- fb_events/ca_v2_size_2.fb: `./example_gen --kind ca --count 2`
 - fb_events/fi-reward_v2.fb `./example_gen --kind fi-reward --count 1`
 - valid_joined_logs/rcrfrmr.fb `./log_gen.py rcrfrmr`
 - valid_joined_logs/rrcr.fb `./log_gen.py rrcr`

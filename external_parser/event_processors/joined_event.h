@@ -300,21 +300,18 @@ struct ccb_joined_event : public typed_joined_event {
   }
 };
 
-// MOVE TO VW
-struct DecisionServiceInteraction_CA
+struct DecisionServiceInteractionCats
 {
   std::string eventId;
   std::string timestamp;
-  unsigned action;
+  float action;
   float pdf_value;
   float probabilityOfDrop = 0.f;
   bool skipLearn{false};
 };
 
 struct ca_joined_event : public typed_joined_event {
-  DecisionServiceInteraction_CA interaction_data;
-  // Default Baseline Action for CB is 1 (rl client recommended actions are 1
-  // indexed in the CB case)
+  DecisionServiceInteractionCats interaction_data;
   float reward = 0.0f;
   float original_reward = 0.0f;
 
@@ -324,15 +321,13 @@ struct ca_joined_event : public typed_joined_event {
 
   void set_skip_learn(bool sl) override { interaction_data.skipLearn = sl; }
 
-  // TODO: Add learning_mode to CaEvent
   void set_apprentice_reward() override {
-    /*if (!interaction_data.actions.empty() &&
-        interaction_data.actions[0] == CB_BASELINE_ACTION)
+    if (!std::isnan(interaction_data.action))
     {
       // TODO: default apprenticeReward should come from config
       // setting to default reward matches current behavior for now
       reward = original_reward;
-    }*/
+    }
   }
 
   void fill_in_label(v_array<example *> &examples) const override {
@@ -382,15 +377,13 @@ struct ca_joined_event : public typed_joined_event {
     original_reward = default_reward;
 
     if (should_calculate_reward(outcome_events)) {
-      reward = reward_function(outcome_events);
-      // TODO: Add learning_mode to CaEvent
-      /*original_reward = reward_function(outcome_events);
+      original_reward = reward_function(outcome_events);
 
       if (interaction_metadata.learning_mode == v2::LearningModeType_Apprentice) {
         set_apprentice_reward();
       } else {
         reward = original_reward;
-      }*/
+      }
     }
 
     set_cost(examples, reward);

@@ -166,8 +166,7 @@ template <> struct event_processor<v2::CaEvent> {
       return false;
     }
 
-    // TODO: Add learning_mode to CaEvent
-    /*if (evt.learning_mode() != loop_info.learning_mode_config) {
+    if (evt.learning_mode() != loop_info.learning_mode_config) {
       VW::io::logger::log_warn(
           "Online Trainer learning mode [{}] "
           "and Interaction event learning mode [{}]"
@@ -175,13 +174,13 @@ template <> struct event_processor<v2::CaEvent> {
           EnumNameLearningModeType(loop_info.learning_mode_config),
           EnumNameLearningModeType(evt.learning_mode()));
       return false;
-    }*/
+    }
     return true;
   }
-  // TODO: Add learning_mode to CaEvent
-  /*static v2::LearningModeType get_learning_mode(const v2::CaEvent &evt) {
+
+  static v2::LearningModeType get_learning_mode(const v2::CaEvent &evt) {
     return evt.learning_mode();
-  }*/
+  }
 
   static std::string get_context(const v2::CaEvent &evt) {
     return {reinterpret_cast<char const *>(evt.context()->data()),
@@ -208,8 +207,7 @@ template <> struct event_processor<v2::CaEvent> {
                  : TimePoint(),
              metadata.app_id() ? metadata.app_id()->str() : "",
              metadata.payload_type(), metadata.pass_probability(),
-             metadata.encoding(), metadata.id()->str(),
-             v2::LearningModeType::LearningModeType_Online /* TODO: Add learning_mode to CaEvent*/},
+             metadata.encoding(), metadata.id()->str(),evt.learning_mode()},
             std::move(line_vec),
             std::string(evt.model_id() ? evt.model_id()->c_str() : "N/A"),
             std::move(ca_data)};

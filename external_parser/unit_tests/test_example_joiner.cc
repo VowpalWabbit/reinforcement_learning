@@ -3,7 +3,7 @@
 #include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE(example_joiner_test_ca) {
-  auto vw = VW::initialize("--quiet --binary_parser --cats 1 --min_value=0 --max_value=1", nullptr,
+  auto vw = VW::initialize("--quiet --binary_parser --cats 4 --min_value 1 --max_value 100 --bandwidth 1", nullptr,
                            false, nullptr, nullptr);
 
   example_joiner joiner(vw);
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_ca) {
   joiner.process_joined(examples);
   BOOST_CHECK_EQUAL(examples.size(), 1);
   // check action and cost
-  BOOST_CHECK_EQUAL(examples[0]->l.cb_cont.costs[0].action, 1);
+  BOOST_CHECK(!std::isnan(examples[0]->l.cb_cont.costs[0].action));
   BOOST_CHECK_EQUAL(examples[0]->l.cb_cont.costs[0].cost, -1.5);
 
   // check example features
