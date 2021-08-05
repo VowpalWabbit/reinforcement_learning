@@ -22,7 +22,8 @@ std::vector<float> get_float_rewards(
       command = "--quiet --binary_parser --ccb_explore_adf";
       break;
     case v2::ProblemType_CA:
-      command ="--quiet --binary_parser --cats 4 --min_value 1 --max_value 100 --bandwidth 1";
+      command = "--quiet --binary_parser --cats 4 --min_value 1 --max_value "
+                "100 --bandwidth 1";
       break;
   }
 
@@ -70,28 +71,26 @@ std::vector<float> get_float_rewards(
       }
     }
       break;
-    case v2::ProblemType_CCB:
-    {
-      // learn/predict isn't called in the unit test but cleanup examples expects
-      // shared pred to be set
-      examples[0]->pred.decision_scores = {v_init<ACTION_SCORE::action_score>()};
+    case v2::ProblemType_CCB: {
+      // learn/predict isn't called in the unit test but cleanup examples
+      // expects shared pred to be set
+      examples[0]->pred.decision_scores = {
+          v_init<ACTION_SCORE::action_score>()};
       examples[0]->pred.decision_scores[0].push_back({0, 0.f});
 
       for (auto *example : examples) {
         if (example->l.conditional_contextual_bandit.type ==
-          CCB::example_type::slot) {
-          rewards.push_back(-1.0 * example->l.conditional_contextual_bandit.outcome->cost);
+            CCB::example_type::slot) {
+          rewards.push_back(
+              -1.0 * example->l.conditional_contextual_bandit.outcome->cost);
         }
       }
-    }
-      break;
-    case v2::ProblemType_CA:
-    {
+    } break;
+    case v2::ProblemType_CA: {
       if (examples.size() == 1) {
         rewards.push_back(-1.0 * examples[0]->l.cb_cont.costs[0].cost);
       }
-    }
-      break;
+    } break;
   }
 
   clear_examples(examples, vw);
@@ -176,12 +175,8 @@ BOOST_AUTO_TEST_SUITE(reward_functions_with_ca_format_and_float_reward)
 // descending order added in test_common.cc
 BOOST_AUTO_TEST_CASE(earliest) {
   auto rewards = get_float_rewards(
-    "ca/ca_v2.fb",
-    "ca/f-reward_3obs_v2.fb",
-    v2::RewardFunctionType_Earliest,
-    v2::LearningModeType_Online,
-    v2::ProblemType_CA
-  );
+      "ca/ca_v2.fb", "ca/f-reward_3obs_v2.fb", v2::RewardFunctionType_Earliest,
+      v2::LearningModeType_Online, v2::ProblemType_CA);
 
   BOOST_CHECK_EQUAL(rewards.size(), 1);
   BOOST_CHECK_EQUAL(rewards.front(), 3);
@@ -189,12 +184,8 @@ BOOST_AUTO_TEST_CASE(earliest) {
 
 BOOST_AUTO_TEST_CASE(average) {
   auto rewards = get_float_rewards(
-    "ca/ca_v2.fb",
-    "ca/f-reward_3obs_v2.fb",
-    v2::RewardFunctionType_Average,
-    v2::LearningModeType_Online,
-    v2::ProblemType_CA
-  );
+      "ca/ca_v2.fb", "ca/f-reward_3obs_v2.fb", v2::RewardFunctionType_Average,
+      v2::LearningModeType_Online, v2::ProblemType_CA);
 
   BOOST_CHECK_EQUAL(rewards.size(), 1);
   BOOST_CHECK_EQUAL(rewards.front(), (3.0 + 4 + 5) / 3);
@@ -202,12 +193,8 @@ BOOST_AUTO_TEST_CASE(average) {
 
 BOOST_AUTO_TEST_CASE(min) {
   auto rewards = get_float_rewards(
-    "ca/ca_v2.fb",
-    "ca/f-reward_3obs_v2.fb",
-    v2::RewardFunctionType_Min,
-    v2::LearningModeType_Online,
-    v2::ProblemType_CA
-  );
+      "ca/ca_v2.fb", "ca/f-reward_3obs_v2.fb", v2::RewardFunctionType_Min,
+      v2::LearningModeType_Online, v2::ProblemType_CA);
 
   BOOST_CHECK_EQUAL(rewards.size(), 1);
   BOOST_CHECK_EQUAL(rewards.front(), 3);
@@ -215,12 +202,8 @@ BOOST_AUTO_TEST_CASE(min) {
 
 BOOST_AUTO_TEST_CASE(max) {
   auto rewards = get_float_rewards(
-    "ca/ca_v2.fb",
-    "ca/f-reward_3obs_v2.fb",
-    v2::RewardFunctionType_Max,
-    v2::LearningModeType_Online,
-    v2::ProblemType_CA
-  );
+      "ca/ca_v2.fb", "ca/f-reward_3obs_v2.fb", v2::RewardFunctionType_Max,
+      v2::LearningModeType_Online, v2::ProblemType_CA);
 
   BOOST_CHECK_EQUAL(rewards.size(), 1);
   BOOST_CHECK_EQUAL(rewards.front(), 5);
@@ -228,12 +211,8 @@ BOOST_AUTO_TEST_CASE(max) {
 
 BOOST_AUTO_TEST_CASE(median) {
   auto rewards = get_float_rewards(
-    "ca/ca_v2.fb",
-    "ca/f-reward_3obs_v2.fb",
-    v2::RewardFunctionType_Median,
-    v2::LearningModeType_Online,
-    v2::ProblemType_CA
-  );
+      "ca/ca_v2.fb", "ca/f-reward_3obs_v2.fb", v2::RewardFunctionType_Median,
+      v2::LearningModeType_Online, v2::ProblemType_CA);
 
   BOOST_CHECK_EQUAL(rewards.size(), 1);
   BOOST_CHECK_EQUAL(rewards.front(), 4);
@@ -241,12 +220,8 @@ BOOST_AUTO_TEST_CASE(median) {
 
 BOOST_AUTO_TEST_CASE(sum) {
   auto rewards = get_float_rewards(
-    "ca/ca_v2.fb",
-    "ca/f-reward_3obs_v2.fb",
-    v2::RewardFunctionType_Sum,
-    v2::LearningModeType_Online,
-    v2::ProblemType_CA
-  );
+      "ca/ca_v2.fb", "ca/f-reward_3obs_v2.fb", v2::RewardFunctionType_Sum,
+      v2::LearningModeType_Online, v2::ProblemType_CA);
 
   BOOST_CHECK_EQUAL(rewards.size(), 1);
   BOOST_CHECK_EQUAL(rewards.front(), 3 + 4 + 5);

@@ -390,7 +390,8 @@ struct ca_joined_event : public typed_joined_event {
 
       if (interaction_metadata.learning_mode ==
           v2::LearningModeType_Apprentice) {
-        VW::io::logger::log_warn("Apprentice mode is not implmeneted for cats.");
+        VW::io::logger::log_warn(
+            "Apprentice mode is not implmeneted for cats.");
       }
       reward = original_reward;
     }

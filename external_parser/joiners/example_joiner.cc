@@ -277,7 +277,6 @@ bool example_joiner::process_interaction(const v2::Event &event,
     return false;
   }
 
-
   if(!_binary_to_json) {
     std::string context(je.context);
     try {
