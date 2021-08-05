@@ -300,8 +300,7 @@ struct ccb_joined_event : public typed_joined_event {
   }
 };
 
-struct DecisionServiceInteractionCats
-{
+struct DecisionServiceInteractionCats {
   std::string eventId;
   std::string timestamp;
   float action;
@@ -322,8 +321,7 @@ struct ca_joined_event : public typed_joined_event {
   void set_skip_learn(bool sl) override { interaction_data.skipLearn = sl; }
 
   void set_apprentice_reward() override {
-    if (!std::isnan(interaction_data.action))
-    {
+    if (!std::isnan(interaction_data.action)) {
       // TODO: default apprenticeReward should come from config
       // setting to default reward matches current behavior for now
       reward = original_reward;
@@ -344,8 +342,9 @@ struct ca_joined_event : public typed_joined_event {
       return;
     }
 
-    example* ex = examples[0];
-    ex->l.cb_cont.costs.push_back({interaction_data.action, 0.f, interaction_data.pdf_value});
+    example *ex = examples[0];
+    ex->l.cb_cont.costs.push_back(
+        {interaction_data.action, 0.f, interaction_data.pdf_value});
   }
 
   void set_cost(v_array<example *> &examples, float reward,
@@ -364,7 +363,7 @@ struct ca_joined_event : public typed_joined_event {
                        [](const reward::outcome_event &o) {
                          return o.action_taken != true;
                        });
-      return false;
+    return false;
   }
 
   void calc_and_set_cost(
@@ -379,7 +378,8 @@ struct ca_joined_event : public typed_joined_event {
     if (should_calculate_reward(outcome_events)) {
       original_reward = reward_function(outcome_events);
 
-      if (interaction_metadata.learning_mode == v2::LearningModeType_Apprentice) {
+      if (interaction_metadata.learning_mode ==
+          v2::LearningModeType_Apprentice) {
         set_apprentice_reward();
       } else {
         reward = original_reward;
@@ -389,7 +389,7 @@ struct ca_joined_event : public typed_joined_event {
     set_cost(examples, reward);
   }
 
-  void calculate_metrics(dsjson_metrics* metrics) override {
+  void calculate_metrics(dsjson_metrics *metrics) override {
     if (metrics && std::isnan(interaction_data.action)) {
       metrics->NumberOfEventsZeroActions++;
     }

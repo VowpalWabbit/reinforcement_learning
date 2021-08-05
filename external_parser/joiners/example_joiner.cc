@@ -258,8 +258,7 @@ bool example_joiner::process_interaction(const v2::Event &event,
       return false;
     }
 
-    if (!typed_event::event_processor<v2::CaEvent>::is_valid(
-            *ca, _loop_info)) {
+    if (!typed_event::event_processor<v2::CaEvent>::is_valid(*ca, _loop_info)) {
       VW::io::logger::log_warn("CA payload with event id [{}] is malformed. "
                                "Skipping interaction from processing.",
                                metadata.id()->c_str());
@@ -268,10 +267,8 @@ bool example_joiner::process_interaction(const v2::Event &event,
     je = std::move(
         typed_event::event_processor<v2::CaEvent>::fill_in_joined_event(
             *ca, metadata, enqueued_time_utc,
-            typed_event::event_processor<v2::CaEvent>::get_context(
-                *ca)));
-  }
-  else {
+            typed_event::event_processor<v2::CaEvent>::get_context(*ca)));
+  } else {
     // for now only CB is supported so log and return false
     VW::io::logger::log_error("Interaction event learning mode [{}] not "
                               "currently supported, skipping interaction "

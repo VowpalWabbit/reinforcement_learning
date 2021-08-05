@@ -1,9 +1,9 @@
 #pragma once
 
+#include "generated/v2/CaEvent_generated.h"
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "generated/v2/MultiSlotEvent_generated.h"
-#include "generated/v2/CaEvent_generated.h"
 #include "joined_event.h"
 #include "loop.h"
 #include "zstd.h"
@@ -188,8 +188,7 @@ template <> struct event_processor<v2::CaEvent> {
   }
 
   static joined_event::joined_event
-  fill_in_joined_event(const v2::CaEvent &evt,
-                       const v2::Metadata &metadata,
+  fill_in_joined_event(const v2::CaEvent &evt, const v2::Metadata &metadata,
                        const TimePoint &enqueued_time_utc,
                        std::string &&line_vec) {
 
@@ -207,7 +206,7 @@ template <> struct event_processor<v2::CaEvent> {
                  : TimePoint(),
              metadata.app_id() ? metadata.app_id()->str() : "",
              metadata.payload_type(), metadata.pass_probability(),
-             metadata.encoding(), metadata.id()->str(),evt.learning_mode()},
+             metadata.encoding(), metadata.id()->str(), evt.learning_mode()},
             std::move(line_vec),
             std::string(evt.model_id() ? evt.model_id()->c_str() : "N/A"),
             std::move(ca_data)};

@@ -3,8 +3,9 @@
 #include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE(example_joiner_test_ca) {
-  auto vw = VW::initialize("--quiet --binary_parser --cats 4 --min_value 1 --max_value 100 --bandwidth 1", nullptr,
-                           false, nullptr, nullptr);
+  auto vw = VW::initialize("--quiet --binary_parser --cats 4 --min_value 1 "
+                           "--max_value 100 --bandwidth 1",
+                           nullptr, false, nullptr, nullptr);
 
   example_joiner joiner(vw);
   v_array<example *> examples;
