@@ -117,10 +117,10 @@ void multistep_example_joiner::populate_order() {
   _sorted = true;
 }
 
-joined_event::outcome_event multistep_example_joiner::process_outcome(const multistep_example_joiner::Parsed<v2::OutcomeEvent> &event_meta) {
+reward::outcome_event multistep_example_joiner::process_outcome(const multistep_example_joiner::Parsed<v2::OutcomeEvent> &event_meta) {
   const auto& metadata = event_meta.meta;
   const auto& event = event_meta.event;
-  joined_event::outcome_event o_event;
+  reward::outcome_event o_event;
   o_event.metadata = {timestamp_to_chrono(*metadata.client_time_utc()),
                       metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(),
@@ -142,7 +142,7 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
     v_array<example *> &examples) {
   const auto& metadata = event_meta.meta;
   const auto& event = event_meta.event;
-  joined_event::metadata_info meta = {metadata.client_time_utc()
+  metadata::event_metadata_info meta = {metadata.client_time_utc()
                          ? timestamp_to_chrono(*metadata.client_time_utc())
                          : TimePoint(),
                         metadata.app_id() ? metadata.app_id()->str() : "",
@@ -153,7 +153,7 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
                         v2::LearningModeType::LearningModeType_Online};
 
   auto cb_data = VW::make_unique<joined_event::cb_joined_event>();
-  
+
   cb_data->interaction_data.eventId = event.event_id()->str();
   cb_data->interaction_data.actions = {event.action_ids()->data(),
                   event.action_ids()->data() + event.action_ids()->size()};
@@ -208,7 +208,7 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
   for (const auto& o: _episodic_outcomes) {
     joined.outcome_events.push_back(process_outcome(o));
   }
-  const auto reward = _reward_calculation(joined);
+  const auto reward = _reward_calculation(joined.outcome_events);
   try_set_label(joined, reward, examples);
 
   // add an empty example to signal end-of-multiline

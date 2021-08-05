@@ -9,6 +9,8 @@ table MultiStepEvent {
     context:[ubyte];                 // context
     probabilities:[float];           // probabilities
     model_id:string;                 // model ID
+    
+    deferred_action:bool = false;
 }
 
 root_type MultiStepEvent;
