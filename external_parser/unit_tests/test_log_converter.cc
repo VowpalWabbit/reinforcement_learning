@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(convert_binary_to_dsjson) {
   std::string expected_joined_json = "{\"_label_cost\":-1.5,"
     "\"_label_probability\":0.9000000357627869,\"_label_Action\":1,"
     "\"_labelIndex\":0,\"o\":[{\"v\":1.5,\"EventId\":\"91f71c8\","
-    "\"ActionTaken\":false}],\"Timestamp\":\"2021-04-13 15:08:46.000 UTC\","
+    "\"ActionTaken\":false}],\"Timestamp\":\"2021-04-13T15:08:46.000000Z\","
     "\"Version\":\"1\",\"EventId\":\"91f71c8\",\"a\":[1,2],"
     "\"c\":{\"GUser\":{\"id\":\"a\",\"major\":\"eng\",\"hobby\":\"hiking\"},"
     "\"_multi\":[{\"TAction\":{\"a1\":\"f1\"}},{\"TAction\":{\"a2\":\"f2\"}}]},"
@@ -47,15 +47,15 @@ BOOST_AUTO_TEST_CASE(convert_binary_to_dsjson) {
 }
 
 BOOST_AUTO_TEST_CASE(convert_inactive_event_without_activation) {
-  std::string infile_path = "/skip_learn/cb_deferred_action_without_activation.fb";
-  std::string outfile_path = "/skip_learn/cb_deferred_action_without_activation.dsjson";
+  std::string infile_path = "/skip_learn/cb/deferred_action_without_activation.fb";
+  std::string outfile_path = "/skip_learn/cb/deferred_action_without_activation.dsjson";
 
   std::string converted_json = get_json_event(infile_path, outfile_path);
   std::string expected_joined_json = "{\"_label_cost\":-1.5,"
     "\"_label_probability\":0.9000000357627869,\"_label_Action\":1,"
     "\"_labelIndex\":0,\"_skipLearn\":true,\"o\":[{\"v\":1.5,"
     "\"EventId\":\"91f71c8\",\"ActionTaken\":false}],"
-    "\"Timestamp\":\"2021-05-21 18:54:38.000 UTC\",\"Version\":\"1\","
+    "\"Timestamp\":\"2021-05-21T18:54:38.000000Z\",\"Version\":\"1\","
     "\"EventId\":\"91f71c8\",\"a\":[1,2],\"c\":{\"GUser\":{\"id\":\"a\","
     "\"major\":\"eng\",\"hobby\":\"hiking\"},\"_multi\":[{\"TAction\":"
     "{\"a1\":\"f1\"}},{\"TAction\":{\"a2\":\"f2\"}}]},\"p\":[0.9000000357627869,"
@@ -65,14 +65,14 @@ BOOST_AUTO_TEST_CASE(convert_inactive_event_without_activation) {
 }
 
 BOOST_AUTO_TEST_CASE(convert_inactive_event_with_activation) {
-  std::string infile_path = "/skip_learn/cb_deferred_action_with_activation.fb";
-  std::string outfile_path = "/skip_learn/cb_deferred_action_with_activation.dsjson";
+  std::string infile_path = "/skip_learn/cb/deferred_action_with_activation.fb";
+  std::string outfile_path = "/skip_learn/cb/deferred_action_with_activation.dsjson";
 
   std::string converted_json = get_json_event(infile_path, outfile_path);
   std::string expected_joined_json = "{\"_label_cost\":-0.0,"
     "\"_label_probability\":0.9000000357627869,\"_label_Action\":1,"
     "\"_labelIndex\":0,\"o\":[{\"EventId\":\"91f71c8\",\"ActionTaken\":true}],"
-    "\"Timestamp\":\"2021-06-04 17:40:13.000 UTC\",\"Version\":\"1\","
+    "\"Timestamp\":\"2021-06-04T17:40:13.000000Z\",\"Version\":\"1\","
     "\"EventId\":\"91f71c8\",\"a\":[1,2],\"c\":{\"GUser\":{\"id\":\"a\","
     "\"major\":\"eng\",\"hobby\":\"hiking\"},\"_multi\":[{\"TAction\":"
     "{\"a1\":\"f1\"}},{\"TAction\":{\"a2\":\"f2\"}}]},\"p\":[0.9000000357627869,"

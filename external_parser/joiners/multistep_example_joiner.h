@@ -53,7 +53,7 @@ private:
 
 private:
   void populate_order();
-  joined_event::outcome_event
+  reward::outcome_event
   process_outcome(const Parsed<v2::OutcomeEvent> &event_meta);
   joined_event::joined_event
   process_interaction(const Parsed<v2::MultiStepEvent> &event_meta,

@@ -6,8 +6,8 @@
 #include "event_processors/loop.h"
 #include "example.h"
 #include "joiners/i_joiner.h"
-#include "metrics/metrics.h"
 #include "lru_dedup_cache.h"
+#include "metrics/metrics.h"
 #include "v_array.h"
 
 #include <fstream>
@@ -67,15 +67,23 @@ public:
    * in the metadata)
    */
   bool process_joined(v_array<example *> &examples) override;
+
   // true if there are still event-groups to be processed from a deserialized
   // batch
   bool processing_batch() override;
+
+  // to be called after process_joined
+  // returns true if the event that was just processed is a skip_learn event
+  // otherwise returns false
+  bool current_event_is_skip_learn() override;
 
   void on_new_batch() override;
 
   void on_batch_read() override;
 
   metrics::joiner_metrics get_metrics() override;
+
+  void persist_metrics() override;
 
 private:
   bool process_dedup(const v2::Event &event, const v2::Metadata &metadata);
@@ -118,6 +126,11 @@ private:
   loop::sticky_value<reward::RewardFunctionType> _reward_calculation;
   loop::loop_info _loop_info;
   metrics::joiner_metrics _joiner_metrics;
+
+  // should be reset on each call to process_joined
+  // let's us know if the current event processed by process_joined is a
+  // skip_learn event or not
+  bool _current_je_is_skip_learn;
 
   bool _binary_to_json;
   std::ofstream _outfile;
