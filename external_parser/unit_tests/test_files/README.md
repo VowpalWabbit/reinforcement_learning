@@ -56,6 +56,10 @@ Residing under `reward_functions`
 - fmix-reward_v2.fb: `./example_gen --kind fmix-reward --random_reward`
 - fi-out-of-bound-reward_v2.fb: `./example_gen --kind fi-out-of-bound-reward`
 
+#### ca format
+- ca_v2.fb: `./example_gen --kind ca --count 1 --seed -1`
+- f-reward_3obs_v2.fb: `./example_gen --kind f-reward --count 3 --seed -1 --random_reward`
+
 ### skip learn test files
 
 Residing under `skip_learn`
