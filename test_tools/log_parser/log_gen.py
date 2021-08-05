@@ -184,28 +184,31 @@ def mk_cb_payload():
 
 
 
+def main():
+    if len(sys.argv) != 2:
+        print("""Usage: log_gen.py <XXXX>
+    Where XXXX is a sequence of letters telling which kind of message to output next:
+    m -> File Magic
+    h -> File Header
+    c -> Checkpoint message
+    r -> Single CB message with no observation
+    For example: ./log_gen.py mhcrr
+    This writes to output.fb five messages in sequence: file magic, file header, checkpoint, CB and CB.
+        """)
+    else:
+        foo = BinLogWriter('output.fb')
 
-if len(sys.argv) != 2:
-    print("""Usage: log_gen.py <XXXX>
-Where XXXX is a sequence of letters telling which kind of message to output next:
-m -> File Magic
-h -> File Header
-c -> Checkpoint message
-r -> Single CB message with no observation
-For example: ./log_gen.py mhcrr
-This writes to output.fb five messages in sequence: file magic, file header, checkpoint, CB and CB.
-    """)
-else:
-    foo = BinLogWriter('output.fb')
+        for c in sys.argv[1]:
+            if   c == 'm':
+                foo.write_file_magic()
+            elif c == 'h':
+                foo.write_file_header({ 'foo': 'bar'})
+            elif c == 'c':
+                foo.write_checkpoint_info()
+            elif c == 'r':
+                foo.write_regular_message([mk_cb_payload()])
+            else:
+                print(f'Invalid character \'{c}\'. Ignoring it.')
 
-    for c in sys.argv[1]:
-        if   c == 'm':
-            foo.write_file_magic()
-        elif c == 'h':
-            foo.write_file_header({ 'foo': 'bar'})
-        elif c == 'c':
-            foo.write_checkpoint_info()
-        elif c == 'r':
-            foo.write_regular_message([mk_cb_payload()])
-        else:
-            print(f'Invalid character \'{c}\'. Ignoring it.')
+if __name__ == "__main__":
+    main()
