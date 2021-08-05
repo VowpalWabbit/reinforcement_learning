@@ -6,7 +6,8 @@
 using namespace rapidjson;
 
 void should_match_expected_metrics(
-    const std::string &infile_name, const std::string &outfile_name,
+    const std::string &args, const std::string &infile_name,
+    const std::string &outfile_name,
     const std::map<std::string, int> &expected_int_metrics,
     const std::map<std::string, float> &expected_float_metrics,
     const std::map<std::string, std::string> &expected_string_metrics) {
@@ -18,7 +19,7 @@ void should_match_expected_metrics(
   remove(outfile.c_str());
 
   auto vw =
-      VW::initialize("--cb_explore_adf -d " + infile +
+      VW::initialize(args + " -d " + infile +
                          " --binary_parser --quiet --extra_metrics " + outfile,
                      nullptr, false, nullptr, nullptr);
 
@@ -85,11 +86,13 @@ BOOST_AUTO_TEST_CASE(metrics_increase_with_events_should_be_tracked) {
   std::map<std::string, float> expected_float_metrics = {
       {"cbea_sum_cost", -270.29998779296877},
       {"cbea_sum_cost_baseline", -119.21666717529297},
-      {"cbea_avg_feat_per_event", 8.0},
-      {"cbea_avg_actions_per_event", 2.0},
-      {"cbea_avg_ns_per_event", 6.0},
-      {"cbea_avg_feat_per_action", 4.0},
-      {"cbea_avg_ns_per_action", 3.0}};
+      // TODO uncomment and fix when some interaction work is pulled in from VW
+      //   {"cbea_avg_feat_per_event", 8.0},
+      //   {"cbea_avg_actions_per_event", 2.0},
+      //   {"cbea_avg_ns_per_event", 6.0},
+      //   {"cbea_avg_feat_per_action", 4.0},
+      //   {"cbea_avg_ns_per_action", 3.0}
+  };
 
   std::map<std::string, std::string> expected_string_metrics = {
       {"first_event_id", "91f71c8"},
@@ -97,8 +100,8 @@ BOOST_AUTO_TEST_CASE(metrics_increase_with_events_should_be_tracked) {
       {"last_event_id", "1357e515"},
       {"last_event_time", "2021-05-18T13:26:39.000000Z"}};
 
-  should_match_expected_metrics(infile_name, outfile_name, expected_int_metrics,
-                                expected_float_metrics,
+  should_match_expected_metrics("--cb_explore_adf", infile_name, outfile_name,
+                                expected_int_metrics, expected_float_metrics,
                                 expected_string_metrics);
 }
 
@@ -132,14 +135,16 @@ BOOST_AUTO_TEST_CASE(check_metrics_deferred_actions_without_activations) {
       {"last_event_id", ""},
       {"last_event_time", ""}};
 
-  should_match_expected_metrics(infile_name, outfile_name, expected_int_metrics,
-                                expected_float_metrics,
+  should_match_expected_metrics("--cb_explore_adf", infile_name, outfile_name,
+                                expected_int_metrics, expected_float_metrics,
                                 expected_string_metrics);
 }
 
-BOOST_AUTO_TEST_CASE(check_metrics_deferred_actions_with_activations_and_apprentice) {
+BOOST_AUTO_TEST_CASE(
+    check_metrics_deferred_actions_with_activations_and_apprentice) {
   std::string infile_name =
-      "valid_joined_logs/cb_deferred_actions_w_activations_and_apprentice_10.fb";
+      "valid_joined_logs/"
+      "cb_deferred_actions_w_activations_and_apprentice_10.fb";
   std::string outfile_name =
       "cb_deferred_actions_w_activations_and_apprentice_10_metrics_spec.json";
 
@@ -160,10 +165,14 @@ BOOST_AUTO_TEST_CASE(check_metrics_deferred_actions_with_activations_and_apprent
       {"cbea_max_actions", 2}};
 
   std::map<std::string, float> expected_float_metrics = {
-      {"cbea_sum_cost", -9.0},         {"cbea_sum_cost_baseline", -9.0},
-      {"cbea_avg_feat_per_event", 8.0}, {"cbea_avg_actions_per_event", 2.0},
-      {"cbea_avg_ns_per_event", 6.0},   {"cbea_avg_feat_per_action", 4.0},
-      {"cbea_avg_ns_per_action", 3.0}};
+      {"cbea_sum_cost", -9.0}, {"cbea_sum_cost_baseline", -9.0},
+      // TODO uncomment and fix when some interaction work is pulled in from VW
+      //   {"cbea_avg_feat_per_event", 8.0},
+      //   {"cbea_avg_actions_per_event", 2.0},
+      //   {"cbea_avg_ns_per_event", 6.0},
+      //   {"cbea_avg_feat_per_action", 4.0},
+      //   {"cbea_avg_ns_per_action", 3.0}
+  };
 
   std::map<std::string, std::string> expected_string_metrics = {
       {"first_event_id", "e28a9ae6"},
@@ -171,7 +180,52 @@ BOOST_AUTO_TEST_CASE(check_metrics_deferred_actions_with_activations_and_apprent
       {"last_event_id", "db81aacf"},
       {"last_event_time", "2021-07-23T13:35:30.000000Z"}};
 
-  should_match_expected_metrics(infile_name, outfile_name, expected_int_metrics,
-                                expected_float_metrics,
+  should_match_expected_metrics("--cb_explore_adf", infile_name, outfile_name,
+                                expected_int_metrics, expected_float_metrics,
+                                expected_string_metrics);
+}
+
+BOOST_AUTO_TEST_CASE(
+    check_metrics_ccb_deferred_actions_with_activations_and_apprentice) {
+  std::string infile_name =
+      "valid_joined_logs/"
+      "ccb_deferred_actions_w_activations_and_apprentice_20.fb";
+  std::string outfile_name =
+      "ccb_deferred_actions_w_activations_and_apprentice_20_metrics_spec.json";
+
+  std::map<std::string, int> expected_int_metrics = {
+      {"total_predict_calls", 0},
+      {"total_learn_calls", 17},
+      {"sfm_count_learn_example_with_shared", 34},
+      {"cbea_labeled_ex", 34},
+      {"cbea_predict_in_learn", 0},
+      {"cbea_label_first_action", 29},
+      {"cbea_label_not_first", 5},
+      // 5 instead of expected 20 since it's apprentice mode plus skip learn
+      {"cbea_non_zero_cost", 6},
+      {"number_skipped_events", 3},
+      {"number_events_zero_actions", 0},
+      {"line_parse_error", 0},
+      {"cbea_min_actions", 1},
+      {"cbea_max_actions", 2}};
+
+  std::map<std::string, float> expected_float_metrics = {
+      {"cbea_sum_cost", -16.0}, {"cbea_sum_cost_baseline", -5.0},
+      // TODO uncomment when some interaction work is pulled in from VW
+      //   {"cbea_avg_feat_per_event", 18.0},
+      //   {"cbea_avg_actions_per_event", 1.0},
+      //   {"cbea_avg_ns_per_event", 7.0},
+      //   {"cbea_avg_feat_per_action", 12.0},
+      //   {"cbea_avg_ns_per_action", 5.0}
+  };
+
+  std::map<std::string, std::string> expected_string_metrics = {
+      {"first_event_id", "75d50657"},
+      {"first_event_time", "2021-07-27T17:51:23.000000Z"},
+      {"last_event_id", "1a997865"},
+      {"last_event_time", "2021-07-27T17:51:23.000000Z"}};
+
+  should_match_expected_metrics("--ccb_explore_adf", infile_name, outfile_name,
+                                expected_int_metrics, expected_float_metrics,
                                 expected_string_metrics);
 }
