@@ -487,7 +487,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
 
   je->calc_reward(_loop_info.default_reward, _reward_calculation.value());
 
-  if (!label_is_valid || !je->is_joined_event_learnable()) {
+  if (!je->is_joined_event_learnable()) {
     _current_je_is_skip_learn = true;
     clear_examples = true;
     return false;
