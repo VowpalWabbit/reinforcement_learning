@@ -376,11 +376,10 @@ struct ca_joined_event : public typed_joined_event {
     return false;
   }
 
-  void calc_and_set_cost(
-      v_array<example *> &examples, float default_reward,
-      reward::RewardFunctionType reward_function,
-      const metadata::event_metadata_info &interaction_metadata,
-      std::vector<reward::outcome_event> &outcome_events) override {
+  void calc_cost(float default_reward,
+                 reward::RewardFunctionType reward_function,
+                 const metadata::event_metadata_info &interaction_metadata,
+                 std::vector<reward::outcome_event> &outcome_events) override {
     reward = default_reward;
     // original reward is used to record the observed reward of apprentice mode
     original_reward = default_reward;
@@ -395,7 +394,9 @@ struct ca_joined_event : public typed_joined_event {
       }
       reward = original_reward;
     }
+  }
 
+  void set_cost_from_data(v_array<example *> &examples) const override {
     set_cost(examples, reward);
   }
 
