@@ -62,7 +62,6 @@ def parse_cb(payload, verbose):
     evt = CbEvent.GetRootAsCbEvent(payload, 0)
     if not verbose:
         print(f'\tcb: actions:{evt.ActionIdsLength()} model:{evt.ModelId()} lm:{learning_mode_name(evt.LearningMode())} deferred:{evt.DeferredAction()}')
-        print(f'\t\tcontext: {fmt_payload(evt.ContextAsNumpy())}')
     else:
         print(f'\tcb: actions:{evt.ActionIdsAsNumpy()} probs: {evt.ProbabilitiesAsNumpy()} model:{evt.ModelId()} lm:{learning_mode_name(evt.LearningMode())} deferred:{evt.DeferredAction()}')
         print(f'\t\tcontext: {fmt_payload(evt.ContextAsNumpy())}')        
@@ -287,10 +286,8 @@ from reinforcement_learning.messages.flatbuff.v2.ProblemType import *
 def main():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('files', metavar='N', type=str, nargs='+',
-                        help='files to parse')
-    parser.add_argument('--verbose', dest='verbose', type=bool, default=False,
-                        help='verbose output')
+    parser.add_argument('files', metavar='N', type=str, nargs='+', help='files to parse')
+    parser.add_argument('--verbose', dest='verbose', action='store_true', help='verbose output')
 
     args = parser.parse_args()
     for input_file in args.files:
