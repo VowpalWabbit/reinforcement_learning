@@ -222,10 +222,10 @@ BOOST_AUTO_TEST_CASE(rrcr_ignore_examples_before_checkpoint) {
   VW::finish(*vw);
 }
 
-BOOST_AUTO_TEST_CASE(rcrfrmr_file_magic_and_header_in_the_middle_works) {
+BOOST_AUTO_TEST_CASE(rcrrmr_file_magic_and_header_in_the_middle_works) {
   std::string input_files = get_test_files_location();
 
-  auto buffer = read_file(input_files + "/valid_joined_logs/rcrfrmr.fb");
+  auto buffer = read_file(input_files + "/valid_joined_logs/rcrrmr.fb");
 
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
