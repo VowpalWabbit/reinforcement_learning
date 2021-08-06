@@ -6,7 +6,7 @@
 
 namespace log_converter {
 namespace rj = rapidjson;
- 
+
 void build_cb_json(std::ofstream &outfile,
                    joined_event::joined_event &je) {
   float cost = -1.f * reinterpret_cast<const joined_event::cb_joined_event *>(
@@ -109,6 +109,11 @@ void build_cb_json(std::ofstream &outfile,
     writer.Key("m", strlen("m"), true);
     writer.String(je.model_id.c_str(), je.model_id.length(), true);
     writer.EndObject();
+
+    if (interaction_data.probabilityOfDrop != 0.f) {
+      writer.Key("pdrop");
+      writer.Double(interaction_data.probabilityOfDrop);
+    }
 
     writer.Key("_original_label_cost", strlen("_original_label_cost"), true);
     writer.Double(original_cost);
