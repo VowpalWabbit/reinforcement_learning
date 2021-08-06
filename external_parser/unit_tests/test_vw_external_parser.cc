@@ -391,3 +391,33 @@ BOOST_AUTO_TEST_CASE(cb_pdrop_05_parse) {
   clear_examples(examples, vw);
   VW::finish(*vw);
 }
+
+BOOST_AUTO_TEST_CASE(cb_pdrop_1_parse) {
+  std::string input_files = get_test_files_location();
+
+  auto buffer =
+      read_file(input_files + "/valid_joined_logs/cb_joined_with_pdrop_1.fb");
+
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+  set_buffer_as_vw_input(buffer, vw);
+
+  bool read_payload = false;
+  while (vw->example_parser->reader(vw, examples) > 0) {
+    read_payload = true;
+    BOOST_CHECK_EQUAL(examples.size(), 4);
+    BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[0]->indices[0], 'S');
+    BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  BOOST_CHECK_EQUAL(read_payload, true);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
