@@ -220,8 +220,7 @@ def mk_cb_reward(_event_id='event_id_0', _value=1, _pdrop=0):
     MetadataAddClientTimeUtc(builder, mk_timestamp(builder))
     MetadataAddPayloadType(builder, PayloadType.Outcome)
     MetadataAddEncoding(builder, EventEncoding.Identity)
-    if _pdrop != 0:
-        MetadataAddPassProbability(builder=builder, passProbability = 1 - _pdrop)
+    MetadataAddPassProbability(builder=builder, passProbability = 1 - _pdrop)
 
     md_off = MetadataEnd(builder)
     payload_off = mk_bytes_vector(builder, reward_payload)
