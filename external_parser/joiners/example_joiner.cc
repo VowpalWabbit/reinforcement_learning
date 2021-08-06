@@ -482,12 +482,14 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
-  je->fill_in_label(examples);
+  const bool label_is_valid = je->fill_in_label(examples);
 
-  je->calc_and_set_reward(examples, _loop_info.default_reward,
+  if (label_is_valid) {
+    je->calc_and_set_reward(examples, _loop_info.default_reward,
                           _reward_calculation.value());
+  }
 
-  if (!je->is_joined_event_learnable()) {
+  if (!label_is_valid || !je->is_joined_event_learnable()) {
     _current_je_is_skip_learn = true;
     clear_examples = true;
     return false;

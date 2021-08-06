@@ -19,7 +19,7 @@ struct typed_joined_event {
   virtual bool is_skip_learn() const = 0;
   virtual void set_skip_learn(bool sl) = 0;
   virtual void set_apprentice_reward() = 0;
-  virtual void fill_in_label(v_array<example *> &examples) const = 0;
+  virtual bool fill_in_label(v_array<example *> &examples) const = 0;
   virtual void set_cost(v_array<example *> &examples, float reward,
                         size_t index = 0) const = 0;
   virtual void
@@ -57,18 +57,18 @@ struct cb_joined_event : public typed_joined_event {
     }
   }
 
-  void fill_in_label(v_array<example *> &examples) const override {
+  bool fill_in_label(v_array<example *> &examples) const override {
 
     if (interaction_data.actions.empty()) {
       VW::io::logger::log_warn("missing actions for event [{}]",
                                interaction_data.eventId);
-      return;
+      return false;
     }
 
     if (interaction_data.probabilities.empty()) {
       VW::io::logger::log_warn("missing probabilities for event [{}]",
                                interaction_data.eventId);
-      return;
+      return false;
     }
 
     if (std::any_of(interaction_data.probabilities.begin(),
@@ -77,15 +77,22 @@ struct cb_joined_event : public typed_joined_event {
       VW::io::logger::log_warn(
           "distribution for event [{}] contains invalid probabilities",
           interaction_data.eventId);
+      return true; //why?
     }
 
     int index = interaction_data.actions[0];
     auto action = interaction_data.actions[0];
     auto probability = interaction_data.probabilities[0];
+    if (interaction_data.probabilityOfDrop >= 1.f || interaction_data.probabilityOfDrop < 0) {
+      VW::io::logger::log_warn("Probability of drop should be within [0, 1): [{}]",
+                               interaction_data.eventId);
+      return false;
+    }
     auto weight = 1.f / (1.f - interaction_data.probabilityOfDrop);
 
     examples[index]->l.cb.costs.push_back({0.f, action, probability});
     examples[index]->l.cb.weight = weight;
+    return true;
   }
 
   void set_cost(v_array<example *> &examples, float reward,
@@ -166,7 +173,7 @@ struct ccb_joined_event : public typed_joined_event {
     }
   }
 
-  void fill_in_label(v_array<example *> &examples) const override {
+  bool fill_in_label(v_array<example *> &examples) const override {
     // index to interaction_data vector which holds per-slot info
     size_t slot_index = 0;
 
@@ -199,6 +206,7 @@ struct ccb_joined_event : public typed_joined_event {
         slot_index++;
       }
     }
+    return true;
   }
 
   void set_cost(v_array<example *> &examples, float reward,
@@ -325,8 +333,8 @@ struct joined_event {
     return typed_data->set_apprentice_reward();
   }
 
-  void fill_in_label(v_array<example *> &examples) const {
-    typed_data->fill_in_label(examples);
+  bool fill_in_label(v_array<example *> &examples) const {
+    return typed_data->fill_in_label(examples);
   }
 
   void set_cost(v_array<example *> &examples, float reward,
