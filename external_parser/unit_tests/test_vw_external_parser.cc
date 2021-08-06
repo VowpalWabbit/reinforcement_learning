@@ -1,3 +1,4 @@
+#include "ccb_label.h"
 #include "test_common.h"
 
 #include <boost/test/unit_test.hpp>
@@ -311,11 +312,13 @@ BOOST_AUTO_TEST_CASE(cb_apprentice_mode) {
 BOOST_AUTO_TEST_CASE(cb_skip_learn_w_activations_and_apprentice) {
   std::string input_files = get_test_files_location();
 
-  // this datafile contains 10 joined events with the 5 first interactions being deferred actions
-  // but 2 of those 5 have activations reported (event_id's: [e28a9ae6,bbf5c404])
+  // this datafile contains 10 joined events with the 5 first interactions being
+  // deferred actions but 2 of those 5 have activations reported (event_id's:
+  // [e28a9ae6,bbf5c404])
 
-  auto buffer =
-      read_file(input_files + "/valid_joined_logs/cb_deferred_actions_w_activations_and_apprentice_10.fb");
+  auto buffer = read_file(
+      input_files + "/valid_joined_logs/"
+                    "cb_deferred_actions_w_activations_and_apprentice_10.fb");
 
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
@@ -342,15 +345,171 @@ BOOST_AUTO_TEST_CASE(cb_skip_learn_w_activations_and_apprentice) {
   VW::finish(*vw);
 }
 
-BOOST_AUTO_TEST_CASE(cb_compare_dsjson_with_fb_models_deferred_actions_w_activations_and_apprentice) {
+BOOST_AUTO_TEST_CASE(
+    cb_compare_dsjson_with_fb_models_deferred_actions_w_activations_and_apprentice) {
   std::string input_files = get_test_files_location();
 
-  std::string model_name = input_files + "/test_outputs/deferred_actions_w_activations_and_apprentice";
+  std::string model_name =
+      input_files +
+      "/test_outputs/deferred_actions_w_activations_and_apprentice";
 
   std::string file_name =
-      input_files + "/valid_joined_logs/cb_deferred_actions_w_activations_and_apprentice_10";
+      input_files +
+      "/valid_joined_logs/cb_deferred_actions_w_activations_and_apprentice_10";
 
   generate_dsjson_and_fb_models(model_name, "--cb_explore_adf ", file_name);
+
+  // read the models and compare
+  auto buffer_fb_model = read_file(model_name + ".fb");
+  auto buffer_dsjson_model = read_file(model_name + ".json");
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
+                                buffer_dsjson_model.begin(),
+                                buffer_dsjson_model.end());
+}
+
+BOOST_AUTO_TEST_CASE(ccb_apprentice_mode) {
+  std::string input_files = get_test_files_location();
+
+  // this datafile contains 5 joined events. Two joined events (the 2nd and 5th
+  // joined events)'s interaction DO match the baseline actions and so the
+  // reward will NOT be the default reward. The rest of the interactions DO NOT
+  // match the baseline action so the reward WILL BE the default reward
+
+  auto buffer =
+      read_file(input_files + "/valid_joined_logs/ccb_apprentice_5.log");
+
+  auto vw = VW::initialize("--ccb_explore_adf --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+
+  set_buffer_as_vw_input(buffer, vw);
+
+  size_t joined_events_count = 0;
+  while (vw->example_parser->reader(vw, examples) > 0) {
+    joined_events_count++;
+    if (joined_events_count == 2 || joined_events_count == 5) {
+      // baseline sent by example_gen is {1, 0}
+      size_t slot_idx = 0;
+      for (auto *ex : examples) {
+        if (ex->l.conditional_contextual_bandit.type ==
+            CCB::example_type::slot) {
+          // check default cost
+          slot_idx++;
+          if (slot_idx == 1) {
+            // 1st slot check action chosen is 1
+            BOOST_CHECK_EQUAL(
+                ex->l.conditional_contextual_bandit.outcome->probabilities[0]
+                    .action,
+                1);
+          } else {
+            // 2nd slot check action chosen is 0
+            BOOST_CHECK_EQUAL(
+                ex->l.conditional_contextual_bandit.outcome->probabilities[0]
+                    .action,
+                0);
+          }
+          BOOST_CHECK_NE(ex->l.conditional_contextual_bandit.outcome->cost,
+                         -0.f);
+        }
+      }
+    } else {
+      // 1st example is the example with cost in the baseline case (since
+      // baseline is 1)
+      size_t slot_idx = 0;
+      for (auto *ex : examples) {
+        if (ex->l.conditional_contextual_bandit.type ==
+            CCB::example_type::slot) {
+          slot_idx++;
+          if (slot_idx == 1) {
+            // 1st slot check action chosen is 0 (opposite of baseline for this
+            // slot)
+            BOOST_CHECK_EQUAL(
+                ex->l.conditional_contextual_bandit.outcome->probabilities[0]
+                    .action,
+                0);
+          } else {
+            // 2nd slot check action chosen is 1 (opposite of baseline for this
+            // slot)
+            BOOST_CHECK_EQUAL(
+                ex->l.conditional_contextual_bandit.outcome->probabilities[0]
+                    .action,
+                1);
+          }
+          // check default cost
+          BOOST_CHECK_EQUAL(ex->l.conditional_contextual_bandit.outcome->cost,
+                            -0.f);
+        }
+      }
+    }
+    // learn/predict isn't called in the unit test but cleanup examples expects
+    // shared pred to be set
+    examples[0]->pred.decision_scores = {v_init<ACTION_SCORE::action_score>()};
+    examples[0]->pred.decision_scores[0].push_back({0, 0.f});
+    // simulate next call to parser->read by clearing up examples
+    // and preparing one unused example
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  // this file contains 5 joined events
+  BOOST_CHECK_EQUAL(joined_events_count, 5);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
+BOOST_AUTO_TEST_CASE(ccb_skip_learn_w_activations_and_apprentice) {
+  std::string input_files = get_test_files_location();
+
+  // this datafile contains 20 joined events with the 5 first interactions being
+  // deferred actions but 2 of those 5 have activations reported (event_id's:
+  // [75d50657, 4f402f75])
+
+  auto buffer = read_file(
+      input_files + "/valid_joined_logs/"
+                    "ccb_deferred_actions_w_activations_and_apprentice_20.fb");
+
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+
+  set_buffer_as_vw_input(buffer, vw);
+
+  size_t joined_events_count = 0;
+  while (vw->example_parser->reader(vw, examples) > 0) {
+    joined_events_count++;
+
+    // simulate next call to parser->read by clearing up examples
+    // and preparing one unused example
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  // this file contains 20 joined events 5 deferred but 2 of those activated
+  BOOST_CHECK_EQUAL(joined_events_count, 17);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
+BOOST_AUTO_TEST_CASE(
+    ccb_compare_dsjson_with_fb_models_deferred_actions_w_activations_and_apprentice) {
+  std::string input_files = get_test_files_location();
+
+  std::string model_name =
+      input_files +
+      "/test_outputs/deferred_actions_w_activations_and_apprentice";
+
+  std::string file_name =
+      input_files +
+      "/valid_joined_logs/ccb_deferred_actions_w_activations_and_apprentice_20";
+
+  generate_dsjson_and_fb_models(model_name, "--ccb_explore_adf ", file_name);
 
   // read the models and compare
   auto buffer_fb_model = read_file(model_name + ".fb");

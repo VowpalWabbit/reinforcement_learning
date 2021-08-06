@@ -260,26 +260,28 @@ bool example_joiner::process_interaction(const v2::Event &event,
     return false;
   }
 
-  std::string context(je.context);
 
-  try {
-    if (_vw->audit || _vw->hash_inv) {
-      VW::template read_line_json<true>(
-          *_vw, examples, const_cast<char *>(context.c_str()),
-          reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
-          &_dedup_cache.dedup_examples);
-    } else {
-      VW::template read_line_json<false>(
-          *_vw, examples, const_cast<char *>(context.c_str()),
-          reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
-          &_dedup_cache.dedup_examples);
+  if(!_binary_to_json) {
+    std::string context(je.context);
+    try {
+      if (_vw->audit || _vw->hash_inv) {
+        VW::template read_line_json<true>(
+            *_vw, examples, const_cast<char *>(context.c_str()),
+            reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
+            &_dedup_cache.dedup_examples);
+      } else {
+        VW::template read_line_json<false>(
+            *_vw, examples, const_cast<char *>(context.c_str()),
+            reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
+            &_dedup_cache.dedup_examples);
+      }
+    } catch (VW::vw_exception &e) {
+      VW::io::logger::log_warn(
+          "JSON parsing during interaction processing failed "
+          "with error: [{}] for event with id: [{}]",
+          e.what(), metadata.id()->c_str());
+      return false;
     }
-  } catch (VW::vw_exception &e) {
-    VW::io::logger::log_warn(
-        "JSON parsing during interaction processing failed "
-        "with error: [{}] for event with id: [{}]",
-        e.what(), metadata.id()->c_str());
-    return false;
   }
 
   _batch_grouped_examples.emplace(
@@ -299,7 +301,8 @@ bool example_joiner::process_outcome(const v2::Event &event,
                       metadata.payload_type(),
                       metadata.pass_probability(),
                       metadata.encoding(),
-                      metadata.id()->str()};
+                      metadata.id()->str(),
+                      v2::LearningModeType_Online }; //Online is the default value, we should not leave this uninitialized
   o_event.enqueued_time_utc = enqueued_time_utc;
 
   const v2::OutcomeEvent *outcome = nullptr;
@@ -482,12 +485,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
-  const bool label_is_valid = je->fill_in_label(examples);
-
-  if (label_is_valid) {
-    je->calc_and_set_reward(examples, _loop_info.default_reward,
-                          _reward_calculation.value());
-  }
+  je->calc_reward(_loop_info.default_reward, _reward_calculation.value());
 
   if (!label_is_valid || !je->is_joined_event_learnable()) {
     _current_je_is_skip_learn = true;
@@ -499,6 +497,14 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     clear_examples = true;
     return true;
   }
+
+  if (!je->fill_in_label(examples)) {
+    _current_je_is_skip_learn = true;
+    clear_examples = true;
+    return false;    
+  }
+  je->set_reward_from_data(examples);
+
 
   if (multiline) {
     // add an empty example to signal end-of-multiline

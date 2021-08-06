@@ -23,12 +23,15 @@ struct typed_joined_event {
   virtual void set_cost(v_array<example *> &examples, float reward,
                         size_t index = 0) const = 0;
   virtual void
-  calc_and_set_cost(v_array<example *> &examples, float default_reward,
+  calc_cost(float default_reward,
                     reward::RewardFunctionType reward_function,
                     const metadata::event_metadata_info &interaction_metadata,
                     // TODO outcome_events should also idealy be const here but
                     // we currently need it for ccb calculation
                     std::vector<reward::outcome_event> &outcome_events) = 0;
+
+  // this sets the cost from the data stored in this instance. MUST call calc_cost before this one.
+  virtual void set_cost_from_data(v_array<example *> &examples) const = 0;
 
   virtual void calculate_metrics(dsjson_metrics*) {}
 };
@@ -120,11 +123,15 @@ struct cb_joined_event : public typed_joined_event {
                        });
   }
 
-  void calc_and_set_cost(
-      v_array<example *> &examples, float default_reward,
-      reward::RewardFunctionType reward_function,
-      const metadata::event_metadata_info &interaction_metadata,
-      std::vector<reward::outcome_event> &outcome_events) override {
+  void set_cost_from_data(v_array<example *> &examples) const override {
+    set_cost(examples, reward);
+  }
+
+  void calc_cost(
+    float default_reward,
+    reward::RewardFunctionType reward_function,
+    const metadata::event_metadata_info &interaction_metadata,
+    std::vector<reward::outcome_event> &outcome_events) override {
     reward = default_reward;
     // original reward is used to record the observed reward of apprentice mode
     original_reward = default_reward;
@@ -138,9 +145,8 @@ struct cb_joined_event : public typed_joined_event {
         reward = original_reward;
       }
     }
-
-    set_cost(examples, reward);
   }
+
 
   void calculate_metrics(dsjson_metrics* metrics) override {
     if (metrics && interaction_data.actions.size() == 0) {
@@ -240,8 +246,16 @@ struct ccb_joined_event : public typed_joined_event {
     }
   }
 
-  void calc_and_set_cost(
-      v_array<example *> &examples, float default_reward,
+  void set_cost_from_data(v_array<example *> &examples) const override {
+    size_t num_of_slots = interaction_data.size();
+
+    for (size_t i = 0; i < num_of_slots; i++) {
+      set_cost(examples, rewards[i], i);
+    }
+  }
+
+  void calc_cost(
+      float default_reward,
       reward::RewardFunctionType reward_function,
       const metadata::event_metadata_info &metadata_info,
       std::vector<reward::outcome_event> &outcome_events) override {
@@ -300,10 +314,6 @@ struct ccb_joined_event : public typed_joined_event {
     } else {
       rewards.assign(original_rewards.begin(), original_rewards.end());
     }
-
-    for (size_t i = 0; i < num_of_slots; i++) {
-      set_cost(examples, rewards[i], i);
-    }
   }
 };
 
@@ -361,10 +371,13 @@ struct joined_event {
     }
   }
 
-  void calc_and_set_reward(v_array<example *> &examples, float default_reward,
-                           reward::RewardFunctionType reward_function) {
-    typed_data->calc_and_set_cost(examples, default_reward, reward_function,
-                                  interaction_metadata, outcome_events);
+  void calc_reward(float default_reward, reward::RewardFunctionType reward_function)
+  {
+    typed_data->calc_cost(default_reward, reward_function, interaction_metadata, outcome_events);
+  }
+
+  void set_reward_from_data(v_array<example *> &examples) const {
+    typed_data->set_cost_from_data(examples);
   }
 };
 } // namespace joined_event
