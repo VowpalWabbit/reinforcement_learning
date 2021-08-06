@@ -80,7 +80,6 @@ struct cb_joined_event : public typed_joined_event {
       VW::io::logger::log_warn(
           "distribution for event [{}] contains invalid probabilities",
           interaction_data.eventId);
-      return true; //why?
     }
 
     int index = interaction_data.actions[0];
