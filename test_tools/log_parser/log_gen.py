@@ -150,7 +150,6 @@ def mk_long_vector(builder, arr):
     return builder.CreateNumpyVector(np.array(list(arr), dtype=np.int64))
 
 def mk_float_vector(builder, arr):
-    print(np.array(list(arr), dtype=np.float32))
     return builder.CreateNumpyVector(np.array(list(arr), dtype=np.float32))
 
 
