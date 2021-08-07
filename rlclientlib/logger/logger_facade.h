@@ -55,7 +55,7 @@ namespace reinforcement_learning
       //CB v1/v2
       int log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
 
-      int log(const char* episode_id, const char* previous_id, const char* context, const ranking_response& response, api_status* status);
+      int log(const char* episode_id, const char* previous_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status);
       const multistep_serializer _multistep_serializer;
       int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);

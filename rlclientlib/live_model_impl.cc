@@ -605,7 +605,7 @@ namespace reinforcement_learning {
     resp.set_event_id(event_id);
 
     RETURN_IF_FAIL(episode.update(event_id, previous_id, context_json, resp, status));
-    RETURN_IF_FAIL(_interaction_logger->log(episode.get_episode_id(), previous_id, context_patched.c_str(), resp, status));
+    RETURN_IF_FAIL(_interaction_logger->log(episode.get_episode_id(), previous_id, context_patched.c_str(), flags, resp, status));
     return error_code::success;
   }
 
