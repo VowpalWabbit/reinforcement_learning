@@ -40,6 +40,7 @@ namespace reinforcement_learning
     int request_multi_slot_decision(const char* context_json, unsigned int flags, multi_slot_response_detailed& resp, const std::vector<int>& baseline_actions, api_status* status = nullptr);
 
     int report_action_taken(const char* event_id, api_status* status);
+    int report_action_taken(const char* primary_id, const char *secondary_id, api_status* status);
 
     int report_outcome(const char* event_id, const char* outcome_data, api_status* status);
     int report_outcome(const char* event_id, float reward, api_status* status);

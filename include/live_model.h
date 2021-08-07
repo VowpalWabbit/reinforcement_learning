@@ -276,6 +276,17 @@ namespace reinforcement_learning {
     int report_action_taken(const char* event_id, api_status* status = nullptr);
 
     /**
+    * @brief Report that action was taken.
+    *
+    * @param primary_id  The unique primary_id used when choosing an action should be presented here.  This is so that
+    *                  the action taken can be matched with feedback received.
+    * @param secondary_id Index of the partial outcome.
+    * @param status  Optional field with detailed string description if there is an error
+    * @return int Return error code.  This will also be returned in the api_status object
+    */
+    int report_action_taken(const char* primary_id, const char *secondary_id, api_status* status = nullptr);
+
+    /**
      * @brief Report the outcome for the top action.
      *
      * @param event_id  The unique event_id used when choosing an action should be presented here.  This is so that

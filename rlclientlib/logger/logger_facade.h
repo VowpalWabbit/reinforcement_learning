@@ -108,6 +108,7 @@ namespace reinforcement_learning
       int log(const char* event_id, const char* index, const char* outcome, api_status* status);
 
       int report_action_taken(const char* event_id, api_status* status);
+      int report_action_taken(const char* event_id, const char* index, api_status* status);
     private:
       const int _version;
       int _serializer_shared_state;

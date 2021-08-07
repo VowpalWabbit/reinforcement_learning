@@ -165,6 +165,14 @@ namespace reinforcement_learning {
         fbb.Finish(fb);
         return fbb.Release();
       }
+
+      static generic_event::payload_buffer_t report_action_taken(const char* index) {
+        flatbuffers::FlatBufferBuilder fbb;
+        const auto idx = fbb.CreateString(index).Union();
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_NONE, 0, v2::IndexValue_literal, idx, true);
+        fbb.Finish(fb);
+        return fbb.Release();
+      }      
     };
 
     struct multistep_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_MultiStep> {
