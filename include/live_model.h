@@ -415,6 +415,7 @@ namespace reinforcement_learning {
 
     //multistep
     int request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, ranking_response& resp, episode_state& episode, api_status* status = nullptr);
+    int request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, unsigned int flags, ranking_response& resp, episode_state& episode, api_status* status = nullptr);
 
   private:
     std::unique_ptr<live_model_impl> _pimpl;  //! The actual implementation details are forwarded to this object (PIMPL pattern)
