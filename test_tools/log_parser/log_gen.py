@@ -211,7 +211,7 @@ def mk_multistep_payload(_episode_id='episode_0', _event_id='0', _actions=[1,2],
     event_id = builder.CreateString(_event_id)
 
     MultiStepEventStart(builder)
-    MultiStepEventAddEventId(event_id)
+    MultiStepEventAddEventId(builder, event_id)
     MultiStepEventAddDeferredAction(builder, _deferred)
     MultiStepEventAddActionIds(builder, actions)
     MultiStepEventAddContext(builder, ctx)
@@ -227,7 +227,7 @@ def mk_multistep_payload(_episode_id='episode_0', _event_id='0', _actions=[1,2],
     MetadataStart(builder)
     MetadataAddId(builder, episode_id)
     MetadataAddClientTimeUtc(builder, mk_timestamp(builder))
-    MetadataAddPayloadType(builder, PayloadType.CB)
+    MetadataAddPayloadType(builder, PayloadType.MultiStep)
     MetadataAddEncoding(builder, EventEncoding.Identity)
     MetadataAddPassProbability(builder=builder, passProbability = 1 - _pdrop)
 
@@ -276,7 +276,7 @@ def mk_outcome(_primary_id='event_id_0', _secondary_id=None, _value=1, _pdrop=0)
         NumericIndexStart(builder)
         NumericIndexAddIndex(builder, _secondary_id)
         index = NumericIndexEnd(builder)
-    elif value_type == OutcomeValue.literal:
+    elif index_type == OutcomeValue.literal:
         index = builder.CreateString(_secondary_id)
 
     OutcomeEventStart(builder)
