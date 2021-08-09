@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-#%% setup
-
 from log_gen import *
 from pathlib import Path
 
@@ -69,8 +67,6 @@ class Env:
                 mk_outcome(_primary_id='ep3', _value = 4)])
                 
 
-
-#%% Generate pdrop test data
 def main():
     env = Env()
     env.cb_pdrop_05()
