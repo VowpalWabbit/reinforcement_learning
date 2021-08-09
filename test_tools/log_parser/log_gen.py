@@ -244,31 +244,6 @@ def mk_multistep_payload(_episode_id='episode_0', _event_id='0', _previous_id=No
 
     return builder.Output()
 
-def mk_cb_reward(_event_id='event_id_0', _value=1, _pdrop=0):
-    builder = flatbuffers.Builder(0)
-
-    NumericOutcomeStart(builder)
-    NumericOutcomeAddValue(builder, -_value)
-    outcome = NumericOutcomeEnd(builder)
-
-    OutcomeEventStart(builder)
-    OutcomeEventAddValueType(builder, OutcomeValue.numeric)
-    OutcomeEventAddValue(builder, outcome)
-
-    builder.Finish(OutcomeEventEnd(builder))
-    
-    reward_payload = builder.Output()
-
-    builder = flatbuffers.Builder(0)
-    event_id = builder.CreateString(_event_id)
-
-    MetadataStart(builder)
-    MetadataAddId(builder, event_id)
-    MetadataAddClientTimeUtc(builder, mk_timestamp(builder))
-    MetadataAddPayloadType(builder, PayloadType.Outcome)
-    MetadataAddEncoding(builder, EventEncoding.Identity)
-    MetadataAddPassProbability(builder=builder, passProbability = 1 - _pdrop)
-
 def mk_outcome(_primary_id='event_id_0', _secondary_id=None, _value=1, _pdrop=0):
     if isinstance(_value, (int, float)):
         value_type = OutcomeValue.numeric
