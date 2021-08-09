@@ -192,7 +192,6 @@ bool example_joiner::process_interaction(const v2::Event &event,
                                          const v2::Metadata &metadata,
                                          const TimePoint &enqueued_time_utc,
                                          v_array<example *> &examples) {
-
   if (EnumNamePayloadType(metadata.payload_type()) !=
       EnumNameProblemType(_loop_info.problem_type_config)) {
     VW::io::logger::log_warn(
@@ -337,6 +336,8 @@ bool example_joiner::process_outcome(const v2::Event &event,
     o_event.value = outcome->value_as_numeric()->value();
   }
 
+  o_event.index_type = outcome->index_type();
+
   if (outcome->index_type() == v2::IndexValue_literal) {
     o_event.s_index = outcome->index_as_literal()->c_str();
   } else if (outcome->index_type() == v2::IndexValue_numeric) {
@@ -469,9 +470,8 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
         }
       }
 
-      if (_binary_to_json &&
-          je->interaction_metadata.payload_type == v2::PayloadType_CB) {
-        log_converter::build_cb_json(_outfile, *je);
+      if (_binary_to_json) {
+        log_converter::build_json(_outfile, *je);
       }
     }
 
@@ -516,7 +516,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
 
   if (!je->fill_in_label(examples)) {
     clear_examples = true;
-    return false;    
+    return false;
   }
   je->set_reward_from_data(examples);
 

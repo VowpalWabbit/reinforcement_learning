@@ -7,6 +7,15 @@
 namespace log_converter {
 namespace rj = rapidjson;
 
+void build_json(std::ofstream &outfile,
+                joined_event::joined_event &je) {
+  if (je.interaction_metadata.payload_type == v2::PayloadType_CB) {
+    build_cb_json(outfile, je);
+  } else if (je.interaction_metadata.payload_type == v2::PayloadType_CCB) {
+    build_ccb_json(outfile, je);
+  }
+}
+
 void build_cb_json(std::ofstream &outfile,
                    joined_event::joined_event &je) {
   float cost = -1.f * reinterpret_cast<const joined_event::cb_joined_event *>(
@@ -123,8 +132,148 @@ void build_cb_json(std::ofstream &outfile,
     outfile << out_buffer.GetString() << std::endl;
   } catch (const std::exception &e) {
     VW::io::logger::log_error(
-        "convert events: [{}] from binary to json format failed: [{}].",
+        "convert event: [{}] from binary to json format failed: [{}].",
         interaction_data.eventId, e.what());
+  }
+}
+
+void build_ccb_json(std::ofstream &outfile,
+                    joined_event::joined_event &je) {
+  const std::string &event_id = je.interaction_metadata.event_id;
+
+  auto ccb_joined_event = reinterpret_cast<const joined_event::ccb_joined_event *>(
+                          je.get_hold_of_typed_data());
+  const auto &interaction_data = ccb_joined_event->interaction_data;
+  const auto &outcomes_map = ccb_joined_event->outcomes_map;
+  const auto &rewards = ccb_joined_event->rewards;
+  const auto &original_rewards = ccb_joined_event->original_rewards;
+  const auto &baseline_actions = ccb_joined_event->baseline_actions;
+
+  bool skip_learn = !je.is_joined_event_learnable();
+
+  try {
+    rj::StringBuffer out_buffer;
+    rj::Writer<rj::StringBuffer> writer(out_buffer);
+
+    writer.StartObject();
+
+    std::string ts_str = date::format(
+      "%FT%TZ",
+      date::floor<std::chrono::microseconds>(je.joined_event_timestamp));
+
+    writer.Key("Timestamp");
+    writer.String(ts_str.c_str(), ts_str.length(), true);
+
+    if (skip_learn) {
+      writer.Key("_skipLearn");
+      writer.Bool(skip_learn);
+    }
+
+    writer.Key("Version");
+    writer.String("1");
+
+    if (!event_id.empty()) {
+      writer.Key("EventId");
+      writer.String(event_id.c_str());
+    }
+
+    writer.Key("c");
+    std::replace(je.context.begin(), je.context.end(), '\n', ' ');
+    writer.RawValue(je.context.c_str(), je.context.length(), rj::kObjectType);
+
+    writer.Key("_outcomes");
+    writer.StartArray();
+    for (size_t i = 0; i < interaction_data.size(); i++) {
+      writer.StartObject();
+      writer.Key("_label_cost");
+      writer.Double(-1.f * rewards[i]);
+
+      writer.Key("_id"); // slot id
+      writer.String(interaction_data[i].eventId.c_str(),
+        interaction_data[i].eventId.length(), true);
+
+      writer.Key("_a");
+      writer.StartArray();
+      for (auto &action_id : interaction_data[i].actions) {
+        writer.Uint(action_id);
+      }
+      writer.EndArray();
+
+      writer.Key("_p");
+      writer.StartArray();
+
+      for (auto &p : interaction_data[i].probabilities) {
+        writer.Uint(p);
+      }
+      writer.EndArray();
+
+      if (outcomes_map.find(i) != outcomes_map.end()) {
+        writer.Key("_o");
+        writer.StartArray();
+
+        for (auto &o : outcomes_map.at(i)) {
+          writer.StartObject();
+
+          if (!o.action_taken) {
+            writer.Key("v");
+            writer.Double(o.value);
+          }
+
+          writer.Key("EventId");
+          writer.String(o.metadata.event_id.c_str(),
+            o.metadata.event_id.length(), true);
+
+          writer.Key("Index");
+
+          if (o.index_type == v2::IndexValue_literal) {
+            writer.String(o.s_index.c_str(), o.s_index.length(), true);
+          } else {
+            writer.String(std::to_string(o.index).c_str(),
+              std::to_string(o.index).length(), true);
+          }
+
+          writer.Key("ActionTaken");
+          writer.Bool(o.action_taken);
+
+          writer.EndObject();
+        }
+
+        writer.EndArray();
+      }
+
+      writer.Key("_original_label_cost");
+      writer.Double(-1.f * original_rewards[i]);
+      writer.EndObject();
+    }
+    writer.EndArray();
+
+    if (baseline_actions.size() > 0) {
+      writer.Key("_ba");
+      writer.StartArray();
+      for (auto &ba : baseline_actions) {
+        writer.Uint(ba);
+      }
+      writer.EndArray();
+    }
+
+    writer.Key("VWState");
+    writer.StartObject();
+    writer.Key("m");
+    writer.String(je.model_id.c_str(), je.model_id.length(), true);
+    writer.EndObject();
+
+    if (ccb_joined_event->probability_of_drop != 0.f) {
+      writer.Key("pdrop");
+      writer.Double(ccb_joined_event->probability_of_drop);
+    }
+
+    writer.EndObject();
+    outfile << out_buffer.GetString() << std::endl;
+
+  } catch (const std::exception &e) {
+    VW::io::logger::log_error(
+      "convert event: [{}] from binary to json format failed: [{}].",
+      event_id, e.what());
   }
 }
 } // namespace log_converter
