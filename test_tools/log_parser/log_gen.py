@@ -1,5 +1,6 @@
 #! /usr/bin/env python3 -W ignore::DeprecationWarning
 
+from reinforcement_learning.messages.flatbuff.v2.IndexValue import IndexValue
 from reinforcement_learning.messages.flatbuff.v2.EventBatch import *
 from reinforcement_learning.messages.flatbuff.v2.BatchMetadata import *
 from reinforcement_learning.messages.flatbuff.v2.EventBatch import *
@@ -7,7 +8,7 @@ from reinforcement_learning.messages.flatbuff.v2.LearningModeType import Learnin
 from reinforcement_learning.messages.flatbuff.v2.PayloadType import PayloadType
 from reinforcement_learning.messages.flatbuff.v2.OutcomeValue import OutcomeValue
 from reinforcement_learning.messages.flatbuff.v2.NumericOutcome import NumericOutcome, NumericOutcomeAddValue, NumericOutcomeEnd, NumericOutcomeStart
-from reinforcement_learning.messages.flatbuff.v2.NumericIndex import NumericIndex
+from reinforcement_learning.messages.flatbuff.v2.NumericIndex import *
 
 from reinforcement_learning.messages.flatbuff.v2.Metadata import *
 from reinforcement_learning.messages.flatbuff.v2.CbEvent import *
@@ -207,8 +208,10 @@ def mk_multistep_payload(_episode_id='episode_0', _event_id='0', _actions=[1,2],
     ctx = mk_bytes_vector(builder, bytes(_ctx, 'utf-8'))
     probs = mk_float_vector(builder, _probs)
     model_id = builder.CreateString(_model_id)
+    event_id = builder.CreateString(_event_id)
 
     MultiStepEventStart(builder)
+    MultiStepEventAddEventId(event_id)
     MultiStepEventAddDeferredAction(builder, _deferred)
     MultiStepEventAddActionIds(builder, actions)
     MultiStepEventAddContext(builder, ctx)
@@ -219,10 +222,10 @@ def mk_multistep_payload(_episode_id='episode_0', _event_id='0', _actions=[1,2],
     cb_payload = builder.Output()
 
     builder = flatbuffers.Builder(0)
-    event_id = builder.CreateString(_event_id)
+    episode_id = builder.CreateString(_episode_id)
 
     MetadataStart(builder)
-    MetadataAddId(builder, event_id)
+    MetadataAddId(builder, episode_id)
     MetadataAddClientTimeUtc(builder, mk_timestamp(builder))
     MetadataAddPayloadType(builder, PayloadType.CB)
     MetadataAddEncoding(builder, EventEncoding.Identity)
@@ -239,23 +242,59 @@ def mk_multistep_payload(_episode_id='episode_0', _event_id='0', _actions=[1,2],
     return builder.Output()
 
 
-def mk_cb_reward(_event_id='event_id_0', _value=1, _pdrop=0):
-    builder = flatbuffers.Builder(0)
+def mk_outcome(_primary_id='event_id_0', _secondary_id=None, _value=1, _pdrop=0):
+    if isinstance(_value, (int, float)):
+        value_type = OutcomeValue.numeric
+    elif isinstance(_value, str):
+        value_type = OutcomeValue.literal
+    elif _value is None:
+        value_type = OutcomeValue.NONE
+    else:
+        raise 'Unknown value type'
 
-    NumericOutcomeStart(builder)
-    NumericOutcomeAddValue(builder, -_value)
-    outcome = NumericOutcomeEnd(builder)
+    if _secondary_id is None:
+        index_type = IndexValue.NONE
+    elif isinstance(_secondary_id, (int, float)):
+        index_type = IndexValue.numeric
+    elif isinstance(_secondary_id, str):
+        index_type = IndexValue.literal
+    else:
+        raise 'Unknown index type'
+
+    builder = flatbuffers.Builder(0)
+    
+    outcome = None
+    if value_type == OutcomeValue.numeric:
+        NumericOutcomeStart(builder)
+        NumericOutcomeAddValue(builder, -_value)
+        outcome = NumericOutcomeEnd(builder)
+    elif value_type == OutcomeValue.literal:
+        outcome = builder.CreateString(_value)
+
+    index = None
+    if index_type == IndexValue.numeric:
+        NumericIndexStart(builder)
+        NumericIndexAddIndex(builder, _secondary_id)
+        index = NumericIndexEnd(builder)
+    elif value_type == OutcomeValue.literal:
+        index = builder.CreateString(_secondary_id)
 
     OutcomeEventStart(builder)
-    OutcomeEventAddValueType(builder, OutcomeValue.numeric)
-    OutcomeEventAddValue(builder, outcome)
+    OutcomeEventAddIndexType(builder, index_type)
+    if index_type != IndexValue.NONE:
+        OutcomeEventAddIndex(builder, index)
+
+    OutcomeEventAddValueType(builder, value_type)
+    if value_type != OutcomeValue.NONE:
+        OutcomeEventAddValue(builder, outcome)
+    OutcomeEventAddActionTaken(builder, value_type == OutcomeValue.NONE)
 
     builder.Finish(OutcomeEventEnd(builder))
     
     reward_payload = builder.Output()
 
     builder = flatbuffers.Builder(0)
-    event_id = builder.CreateString(_event_id)
+    event_id = builder.CreateString(_primary_id)
 
     MetadataStart(builder)
     MetadataAddId(builder, event_id)
