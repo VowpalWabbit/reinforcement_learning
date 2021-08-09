@@ -1,5 +1,6 @@
 #pragma once
 
+#include "generated/v2/CaEvent_generated.h"
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "generated/v2/MultiSlotEvent_generated.h"
@@ -155,6 +156,60 @@ template <> struct event_processor<v2::CbEvent> {
             std::move(line_vec),
             std::string(evt.model_id() ? evt.model_id()->c_str() : "N/A"),
             std::move(cb_data)};
+  }
+};
+
+template <> struct event_processor<v2::CaEvent> {
+  static bool is_valid(const v2::CaEvent &evt,
+                       const loop::loop_info &loop_info) {
+    if (evt.context() == nullptr) {
+      return false;
+    }
+
+    if (evt.learning_mode() != loop_info.learning_mode_config) {
+      VW::io::logger::log_warn(
+          "Online Trainer learning mode [{}] "
+          "and Interaction event learning mode [{}]"
+          "don't match.",
+          EnumNameLearningModeType(loop_info.learning_mode_config),
+          EnumNameLearningModeType(evt.learning_mode()));
+      return false;
+    }
+    return true;
+  }
+
+  static v2::LearningModeType get_learning_mode(const v2::CaEvent &evt) {
+    return evt.learning_mode();
+  }
+
+  static std::string get_context(const v2::CaEvent &evt) {
+    return {reinterpret_cast<char const *>(evt.context()->data()),
+            evt.context()->size()};
+  }
+
+  static joined_event::joined_event
+  fill_in_joined_event(const v2::CaEvent &evt, const v2::Metadata &metadata,
+                       const TimePoint &enqueued_time_utc,
+                       std::string &&line_vec) {
+
+    auto ca_data = VW::make_unique<joined_event::ca_joined_event>();
+    ca_data->interaction_data.eventId = metadata.id()->str();
+    ca_data->interaction_data.action = evt.action();
+    ca_data->interaction_data.pdf_value = evt.pdf_value();
+    ca_data->interaction_data.probabilityOfDrop =
+        1.f - metadata.pass_probability();
+    ca_data->interaction_data.skipLearn = evt.deferred_action();
+
+    return {TimePoint(enqueued_time_utc),
+            {metadata.client_time_utc()
+                 ? timestamp_to_chrono(*metadata.client_time_utc())
+                 : TimePoint(),
+             metadata.app_id() ? metadata.app_id()->str() : "",
+             metadata.payload_type(), metadata.pass_probability(),
+             metadata.encoding(), metadata.id()->str(), evt.learning_mode()},
+            std::move(line_vec),
+            std::string(evt.model_id() ? evt.model_id()->c_str() : "N/A"),
+            std::move(ca_data)};
   }
 };
 

@@ -2,6 +2,59 @@
 #include "test_common.h"
 #include <boost/test/unit_test.hpp>
 
+BOOST_AUTO_TEST_CASE(example_joiner_test_ca) {
+  auto vw = VW::initialize("--quiet --binary_parser --cats 4 --min_value 1 "
+                           "--max_value 100 --bandwidth 1",
+                           nullptr, false, nullptr, nullptr);
+
+  example_joiner joiner(vw);
+  v_array<example *> examples;
+  joiner.set_problem_type_config(v2::ProblemType_CA);
+  std::string input_files = get_test_files_location();
+  auto interaction_buffer = read_file(input_files + "/fb_events/ca_v2.fb");
+  // need to keep the fb buffer around in order to process the event
+  std::vector<flatbuffers::DetachedBuffer> int_detached_buffers;
+
+  auto joined_ca_events =
+      wrap_into_joined_events(interaction_buffer, int_detached_buffers);
+
+  for (auto &je : joined_ca_events) {
+    joiner.process_event(*je);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  // need to keep the fb buffer around in order to process the event
+  std::vector<flatbuffers::DetachedBuffer> obs_detached_buffers;
+
+  auto observation_buffer =
+      read_file(input_files + "/fb_events/f-reward_v2.fb");
+  joined_ca_events =
+      wrap_into_joined_events(observation_buffer, obs_detached_buffers);
+
+  for (auto &je : joined_ca_events) {
+    joiner.process_event(*je);
+  }
+  BOOST_CHECK_EQUAL(joiner.processing_batch(), true);
+  joiner.process_joined(examples);
+  BOOST_CHECK_EQUAL(examples.size(), 1);
+  // check action and cost
+  BOOST_CHECK(!std::isnan(examples[0]->l.cb_cont.costs[0].action));
+  BOOST_CHECK_EQUAL(examples[0]->l.cb_cont.costs[0].cost, -1.5);
+
+  // check example features
+  // from example_gen payload is:
+  // JSON_CA_CONTEXT = R"({"RobotJoint1":{"friction":78}})"
+  BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
+  BOOST_CHECK_EQUAL(examples[0]->indices[0], 'R');
+  BOOST_CHECK_EQUAL(examples[0]->feature_space[(int)'R'].values[0], 78);
+  BOOST_CHECK_EQUAL(examples[0]->feature_space[(int)'R'].values.size(), 1);
+  BOOST_CHECK_EQUAL(examples[0]->feature_space[(int)'R'].sum_feat_sq, 6084);
+
+  BOOST_CHECK_EQUAL(joiner.processing_batch(), false);
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
 BOOST_AUTO_TEST_CASE(example_joiner_test_cb) {
   auto vw = VW::initialize("--quiet --binary_parser --cb_explore_adf", nullptr,
                            false, nullptr, nullptr);
