@@ -13,6 +13,9 @@ void should_not_add_examples(std::string &infile,
     case v2::ProblemType_CCB:
       command = "--quiet --binary_parser --ccb_explore_adf";
       break;
+    case v2::ProblemType_CA:
+      command = "--quiet --binary_parser --cats 4 --min_value 1 --max_value 100 --bandwidth 1";
+      break;
   }
 
   std::string infile_name = get_test_files_location() + "skip_learn/" + infile;
@@ -43,6 +46,9 @@ void should_add_examples(std::string &infile,
     case v2::ProblemType_CCB:
       command = "--quiet --binary_parser --ccb_explore_adf";
       break;
+    case v2::ProblemType_CA:
+      command = "--quiet --binary_parser --cats 4 --min_value 1 --max_value 100 --bandwidth 1";
+    break;
   }
 
   std::string infile_name = get_test_files_location() + "skip_learn/" + infile;
@@ -89,6 +95,12 @@ void should_add_examples(std::string &infile,
                     CCB::example_type::slot);
       // last example is empty
       BOOST_CHECK_EQUAL(example_is_newline(*examples[5]), true);
+      break;
+    case v2::ProblemType_CA:
+      BOOST_CHECK_EQUAL(examples.size(), 1);
+      BOOST_CHECK_EQUAL(examples[0]->l.cb_cont.costs.size(), 1);
+      BOOST_CHECK_EQUAL(examples[0]->indices[0], 'R');
+      BOOST_CHECK_EQUAL(examples[0]->feature_space[(int)'R'].sum_feat_sq, 78*78);
       break;
   }
 
@@ -169,5 +181,41 @@ BOOST_AUTO_TEST_CASE(joined_event_with_deferred_action_and_at_least_one_activate
   // file contains 1 interaction with deferred action and 1 action taken outcome event
   std::string test_file = "ccb/deferred_action_with_activation_deduped.fb";
   should_add_examples(test_file, v2::ProblemType_CCB);
+}
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(skip_learn_with_regular_ca_payload)
+BOOST_AUTO_TEST_CASE(joined_event_with_deferred_action_and_regular_outcome_is_not_learnable) {
+  //file contains 1 interaction with deferred action and 1 inactivated observation
+  std::string test_file = "ca/deferred_action_without_activation.fb";
+  should_not_add_examples(test_file, v2::ProblemType_CA);
+}
+
+BOOST_AUTO_TEST_CASE(joined_event_with_deferred_action_and_at_least_one_activated_outcome_is_learnable) {
+  //file contains 1 interaction with deferred action and 1 activated observation
+  std::string test_file = "ca/deferred_action_with_activation.fb";
+  should_add_examples(test_file, v2::ProblemType_CA);
+}
+
+BOOST_AUTO_TEST_CASE(only_add_learnable_events_to_examples) {
+  //file contains 2 interaction, first interaction is deferred action.
+  //observations are not activated
+  //only second joined event should be added to examples
+  std::string test_file = "ca/mixed_deferred_action_events.fb";
+  should_add_examples(test_file, v2::ProblemType_CA);
+}
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(skip_learn_with_compressed_and_deduped_ca_payload)
+BOOST_AUTO_TEST_CASE(joined_event_with_deferred_action_and_regular_outcome_is_not_learnable) {
+  //file contains 1 interaction with deferred action and 1 inactivated observation
+  std::string test_file = "ca/deferred_action_without_activation_deduped.fb";
+  should_not_add_examples(test_file, v2::ProblemType_CA);
+}
+
+BOOST_AUTO_TEST_CASE(joined_event_with_deferred_action_and_at_least_one_activated_outcome_is_learnable) {
+  //file contains 1 interaction with deferred action and 1 activated observation
+  std::string test_file = "ca/deferred_action_with_activation_deduped.fb";
+  should_add_examples(test_file, v2::ProblemType_CA);
 }
 BOOST_AUTO_TEST_SUITE_END()

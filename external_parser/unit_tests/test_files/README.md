@@ -116,3 +116,25 @@ Residing under `skip_learn`
   - Generate ccb_v2.fb with deferred action: `./example_gen --kind ccb --deferred_action_count 1 --dedup`
   - Generate action-taken_v2.fb: `./example_gen --kind action-taken --dedup`
   - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 2`. Then rename the merged.log file.
+
+#### ca format
+- deferred_action_without_activation.fb:
+  - Generate ca_v2.fb with deferred action: `./example_gen --kind ca --deferred_action_count 1`
+  - Generate regular f-reward_v2.fb: `./example_gen --kind f-reward`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 4`. Then rename the merged.log file.
+- deferred_action_with_activation.fb:
+  - Generate ca_v2.fb with deferred action: `./example_gen --kind ca --deferred_action_count 1`
+  - Generate action-taken_v2.fb: `./example_gen --kind action-taken`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 4`. Then rename the merged.log file.
+- mixed_deferred_action_events.fb:
+  - Generate ca_v2.fb with 2 events first event has deferred_action equals to true: `./example_gen --kind ca --count 2 --deferred_action_count 1`
+  - Generated regular f-reward_v2.fb: `./example_gen --kind f-reward --count 2`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 4`. Then rename the merged.log file.
+- deferred_action_without_activation_deduped.fb:
+  - Generate ca_v2.fb with deferred action: `./example_gen --kind ca --deferred_action_count 1 --dedup`
+  - Generate regular f-reward_v2.fb: `./example_gen --kind f-reward --dedup`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 4`. Then rename the merged.log file.
+- deferred_action_with_activation_deduped.fb:
+  - Generate ca_v2.fb with deferred action: `./example_gen --kind ca --deferred_action_count 1 --dedup`
+  - Generate action-taken_v2.fb: `./example_gen --kind action-taken --dedup`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 4`. Then rename the merged.log file.
