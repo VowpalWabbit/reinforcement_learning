@@ -223,10 +223,10 @@ BOOST_AUTO_TEST_CASE(rrcr_ignore_examples_before_checkpoint) {
   VW::finish(*vw);
 }
 
-BOOST_AUTO_TEST_CASE(rcrfrmr_file_magic_and_header_in_the_middle_works) {
+BOOST_AUTO_TEST_CASE(rcrrmr_file_magic_and_header_in_the_middle_works) {
   std::string input_files = get_test_files_location();
 
-  auto buffer = read_file(input_files + "/valid_joined_logs/rcrfrmr.fb");
+  auto buffer = read_file(input_files + "/valid_joined_logs/rcrrmr.fb");
 
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
@@ -518,4 +518,65 @@ BOOST_AUTO_TEST_CASE(
   BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
                                 buffer_dsjson_model.begin(),
                                 buffer_dsjson_model.end());
+}
+
+BOOST_AUTO_TEST_CASE(cb_pdrop_05_parse) {
+  std::string input_files = get_test_files_location();
+
+  auto buffer =
+      read_file(input_files + "/valid_joined_logs/cb_joined_with_pdrop_05.fb");
+
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+  set_buffer_as_vw_input(buffer, vw);
+
+  bool read_payload = false;
+  while (vw->example_parser->reader(vw, examples) > 0) {
+    read_payload = true;
+    BOOST_CHECK_EQUAL(examples.size(), 4);
+    BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 0);
+    BOOST_CHECK_EQUAL(examples[2]->l.cb.costs.size(), 1);
+    BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 2);
+    BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  BOOST_CHECK_EQUAL(read_payload, true);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
+BOOST_AUTO_TEST_CASE(cb_pdrop_1_parse) {
+  std::string input_files = get_test_files_location();
+
+  auto buffer =
+      read_file(input_files + "/valid_joined_logs/cb_joined_with_pdrop_1.fb");
+
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+  set_buffer_as_vw_input(buffer, vw);
+
+  bool read_payload = false;
+  while (vw->example_parser->reader(vw, examples) > 0) {
+    read_payload = true;
+    BOOST_CHECK_EQUAL(examples.size(), 4);
+    BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[0]->indices[0], 'S');
+    BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  BOOST_CHECK_EQUAL(read_payload, true);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
 }

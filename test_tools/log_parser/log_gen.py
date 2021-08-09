@@ -6,12 +6,12 @@ from reinforcement_learning.messages.flatbuff.v2.EventBatch import *
 from reinforcement_learning.messages.flatbuff.v2.LearningModeType import LearningModeType
 from reinforcement_learning.messages.flatbuff.v2.PayloadType import PayloadType
 from reinforcement_learning.messages.flatbuff.v2.OutcomeValue import OutcomeValue
-from reinforcement_learning.messages.flatbuff.v2.NumericOutcome import NumericOutcome
+from reinforcement_learning.messages.flatbuff.v2.NumericOutcome import NumericOutcome, NumericOutcomeAddValue, NumericOutcomeEnd, NumericOutcomeStart
 from reinforcement_learning.messages.flatbuff.v2.NumericIndex import NumericIndex
 
 from reinforcement_learning.messages.flatbuff.v2.Metadata import *
 from reinforcement_learning.messages.flatbuff.v2.CbEvent import *
-from reinforcement_learning.messages.flatbuff.v2.OutcomeEvent import OutcomeEvent
+from reinforcement_learning.messages.flatbuff.v2.OutcomeEvent import *
 from reinforcement_learning.messages.flatbuff.v2.MultiSlotEvent import MultiSlotEvent
 from reinforcement_learning.messages.flatbuff.v2.CaEvent import CaEvent
 from reinforcement_learning.messages.flatbuff.v2.DedupInfo import DedupInfo
@@ -42,6 +42,13 @@ MSG_TYPE_CHECKPOINT = 0x11111111
 MSG_TYPE_REGULAR = 0xFFFFFFFF
 MSG_TYPE_EOF = 0xAAAAAAAA
 
+def EndVector(builder, size):
+    from packaging import version
+    if version.parse(flatbuffers.__version__).major >= 2:
+        return builder.EndVector()
+    else:
+        return builder.EndVector(size)
+
 def mk_timestamp(builder):
     time = datetime.utcnow()
     return CreateTimeStamp(builder, time.year, time.month, time.day, time.hour, time.minute, time.second, int(time.microsecond))
@@ -50,7 +57,7 @@ def mk_offsets_vector(builder, arr, startFun):
     startFun(builder, len(arr))
     for i in reversed(range(len(arr))):
         builder.PrependUOffsetTRelative(arr[i])
-    return builder.EndVector(len(arr))
+    return EndVector(builder, len(arr))
 
 def mk_bytes_vector(builder, arr):
     return builder.CreateNumpyVector(np.array(list(arr), dtype='b'))
@@ -132,45 +139,53 @@ class BinLogWriter:
         if padding_bytes > 0:
             self.file.write(bytes([0] * padding_bytes))
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        return self.file.__exit__(type, value, traceback)
+
 
 def mk_long_vector(builder, arr):
     return builder.CreateNumpyVector(np.array(list(arr), dtype=np.int64))
 
 def mk_float_vector(builder, arr):
-    return builder.CreateNumpyVector(np.array(list(arr), dtype=np.float))
+    return builder.CreateNumpyVector(np.array(list(arr), dtype=np.float32))
 
 
 
 CB_STR = """{"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"}},{"TAction":{"a2":"f2"}}]}"""
 
-def mk_cb_payload():
+def mk_cb_payload(_event_id='event_id_0', _actions=[1,3], _ctx=CB_STR, _probs=[0.1,0.9],
+        _deferred=False, _model_id='the model', _learning_mode=LearningModeType.Online, _pdrop = 0):
     # first gen the CB payload
     builder = flatbuffers.Builder(0)
 
-    actions = mk_long_vector(builder, [1,3])
-    ctx = mk_bytes_vector(builder, bytes(CB_STR, 'utf-8'))
-    probs = mk_float_vector(builder, [0.1,0.9])
-    model_id = builder.CreateString("the model")
+    actions = mk_long_vector(builder, _actions)
+    ctx = mk_bytes_vector(builder, bytes(_ctx, 'utf-8'))
+    probs = mk_float_vector(builder, _probs)
+    model_id = builder.CreateString(_model_id)
 
     CbEventStart(builder)
-    CbEventAddDeferredAction(builder, False)
+    CbEventAddDeferredAction(builder, _deferred)
     CbEventAddActionIds(builder, actions)
     CbEventAddContext(builder, ctx)
     CbEventAddProbabilities(builder, probs)
     CbEventAddModelId(builder, model_id)
-    CbEventAddLearningMode(builder, LearningModeType.Online)
+    CbEventAddLearningMode(builder, _learning_mode)
     builder.Finish(CbEventEnd(builder))
     
     cb_payload = builder.Output()
 
     builder = flatbuffers.Builder(0)
-    event_id = builder.CreateString("event_id_0")
+    event_id = builder.CreateString(_event_id)
 
     MetadataStart(builder)
     MetadataAddId(builder, event_id)
     MetadataAddClientTimeUtc(builder, mk_timestamp(builder))
     MetadataAddPayloadType(builder, PayloadType.CB)
     MetadataAddEncoding(builder, EventEncoding.Identity)
+    MetadataAddPassProbability(builder=builder, passProbability = 1 - _pdrop)
 
     md_off = MetadataEnd(builder)
     payload_off = mk_bytes_vector(builder, cb_payload)
@@ -182,30 +197,66 @@ def mk_cb_payload():
 
     return builder.Output()
 
+def mk_cb_reward(_event_id='event_id_0', _value=1, _pdrop=0):
+    builder = flatbuffers.Builder(0)
 
+    NumericOutcomeStart(builder)
+    NumericOutcomeAddValue(builder, -_value)
+    outcome = NumericOutcomeEnd(builder)
 
+    OutcomeEventStart(builder)
+    OutcomeEventAddValueType(builder, OutcomeValue.numeric)
+    OutcomeEventAddValue(builder, outcome)
 
-if len(sys.argv) != 2:
-    print("""Usage: log_gen.py <XXXX>
-Where XXXX is a sequence of letters telling which kind of message to output next:
-m -> File Magic
-h -> File Header
-c -> Checkpoint message
-r -> Single CB message with no observation
-For example: ./log_gen.py mhcrr
-This writes to output.fb five messages in sequence: file magic, file header, checkpoint, CB and CB.
-    """)
-else:
-    foo = BinLogWriter('output.fb')
+    builder.Finish(OutcomeEventEnd(builder))
+    
+    reward_payload = builder.Output()
 
-    for c in sys.argv[1]:
-        if   c == 'm':
-            foo.write_file_magic()
-        elif c == 'h':
-            foo.write_file_header({ 'foo': 'bar'})
-        elif c == 'c':
-            foo.write_checkpoint_info()
-        elif c == 'r':
-            foo.write_regular_message([mk_cb_payload()])
-        else:
-            print(f'Invalid character \'{c}\'. Ignoring it.')
+    builder = flatbuffers.Builder(0)
+    event_id = builder.CreateString(_event_id)
+
+    MetadataStart(builder)
+    MetadataAddId(builder, event_id)
+    MetadataAddClientTimeUtc(builder, mk_timestamp(builder))
+    MetadataAddPayloadType(builder, PayloadType.Outcome)
+    MetadataAddEncoding(builder, EventEncoding.Identity)
+    MetadataAddPassProbability(builder=builder, passProbability = 1 - _pdrop)
+
+    md_off = MetadataEnd(builder)
+    payload_off = mk_bytes_vector(builder, reward_payload)
+
+    EventStart(builder)
+    EventAddMeta(builder, md_off)
+    EventAddPayload(builder, payload_off)
+    builder.Finish(EventEnd(builder))
+
+    return builder.Output()
+
+def main():
+    if len(sys.argv) != 2:
+        print("""Usage: log_gen.py <XXXX>
+    Where XXXX is a sequence of letters telling which kind of message to output next:
+    m -> File Magic
+    h -> File Header
+    c -> Checkpoint message
+    r -> Single CB message with no observation
+    For example: ./log_gen.py mhcrr
+    This writes to output.fb five messages in sequence: file magic, file header, checkpoint, CB and CB.
+        """)
+    else:
+        foo = BinLogWriter('output.fb')
+
+        for c in sys.argv[1]:
+            if   c == 'm':
+                foo.write_file_magic()
+            elif c == 'h':
+                foo.write_file_header({ 'foo': 'bar'})
+            elif c == 'c':
+                foo.write_checkpoint_info()
+            elif c == 'r':
+                foo.write_regular_message([mk_cb_payload()])
+            else:
+                print(f'Invalid character \'{c}\'. Ignoring it.')
+
+if __name__ == "__main__":
+    main()
