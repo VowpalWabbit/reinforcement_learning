@@ -499,7 +499,6 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   }
 
   if (!je->fill_in_label(examples)) {
-    _current_je_is_skip_learn = true;
     clear_examples = true;
     return false;    
   }
