@@ -199,7 +199,7 @@ def mk_cb_payload(_event_id='event_id_0', _actions=[1,3], _ctx=CB_STR, _probs=[0
 
     return builder.Output()
 
-def mk_multistep_payload(_episode_id='episode_0', _event_id='0', _actions=[1,2], _ctx=CB_STR, _probs=[0.1,0.9],
+def mk_multistep_payload(_episode_id='episode_0', _event_id='0', _previous_id=None, _actions=[1,2], _ctx=CB_STR, _probs=[0.1,0.9],
         _deferred=False, _model_id='the model', _pdrop = 0):
     # first gen the CB payload
     builder = flatbuffers.Builder(0)
@@ -209,9 +209,12 @@ def mk_multistep_payload(_episode_id='episode_0', _event_id='0', _actions=[1,2],
     probs = mk_float_vector(builder, _probs)
     model_id = builder.CreateString(_model_id)
     event_id = builder.CreateString(_event_id)
+    previous_id = builder.CreateString(_previous_id) if _previous_id is not None else None
 
     MultiStepEventStart(builder)
     MultiStepEventAddEventId(builder, event_id)
+    if previous_id is not None:
+        MultiStepEventAddPreviousId(builder, previous_id)
     MultiStepEventAddDeferredAction(builder, _deferred)
     MultiStepEventAddActionIds(builder, actions)
     MultiStepEventAddContext(builder, ctx)
