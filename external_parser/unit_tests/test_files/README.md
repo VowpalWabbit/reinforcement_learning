@@ -7,6 +7,8 @@
 - fb_events/f-reward_v2_size_2.fb: `./example_gen --kind f-reward --count 2`
 - fb_events/invalid-cb_v2_size_2.fb: `./example_gen --kind invalid-cb --count 2`
 - fb_events/ccb_v2.fb: `./example_gen --kind ccb --count 1`
+- fb_events/ca_v2.fb: `./example_gen --kind ca --count 1`
+- fb_events/ca_v2_size_2.fb: `./example_gen --kind ca --count 2`
 - fb_events/fi-reward_v2.fb `./example_gen --kind fi-reward --count 1`
 - valid_joined_logs/rcrrmr.fb `./log_gen.py rcrrmr`
 - valid_joined_logs/rrcr.fb `./log_gen.py rrcr`
@@ -58,6 +60,10 @@ Residing under `reward_functions`
 - fs-reward_v2.fb: `./example_gen --kind fs-reward --random_reward`
 - fmix-reward_v2.fb: `./example_gen --kind fmix-reward --random_reward`
 - fi-out-of-bound-reward_v2.fb: `./example_gen --kind fi-out-of-bound-reward`
+
+#### ca format
+- ca_v2.fb: `./example_gen --kind ca --count 1 --seed -1`
+- f-reward_3obs_v2.fb: `./example_gen --kind f-reward --count 3 --seed -1 --random_reward`
 
 ### skip learn test files
 
