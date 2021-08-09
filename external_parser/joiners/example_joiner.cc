@@ -514,7 +514,10 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     return true;
   }
 
-  je->fill_in_label(examples);
+  if (!je->fill_in_label(examples)) {
+    clear_examples = true;
+    return false;    
+  }
   je->set_reward_from_data(examples);
 
 
