@@ -284,7 +284,7 @@ namespace reinforcement_learning {
     * @param status  Optional field with detailed string description if there is an error
     * @return int Return error code.  This will also be returned in the api_status object
     */
-    int report_action_taken(const char* primary_id, const char *secondary_id, api_status* status = nullptr);
+    int report_action_taken(const char* primary_id, const char* secondary_id, api_status* status = nullptr);
 
     /**
      * @brief Report the outcome for the top action.

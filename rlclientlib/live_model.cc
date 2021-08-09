@@ -247,7 +247,7 @@ namespace reinforcement_learning
     return _pimpl->request_episodic_decision(event_id, previous_id, context_json, flags, resp, episode, status);
   } 
 
-  int live_model::report_action_taken(const char* primary_id, const char *secondary_id, api_status* status) {
+  int live_model::report_action_taken(const char* primary_id, const char* secondary_id, api_status* status) {
     INIT_CHECK();
     return _pimpl->report_action_taken(primary_id, secondary_id, status);
   }
