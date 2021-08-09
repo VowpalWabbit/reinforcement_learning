@@ -352,6 +352,12 @@ struct ca_joined_event : public typed_joined_event {
       return;
     }
 
+    if (examples.size() != 1) {
+      VW::io::logger::log_warn("example size must be 1, instead got [{}] for event [{}]",
+                               examples.size(), interaction_data.eventId);
+      return;
+    }
+
     example *ex = examples[0];
     ex->l.cb_cont.costs.push_back(
         {interaction_data.action, 0.f, interaction_data.pdf_value});
