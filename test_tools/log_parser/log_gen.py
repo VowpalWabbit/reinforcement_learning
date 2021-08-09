@@ -269,7 +269,7 @@ def mk_outcome(_primary_id='event_id_0', _secondary_id=None, _value=1, _pdrop=0)
     outcome = None
     if value_type == OutcomeValue.numeric:
         NumericOutcomeStart(builder)
-        NumericOutcomeAddValue(builder, -_value)
+        NumericOutcomeAddValue(builder, _value)
         outcome = NumericOutcomeEnd(builder)
     elif value_type == OutcomeValue.literal:
         outcome = builder.CreateString(_value)
