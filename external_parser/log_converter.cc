@@ -139,7 +139,7 @@ void build_cb_json(std::ofstream &outfile,
 
 void build_ccb_json(std::ofstream &outfile,
                     joined_event::joined_event &je) {
-  std::string event_id = je.interaction_metadata.event_id;
+  const std::string &event_id = je.interaction_metadata.event_id;
 
   auto ccb_joined_event = reinterpret_cast<const joined_event::ccb_joined_event *>(
                           je.get_hold_of_typed_data());
