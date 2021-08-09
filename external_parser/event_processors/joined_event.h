@@ -344,29 +344,30 @@ struct ca_joined_event : public typed_joined_event {
     }
   }
 
-  void fill_in_label(v_array<example *> &examples) const override {
+  bool fill_in_label(v_array<example *> &examples) const override {
 
     if (std::isnan(interaction_data.action)) {
       VW::io::logger::log_warn("missing action for event [{}]",
                                interaction_data.eventId);
-      return;
+      return false;
     }
 
     if (std::isnan(interaction_data.pdf_value)) {
       VW::io::logger::log_warn("missing pdf_value for event [{}]",
                                interaction_data.eventId);
-      return;
+      return false;
     }
 
     if (examples.size() != 1) {
       VW::io::logger::log_warn("example size must be 1, instead got [{}] for event [{}]",
                                examples.size(), interaction_data.eventId);
-      return;
+      return false;
     }
 
     example *ex = examples[0];
     ex->l.cb_cont.costs.push_back(
         {interaction_data.action, 0.f, interaction_data.pdf_value});
+    return true;
   }
 
   void set_cost(v_array<example *> &examples, float reward,
