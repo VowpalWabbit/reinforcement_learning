@@ -95,14 +95,14 @@ namespace reinforcement_learning {
       }
     }
 
-    int interaction_logger_facade::log(const char* episode_id, const char* previous_id, const char* context, const ranking_response& response, api_status* status) {
+    int interaction_logger_facade::log(const char* episode_id, const char* previous_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status) {
       switch (_version) {
         case 2: {
           generic_event::object_list_t actions;
           generic_event::payload_buffer_t payload;
           event_content_type content_type;
 
-          RETURN_IF_FAIL(wrap_log_call(_ext, _multistep_serializer, context, actions, payload, content_type, status, previous_id, response));
+          RETURN_IF_FAIL(wrap_log_call(_ext, _multistep_serializer, context, actions, payload, content_type, status, previous_id, flags, response));
           return _v2->log(episode_id, std::move(payload), _multistep_serializer.type, content_type, std::move(actions), status);
         }
         default: return protocol_not_supported(status);
@@ -245,6 +245,13 @@ namespace reinforcement_learning {
       switch (_version) {
         case 1: return _v1->report_action_taken(event_id, status);
         case 2: return _v2->log(event_id, _serializer.report_action_taken(), _serializer.type, event_content_type::IDENTITY, status);
+        default: return protocol_not_supported(status);
+      }
+    }
+
+    int observation_logger_facade::report_action_taken(const char* primary_id, const char* secondary_id, api_status* status) {
+      switch (_version) {
+        case 2: return _v2->log(primary_id, _serializer.report_action_taken(secondary_id), _serializer.type, event_content_type::IDENTITY, status);
         default: return protocol_not_supported(status);
       }
     }

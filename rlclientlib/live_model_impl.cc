@@ -308,6 +308,13 @@ namespace reinforcement_learning {
     return _outcome_logger->report_action_taken(event_id, status);
   }
 
+  int live_model_impl::report_action_taken(const char* primary_id, const char* secondary_id, api_status* status) {
+    // Clear previous errors if any
+    api_status::try_clear(status);
+    // Send the outcome event to the backend
+    return _outcome_logger->report_action_taken(primary_id, secondary_id, status);
+  }
+
   int live_model_impl::report_outcome(const char* event_id, const char* outcome, api_status* status) {
     // Check arguments
     RETURN_IF_FAIL(check_null_or_empty(event_id, outcome, _trace_logger.get(), status));
@@ -582,7 +589,7 @@ namespace reinforcement_learning {
     return refresh_model(status);
   }
 
-  int live_model_impl::request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, ranking_response& resp, episode_state& episode, api_status* status) {
+  int live_model_impl::request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, unsigned int flags, ranking_response& resp, episode_state& episode, api_status* status) {
     resp.clear();
     //clear previous errors if any
     api_status::try_clear(status);
@@ -605,7 +612,7 @@ namespace reinforcement_learning {
     resp.set_event_id(event_id);
 
     RETURN_IF_FAIL(episode.update(event_id, previous_id, context_json, resp, status));
-    RETURN_IF_FAIL(_interaction_logger->log(episode.get_episode_id(), previous_id, context_patched.c_str(), resp, status));
+    RETURN_IF_FAIL(_interaction_logger->log(episode.get_episode_id(), previous_id, context_patched.c_str(), flags, resp, status));
     return error_code::success;
   }
 

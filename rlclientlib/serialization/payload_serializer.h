@@ -165,10 +165,18 @@ namespace reinforcement_learning {
         fbb.Finish(fb);
         return fbb.Release();
       }
+
+      static generic_event::payload_buffer_t report_action_taken(const char* index) {
+        flatbuffers::FlatBufferBuilder fbb;
+        const auto idx = fbb.CreateString(index).Union();
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_NONE, 0, v2::IndexValue_literal, idx, true);
+        fbb.Finish(fb);
+        return fbb.Release();
+      }      
     };
 
     struct multistep_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_MultiStep> {
-      static generic_event::payload_buffer_t event(const char* context, const char* previous_id, const ranking_response& response) {
+      static generic_event::payload_buffer_t event(const char* context, const char* previous_id, unsigned int flags, const ranking_response& response) {
         flatbuffers::FlatBufferBuilder fbb;
         std::vector<uint64_t> action_ids;
         std::vector<float> probabilities;
@@ -180,7 +188,8 @@ namespace reinforcement_learning {
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-        auto fb = v2::CreateMultiStepEventDirect(fbb, response.get_event_id(), previous_id, &action_ids, &_context, &probabilities, response.get_model_id());
+        auto fb = v2::CreateMultiStepEventDirect(fbb, response.get_event_id(), previous_id, &action_ids,
+          &_context, &probabilities, response.get_model_id(), flags & action_flags::DEFERRED);
         fbb.Finish(fb);
         return fbb.Release();
       }
