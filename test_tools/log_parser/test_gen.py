@@ -35,13 +35,13 @@ class Env:
             writer.write_file_magic()
             writer.write_checkpoint_info()
             writer.write_regular_message([
-                mk_multistep_payload(_episode_id='ep0', _event_id='0', _ctx=ctx1_1),
-                mk_multistep_payload(_episode_id='ep0', _event_id='1', _previous_id='0', _ctx=ctx1_2),
-                mk_outcome(_primary_id='ep0', _secondary_id='0', _value = 2)])
+                mk_multistep_payload(_episode_id='ep1', _event_id='1', _ctx=ctx1_1),
+                mk_multistep_payload(_episode_id='ep1', _event_id='2', _previous_id='1', _ctx=ctx1_2),
+                mk_outcome(_primary_id='ep1', _secondary_id='1', _value = 2)])
             writer.write_regular_message([
-                mk_multistep_payload(_episode_id='ep1', _event_id='0', _ctx=ctx2_1),
-                mk_multistep_payload(_episode_id='ep1', _event_id='1', _previous_id='0', _ctx=ctx2_2),
-                mk_outcome(_primary_id='ep0', _value = 3)])
+                mk_multistep_payload(_episode_id='ep2', _event_id='1', _ctx=ctx2_1),
+                mk_multistep_payload(_episode_id='ep2', _event_id='2', _previous_id='1', _ctx=ctx2_2),
+                mk_outcome(_primary_id='ep2', _value = 3)])
 
 
 #%% Generate pdrop test data
