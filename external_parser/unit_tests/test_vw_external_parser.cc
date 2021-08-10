@@ -580,3 +580,157 @@ BOOST_AUTO_TEST_CASE(cb_pdrop_1_parse) {
   clear_examples(examples, vw);
   VW::finish(*vw);
 }
+
+BOOST_AUTO_TEST_CASE(multistep_2_episodes) {
+  // order within episode is not guaranteed. TODO: fix strict ordering
+  std::string input_files = get_test_files_location();
+
+  auto buffer =
+      read_file(input_files + "/valid_joined_logs/multistep_2_episodes.fb");
+
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet --multistep", nullptr,
+                           false, nullptr, nullptr);
+
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+  set_buffer_as_vw_input(buffer, vw);
+
+  bool seenA = false;
+  bool seenB = false;
+  bool seenC = false;
+  bool seenD = false;
+  while (vw->example_parser->reader(vw, examples) > 0) {
+    BOOST_CHECK_EQUAL(examples.size(), 4);
+    BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
+    switch (examples[0]->indices[0]) {
+      case 'A':
+        seenA = true;
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, -2);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.weight, 1);
+        BOOST_CHECK_EQUAL(examples[2]->l.cb.costs.size(), 0);
+        BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 1);
+        break;
+
+      case 'B':
+        seenB = true;
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, 0);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.weight, 1);
+        BOOST_CHECK_EQUAL(examples[2]->l.cb.costs.size(), 0);
+        BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 1);
+        break;
+
+      case 'C':
+        seenC = true;
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, -3);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.weight, 1);
+        BOOST_CHECK_EQUAL(examples[2]->l.cb.costs.size(), 0);
+        BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 1);
+        break;
+
+      case 'D':
+        seenD = true;
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, -3);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.weight, 1);
+        BOOST_CHECK_EQUAL(examples[2]->l.cb.costs.size(), 0);
+        BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 1);
+        break;         
+    }
+
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  BOOST_CHECK_EQUAL(seenA, true);
+  BOOST_CHECK_EQUAL(seenB, true);
+  BOOST_CHECK_EQUAL(seenC, true);
+  BOOST_CHECK_EQUAL(seenD, true);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
+BOOST_AUTO_TEST_CASE(multistep_3_deferred_episodes) {
+  // order within episode is not guaranteed. TODO: fix strict ordering
+  std::string input_files = get_test_files_location();
+
+  auto buffer =
+      read_file(input_files + "/valid_joined_logs/multistep_3_deferred_episodes.fb");
+
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet --multistep", nullptr,
+                           false, nullptr, nullptr);
+
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+  set_buffer_as_vw_input(buffer, vw);
+
+  bool seenA = false;
+  bool seenB = false;
+  bool seenC = false;
+  bool seenD = false;
+  bool seenE = false;
+  bool seenF = false;
+
+  while (vw->example_parser->reader(vw, examples) > 0) {
+    BOOST_CHECK_EQUAL(examples.size(), 4);
+    BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
+    switch (examples[0]->indices[0]) {
+      case 'A':
+        seenA = true;
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, -2);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.weight, 1);
+        BOOST_CHECK_EQUAL(examples[2]->l.cb.costs.size(), 0);
+        BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 1);
+        break;
+
+      case 'B':
+        seenB = true;
+        break;
+
+      case 'C':
+        seenC = true;
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, -3);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.weight, 1);
+        BOOST_CHECK_EQUAL(examples[2]->l.cb.costs.size(), 0);
+        BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 1);
+        break;
+
+      case 'D':
+        seenD = true;
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, -3);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.weight, 1);
+        BOOST_CHECK_EQUAL(examples[2]->l.cb.costs.size(), 0);
+        BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 1);
+        break;
+
+      case 'E':
+        seenE = true;
+        break;  
+
+      case 'F':
+        seenF = true;
+        break;             
+    }
+
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  BOOST_CHECK_EQUAL(seenA, true);
+  BOOST_CHECK_EQUAL(seenB, false);
+  BOOST_CHECK_EQUAL(seenC, true);
+  BOOST_CHECK_EQUAL(seenD, true);
+  BOOST_CHECK_EQUAL(seenE, false);
+  BOOST_CHECK_EQUAL(seenF, false);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}

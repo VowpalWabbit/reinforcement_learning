@@ -133,7 +133,7 @@ reward::outcome_event multistep_example_joiner::process_outcome(const multistep_
   } else if (event.value_type() == v2::OutcomeValue_numeric) {
     o_event.value = event.value_as_numeric()->value();
   }
-
+  o_event.action_taken = event.action_taken();
   return o_event;
 }
 
@@ -161,7 +161,7 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
                         event.probabilities()->data() +
                         event.probabilities()->size()};
   cb_data->interaction_data.probabilityOfDrop = 1.f - metadata.pass_probability();
-  cb_data->interaction_data.skipLearn = false;//cb->deferred_action();
+  cb_data->interaction_data.skipLearn = event.deferred_action();
 
   std::string line_vec(reinterpret_cast<char const *>(event.context()->data()),
                         event.context()->size());
@@ -189,6 +189,8 @@ void try_set_label(const joined_event::joined_event &je, float reward,
 }
 
 bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
+  _current_je_is_skip_learn = false;
+
   if (!_sorted) {
     populate_order();
   }
@@ -208,6 +210,22 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
   for (const auto& o: _episodic_outcomes) {
     joined.outcome_events.push_back(process_outcome(o));
   }
+
+  bool clear_examples = false;
+  auto guard = VW::scope_exit([&] {
+    _order.pop();
+    if (clear_examples) {
+      VW::return_multiple_example(*_vw, examples);
+      examples.push_back(&VW::get_unused_example(_vw));
+    }
+  });
+
+  if (!joined.is_joined_event_learnable()) {
+    _current_je_is_skip_learn = true;
+    clear_examples = true;
+    return false;
+  }
+
   const auto reward = _reward_calculation(joined.outcome_events);
   try_set_label(joined, reward, examples);
 
@@ -216,7 +234,6 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
   _vw->example_parser->lbl_parser.default_label(&examples.back()->l);
   examples.back()->is_newline = true;
 
-  _order.pop();
   return true;
 }
 
@@ -239,4 +256,8 @@ void multistep_example_joiner::on_batch_read() {
 metrics::joiner_metrics multistep_example_joiner::get_metrics()
 {
   return _joiner_metrics;
+}
+
+bool multistep_example_joiner::current_event_is_skip_learn() {
+  return _current_je_is_skip_learn;
 }
