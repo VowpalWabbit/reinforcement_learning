@@ -35,6 +35,7 @@ public:
   void set_problem_type_config(v2::ProblemType problem_type, bool sticky) override;
   bool joiner_ready() override;
 
+  bool current_event_is_skip_learn() override;
 
   bool process_event(const v2::JoinedEvent &joined_event) override;
   bool process_joined(v_array<example *> &examples) override;
@@ -79,4 +80,6 @@ private:
   bool _sorted = false;
 
   metrics::joiner_metrics _joiner_metrics;
+
+  bool _current_je_is_skip_learn;
 };
