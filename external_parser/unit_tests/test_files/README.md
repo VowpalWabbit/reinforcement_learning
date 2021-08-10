@@ -35,6 +35,10 @@ Residing under `valid_joined_logs`
   - interaction: `./example_gen --kind ccb-with-slot-id`
   - observation: `./example_gen --kind fs-reward` (change the num_of_rewards to 1)
   - `python joiner.py --problem_type_config 2` with the files generated from previous 2 steps
+- ca_mixed_deferred_action_events_20.log:
+  - Generate ca_v2.fb with 2 events first event has deferred_action equals to true: `./example_gen --kind ca --count 20 --deferred_action_count 10`
+  - Generated regular f-reward_v2.fb: `./example_gen --kind f-reward --count 20`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 4`. Then rename the merged.log file.
 
 ### invalid joined logs
 
