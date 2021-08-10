@@ -240,7 +240,6 @@ BOOST_AUTO_TEST_CASE(
   std::map<std::string, int> expected_int_metrics = {
       {"total_predict_calls", 0},
       {"total_learn_calls", 10},
-      {"total_log_calls", 233},
       {"number_skipped_events", 10},
       {"number_events_zero_actions", 0},
       {"line_parse_error", 0}};
