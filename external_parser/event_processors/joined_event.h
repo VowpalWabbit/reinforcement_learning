@@ -158,27 +158,29 @@ struct cb_joined_event : public typed_joined_event {
   }
 };
 
-struct ccb_joined_event : public typed_joined_event {
+struct MultiSlotInteraction {
   std::vector<DecisionServiceInteraction> interaction_data;
   std::vector<unsigned> baseline_actions;
-  std::map<std::string, int> slot_id_to_index_map;
+  bool skip_learn;
+  float probability_of_drop {0.f};
+};
 
+struct ccb_joined_event : public typed_joined_event {
+  MultiSlotInteraction multi_slot_interaction;
+  std::map<std::string, int> slot_id_to_index_map;
   std::vector<float> rewards;
   std::vector<float> original_rewards;
   std::map<int, std::vector<reward::outcome_event>> outcomes_map;
 
-  bool skip_learn;
-  float probability_of_drop{0.f};
-
   ~ccb_joined_event() = default;
   // TODO fill in
-  bool is_skip_learn() const override { return skip_learn; }
-  void set_skip_learn(bool sl) override { skip_learn = sl; }
+  bool is_skip_learn() const override { return multi_slot_interaction.skip_learn; }
+  void set_skip_learn(bool sl) override { multi_slot_interaction.skip_learn = sl; }
 
   void set_apprentice_reward() override {
-    for (size_t i = 0; i < interaction_data.size(); i++) {
-      if (!interaction_data[i].actions.empty() &&
-        interaction_data[i].actions[0] == baseline_actions[i]) {
+    for (size_t i = 0; i < multi_slot_interaction.interaction_data.size(); i++) {
+      if (!multi_slot_interaction.interaction_data[i].actions.empty() &&
+        multi_slot_interaction.interaction_data[i].actions[0] == multi_slot_interaction.baseline_actions[i]) {
         rewards[i] = original_rewards[i];
       }
     }
@@ -187,15 +189,15 @@ struct ccb_joined_event : public typed_joined_event {
   bool fill_in_label(v_array<example *> &examples) const override {
     // index to interaction_data vector which holds per-slot info
     size_t slot_index = 0;
-    auto weight = 1.f / (1.f - probability_of_drop);
+    auto weight = 1.f / (1.f - multi_slot_interaction.probability_of_drop);
 
     for (auto *ex : examples) {
       ex->l.conditional_contextual_bandit.weight = weight;
 
       if (ex->l.conditional_contextual_bandit.type == CCB::example_type::slot) {
         auto &slot_label = ex->l.conditional_contextual_bandit;
-        if (interaction_data.size() > slot_index) {
-          const auto &slot_data = interaction_data[slot_index];
+        if (multi_slot_interaction.interaction_data.size() > slot_index) {
+          const auto &slot_data = multi_slot_interaction.interaction_data[slot_index];
           if ((slot_data.actions.size() != 0) &&
               (slot_data.probabilities.size() != 0)) {
             auto outcome = new CCB::conditional_contextual_bandit_outcome();
@@ -255,7 +257,7 @@ struct ccb_joined_event : public typed_joined_event {
   }
 
   void set_cost_from_data(v_array<example *> &examples) const override {
-    size_t num_of_slots = interaction_data.size();
+    size_t num_of_slots = multi_slot_interaction.interaction_data.size();
 
     for (size_t i = 0; i < num_of_slots; i++) {
       set_cost(examples, rewards[i], i);
@@ -267,15 +269,15 @@ struct ccb_joined_event : public typed_joined_event {
       reward::RewardFunctionType reward_function,
       const metadata::event_metadata_info &metadata_info,
       std::vector<reward::outcome_event> &outcome_events) override {
-    size_t num_of_slots = interaction_data.size();
+    size_t num_of_slots = multi_slot_interaction.interaction_data.size();
 
     if (metadata_info.learning_mode == v2::LearningModeType_Apprentice &&
-      num_of_slots != baseline_actions.size()
+      num_of_slots != multi_slot_interaction.baseline_actions.size()
     ) {
       VW::io::logger::log_error (
         "slot size [{}] and baseline action size [{}] do not match for event: [{}]",
         num_of_slots,
-        baseline_actions.size(),
+        multi_slot_interaction.baseline_actions.size(),
         metadata_info.event_id
       );
       return;
@@ -323,6 +325,77 @@ struct ccb_joined_event : public typed_joined_event {
     }
   }
 };
+
+struct slates_joined_event : public typed_joined_event {
+  MultiSlotInteraction multi_slot_interaction;
+  float reward;
+  float original_reward;
+
+  ~slates_joined_event() = default;
+
+  bool is_skip_learn() const override { return multi_slot_interaction.skip_learn; }
+  void set_skip_learn(bool sl) override { multi_slot_interaction.skip_learn = sl; }
+
+  void set_apprentice_reward() override {}
+
+  bool fill_in_label(v_array<example *> &examples) const override {
+    size_t slot_index = 0;
+
+    for (auto *ex : examples) {
+      if (ex->l.slates.type ==  VW::slates::example_type::slot) {
+        auto &slot_label = ex->l.slates;
+        if (multi_slot_interaction.interaction_data.size() > slot_index) {
+          const auto &slot_data = multi_slot_interaction.interaction_data[slot_index];
+          if ((slot_data.actions.size() != 0) &&
+              (slot_data.probabilities.size() != 0)) {
+            if (slot_data.actions.size() != slot_data.probabilities.size()) {
+              VW::io::logger::log_warn(
+                  "actions and probabilities for event [{}] don't have the "
+                  "same size. Actions [{}], probabilities [{}]",
+                  slot_data.eventId, slot_data.actions.size(),
+                  slot_data.probabilities.size());
+              continue;
+            }
+
+            for (size_t i = 0; i < slot_data.actions.size(); i++) {
+              slot_label.probabilities.push_back(
+                {slot_data.actions[i], slot_data.probabilities[i]}
+              );
+            }
+          }
+        }
+        // process next slot from interaction_data vector
+        slot_index++;
+      }
+    }
+    return true;
+  }
+
+  void set_cost(v_array<example *> &examples, float reward,
+                size_t slot_offset = 0) const override {
+    if (examples[0]->l.slates.type ==  VW::slates::example_type::shared) {
+      examples[0]->l.slates.cost= -1.f * reward;
+    }
+
+    for (auto &ex : examples) {
+      ex->l.slates.labeled = true;
+    }
+    return;
+  }
+
+  void set_cost_from_data(v_array<example *> &examples) const override {
+    set_cost(examples, reward);
+  }
+
+  void calc_cost(
+      float default_reward,
+      reward::RewardFunctionType reward_function,
+      const metadata::event_metadata_info &metadata_info,
+      std::vector<reward::outcome_event> &outcome_events) override {
+
+    reward = reward_function(outcome_events);
+  }
+}; // slates_joined_event
 
 struct DecisionServiceInteractionCats {
   std::string eventId;

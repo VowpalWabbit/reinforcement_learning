@@ -6,6 +6,7 @@
 #include "generated/v2/Event_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
 #include "zstd.h"
+#include <boost/algorithm/string.hpp>
 
 #include <limits.h>
 #include <time.h>
@@ -196,8 +197,11 @@ bool example_joiner::process_interaction(const v2::Event &event,
                                          const v2::Metadata &metadata,
                                          const TimePoint &enqueued_time_utc,
                                          v_array<example *> &examples) {
-  if (EnumNamePayloadType(metadata.payload_type()) !=
-      EnumNameProblemType(_loop_info.problem_type_config)) {
+
+  std::string payload_type(EnumNamePayloadType(metadata.payload_type()));
+  std::string loop_type(EnumNameProblemType(_loop_info.problem_type_config));
+
+  if (!boost::iequals(payload_type, loop_type)) {
     VW::io::logger::log_warn(
         "Online Trainer mode [{}] "
         "and Interaction event type [{}] "
@@ -211,7 +215,6 @@ bool example_joiner::process_interaction(const v2::Event &event,
   joined_event::joined_event je;
 
   if (metadata.payload_type() == v2::PayloadType_CB) {
-
     const v2::CbEvent *cb = nullptr;
     if (!typed_event::process_compression<v2::CbEvent>(
             event.payload()->data(), event.payload()->size(), metadata, cb,
@@ -227,28 +230,30 @@ bool example_joiner::process_interaction(const v2::Event &event,
       return false;
     }
 
+<<<<<<< 42452d84f6e037e7064c62c1218d7a6338b3d93a
     je = typed_event::event_processor<v2::CbEvent>::fill_in_joined_event(
         *cb, metadata, enqueued_time_utc,
         typed_event::event_processor<v2::CbEvent>::get_context(*cb));
-  } else if (metadata.payload_type() == v2::PayloadType_CCB) {
-    const v2::MultiSlotEvent *ccb = nullptr;
+  } else if (metadata.payload_type() == v2::PayloadType_CCB ||
+             metadata.payload_type() == v2::PayloadType_Slates) {
+    const v2::MultiSlotEvent *multislot = nullptr;
     if (!typed_event::process_compression<v2::MultiSlotEvent>(
-            event.payload()->data(), event.payload()->size(), metadata, ccb,
-            _detached_buffer) ||
-        ccb == nullptr) {
+            event.payload()->data(), event.payload()->size(), metadata, multislot,
+            _detached_buffer) || multislot == nullptr) {
       return false;
     }
 
     if (!typed_event::event_processor<v2::MultiSlotEvent>::is_valid(
-            *ccb, _loop_info)) {
-      VW::io::logger::log_warn("CCB payload with event id [{}] is malformed. "
+            *multislot, _loop_info)) {
+      VW::io::logger::log_warn("[{}] payload with event id [{}] is malformed. "
                                "Skipping interaction from processing.",
+                               EnumNamePayloadType(metadata.payload_type()),
                                metadata.id()->c_str());
       return false;
     }
     je = typed_event::event_processor<v2::MultiSlotEvent>::fill_in_joined_event(
-        *ccb, metadata, enqueued_time_utc,
-        typed_event::event_processor<v2::MultiSlotEvent>::get_context(*ccb));
+        *multislot, metadata, enqueued_time_utc,
+        typed_event::event_processor<v2::MultiSlotEvent>::get_context(*multislot));
   } else if (metadata.payload_type() == v2::PayloadType_CA) {
     const v2::CaEvent *ca = nullptr;
     if (!typed_event::process_compression<v2::CaEvent>(

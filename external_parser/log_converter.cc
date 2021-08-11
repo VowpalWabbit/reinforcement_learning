@@ -143,11 +143,11 @@ void build_ccb_json(std::ofstream &outfile,
 
   auto ccb_joined_event = reinterpret_cast<const joined_event::ccb_joined_event *>(
                           je.get_hold_of_typed_data());
-  const auto &interaction_data = ccb_joined_event->interaction_data;
+  const auto &interaction_data = ccb_joined_event->multi_slot_interaction.interaction_data;
   const auto &outcomes_map = ccb_joined_event->outcomes_map;
   const auto &rewards = ccb_joined_event->rewards;
   const auto &original_rewards = ccb_joined_event->original_rewards;
-  const auto &baseline_actions = ccb_joined_event->baseline_actions;
+  const auto &baseline_actions = ccb_joined_event->multi_slot_interaction.baseline_actions;
 
   bool skip_learn = !je.is_joined_event_learnable();
 
@@ -262,9 +262,9 @@ void build_ccb_json(std::ofstream &outfile,
     writer.String(je.model_id.c_str(), je.model_id.length(), true);
     writer.EndObject();
 
-    if (ccb_joined_event->probability_of_drop != 0.f) {
+    if (ccb_joined_event-> multi_slot_interaction.probability_of_drop != 0.f) {
       writer.Key("pdrop");
-      writer.Double(ccb_joined_event->probability_of_drop);
+      writer.Double(ccb_joined_event->multi_slot_interaction.probability_of_drop);
     }
 
     writer.EndObject();
