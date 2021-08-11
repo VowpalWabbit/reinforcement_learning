@@ -9,23 +9,23 @@ namespace rj = rapidjson;
 
 void build_json(std::ofstream &outfile,
                 joined_event::joined_event &je) {
-  switch(je.interaction_metadata.payload_type) {
-    case v2::PayloadType_CB:
-      build_cb_json(outfile, je);
-      break;
-    case v2::PayloadType_CCB:
-      build_ccb_json(outfile, je);
-      break;
-    case v2::PayloadType_CA:
-      build_ca_json(outfile, je);
-      break;
+  switch (je.interaction_metadata.payload_type) {
+  case v2::PayloadType_CB:
+    build_cb_json(outfile, je);
+    break;
+  case v2::PayloadType_CCB:
+    build_ccb_json(outfile, je);
+    break;
+  case v2::PayloadType_CA:
+    build_ca_json(outfile, je);
+    break;
   }
 }
 
 void build_cb_json(std::ofstream &outfile,
                    joined_event::joined_event &je) {
   auto cb_je = reinterpret_cast<const joined_event::cb_joined_event *>(
-                   je.get_hold_of_typed_data());
+      je.get_hold_of_typed_data());
   float cost = -1.f * cb_je->reward;
   float original_cost = -1.f * cb_je->original_reward;
   const auto &interaction_data = cb_je->interaction_data;
@@ -277,10 +277,9 @@ void build_ccb_json(std::ofstream &outfile,
   }
 }
 
-void build_ca_json(std::ofstream &outfile,
-                   joined_event::joined_event &je) {
+void build_ca_json(std::ofstream &outfile, joined_event::joined_event &je) {
   auto ca_je = reinterpret_cast<const joined_event::ca_joined_event *>(
-                   je.get_hold_of_typed_data());
+      je.get_hold_of_typed_data());
   float cost = -1.f * ca_je->reward;
   float original_cost = -1.f * ca_je->original_reward;
   const auto &interaction_data = ca_je->interaction_data;
@@ -311,7 +310,8 @@ void build_ca_json(std::ofstream &outfile,
     writer.String("1", strlen("1"), true);
 
     writer.Key("EventId", strlen("EventId"), true);
-    writer.String(interaction_data.eventId.c_str(), interaction_data.eventId.length(), true);
+    writer.String(interaction_data.eventId.c_str(),
+                  interaction_data.eventId.length(), true);
 
     writer.Key("c", strlen("c"), true);
     std::replace(je.context.begin(), je.context.end(), '\n', ' ');
@@ -326,6 +326,12 @@ void build_ca_json(std::ofstream &outfile,
     if (interaction_data.probabilityOfDrop != 0.f) {
       writer.Key("pdrop", strlen("pdrop"), true);
       writer.Double(interaction_data.probabilityOfDrop);
+    }
+
+    bool skip_learn = !je.is_joined_event_learnable();
+    if (skip_learn) {
+      writer.Key("_skipLearn", strlen("_skipLearn"), true);
+      writer.Bool(skip_learn);
     }
 
     writer.EndObject();
