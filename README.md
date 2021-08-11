@@ -40,8 +40,8 @@ rm -rf cpprestsdk
 cd ~
 git clone https://github.com/google/flatbuffers.git flatbuffers
 cd ./flatbuffers
-# 1.10.0 release commit
-git checkout 925c1d77fcc72636924c3c13428a34180c30f96f
+# 2.0.0 release commit
+git checkout a9a295fecf3fbd5a4f571f53b01f63202a3e2113
 mkdir build
 cd build
 cmake .. -DFLATBUFFERS_BUILD_TESTS=Off -DFLATBUFFERS_INSTALL=On -DCMAKE_BUILD_TYPE=Release -DFLATBUFFERS_BUILD_FLATHASH=Off
