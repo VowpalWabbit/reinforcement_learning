@@ -116,6 +116,10 @@ void example_joiner::set_problem_type_config(v2::ProblemType problem_type,
   _loop_info.problem_type_config.set(problem_type, sticky);
 }
 
+void example_joiner::set_use_client_time(bool use_client_time, bool sticky) {
+  _loop_info.use_client_time.set(use_client_time, sticky);
+}
+
 bool example_joiner::joiner_ready() {
   return _loop_info.is_configured() && _reward_calculation.is_valid();
 }
@@ -223,10 +227,9 @@ bool example_joiner::process_interaction(const v2::Event &event,
       return false;
     }
 
-    je = std::move(
-        typed_event::event_processor<v2::CbEvent>::fill_in_joined_event(
-            *cb, metadata, enqueued_time_utc,
-            typed_event::event_processor<v2::CbEvent>::get_context(*cb)));
+    je = typed_event::event_processor<v2::CbEvent>::fill_in_joined_event(
+        *cb, metadata, enqueued_time_utc,
+        typed_event::event_processor<v2::CbEvent>::get_context(*cb));
   } else if (metadata.payload_type() == v2::PayloadType_CCB) {
     const v2::MultiSlotEvent *ccb = nullptr;
     if (!typed_event::process_compression<v2::MultiSlotEvent>(
@@ -243,11 +246,9 @@ bool example_joiner::process_interaction(const v2::Event &event,
                                metadata.id()->c_str());
       return false;
     }
-    je = std::move(
-        typed_event::event_processor<v2::MultiSlotEvent>::fill_in_joined_event(
-            *ccb, metadata, enqueued_time_utc,
-            typed_event::event_processor<v2::MultiSlotEvent>::get_context(
-                *ccb)));
+    je = typed_event::event_processor<v2::MultiSlotEvent>::fill_in_joined_event(
+        *ccb, metadata, enqueued_time_utc,
+        typed_event::event_processor<v2::MultiSlotEvent>::get_context(*ccb));
   } else if (metadata.payload_type() == v2::PayloadType_CA) {
     const v2::CaEvent *ca = nullptr;
     if (!typed_event::process_compression<v2::CaEvent>(
@@ -263,10 +264,9 @@ bool example_joiner::process_interaction(const v2::Event &event,
                                metadata.id()->c_str());
       return false;
     }
-    je = std::move(
-        typed_event::event_processor<v2::CaEvent>::fill_in_joined_event(
-            *ca, metadata, enqueued_time_utc,
-            typed_event::event_processor<v2::CaEvent>::get_context(*ca)));
+    je = typed_event::event_processor<v2::CaEvent>::fill_in_joined_event(
+        *ca, metadata, enqueued_time_utc,
+        typed_event::event_processor<v2::CaEvent>::get_context(*ca));
   } else {
     // for now only CB is supported so log and return false
     VW::io::logger::log_error("Interaction event learning mode [{}] not "
@@ -276,19 +276,19 @@ bool example_joiner::process_interaction(const v2::Event &event,
     return false;
   }
 
-  if(!_binary_to_json) {
+  if (!_binary_to_json) {
     std::string context(je.context);
     try {
       if (_vw->audit || _vw->hash_inv) {
         VW::template read_line_json<true>(
             *_vw, examples, const_cast<char *>(context.c_str()),
-            reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
-            &_dedup_cache.dedup_examples);
+            reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example),
+            _vw, &_dedup_cache.dedup_examples);
       } else {
         VW::template read_line_json<false>(
             *_vw, examples, const_cast<char *>(context.c_str()),
-            reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
-            &_dedup_cache.dedup_examples);
+            reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example),
+            _vw, &_dedup_cache.dedup_examples);
       }
     } catch (VW::vw_exception &e) {
       VW::io::logger::log_warn(
@@ -317,8 +317,21 @@ bool example_joiner::process_outcome(const v2::Event &event,
                       metadata.pass_probability(),
                       metadata.encoding(),
                       metadata.id()->str(),
-                      v2::LearningModeType_Online }; //Online is the default value, we should not leave this uninitialized
-  o_event.enqueued_time_utc = enqueued_time_utc;
+                      v2::LearningModeType_Online};
+
+  if (_loop_info.use_client_time) {
+    if (!metadata.client_time_utc() ||
+        is_empty_timestamp(*metadata.client_time_utc())) {
+      VW::io::logger::log_warn(
+          "binary parser is configured to use client-provided EnqueuedTimeUTC, "
+          "but input metadata does not contain a client timestamp.");
+      o_event.enqueued_time_utc = enqueued_time_utc;
+    } else {
+      o_event.enqueued_time_utc = o_event.metadata.client_time_utc;
+    }
+  } else {
+    o_event.enqueued_time_utc = enqueued_time_utc;
+  }
 
   const v2::OutcomeEvent *outcome = nullptr;
   if (!typed_event::process_compression<v2::OutcomeEvent>(
@@ -519,7 +532,6 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
   je->set_reward_from_data(examples);
-
 
   if (multiline) {
     // add an empty example to signal end-of-multiline

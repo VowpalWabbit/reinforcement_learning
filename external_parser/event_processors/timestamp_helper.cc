@@ -15,3 +15,8 @@ TimePoint timestamp_to_chrono(const v2::TimeStamp &ts) {
          std::chrono::hours(ts.hour()) + std::chrono::minutes(ts.minute()) +
          std::chrono::seconds(ts.second());
 }
+
+bool is_empty_timestamp(const v2::TimeStamp &ts) {
+  return (ts.year() == 0 && ts.month() == 0 && ts.day() == 0 &&
+          ts.hour() == 0 && ts.minute() == 0 && ts.second() == 0);
+}

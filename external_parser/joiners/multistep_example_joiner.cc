@@ -69,6 +69,10 @@ void multistep_example_joiner::set_problem_type_config(v2::ProblemType problem_t
   _loop_info.problem_type_config.set(problem_type, sticky);
 }
 
+void multistep_example_joiner::set_use_client_time(bool use_client_time, bool sticky) {
+  _loop_info.use_client_time.set(use_client_time, sticky);
+}
+
 bool multistep_example_joiner::joiner_ready() {
   return _loop_info.is_configured() && _reward_calculation.is_valid();
 }

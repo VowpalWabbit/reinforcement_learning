@@ -26,11 +26,13 @@ public:
   void set_default_reward(float default_reward, bool sticky = false) override;
   void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky = false) override;
   void set_problem_type_config(v2::ProblemType problem_type, bool sticky = false) override;
+  void set_use_client_time(bool use_client_time, bool sticky = false) override;
   bool joiner_ready() override;
 
   float default_reward() const { return _loop_info.default_reward; }
   v2::LearningModeType learning_mode_config() const { return _loop_info.learning_mode_config; }
   v2::ProblemType problem_type_config() const { return _loop_info.problem_type_config; }
+  bool use_client_time() const { return _loop_info.use_client_time; }
 
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their

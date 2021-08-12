@@ -13,6 +13,7 @@ set(TEST_SOURCES
   test_log_converter.cc
   test_skip_learn.cc
   test_metrics.cc
+  test_client_and_enqueued_time.cc
 )
 
 add_executable(binary_parser_unit_tests ${TEST_SOURCES})
