@@ -90,10 +90,14 @@ struct cb_joined_event : public typed_joined_event {
                                interaction_data.eventId);
       return false;
     }
-    auto weight = 1.f / (1.f - interaction_data.probabilityOfDrop);
 
     examples[index]->l.cb.costs.push_back({0.f, action, probability});
-    examples[index]->l.cb.weight = weight;
+    auto weight = 1.f / (1.f - interaction_data.probabilityOfDrop);
+
+    for (auto *e : examples) {
+      e->l.cb.weight = weight;
+    }
+
     return true;
   }
 
@@ -164,7 +168,7 @@ struct ccb_joined_event : public typed_joined_event {
   std::map<int, std::vector<reward::outcome_event>> outcomes_map;
 
   bool skip_learn;
-  float probability_of_drop {0.f};
+  float probability_of_drop{0.f};
 
   ~ccb_joined_event() = default;
   // TODO fill in
@@ -183,8 +187,11 @@ struct ccb_joined_event : public typed_joined_event {
   bool fill_in_label(v_array<example *> &examples) const override {
     // index to interaction_data vector which holds per-slot info
     size_t slot_index = 0;
+    auto weight = 1.f / (1.f - probability_of_drop);
 
     for (auto *ex : examples) {
+      ex->l.conditional_contextual_bandit.weight = weight;
+
       if (ex->l.conditional_contextual_bandit.type == CCB::example_type::slot) {
         auto &slot_label = ex->l.conditional_contextual_bandit;
         if (interaction_data.size() > slot_index) {
@@ -372,12 +379,12 @@ struct ca_joined_event : public typed_joined_event {
   }
 
   void set_cost(v_array<example *> &examples, float reward,
-                size_t index = 0) const override {
+          size_t index = 0) const override {
     if (std::isnan(interaction_data.action)) {
       return;
     }
 
-    examples[0]->l.cb_cont.costs[0].cost = -1.f * reward;
+    examples[index]->l.cb_cont.costs[0].cost = -1.f * reward;
   }
 
   bool should_calculate_reward(
