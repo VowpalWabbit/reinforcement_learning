@@ -1,4 +1,5 @@
 #include "timestamp_helper.h"
+#include "io/logger.h"
 
 TimePoint timestamp_to_chrono(const v2::TimeStamp &ts) {
 
@@ -19,4 +20,19 @@ TimePoint timestamp_to_chrono(const v2::TimeStamp &ts) {
 bool is_empty_timestamp(const v2::TimeStamp &ts) {
   return (ts.year() == 0 && ts.month() == 0 && ts.day() == 0 &&
           ts.hour() == 0 && ts.minute() == 0 && ts.second() == 0);
+}
+
+TimePoint get_enqueued_time(const v2::TimeStamp *enqueued_time_utc,
+                            const v2::TimeStamp *client_time_utc,
+                            bool use_client_time) {
+  if (use_client_time) {
+    if (!client_time_utc || is_empty_timestamp(*client_time_utc)) {
+      VW::io::logger::log_warn(
+          "binary parser is configured to use client-provided EnqueuedTimeUTC, "
+          "but input metadata does not contain a client timestamp.");
+      return timestamp_to_chrono(*enqueued_time_utc);
+    }
+    return timestamp_to_chrono(*client_time_utc);
+  }
+  return timestamp_to_chrono(*enqueued_time_utc);
 }

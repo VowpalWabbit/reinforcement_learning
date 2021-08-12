@@ -309,29 +309,14 @@ bool example_joiner::process_outcome(const v2::Event &event,
                                      const v2::Metadata &metadata,
                                      const TimePoint &enqueued_time_utc) {
   reward::outcome_event o_event;
-  o_event.metadata = {metadata.client_time_utc()
-                          ? timestamp_to_chrono(*metadata.client_time_utc())
-                          : TimePoint(),
-                      metadata.app_id() ? metadata.app_id()->str() : "",
+  o_event.metadata = {metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(),
                       metadata.pass_probability(),
                       metadata.encoding(),
                       metadata.id()->str(),
                       v2::LearningModeType_Online};
 
-  if (_loop_info.use_client_time) {
-    if (!metadata.client_time_utc() ||
-        is_empty_timestamp(*metadata.client_time_utc())) {
-      VW::io::logger::log_warn(
-          "binary parser is configured to use client-provided EnqueuedTimeUTC, "
-          "but input metadata does not contain a client timestamp.");
-      o_event.enqueued_time_utc = enqueued_time_utc;
-    } else {
-      o_event.enqueued_time_utc = o_event.metadata.client_time_utc;
-    }
-  } else {
-    o_event.enqueued_time_utc = enqueued_time_utc;
-  }
+  o_event.enqueued_time_utc = enqueued_time_utc;
 
   const v2::OutcomeEvent *outcome = nullptr;
   if (!typed_event::process_compression<v2::OutcomeEvent>(
@@ -441,7 +426,9 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   for (auto &joined_event : _batch_grouped_events[id]) {
     auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
     auto metadata = event->meta();
-    auto enqueued_time_utc = timestamp_to_chrono(*joined_event->timestamp());
+    auto enqueued_time_utc = get_enqueued_time(joined_event->timestamp(),
+                                               metadata->client_time_utc(),
+                                               _loop_info.use_client_time);
     const auto &payload_type = metadata->payload_type();
 
     if (payload_type == v2::PayloadType_Outcome) {
@@ -467,8 +454,6 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
         if (!je->is_joined_event_learnable()) {
           _joiner_metrics.number_of_skipped_events++;
         } else {
-          // TODO does this potentially need to check and set client time utc if
-          // that option is on?
           if (_joiner_metrics.first_event_id.empty()) {
             _joiner_metrics.first_event_id =
                 std::move(je->interaction_metadata.event_id);

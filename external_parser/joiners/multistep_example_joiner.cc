@@ -31,7 +31,9 @@ multistep_example_joiner::~multistep_example_joiner() {
 bool multistep_example_joiner::process_event(const v2::JoinedEvent &joined_event) {
   auto event = flatbuffers::GetRoot<v2::Event>(joined_event.event()->data());
   const v2::Metadata& meta = *event->meta();
-  auto enqueued_time_utc = timestamp_to_chrono(*joined_event.timestamp());
+  auto enqueued_time_utc = get_enqueued_time(joined_event.timestamp(),
+                                               meta.client_time_utc(),
+                                               _loop_info.use_client_time);
   switch (meta.payload_type()) {
     case v2::PayloadType_MultiStep:
     {
@@ -125,8 +127,7 @@ reward::outcome_event multistep_example_joiner::process_outcome(const multistep_
   const auto& metadata = event_meta.meta;
   const auto& event = event_meta.event;
   reward::outcome_event o_event;
-  o_event.metadata = {timestamp_to_chrono(*metadata.client_time_utc()),
-                      metadata.app_id() ? metadata.app_id()->str() : "",
+  o_event.metadata = {metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(),
                       metadata.pass_probability(),
                       metadata.encoding(),
@@ -146,9 +147,7 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
     v_array<example *> &examples) {
   const auto& metadata = event_meta.meta;
   const auto& event = event_meta.event;
-  metadata::event_metadata_info meta = {metadata.client_time_utc()
-                         ? timestamp_to_chrono(*metadata.client_time_utc())
-                         : TimePoint(),
+  metadata::event_metadata_info meta = {
                         metadata.app_id() ? metadata.app_id()->str() : "",
                         metadata.payload_type(),
                         metadata.pass_probability(),

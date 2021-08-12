@@ -81,10 +81,7 @@ template <> struct event_processor<v2::MultiSlotEvent> {
     ccb_data->probability_of_drop = 1.f - metadata.pass_probability();
 
     return {TimePoint(enqueued_time_utc),
-            {metadata.client_time_utc()
-                 ? timestamp_to_chrono(*metadata.client_time_utc())
-                 : TimePoint(),
-             metadata.app_id() ? metadata.app_id()->str() : "",
+            {metadata.app_id() ? metadata.app_id()->str() : "",
              metadata.payload_type(), metadata.pass_probability(),
              metadata.encoding(), metadata.id()->str(), evt.learning_mode()},
             std::move(line_vec),
@@ -147,10 +144,7 @@ template <> struct event_processor<v2::CbEvent> {
     cb_data->interaction_data.skipLearn = evt.deferred_action();
 
     return {TimePoint(enqueued_time_utc),
-            {metadata.client_time_utc()
-                 ? timestamp_to_chrono(*metadata.client_time_utc())
-                 : TimePoint(),
-             metadata.app_id() ? metadata.app_id()->str() : "",
+            {metadata.app_id() ? metadata.app_id()->str() : "",
              metadata.payload_type(), metadata.pass_probability(),
              metadata.encoding(), metadata.id()->str(), evt.learning_mode()},
             std::move(line_vec),
@@ -201,10 +195,7 @@ template <> struct event_processor<v2::CaEvent> {
     ca_data->interaction_data.skipLearn = evt.deferred_action();
 
     return {TimePoint(enqueued_time_utc),
-            {metadata.client_time_utc()
-                 ? timestamp_to_chrono(*metadata.client_time_utc())
-                 : TimePoint(),
-             metadata.app_id() ? metadata.app_id()->str() : "",
+            {metadata.app_id() ? metadata.app_id()->str() : "",
              metadata.payload_type(), metadata.pass_probability(),
              metadata.encoding(), metadata.id()->str(), evt.learning_mode()},
             std::move(line_vec),
