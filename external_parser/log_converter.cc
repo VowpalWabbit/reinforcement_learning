@@ -9,26 +9,26 @@ namespace rj = rapidjson;
 
 void build_json(std::ofstream &outfile,
                 joined_event::joined_event &je) {
-  if (je.interaction_metadata.payload_type == v2::PayloadType_CB) {
+  switch (je.interaction_metadata.payload_type) {
+  case v2::PayloadType_CB:
     build_cb_json(outfile, je);
-  } else if (je.interaction_metadata.payload_type == v2::PayloadType_CCB) {
+    break;
+  case v2::PayloadType_CCB:
     build_ccb_json(outfile, je);
+    break;
+  case v2::PayloadType_CA:
+    build_ca_json(outfile, je);
+    break;
   }
 }
 
 void build_cb_json(std::ofstream &outfile,
                    joined_event::joined_event &je) {
-  float cost = -1.f * reinterpret_cast<const joined_event::cb_joined_event *>(
-                          je.get_hold_of_typed_data())
-                          ->reward;
-  float original_cost =
-      -1.f * reinterpret_cast<const joined_event::cb_joined_event *>(
-                 je.get_hold_of_typed_data())
-                 ->original_reward;
-  const auto &interaction_data =
-      reinterpret_cast<const joined_event::cb_joined_event *>(
-          je.get_hold_of_typed_data())
-          ->interaction_data;
+  auto cb_je = reinterpret_cast<const joined_event::cb_joined_event *>(
+      je.get_hold_of_typed_data());
+  float cost = -1.f * cb_je->reward;
+  float original_cost = -1.f * cb_je->original_reward;
+  const auto &interaction_data = cb_je->interaction_data;
   const auto &probabilities = interaction_data.probabilities;
   const auto &actions = interaction_data.actions;
   try {
@@ -274,6 +274,73 @@ void build_ccb_json(std::ofstream &outfile,
     VW::io::logger::log_error(
       "convert event: [{}] from binary to json format failed: [{}].",
       event_id, e.what());
+  }
+}
+
+void build_ca_json(std::ofstream &outfile, joined_event::joined_event &je) {
+  auto ca_je = reinterpret_cast<const joined_event::ca_joined_event *>(
+      je.get_hold_of_typed_data());
+  float cost = -1.f * ca_je->reward;
+  float original_cost = -1.f * ca_je->original_reward;
+  const auto &interaction_data = ca_je->interaction_data;
+  try {
+    rj::StringBuffer out_buffer;
+    rj::Writer<rj::StringBuffer> writer(out_buffer);
+
+    writer.StartObject();
+
+    writer.Key("_label_ca", strlen("_label_ca"), true);
+    writer.StartObject();
+    writer.Key("cost", strlen("cost"), true);
+    writer.Double(cost);
+    writer.Key("pdf_value", strlen("pdf_value"), true);
+    writer.Double(interaction_data.pdf_value);
+    writer.Key("action", strlen("action"), true);
+    writer.Double(interaction_data.action);
+    writer.EndObject();
+
+    std::string ts_str = date::format(
+        "%FT%TZ",
+        date::floor<std::chrono::microseconds>(je.joined_event_timestamp));
+
+    writer.Key("Timestamp", strlen("Timestamp"), true);
+    writer.String(ts_str.c_str(), ts_str.length(), true);
+
+    writer.Key("Version", strlen("Version"), true);
+    writer.String("1", strlen("1"), true);
+
+    writer.Key("EventId", strlen("EventId"), true);
+    writer.String(interaction_data.eventId.c_str(),
+                  interaction_data.eventId.length(), true);
+
+    writer.Key("c", strlen("c"), true);
+    std::replace(je.context.begin(), je.context.end(), '\n', ' ');
+    writer.RawValue(je.context.c_str(), je.context.length(), rj::kObjectType);
+
+    writer.Key("VWState", strlen("VWState"), true);
+    writer.StartObject();
+    writer.Key("m", strlen("m"), true);
+    writer.String(je.model_id.c_str(), je.model_id.length(), true);
+    writer.EndObject();
+
+    if (interaction_data.probabilityOfDrop != 0.f) {
+      writer.Key("pdrop", strlen("pdrop"), true);
+      writer.Double(interaction_data.probabilityOfDrop);
+    }
+
+    bool skip_learn = !je.is_joined_event_learnable();
+    if (skip_learn) {
+      writer.Key("_skipLearn", strlen("_skipLearn"), true);
+      writer.Bool(skip_learn);
+    }
+
+    writer.EndObject();
+
+    outfile << out_buffer.GetString() << std::endl;
+  } catch (const std::exception &e) {
+    VW::io::logger::log_error(
+        "convert event: [{}] from binary to json format failed: [{}].",
+        interaction_data.eventId, e.what());
   }
 }
 } // namespace log_converter
