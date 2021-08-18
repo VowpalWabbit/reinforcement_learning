@@ -69,6 +69,10 @@ Residing under `reward_functions`
 - fmix-reward_v2.fb: `./example_gen --kind fmix-reward --random_reward`
 - fi-out-of-bound-reward_v2.fb: `./example_gen --kind fi-out-of-bound-reward`
 
+#### slates format
+- slates_v2.fb `./example_gen --kind slates`
+- fi-reward_v2.fb: `./example_gen --kind fi-reward --random_reward` (change num_of_rewards to 2)
+
 #### ca format
 - ca_v2.fb: `./example_gen --kind ca --count 1 --seed -1`
 - f-reward_3obs_v2.fb: `./example_gen --kind f-reward --count 3 --seed -1 --random_reward`

@@ -230,7 +230,6 @@ bool example_joiner::process_interaction(const v2::Event &event,
       return false;
     }
 
-<<<<<<< 42452d84f6e037e7064c62c1218d7a6338b3d93a
     je = typed_event::event_processor<v2::CbEvent>::fill_in_joined_event(
         *cb, metadata, enqueued_time_utc,
         typed_event::event_processor<v2::CbEvent>::get_context(*cb));
@@ -251,6 +250,7 @@ bool example_joiner::process_interaction(const v2::Event &event,
                                metadata.id()->c_str());
       return false;
     }
+
     je = typed_event::event_processor<v2::MultiSlotEvent>::fill_in_joined_event(
         *multislot, metadata, enqueued_time_utc,
         typed_event::event_processor<v2::MultiSlotEvent>::get_context(*multislot));
@@ -269,6 +269,7 @@ bool example_joiner::process_interaction(const v2::Event &event,
                                metadata.id()->c_str());
       return false;
     }
+
     je = typed_event::event_processor<v2::CaEvent>::fill_in_joined_event(
         *ca, metadata, enqueued_time_utc,
         typed_event::event_processor<v2::CaEvent>::get_context(*ca));
@@ -521,7 +522,6 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     clear_examples = true;
     return false;
   }
-  je->set_reward_from_data(examples);
 
   if (multiline) {
     // add an empty example to signal end-of-multiline
