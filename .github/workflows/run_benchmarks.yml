@@ -15,6 +15,7 @@ jobs:
       - uses: actions/checkout@v1
         with:
           ref: ${{ github.base_ref }}
+        submodules: true
       - name: Install google benchmarks
         shell: bash
         run: ./ext_libs/vowpal_wabbit/.scripts/linux/install-benchmarks.sh
@@ -42,6 +43,7 @@ jobs:
         # temp for first build
         with:
           ref: ${{ github.base_ref }}
+        submodules: true
       - name: Download ${{ github.base_ref }} benchmark results
         uses: actions/download-artifact@v2
         with:
