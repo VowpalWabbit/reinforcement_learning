@@ -95,15 +95,6 @@ struct cb_joined_event : public typed_joined_event {
     return true;
   }
 
-  bool should_calculate_reward(
-      const std::vector<reward::outcome_event> &outcome_events) {
-    return outcome_events.size() > 0 &&
-           std::any_of(outcome_events.begin(), outcome_events.end(),
-                       [](const reward::outcome_event &o) {
-                         return o.action_taken != true;
-                       });
-  }
-
   void calc_cost(
     float default_reward,
     reward::RewardFunctionType reward_function,
@@ -111,19 +102,14 @@ struct cb_joined_event : public typed_joined_event {
     std::vector<reward::outcome_event> &outcome_events) override {
     reward = default_reward;
     // original reward is used to record the observed reward of apprentice mode
-    original_reward = default_reward;
+    original_reward = reward_function(outcome_events, default_reward);
 
-    if (should_calculate_reward(outcome_events)) {
-      original_reward = reward_function(outcome_events);
-
-      if (interaction_metadata.learning_mode == v2::LearningModeType_Apprentice) {
-        set_apprentice_reward();
-      } else {
-        reward = original_reward;
-      }
+    if (interaction_metadata.learning_mode == v2::LearningModeType_Apprentice) {
+      set_apprentice_reward();
+    } else {
+      reward = original_reward;
     }
   }
-
 
   void calculate_metrics(dsjson_metrics* metrics) override {
     if (metrics && interaction_data.actions.size() == 0) {
@@ -249,7 +235,7 @@ struct ccb_joined_event : public typed_joined_event {
 
     for (size_t i = 0; i < num_of_slots; i++) {
       if (outcomes_map.find(i) != outcomes_map.end()) {
-        original_rewards[i] = reward_function(outcomes_map[i]);
+        original_rewards[i] = reward_function(outcomes_map[i], default_reward);
       }
     }
 
@@ -319,8 +305,14 @@ struct slates_joined_event : public typed_joined_event {
       reward::RewardFunctionType reward_function,
       const metadata::event_metadata_info &metadata_info,
       std::vector<reward::outcome_event> &outcome_events) override {
+    reward = default_reward;
+    original_reward = reward_function(outcome_events, default_reward);
 
-    reward = reward_function(outcome_events);
+    if (metadata_info.learning_mode == v2::LearningModeType_Apprentice) {
+      VW::io::logger::log_warn( "Apprentice mode is not implmeneted for slates.");
+    } else {
+      reward = original_reward;
+    }
   }
 }; // slates_joined_event
 
@@ -394,16 +386,12 @@ struct ca_joined_event : public typed_joined_event {
                  std::vector<reward::outcome_event> &outcome_events) override {
     reward = default_reward;
     // original reward is used to record the observed reward of apprentice mode
-    original_reward = default_reward;
+    original_reward = reward_function(outcome_events, default_reward);
 
-    if (should_calculate_reward(outcome_events)) {
-      original_reward = reward_function(outcome_events);
-
-      if (interaction_metadata.learning_mode ==
-          v2::LearningModeType_Apprentice) {
-        VW::io::logger::log_warn(
-            "Apprentice mode is not implmeneted for cats.");
-      }
+    if (interaction_metadata.learning_mode == v2::LearningModeType_Apprentice) {
+      VW::io::logger::log_warn(
+          "Apprentice mode is not implmeneted for cats.");
+    } else {
       reward = original_reward;
     }
   }

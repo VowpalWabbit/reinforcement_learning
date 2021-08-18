@@ -155,3 +155,17 @@ Residing under `skip_learn`
   - Generate ca_v2.fb with deferred action: `./example_gen --kind ca --deferred_action_count 1 --dedup`
   - Generate action-taken_v2.fb: `./example_gen --kind action-taken --dedup`
   - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 4`. Then rename the merged.log file.
+
+#### slates format
+- deferred_action_without_activation.fb:
+  - Generate slates_v2.fb with deferred action: `./example_gen --kind slates --deferred_action_count 1`
+  - Generate regular fi-reward_v2.fb: `./example_gen --kind fi-reward --random_reward`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 3`. Then rename the merged.log file.
+- deferred_action_with_activation.fb:
+  - Generate slates_v2.fb with deferred action: `./example_gen --kind slates --deferred_action_count 1`
+  - Generate action-taken_v2.fb: `./example_gen --kind action-taken`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 3`. Then rename the merged.log file.
+- mixed_deferred_action_events.fb:
+  - Generate slates_v2.fb with 2 events first event has deferred_action equals to true: `./example_gen --kind slates --count 2 --deferred_action_count 1`
+  - Generated regular fi-reward_v2.fb: `./example_gen --kind fi-reward --count 2`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 3`. Then rename the merged.log file.
