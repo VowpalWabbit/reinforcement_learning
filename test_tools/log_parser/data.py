@@ -192,7 +192,7 @@ def event_2_builder(meta, payload, builder):
 @dataclass
 class CbEvent:
     id: str = 'id'
-    client_time_utc: datetime = datetime.utcnow()
+    client_time_utc: datetime = datetime(2021, 1, 1, 0, 0, 0)
     encoding: _EventEncoding.EventEncoding = _EventEncoding.EventEncoding.Identity
     pass_prob: float = 1.
 
@@ -227,7 +227,7 @@ class CbEvent:
 @dataclass
 class OutcomeEvent:
     primary_id: str = 'id'
-    client_time_utc: datetime = datetime.utcnow()
+    client_time_utc: datetime = datetime(2021, 1, 1, 0, 0, 0)
     encoding: _EventEncoding.EventEncoding = _EventEncoding.EventEncoding.Identity
     pass_prob: float = 1.
 
@@ -254,7 +254,7 @@ class OutcomeEvent:
 @dataclass
 class MultiStepEvent:
     episode_id: str = 'episode'
-    client_time_utc: datetime = datetime.utcnow()
+    client_time_utc: datetime = datetime(2021, 1, 1, 0, 0, 0)
     encoding: _EventEncoding.EventEncoding = _EventEncoding.EventEncoding.Identity
     pass_prob: float = 1.
 
