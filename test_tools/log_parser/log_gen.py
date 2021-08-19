@@ -34,7 +34,7 @@ def EndVector(builder, size):
         return builder.EndVector(size)
 
 def mk_timestamp(builder):
-    time = datetime.utcnow()
+    time = datetime(2021, 1, 1, 0, 0, 0)
     return CreateTimeStamp(builder, time.year, time.month, time.day, time.hour, time.minute, time.second, int(time.microsecond))
 
 def mk_offsets_vector(builder, arr, startFun):
