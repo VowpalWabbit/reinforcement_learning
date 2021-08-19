@@ -288,10 +288,3 @@ class MultiStepEvent:
     def serialize(self):
         return serialize(self)
   
-
-
-
-
-
-
-
