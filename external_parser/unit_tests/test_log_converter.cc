@@ -14,6 +14,12 @@ std::string get_json_event(std::string infile_path, std::string outfile_path,
     case v2::ProblemType_CCB:
       command = "--quiet --binary_to_json --binary_parser --ccb_explore_adf -d " + infile_name;
       break;
+    case v2::ProblemType_CA:
+      command =
+          "--quiet --binary_to_json --binary_parser --cats 4 --min_value 1 "
+          "--max_value 100 --bandwidth 1 -d" +
+          infile_name;
+      break;
   }
 
   auto vw = VW::initialize(command, nullptr, false, nullptr, nullptr);
@@ -129,6 +135,28 @@ BOOST_AUTO_TEST_CASE(ccb_payload_with_slot_id) {
     "{\"_label_cost\":-1.5,\"_id\":\"slot_1\",\"_a\":[1],\"_p\":[1],\"_o\":["
     "{\"v\":1.5,\"EventId\":\"91f71c8\",\"Index\":\"slot_1\",\"ActionTaken\":false}],"
     "\"_original_label_cost\":-1.5}],\"VWState\":{\"m\":\"N/A\"}}\n";
+
+  BOOST_CHECK_EQUAL(converted_json, expected_json);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(log_converter_ca_format)
+BOOST_AUTO_TEST_CASE(ca_deferred_action_without_activation) {
+  std::string infile_path =
+      "skip_learn/ca/deferred_action_without_activation.fb";
+  std::string outfile_path =
+      "skip_learn/ca/deferred_action_without_activation.dsjson";
+
+  std::string converted_json =
+      get_json_event(infile_path, outfile_path, v2::ProblemType_CA);
+  std::string expected_json =
+      "{\"_label_ca\":{\"cost\":-1.5,\"pdf_value\":"
+      "0.0005050505278632045,\"action\":1.014871597290039},\"Timestamp\":"
+      "\"2021-08-09T20:57:05.000000Z\",\"Version\":\"1\",\"EventId\":"
+      "\"91f71c8\",\"c\":"
+      "{\"RobotJoint1\":{\"friction\":78}},\"VWState\":{\"m\":\"N/"
+      "A\"},\"_skipLearn\":true}\n";
 
   BOOST_CHECK_EQUAL(converted_json, expected_json);
 }

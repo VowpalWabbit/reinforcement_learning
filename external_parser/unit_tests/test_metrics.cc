@@ -229,3 +229,33 @@ BOOST_AUTO_TEST_CASE(
                                 expected_int_metrics, expected_float_metrics,
                                 expected_string_metrics);
 }
+
+BOOST_AUTO_TEST_CASE(
+    check_metrics_ca_mixed_deferred_action_events) {
+  std::string infile_name =
+      "valid_joined_logs/ca_mixed_deferred_action_events_20.log";
+  std::string outfile_name =
+      "ca_mixed_deferred_action_events.json";
+
+  std::map<std::string, int> expected_int_metrics = {
+      {"total_predict_calls", 0},
+      {"total_learn_calls", 10},
+      {"number_skipped_events", 10},
+      {"number_events_zero_actions", 0},
+      {"line_parse_error", 0}};
+
+  std::map<std::string, float> expected_float_metrics = {
+
+  };
+
+  std::map<std::string, std::string> expected_string_metrics = {
+      {"first_event_id", "48373f5e"},
+      {"first_event_time", "2021-08-10T01:29:55.000000Z"},
+      {"last_event_id", "1a997865"},
+      {"last_event_time", "2021-08-10T01:29:55.000000Z"}};
+
+  should_match_expected_metrics("--cats 4 --min_value 1 --max_value 100 --bandwidth 1",
+                                infile_name, outfile_name,
+                                expected_int_metrics, expected_float_metrics,
+                                expected_string_metrics);
+}
