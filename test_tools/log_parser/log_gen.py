@@ -1,30 +1,15 @@
 #! /usr/bin/env python3 -W ignore::DeprecationWarning
 
-from reinforcement_learning.messages.flatbuff.v2.IndexValue import IndexValue
 from reinforcement_learning.messages.flatbuff.v2.EventBatch import *
 from reinforcement_learning.messages.flatbuff.v2.BatchMetadata import *
 from reinforcement_learning.messages.flatbuff.v2.EventBatch import *
 from reinforcement_learning.messages.flatbuff.v2.LearningModeType import LearningModeType
-from reinforcement_learning.messages.flatbuff.v2.PayloadType import PayloadType
-from reinforcement_learning.messages.flatbuff.v2.OutcomeValue import OutcomeValue
-from reinforcement_learning.messages.flatbuff.v2.NumericOutcome import NumericOutcome, NumericOutcomeAddValue, NumericOutcomeEnd, NumericOutcomeStart
-from reinforcement_learning.messages.flatbuff.v2.NumericIndex import *
-
-from reinforcement_learning.messages.flatbuff.v2.Metadata import *
-from reinforcement_learning.messages.flatbuff.v2.CbEvent import *
-from reinforcement_learning.messages.flatbuff.v2.OutcomeEvent import *
-from reinforcement_learning.messages.flatbuff.v2.MultiSlotEvent import MultiSlotEvent
-from reinforcement_learning.messages.flatbuff.v2.MultiStepEvent import *
-from reinforcement_learning.messages.flatbuff.v2.CaEvent import CaEvent
-from reinforcement_learning.messages.flatbuff.v2.DedupInfo import DedupInfo
 
 from reinforcement_learning.messages.flatbuff.v2.KeyValue import *
 from reinforcement_learning.messages.flatbuff.v2.TimeStamp import *
 from reinforcement_learning.messages.flatbuff.v2.FileHeader import *
 from reinforcement_learning.messages.flatbuff.v2.JoinedEvent import *
 from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *
-from reinforcement_learning.messages.flatbuff.v2.Metadata import *
-from reinforcement_learning.messages.flatbuff.v2.Event import *
 from reinforcement_learning.messages.flatbuff.v2.CheckpointInfo import *
 from reinforcement_learning.messages.flatbuff.v2.RewardFunctionType import *
 from reinforcement_learning.messages.flatbuff.v2.ProblemType import *
@@ -32,12 +17,9 @@ from reinforcement_learning.messages.flatbuff.v2.EventEncoding import *
 
 import flatbuffers
 import sys
-import json
 import struct
 from datetime import datetime
 import numpy as np
-import argparse
-
 
 MSG_TYPE_HEADER = 0x55555555
 MSG_TYPE_CHECKPOINT = 0x11111111
@@ -101,7 +83,7 @@ class BinLogWriter:
 
         evt_offsets = []
         for evt in events:
-            payload_off = mk_bytes_vector(builder, evt)
+            payload_off = mk_bytes_vector(builder, evt.serialize())
             JoinedEventStart(builder)
             JoinedEventAddEvent(builder, payload_off)
             JoinedEventAddTimestamp(builder, mk_timestamp(builder))
@@ -146,174 +128,6 @@ class BinLogWriter:
 
     def __exit__(self, type, value, traceback):
         return self.file.__exit__(type, value, traceback)
-
-
-def mk_long_vector(builder, arr):
-    return builder.CreateNumpyVector(np.array(list(arr), dtype=np.int64))
-
-def mk_float_vector(builder, arr):
-    return builder.CreateNumpyVector(np.array(list(arr), dtype=np.float32))
-
-
-
-CB_STR = """{"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"}},{"TAction":{"a2":"f2"}}]}"""
-
-def mk_cb_payload(_event_id='event_id_0', _actions=[1,3], _ctx=CB_STR, _probs=[0.1,0.9],
-        _deferred=False, _model_id='the model', _learning_mode=LearningModeType.Online, _pdrop = 0):
-    # first gen the CB payload
-    builder = flatbuffers.Builder(0)
-
-    actions = mk_long_vector(builder, _actions)
-    ctx = mk_bytes_vector(builder, bytes(_ctx, 'utf-8'))
-    probs = mk_float_vector(builder, _probs)
-    model_id = builder.CreateString(_model_id)
-
-    CbEventStart(builder)
-    CbEventAddDeferredAction(builder, _deferred)
-    CbEventAddActionIds(builder, actions)
-    CbEventAddContext(builder, ctx)
-    CbEventAddProbabilities(builder, probs)
-    CbEventAddModelId(builder, model_id)
-    CbEventAddLearningMode(builder, _learning_mode)
-    builder.Finish(CbEventEnd(builder))
-    
-    cb_payload = builder.Output()
-
-    builder = flatbuffers.Builder(0)
-    event_id = builder.CreateString(_event_id)
-
-    MetadataStart(builder)
-    MetadataAddId(builder, event_id)
-    MetadataAddClientTimeUtc(builder, mk_timestamp(builder))
-    MetadataAddPayloadType(builder, PayloadType.CB)
-    MetadataAddEncoding(builder, EventEncoding.Identity)
-    MetadataAddPassProbability(builder=builder, passProbability = 1 - _pdrop)
-
-    md_off = MetadataEnd(builder)
-    payload_off = mk_bytes_vector(builder, cb_payload)
-
-    EventStart(builder)
-    EventAddMeta(builder, md_off)
-    EventAddPayload(builder, payload_off)
-    builder.Finish(EventEnd(builder))
-
-    return builder.Output()
-
-def mk_multistep_payload(_episode_id='episode_0', _event_id='0', _previous_id=None, _actions=[1,2], _ctx=CB_STR, _probs=[0.1,0.9],
-        _deferred=False, _model_id='the model', _pdrop = 0):
-    # first gen the CB payload
-    builder = flatbuffers.Builder(0)
-
-    actions = mk_long_vector(builder, _actions)
-    ctx = mk_bytes_vector(builder, bytes(_ctx, 'utf-8'))
-    probs = mk_float_vector(builder, _probs)
-    model_id = builder.CreateString(_model_id)
-    event_id = builder.CreateString(_event_id)
-    previous_id = builder.CreateString(_previous_id) if _previous_id is not None else None
-
-    MultiStepEventStart(builder)
-    MultiStepEventAddEventId(builder, event_id)
-    if previous_id is not None:
-        MultiStepEventAddPreviousId(builder, previous_id)
-    MultiStepEventAddDeferredAction(builder, _deferred)
-    MultiStepEventAddActionIds(builder, actions)
-    MultiStepEventAddContext(builder, ctx)
-    MultiStepEventAddProbabilities(builder, probs)
-    MultiStepEventAddModelId(builder, model_id)
-    builder.Finish(MultiStepEventEnd(builder))
-    
-    cb_payload = builder.Output()
-
-    builder = flatbuffers.Builder(0)
-    episode_id = builder.CreateString(_episode_id)
-
-    MetadataStart(builder)
-    MetadataAddId(builder, episode_id)
-    MetadataAddClientTimeUtc(builder, mk_timestamp(builder))
-    MetadataAddPayloadType(builder, PayloadType.MultiStep)
-    MetadataAddEncoding(builder, EventEncoding.Identity)
-    MetadataAddPassProbability(builder=builder, passProbability = 1 - _pdrop)
-
-    md_off = MetadataEnd(builder)
-    payload_off = mk_bytes_vector(builder, cb_payload)
-
-    EventStart(builder)
-    EventAddMeta(builder, md_off)
-    EventAddPayload(builder, payload_off)
-    builder.Finish(EventEnd(builder))
-
-    return builder.Output()
-
-def mk_outcome(_primary_id='event_id_0', _secondary_id=None, _value=1, _pdrop=0):
-    if isinstance(_value, (int, float)):
-        value_type = OutcomeValue.numeric
-    elif isinstance(_value, str):
-        value_type = OutcomeValue.literal
-    elif _value is None:
-        value_type = OutcomeValue.NONE
-    else:
-        raise 'Unknown value type'
-
-    if _secondary_id is None:
-        index_type = IndexValue.NONE
-    elif isinstance(_secondary_id, (int, float)):
-        index_type = IndexValue.numeric
-    elif isinstance(_secondary_id, str):
-        index_type = IndexValue.literal
-    else:
-        raise 'Unknown index type'
-
-    builder = flatbuffers.Builder(0)
-    
-    outcome = None
-    if value_type == OutcomeValue.numeric:
-        NumericOutcomeStart(builder)
-        NumericOutcomeAddValue(builder, _value)
-        outcome = NumericOutcomeEnd(builder)
-    elif value_type == OutcomeValue.literal:
-        outcome = builder.CreateString(_value)
-
-    index = None
-    if index_type == IndexValue.numeric:
-        NumericIndexStart(builder)
-        NumericIndexAddIndex(builder, _secondary_id)
-        index = NumericIndexEnd(builder)
-    elif index_type == OutcomeValue.literal:
-        index = builder.CreateString(_secondary_id)
-
-    OutcomeEventStart(builder)
-    OutcomeEventAddIndexType(builder, index_type)
-    if index_type != IndexValue.NONE:
-        OutcomeEventAddIndex(builder, index)
-
-    OutcomeEventAddValueType(builder, value_type)
-    if value_type != OutcomeValue.NONE:
-        OutcomeEventAddValue(builder, outcome)
-    OutcomeEventAddActionTaken(builder, value_type == OutcomeValue.NONE)
-
-    builder.Finish(OutcomeEventEnd(builder))
-    
-    reward_payload = builder.Output()
-
-    builder = flatbuffers.Builder(0)
-    event_id = builder.CreateString(_primary_id)
-
-    MetadataStart(builder)
-    MetadataAddId(builder, event_id)
-    MetadataAddClientTimeUtc(builder, mk_timestamp(builder))
-    MetadataAddPayloadType(builder, PayloadType.Outcome)
-    MetadataAddEncoding(builder, EventEncoding.Identity)
-    MetadataAddPassProbability(builder=builder, passProbability = 1 - _pdrop)
-
-    md_off = MetadataEnd(builder)
-    payload_off = mk_bytes_vector(builder, reward_payload)
-
-    EventStart(builder)
-    EventAddMeta(builder, md_off)
-    EventAddPayload(builder, payload_off)
-    builder.Finish(EventEnd(builder))
-
-    return builder.Output()
 
 def main():
     if len(sys.argv) != 2:
