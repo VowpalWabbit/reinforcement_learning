@@ -10,7 +10,7 @@
 #include "model_mgmt.h"
 #include "ranking_response.h"
 
-#include "../benchmarks_common.h"
+#include "benchmarks_common.h"
 
 namespace r = reinforcement_learning;
 namespace u = reinforcement_learning::utility;
