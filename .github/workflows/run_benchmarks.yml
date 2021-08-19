@@ -9,7 +9,7 @@ on:
 jobs:
   benchmark:
     container:
-      image: vowpalwabbit/rlclientlib-manylinux2010-build:latest
+      image: vowpalwabbit/rl-ubuntu-1604:latest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
