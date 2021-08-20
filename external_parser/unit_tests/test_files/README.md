@@ -39,6 +39,10 @@ Residing under `valid_joined_logs`
   - Generate ca_v2.fb with 2 events first event has deferred_action equals to true: `./example_gen --kind ca --count 20 --deferred_action_count 10`
   - Generated regular f-reward_v2.fb: `./example_gen --kind f-reward --count 20`
   - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 4`. Then rename the merged.log file.
+- slates_simple.log:
+  - slates_v2.fb: `./example_gen --kind slates --seed -1`
+  - f-reward_v2.fb: `./example_gen --kind f-reward --seed -1`
+  - Run `python joiner.py --problem_type_config 3` on the above files (slates_v2.fb, f-reward_v2.fb) and renaming the resulting default `merged.log`
 
 ### invalid joined logs
 
