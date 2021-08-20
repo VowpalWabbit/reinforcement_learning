@@ -19,7 +19,7 @@ uint32_t prng::next_uint() {
 }
 
 std::string cb_decision_gen::mk_feature_vector(int count, uint32_t max_idx) {
-  std::stringstream str;
+  std::ostringstream str;
   str << "{";
   std::set<uint32_t> added_idx;
   int added = 0;
@@ -51,7 +51,7 @@ cb_decision_gen::cb_decision_gen(int shared_features, int action_features,
 }
 
 std::string cb_decision_gen::gen_example() {
-  std::stringstream str;
+  std::ostringstream str;
   str << R"({"shared":)";
   str << mk_feature_vector(shared_features, shared_features * 3) << ",";
   str << R"("_multi":[)";
