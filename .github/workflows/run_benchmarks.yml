@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
         with:
-          ref: ${{ github.base_ref }}
+          # ref: ${{ github.base_ref }}
           submodules: recursive
       - name: Install google benchmarks
         shell: bash

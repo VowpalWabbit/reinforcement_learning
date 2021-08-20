@@ -62,7 +62,7 @@ public:
           mk_feature_vector(action_features, action_features * 3));
     }
   }
-  const char *gen_example() {
+  std::string gen_example() {
     std::stringstream str;
     str << R"({"shared":)";
     str << mk_feature_vector(shared_features, shared_features * 3) << ",";
@@ -96,6 +96,6 @@ public:
     }
     temp_str = str.str();
 
-    return temp_str.c_str();
+    return temp_str;
   }
 };

@@ -1,5 +1,6 @@
 #include <benchmark/benchmark.h>
 #include <iostream>
+#include <algorithm>
 
 #include "api_status.h"
 #include "config_utility.h"
@@ -41,6 +42,10 @@ static void bench_cb(benchmark::State &state, ExtraArgs &&... extra_args) {
   cb_decision_gen cb_gen(shared_features, action_features, actions_per_decision,
                          total_actions, 0, false);
 
+  std::vector<std::string> examples;
+  std::generate_n(std::back_inserter(examples), count,
+                  [&cb_gen] { return cb_gen.gen_example(); });
+
   u::configuration config;
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::PROTOCOL_VERSION, "2");
@@ -69,7 +74,7 @@ static void bench_cb(benchmark::State &state, ExtraArgs &&... extra_args) {
 
   for (auto _ : state) {
     for (size_t i = 0; i < count; i++) {
-      if (model.choose_rank(event_id, cb_gen.gen_example(), response,
+      if (model.choose_rank(event_id, examples[i].c_str(), response,
                             &status) != err::success) {
         std::cout << "there was an error so something went wrong during "
                      "benchmarking: "
