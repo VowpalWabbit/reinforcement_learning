@@ -85,13 +85,15 @@ static void bench_cb(benchmark::State &state, ExtraArgs &&... extra_args) {
   }
 }
 
+// characteristics of the benchmark examples that will be generated are:
+
 // x shared features
-// x features per action
+// x features per action (affects dedup-ness)
 // x actions per example
-// x actions in total
-// example count
-// compression
-// dedup
+// x actions in total (affects dedup-ness)
+// x number of total examples so x number of total rank calls to benchmark
+// compression (on/off)
+// dedup (on/off)
 BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload, 20, 10, 50, 2000, 500, false,
                   false);
 BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload_compression, 20, 10, 50, 2000,

@@ -5,7 +5,7 @@ by default google benchmark is built in Debug mode so you might want to specify 
 build rl benchmarks:
 
 ```
-make -j rl_benchmarks
+make -j $(nproc) rl_benchmarks
 ```
 
 run rl benchmarks:
