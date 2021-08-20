@@ -473,9 +473,9 @@ namespace reinforcement_learning {
     _outcome_logger.reset(new logger::observation_logger_facade(_configuration, outcome_msg_sender, _watchdog, observation_time_provider, &_error_cb));
     RETURN_IF_FAIL(_outcome_logger->init(status));
 
-    // TODO: Check episodic or not to initialize episode_logger.
     // TODO: Use a specific episode message type (for now it is the same with the observation logger, using observation_logger_facade).
-    if (/*using multistep*/true) {
+    if (_configuration.get(name::EPISODE_EH_HOST, nullptr) != nullptr) {
+      std::cout << _configuration << std::endl;
       // Get the name of raw data (as opposed to message) sender for episodes.
       const auto* const episode_sender_impl = _configuration.get(name::EPISODE_SENDER_IMPLEMENTATION, value::get_default_episode_sender());
       i_sender* episode_sender;
