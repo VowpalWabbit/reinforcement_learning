@@ -110,7 +110,6 @@ class Env:
             perm = Permutation([[0, 5], [1, 3], [2, 6, 7, 8, 9, 10, 11], [4]])
             writer.write_regular_message(perm(msg))  
                 
-
 def main():
     env = Env()
     env.cb_pdrop_05()
