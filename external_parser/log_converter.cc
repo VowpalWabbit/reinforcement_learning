@@ -19,6 +19,11 @@ void build_json(std::ofstream &outfile,
   case v2::PayloadType_CA:
     build_ca_json(outfile, je);
     break;
+  case v2::PayloadType_Slates:
+    build_slates_json(outfile, je);
+    break;
+  default:
+    break;
   }
 }
 
@@ -281,7 +286,7 @@ void build_ca_json(std::ofstream &outfile, joined_event::joined_event &je) {
   auto ca_je = reinterpret_cast<const joined_event::ca_joined_event *>(
       je.get_hold_of_typed_data());
   float cost = -1.f * ca_je->reward;
-  float original_cost = -1.f * ca_je->original_reward;
+
   const auto &interaction_data = ca_je->interaction_data;
   try {
     rj::StringBuffer out_buffer;
@@ -341,6 +346,115 @@ void build_ca_json(std::ofstream &outfile, joined_event::joined_event &je) {
     VW::io::logger::log_error(
         "convert event: [{}] from binary to json format failed: [{}].",
         interaction_data.eventId, e.what());
+  }
+}
+
+void build_slates_json(std::ofstream &outfile, joined_event::joined_event &je) {
+  const std::string &event_id = je.interaction_metadata.event_id;
+
+  auto slates_je = reinterpret_cast<const joined_event::slates_joined_event *>(
+                          je.get_hold_of_typed_data());
+  const auto &interaction_data = slates_je->multi_slot_interaction.interaction_data;
+  float cost = -1.f * slates_je->reward;
+  bool skip_learn = !je.is_joined_event_learnable();
+
+  try {
+    rj::StringBuffer out_buffer;
+    rj::Writer<rj::StringBuffer> writer(out_buffer);
+
+    writer.StartObject();
+
+    std::string ts_str = date::format(
+      "%FT%TZ",
+      date::floor<std::chrono::microseconds>(je.joined_event_timestamp));
+
+    writer.Key("Timestamp");
+    writer.String(ts_str.c_str(), ts_str.length(), true);
+
+    writer.Key("Version");
+    writer.String("1");
+
+    if (!event_id.empty()) {
+      writer.Key("EventId");
+      writer.String(event_id.c_str());
+    }
+
+    writer.Key("_label_cost", strlen("_label_cost"), true);
+    writer.Double(cost);
+
+    writer.Key("o", strlen("o"), true);
+
+    writer.StartArray();
+    for (auto &o : je.outcome_events) {
+      writer.StartObject();
+      if (!o.action_taken) {
+        writer.Key("v", strlen("v"), true);
+        writer.Double(o.value);
+      }
+      writer.Key("EventId", strlen("EventId"), true);
+      writer.String(o.metadata.event_id.c_str(), o.metadata.event_id.length(), true);
+
+      writer.Key("ActionTaken", strlen("ActionTaken"), true);
+      writer.Bool(o.action_taken);
+
+      writer.EndObject();
+    }
+
+    writer.EndArray();
+
+    writer.Key("_outcomes", strlen("_outcomes"), true);
+
+    writer.StartArray();
+    for (auto &interaction : interaction_data) {
+      writer.StartObject();
+
+      writer.Key("_a");
+      writer.StartArray();
+      for (auto &action_id : interaction.actions) {
+        writer.Uint(action_id);
+      }
+      writer.EndArray();
+
+      writer.Key("_p");
+      writer.StartArray();
+
+      for (auto &p : interaction.probabilities) {
+        writer.Uint(p);
+      }
+      writer.EndArray();
+      writer.EndObject();
+    }
+
+    writer.EndArray();
+
+
+    writer.Key("c");
+    std::replace(je.context.begin(), je.context.end(), '\n', ' ');
+    writer.RawValue(je.context.c_str(), je.context.length(), rj::kObjectType);
+
+    writer.Key("VWState");
+    writer.StartObject();
+    writer.Key("m");
+    writer.String(je.model_id.c_str(), je.model_id.length(), true);
+    writer.EndObject();
+
+    if (slates_je-> multi_slot_interaction.probability_of_drop != 0.f) {
+      writer.Key("pdrop");
+      writer.Double(slates_je->multi_slot_interaction.probability_of_drop);
+    }
+
+    if (skip_learn) {
+      writer.Key("_skipLearn", strlen("_skipLearn"), true);
+      writer.Bool(skip_learn);
+    }
+
+    writer.EndObject();
+    outfile << out_buffer.GetString() << std::endl;
+
+  } catch (const std::exception &e) {
+    VW::io::logger::log_error(
+      "convert event: [{}] from binary to json format failed: [{}].",
+      event_id, e.what());
   }
 }
 } // namespace log_converter

@@ -55,7 +55,8 @@ void should_add_examples(std::string &infile,
     case v2::ProblemType_SLATES:
       command = "--quiet --binary_parser --ccb_explore_adf --slates";
       break;
-
+    default:
+      break;
   }
 
   std::string infile_name = get_test_files_location() + "skip_learn/" + infile;
