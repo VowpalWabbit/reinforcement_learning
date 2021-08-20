@@ -3,6 +3,7 @@
 from log_gen import *
 import data
 from pathlib import Path
+from sympy.combinatorics import Permutation
 
 class Env:
     root = Path('../../external_parser/unit_tests/test_files/')
@@ -32,46 +33,82 @@ class Env:
                 data.OutcomeEvent(primary_id = 'id2', value=1)])
 
     def multistep_2_episodes(self):
-        ctx1_1 = """{"A": {"f": 1}, "_multi":[{"a1":"f1"},{"a2":"f2"}]}"""
-        ctx1_2 = """{"B": {"f": 1}, "_multi":[{"a1":"f1"},{"a2":"f2"}]}"""
-        ctx2_1 = """{"C": {"f": 1}, "_multi":[{"a1":"f1"},{"a2":"f2"}]}"""
-        ctx2_2 = """{"D": {"f": 1}, "_multi":[{"a1":"f1"},{"a2":"f2"}]}"""
+        ctx = """{{"{0}": {{"f": 1}}, "_multi":[{{"a1":"f1"}},{{"a2":"f2"}}]}}"""
+
         with BinLogWriter(self.valid_joined_logs.joinpath('multistep_2_episodes.fb')) as writer:
             writer.write_file_magic()
             writer.write_checkpoint_info()
             writer.write_regular_message([
-                data.MultiStepEvent(episode_id='ep1', event_id='1', context=ctx1_1),
-                data.MultiStepEvent(episode_id='ep1', event_id='2', previous_id='1', context=ctx1_2),
+                data.MultiStepEvent(episode_id='ep1', event_id='1', context=ctx.format('A')),
+                data.MultiStepEvent(episode_id='ep1', event_id='2', previous_id='1', context=ctx.format('B')),
                 data.OutcomeEvent(primary_id='ep1', secondary_id='1', value = 2)])
             writer.write_regular_message([
-                data.MultiStepEvent(episode_id='ep2', event_id='1', context=ctx2_1),
-                data.MultiStepEvent(episode_id='ep2', event_id='2', previous_id='1', context=ctx2_2),
+                data.MultiStepEvent(episode_id='ep2', event_id='1', context=ctx.format('C')),
+                data.MultiStepEvent(episode_id='ep2', event_id='2', previous_id='1', context=ctx.format('D')),
                 data.OutcomeEvent(primary_id='ep2', value = 3)])
 
     def multistep_3_deferred_episodes(self):
-        ctx1_1 = """{"A": {"f": 1}, "_multi":[{"a1":"f1"},{"a2":"f2"}]}"""
-        ctx1_2 = """{"B": {"f": 1}, "_multi":[{"a1":"f1"},{"a2":"f2"}]}"""
-        ctx2_1 = """{"C": {"f": 1}, "_multi":[{"a1":"f1"},{"a2":"f2"}]}"""
-        ctx2_2 = """{"D": {"f": 1}, "_multi":[{"a1":"f1"},{"a2":"f2"}]}"""
-        ctx3_1 = """{"E": {"f": 1}, "_multi":[{"a1":"f1"},{"a2":"f2"}]}"""
-        ctx3_2 = """{"F": {"f": 1}, "_multi":[{"a1":"f1"},{"a2":"f2"}]}"""
+        ctx = """{{"{0}": {{"f": 1}}, "_multi":[{{"a1":"f1"}},{{"a2":"f2"}}]}}"""
+
         with BinLogWriter(self.valid_joined_logs.joinpath('multistep_3_deferred_episodes.fb')) as writer:
             writer.write_file_magic()
             writer.write_checkpoint_info()
             writer.write_regular_message([
-                data.MultiStepEvent(episode_id='ep1', event_id='1', context=ctx1_1, deferred=True),
-                data.MultiStepEvent(episode_id='ep1', event_id='2', previous_id='1', context=ctx1_2, deferred=True),
+                data.MultiStepEvent(episode_id='ep1', event_id='1', context=ctx.format('A'), deferred=True),
+                data.MultiStepEvent(episode_id='ep1', event_id='2', previous_id='1', context=ctx.format('B'), deferred=True),
                 data.OutcomeEvent(primary_id='ep1', secondary_id='1', value = 2),
-                data.OutcomeEvent(primary_id='ep1', secondary_id='1')]),                
+                data.OutcomeEvent(primary_id='ep1', secondary_id='1')])               
             writer.write_regular_message([
-                data.MultiStepEvent(episode_id='ep2', event_id='1', context=ctx2_1, deferred=True),
-                data.MultiStepEvent(episode_id='ep2', event_id='2', previous_id='1', context=ctx2_2, deferred=True),
+                data.MultiStepEvent(episode_id='ep2', event_id='1', context=ctx.format('C'), deferred=True),
+                data.MultiStepEvent(episode_id='ep2', event_id='2', previous_id='1', context=ctx.format('D'), deferred=True),
                 data.OutcomeEvent(primary_id='ep2', value = 3),
-                data.OutcomeEvent(primary_id='ep2')]),  
+                data.OutcomeEvent(primary_id='ep2')])
             writer.write_regular_message([
-                data.MultiStepEvent(episode_id='ep3', event_id='1', context=ctx3_1, deferred=True),
-                data.MultiStepEvent(episode_id='ep3', event_id='2', previous_id='1', context=ctx3_2, deferred=True),
+                data.MultiStepEvent(episode_id='ep3', event_id='1', context=ctx.format('E'), deferred=True),
+                data.MultiStepEvent(episode_id='ep3', event_id='2', previous_id='1', context=ctx.format('F'), deferred=True),
                 data.OutcomeEvent(primary_id='ep3', value = 4)])
+
+    def multistep_unordered_episodes(self):
+        ctx = """{{"{0}": {{"f": 1}}, "_multi":[{{"a1":"f1"}},{{"a2":"f2"}}]}}"""
+
+        dt_before = datetime(2021, 1, 1, 0, 0, 0)
+        dt_after = datetime(2021, 1, 1, 1, 0, 0)
+
+        with BinLogWriter(self.valid_joined_logs.joinpath('multistep_unordered_episodes.fb')) as writer:
+            writer.write_file_magic()
+            writer.write_checkpoint_info()
+            # 1(A) -> 2(B)
+
+            msg = [
+                data.MultiStepEvent(episode_id='ep1', event_id='1', context=ctx.format('A')),
+                data.MultiStepEvent(episode_id='ep1', event_id='2', previous_id='1', context=ctx.format('B')),
+                data.OutcomeEvent(primary_id='ep1', secondary_id='1', value = 1),
+                data.OutcomeEvent(primary_id='ep1', secondary_id='2', value = 2)]
+
+            perm = Permutation([[0, 1], [2, 3]])
+            writer.write_regular_message(perm(msg)) 
+
+            #    1(C)       4(F)
+            #   /          /    \
+            #  2(D)       5(G)   6(H)
+            #   \
+            #    3(E)      
+            # 
+            msg = [
+                data.MultiStepEvent(episode_id='ep2', event_id='1', context=ctx.format('C'), client_time_utc=dt_before), 
+                data.MultiStepEvent(episode_id='ep2', event_id='2', previous_id='1', context=ctx.format('D'), client_time_utc=dt_after),
+                data.MultiStepEvent(episode_id='ep2', event_id='3', previous_id='2', context=ctx.format('E'), client_time_utc=dt_before),
+                data.MultiStepEvent(episode_id='ep2', event_id='4', context=ctx.format('F'), client_time_utc=dt_before),
+                data.MultiStepEvent(episode_id='ep2', event_id='5', previous_id='4', context=ctx.format('G'), client_time_utc=dt_before),
+                data.MultiStepEvent(episode_id='ep2', event_id='6', previous_id='4', context=ctx.format('H'), client_time_utc=dt_after),
+                data.OutcomeEvent(primary_id='ep2', secondary_id='1', value = 1),
+                data.OutcomeEvent(primary_id='ep2', secondary_id='2', value = 2),
+                data.OutcomeEvent(primary_id='ep2', secondary_id='3', value = 3),
+                data.OutcomeEvent(primary_id='ep2', secondary_id='4', value = 4),
+                data.OutcomeEvent(primary_id='ep2', secondary_id='5', value = 5),
+                data.OutcomeEvent(primary_id='ep2', secondary_id='6', value = 6)]
+            perm = Permutation([[0, 5], [1, 3], [2, 6, 7, 8, 9, 10, 11], [4]])
+            writer.write_regular_message(perm(msg))  
                 
 
 def main():
@@ -80,6 +117,7 @@ def main():
     env.cb_pdrop_1()
     env.multistep_2_episodes()
     env.multistep_3_deferred_episodes()
+    env.multistep_unordered_episodes()
 
 if __name__ == "__main__":
     main()
