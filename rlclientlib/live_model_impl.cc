@@ -442,7 +442,7 @@ namespace reinforcement_learning {
     i_time_provider* logger_extensions_time_provider;
     RETURN_IF_FAIL(_time_provider_factory->create(&logger_extensions_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
-    //Create the logger extension
+    // Create the logger extension
     _logger_extensions.reset(logger::i_logger_extensions::get_extensions(_configuration, logger_extensions_time_provider));
 
     i_time_provider* ranking_time_provider;
@@ -472,6 +472,31 @@ namespace reinforcement_learning {
     // Create a logger for observations that will use msg sender to send observation messages
     _outcome_logger.reset(new logger::observation_logger_facade(_configuration, outcome_msg_sender, _watchdog, observation_time_provider, &_error_cb));
     RETURN_IF_FAIL(_outcome_logger->init(status));
+
+    // TODO: Check episodic or not to initialize episode_logger.
+    // TODO: Use a specific episode message type (for now it is the same with the observation logger, using observation_logger_facade).
+    if (/*using multistep*/true) {
+      // Get the name of raw data (as opposed to message) sender for episodes.
+      const auto* const episode_sender_impl = _configuration.get(name::EPISODE_SENDER_IMPLEMENTATION, value::get_default_episode_sender());
+      i_sender* episode_sender;
+
+      // Use the name to create an instance of raw data sender for episodes
+      RETURN_IF_FAIL(_sender_factory->create(&episode_sender, episode_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
+      RETURN_IF_FAIL(episode_sender->init(status));
+
+      // Create a message sender that will prepend the message with a preamble and send the raw data using the
+      // factory created raw data sender
+      l::i_message_sender* episode_msg_sender = new l::preamble_message_sender(episode_sender);
+      RETURN_IF_FAIL(episode_msg_sender->init(status));
+
+      // Get time provider implementation
+      i_time_provider* episode_time_provider;
+      RETURN_IF_FAIL(_time_provider_factory->create(&episode_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
+
+      // Create a logger for episodes that will use msg sender to send episode messages
+      _episode_logger.reset(new logger::observation_logger_facade(_configuration, episode_msg_sender, _watchdog, episode_time_provider, &_error_cb));
+      RETURN_IF_FAIL(_episode_logger->init(status));
+    }
 
     return error_code::success;
   }
@@ -612,7 +637,13 @@ namespace reinforcement_learning {
     resp.set_event_id(event_id);
 
     RETURN_IF_FAIL(episode.update(event_id, previous_id, context_json, resp, status));
+
+    if (episode.size() == 1) {
+      // Log the episode id when starting a new episode
+      RETURN_IF_FAIL(_episode_logger->log(episode.get_episode_id(), "", status));
+    }
     RETURN_IF_FAIL(_interaction_logger->log(episode.get_episode_id(), previous_id, context_patched.c_str(), flags, resp, status));
+
     return error_code::success;
   }
 

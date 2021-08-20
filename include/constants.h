@@ -14,6 +14,20 @@ namespace reinforcement_learning {  namespace name {
       const char *const  LEARNING_MODE           = "rank.learning.mode";
       const char* const  PROTOCOL_VERSION             = "protocol.version";
 
+      // Episode
+      const char *const EPISODE_EH_HOST     = "episode.eventhub.host";
+      const char *const EPISODE_EH_NAME     = "episode.eventhub.name";
+      const char *const EPISODE_EH_KEY_NAME = "episode.eventhub.keyname";
+      const char *const EPISODE_EH_KEY      = "episode.eventhub.key";
+      const char *const EPISODE_EH_TASKS_LIMIT = "episode.eventhub.tasks_limit";
+      const char *const EPISODE_EH_MAX_HTTP_RETRIES = "episode.eventhub.max_http_retries";
+      // const char *const EPISODE_SEND_HIGH_WATER_MARK     = "episode.send.highwatermark";
+      // const char *const EPISODE_SEND_QUEUE_MAX_CAPACITY_KB    = "episode.send.queue.maxcapacity.kb";
+      // const char *const EPISODE_SEND_BATCH_INTERVAL_MS   = "episode.send.batchintervalms";
+      const char *const EPISODE_SENDER_IMPLEMENTATION    = "episode.sender.implementation";
+      // const char *const EPISODE_USE_COMPRESSION = "episode.send.use_compression";
+      // const char *const EPISODE_QUEUE_MODE = "episode.queue.mode";
+
       // Interaction
       const char *const  INTERACTION_EH_HOST     = "interaction.eventhub.host";
       const char *const  INTERACTION_EH_NAME     = "interaction.eventhub.name";
@@ -54,6 +68,7 @@ namespace reinforcement_learning {  namespace name {
 
       const char *const  EH_TEST                 = "eventhub.mock";
       const char *const  TRACE_LOG_IMPLEMENTATION = "trace.logger.implementation";
+      const char *const  EPISODE_FILE_NAME = "episode.file.name";
       const char *const  INTERACTION_FILE_NAME = "interaction.file.name";
       const char *const  OBSERVATION_FILE_NAME = "observation.file.name";
       const char *const  TIME_PROVIDER_IMPLEMENTATION = "time_provider.implementation";
@@ -71,8 +86,10 @@ namespace reinforcement_learning {  namespace value {
       const char *const FILE_MODEL_DATA = "FILE_MODEL_DATA";
       const char *const VW                 = "VW";
       const char *const PASSTHROUGH_PDF_MODEL = "PASSTHROUGH_PDF";
+      const char *const EPISODE_EH_SENDER = "EPISODE_EH_SENDER";
       const char *const OBSERVATION_EH_SENDER = "OBSERVATION_EH_SENDER";
       const char *const INTERACTION_EH_SENDER = "INTERACTION_EH_SENDER";
+      const char *const EPISODE_FILE_SENDER = "EPISODE_FILE_SENDER";
       const char *const OBSERVATION_FILE_SENDER = "OBSERVATION_FILE_SENDER";
       const char *const INTERACTION_FILE_SENDER = "INTERACTION_FILE_SENDER";
       const char *const NULL_TRACE_LOGGER = "NULL_TRACE_LOGGER";
@@ -92,9 +109,9 @@ namespace reinforcement_learning {  namespace value {
       const int DEFAULT_VW_POOL_INIT_SIZE = 4;
       const int DEFAULT_PROTOCOL_VERSION = 1;
 
+      const char *get_default_episode_sender();
       const char *get_default_observation_sender();
       const char *get_default_interaction_sender();
       const char *get_default_data_transport();
       const char *get_default_time_provider();
 }}
-
