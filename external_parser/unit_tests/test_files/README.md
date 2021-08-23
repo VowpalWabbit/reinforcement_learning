@@ -73,6 +73,15 @@ Residing under `reward_functions`
 - ca_v2.fb: `./example_gen --kind ca --count 1 --seed -1`
 - f-reward_3obs_v2.fb: `./example_gen --kind f-reward --count 3 --seed -1 --random_reward`
 
+### client time utc test files
+
+Residing under `client_time`
+
+Note: these files were generated after setting `"time_provider.implementation"` to `"CLOCK_TIME_PROVIDER"` in the configuration of example_gen
+
+- cb_v2_client_time.fb: `./example_gen --kind cb --count 1 --seed -1`
+- f-reward_3obs_v2_client_time.fb: `./example_gen --kind f-reward --count 3 --seed -1 --random_reward`
+
 ### skip learn test files
 
 Residing under `skip_learn`
