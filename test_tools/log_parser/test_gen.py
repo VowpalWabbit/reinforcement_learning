@@ -16,8 +16,10 @@ class Env:
             with_pdrop.write_file_magic()
             with_pdrop.write_checkpoint_info()
             with_pdrop.write_regular_message([
-                data.CbEvent(id = 'id', context=ctx1, actions=[2,1], pass_prob=0.5),
-                data.OutcomeEvent(primary_id= 'id', value=1)])
+                data.JoinedEvent(
+                    event=data.CbEvent(id = 'id', context=ctx1, actions=[2,1], pass_prob=0.5)),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id= 'id', value=1))])
 
     def cb_pdrop_1(self):       
         ctx1 = """{"_multi":[{"a1":"f1"},{"a2":"f2"}]}"""
@@ -26,11 +28,15 @@ class Env:
             with_pdrop.write_file_magic()
             with_pdrop.write_checkpoint_info()
             with_pdrop.write_regular_message([
-                data.CbEvent(id = 'id1', context=ctx1, actions=[2,1], pass_prob=0),
-                data.OutcomeEvent(primary_id = 'id1', value=1)])
+                data.JoinedEvent(
+                    event=data.CbEvent(id = 'id1', context=ctx1, actions=[2,1], pass_prob=0)),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id = 'id1', value=1))])
             with_pdrop.write_regular_message([
-                data.CbEvent(id = 'id2', context=ctx2, actions=[2,1], pass_prob=1),
-                data.OutcomeEvent(primary_id = 'id2', value=1)])
+                data.JoinedEvent(
+                    event=data.CbEvent(id = 'id2', context=ctx2, actions=[2,1], pass_prob=1)),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id = 'id2', value=1))])
 
     def multistep_2_episodes(self):
         ctx = """{{"{0}": {{"f": 1}}, "_multi":[{{"a1":"f1"}},{{"a2":"f2"}}]}}"""
@@ -39,13 +45,19 @@ class Env:
             writer.write_file_magic()
             writer.write_checkpoint_info()
             writer.write_regular_message([
-                data.MultiStepEvent(episode_id='ep1', event_id='1', context=ctx.format('A')),
-                data.MultiStepEvent(episode_id='ep1', event_id='2', previous_id='1', context=ctx.format('B')),
-                data.OutcomeEvent(primary_id='ep1', secondary_id='1', value = 2)])
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep1', event_id='1', context=ctx.format('A'))),
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep1', event_id='2', previous_id='1', context=ctx.format('B'))),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id='ep1', secondary_id='1', value = 2))])
             writer.write_regular_message([
-                data.MultiStepEvent(episode_id='ep2', event_id='1', context=ctx.format('C')),
-                data.MultiStepEvent(episode_id='ep2', event_id='2', previous_id='1', context=ctx.format('D')),
-                data.OutcomeEvent(primary_id='ep2', value = 3)])
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep2', event_id='1', context=ctx.format('C'))),
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep2', event_id='2', previous_id='1', context=ctx.format('D'))),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id='ep2', value = 3))])
 
     def multistep_3_deferred_episodes(self):
         ctx = """{{"{0}": {{"f": 1}}, "_multi":[{{"a1":"f1"}},{{"a2":"f2"}}]}}"""
@@ -54,19 +66,30 @@ class Env:
             writer.write_file_magic()
             writer.write_checkpoint_info()
             writer.write_regular_message([
-                data.MultiStepEvent(episode_id='ep1', event_id='1', context=ctx.format('A'), deferred=True),
-                data.MultiStepEvent(episode_id='ep1', event_id='2', previous_id='1', context=ctx.format('B'), deferred=True),
-                data.OutcomeEvent(primary_id='ep1', secondary_id='1', value = 2),
-                data.OutcomeEvent(primary_id='ep1', secondary_id='1')])               
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep1', event_id='1', context=ctx.format('A'), deferred=True)),
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep1', event_id='2', previous_id='1', context=ctx.format('B'), deferred=True)),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id='ep1', secondary_id='1', value = 2)),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id='ep1', secondary_id='1'))])               
             writer.write_regular_message([
-                data.MultiStepEvent(episode_id='ep2', event_id='1', context=ctx.format('C'), deferred=True),
-                data.MultiStepEvent(episode_id='ep2', event_id='2', previous_id='1', context=ctx.format('D'), deferred=True),
-                data.OutcomeEvent(primary_id='ep2', value = 3),
-                data.OutcomeEvent(primary_id='ep2')])
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep2', event_id='1', context=ctx.format('C'), deferred=True)),
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep2', event_id='2', previous_id='1', context=ctx.format('D'), deferred=True)),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id='ep2', value = 3)),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id='ep2'))])
             writer.write_regular_message([
-                data.MultiStepEvent(episode_id='ep3', event_id='1', context=ctx.format('E'), deferred=True),
-                data.MultiStepEvent(episode_id='ep3', event_id='2', previous_id='1', context=ctx.format('F'), deferred=True),
-                data.OutcomeEvent(primary_id='ep3', value = 4)])
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep3', event_id='1', context=ctx.format('E'), deferred=True)),
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep3', event_id='2', previous_id='1', context=ctx.format('F'), deferred=True)),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id='ep3', value = 4))])
 
     def multistep_unordered_episodes(self):
         ctx = """{{"{0}": {{"f": 1}}, "_multi":[{{"a1":"f1"}},{{"a2":"f2"}}]}}"""
@@ -80,33 +103,55 @@ class Env:
             # 1(A) -> 2(B)
 
             msg = [
-                data.MultiStepEvent(episode_id='ep1', event_id='1', context=ctx.format('A')),
-                data.MultiStepEvent(episode_id='ep1', event_id='2', previous_id='1', context=ctx.format('B')),
-                data.OutcomeEvent(primary_id='ep1', secondary_id='1', value = 1),
-                data.OutcomeEvent(primary_id='ep1', secondary_id='2', value = 2)]
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep1', event_id='1', context=ctx.format('A'))),
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep1', event_id='2', previous_id='1', context=ctx.format('B'))),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id='ep1', secondary_id='1', value = 1)),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id='ep1', secondary_id='2', value = 2))]
 
             perm = Permutation([[0, 1], [2, 3]])
             writer.write_regular_message(perm(msg)) 
 
-            #    1(C)       4(F)
+            #    1(C)   <   4(F)
             #   /          /    \
-            #  2(D)       5(G)   6(H)
+            #  2(D)       5(G) < 6(H)
             #   \
             #    3(E)      
             # 
             msg = [
-                data.MultiStepEvent(episode_id='ep2', event_id='1', context=ctx.format('C'), client_time_utc=dt_before), 
-                data.MultiStepEvent(episode_id='ep2', event_id='2', previous_id='1', context=ctx.format('D'), client_time_utc=dt_after),
-                data.MultiStepEvent(episode_id='ep2', event_id='3', previous_id='2', context=ctx.format('E'), client_time_utc=dt_before),
-                data.MultiStepEvent(episode_id='ep2', event_id='4', context=ctx.format('F'), client_time_utc=dt_before),
-                data.MultiStepEvent(episode_id='ep2', event_id='5', previous_id='4', context=ctx.format('G'), client_time_utc=dt_before),
-                data.MultiStepEvent(episode_id='ep2', event_id='6', previous_id='4', context=ctx.format('H'), client_time_utc=dt_after),
-                data.OutcomeEvent(primary_id='ep2', secondary_id='1', value = 1),
-                data.OutcomeEvent(primary_id='ep2', secondary_id='2', value = 2),
-                data.OutcomeEvent(primary_id='ep2', secondary_id='3', value = 3),
-                data.OutcomeEvent(primary_id='ep2', secondary_id='4', value = 4),
-                data.OutcomeEvent(primary_id='ep2', secondary_id='5', value = 5),
-                data.OutcomeEvent(primary_id='ep2', secondary_id='6', value = 6)]
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep2', event_id='1', context=ctx.format('C')),
+                    timestamp=dt_before), 
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep2', event_id='2', previous_id='1', context=ctx.format('D')),
+                    timestamp=dt_after),
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep2', event_id='3', previous_id='2', context=ctx.format('E')),
+                    timestamp=dt_before),
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep2', event_id='4', context=ctx.format('F')),
+                    timestamp=dt_after),
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep2', event_id='5', previous_id='4', context=ctx.format('G')),
+                    timestamp=dt_before),
+                data.JoinedEvent(
+                    event=data.MultiStepEvent(episode_id='ep2', event_id='6', previous_id='4', context=ctx.format('H')),
+                    timestamp=dt_after),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id='ep2', secondary_id='1', value = 1)),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id='ep2', secondary_id='2', value = 2)),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id='ep2', secondary_id='3', value = 3)),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id='ep2', secondary_id='4', value = 4)),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id='ep2', secondary_id='5', value = 5)),
+                data.JoinedEvent(
+                    event=data.OutcomeEvent(primary_id='ep2', secondary_id='6', value = 6))]
             perm = Permutation([[0, 5], [1, 3], [2, 6, 7, 8, 9, 10, 11], [4]])
             writer.write_regular_message(perm(msg))  
                 

@@ -1,22 +1,25 @@
-from datetime import datetime
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Union
+
 import flatbuffers
 import numpy as np
 
+import reinforcement_learning.messages.flatbuff.v2.CbEvent as _CbEvent
+import reinforcement_learning.messages.flatbuff.v2.Event as _Event
+import reinforcement_learning.messages.flatbuff.v2.EventEncoding as _EventEncoding
+import reinforcement_learning.messages.flatbuff.v2.IndexValue as _IndexValue
+import reinforcement_learning.messages.flatbuff.v2.JoinedEvent as _JoinedEvent
 import reinforcement_learning.messages.flatbuff.v2.LearningModeType as _LearningModeType
 import reinforcement_learning.messages.flatbuff.v2.Metadata as _Metadata
-import reinforcement_learning.messages.flatbuff.v2.PayloadType as _PayloadType
-import reinforcement_learning.messages.flatbuff.v2.EventEncoding as _EventEncoding
-import reinforcement_learning.messages.flatbuff.v2.TimeStamp as _TimeStamp
-import reinforcement_learning.messages.flatbuff.v2.CbEvent as _CbEvent
 import reinforcement_learning.messages.flatbuff.v2.MultiStepEvent as _MultiStepEvent
-import reinforcement_learning.messages.flatbuff.v2.Event as _Event
-import reinforcement_learning.messages.flatbuff.v2.IndexValue as _IndexValue
-import reinforcement_learning.messages.flatbuff.v2.OutcomeValue as _OutcomeValue
-import reinforcement_learning.messages.flatbuff.v2.OutcomeEvent as _OutcomeEvent
-import reinforcement_learning.messages.flatbuff.v2.NumericOutcome as _NumericOutcome
 import reinforcement_learning.messages.flatbuff.v2.NumericIndex as _NumericIndex
+import reinforcement_learning.messages.flatbuff.v2.NumericOutcome as _NumericOutcome
+import reinforcement_learning.messages.flatbuff.v2.OutcomeEvent as _OutcomeEvent
+import reinforcement_learning.messages.flatbuff.v2.OutcomeValue as _OutcomeValue
+import reinforcement_learning.messages.flatbuff.v2.PayloadType as _PayloadType
+import reinforcement_learning.messages.flatbuff.v2.TimeStamp as _TimeStamp
+
 
 def EndVector(builder, size):
     from packaging import version
@@ -40,6 +43,16 @@ def mk_long_vector(builder, arr):
 def mk_float_vector(builder, arr):
     return builder.CreateNumpyVector(np.array(list(arr), dtype=np.float32))
 
+def mk_timestamp(builder, dt):
+    return _TimeStamp.CreateTimeStamp(builder,
+                dt.year,
+                dt.month,
+                dt.day,
+                dt.hour,
+                dt.minute,
+                dt.second,
+                int(dt.microsecond))
+
 @dataclass
 class Metadata:
     payload_type: _PayloadType.PayloadType
@@ -53,15 +66,7 @@ class Metadata:
 
         _Metadata.MetadataStart(builder)
         _Metadata.MetadataAddId(builder, id)
-        _Metadata.MetadataAddClientTimeUtc(builder,
-            _TimeStamp.CreateTimeStamp(builder,
-                self.client_time_utc.year,
-                self.client_time_utc.month,
-                self.client_time_utc.day,
-                self.client_time_utc.hour,
-                self.client_time_utc.minute,
-                self.client_time_utc.second,
-                int(self.client_time_utc.microsecond)))
+        _Metadata.MetadataAddClientTimeUtc(builder, mk_timestamp(builder, self.client_time_utc))
         _Metadata.MetadataAddPayloadType(builder, self.payload_type)
         _Metadata.MetadataAddEncoding(builder, self.encoding)
         _Metadata.MetadataAddPassProbability(builder=builder, passProbability = self.pass_prob)
@@ -287,4 +292,15 @@ class MultiStepEvent:
 
     def serialize(self):
         return serialize(self)
-  
+
+@dataclass
+class JoinedEvent:
+    event: Union[CbEvent, MultiStepEvent, OutcomeEvent] = None
+    timestamp: datetime = datetime(2021, 1, 1, 0, 0, 0) 
+
+    def to(self, builder):
+        payload_off = mk_bytes_vector(builder, self.event.serialize())
+        _JoinedEvent.JoinedEventStart(builder)
+        _JoinedEvent.JoinedEventAddEvent(builder, payload_off)
+        _JoinedEvent.JoinedEventAddTimestamp(builder, mk_timestamp(builder, self.timestamp))
+        return _JoinedEvent.JoinedEventEnd(builder)
