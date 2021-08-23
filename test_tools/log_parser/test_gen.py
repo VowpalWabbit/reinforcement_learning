@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from log_gen import *
+import data
 from pathlib import Path
 
 class Env:
@@ -13,7 +14,9 @@ class Env:
         with BinLogWriter(self.valid_joined_logs.joinpath('cb_joined_with_pdrop_05.fb')) as with_pdrop:
             with_pdrop.write_file_magic()
             with_pdrop.write_checkpoint_info()
-            with_pdrop.write_regular_message([mk_cb_payload(_ctx=ctx1, _actions=[2,1], _pdrop=0.5), mk_outcome()])
+            with_pdrop.write_regular_message([
+                data.CbEvent(id = 'id', context=ctx1, actions=[2,1], pass_prob=0.5),
+                data.OutcomeEvent(primary_id= 'id', value=1)])
 
     def cb_pdrop_1(self):       
         ctx1 = """{"_multi":[{"a1":"f1"},{"a2":"f2"}]}"""
@@ -21,8 +24,12 @@ class Env:
         with BinLogWriter(self.valid_joined_logs.joinpath('cb_joined_with_pdrop_1.fb')) as with_pdrop:
             with_pdrop.write_file_magic()
             with_pdrop.write_checkpoint_info()
-            with_pdrop.write_regular_message([mk_cb_payload(_ctx=ctx1, _actions=[2,1], _pdrop=1), mk_outcome()])
-            with_pdrop.write_regular_message([mk_cb_payload(_ctx=ctx2, _actions=[2,1], _pdrop=0), mk_outcome()])
+            with_pdrop.write_regular_message([
+                data.CbEvent(id = 'id1', context=ctx1, actions=[2,1], pass_prob=0),
+                data.OutcomeEvent(primary_id = 'id1', value=1)])
+            with_pdrop.write_regular_message([
+                data.CbEvent(id = 'id2', context=ctx2, actions=[2,1], pass_prob=1),
+                data.OutcomeEvent(primary_id = 'id2', value=1)])
 
     def multistep_2_episodes(self):
         ctx1_1 = """{"A": {"f": 1}, "_multi":[{"a1":"f1"},{"a2":"f2"}]}"""
@@ -33,13 +40,13 @@ class Env:
             writer.write_file_magic()
             writer.write_checkpoint_info()
             writer.write_regular_message([
-                mk_multistep_payload(_episode_id='ep1', _event_id='1', _ctx=ctx1_1),
-                mk_multistep_payload(_episode_id='ep1', _event_id='2', _previous_id='1', _ctx=ctx1_2),
-                mk_outcome(_primary_id='ep1', _secondary_id='1', _value = 2)])
+                data.MultiStepEvent(episode_id='ep1', event_id='1', context=ctx1_1),
+                data.MultiStepEvent(episode_id='ep1', event_id='2', previous_id='1', context=ctx1_2),
+                data.OutcomeEvent(primary_id='ep1', secondary_id='1', value = 2)])
             writer.write_regular_message([
-                mk_multistep_payload(_episode_id='ep2', _event_id='1', _ctx=ctx2_1),
-                mk_multistep_payload(_episode_id='ep2', _event_id='2', _previous_id='1', _ctx=ctx2_2),
-                mk_outcome(_primary_id='ep2', _value = 3)])
+                data.MultiStepEvent(episode_id='ep2', event_id='1', context=ctx2_1),
+                data.MultiStepEvent(episode_id='ep2', event_id='2', previous_id='1', context=ctx2_2),
+                data.OutcomeEvent(primary_id='ep2', value = 3)])
 
     def multistep_3_deferred_episodes(self):
         ctx1_1 = """{"A": {"f": 1}, "_multi":[{"a1":"f1"},{"a2":"f2"}]}"""
@@ -52,19 +59,19 @@ class Env:
             writer.write_file_magic()
             writer.write_checkpoint_info()
             writer.write_regular_message([
-                mk_multistep_payload(_episode_id='ep1', _event_id='1', _ctx=ctx1_1, _deferred=True),
-                mk_multistep_payload(_episode_id='ep1', _event_id='2', _previous_id='1', _ctx=ctx1_2, _deferred=True),
-                mk_outcome(_primary_id='ep1', _secondary_id='1', _value = 2),
-                mk_outcome(_primary_id='ep1', _secondary_id='1', _value = None)]),                
+                data.MultiStepEvent(episode_id='ep1', event_id='1', context=ctx1_1, deferred=True),
+                data.MultiStepEvent(episode_id='ep1', event_id='2', previous_id='1', context=ctx1_2, deferred=True),
+                data.OutcomeEvent(primary_id='ep1', secondary_id='1', value = 2),
+                data.OutcomeEvent(primary_id='ep1', secondary_id='1')]),                
             writer.write_regular_message([
-                mk_multistep_payload(_episode_id='ep2', _event_id='1', _ctx=ctx2_1, _deferred=True),
-                mk_multistep_payload(_episode_id='ep2', _event_id='2', _previous_id='1', _ctx=ctx2_2, _deferred=True),
-                mk_outcome(_primary_id='ep2', _value = 3),
-                mk_outcome(_primary_id='ep2', _value = None)]),  
+                data.MultiStepEvent(episode_id='ep2', event_id='1', context=ctx2_1, deferred=True),
+                data.MultiStepEvent(episode_id='ep2', event_id='2', previous_id='1', context=ctx2_2, deferred=True),
+                data.OutcomeEvent(primary_id='ep2', value = 3),
+                data.OutcomeEvent(primary_id='ep2')]),  
             writer.write_regular_message([
-                mk_multistep_payload(_episode_id='ep3', _event_id='1', _ctx=ctx3_1, _deferred=True),
-                mk_multistep_payload(_episode_id='ep3', _event_id='2', _previous_id='1', _ctx=ctx3_2, _deferred=True),
-                mk_outcome(_primary_id='ep3', _value = 4)])
+                data.MultiStepEvent(episode_id='ep3', event_id='1', context=ctx3_1, deferred=True),
+                data.MultiStepEvent(episode_id='ep3', event_id='2', previous_id='1', context=ctx3_2, deferred=True),
+                data.OutcomeEvent(primary_id='ep3', value = 4)])
                 
 
 def main():
