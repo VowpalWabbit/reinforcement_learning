@@ -805,6 +805,7 @@ BOOST_AUTO_TEST_CASE(multistep_unordered_episodes) {
     clear_examples(examples, vw);
     examples.push_back(&VW::get_unused_example(vw));
   }
-
+  
+  clear_examples(examples, vw);
   VW::finish(*vw);
 }
