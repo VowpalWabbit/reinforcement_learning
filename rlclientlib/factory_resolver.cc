@@ -141,6 +141,13 @@ namespace reinforcement_learning {
     time_provider_factory.register_type(value::CLOCK_TIME_PROVIDER, clock_time_provider_create);
 
     // Register File loggers
+    sender_factory.register_type(value::EPISODE_FILE_SENDER,
+      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status){
+      const char* file_name =  c.get(name::EPISODE_FILE_NAME,"episode.fb.data");
+      return file_sender_create(retval, c ,
+        file_name,
+        cb, trace_logger, status);
+    });
     sender_factory.register_type(value::OBSERVATION_FILE_SENDER,
       [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status){
       const char* file_name =  c.get(name::OBSERVATION_FILE_NAME,"observation.fb.data");

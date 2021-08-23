@@ -27,6 +27,8 @@ namespace reinforcement_learning {
     void update(const char* event_id, const char* previous_event_id, const char* context, const ranking_response& resp);
     std::string get_context(const char* previous_event_id, const char* context) const;
 
+    size_t size() const;
+
   private:
     int get_depth(const char* id) const;
 
@@ -46,12 +48,13 @@ namespace reinforcement_learning {
 
     const char* get_episode_id() const;
     const episode_history& get_history() const;
+    size_t size() const;
 
     int update(const char* event_id, const char* previous_event_id, const char* context, const ranking_response& response, api_status* error = nullptr);
 
   private:
     const std::string _episode_id;
-    
+
     episode_history _history;
   };
 

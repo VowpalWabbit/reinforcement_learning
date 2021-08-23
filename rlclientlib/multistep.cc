@@ -18,6 +18,10 @@ namespace reinforcement_learning {
     return (result == _depths.end()) ? 0 : result->second;
   }
 
+  size_t episode_history::size() const {
+    return _depths.size();
+  }
+
   episode_state::episode_state(const char* episode_id)
   : _episode_id(episode_id) {}
 
@@ -27,6 +31,10 @@ namespace reinforcement_learning {
 
   const episode_history& episode_state::get_history() const {
     return _history;
+  }
+
+  size_t episode_state::size() const {
+    return _history.size();
   }
 
   int episode_state::update(const char* event_id, const char* previous_event_id, const char* context, const ranking_response& response, api_status* status) {
