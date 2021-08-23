@@ -20,4 +20,5 @@ void build_cb_json(std::ofstream &outfile,
 void build_ccb_json(std::ofstream &outfile,
                    joined_event::joined_event &je);
 void build_ca_json(std::ofstream &outfile, joined_event::joined_event &je);
+void build_slates_json(std::ofstream &outfile, joined_event::joined_event &je);
 } // namespace log_converter

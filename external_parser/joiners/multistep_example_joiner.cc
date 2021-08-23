@@ -109,7 +109,7 @@ void multistep_example_joiner::set_reward_function(const v2::RewardFunctionType 
   default:
     break;
   }
-  
+
   if(reward_calculation) {
     _reward_calculation.set(reward_calculation, sticky);
   }
@@ -185,12 +185,6 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
       std::move(cb_data));
 }
 
-void try_set_label(const joined_event::joined_event &je, float reward,
-                                   v_array<example *> &examples) {
-  je.fill_in_label(examples);
-  je.set_cost(examples, reward);
-}
-
 bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
   _current_je_is_skip_learn = false;
 
@@ -229,8 +223,8 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
-  const auto reward = _reward_calculation(joined.outcome_events);
-  try_set_label(joined, reward, examples);
+  joined.calc_reward(_loop_info.default_reward, _reward_calculation.value());
+  joined.fill_in_label(examples);
 
   // add an empty example to signal end-of-multiline
   examples.push_back(&VW::get_unused_example(_vw));
