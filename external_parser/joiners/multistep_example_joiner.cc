@@ -35,7 +35,9 @@ multistep_example_joiner::~multistep_example_joiner() {
 bool multistep_example_joiner::process_event(const v2::JoinedEvent &joined_event) {
   auto event = flatbuffers::GetRoot<v2::Event>(joined_event.event()->data());
   const v2::Metadata& meta = *event->meta();
-  auto enqueued_time_utc = timestamp_to_chrono(*joined_event.timestamp());
+  auto enqueued_time_utc = get_enqueued_time(joined_event.timestamp(),
+                                               meta.client_time_utc(),
+                                               _loop_info.use_client_time);
   switch (meta.payload_type()) {
     case v2::PayloadType_MultiStep:
     {
@@ -73,6 +75,10 @@ void multistep_example_joiner::set_problem_type_config(v2::ProblemType problem_t
   _loop_info.problem_type_config.set(problem_type, sticky);
 }
 
+void multistep_example_joiner::set_use_client_time(bool use_client_time, bool sticky) {
+  _loop_info.use_client_time.set(use_client_time, sticky);
+}
+
 bool multistep_example_joiner::joiner_ready() {
   return _loop_info.is_configured() && _reward_calculation.is_valid();
 }
@@ -107,7 +113,7 @@ void multistep_example_joiner::set_reward_function(const v2::RewardFunctionType 
   default:
     break;
   }
-  
+
   if(reward_calculation) {
     _reward_calculation.set(reward_calculation, sticky);
   }
@@ -170,8 +176,7 @@ reward::outcome_event multistep_example_joiner::process_outcome(const multistep_
   const auto& metadata = event_meta.meta;
   const auto& event = event_meta.event;
   reward::outcome_event o_event;
-  o_event.metadata = {timestamp_to_chrono(*metadata.client_time_utc()),
-                      metadata.app_id() ? metadata.app_id()->str() : "",
+  o_event.metadata = {metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(),
                       metadata.pass_probability(),
                       metadata.encoding(),
@@ -191,9 +196,7 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
     v_array<example *> &examples) {
   const auto& metadata = event_meta.meta;
   const auto& event = event_meta.event;
-  metadata::event_metadata_info meta = {metadata.client_time_utc()
-                         ? timestamp_to_chrono(*metadata.client_time_utc())
-                         : TimePoint(),
+  metadata::event_metadata_info meta = {
                         metadata.app_id() ? metadata.app_id()->str() : "",
                         metadata.payload_type(),
                         metadata.pass_probability(),
@@ -229,12 +232,6 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
       TimePoint(event_meta.timestamp), std::move(meta), std::string(line_vec),
       std::string(event.model_id() ? event.model_id()->c_str() : "N/A"),
       std::move(cb_data));
-}
-
-void try_set_label(const joined_event::joined_event &je, float reward,
-                                   v_array<example *> &examples) {
-  je.fill_in_label(examples);
-  je.set_cost(examples, reward);
 }
 
 bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
@@ -277,8 +274,8 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
-  const auto reward = _reward_calculation(joined.outcome_events);
-  try_set_label(joined, reward, examples);
+  joined.calc_reward(_loop_info.default_reward, _reward_calculation.value());
+  joined.fill_in_label(examples);
 
   // add an empty example to signal end-of-multiline
   examples.push_back(&VW::get_unused_example(_vw));

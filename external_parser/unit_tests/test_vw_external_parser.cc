@@ -87,6 +87,64 @@ BOOST_AUTO_TEST_CASE(ccb_simple) {
   VW::finish(*vw);
 }
 
+BOOST_AUTO_TEST_CASE(slates_simple) {
+  std::string input_files = get_test_files_location();
+
+  auto buffer = read_file(input_files + "/valid_joined_logs/slates_simple.log");
+
+  auto vw = VW::initialize("--ccb_explore_adf --slates --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+
+  set_buffer_as_vw_input(buffer, vw);
+
+  bool read_payload = false;
+
+  while (vw->example_parser->reader(vw, examples) > 0) {
+    read_payload = true;
+
+    BOOST_CHECK_EQUAL(examples.size(), 9);
+    BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[0]->indices[0], 'G');
+    BOOST_CHECK_EQUAL(examples[1]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[1]->indices[0], 'T');
+    BOOST_CHECK_EQUAL(examples[2]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[2]->indices[0], 'T');
+    BOOST_CHECK_EQUAL(examples[3]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[3]->indices[0], 'T');
+    BOOST_CHECK_EQUAL(examples[4]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[4]->indices[0], 'T');
+    BOOST_CHECK_EQUAL(examples[5]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[5]->indices[0], 'T');
+    BOOST_CHECK_EQUAL(examples[6]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[6]->indices[0], 'S');
+    BOOST_CHECK_EQUAL(examples[7]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[7]->indices[0], 'S');
+    BOOST_CHECK_EQUAL(examples[8]->indices.size(), 0); // newline example
+
+    // learn/predict isn't called in the unit test but cleanup examples
+    // expects shared pred to be set
+    examples[0]->pred.decision_scores = {
+      v_init<ACTION_SCORE::action_score>(),
+      v_init<ACTION_SCORE::action_score>()
+    };
+    examples[0]->pred.decision_scores[0].push_back({0, 0.f});
+    examples[0]->pred.decision_scores[1].push_back({1, 0.f});
+
+    // simulate next call to parser->read by clearing up examples
+    // and preparing one unused example
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  BOOST_CHECK_EQUAL(read_payload, true);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
 BOOST_AUTO_TEST_CASE(cb_dedup_compressed) {
   std::string input_files = get_test_files_location();
 
@@ -638,7 +696,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes) {
         BOOST_CHECK_EQUAL(examples[1]->l.cb.weight, 1);
         BOOST_CHECK_EQUAL(examples[2]->l.cb.costs.size(), 0);
         BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 1);
-        break;         
+        break;
     }
 
     clear_examples(examples, vw);
@@ -713,11 +771,11 @@ BOOST_AUTO_TEST_CASE(multistep_3_deferred_episodes) {
 
       case 'E':
         seenE = true;
-        break;  
+        break;
 
       case 'F':
         seenF = true;
-        break;             
+        break;
     }
 
     clear_examples(examples, vw);

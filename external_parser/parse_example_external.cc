@@ -89,6 +89,9 @@ void apply_cli_overrides(std::unique_ptr<i_joiner>& joiner, vw *all, const input
     }
     joiner->set_problem_type_config(problem_type, true);
   }
+  if(all->options->was_supplied("use_client_time")) {
+    joiner->set_use_client_time(parsed_options.ext_opts->use_client_time, true);
+  }
   if(all->options->was_supplied("learning_mode")) {
     v2::LearningModeType learning_mode;
     if(!str_to_learning_mode(parsed_options.ext_opts->learning_mode, learning_mode)) {
@@ -167,6 +170,9 @@ void parser::set_parse_args(VW::config::option_group_definition &in_options,
     .add(
       VW::config::make_option("problem_type", parsed_options.ext_opts->problem_type)
         .help("Override the problem type trying to be solved, valid values: CB, CCB, SLATES, CA"))
+    .add(
+      VW::config::make_option("use_client_time", parsed_options.ext_opts->use_client_time)
+        .help("Override use_client_time to define whether client time or enqueued time will be used for reward calculation"))
     .add(
       VW::config::make_option("reward_function", parsed_options.ext_opts->reward_function)
         .help("Override the reward function to be used, valid values: earliest, average, median, sum, min, max"))

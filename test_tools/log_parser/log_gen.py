@@ -94,7 +94,7 @@ class BinLogWriter:
         builder.Finish(joined_payload_off)
         self._write_message(MSG_TYPE_REGULAR, builder.Output())
 
-    def write_checkpoint_info(self, reward_fun = RewardFunctionType.Earliest, default_reward = 0.0, learning_mode = LearningModeType.Online, problem_type = ProblemType.CB):
+    def write_checkpoint_info(self, reward_fun = RewardFunctionType.Earliest, default_reward = 0.0, learning_mode = LearningModeType.Online, problem_type = ProblemType.CB, use_client_time = False):
         builder = flatbuffers.Builder(0)
 
         CheckpointInfoStart(builder)
@@ -102,6 +102,7 @@ class BinLogWriter:
         CheckpointInfoAddDefaultReward(builder, default_reward)
         CheckpointInfoAddLearningModeConfig(builder, learning_mode)
         CheckpointInfoAddProblemTypeConfig(builder, problem_type)
+        CheckpointInfoAddUseClientTime(builder, use_client_time)
 
         checkpoint_info_off = CheckpointInfoEnd(builder)
         builder.Finish(checkpoint_info_off)

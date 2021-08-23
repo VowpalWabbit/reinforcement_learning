@@ -37,9 +37,10 @@ struct loop_info {
   sticky_value<float> default_reward = sticky_value<float>(0.f);
   sticky_value<v2::LearningModeType> learning_mode_config = sticky_value<v2::LearningModeType>(v2::LearningModeType_Online);
   sticky_value<v2::ProblemType> problem_type_config;
+  sticky_value<bool> use_client_time = sticky_value<bool>(false);
 
   bool is_configured() const {
-    return default_reward.is_valid()  && learning_mode_config.is_valid() && problem_type_config.is_valid();
+    return default_reward.is_valid()  && learning_mode_config.is_valid() && problem_type_config.is_valid() && use_client_time.is_valid();
   }//&& type.is_valid()
 };
 } // namespace loop
