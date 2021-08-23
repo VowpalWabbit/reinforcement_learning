@@ -370,16 +370,6 @@ struct ca_joined_event : public typed_joined_event {
     return true;
   }
 
-  bool should_calculate_reward(
-      const std::vector<reward::outcome_event> &outcome_events) {
-    return outcome_events.size() > 0 &&
-           std::any_of(outcome_events.begin(), outcome_events.end(),
-                       [](const reward::outcome_event &o) {
-                         return o.action_taken != true;
-                       });
-    return false;
-  }
-
   void calc_cost(float default_reward,
                  reward::RewardFunctionType reward_function,
                  const metadata::event_metadata_info &interaction_metadata,

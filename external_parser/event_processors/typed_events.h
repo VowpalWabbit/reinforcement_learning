@@ -96,12 +96,9 @@ template <> struct event_processor<v2::MultiSlotEvent> {
     } else {
       slates_data->multi_slot_interaction = multislot_data;
       return {TimePoint(enqueued_time_utc),
-            {metadata.client_time_utc()
-              ? timestamp_to_chrono(*metadata.client_time_utc())
-              : TimePoint(),
-              metadata.app_id() ? metadata.app_id()->str() : "",
-              metadata.payload_type(), metadata.pass_probability(),
-              metadata.encoding(), metadata.id()->str(), evt.learning_mode()},
+            {metadata.app_id() ? metadata.app_id()->str() : "",
+             metadata.payload_type(), metadata.pass_probability(),
+             metadata.encoding(), metadata.id()->str(), evt.learning_mode()},
             std::move(line_vec),
             std::string(evt.model_id() ? evt.model_id()->c_str() : "N/A"),
             std::move(slates_data)};
