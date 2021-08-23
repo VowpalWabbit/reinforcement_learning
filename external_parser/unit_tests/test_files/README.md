@@ -39,6 +39,10 @@ Residing under `valid_joined_logs`
   - Generate ca_v2.fb with 2 events first event has deferred_action equals to true: `./example_gen --kind ca --count 20 --deferred_action_count 10`
   - Generated regular f-reward_v2.fb: `./example_gen --kind f-reward --count 20`
   - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 4`. Then rename the merged.log file.
+- slates_simple.log:
+  - slates_v2.fb: `./example_gen --kind slates --seed -1`
+  - f-reward_v2.fb: `./example_gen --kind f-reward --seed -1`
+  - Run `python joiner.py --problem_type_config 3` on the above files (slates_v2.fb, f-reward_v2.fb) and renaming the resulting default `merged.log`
 
 ### invalid joined logs
 
@@ -68,6 +72,10 @@ Residing under `reward_functions`
 - fs-reward_v2.fb: `./example_gen --kind fs-reward --random_reward`
 - fmix-reward_v2.fb: `./example_gen --kind fmix-reward --random_reward`
 - fi-out-of-bound-reward_v2.fb: `./example_gen --kind fi-out-of-bound-reward`
+
+#### slates format
+- slates_v2.fb `./example_gen --kind slates`
+- fi-reward_v2.fb: `./example_gen --kind fi-reward --random_reward` (change num_of_rewards to 2)
 
 #### ca format
 - ca_v2.fb: `./example_gen --kind ca --count 1 --seed -1`
@@ -151,3 +159,17 @@ Residing under `skip_learn`
   - Generate ca_v2.fb with deferred action: `./example_gen --kind ca --deferred_action_count 1 --dedup`
   - Generate action-taken_v2.fb: `./example_gen --kind action-taken --dedup`
   - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 4`. Then rename the merged.log file.
+
+#### slates format
+- deferred_action_without_activation.fb:
+  - Generate slates_v2.fb with deferred action: `./example_gen --kind slates --deferred_action_count 1`
+  - Generate regular fi-reward_v2.fb: `./example_gen --kind fi-reward --random_reward`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 3`. Then rename the merged.log file.
+- deferred_action_with_activation.fb:
+  - Generate slates_v2.fb with deferred action: `./example_gen --kind slates --deferred_action_count 1`
+  - Generate action-taken_v2.fb: `./example_gen --kind action-taken`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 3`. Then rename the merged.log file.
+- mixed_deferred_action_events.fb:
+  - Generate slates_v2.fb with 2 events first event has deferred_action equals to true: `./example_gen --kind slates --count 2 --deferred_action_count 1`
+  - Generated regular fi-reward_v2.fb: `./example_gen --kind fi-reward --count 2`
+  - Run python joiner with files from previous two steps: `python joiner.py --problem_type_config 3`. Then rename the merged.log file.

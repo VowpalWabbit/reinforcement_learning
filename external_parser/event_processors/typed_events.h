@@ -45,7 +45,11 @@ template <> struct event_processor<v2::MultiSlotEvent> {
                        const v2::Metadata &metadata,
                        const TimePoint &enqueued_time_utc,
                        std::string &&line_vec) {
+    joined_event::MultiSlotInteraction multislot_data;
+    bool is_ccb = metadata.payload_type() == v2::PayloadType_CCB;
+
     auto ccb_data = VW::make_unique<joined_event::ccb_joined_event>();
+    auto slates_data = VW::make_unique<joined_event::slates_joined_event>();
 
     size_t slot_index = 0;
     for (auto *slot_event : *evt.slots()) {
@@ -53,7 +57,7 @@ template <> struct event_processor<v2::MultiSlotEvent> {
       data.eventId = slot_event->id() == nullptr ? metadata.id()->str()
                                                  : slot_event->id()->str();
 
-      if (slot_event->id() != nullptr) {
+      if (is_ccb && slot_event->id() != nullptr) {
         ccb_data->slot_id_to_index_map.insert(
             std::pair<std::string, int>(slot_event->id()->str(), slot_index));
       }
@@ -68,25 +72,37 @@ template <> struct event_processor<v2::MultiSlotEvent> {
         data.probabilities.emplace_back(prob);
       }
 
-      ccb_data->interaction_data.emplace_back(std::move(data));
+      multislot_data.interaction_data.emplace_back(std::move(data));
       slot_index++;
     }
 
-    ccb_data->baseline_actions.assign(
+    multislot_data.baseline_actions.assign(
       evt.baseline_actions()->begin(),
       evt.baseline_actions()->end()
     );
 
-    ccb_data->skip_learn = evt.deferred_action();
-    ccb_data->probability_of_drop = 1.f - metadata.pass_probability();
+    multislot_data.skip_learn = evt.deferred_action();
+    multislot_data.probability_of_drop = 1.f - metadata.pass_probability();
 
-    return {TimePoint(enqueued_time_utc),
+    if (is_ccb) {
+      ccb_data->multi_slot_interaction = multislot_data;
+      return {TimePoint(enqueued_time_utc),
             {metadata.app_id() ? metadata.app_id()->str() : "",
              metadata.payload_type(), metadata.pass_probability(),
              metadata.encoding(), metadata.id()->str(), evt.learning_mode()},
             std::move(line_vec),
             std::string(evt.model_id() ? evt.model_id()->c_str() : "N/A"),
             std::move(ccb_data)};
+    } else {
+      slates_data->multi_slot_interaction = multislot_data;
+      return {TimePoint(enqueued_time_utc),
+            {metadata.app_id() ? metadata.app_id()->str() : "",
+             metadata.payload_type(), metadata.pass_probability(),
+             metadata.encoding(), metadata.id()->str(), evt.learning_mode()},
+            std::move(line_vec),
+            std::string(evt.model_id() ? evt.model_id()->c_str() : "N/A"),
+            std::move(slates_data)};
+    }
   }
 };
 
