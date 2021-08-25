@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(log_converter_ca_format)
 BOOST_AUTO_TEST_CASE(ca_loop_simple) {
-  std::string infile_path = "valid_joined_logs/ca_loop_simple.log";
+  std::string infile_path = "valid_joined_logs/ca_loop_simple.fb";
   std::string outfile_path = "valid_joined_logs/ca_loop_simple.dsjson";
 
   std::string converted_json =
@@ -187,6 +187,20 @@ BOOST_AUTO_TEST_CASE(ca_loop_simple_e2e) {
       "\"action\":12.43958568572998},\"Timestamp\":\"2021-08-24T16:34:38."
       "000000Z\",\"Version\":\"1\",\"EventId\":\"e28a9ae6\",\"c\":{"
       "\"RobotJoint1\":{\"friction\":78}},\"VWState\":{\"m\":\"N/A\"}}\n";
+
+  BOOST_CHECK_EQUAL(converted_json, expected_json);
+}
+
+BOOST_AUTO_TEST_CASE(ca_loop_mixed_skip_learn) {
+  std::string infile_path = "valid_joined_logs/ca_loop_mixed_skip_learn.fb";
+  std::string outfile_path = "valid_joined_logs/ca_loop_mixed_skip_learn.dsjson";
+
+  std::string converted_json =
+      get_json_event(infile_path, outfile_path, v2::ProblemType_CA);
+  std::string expected_json =
+"{\"_label_ca\":{\"cost\":-1.5,\"pdf_value\":0.0005050505278632045,\"action\":1.014871597290039},\"Timestamp\":\"2021-08-25T15:36:54.000000Z\",\"Version\":\"1\",\"EventId\":\"91f71c8\",\"c\":{\"RobotJoint1\":{\"friction\":78}},\"VWState\":{\"m\":\"N/A\"},\"_skipLearn\":true}\n"
+"{\"_label_ca\":{\"cost\":-1.5,\"pdf_value\":0.4755050539970398,\"action\":12.464624404907227},\"Timestamp\":\"2021-08-25T15:36:54.000000Z\",\"Version\":\"1\",\"EventId\":\"75d50657\",\"c\":{\"RobotJoint1\":{\"friction\":78}},\"VWState\":{\"m\":\"N/A\"}}\n"
+"{\"_label_ca\":{\"cost\":-1.5,\"pdf_value\":0.4755050539970398,\"action\":12.43958568572998},\"Timestamp\":\"2021-08-25T15:36:54.000000Z\",\"Version\":\"1\",\"EventId\":\"e28a9ae6\",\"c\":{\"RobotJoint1\":{\"friction\":78}},\"VWState\":{\"m\":\"N/A\"}}\n";
 
   BOOST_CHECK_EQUAL(converted_json, expected_json);
 }

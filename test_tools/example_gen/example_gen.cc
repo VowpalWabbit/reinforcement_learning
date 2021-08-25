@@ -250,7 +250,7 @@ void send_ccb_outcome(std::mt19937& rng, bool gen_random_reward, const char * ev
       }
 }
 
-int take_action(r::live_model& rl, const char *event_id, int action, unsigned int action_flag, bool gen_random_reward, std::mt19937& rng) {
+int take_action(r::live_model& rl, const char *event_id, int action, unsigned int action_flag, bool gen_random_reward, std::mt19937& rng, bool no_loop_actions) {
   r::api_status status;
   float reward = gen_random_reward ? get_random_number(rng) : 1.5f;
 
@@ -422,7 +422,7 @@ int take_action(r::live_model& rl, const char *event_id, int action, unsigned in
             std::cout << status.get_error_msg() << std::endl;
       }
 
-      if (action_flag == r::action_flags::DEFERRED)
+      if (action_flag == r::action_flags::DEFERRED && !no_loop_actions)
       {
         size_t rand_num = get_random_number(rng, 0 /*min*/);
         if (rand_num % 2)
@@ -525,7 +525,7 @@ int pseudo_random(int seed) {
   return (int)(val & 0xFFFFFFFF);
 }
 
-int run_config(int action, int count, int initial_seed, bool gen_random_reward, bool enable_apprentice_mode, int deferred_action_count, std::string config_file, std::mt19937& rng, float epsilon = 0.0f) {
+int run_config(int action, int count, int initial_seed, bool gen_random_reward, bool enable_apprentice_mode, int deferred_action_count, std::string config_file, std::mt19937& rng, bool no_loop_actions, float epsilon = 0.0f) {
   u::configuration config;
 
   if (config_file.empty())
@@ -558,7 +558,7 @@ int run_config(int action, int count, int initial_seed, bool gen_random_reward, 
     auto action_flag = i < deferred_action_count
       ? r::action_flags::DEFERRED : r::action_flags::DEFAULT;
 
-    int r = take_action(rl, event_id, action, action_flag, gen_random_reward, rng);
+    int r = take_action(rl, event_id, action, action_flag, gen_random_reward, rng, no_loop_actions);
     if(r)
       return r;
   }
@@ -577,6 +577,7 @@ int main(int argc, char *argv[]) {
   bool enable_apprentice_mode = false;
   int deferred_action_count = 0;
   float epsilon = 0.f;
+  bool no_loop_actions = false;
 
   desc.add_options()
     ("help", "Produce help message")
@@ -589,7 +590,8 @@ int main(int argc, char *argv[]) {
     ("random_reward", "Generate random float reward for observation event")
     ("config_file", po::value<std::string>(), "json config file for rlclinetlib")
     ("apprentice", "Enable apprentice mode")
-    ("deferred_action_count",  po::value<int>(), "Number of deferred action for interaction events. Set the deferred_action flag to true for first deferred_action_count number of actions");
+    ("deferred_action_count",  po::value<int>(), "Number of deferred action for interaction events. Set the deferred_action flag to true for first deferred_action_count number of actions")
+    ("no_loop_actions", "Flag to disable actions being taken for all outcome events");
 
   po::positional_options_description pd;
   pd.add("kind", 1);
@@ -602,6 +604,7 @@ int main(int argc, char *argv[]) {
     gen_random_reward = vm.count("random_reward");
     enable_apprentice_mode = vm.count("apprentice");
     enable_dedup = vm.count("dedup");
+    no_loop_actions = vm.count("no_loop_actions");
 
     std::vector<std::string> deferrable_interactions {
       "cb", "invalid-cb", "ccb", "ccb-baseline", "slates", "ca", "cb-loop", "ca-loop", 
@@ -644,7 +647,7 @@ int main(int argc, char *argv[]) {
 
   if(gen_all) {
     for(int i = 0; options[i]; ++i) {
-      if(run_config(i, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file, rng, epsilon))
+      if(run_config(i, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file, rng, no_loop_actions, epsilon))
         return -1;
     }
     return 0;
@@ -664,5 +667,5 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  return run_config(action, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file, rng, epsilon);
+  return run_config(action, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file, rng, no_loop_actions, epsilon);
 }
