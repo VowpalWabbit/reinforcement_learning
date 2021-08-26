@@ -9,6 +9,10 @@
 
 #include <limits.h>
 #include <time.h>
+#include <map>
+#include <stack>
+#include <queue>
+#include <tuple>
 
 // VW headers
 #include "example.h"
@@ -115,12 +119,63 @@ void multistep_example_joiner::set_reward_function(const v2::RewardFunctionType 
   }
 }
 
-void multistep_example_joiner::populate_order() {
-  //TODO: topological sort
-  for (const auto it: _interactions) {
-    _order.push(it.first);
+/*
+take forest of tuples <id, secondary> as input.
+Edges are defined using optional previous_id parameter.
+get return list of ids ordered topologically with respect to <previous_id, id> edges and 
+according to comp_t comparison for vertices that are not connected
+*/
+template<typename id_t, typename secondary_t, typename comp_t = std::greater<std::tuple<secondary_t, id_t>>>
+class topo_sorter {
+public:
+  using elem_t = std::tuple<secondary_t, id_t>;
+  using layer_t = std::priority_queue<elem_t, std::vector<elem_t>, comp_t>;
+
+private:
+  std::map<id_t, layer_t> next;
+  layer_t roots;
+
+public:
+  void push(const id_t& id, const secondary_t& secondary) {
+    roots.push(std::make_tuple(secondary, id));
   }
+
+  void push(const id_t& id, const secondary_t& secondary, const id_t& previous_id) {
+    next[previous_id].push(std::make_tuple(secondary, id));
+  }
+
+  void get(std::queue<id_t>& result) {
+    std::stack<layer_t*> states;
+    states.emplace(&roots);
+    while (!states.empty()) {
+      auto& top = *(states.top());
+      if (!top.empty()) {
+        const auto& cur = top.top();
+        const auto& cur_id = std::get<1>(cur); 
+        result.push(cur_id);
+        states.push(&next[cur_id]);
+        top.pop();
+      }
+      else {
+        states.pop();
+      }
+    }
+  } 
+};
+
+bool multistep_example_joiner::populate_order() {
+  topo_sorter<std::string, TimePoint> sorter;
+  for (const auto& it: _interactions) {
+    const auto& parsed = it.second[0];
+    if (parsed.event.previous_id() == nullptr) {
+      sorter.push(it.first, parsed.timestamp);
+    } else {
+      sorter.push(it.first, parsed.timestamp, parsed.event.previous_id()->str());
+    }
+  }
+  sorter.get(_order);
   _sorted = true;
+  return true;
 }
 
 reward::outcome_event multistep_example_joiner::process_outcome(const multistep_example_joiner::Parsed<v2::OutcomeEvent> &event_meta) {
@@ -189,13 +244,15 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
   _current_je_is_skip_learn = false;
 
   if (!_sorted) {
-    populate_order();
+    if (!populate_order()) {
+      return false;
+    }
   }
   const auto& id = _order.front();
 
   const auto& interactions = _interactions[id];
   if (interactions.size() != 1) {
-    return -1;
+    return false;
   }
   const auto& interaction = interactions[0];
   auto joined = process_interaction(interaction, examples);
