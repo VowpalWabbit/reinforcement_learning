@@ -376,7 +376,7 @@ bool example_joiner::process_dedup(const v2::Event &event,
     return false;
   }
 
-  auto examples = v_init<example *>();
+  v_array<example *> examples;
 
   for (size_t i = 0; i < dedup->ids()->size(); i++) {
     auto dedup_id = dedup->ids()->Get(i);
@@ -472,6 +472,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
                 std::move(je->joined_event_timestamp);
           }
         }
+        _joiner_metrics.sum_cost_original = -1. * je->get_sum_original_reward();
       }
 
       if (_binary_to_json) {
@@ -537,6 +538,8 @@ void example_joiner::persist_metrics() {
   if (_vw->example_parser->metrics) {
     _vw->example_parser->metrics->NumberOfSkippedEvents =
         _joiner_metrics.number_of_skipped_events;
+
+    _vw->example_parser->metrics->DsjsonSumCostOriginal = _joiner_metrics.sum_cost_original;
 
     if (!_joiner_metrics.first_event_id.empty()) {
       _vw->example_parser->metrics->FirstEventId =

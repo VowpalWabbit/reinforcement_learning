@@ -29,6 +29,7 @@ struct typed_joined_event {
                     std::vector<reward::outcome_event> &outcome_events) = 0;
 
   virtual void calculate_metrics(dsjson_metrics*) {}
+  virtual float get_sum_original_reward() const = 0;
 };
 
 struct cb_joined_event : public typed_joined_event {
@@ -115,6 +116,10 @@ struct cb_joined_event : public typed_joined_event {
     if (metrics && interaction_data.actions.size() == 0) {
       metrics->NumberOfEventsZeroActions++;
     }
+  }
+
+  float get_sum_original_reward() const override {
+    return original_reward;
   }
 };
 
@@ -245,6 +250,14 @@ struct ccb_joined_event : public typed_joined_event {
       rewards.assign(original_rewards.begin(), original_rewards.end());
     }
   }
+
+  float get_sum_original_reward() const override {
+    float ret = 0.f;
+    for(auto reward : original_rewards) {
+      ret += reward;
+    }
+    return ret;
+  }
 };
 
 struct slates_joined_event : public typed_joined_event {
@@ -313,6 +326,10 @@ struct slates_joined_event : public typed_joined_event {
     } else {
       reward = original_reward;
     }
+  }
+
+  float get_sum_original_reward() const override {
+    return original_reward;
   }
 }; // slates_joined_event
 
@@ -391,6 +408,10 @@ struct ca_joined_event : public typed_joined_event {
       metrics->NumberOfEventsZeroActions++;
     }
   }
+
+  float get_sum_original_reward() const override {
+    return original_reward;
+  }
 };
 
 struct joined_event {
@@ -445,6 +466,10 @@ struct joined_event {
   void calc_reward(float default_reward, reward::RewardFunctionType reward_function)
   {
     typed_data->calc_cost(default_reward, reward_function, interaction_metadata, outcome_events);
+  }
+
+  float get_sum_original_reward() const {
+    return typed_data->get_sum_original_reward();
   }
 };
 } // namespace joined_event

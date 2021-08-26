@@ -25,7 +25,7 @@ void should_not_add_examples(std::string &infile,
   auto vw = VW::initialize(command + " -d " + infile_name,
                            nullptr, false, nullptr, nullptr);
 
-  v_array<example *> examples = v_init<example*>();
+  v_array<example *> examples;
   examples.push_back(&VW::get_unused_example(vw));
 
   while (vw->example_parser->reader(vw, examples) > 0) {
@@ -63,7 +63,7 @@ void should_add_examples(std::string &infile,
   auto vw = VW::initialize(command + " -d " + infile_name,
                            nullptr, false, nullptr, nullptr);
 
-  v_array<example *> examples = v_init<example*>();
+  v_array<example *> examples;
   examples.push_back(&VW::get_unused_example(vw));
 
   while (vw->example_parser->reader(vw, examples) > 0) {
@@ -84,7 +84,7 @@ void should_add_examples(std::string &infile,
     case v2::ProblemType_CCB:
       // learn/predict isn't called in the unit test but cleanup examples expects
       // shared pred to be set
-      examples[0]->pred.decision_scores = {v_init<ACTION_SCORE::action_score>()};
+      examples[0]->pred.decision_scores.resize(1);
       examples[0]->pred.decision_scores[0].push_back({0, 0.f});
 
       // shared, two actions, two slots and one empty (end of multiline)
@@ -113,10 +113,7 @@ void should_add_examples(std::string &infile,
     case v2::ProblemType_SLATES:
       // learn/predict isn't called in the unit test but cleanup examples
       // expects shared pred to be set
-      examples[0]->pred.decision_scores = {
-        v_init<ACTION_SCORE::action_score>(),
-        v_init<ACTION_SCORE::action_score>()
-      };
+      examples[0]->pred.decision_scores.resize(2);
       examples[0]->pred.decision_scores[0].push_back({0, 0.f});
       examples[0]->pred.decision_scores[1].push_back({1, 0.f});
 
