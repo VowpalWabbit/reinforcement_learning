@@ -119,6 +119,12 @@ void multistep_example_joiner::set_reward_function(const v2::RewardFunctionType 
   }
 }
 
+/*
+take forest of tuples <id, secondary> as input.
+Edges are defined using optional previous_id parameter.
+get return list of ids ordered topologically with respect to <previous_id, id> edges and 
+according to comp_t comparison for vertices that are not connected
+*/
 template<typename id_t, typename secondary_t, typename comp_t = std::greater<std::tuple<secondary_t, id_t>>>
 class topo_sorter {
 public:
