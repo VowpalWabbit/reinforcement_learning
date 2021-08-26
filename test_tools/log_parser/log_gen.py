@@ -78,16 +78,12 @@ class BinLogWriter:
         builder.Finish(header_off)
         self._write_message(MSG_TYPE_HEADER, builder.Output())
 
-    def write_regular_message(self, events):
+    def write_regular_message(self, joined_events):
         builder = flatbuffers.Builder(0)
 
         evt_offsets = []
-        for evt in events:
-            payload_off = mk_bytes_vector(builder, evt.serialize())
-            JoinedEventStart(builder)
-            JoinedEventAddEvent(builder, payload_off)
-            JoinedEventAddTimestamp(builder, mk_timestamp(builder))
-            evt_offsets.append(JoinedEventEnd(builder))
+        for evt in joined_events:
+            evt_offsets.append(evt.to(builder))
 
         evt_array_offset = mk_offsets_vector(builder, evt_offsets, JoinedPayloadStartEventsVector)
 

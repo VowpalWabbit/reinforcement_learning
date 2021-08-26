@@ -54,7 +54,7 @@ private:
   };
 
 private:
-  void populate_order();
+  bool populate_order();
   reward::outcome_event
   process_outcome(const Parsed<v2::OutcomeEvent> &event_meta);
   joined_event::joined_event
