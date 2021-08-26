@@ -159,7 +159,7 @@ public:
 
 bool multistep_example_joiner::populate_order() {
   topo_sorter<std::string, TimePoint> sorter;
-  for (const auto it: _interactions) {
+  for (const auto& it: _interactions) {
     const auto& parsed = it.second[0];
     if (parsed.event.previous_id() == nullptr) {
       sorter.push(it.first, parsed.timestamp);
