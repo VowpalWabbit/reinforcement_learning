@@ -794,7 +794,6 @@ BOOST_AUTO_TEST_CASE(multistep_3_deferred_episodes) {
 }
 
 BOOST_AUTO_TEST_CASE(multistep_unordered_episodes) {
-  // order within episode is not guaranteed. TODO: fix strict ordering
   std::string input_files = get_test_files_location();
 
   auto buffer =
