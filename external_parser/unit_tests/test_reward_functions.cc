@@ -95,14 +95,7 @@ std::vector<float> get_float_rewards(
       }
     } break;
     case v2::ProblemType_SLATES: {
-      // learn/predict isn't called in the unit test but cleanup examples
-      // expects shared pred to be set
-      examples[0]->pred.decision_scores = {
-        v_init<ACTION_SCORE::action_score>(),
-        v_init<ACTION_SCORE::action_score>()
-      };
-      examples[0]->pred.decision_scores[0].push_back({0, 0.f});
-      examples[0]->pred.decision_scores[1].push_back({1, 0.f});
+      set_slates_label(examples);
 
       for (auto *example : examples) {
         if (example->l.slates.type == VW::slates::example_type::shared) {
