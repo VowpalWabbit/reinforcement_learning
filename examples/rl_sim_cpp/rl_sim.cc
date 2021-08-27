@@ -101,14 +101,14 @@ int rl_sim::multistep_loop() {
       const auto action_features = get_action_features();
       const auto context_json = create_context_json(context_features, action_features);
       const auto req_id = create_event_id();
-      
+
       r::ranking_response response1;
       if (_rl->request_episodic_decision(req_id.c_str(), i == 0 ? nullptr : previous_id.c_str(),
         context_json.c_str(), response, episode, &status) != err::success) {
         std::cout << status.get_error_msg() << std::endl;
         return -1;
       }
-      
+
       size_t chosen_action;
       if (response.get_chosen_action_id(chosen_action) != err::success) {
         std::cout << status.get_error_msg() << std::endl;
@@ -396,15 +396,15 @@ bool rl_sim::init_sim_world() {
 
 bool rl_sim::init_continuous_sim_world() {
   // initialize continuous actions robot joints
-  
+
   _friction = {25.4, 41.2, 66.5, 81.9, 104.4};
-  
+
   // temperature (C) range: 20.f to 45.f
   // angular velocity range: 0.f to 200.f
   // load range: -60.f to 60.f
 
   // first joint j1
-  joint::friction_prob fb = 
+  joint::friction_prob fb =
   {
     { _friction[0], 0.08f },
     { _friction[1], 0.03f },
@@ -416,7 +416,7 @@ bool rl_sim::init_continuous_sim_world() {
   _robot_joints.emplace_back("j1", 20.3, 102.4, -10.2, fb);
 
   // second joint j2
-  fb = 
+  fb =
   {
     { _friction[0],0.08f },
     { _friction[1],0.30f },

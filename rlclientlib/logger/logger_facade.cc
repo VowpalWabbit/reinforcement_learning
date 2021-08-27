@@ -118,7 +118,6 @@ namespace reinforcement_learning {
     }
 
     int multi_slot_model_type_to_payload_type(model_type_t model_type, generic_event::payload_type_t& payload_type, api_status* status)
-
     {
       //XXX out params must be always initialized. This is an ok default
       payload_type = generic_event::payload_type_t::PayloadType_Slates;
@@ -211,7 +210,6 @@ namespace reinforcement_learning {
         default: return protocol_not_supported(status);
       }
     }
-
 
     int observation_logger_facade::log(const char* primary_id, int secondary_id, float outcome, api_status* status) {
       switch (_version) {

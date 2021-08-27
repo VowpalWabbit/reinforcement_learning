@@ -46,7 +46,6 @@ namespace reinforcement_learning {
     const auto eh_host = cfg.get(name::EPISODE_EH_HOST, "localhost:8080");
     const auto eh_name = cfg.get(name::EPISODE_EH_NAME, "episode");
     const auto eh_url = build_eh_url(eh_host, eh_name);
-    puts(eh_url.c_str());
     i_http_client* client;
     RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
     *retval = new eventhub_client(

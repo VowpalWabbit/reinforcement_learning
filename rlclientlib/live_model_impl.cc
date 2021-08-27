@@ -475,7 +475,6 @@ namespace reinforcement_learning {
 
     // TODO: Use a specific episode message type (for now it is the same with the observation logger, using observation_logger_facade).
     if (_configuration.get(name::EPISODE_EH_HOST, nullptr) != nullptr) {
-      std::cout << _configuration << std::endl;
       // Get the name of raw data (as opposed to message) sender for episodes.
       const auto* const episode_sender_impl = _configuration.get(name::EPISODE_SENDER_IMPLEMENTATION, value::get_default_episode_sender());
       i_sender* episode_sender;
