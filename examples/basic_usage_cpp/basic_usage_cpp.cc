@@ -301,14 +301,14 @@ int basic_usage_multistep() {
   }
 
   {
-    if (rl.report_outcome(episode1.get_episode_id(), "event1", 1.0f, &status)) {
+    if (rl.report_outcome(episode1.get_episode_id(), "event1", 1.0f, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;
       return -1;
     }
   }
 
   {
-    if (rl.report_outcome(episode2.get_episode_id(), "event2", 1.0f, &status)) {
+    if (rl.report_outcome(episode2.get_episode_id(), "event2", 1.0f, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;
       return -1;
     }
