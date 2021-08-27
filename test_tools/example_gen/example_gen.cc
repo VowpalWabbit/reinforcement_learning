@@ -41,6 +41,7 @@ static const char *options[] = {
   "cb-loop",
   "ccb-loop",
   "ccb-baseline-loop",
+  "slates-loop",
   nullptr
 };
 
@@ -64,7 +65,8 @@ enum options{
   ACTION_TAKEN,
   CB_LOOP,
   CCB_LOOP,
-  CCB_BASELINE_ACTION_LOOP
+  CCB_BASELINE_ACTION_LOOP,
+  SLATES_LOOP
 };
 
 void load_config_from_json(int action, u::configuration& config, bool enable_apprentice_mode, float epsilon = 0.0f)
@@ -112,7 +114,7 @@ void load_config_from_json(int action, u::configuration& config, bool enable_app
   if(action == CCB_ACTION || action == CCB_BASELINE_ACTION || action == CCB_WITH_SLOT_ID_ACTION || action == CCB_LOOP || action == CCB_BASELINE_ACTION_LOOP) {
     std::string args = "--ccb_explore_adf --json --quiet --epsilon " + std::to_string(epsilon) + " --first_only --id N/A";
     config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, args.c_str());
-  } else if (action == SLATES_ACTION) {
+  } else if (action == SLATES_ACTION || action == SLATES_LOOP) {
     std::string args = "--slates --ccb_explore_adf --json --quiet --epsilon " + std::to_string(epsilon) + " --first_only --id N/A";
     config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, args.c_str());
   }
@@ -478,6 +480,36 @@ int take_action(r::live_model& rl, const char *event_id, int action, unsigned in
 
       break;
     };
+    case SLATES_LOOP: { // "slates action and random number of float rewards"
+      std::cout << "request multi-slot decision with baseline for event: " << event_id << std::endl;
+      r::multi_slot_response response;
+      if(rl.request_multi_slot_decision(event_id, JSON_SLATES_CONTEXT, action_flag, response, &status) != err::success) {
+        std::cout << status.get_error_msg() << std::endl;
+      }
+
+      size_t num_of_rewards = get_random_number(rng);
+      for (size_t i = 0; i < num_of_rewards; i++) {
+        float reward = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
+        std::cout << "report outcome: " << reward << " for event: " << event_id << std::endl;
+        if( rl.report_outcome(event_id, reward, &status) != err::success ) {
+          std::cout << status.get_error_msg() << std::endl;
+        }
+      }
+
+      if (action_flag == r::action_flags::DEFERRED) {
+        size_t rand_num = get_random_number(rng, 0 /*min*/);
+        if (rand_num % 2)
+        {
+          // send activation
+          std::cout << "sending activation for event_id: " << event_id << std::endl;
+          if (rl.report_action_taken(event_id, &status) != err::success ) {
+            std::cout << status.get_error_msg() << std::endl;
+          }
+        }
+      }
+
+      break;
+    };
 
     default:
       std::cout << "Invalid action " << action << std::endl;
@@ -555,7 +587,7 @@ int main(int argc, char *argv[]) {
     ("count", po::value<int>(), "Number of events to produce")
     ("seed", po::value<int>(), "Initial seed used to produce event ids")
     ("epsilon", po::value<float>(), "epsilon to be used in command line args for VW")
-    ("kind", po::value<std::string>(), "which kind of example to generate (cb,invalid-cb,ccb,ccb-with-slot-id,ccb-baseline,slates,ca,cb-loop,ccb-loop,ccb-baseline-loop,(f|s)(s|i|mix|i-out-of-bound)?-reward,action-taken)")
+    ("kind", po::value<std::string>(), "which kind of example to generate (cb,invalid-cb,ccb,ccb-with-slot-id,ccb-baseline,slates,ca,cb-loop,ccb-loop,ccb-baseline-loop,slates-loop,(f|s)(s|i|mix|i-out-of-bound)?-reward,action-taken)")
     ("random_reward", "Generate random float reward for observation event")
     ("config_file", po::value<std::string>(), "json config file for rlclinetlib")
     ("apprentice", "Enable apprentice mode")
@@ -575,7 +607,7 @@ int main(int argc, char *argv[]) {
 
     std::vector<std::string> deferrable_interactions {
       "cb", "invalid-cb", "ccb", "ccb-baseline", "slates", "ca", "cb-loop",
-      "ccb-with-slot-id", "ccb-loop", "ccb-baseline-loop"
+      "ccb-with-slot-id", "ccb-loop", "ccb-baseline-loop", "slates-loop"
     };
 
     if(vm.count("kind") > 0)
