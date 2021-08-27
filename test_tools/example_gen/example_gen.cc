@@ -252,7 +252,7 @@ void send_ccb_outcome(std::mt19937& rng, bool gen_random_reward, const char * ev
 
 int take_action(r::live_model &rl, const char *event_id, int action,
                 unsigned int action_flag, bool gen_random_reward,
-                std::mt19937 &rng, float activation_ratio) {
+                std::mt19937 &rng) {
   r::api_status status;
   float reward = gen_random_reward ? get_random_number(rng) : 1.5f;
 
@@ -398,8 +398,8 @@ int take_action(r::live_model &rl, const char *event_id, int action,
 
       if (action_flag == r::action_flags::DEFERRED)
       {
-        float rand_float = rand()/float(RAND_MAX);
-        if (rand_float < activation_ratio)
+        size_t rand_num = get_random_number(rng, 0 /*min*/);
+        if (rand_num % 2)
         {
           // send activation
           std::cout << "sending activation for event_id: " << event_id << std::endl;
@@ -426,8 +426,8 @@ int take_action(r::live_model &rl, const char *event_id, int action,
       }
 
       if (action_flag == r::action_flags::DEFERRED) {
-        float rand_float = rand()/float(RAND_MAX);
-        if (rand_float < activation_ratio)
+        size_t rand_num = get_random_number(rng, 0 /*min*/);
+        if (rand_num % 2)
         {
           // send activation
           std::cout << "sending activation for event_id: " << event_id
@@ -462,8 +462,8 @@ int take_action(r::live_model &rl, const char *event_id, int action,
 
       if (action_flag == r::action_flags::DEFERRED)
       {
-        float rand_float = rand()/float(RAND_MAX);
-        if (rand_float < activation_ratio)
+        size_t rand_num = get_random_number(rng, 0 /*min*/);
+        if (rand_num % 2)
         {
           // send activation
           std::cout << "sending activation for event_id: " << event_id << std::endl;
@@ -498,8 +498,8 @@ int take_action(r::live_model &rl, const char *event_id, int action,
 
       if (action_flag == r::action_flags::DEFERRED)
       {
-        float rand_float = rand()/float(RAND_MAX);
-        if (rand_float < activation_ratio)
+        size_t rand_num = get_random_number(rng, 0 /*min*/);
+        if (rand_num % 2)
         {
           // send activation
           std::cout << "sending activation for event_id: " << event_id << std::endl;
@@ -560,8 +560,7 @@ int pseudo_random(int seed) {
 
 int run_config(int action, int count, int initial_seed, bool gen_random_reward,
                bool enable_apprentice_mode, int deferred_action_count,
-               std::string config_file, std::mt19937 &rng, float activation_ratio,
-               float epsilon = 0.0f) {
+               std::string config_file, std::mt19937 &rng, float epsilon = 0.0f) {
   u::configuration config;
 
   if (config_file.empty())
@@ -595,7 +594,7 @@ int run_config(int action, int count, int initial_seed, bool gen_random_reward,
       ? r::action_flags::DEFERRED : r::action_flags::DEFAULT;
 
     int r = take_action(rl, event_id, action, action_flag, gen_random_reward,
-                        rng, activation_ratio);
+                        rng);
     if(r)
       return r;
   }
@@ -614,7 +613,6 @@ int main(int argc, char *argv[]) {
   bool enable_apprentice_mode = false;
   int deferred_action_count = 0;
   float epsilon = 0.f;
-  float activation_ratio = 0.5f;
 
   desc.add_options()
     ("help", "Produce help message")
@@ -627,8 +625,7 @@ int main(int argc, char *argv[]) {
     ("random_reward", "Generate random float reward for observation event")
     ("config_file", po::value<std::string>(), "json config file for rlclinetlib")
     ("apprentice", "Enable apprentice mode")
-    ("deferred_action_count",  po::value<int>(), "Number of deferred action for interaction events. Set the deferred_action flag to true for first deferred_action_count number of actions")
-    ("activation_ratio", po::value<float>(), "Percent of observations to activate in loop generators");
+    ("deferred_action_count",  po::value<int>(), "Number of deferred action for interaction events. Set the deferred_action flag to true for first deferred_action_count number of actions");
 
   po::positional_options_description pd;
   pd.add("kind", 1);
@@ -659,8 +656,6 @@ int main(int argc, char *argv[]) {
       config_file = vm["config_file"].as<std::string>();
     if(vm.count("deferred_action_count") > 0)
       deferred_action_count = vm["deferred_action_count"].as<int>();
-    if(vm.count("activation_ratio") > 0)
-      activation_ratio = vm["activation_ratio"].as<float>();
 
     if(vm.count("deferred_action_count") > 0 && !std::any_of(
       deferrable_interactions.begin(),
@@ -686,8 +681,7 @@ int main(int argc, char *argv[]) {
   if(gen_all) {
     for(int i = 0; options[i]; ++i) {
       if (run_config(i, count, seed, gen_random_reward, enable_apprentice_mode,
-                     deferred_action_count, config_file, rng, activation_ratio,
-                     epsilon))
+                     deferred_action_count, config_file, rng, epsilon))
         return -1;
     }
     return 0;
@@ -709,5 +703,5 @@ int main(int argc, char *argv[]) {
 
   return run_config(action, count, seed, gen_random_reward,
                     enable_apprentice_mode, deferred_action_count, config_file,
-                    rng, activation_ratio, epsilon);
+                    rng, epsilon);
 }
