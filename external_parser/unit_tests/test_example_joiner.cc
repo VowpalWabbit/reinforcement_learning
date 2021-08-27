@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cbb) {
   joiner.process_joined(examples);
   // learn/predict isn't called in the unit test but cleanup examples expects
   // shared pred to be set
-  examples[0]->pred.decision_scores = {v_init<ACTION_SCORE::action_score>()};
+  examples[0]->pred.decision_scores.resize(1);
   examples[0]->pred.decision_scores[0].push_back({0, 0.f});
 
   // shared, two actions, two slots and one empty (end of multiline)

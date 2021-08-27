@@ -404,7 +404,7 @@ BOOST_AUTO_TEST_CASE(cb_apprentice_mode) {
     if (joined_events_count == event_without_baseline) {
       // non-baseline action, find the label and check that cost is -0.0 (i.e.
       // -1*default_reward)
-      v_array<CB::cb_class> costs;
+      std::vector<CB::cb_class> costs;
       for (auto *ex : examples) {
         if (ex->l.cb.costs.size() > 0 &&
             ex->l.cb.costs[0].probability != -1.f /*shared example*/) {
@@ -575,7 +575,7 @@ BOOST_AUTO_TEST_CASE(ccb_apprentice_mode) {
     }
     // learn/predict isn't called in the unit test but cleanup examples expects
     // shared pred to be set
-    examples[0]->pred.decision_scores = {v_init<ACTION_SCORE::action_score>()};
+    examples[0]->pred.decision_scores.resize(1);
     examples[0]->pred.decision_scores[0].push_back({0, 0.f});
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
