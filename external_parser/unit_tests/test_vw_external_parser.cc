@@ -124,15 +124,7 @@ BOOST_AUTO_TEST_CASE(slates_simple) {
     BOOST_CHECK_EQUAL(examples[7]->indices[0], 'S');
     BOOST_CHECK_EQUAL(examples[8]->indices.size(), 0); // newline example
 
-    // learn/predict isn't called in the unit test but cleanup examples
-    // expects shared pred to be set
-    examples[0]->pred.decision_scores = {
-      v_init<ACTION_SCORE::action_score>(),
-      v_init<ACTION_SCORE::action_score>()
-    };
-    examples[0]->pred.decision_scores[0].push_back({0, 0.f});
-    examples[0]->pred.decision_scores[1].push_back({1, 0.f});
-
+    set_slates_label(examples);
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
     clear_examples(examples, vw);
@@ -247,7 +239,7 @@ BOOST_AUTO_TEST_CASE(ccb_compare_dsjson_with_fb_models) {
   generate_dsjson_and_fb_models(model_name, "--ccb_explore_adf ", file_name);
 
   // read the models and compare
-  auto buffer_fb_model = read_file(model_name + ".fb");
+  auto bufffb_model = read_file(model_name + ".fb");
   auto buffer_dsjson_model = read_file(model_name + ".json");
 
   BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
@@ -288,6 +280,85 @@ BOOST_AUTO_TEST_CASE(ca_compare_dsjson_with_fb_models_mixed_skip_learn) {
       model_name,
       "--cats 4 --min_value 1 --max_value 100 --bandwidth 1 --id N/A ",
       file_name);
+  
+  // read the models and compare
+  auto buffer_fb_model = read_file(model_name + ".fb");
+  auto buffer_dsjson_model = read_file(model_name + ".json");
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
+                                buffer_dsjson_model.begin(),
+                                buffer_dsjson_model.end());
+}
+
+BOOST_AUTO_TEST_CASE(slates_compare_dsjson_with_fb_models) {
+  std::string input_files = get_test_files_location();
+
+  std::string model_name = input_files + "/test_outputs/slates_m_average";
+
+  std::string file_name =
+      input_files + "/valid_joined_logs/slates_average_reward_100_interactions";
+
+  generate_dsjson_and_fb_models(model_name, "--ccb_explore_adf --slates ", file_name);
+
+  // read the models and compare
+  auto buffer_fb_model = read_file(model_name + ".fb");
+  auto buffer_dsjson_model = read_file(model_name + ".json");
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
+                                buffer_dsjson_model.begin(),
+                                buffer_dsjson_model.end());
+}
+
+BOOST_AUTO_TEST_CASE(slates_skip_learn_w_activations) {
+  std::string input_files = get_test_files_location();
+
+  // this datafile contains 10 joined events with the 5 first interactions being
+  // deferred actions but 2 of those 5 have activations reported (event_id's:
+  // [e28a9ae6,bbf5c404])
+
+  auto buffer = read_file(
+      input_files + "/valid_joined_logs/"
+                    "slates_deferred_actions_w_activations_10.fb");
+
+  auto vw = VW::initialize("--ccb_explore_adf --slates --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+
+  set_buffer_as_vw_input(buffer, vw);
+
+  size_t joined_events_count = 0;
+  while (vw->example_parser->reader(vw, examples) > 0) {
+    joined_events_count++;
+
+    set_slates_label(examples);
+    // simulate next call to parser->read by clearing up examples
+    // and preparing one unused example
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  // this file contains 10 joined events 5 deferred but 2 of those activated
+  BOOST_CHECK_EQUAL(joined_events_count, 7);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
+BOOST_AUTO_TEST_CASE(
+    slates_compare_dsjson_with_fb_models_deferred_actions_w_activations) {
+  std::string input_files = get_test_files_location();
+
+  std::string model_name =
+      input_files +
+      "/test_outputs/slates_deferred_actions_w_activations";
+
+  std::string file_name =
+      input_files +
+      "/valid_joined_logs/slates_deferred_actions_w_activations_10";
+
+  generate_dsjson_and_fb_models(model_name, "--ccb_explore_adf --slates ", file_name);
 
   // read the models and compare
   auto buffer_fb_model = read_file(model_name + ".fb");
