@@ -111,12 +111,6 @@ void should_add_examples(std::string &infile,
       BOOST_CHECK_EQUAL(examples[0]->feature_space[(int)'R'].sum_feat_sq, 78*78);
       break;
     case v2::ProblemType_SLATES:
-      // learn/predict isn't called in the unit test but cleanup examples
-      // expects shared pred to be set
-      examples[0]->pred.decision_scores.resize(2);
-      examples[0]->pred.decision_scores[0].push_back({0, 0.f});
-      examples[0]->pred.decision_scores[1].push_back({1, 0.f});
-
       BOOST_CHECK_EQUAL(examples.size(), 9);
       BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
       BOOST_CHECK_EQUAL(examples[0]->indices[0], 'G');
@@ -135,6 +129,8 @@ void should_add_examples(std::string &infile,
       BOOST_CHECK_EQUAL(examples[7]->indices.size(), 1);
       BOOST_CHECK_EQUAL(examples[7]->indices[0], 'S');
       BOOST_CHECK_EQUAL(examples[8]->indices.size(), 0); // newline example
+
+      set_slates_label(examples); // set the shared pred label for clear example
       break;
   }
 
