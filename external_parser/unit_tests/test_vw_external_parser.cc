@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE(ccb_compare_dsjson_with_fb_models) {
   generate_dsjson_and_fb_models(model_name, "--ccb_explore_adf ", file_name);
 
   // read the models and compare
-  auto bufffb_model = read_file(model_name + ".fb");
+  auto buffer_fb_model = read_file(model_name + ".fb");
   auto buffer_dsjson_model = read_file(model_name + ".json");
 
   BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
