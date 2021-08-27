@@ -460,6 +460,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
         if (!je->is_joined_event_learnable()) {
           _joiner_metrics.number_of_skipped_events++;
         } else {
+          _joiner_metrics.sum_cost_original += -1. * je->get_sum_original_reward();
           if (_joiner_metrics.first_event_id.empty()) {
             _joiner_metrics.first_event_id =
                 std::move(je->interaction_metadata.event_id);
@@ -472,7 +473,6 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
                 std::move(je->joined_event_timestamp);
           }
         }
-        _joiner_metrics.sum_cost_original += -1. * je->get_sum_original_reward();
       }
 
       if (_binary_to_json) {
