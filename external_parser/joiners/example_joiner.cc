@@ -472,7 +472,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
                 std::move(je->joined_event_timestamp);
           }
         }
-        _joiner_metrics.sum_cost_original = -1. * je->get_sum_original_reward();
+        _joiner_metrics.sum_cost_original += -1. * je->get_sum_original_reward();
       }
 
       if (_binary_to_json) {
