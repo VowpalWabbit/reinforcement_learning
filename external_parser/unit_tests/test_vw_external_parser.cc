@@ -247,6 +247,49 @@ BOOST_AUTO_TEST_CASE(ccb_compare_dsjson_with_fb_models) {
                                 buffer_dsjson_model.end());
 }
 
+BOOST_AUTO_TEST_CASE(ca_compare_dsjson_with_fb_models_simple) {
+  std::string input_files = get_test_files_location();
+
+  std::string model_name = input_files + "/test_outputs/m_average";
+
+  std::string file_name = input_files + "/valid_joined_logs/ca_loop_simple";
+
+  generate_dsjson_and_fb_models(
+      model_name,
+      "--cats 4 --min_value 1 --max_value 100 --bandwidth 1 --id N/A ",
+      file_name);
+
+  // read the models and compare
+  auto buffer_fb_model = read_file(model_name + ".fb");
+  auto buffer_dsjson_model = read_file(model_name + ".json");
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
+                                buffer_dsjson_model.begin(),
+                                buffer_dsjson_model.end());
+}
+
+BOOST_AUTO_TEST_CASE(ca_compare_dsjson_with_fb_models_mixed_skip_learn) {
+  std::string input_files = get_test_files_location();
+
+  std::string model_name = input_files + "/test_outputs/m_average";
+
+  std::string file_name =
+      input_files + "/valid_joined_logs/ca_loop_mixed_skip_learn";
+
+  generate_dsjson_and_fb_models(
+      model_name,
+      "--cats 4 --min_value 1 --max_value 100 --bandwidth 1 --id N/A ",
+      file_name);
+  
+  // read the models and compare
+  auto buffer_fb_model = read_file(model_name + ".fb");
+  auto buffer_dsjson_model = read_file(model_name + ".json");
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
+                                buffer_dsjson_model.begin(),
+                                buffer_dsjson_model.end());
+}
+
 BOOST_AUTO_TEST_CASE(slates_compare_dsjson_with_fb_models) {
   std::string input_files = get_test_files_location();
 
