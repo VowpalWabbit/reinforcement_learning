@@ -21,12 +21,7 @@ namespace reinforcement_learning {  namespace name {
       const char *const EPISODE_EH_KEY      = "episode.eventhub.key";
       const char *const EPISODE_EH_TASKS_LIMIT = "episode.eventhub.tasks_limit";
       const char *const EPISODE_EH_MAX_HTTP_RETRIES = "episode.eventhub.max_http_retries";
-      // const char *const EPISODE_SEND_HIGH_WATER_MARK     = "episode.send.highwatermark";
-      // const char *const EPISODE_SEND_QUEUE_MAX_CAPACITY_KB    = "episode.send.queue.maxcapacity.kb";
-      // const char *const EPISODE_SEND_BATCH_INTERVAL_MS   = "episode.send.batchintervalms";
       const char *const EPISODE_SENDER_IMPLEMENTATION    = "episode.sender.implementation";
-      // const char *const EPISODE_USE_COMPRESSION = "episode.send.use_compression";
-      // const char *const EPISODE_QUEUE_MODE = "episode.queue.mode";
 
       // Interaction
       const char *const  INTERACTION_EH_HOST     = "interaction.eventhub.host";
