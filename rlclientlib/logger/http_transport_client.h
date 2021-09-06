@@ -22,36 +22,36 @@ namespace reinforcement_learning {
   class http_transport_client : public i_sender {
   public:
     virtual int init(api_status* status) override;
-
+    
     // Takes the ownership of the i_http_client and delete it at the end of lifetime
     http_transport_client(i_http_client* client, size_t tasks_count, size_t MAX_RETRIES, i_trace* trace, error_callback_fn* _error_cb,
                           i_authorization* authorization);
    ~http_transport_client();
-    protected:
-      int v_send(const buffer& data, api_status* status) override;
+  protected:
+    int v_send(const buffer& data, api_status* status) override;
 
-    private:
-      class http_request_task {
-      public:
-        using buffer = std::shared_ptr< utility::data_buffer>;
-        http_request_task() = default;
-        http_request_task(
-          i_http_client* client,
-          http_headers headers,
-          const buffer& data,
-          size_t max_retries = 1, // If MAX_RETRIES is set to 1, only the initial request will be attempted.
-          error_callback_fn* error_callback = nullptr,
-          i_trace* trace = nullptr);
+  private:
+    class http_request_task {
+    public:
+      using buffer = std::shared_ptr< utility::data_buffer>;
+      http_request_task() = default;
+      http_request_task(
+        i_http_client* client,
+        http_headers headers,
+        const buffer& data,
+        size_t max_retries = 1, // If MAX_RETRIES is set to 1, only the initial request will be attempted.
+        error_callback_fn* error_callback = nullptr,
+        i_trace* trace = nullptr);
 
-          // The constructor kicks off an async request which captures the this variable. If this object is moved then the
-          // this pointer is invalidated and causes tricky bugs.
-          http_request_task(http_request_task&& other) = delete;
-          http_request_task& operator=(http_request_task&& other) = delete;
-          http_request_task(const http_request_task&) = delete;
-          http_request_task& operator=(const http_request_task&) = delete;
+        // The constructor kicks off an async request which captures the this variable. If this object is moved then the
+        // this pointer is invalidated and causes tricky bugs.
+        http_request_task(http_request_task&& other) = delete;
+        http_request_task& operator=(http_request_task&& other) = delete;
+        http_request_task(const http_request_task&) = delete;
+        http_request_task& operator=(const http_request_task&) = delete;
 
-          // Return error_code
-          int join();
+        // Return error_code
+        int join();
     private:
       pplx::task<web::http::status_code> send_request(size_t try_count);
 
