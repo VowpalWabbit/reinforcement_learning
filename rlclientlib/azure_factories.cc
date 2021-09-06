@@ -4,8 +4,10 @@
 #include "constants.h"
 #include "model_mgmt/restapi_data_transport.h"
 #include "logger/event_logger.h"
-#include "logger/eventhub_client.h"
+#include "logger/http_transport_client.h"
 #include "utility/http_helper.h"
+#include "utility/authorization.h"
+#include "utility/apim_http_authorization.h"
 
 namespace reinforcement_learning {
   namespace m = model_management;
@@ -15,11 +17,15 @@ namespace reinforcement_learning {
   int observation_sender_create(i_sender** retval, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status);
   int interaction_sender_create(i_sender** retval, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status);
   int decision_sender_create(i_sender** retval, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status);
-
+  int observation_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status);
+  int interaction_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status);
+ 
   void register_azure_factories() {
     data_transport_factory.register_type(value::AZURE_STORAGE_BLOB, restapi_data_transport_create);
     sender_factory.register_type(value::OBSERVATION_EH_SENDER, observation_sender_create);
     sender_factory.register_type(value::INTERACTION_EH_SENDER, interaction_sender_create);
+	sender_factory.register_type(value::OBSERVATION_API_SENDER, observation_api_sender_create);
+	sender_factory.register_type(value::INTERACTION_API_SENDER, interaction_api_sender_create);	
   }
 
   int restapi_data_transport_create(m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status) {
@@ -40,22 +46,71 @@ namespace reinforcement_learning {
     return url;
   }
 
+  int observation_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status) {
+    const auto api_host = cfg.get(name::OBSERVATION_API_HOST, "localhost:8080");
+    const auto api_key = cfg.get(name::API_KEY, "dummykey");
+
+    std::string url;
+    url.append(api_host);
+
+    i_http_client* client;
+    i_authorization* authorization;
+    RETURN_IF_FAIL(create_http_client(url.c_str(), cfg, &client, status));
+
+    *retval = new http_transport_client(
+      client,
+      cfg.get_int(name::OBSERVATION_APIM_TASKS_LIMIT, 16),
+      cfg.get_int(name::OBSERVATION_APIM_MAX_HTTP_RETRIES, 4),
+      trace_logger,
+      error_cb,
+      authorization);
+
+    return error_code::success;
+  }
+
+  int interaction_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status) {	  
+    const auto api_host = cfg.get(name::INTERACTION_API_HOST, "localhost:8080");
+    const auto api_key = cfg.get(name::API_KEY, "dummykey");
+
+    std::string url;
+    url.append(api_host);
+
+    i_http_client* client;
+    i_authorization* authorization = new apim_http_authorization(api_key);
+    RETURN_IF_FAIL(create_http_client(url.c_str(), cfg, &client, status));
+
+    *retval = new http_transport_client(
+      client,
+      cfg.get_int(name::INTERACTION_APIM_TASKS_LIMIT, 16),
+      cfg.get_int(name::INTERACTION_APIM_MAX_HTTP_RETRIES, 4),
+      trace_logger,
+      error_cb,
+      authorization);
+
+    return error_code::success;
+  }
+
   int observation_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status) {
     const auto eh_host = cfg.get(name::OBSERVATION_EH_HOST, "localhost:8080");
     const auto eh_name = cfg.get(name::OBSERVATION_EH_NAME, "observation");
     const auto eh_url = build_eh_url(eh_host, eh_name);
     i_http_client* client;
-    RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
-    *retval = new eventhub_client(
-      client,
+    i_authorization* authorization = new http_authorization(
       eh_host,
       cfg.get(name::OBSERVATION_EH_KEY_NAME, ""),
       cfg.get(name::OBSERVATION_EH_KEY, ""),
       eh_name,
+      trace_logger);
+
+    RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
+    *retval = new http_transport_client(
+      client,
       cfg.get_int(name::OBSERVATION_EH_TASKS_LIMIT, 16),
       cfg.get_int(name::OBSERVATION_EH_MAX_HTTP_RETRIES, 4),
       trace_logger,
-      error_cb);
+      error_cb,
+      authorization);
+
     return error_code::success;
   }
 
@@ -64,17 +119,22 @@ namespace reinforcement_learning {
     const auto eh_name = cfg.get(name::INTERACTION_EH_NAME, "interaction");
     const auto eh_url = build_eh_url(eh_host, eh_name);
     i_http_client* client;
-    RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
-    *retval = new eventhub_client(
-      client,
-      cfg.get(name::INTERACTION_EH_HOST, "localhost:8080"),
+    i_authorization* authorization = new http_authorization(
+      eh_host,
       cfg.get(name::INTERACTION_EH_KEY_NAME, ""),
       cfg.get(name::INTERACTION_EH_KEY, ""),
-      cfg.get(name::INTERACTION_EH_NAME, "interaction"),
+      eh_name,
+      trace_logger);
+
+    RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
+    *retval = new http_transport_client(
+      client,
       cfg.get_int(name::INTERACTION_EH_TASKS_LIMIT, 16),
       cfg.get_int(name::INTERACTION_EH_MAX_HTTP_RETRIES, 4),
       trace_logger,
-      error_cb);
+      error_cb,
+      authorization);
+
     return error_code::success;
   }
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "api_status.h"
+#include "authorization.h"
 
 #include <chrono>
 #include <mutex>
@@ -11,17 +12,18 @@ namespace reinforcement_learning {
 
   // The eventhub_client send string data in POST requests to an HTTP endpoint.
   // It handles authorization headers specific for the Azure event hubs.
-  class http_authorization {
+  class eventhub_http_authorization : public i_authorization {
   public:
-    http_authorization(const std::string& host, const std::string& key_name,
+    eventhub_http_authorization(const std::string& host, const std::string& key_name,
       const std::string& key, const std::string& name, i_trace* trace);
-    ~http_authorization() = default;
+    ~eventhub_http_authorization() = default;
     
-    int init(api_status* status);
-    int get(std::string& authorization, api_status* status);
+    virtual int init(api_status* status) override;
+    virtual int get_http_headers(http_headers& headers, api_status* status) override;
 
   private:
     int check_authorization_validity_generate_if_needed(api_status* status);
+    int get(std::string& authorization, api_status* status);
 
     static int generate_authorization_string(
       std::chrono::seconds now,
@@ -35,10 +37,10 @@ namespace reinforcement_learning {
       i_trace* trace);
 
     // cannot be copied or assigned
-    http_authorization(const http_authorization&) = delete;
-    http_authorization(http_authorization&&) = delete;
-    http_authorization& operator=(const http_authorization&) = delete;
-    http_authorization& operator=(http_authorization&&) = delete;
+    eventhub_http_authorization(const eventhub_http_authorization&) = delete;
+    eventhub_http_authorization(eventhub_http_authorization&&) = delete;
+    eventhub_http_authorization& operator=(const eventhub_http_authorization&) = delete;
+    eventhub_http_authorization& operator=(eventhub_http_authorization&&) = delete;
 
   private:
     const std::string _eventhub_host; //e.g. "ingest-x2bw4dlnkv63q.servicebus.windows.net"
