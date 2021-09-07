@@ -201,7 +201,7 @@
     <ClCompile Include="watchdog_test.cc" />
   </ItemGroup>
   <ItemGroup Condition="'$(SkipAzureFactories)' != 'true'">
-    <ClCompile Include="eventhub_client_test.cc" />
+    <ClCompile Include="http_transport_client_test.cc" />
     <ClCompile Include="mock_http_client.cc" />
     <ClCompile Include="http_client_test.cc" />
   </ItemGroup>
