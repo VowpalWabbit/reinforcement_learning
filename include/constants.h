@@ -48,7 +48,7 @@ namespace reinforcement_learning {  namespace name {
       const char *const  OBSERVATION_QUEUE_MODE = "observation.queue.mode";
       const char *const  OBSERVATION_API_HOST = "observation.api.host";
       const char *const  OBSERVATION_APIM_TASKS_LIMIT = "observation.apim.tasks_limit";
-	  const char *const  OBSERVATION_APIM_MAX_HTTP_RETRIES = "observation.apim.max_http_retries";
+      const char *const  OBSERVATION_APIM_MAX_HTTP_RETRIES = "observation.apim.max_http_retries";
 
 
       //global sender properties

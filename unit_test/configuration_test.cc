@@ -96,7 +96,6 @@ BOOST_AUTO_TEST_CASE(configuration_parse_eventhub_connection_string) {
 }
 
 BOOST_AUTO_TEST_CASE(configuration_parse_interaction_observation_config) {
-/**/
   const auto json = R"({
     "api.key": "api_key",
     "interaction.api.host": "http://localhost:8080",

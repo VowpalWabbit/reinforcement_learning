@@ -13,7 +13,7 @@ using namespace std::chrono;
 using namespace utility; // Common utilities like string conversions
 
 namespace reinforcement_learning {
-	eventhub_http_authorization::eventhub_http_authorization(
+    eventhub_http_authorization::eventhub_http_authorization(
     const std::string& host,
     const std::string& key_name,
     const std::string& key,
