@@ -47,6 +47,7 @@ namespace reinforcement_learning {
     return url;
   }
 
+  // Creates i_sender object for sending observations data to the apim endpoint.
   int observation_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status) {
     const auto api_host = cfg.get(name::OBSERVATION_API_HOST, "localhost:8080");
     const auto api_key = cfg.get(name::API_KEY, "dummykey");
@@ -69,6 +70,7 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
+  // Creates i_sender object for sending interactions data to the apim endpoint.
   int interaction_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status) {	  
     const auto api_host = cfg.get(name::INTERACTION_API_HOST, "localhost:8080");
     const auto api_key = cfg.get(name::API_KEY, "dummykey");
@@ -91,6 +93,7 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
+  // Creates i_sender object for sending observations data to the event hub.
   int observation_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status) {
     const auto eh_host = cfg.get(name::OBSERVATION_EH_HOST, "localhost:8080");
     const auto eh_name = cfg.get(name::OBSERVATION_EH_NAME, "observation");
@@ -116,6 +119,7 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
+  // Creates i_sender object for sending interactions data to the event hub.
   int interaction_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status) {
     const auto eh_host = cfg.get(name::INTERACTION_EH_HOST, "localhost:8080");
     const auto eh_name = cfg.get(name::INTERACTION_EH_NAME, "interaction");

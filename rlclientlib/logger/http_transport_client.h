@@ -17,8 +17,7 @@ namespace reinforcement_learning {
   class i_trace;
   class i_authorization;
 
-  // The eventhub_client send string data in POST requests to an HTTP endpoint.
-  // It handles authorization headers specific for the Azure event hubs.
+  // The http_transport_client sends string data in POST requests to an HTTP endpoint using the passed in authorization headers.
   class http_transport_client : public i_sender {
   public:
     virtual int init(api_status* status) override;
