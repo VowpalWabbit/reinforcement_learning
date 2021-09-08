@@ -47,22 +47,19 @@ namespace reinforcement_learning {
     return url;
   }
 
-  // Creates i_sender object for sending observations data to the apim endpoint.
-  int observation_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status) {
-    const auto api_host = cfg.get(name::OBSERVATION_API_HOST, "localhost:8080");
-    const auto api_key = cfg.get(name::API_KEY, "dummykey");
-
+  int create_apim_http_api_sender(i_sender** retval, const u::configuration& cfg, const char* api_host, int tasks_limit, int max_http_retries, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
+  {
     std::string url;
     url.append(api_host);
 
     i_http_client* client;
     RETURN_IF_FAIL(create_http_client(url.c_str(), cfg, &client, status));
 
-    i_authorization* authorization = new apim_http_authorization(api_key);
+    i_authorization* authorization = new apim_http_authorization(cfg.get(name::API_KEY, "dummykey"));
     *retval = new http_transport_client(
       client,
-      cfg.get_int(name::OBSERVATION_APIM_TASKS_LIMIT, 16),
-      cfg.get_int(name::OBSERVATION_APIM_MAX_HTTP_RETRIES, 4),
+      tasks_limit,
+      max_http_retries,
       trace_logger,
       error_cb,
       authorization);
@@ -70,27 +67,18 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
+  // Creates i_sender object for sending observations data to the apim endpoint.
+  int observation_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status) {
+    const auto api_host = cfg.get(name::OBSERVATION_API_HOST, "localhost:8080");
+
+    return create_apim_http_api_sender(retval, cfg, api_host, cfg.get_int(name::OBSERVATION_APIM_TASKS_LIMIT, 16), cfg.get_int(name::OBSERVATION_APIM_MAX_HTTP_RETRIES, 4), error_cb, trace_logger, status);
+  }
+
   // Creates i_sender object for sending interactions data to the apim endpoint.
-  int interaction_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status) {	  
+  int interaction_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status) {
     const auto api_host = cfg.get(name::INTERACTION_API_HOST, "localhost:8080");
-    const auto api_key = cfg.get(name::API_KEY, "dummykey");
 
-    std::string url;
-    url.append(api_host);
-
-    i_http_client* client;
-    RETURN_IF_FAIL(create_http_client(url.c_str(), cfg, &client, status));
-
-    i_authorization* authorization = new apim_http_authorization(api_key);
-    *retval = new http_transport_client(
-      client,
-      cfg.get_int(name::INTERACTION_APIM_TASKS_LIMIT, 16),
-      cfg.get_int(name::INTERACTION_APIM_MAX_HTTP_RETRIES, 4),
-      trace_logger,
-      error_cb,
-      authorization);
-
-    return error_code::success;
+    return create_apim_http_api_sender(retval, cfg, api_host, cfg.get_int(name::INTERACTION_APIM_TASKS_LIMIT, 16), cfg.get_int(name::INTERACTION_APIM_MAX_HTTP_RETRIES, 4), error_cb, trace_logger, status);
   }
 
   // Creates i_sender object for sending observations data to the event hub.

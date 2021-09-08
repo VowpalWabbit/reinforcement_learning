@@ -23,7 +23,7 @@ namespace reinforcement_learning {
 
   private:
     int check_authorization_validity_generate_if_needed(api_status* status);
-    int get(std::string& authorization, api_status* status);
+    int get_authorization_token(std::string& authorization, api_status* status);
 
     static int generate_authorization_string(
       std::chrono::seconds now,
