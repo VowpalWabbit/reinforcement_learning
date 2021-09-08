@@ -100,7 +100,7 @@ namespace reinforcement_learning {
     const auto eh_url = build_eh_url(eh_host, eh_name);
 
     i_http_client* client;
-	RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
+    RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
 
     i_authorization* authorization = new eventhub_http_authorization(
       eh_host,

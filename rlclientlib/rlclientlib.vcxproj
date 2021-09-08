@@ -300,7 +300,7 @@ $(flatcPath) -o "$(SolutionDir)rlclientlib\generated\v2" --cpp "$(SolutionDir)rl
     <ClInclude Include="utility\eventhub_http_authorization.h" />
     <ClInclude Include="utility\apim_http_authorization.h" />
     <ClCompile Include="azure_factories.cc" />
-    <ClInclude Include="logger\http_transport_client.cc" />
+    <ClCompile Include="logger\http_transport_client.cc" />
     <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="utility\http_client.cc" />
     <ClCompile Include="utility\http_helper.cc" />
