@@ -1,6 +1,6 @@
 #include "rl_sim_cpp.h"
 
-// Entry point of console app
+// Entry point of console apps
 int main(int argc, char** argv) {
   try {
     const auto vm = process_cmd_line(argc, argv);
