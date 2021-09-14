@@ -89,7 +89,4 @@ namespace reinforcement_learning {
     i_trace* _trace;
     error_callback_fn* _error_callback;
   };
-
-  template class http_transport_client<apim_http_authorization>;
-  template class http_transport_client<eventhub_http_authorization>;
 }
