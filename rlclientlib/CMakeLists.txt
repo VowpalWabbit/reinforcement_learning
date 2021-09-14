@@ -147,8 +147,7 @@ if(vw_USE_AZURE_FACTORIES)
     logger/http_transport_client.h
     model_mgmt/restapi_data_transport.h
     utility/http_client.h
-    utility/http_helper.h
-    utility/authorization.h
+    utility/http_helper.h    
     utility/eventhub_http_authorization.h
     utility/apim_http_authorization.h
   )

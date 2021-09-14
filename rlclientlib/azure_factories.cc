@@ -46,13 +46,9 @@ namespace reinforcement_learning {
     return url;
   }
 
-  int create_apim_http_api_sender(i_sender** retval, const u::configuration& cfg, const char* api_host, int tasks_limit, int max_http_retries, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
-  {
-    std::string url;
-    url.append(api_host);
-
+  int create_apim_http_api_sender(i_sender** retval, const u::configuration& cfg, const char* api_host, int tasks_limit, int max_http_retries, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status) {
     i_http_client* client;
-    RETURN_IF_FAIL(create_http_client(url.c_str(), cfg, &client, status));
+    RETURN_IF_FAIL(create_http_client(api_host, cfg, &client, status));
 
     *retval = new http_transport_client<apim_http_authorization>(
       client,
