@@ -5,26 +5,29 @@
 #include "sender.h"
 #include "error_callback_fn.h"
 
-#include "utility/authorization.h"
 #include "utility/http_client.h"
+#include "utility/apim_http_authorization.h"
+#include "utility/eventhub_http_authorization.h"
 
 #include <pplx/pplxtasks.h>
+#include <cpprest/http_headers.h>
 
 #include <memory>
 #include "data_buffer.h"
 
+using namespace web::http;
+
 namespace reinforcement_learning {
   class i_trace;
-  class i_authorization;
 
+  template <typename T>
   // The http_transport_client sends string data in POST requests to an HTTP endpoint using the passed in authorization headers.
   class http_transport_client : public i_sender {
   public:
-    virtual int init(api_status* status) override;
-    
+    virtual int init(const utility::configuration& config, api_status* status) override;
+
     // Takes the ownership of the i_http_client and delete it at the end of lifetime
-    http_transport_client(i_http_client* client, size_t tasks_count, size_t MAX_RETRIES, i_trace* trace, error_callback_fn* _error_cb,
-                          i_authorization* authorization);
+    http_transport_client(i_http_client* client, size_t tasks_count, size_t MAX_RETRIES, i_trace* trace, error_callback_fn* _error_cb);
     ~http_transport_client();
   protected:
     int v_send(const buffer& data, api_status* status) override;
@@ -77,7 +80,7 @@ namespace reinforcement_learning {
 
   private:
     std::unique_ptr<i_http_client> _client;
-    std::unique_ptr<i_authorization> _authorization;
+    T _authorization;
 
     std::mutex _mutex;
     moving_queue<std::unique_ptr<http_request_task>> _tasks;
@@ -86,4 +89,7 @@ namespace reinforcement_learning {
     i_trace* _trace;
     error_callback_fn* _error_callback;
   };
+
+  template class http_transport_client<apim_http_authorization>;
+  template class http_transport_client<eventhub_http_authorization>;
 }

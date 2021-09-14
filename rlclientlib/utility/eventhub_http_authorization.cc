@@ -13,21 +13,16 @@ using namespace std::chrono;
 using namespace utility; // Common utilities like string conversions
 
 namespace reinforcement_learning {
-  eventhub_http_authorization::eventhub_http_authorization(
-    const std::string& host,
-    const std::string& key_name,
-    const std::string& key,
-    const std::string& name,
-    i_trace* trace)
-    : _eventhub_host(host)
-    , _shared_access_key_name(key_name)
-    , _shared_access_key(key)
-    , _eventhub_name(name)
-    , _valid_until(0)
-    , _trace(trace) {
-  }
+  int eventhub_http_authorization::init(const utility::configuration& config, api_status* status, i_trace* trace) {
+    std::string config_section = config.get(name::CONFIG_SECTION, name::INTERACTION);
+    _eventhub_host = config.get((config_section + name::EH_HOST).c_str(), "localhost:8080");
+    _shared_access_key_name = config.get((config_section + name::EH_KEY_NAME).c_str(), "");
+    _shared_access_key = config.get((config_section + name::EH_KEY).c_str(), "");
+    _eventhub_name = config.get((config_section + name::EH_NAME).c_str(), name::INTERACTION);
+    _valid_until = 0;
+    _trace = trace;
 
-  int eventhub_http_authorization::init(api_status* status) {
+
     return check_authorization_validity_generate_if_needed(status);
   }
 

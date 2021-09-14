@@ -3,12 +3,8 @@
 #include "apim_http_authorization.h"
 
 namespace reinforcement_learning {
-  apim_http_authorization::apim_http_authorization(
-    const std::string& api_key)
-    : _api_key(api_key) {
-  }
-
-  int apim_http_authorization::init(api_status* status) {
+  int apim_http_authorization::init(const utility::configuration& config, api_status* status, i_trace* trace) {
+    _api_key = config.get(name::HTTP_API_KEY, "dummykey");
     return error_code::success;
   }
 

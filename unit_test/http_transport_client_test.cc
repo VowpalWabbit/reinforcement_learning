@@ -9,7 +9,6 @@
 #include "err_constants.h"
 #include "utility/data_buffer_streambuf.h"
 #include "logger/preamble.h"
-#include "utility/authorization.h"
 #include "utility/apim_http_authorization.h"
 #include "utility/eventhub_http_authorization.h"
 
@@ -38,8 +37,7 @@ BOOST_AUTO_TEST_CASE(send_something_apim_authorization)
   mock_http_client* http_client = new mock_http_client("localhost:8080");
 
   //create a client
-  r::i_authorization* authorization = new r::apim_http_authorization("api_key");
-  r::http_transport_client eh(http_client, 1, 1, nullptr, nullptr, authorization);
+  r::http_transport_client<r::apim_http_authorization> eh(http_client, 1, 1, nullptr, nullptr);
   r::api_status ret;
 
   std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
@@ -65,9 +63,8 @@ BOOST_AUTO_TEST_CASE(send_something_eventhub_authorization)
 {
   mock_http_client* http_client = new mock_http_client("localhost:8080");
 
-  //create a client
-  r::i_authorization* authorization = new r::eventhub_http_authorization("localhost:8080", "", "", "", nullptr);
-  r::http_transport_client eh(http_client, 1, 1, nullptr, nullptr, authorization);
+  //create a client  
+  r::http_transport_client<r::eventhub_http_authorization> eh(http_client, 1, 1, nullptr, nullptr);
   r::api_status ret;
 
   std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
@@ -112,8 +109,7 @@ BOOST_AUTO_TEST_CASE(retry_http_send_success)
   // Use scope to force destructor and therefore flushing of buffers.
   {
     //create a client
-    r::i_authorization* authorization = new r::eventhub_http_authorization("localhost:8080", "", "", "", nullptr);
-    r::http_transport_client eh(http_client, 1, 8 /* retries */, nullptr, &error_callback, authorization);
+    r::http_transport_client<r::eventhub_http_authorization> eh(http_client, 1, 8 /* retries */, nullptr, &error_callback);
     reinforcement_learning::api_status ret;
 
     std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
@@ -146,9 +142,8 @@ BOOST_AUTO_TEST_CASE(retry_http_send_fail)
 
   // Use scope to force destructor and therefore flushing of buffers.
   {
-    //create a client    
-    r::i_authorization* authorization = new r::eventhub_http_authorization("localhost:8080", "", "", "", nullptr);
-    r::http_transport_client eh(http_client, 1, MAX_RETRIES, nullptr, &error_callback, authorization);
+    //create a client
+    r::http_transport_client<r::eventhub_http_authorization> eh(http_client, 1, MAX_RETRIES, nullptr, &error_callback);
 
     r::api_status ret;
     std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
@@ -192,9 +187,8 @@ BOOST_AUTO_TEST_CASE(http_in_order_after_retry)
 
   // Use scope to force destructor and therefore flushing of buffers.
   {
-    //create a client    
-    r::i_authorization* authorization = new r::eventhub_http_authorization("localhost:8080", "", "", "", nullptr);
-    r::http_transport_client eh(http_client, 1, MAX_RETRIES, nullptr, &error_callback, authorization);
+    //create a client
+    r::http_transport_client<r::eventhub_http_authorization> eh(http_client, 1, MAX_RETRIES, nullptr, &error_callback);
 
     r::api_status ret;
     std::shared_ptr<u::data_buffer> db1(new u::data_buffer());

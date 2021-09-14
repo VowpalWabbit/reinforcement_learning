@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace reinforcement_learning {  namespace name {
       const char *const  APP_ID                  = "appid";
       const char *const  MODEL_SRC               = "model.source";
@@ -13,7 +15,14 @@ namespace reinforcement_learning {  namespace name {
       const char *const  INITIAL_EPSILON         = "initial_exploration.epsilon";
       const char *const  LEARNING_MODE           = "rank.learning.mode";
       const char* const  PROTOCOL_VERSION             = "protocol.version";
-      const char* const  API_KEY                 = "api.key";
+      const char* const  HTTP_API_KEY            = "http.api.key";
+      const char *const  INTERACTION             = "interaction";
+      const char *const  OBSERVATION             = "observation";
+      const char *const  CONFIG_SECTION          = "config.section";
+      const char *const  EH_HOST                 = ".eventhub.host";
+      const char *const  EH_NAME                 = ".eventhub.name";
+      const char *const  EH_KEY_NAME             = ".eventhub.keyname";
+      const char *const  EH_KEY                  = ".eventhub.key";
 
       // Interaction
       const char *const  INTERACTION_EH_HOST     = "interaction.eventhub.host";
@@ -29,7 +38,7 @@ namespace reinforcement_learning {  namespace name {
       const char *const  INTERACTION_USE_COMPRESSION = "interaction.send.use_compression";
       const char *const  INTERACTION_USE_DEDUP = "interaction.send.use_dedup";
       const char *const  INTERACTION_QUEUE_MODE = "interaction.queue.mode";
-      const char *const  INTERACTION_API_HOST = "interaction.api.host";
+      const char *const  INTERACTION_HTTP_API_HOST = "interaction.http.api.host";
       const char *const  INTERACTION_APIM_TASKS_LIMIT = "interaction.apim.tasks_limit";
       const char *const  INTERACTION_APIM_MAX_HTTP_RETRIES = "interaction.apim.max_http_retries";
 
@@ -46,7 +55,7 @@ namespace reinforcement_learning {  namespace name {
       const char *const  OBSERVATION_SENDER_IMPLEMENTATION    = "observation.sender.implementation";
       const char *const  OBSERVATION_USE_COMPRESSION = "observation.send.use_compression";
       const char *const  OBSERVATION_QUEUE_MODE = "observation.queue.mode";
-      const char *const  OBSERVATION_API_HOST = "observation.api.host";
+      const char *const  OBSERVATION_HTTP_API_HOST = "observation.http.api.host";
       const char *const  OBSERVATION_APIM_TASKS_LIMIT = "observation.apim.tasks_limit";
       const char *const  OBSERVATION_APIM_MAX_HTTP_RETRIES = "observation.apim.max_http_retries";
 
@@ -82,8 +91,8 @@ namespace reinforcement_learning {  namespace value {
       const char *const INTERACTION_EH_SENDER = "INTERACTION_EH_SENDER";
       const char *const OBSERVATION_FILE_SENDER = "OBSERVATION_FILE_SENDER";
       const char *const INTERACTION_FILE_SENDER = "INTERACTION_FILE_SENDER";
-      const char* const OBSERVATION_API_SENDER = "OBSERVATION_API_SENDER";
-      const char* const INTERACTION_API_SENDER = "INTERACTION_API_SENDER";
+      const char* const OBSERVATION_HTTP_API_SENDER = "OBSERVATION_HTTP_API_SENDER";
+      const char* const INTERACTION_HTTP_API_SENDER = "INTERACTION_HTTP_API_SENDER";
       const char *const NULL_TRACE_LOGGER = "NULL_TRACE_LOGGER";
       const char *const CONSOLE_TRACE_LOGGER = "CONSOLE_TRACE_LOGGER";
       const char *const NULL_TIME_PROVIDER = "NULL_TIME_PROVIDER";

@@ -4,7 +4,7 @@
     <ClCompile Include="model_mgmt\model_downloader.cc" />
     <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="model_mgmt\data_callback_fn.cc" />
-    <ClCompile Include="model_mgmt\model_mgmt.cc" />    
+    <ClCompile Include="model_mgmt\model_mgmt.cc" />
     <ClCompile Include="utility\config_utility.cc" />
     <ClCompile Include="utility\str_util.cc" />
     <ClCompile Include="utility\context_helper.cc" />
@@ -29,7 +29,7 @@
     <ClCompile Include="logger\preamble.cc" />
     <ClCompile Include="logger\logger_extensions.cc" />
     <ClCompile Include="utility\http_helper.cc" />
-    <ClCompile Include="utility\http_client.cc" />    
+    <ClCompile Include="utility\http_client.cc" />
     <ClCompile Include="utility\data_buffer.cc" />
     <ClCompile Include="utility\stl_container_adapter.cc" />
     <ClCompile Include="utility\data_buffer_streambuf.cc" />
@@ -51,6 +51,9 @@
     <ClCompile Include="logger\http_transport_client.cc" />
     <ClCompile Include="utility\eventhub_http_authorization.cc" />
     <ClCompile Include="utility\apim_http_authorization.cc" />
+    <ClCompile Include="constants.cc" />
+    <ClCompile Include="multi_slot_response_detailed.cc" />
+    <ClCompile Include="slot_ranking.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\api_status.h" />
@@ -71,7 +74,7 @@
     <ClInclude Include="model_mgmt\data_callback_fn.h" />
     <ClInclude Include="model_mgmt\restapi_data_transport.h" />
     <ClInclude Include="logger\async_batcher.h" />
-    <ClInclude Include="logger\event_queue.h" />    
+    <ClInclude Include="logger\event_queue.h" />
     <ClInclude Include="vw_model\vw_model.h" />
     <ClInclude Include="vw_model\safe_vw.h" />
     <ClInclude Include="live_model_impl.h" />
@@ -100,7 +103,7 @@
     <ClInclude Include="utility\versioned_object_pool.h" />
     <ClInclude Include="utility\object_pool.h" />
     <ClInclude Include="utility\data_buffer_streambuf.h" />
-    <ClInclude Include="utility\http_client.h" />    
+    <ClInclude Include="utility\http_client.h" />
     <ClInclude Include="utility\http_helper.h" />
     <ClInclude Include="..\include\action_flags.h" />
     <ClInclude Include="logger\file\file_logger.h" />
@@ -121,10 +124,11 @@
     <ClInclude Include="generic_event.h" />
     <ClInclude Include="dedup.h" />
     <ClInclude Include="dedup_internals.h" />
-    <ClInclude Include="logger\http_transport_client.h" />
-    <ClInclude Include="utility\authorization.h" />
+    <ClInclude Include="logger\http_transport_client.h" />    
     <ClInclude Include="utility\eventhub_http_authorization.h" />
     <ClInclude Include="utility\apim_http_authorization.h" />
+    <ClInclude Include="..\include\multi_slot_response_detailed.h" />
+    <ClInclude Include="..\include\slot_ranking.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -139,7 +143,9 @@
     <None Include="schema\v2\CaEvent.fbs" />
     <None Include="schema\v2\MultiSlotEvent.fbs" />
     <None Include="schema\v2\Event.fbs" />
-    <None Include="schema\v2\DedupInfo.fbs" />
+    <None Include="ClassDiagram.cd" />
+    <None Include="schema\v2\LearningModeType.fbs" />
+    <None Include="schema\v2\MultiStepEvent.fbs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
