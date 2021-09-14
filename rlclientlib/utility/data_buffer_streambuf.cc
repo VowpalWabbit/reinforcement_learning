@@ -14,7 +14,7 @@ namespace reinforcement_learning { namespace utility {
     _db->set_body_endoffset(_db->preamble_size());
     // Sanity check body capacity
     assert(db->body_capacity() > 1);
-    // Setup streambuf to write from beginning to end of body region
+    // Setup streambuf to write from beginning to end of body regions
     // Reserve one byte for overflow
     setp( reinterpret_cast<char *>(_db->body_begin()),
           reinterpret_cast<char *>(_db->body_begin() + _db->body_capacity() - 1));
