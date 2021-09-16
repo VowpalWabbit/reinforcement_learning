@@ -124,8 +124,7 @@
     <ClInclude Include="generic_event.h" />
     <ClInclude Include="dedup.h" />
     <ClInclude Include="dedup_internals.h" />
-    <ClInclude Include="logger\http_transport_client.h" />    
-    <ClInclude Include="utility\eventhub_http_authorization.h" />
+    <ClInclude Include="logger\http_transport_client.h" />
     <ClInclude Include="utility\apim_http_authorization.h" />
     <ClInclude Include="..\include\multi_slot_response_detailed.h" />
     <ClInclude Include="..\include\slot_ranking.h" />
