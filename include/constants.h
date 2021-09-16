@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 namespace reinforcement_learning {  namespace name {
       const char *const  APP_ID                  = "appid";
       const char *const  MODEL_SRC               = "model.source";

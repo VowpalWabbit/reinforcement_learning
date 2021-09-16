@@ -22,7 +22,6 @@ namespace reinforcement_learning {
     _valid_until = 0;
     _trace = trace;
 
-
     return check_authorization_validity_generate_if_needed(status);
   }
 

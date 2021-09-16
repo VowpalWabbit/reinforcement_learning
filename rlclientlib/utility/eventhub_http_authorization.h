@@ -22,15 +22,15 @@ namespace reinforcement_learning {
     int init(const utility::configuration& config, api_status* status, i_trace* trace);
     int get_http_headers(http_headers& headers, api_status* status);
 
-  private:
-    int check_authorization_validity_generate_if_needed(api_status* status);
-    int get_authorization_token(std::string& authorization, api_status* status);
-
     // cannot be copied or assigned
     eventhub_http_authorization(const eventhub_http_authorization&) = delete;
     eventhub_http_authorization(eventhub_http_authorization&&) = delete;
     eventhub_http_authorization& operator=(const eventhub_http_authorization&) = delete;
     eventhub_http_authorization& operator=(eventhub_http_authorization&&) = delete;
+
+  private:
+    int check_authorization_validity_generate_if_needed(api_status* status);
+    int get_authorization_token(std::string& authorization, api_status* status);
 
     static int generate_authorization_string(
       std::chrono::seconds now,

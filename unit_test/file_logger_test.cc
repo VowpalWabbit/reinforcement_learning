@@ -28,8 +28,8 @@ BOOST_AUTO_TEST_CASE(file_logger_test) {
     BOOST_CHECK(!file_exists(file));
 
     rlog::file::file_logger logger(file, nullptr);
-	rutil::configuration config;
-	BOOST_CHECK_EQUAL(logger.init(config, nullptr), rerr::success);
+    rutil::configuration config;
+    BOOST_CHECK_EQUAL(logger.init(config, nullptr), rerr::success);
     const auto buff = rl::i_sender::buffer(new rutil::data_buffer());
     logger.send(buff);
   }
