@@ -110,13 +110,7 @@ namespace reinforcement_learning { namespace utility { namespace config {
       { "InitialCommandLine"        , name::MODEL_VW_INITIAL_COMMAND_LINE},
       { "initialCommandLine"        , name::MODEL_VW_INITIAL_COMMAND_LINE},
       { "ProtocolVersion"           , name::PROTOCOL_VERSION},
-      { "protocolVersion"           , name::PROTOCOL_VERSION},
-      { "InteractionHttpApiHost"    , name::INTERACTION_HTTP_API_HOST},
-      { "interactionHttpApiHost"    , name::INTERACTION_HTTP_API_HOST},
-      { "ObservationHttpApiHost"    , name::OBSERVATION_HTTP_API_HOST},
-      { "observationHttpApiHost"    , name::OBSERVATION_HTTP_API_HOST},
-      { "HttpApiKey"                , name::HTTP_API_KEY},
-      { "httpApiKey"                , name::HTTP_API_KEY}
+      { "protocolVersion"           , name::PROTOCOL_VERSION}
     };
 
     static const std::unordered_map<std::string, std::string> parsed_translation_mapping = {

@@ -16,13 +16,6 @@ namespace reinforcement_learning {  namespace name {
       const char *const  LEARNING_MODE           = "rank.learning.mode";
       const char* const  PROTOCOL_VERSION             = "protocol.version";
       const char* const  HTTP_API_KEY            = "http.api.key";
-      const char *const  INTERACTION             = "interaction";
-      const char *const  OBSERVATION             = "observation";
-      const char *const  CONFIG_SECTION          = "config.section";
-      const char *const  EH_HOST                 = ".eventhub.host";
-      const char *const  EH_NAME                 = ".eventhub.name";
-      const char *const  EH_KEY_NAME             = ".eventhub.keyname";
-      const char *const  EH_KEY                  = ".eventhub.key";
 
       // Interaction
       const char *const  INTERACTION_EH_HOST     = "interaction.eventhub.host";
@@ -116,3 +109,12 @@ namespace reinforcement_learning {  namespace value {
       const char *get_default_time_provider();
 }}
 
+namespace reinforcement_learning { namespace constant {
+      const char *const  INTERACTION = "interaction";
+      const char *const  OBSERVATION = "observation";
+      const char *const  CONFIG_SECTION = "config.section";
+      const char *const  EH_HOST = ".eventhub.host";
+      const char *const  EH_NAME = ".eventhub.name";
+      const char *const  EH_KEY_NAME = ".eventhub.keyname";
+      const char *const  EH_KEY = ".eventhub.key";
+}}

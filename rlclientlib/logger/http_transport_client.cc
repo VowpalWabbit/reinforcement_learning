@@ -16,8 +16,8 @@ using namespace web::http; // Common HTTP functionality
 namespace u = reinforcement_learning::utility;
 
 namespace reinforcement_learning {
-  template <typename T>
-  http_transport_client<T>::http_request_task::http_request_task(
+  template <typename TAuthorization>
+  http_transport_client<TAuthorization>::http_request_task::http_request_task(
     i_http_client* client,
     http_headers headers,
     const buffer& post_data,
@@ -34,8 +34,8 @@ namespace reinforcement_learning {
       _task = send_request(0 /* inital try */);
     }
 
-  template <typename T>
-  pplx::task<web::http::status_code> http_transport_client<T>::http_request_task::send_request(size_t try_count) {
+  template <typename TAuthorization>
+  pplx::task<web::http::status_code> http_transport_client<TAuthorization>::http_request_task::send_request(size_t try_count) {
     http_request request(methods::POST);
     request.headers() = _headers;
 
@@ -78,8 +78,8 @@ namespace reinforcement_learning {
     });
   }
 
-  template <typename T>
-  int http_transport_client<T>::http_request_task::join() {
+  template <typename TAuthorization>
+  int http_transport_client<TAuthorization>::http_request_task::join() {
     _task.get();
 
     // The task may have failed but was reported with the callback. This function's primary purpose
@@ -87,14 +87,14 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  template <typename T>
-  int http_transport_client<T>::init(const utility::configuration& config, api_status* status) {
+  template <typename TAuthorization>
+  int http_transport_client<TAuthorization>::init(const utility::configuration& config, api_status* status) {
     RETURN_IF_FAIL(_authorization.init(config, status, _trace));
     return error_code::success;
   }
 
-  template <typename T>
-  int http_transport_client<T>::pop_task(api_status* status) {
+  template <typename TAuthorization>
+  int http_transport_client<TAuthorization>::pop_task(api_status* status) {
     // This function must be under a lock as there is a delay between popping from the queue and joining the task, but it should essentially be atomic.
     std::lock_guard<std::mutex> lock(_mutex);
 
@@ -113,8 +113,8 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  template <typename T>
-  int http_transport_client<T>::v_send(const buffer& post_data, api_status* status) {
+  template <typename TAuthorization>
+  int http_transport_client<TAuthorization>::v_send(const buffer& post_data, api_status* status) {
     http_headers headers;
     RETURN_IF_FAIL(_authorization.get_http_headers(headers, status));
 
@@ -133,8 +133,8 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  template <typename T>
-  http_transport_client<T>::http_transport_client(i_http_client* client, size_t max_tasks_count, size_t max_retries, i_trace* trace, error_callback_fn* error_callback)
+  template <typename TAuthorization>
+  http_transport_client<TAuthorization>::http_transport_client(i_http_client* client, size_t max_tasks_count, size_t max_retries, i_trace* trace, error_callback_fn* error_callback)
     : _client(client)
     , _max_tasks_count(max_tasks_count)
     , _max_retries(max_retries)
@@ -142,8 +142,8 @@ namespace reinforcement_learning {
     , _error_callback(error_callback) {
   }
 
-  template <typename T>
-  http_transport_client<T>::~http_transport_client() {
+  template <typename TAuthorization>
+  http_transport_client<TAuthorization>::~http_transport_client() {
     while (_tasks.size() != 0) {
       pop_task(nullptr);
     }

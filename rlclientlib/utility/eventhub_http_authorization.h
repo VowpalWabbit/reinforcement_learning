@@ -26,6 +26,12 @@ namespace reinforcement_learning {
     int check_authorization_validity_generate_if_needed(api_status* status);
     int get_authorization_token(std::string& authorization, api_status* status);
 
+    // cannot be copied or assigned
+    eventhub_http_authorization(const eventhub_http_authorization&) = delete;
+    eventhub_http_authorization(eventhub_http_authorization&&) = delete;
+    eventhub_http_authorization& operator=(const eventhub_http_authorization&) = delete;
+    eventhub_http_authorization& operator=(eventhub_http_authorization&&) = delete;
+
     static int generate_authorization_string(
       std::chrono::seconds now,
       const std::string& shared_access_key,
@@ -36,12 +42,6 @@ namespace reinforcement_learning {
       long long& valid_until /* out */,
       api_status* status,
       i_trace* trace);
-
-    // cannot be copied or assigned
-    eventhub_http_authorization(const eventhub_http_authorization&) = delete;
-    eventhub_http_authorization(eventhub_http_authorization&&) = delete;
-    eventhub_http_authorization& operator=(const eventhub_http_authorization&) = delete;
-    eventhub_http_authorization& operator=(eventhub_http_authorization&&) = delete;
 
   private:
     std::string _eventhub_host; //e.g. "ingest-x2bw4dlnkv63q.servicebus.windows.net"

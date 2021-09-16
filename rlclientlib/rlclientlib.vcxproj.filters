@@ -143,7 +143,6 @@
     <None Include="schema\v2\CaEvent.fbs" />
     <None Include="schema\v2\MultiSlotEvent.fbs" />
     <None Include="schema\v2\Event.fbs" />
-    <None Include="ClassDiagram.cd" />
     <None Include="schema\v2\LearningModeType.fbs" />
     <None Include="schema\v2\MultiStepEvent.fbs" />
   </ItemGroup>

@@ -20,7 +20,7 @@ using namespace web::http;
 namespace reinforcement_learning {
   class i_trace;
 
-  template <typename T>
+  template <typename TAuthorization>
   // The http_transport_client sends string data in POST requests to an HTTP endpoint using the passed in authorization headers.
   class http_transport_client : public i_sender {
   public:
@@ -80,7 +80,7 @@ namespace reinforcement_learning {
 
   private:
     std::unique_ptr<i_http_client> _client;
-    T _authorization;
+    TAuthorization _authorization;
 
     std::mutex _mutex;
     moving_queue<std::unique_ptr<http_request_task>> _tasks;
