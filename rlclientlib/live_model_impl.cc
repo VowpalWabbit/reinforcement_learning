@@ -10,6 +10,7 @@
 #include "live_model_impl.h"
 #include "err_constants.h"
 #include "constants.h"
+#include "internal_constants.h"
 #include "vw_model/safe_vw.h"
 #include "trace_logger.h"
 #include "explore_internal.h"

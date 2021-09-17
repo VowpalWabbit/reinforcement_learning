@@ -2,7 +2,7 @@
 
 #include "api_status.h"
 #include "configuration.h"
-#include "constants.h"
+#include "internal_constants.h"
 
 #include <cpprest/http_headers.h>
 #include <chrono>
