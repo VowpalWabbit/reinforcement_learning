@@ -50,9 +50,9 @@ bool multistep_example_joiner::process_event(const v2::JoinedEvent &joined_event
       auto outcome = flatbuffers::GetRoot<v2::OutcomeEvent>(event->payload()->data());
       const char* id =  outcome->index_type() == v2::IndexValue_literal ? outcome->index_as_literal()->c_str() : nullptr;
       if (id == nullptr) {
-        _episodic_outcomes.push_back({enqueued_time_utc, meta, *outcome});
+        _episodic_outcomes.push_back(process_outcome(enqueued_time_utc, meta, *outcome));
       } else {
-        _outcomes[std::string(id)].push_back({enqueued_time_utc, meta, *outcome});
+        _outcomes[std::string(id)].push_back(process_outcome(enqueued_time_utc, meta, *outcome));
       }
       break;
     }
@@ -144,7 +144,7 @@ public:
     next[previous_id].push(std::make_tuple(secondary, id));
   }
 
-  void get(std::queue<id_t>& result) {
+  void get(std::deque<id_t>& result) {
     std::stack<layer_t*> states;
     states.emplace(&roots);
     while (!states.empty()) {
@@ -152,7 +152,7 @@ public:
       if (!top.empty()) {
         const auto& cur = top.top();
         const auto& cur_id = std::get<1>(cur); 
-        result.push(cur_id);
+        result.push_back(cur_id);
         states.push(&next[cur_id]);
         top.pop();
       }
@@ -178,9 +178,8 @@ bool multistep_example_joiner::populate_order() {
   return true;
 }
 
-reward::outcome_event multistep_example_joiner::process_outcome(const multistep_example_joiner::Parsed<v2::OutcomeEvent> &event_meta) {
-  const auto& metadata = event_meta.meta;
-  const auto& event = event_meta.event;
+reward::outcome_event multistep_example_joiner::process_outcome(
+  const TimePoint timestamp, const v2::Metadata &metadata, const v2::OutcomeEvent& event) {
   reward::outcome_event o_event;
   o_event.metadata = {metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(),
@@ -249,7 +248,7 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
     }
   }
   const auto& id = _order.front();
-
+  const float reward = _rewards.front();
   const auto& interactions = _interactions[id];
   if (interactions.size() != 1) {
     return false;
@@ -259,15 +258,16 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
 
   const auto outcomes = _outcomes[id];
   for (const auto& o: outcomes) {
-    joined.outcome_events.push_back(process_outcome(o));
+    joined.outcome_events.push_back(o);
   }
   for (const auto& o: _episodic_outcomes) {
-    joined.outcome_events.push_back(process_outcome(o));
+    joined.outcome_events.push_back(o);
   }
 
   bool clear_examples = false;
   auto guard = VW::scope_exit([&] {
-    _order.pop();
+    _order.pop_front();
+    _rewards.pop_front();
     if (clear_examples) {
       VW::return_multiple_example(*_vw, examples);
       examples.push_back(&VW::get_unused_example(_vw));
@@ -280,7 +280,8 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
-  joined.calc_reward(_loop_info.default_reward, _reward_calculation.value());
+  dynamic_cast<joined_event::cb_joined_event*>(joined.typed_data.get())->reward = reward;
+ // joined.calc_reward(_loop_info.default_reward, _reward_calculation.value());
   joined.fill_in_label(examples);
 
   // add an empty example to signal end-of-multiline
@@ -299,12 +300,30 @@ void multistep_example_joiner::on_new_batch() {
   _interactions.clear();
   _outcomes.clear();
   _episodic_outcomes.clear();
+  _rewards.clear();
   _sorted = false;
+}
+
+void multistep_example_joiner::populate_episodic_rewards() {
+  for (const std::string& id: _order) {
+    std::vector<reward::outcome_event> outcomes = _episodic_outcomes;
+    const auto outcomes_per_step = _outcomes[id];
+    outcomes.insert(outcomes.end(), std::make_move_iterator(outcomes_per_step.begin()), 
+                    std::make_move_iterator(outcomes_per_step.end()));
+    _rewards.push_back(_reward_calculation.value()(outcomes, _loop_info.default_reward));
+  }
+  for (size_t i = 1; i < _rewards.size(); ++i) {
+    _rewards[_rewards.size() - 1 - i] += _rewards[_rewards.size() - i];
+  }
+  for (size_t i = 0; i < _rewards.size(); ++i) {
+    _rewards[i] /= _rewards.size() - i;
+  }
 }
 
 void multistep_example_joiner::on_batch_read() {
   populate_order();
   _sorted = true;
+  populate_episodic_rewards();
 }
 
 metrics::joiner_metrics multistep_example_joiner::get_metrics()

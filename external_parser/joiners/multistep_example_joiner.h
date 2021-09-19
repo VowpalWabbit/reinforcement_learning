@@ -13,6 +13,7 @@
 
 #include <list>
 #include <queue>
+#include <deque>
 #include <unordered_map>
 // VW headers
 // vw.h has to come before json_utils.h
@@ -56,10 +57,11 @@ private:
 private:
   bool populate_order();
   reward::outcome_event
-  process_outcome(const Parsed<v2::OutcomeEvent> &event_meta);
+  process_outcome(const TimePoint timestamp, const v2::Metadata &metadata, const v2::OutcomeEvent& event);
   joined_event::joined_event
   process_interaction(const Parsed<v2::MultiStepEvent> &event_meta,
                       v_array<example *> &examples);
+  void populate_episodic_rewards();
 
 private:
   std::vector<example *> _example_pool;
@@ -72,11 +74,12 @@ private:
 
   std::unordered_map<std::string, std::vector<Parsed<v2::MultiStepEvent>>>
       _interactions;
-  std::unordered_map<std::string, std::vector<Parsed<v2::OutcomeEvent>>>
+  std::unordered_map<std::string, std::vector<reward::outcome_event>>
       _outcomes;
-  std::vector<Parsed<v2::OutcomeEvent>> _episodic_outcomes;
+  std::vector<reward::outcome_event> _episodic_outcomes;
 
-  std::queue<std::string> _order;
+  std::deque<std::string> _order;
+  std::deque<float> _rewards;
 
   bool _sorted = false;
 
