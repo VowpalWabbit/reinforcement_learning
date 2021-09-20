@@ -12,7 +12,7 @@ namespace reinforcement_learning { namespace logger { namespace file {
   {
   public:
     explicit file_logger(const std::string& file_name, i_trace*);
-    int init(api_status* status) override;
+    int init(const utility::configuration& config, api_status* status) override;
 
     file_logger(const file_logger&) = delete;
     file_logger(file_logger&&) = delete;

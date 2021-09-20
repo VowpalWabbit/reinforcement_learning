@@ -28,7 +28,7 @@ public:
       : _stream(stream),
         _mutex(mutex) {}
 
-  virtual int init(r::api_status *status) override
+  virtual int init(const u::configuration& config, r::api_status *status) override
   {
     return err::success;
   }

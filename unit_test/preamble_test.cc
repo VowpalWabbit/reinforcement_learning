@@ -15,7 +15,7 @@ using namespace reinforcement_learning::logger;
 using namespace reinforcement_learning;
 
 struct dummy_sender : i_sender {
-  int init(api_status* status) override {
+  int init(const utility::configuration& config, api_status* status) override {
     return error_code::success;
   };
 
