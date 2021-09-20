@@ -1,10 +1,9 @@
 #define OPENSSL_API_COMPAT 0x0908
-#include "eventhub_client.h"
+#include "http_transport_client.h"
 #include "err_constants.h"
 #include "trace_logger.h"
 #include "str_util.h"
 
-#include "utility/http_authorization.h"
 #include "utility/http_client.h"
 
 #include <sstream>
@@ -17,17 +16,16 @@ using namespace web::http; // Common HTTP functionality
 namespace u = reinforcement_learning::utility;
 
 namespace reinforcement_learning {
-  eventhub_client::http_request_task::http_request_task(
+  template <typename TAuthorization>
+  http_transport_client<TAuthorization>::http_request_task::http_request_task(
     i_http_client* client,
-    const std::string& host,
-    const std::string& auth,
+    http_headers headers,
     const buffer& post_data,
     size_t max_retries,
     error_callback_fn* error_callback,
     i_trace* trace)
     : _client(client),
-    _host(host),
-    _auth(auth),
+    _headers(headers),
     _post_data(post_data),
     _max_retries(max_retries),
     _error_callback(error_callback),
@@ -36,10 +34,10 @@ namespace reinforcement_learning {
       _task = send_request(0 /* inital try */);
     }
 
-  pplx::task<web::http::status_code> eventhub_client::http_request_task::send_request(size_t try_count) {
+  template <typename TAuthorization>
+  pplx::task<web::http::status_code> http_transport_client<TAuthorization>::http_request_task::send_request(size_t try_count) {
     http_request request(methods::POST);
-    request.headers().add(_XPLATSTR("Authorization"), _auth.c_str());
-    request.headers().add(_XPLATSTR("Host"), _host.c_str());
+    request.headers() = _headers;
 
     utility::stl_container_adapter container(_post_data.get());
     const size_t container_size = container.size();
@@ -58,7 +56,7 @@ namespace reinforcement_learning {
       }
 
       // If the response is not the expected code then it has failed. Retry if possible otherwise report background error.
-      if(code != status_codes::Created) {
+      if(code != status_codes::Created && code != status_codes::NoContent) {
         // Stop condition of recurison.
         if(try_count < _max_retries){
           TRACE_ERROR(_trace, "HTTP request failed, retrying...");
@@ -80,7 +78,8 @@ namespace reinforcement_learning {
     });
   }
 
-  int eventhub_client::http_request_task::join() {
+  template <typename TAuthorization>
+  int http_transport_client<TAuthorization>::http_request_task::join() {
     _task.get();
 
     // The task may have failed but was reported with the callback. This function's primary purpose
@@ -88,12 +87,14 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int eventhub_client::init(api_status* status) {
-    RETURN_IF_FAIL(_authorization.init(status));
+  template <typename TAuthorization>
+  int http_transport_client<TAuthorization>::init(const utility::configuration& config, api_status* status) {
+    RETURN_IF_FAIL(_authorization.init(config, status, _trace));
     return error_code::success;
   }
 
-  int eventhub_client::pop_task(api_status* status) {
+  template <typename TAuthorization>
+  int http_transport_client<TAuthorization>::pop_task(api_status* status) {
     // This function must be under a lock as there is a delay between popping from the queue and joining the task, but it should essentially be atomic.
     std::lock_guard<std::mutex> lock(_mutex);
 
@@ -112,10 +113,10 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int eventhub_client::v_send(const buffer& post_data, api_status* status) {
-
-    std::string auth_str;
-    RETURN_IF_FAIL(_authorization.get(auth_str, status));
+  template <typename TAuthorization>
+  int http_transport_client<TAuthorization>::v_send(const buffer& post_data, api_status* status) {
+    http_headers headers;
+    RETURN_IF_FAIL(_authorization.get_http_headers(headers, status));
 
     try {
       // Before creating the task, ensure that it is allowed to be created.
@@ -123,7 +124,7 @@ namespace reinforcement_learning {
         RETURN_IF_FAIL(pop_task(status));
       }
 
-      std::unique_ptr<http_request_task> request_task(new http_request_task(_client.get(), _eventhub_host, auth_str, post_data, _max_retries, _error_callback, _trace));
+      std::unique_ptr<http_request_task> request_task(new http_request_task(_client.get(), headers, post_data, _max_retries, _error_callback, _trace));
       _tasks.push(std::move(request_task));
     }
     catch (const std::exception& e) {
@@ -132,22 +133,22 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  eventhub_client::eventhub_client(i_http_client* client, const std::string& host, const std::string& key_name,
-                                   const std::string& key, const std::string& name,
-                                   size_t max_tasks_count, size_t max_retries,  i_trace* trace,
-                                   error_callback_fn* error_callback)
+  template <typename TAuthorization>
+  http_transport_client<TAuthorization>::http_transport_client(i_http_client* client, size_t max_tasks_count, size_t max_retries, i_trace* trace, error_callback_fn* error_callback)
     : _client(client)
-    , _authorization(host, key_name, key, name, trace)
-    , _eventhub_host(host)
     , _max_tasks_count(max_tasks_count)
     , _max_retries(max_retries)
     , _trace(trace)
     , _error_callback(error_callback) {
   }
 
-  eventhub_client::~eventhub_client() {
+  template <typename TAuthorization>
+  http_transport_client<TAuthorization>::~http_transport_client() {
     while (_tasks.size() != 0) {
       pop_task(nullptr);
     }
   }
+
+  template class http_transport_client<apim_http_authorization>;
+  template class http_transport_client<eventhub_http_authorization>;
 }
