@@ -36,6 +36,23 @@ std::vector<std::pair<const char *, multistep_reward_funtion_type>> const multis
   { "suffix_mean", multistep_reward_funtion_type::SuffixMean },
 }};
 
+using MultistepRewardFunctionType = void (*)(std::deque<float> &);
+
+inline void multistep_reward_identity(std::deque<float> &rewards) {}
+
+inline void multistep_reward_suffix_sum(std::deque<float> &rewards) {
+  for (size_t i = 1; i < rewards.size(); ++i) {
+    rewards[rewards.size() - 1 - i] += rewards[rewards.size() - i];
+  }
+}
+
+inline void multistep_reward_suffix_mean(std::deque<float> &rewards) {
+  multistep_reward_suffix_sum(rewards);
+  for (size_t i = 0; i < rewards.size(); ++i) {
+    rewards[i] /= rewards.size() - i;
+  }
+}
+
 
 class multistep_example_joiner : public i_joiner {
 public:
@@ -67,6 +84,7 @@ private:
     const v2::Metadata &meta;
     const event_t &event;
   };
+  void set_multistep_reward_function(const multistep_reward_funtion_type type, bool sticky);
 
 private:
   bool populate_order();
@@ -84,6 +102,7 @@ private:
   flatbuffers::DetachedBuffer _detached_buffer;
 
   loop::sticky_value<reward::RewardFunctionType> _reward_calculation;
+  loop::sticky_value<MultistepRewardFunctionType> _multistep_reward_calculation;
   loop::loop_info _loop_info;
 
   std::unordered_map<std::string, std::vector<Parsed<v2::MultiStepEvent>>>

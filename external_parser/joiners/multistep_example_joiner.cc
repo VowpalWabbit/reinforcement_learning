@@ -26,7 +26,9 @@
 
 
 multistep_example_joiner::multistep_example_joiner(vw *vw)
-    : _vw(vw), _reward_calculation(&reward::earliest) {}
+    : _vw(vw)
+    , _reward_calculation(&reward::earliest)
+    , _multistep_reward_calculation(&multistep_reward_suffix_mean) {}
 
 multistep_example_joiner::~multistep_example_joiner() {
   // cleanup examples
@@ -119,6 +121,28 @@ void multistep_example_joiner::set_reward_function(const v2::RewardFunctionType 
 
   if(reward_calculation) {
     _reward_calculation.set(reward_calculation, sticky);
+  }
+}
+
+void multistep_example_joiner::set_multistep_reward_function(const multistep_reward_funtion_type type, bool sticky) {
+
+  MultistepRewardFunctionType result = nullptr;
+  switch (type) {
+  case multistep_reward_funtion_type::SuffixMean:
+    result = &multistep_reward_suffix_mean;
+    break;
+  case multistep_reward_funtion_type::SuffixSum:
+    result = &multistep_reward_suffix_sum;
+    break;
+  case multistep_reward_funtion_type::Identity:
+    result = &multistep_reward_identity;
+    break;
+  default:
+    break;
+  }
+
+  if(result) {
+    _multistep_reward_calculation.set(result, sticky);
   }
 }
 
@@ -315,12 +339,7 @@ void multistep_example_joiner::populate_episodic_rewards() {
                     std::make_move_iterator(outcomes_per_step.end()));
     _rewards.push_back(_reward_calculation.value()(outcomes, _loop_info.default_reward));
   }
-  for (size_t i = 1; i < _rewards.size(); ++i) {
-    _rewards[_rewards.size() - 1 - i] += _rewards[_rewards.size() - i];
-  }
-  for (size_t i = 0; i < _rewards.size(); ++i) {
-    _rewards[i] /= _rewards.size() - i;
-  }
+  _multistep_reward_calculation.value()(_rewards);
 }
 
 void multistep_example_joiner::on_batch_read() {
@@ -345,5 +364,6 @@ void multistep_example_joiner::apply_cli_overrides(vw *all, const input_options 
     if(!VW::external::str_to_enum(parsed_options.ext_opts->multistep_reward, multistep_reward_functions, multistep_reward_funtion_type::Identity, multistep_reward_func)) {
       throw std::runtime_error("Invalid argument to --multistep_reward " + parsed_options.ext_opts->reward_function);
     }
+    set_multistep_reward_function(multistep_reward_func, true);
   }
 }
