@@ -4,7 +4,7 @@
 using namespace reinforcement_learning;
 
 namespace rl_net_native {
-  int binding_sender::init(api_status* status)
+  int binding_sender::init(const reinforcement_learning::utility::configuration& config, api_status* status)
   {
     return this->vtable.init(managed_handle, status);
   }

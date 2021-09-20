@@ -48,7 +48,7 @@ bool test_loop::init() {
   }
   _sender.reset(sender);
 
-  if (_sender->init(&status) != r::error_code::success) {
+  if (_sender->init(config, &status) != r::error_code::success) {
     std::cout << status.get_error_msg() << std::endl;
     return false;
   }

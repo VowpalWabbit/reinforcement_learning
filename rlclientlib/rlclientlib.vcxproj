@@ -192,6 +192,7 @@ $(flatcPath) -o "$(SolutionDir)rlclientlib\generated\v2" --cpp "$(SolutionDir)rl
     <ClInclude Include="..\include\decision_response.h" />
     <ClInclude Include="..\include\config_utility.h" />
     <ClInclude Include="..\include\constants.h" />
+    <ClInclude Include="..\include\internal_constants.h" />
     <ClInclude Include="..\include\err_constants.h" />
     <ClInclude Include="..\include\factory_resolver.h" />
     <ClInclude Include="..\include\model_mgmt.h" />
@@ -292,17 +293,19 @@ $(flatcPath) -o "$(SolutionDir)rlclientlib\generated\v2" --cpp "$(SolutionDir)rl
   </ItemGroup>
   <ItemGroup Condition="'$(SkipAzureFactories)' != 'true'">
     <ClInclude Include="azure_factories.h" />
-    <ClInclude Include="logger\eventhub_client.h" />
+    <ClInclude Include="logger\http_transport_client.h" />
     <ClInclude Include="model_mgmt\restapi_data_transport.h" />
     <ClInclude Include="utility\http_client.h" />
     <ClInclude Include="utility\http_helper.h" />
-    <ClInclude Include="utility\http_authorization.h" />
+    <ClInclude Include="utility\eventhub_http_authorization.h" />
+    <ClInclude Include="utility\apim_http_authorization.h" />
     <ClCompile Include="azure_factories.cc" />
-    <ClCompile Include="logger\eventhub_client.cc" />
+    <ClCompile Include="logger\http_transport_client.cc" />
     <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="utility\http_client.cc" />
     <ClCompile Include="utility\http_helper.cc" />
-    <ClCompile Include="utility\http_authorization.cc" />
+    <ClCompile Include="utility\eventhub_http_authorization.cc" />
+    <ClCompile Include="utility\apim_http_authorization.cc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ext_libs\libzstd.vcxproj">
