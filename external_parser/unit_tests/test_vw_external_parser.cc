@@ -760,7 +760,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes) {
   auto buffer =
       read_file(input_files + "/valid_joined_logs/multistep_2_episodes.fb");
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet --multistep", nullptr,
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet --multistep --multistep_reward identity", nullptr,
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
@@ -833,7 +833,7 @@ BOOST_AUTO_TEST_CASE(multistep_3_deferred_episodes) {
   auto buffer =
       read_file(input_files + "/valid_joined_logs/multistep_3_deferred_episodes.fb");
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet --multistep", nullptr,
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet --multistep --multistep_reward identity", nullptr,
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
@@ -913,7 +913,7 @@ BOOST_AUTO_TEST_CASE(multistep_unordered_episodes) {
   auto buffer =
       read_file(input_files + "/valid_joined_logs/multistep_unordered_episodes.fb");
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet --multistep", nullptr,
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet --multistep --multistep_reward identity", nullptr,
                            false, nullptr, nullptr);
 
   v_array<example *> examples;

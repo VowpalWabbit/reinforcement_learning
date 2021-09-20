@@ -31,7 +31,7 @@ enum multistep_reward_funtion_type {
 };
 
 std::vector<std::pair<const char *, multistep_reward_funtion_type>> const multistep_reward_functions = {{
-  { "earliest", multistep_reward_funtion_type::Identity },
+  { "identity", multistep_reward_funtion_type::Identity },
   { "suffix_sum", multistep_reward_funtion_type::SuffixSum },
   { "suffix_mean", multistep_reward_funtion_type::SuffixMean },
 }};
