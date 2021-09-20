@@ -1,4 +1,5 @@
 #include "joiners/multistep_example_joiner.h"
+#include "parse_example_external.h"
 
 #include "generated/v2/DedupInfo_generated.h"
 #include "generated/v2/Event_generated.h"
@@ -6,6 +7,7 @@
 #include "generated/v2/OutcomeEvent_generated.h"
 #include "io/logger.h"
 #include "event_processors/typed_events.h"
+#include "utils.h"
 
 #include <limits.h>
 #include <time.h>
@@ -13,6 +15,7 @@
 #include <stack>
 #include <queue>
 #include <tuple>
+#include <cstdio>
 
 // VW headers
 #include "example.h"
@@ -333,4 +336,14 @@ metrics::joiner_metrics multistep_example_joiner::get_metrics()
 
 bool multistep_example_joiner::current_event_is_skip_learn() {
   return _current_je_is_skip_learn;
+}
+
+void multistep_example_joiner::apply_cli_overrides(vw *all, const input_options &parsed_options) {
+  if(all->options->was_supplied("multistep_reward")) {
+    multistep_reward_funtion_type multistep_reward_func;
+
+    if(!VW::external::str_to_enum(parsed_options.ext_opts->multistep_reward, multistep_reward_functions, multistep_reward_funtion_type::Identity, multistep_reward_func)) {
+      throw std::runtime_error("Invalid argument to --multistep_reward " + parsed_options.ext_opts->reward_function);
+    }
+  }
 }

@@ -24,6 +24,19 @@
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
+enum multistep_reward_funtion_type {
+  Identity = 0,
+  SuffixSum = 1,
+  SuffixMean = 2
+};
+
+std::vector<std::pair<const char *, multistep_reward_funtion_type>> const multistep_reward_functions = {{
+  { "earliest", multistep_reward_funtion_type::Identity },
+  { "suffix_sum", multistep_reward_funtion_type::SuffixSum },
+  { "suffix_mean", multistep_reward_funtion_type::SuffixMean },
+}};
+
+
 class multistep_example_joiner : public i_joiner {
 public:
   multistep_example_joiner(vw *vw); // TODO rule of 5
@@ -35,6 +48,7 @@ public:
   void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky) override;
   void set_problem_type_config(v2::ProblemType problem_type, bool sticky) override;
   void set_use_client_time(bool use_client_time, bool sticky = false) override;
+  void apply_cli_overrides(vw *all, const input_options &parsed_options) override;
   bool joiner_ready() override;
 
   bool current_event_is_skip_learn() override;
