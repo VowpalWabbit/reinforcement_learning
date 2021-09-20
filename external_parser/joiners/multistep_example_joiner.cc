@@ -307,8 +307,8 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
+  // TODO: remove
   dynamic_cast<joined_event::cb_joined_event*>(joined.typed_data.get())->reward = reward;
- // joined.calc_reward(_loop_info.default_reward, _reward_calculation.value());
   joined.fill_in_label(examples);
 
   // add an empty example to signal end-of-multiline
