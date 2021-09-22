@@ -14,11 +14,11 @@ using namespace utility; // Common utilities like string conversions
 
 namespace reinforcement_learning {
   int eventhub_http_authorization::init(const utility::configuration& config, api_status* status, i_trace* trace) {
-    std::string config_section = config.get(internal_name::CONFIG_SECTION, internal_name::INTERACTION);
-    _eventhub_host = config.get((config_section + internal_name::EH_HOST).c_str(), "localhost:8080");
-    _shared_access_key_name = config.get((config_section + internal_name::EH_KEY_NAME).c_str(), "");
-    _shared_access_key = config.get((config_section + internal_name::EH_KEY).c_str(), "");
-    _eventhub_name = config.get((config_section + internal_name::EH_NAME).c_str(), internal_name::INTERACTION);
+    std::string config_section = config.get(config_constants::CONFIG_SECTION, config_constants::INTERACTION);
+    _eventhub_host = config.get((config_section + config_constants::EH_HOST).c_str(), "localhost:8080");
+    _shared_access_key_name = config.get((config_section + config_constants::EH_KEY_NAME).c_str(), "");
+    _shared_access_key = config.get((config_section + config_constants::EH_KEY).c_str(), "");
+    _eventhub_name = config.get((config_section + config_constants::EH_NAME).c_str(), config_constants::INTERACTION);
     _valid_until = 0;
     _trace = trace;
 
