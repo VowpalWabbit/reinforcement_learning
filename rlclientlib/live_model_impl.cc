@@ -422,7 +422,7 @@ namespace reinforcement_learning {
     i_sender* ranking_data_sender;
 
     // Use the name to create an instance of raw data sender for interactions
-    _configuration.set(constant::CONFIG_SECTION, constant::INTERACTION);
+    _configuration.set(internal_name::CONFIG_SECTION, internal_name::INTERACTION);
     RETURN_IF_FAIL(_sender_factory->create(&ranking_data_sender, ranking_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
     RETURN_IF_FAIL(ranking_data_sender->init(_configuration, status));
 
@@ -452,7 +452,7 @@ namespace reinforcement_learning {
     i_sender* outcome_sender;
 
     // Use the name to create an instance of raw data sender for observations
-    _configuration.set(constant::CONFIG_SECTION, constant::OBSERVATION);
+    _configuration.set(internal_name::CONFIG_SECTION, internal_name::OBSERVATION);
     RETURN_IF_FAIL(_sender_factory->create(&outcome_sender, outcome_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
     RETURN_IF_FAIL(outcome_sender->init(_configuration, status));
 

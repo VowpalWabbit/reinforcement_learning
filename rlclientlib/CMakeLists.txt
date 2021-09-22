@@ -74,8 +74,7 @@ set(PROJECT_SOURCES
 
 if(vw_USE_AZURE_FACTORIES)
   list(APPEND PROJECT_SOURCES
-    azure_factories.cc
-    logger/http_transport_client.cc
+    azure_factories.cc    
     model_mgmt/restapi_data_transport.cc
     utility/http_client.cc
     utility/http_helper.cc

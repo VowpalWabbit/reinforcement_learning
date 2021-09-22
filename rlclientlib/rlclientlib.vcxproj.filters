@@ -47,8 +47,7 @@
     <ClCompile Include="logger\logger_facade.cc" />
     <ClCompile Include="serialization\payload_serializer.cc" />
     <ClCompile Include="generic_event.cc" />
-    <ClCompile Include="dedup.cc" />
-    <ClCompile Include="logger\http_transport_client.cc" />
+    <ClCompile Include="dedup.cc" />    
     <ClCompile Include="utility\eventhub_http_authorization.cc" />
     <ClCompile Include="utility\apim_http_authorization.cc" />
     <ClCompile Include="constants.cc" />
