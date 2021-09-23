@@ -222,7 +222,7 @@ reward::outcome_event multistep_example_joiner::process_outcome(
   return o_event;
 }
 
-joined_event::joined_event multistep_example_joiner::process_interaction(
+joined_event::multistep_joined_event multistep_example_joiner::process_interaction(
     const multistep_example_joiner::Parsed<v2::MultiStepEvent> &event_meta,
     v_array<example *> &examples) {
   const auto& metadata = event_meta.meta;
@@ -259,10 +259,7 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
         reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
   }
 
-  return joined_event::joined_event(
-      TimePoint(event_meta.timestamp), std::move(meta), std::string(line_vec),
-      std::string(event.model_id() ? event.model_id()->c_str() : "N/A"),
-      std::move(cb_data));
+  return joined_event::multistep_joined_event(std::move(meta), std::move(cb_data));
 }
 
 bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
@@ -283,6 +280,7 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
   auto joined = process_interaction(interaction, examples);
 
   const auto outcomes = _outcomes[id];
+  
   for (const auto& o: outcomes) {
     joined.outcome_events.push_back(o);
   }
@@ -306,8 +304,7 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
-  // TODO: remove
-  dynamic_cast<joined_event::cb_joined_event*>(joined.typed_data.get())->reward = reward;
+  joined.cb_data->reward = reward;
   joined.fill_in_label(examples);
 
   // add an empty example to signal end-of-multiline
