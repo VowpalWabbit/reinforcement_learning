@@ -89,7 +89,7 @@ private:
 private:
   bool populate_order();
   reward::outcome_event
-  process_outcome(const TimePoint timestamp, const v2::Metadata &metadata, const v2::OutcomeEvent& event);
+  process_outcome(const TimePoint& timestamp, const v2::Metadata &metadata, const v2::OutcomeEvent& event);
   joined_event::joined_event
   process_interaction(const Parsed<v2::MultiStepEvent> &event_meta,
                       v_array<example *> &examples);
