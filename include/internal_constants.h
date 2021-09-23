@@ -1,6 +1,6 @@
 #pragma once
 
-namespace reinforcement_learning { namespace constant {
+namespace reinforcement_learning { namespace config_constants {
       const char *const  INTERACTION = "interaction";
       const char *const  OBSERVATION = "observation";
       const char *const  CONFIG_SECTION = "config.section";
