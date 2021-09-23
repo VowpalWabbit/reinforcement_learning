@@ -30,7 +30,7 @@ enum multistep_reward_funtion_type {
   SuffixMean = 2
 };
 
-std::vector<std::pair<const char *, multistep_reward_funtion_type>> const multistep_reward_functions = {{
+std::map<const char *, multistep_reward_funtion_type> const multistep_reward_functions = {{
   { "identity", multistep_reward_funtion_type::Identity },
   { "suffix_sum", multistep_reward_funtion_type::SuffixSum },
   { "suffix_mean", multistep_reward_funtion_type::SuffixMean },

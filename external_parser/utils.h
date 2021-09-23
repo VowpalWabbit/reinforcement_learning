@@ -15,7 +15,7 @@ bool stricmp(const char* first, const char* second);
 template<typename enum_t>
 bool str_to_enum(
   const std::string &str,
-  const std::vector<std::pair<const char *, enum_t>> enum_map,
+  const std::map<const char *, enum_t> enum_map,
   const enum_t default_value,
   enum_t& result) {
   for(auto p : enum_map) {

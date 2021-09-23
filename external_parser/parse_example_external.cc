@@ -20,14 +20,14 @@
 namespace VW {
 namespace external {
 
-std::vector<std::pair<const char *, v2::ProblemType>> const problem_types = {{
+std::map<const char *, v2::ProblemType> const problem_types = {{
   { "cb", v2::ProblemType_CB },
   { "ccb", v2::ProblemType_CCB },
   { "slates", v2::ProblemType_SLATES },
   { "ca", v2::ProblemType_CA },
 }};
 
-std::vector<std::pair<const char *, v2::RewardFunctionType>> const reward_functions = {{
+std::map<const char *, v2::RewardFunctionType> const reward_functions = {{
   { "earliest", v2::RewardFunctionType_Earliest },
   { "average", v2::RewardFunctionType_Average },
   { "median", v2::RewardFunctionType_Median },
@@ -36,7 +36,7 @@ std::vector<std::pair<const char *, v2::RewardFunctionType>> const reward_functi
   { "max", v2::RewardFunctionType_Max },
 }};
 
-std::vector<std::pair<const char *, v2::LearningModeType>> const learning_modes = {{
+std::map<const char *, v2::LearningModeType> const learning_modes = {{
   { "online", v2::LearningModeType_Online },
   { "apprentice", v2::LearningModeType_Apprentice },
   { "loggingonly", v2::LearningModeType_LoggingOnly },
