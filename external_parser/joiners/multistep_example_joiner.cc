@@ -15,7 +15,6 @@
 #include <stack>
 #include <queue>
 #include <tuple>
-#include <cstdio>
 
 // VW headers
 #include "example.h"
@@ -206,7 +205,7 @@ bool multistep_example_joiner::populate_order() {
 }
 
 reward::outcome_event multistep_example_joiner::process_outcome(
-  const TimePoint timestamp, const v2::Metadata &metadata, const v2::OutcomeEvent& event) {
+  const TimePoint& timestamp, const v2::Metadata &metadata, const v2::OutcomeEvent& event) {
   reward::outcome_event o_event;
   o_event.metadata = {metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(),
