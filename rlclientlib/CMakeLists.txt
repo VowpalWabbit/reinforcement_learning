@@ -89,6 +89,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/config_utility.h
   ../include/configuration.h
   ../include/constants.h
+  ../include/internal_constants.h
   ../include/container_iterator.h
   ../include/continuous_action_response.h
   ../include/decision_response.h
