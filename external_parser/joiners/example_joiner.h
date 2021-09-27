@@ -27,6 +27,7 @@ public:
   void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky = false) override;
   void set_problem_type_config(v2::ProblemType problem_type, bool sticky = false) override;
   void set_use_client_time(bool use_client_time, bool sticky = false) override;
+  void apply_cli_overrides(vw *all, const input_options &parsed_options) override;
   bool joiner_ready() override;
 
   float default_reward() const { return _loop_info.default_reward; }

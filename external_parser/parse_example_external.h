@@ -16,6 +16,7 @@ struct parser_options {
   bool binary_to_json;
   bool multistep;
   float default_reward;
+  std::string multistep_reward;
   std::string problem_type;
   std::string reward_function;
   std::string learning_mode;
