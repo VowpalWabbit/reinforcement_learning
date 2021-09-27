@@ -13,10 +13,6 @@
 #include <memory>
 #include <cstdio>
 
-#ifndef _WIN32
-#define _stricmp strcasecmp
-#endif
-
 namespace VW {
 namespace external {
 

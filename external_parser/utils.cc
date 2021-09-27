@@ -2,9 +2,8 @@
 // individual contributors. All rights reserved. Released under a BSD (revised)
 // license as described in the file LICENSE.
 
-#include <cstdio>
+#include <cstring>
 #ifndef _WIN32
-#include "strings.h"
 #define _stricmp strcasecmp
 #endif
 
