@@ -19,6 +19,7 @@ struct parser_options {
   std::string problem_type;
   std::string reward_function;
   std::string learning_mode;
+  bool use_client_time;
 };
 
 int parse_examples(vw *all, v_array<example *> &examples);

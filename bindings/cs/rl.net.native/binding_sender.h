@@ -33,7 +33,7 @@ namespace rl_net_native {
     binding_sender(void* managed_handle, sender_vtable_t vtable, reinforcement_learning::i_trace* trace_logger)
       : managed_handle(managed_handle), vtable(vtable), trace_logger(trace_logger) {};
 
-    virtual int init(reinforcement_learning::api_status* status);
+    virtual int init(const reinforcement_learning::utility::configuration& config, reinforcement_learning::api_status* status);
     virtual ~binding_sender();
 
   protected:

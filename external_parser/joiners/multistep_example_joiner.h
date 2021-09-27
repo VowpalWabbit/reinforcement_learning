@@ -33,6 +33,7 @@ public:
   void set_default_reward(float default_reward, bool sticky) override;
   void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky) override;
   void set_problem_type_config(v2::ProblemType problem_type, bool sticky) override;
+  void set_use_client_time(bool use_client_time, bool sticky = false) override;
   bool joiner_ready() override;
 
   bool current_event_is_skip_learn() override;
@@ -53,7 +54,7 @@ private:
   };
 
 private:
-  void populate_order();
+  bool populate_order();
   reward::outcome_event
   process_outcome(const Parsed<v2::OutcomeEvent> &event_meta);
   joined_event::joined_event

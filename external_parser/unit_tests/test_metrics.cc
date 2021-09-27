@@ -86,6 +86,7 @@ BOOST_AUTO_TEST_CASE(metrics_increase_with_events_should_be_tracked) {
   std::map<std::string, float> expected_float_metrics = {
       {"cbea_sum_cost", -270.29998779296877},
       {"cbea_sum_cost_baseline", -119.21666717529297},
+      {"dsjson_sum_cost_original", -270.299988},
       // TODO uncomment and fix when some interaction work is pulled in from VW
       //   {"cbea_avg_feat_per_event", 8.0},
       //   {"cbea_avg_actions_per_event", 2.0},
@@ -127,6 +128,7 @@ BOOST_AUTO_TEST_CASE(check_metrics_deferred_actions_without_activations) {
   std::map<std::string, float> expected_float_metrics = {
       {"cbea_sum_cost", 0},
       {"cbea_sum_cost_baseline", 0},
+      {"dsjson_sum_cost_original", 0},
   };
 
   std::map<std::string, std::string> expected_string_metrics = {
@@ -166,6 +168,7 @@ BOOST_AUTO_TEST_CASE(
 
   std::map<std::string, float> expected_float_metrics = {
       {"cbea_sum_cost", -9.0}, {"cbea_sum_cost_baseline", -9.0},
+      {"dsjson_sum_cost_original", -19.0},
       // TODO uncomment and fix when some interaction work is pulled in from VW
       //   {"cbea_avg_feat_per_event", 8.0},
       //   {"cbea_avg_actions_per_event", 2.0},
@@ -211,6 +214,7 @@ BOOST_AUTO_TEST_CASE(
 
   std::map<std::string, float> expected_float_metrics = {
       {"cbea_sum_cost", -16.0}, {"cbea_sum_cost_baseline", -5.0},
+      {"dsjson_sum_cost_original", -57.0},
       // TODO uncomment when some interaction work is pulled in from VW
       //   {"cbea_avg_feat_per_event", 18.0},
       //   {"cbea_avg_actions_per_event", 1.0},
@@ -245,7 +249,7 @@ BOOST_AUTO_TEST_CASE(
       {"line_parse_error", 0}};
 
   std::map<std::string, float> expected_float_metrics = {
-
+      {"dsjson_sum_cost_original", -15.0},
   };
 
   std::map<std::string, std::string> expected_string_metrics = {

@@ -74,12 +74,12 @@ set(PROJECT_SOURCES
 
 if(vw_USE_AZURE_FACTORIES)
   list(APPEND PROJECT_SOURCES
-    azure_factories.cc
-    logger/eventhub_client.cc
+    azure_factories.cc    
     model_mgmt/restapi_data_transport.cc
     utility/http_client.cc
     utility/http_helper.cc
-    utility/http_authorization.cc
+    utility/eventhub_http_authorization.cc
+    utility/apim_http_authorization.cc
   )
 endif()
 
@@ -89,6 +89,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/config_utility.h
   ../include/configuration.h
   ../include/constants.h
+  ../include/internal_constants.h
   ../include/container_iterator.h
   ../include/continuous_action_response.h
   ../include/decision_response.h
@@ -143,11 +144,12 @@ set(PROJECT_PRIVATE_HEADERS
 if(vw_USE_AZURE_FACTORIES)
   list(APPEND PROJECT_PRIVATE_HEADERS
     azure_factories.h
-    logger/eventhub_client.h
+    logger/http_transport_client.h
     model_mgmt/restapi_data_transport.h
     utility/http_client.h
-    utility/http_helper.h
-    utility/http_authorization.h
+    utility/http_helper.h    
+    utility/eventhub_http_authorization.h
+    utility/apim_http_authorization.h
   )
 endif()
 

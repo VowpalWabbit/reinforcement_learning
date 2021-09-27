@@ -10,11 +10,10 @@ cd $REPO_DIR/external_parser/build
 
 # Run unit test suite for external parser
 
-export CTEST_OUTPUT_ON_FAILURE=1
-make test
+ctest --verbose --output-on-failure
 
 cd vw_binary_parser/vowpalwabbit
 
 ./vw --extra_metrics metrics.json -d ../../../unit_tests/test_files/valid_joined_logs/cb_simple.log --binary_parser --cb_explore_adf
 
-python -m json.tool metrics.json
+python3 -m json.tool metrics.json

@@ -14,6 +14,9 @@ std::string get_json_event(std::string infile_path, std::string outfile_path,
     case v2::ProblemType_CCB:
       command = "--quiet --binary_to_json --binary_parser --ccb_explore_adf -d " + infile_name;
       break;
+    case v2::ProblemType_SLATES:
+      command = "--quiet --binary_to_json --binary_parser --ccb_explore_adf --slates -d " + infile_name;
+      break;
     case v2::ProblemType_CA:
       command =
           "--quiet --binary_to_json --binary_parser --cats 4 --min_value 1 "
@@ -142,6 +145,77 @@ BOOST_AUTO_TEST_CASE(ccb_payload_with_slot_id) {
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(log_converter_ca_format)
+BOOST_AUTO_TEST_CASE(ca_loop_simple) {
+  std::string infile_path = "valid_joined_logs/ca_loop_simple.fb";
+  std::string outfile_path = "valid_joined_logs/ca_loop_simple.dsjson";
+
+  std::string converted_json =
+      get_json_event(infile_path, outfile_path, v2::ProblemType_CA);
+  std::string expected_json =
+      "{\"_label_ca\":{\"cost\":-1.5,\"pdf_value\":0.0005050505278632045,"
+      "\"action\":1.014871597290039},\"Timestamp\":\"2021-08-24T14:38:15."
+      "000000Z\",\"Version\":\"1\",\"EventId\":\"91f71c8\",\"c\":{"
+      "\"RobotJoint1\":{\"friction\":78}},\"VWState\":{\"m\":\"N/A\"}}\n"
+      "{\"_label_ca\":{\"cost\":-1.5,\"pdf_value\":0.4755050539970398,"
+      "\"action\":12.464624404907227},\"Timestamp\":\"2021-08-24T14:38:15."
+      "000000Z\",\"Version\":\"1\",\"EventId\":\"75d50657\",\"c\":{"
+      "\"RobotJoint1\":{\"friction\":78}},\"VWState\":{\"m\":\"N/A\"}}\n"
+      "{\"_label_ca\":{\"cost\":-1.5,\"pdf_value\":0.4755050539970398,"
+      "\"action\":12.43958568572998},\"Timestamp\":\"2021-08-24T14:38:15."
+      "000000Z\",\"Version\":\"1\",\"EventId\":\"e28a9ae6\",\"c\":{"
+      "\"RobotJoint1\":{\"friction\":78}},\"VWState\":{\"m\":\"N/A\"}}\n";
+
+  BOOST_CHECK_EQUAL(converted_json, expected_json);
+}
+
+BOOST_AUTO_TEST_CASE(ca_loop_simple_e2e) {
+  std::string infile_path = "valid_joined_logs/ca_loop_simple_e2e.log";
+  std::string outfile_path = "valid_joined_logs/ca_loop_simple_e2e.dsjson";
+
+  std::string converted_json =
+      get_json_event(infile_path, outfile_path, v2::ProblemType_CA);
+  std::string expected_json =
+      "{\"_label_ca\":{\"cost\":-1.5,\"pdf_value\":0.0005050505278632045,"
+      "\"action\":1.014871597290039},\"Timestamp\":\"2021-08-24T16:34:38."
+      "000000Z\",\"Version\":\"1\",\"EventId\":\"91f71c8\",\"c\":{"
+      "\"RobotJoint1\":{\"friction\":78}},\"VWState\":{\"m\":\"N/A\"}}\n"
+      "{\"_label_ca\":{\"cost\":-1.5,\"pdf_value\":0.4755050539970398,"
+      "\"action\":12.464624404907227},\"Timestamp\":\"2021-08-24T16:34:38."
+      "000000Z\",\"Version\":\"1\",\"EventId\":\"75d50657\",\"c\":{"
+      "\"RobotJoint1\":{\"friction\":78}},\"VWState\":{\"m\":\"N/A\"}}\n"
+      "{\"_label_ca\":{\"cost\":-1.5,\"pdf_value\":0.4755050539970398,"
+      "\"action\":12.43958568572998},\"Timestamp\":\"2021-08-24T16:34:38."
+      "000000Z\",\"Version\":\"1\",\"EventId\":\"e28a9ae6\",\"c\":{"
+      "\"RobotJoint1\":{\"friction\":78}},\"VWState\":{\"m\":\"N/A\"}}\n";
+
+  BOOST_CHECK_EQUAL(converted_json, expected_json);
+}
+
+BOOST_AUTO_TEST_CASE(ca_loop_mixed_skip_learn) {
+  std::string infile_path = "valid_joined_logs/ca_loop_mixed_skip_learn.fb";
+  std::string outfile_path =
+      "valid_joined_logs/ca_loop_mixed_skip_learn.dsjson";
+
+  std::string converted_json =
+      get_json_event(infile_path, outfile_path, v2::ProblemType_CA);
+  std::string expected_json =
+      "{\"_label_ca\":{\"cost\":-1.5,\"pdf_value\":0.0005050505278632045,"
+      "\"action\":1.014871597290039},\"Timestamp\":\"2021-08-25T15:36:54."
+      "000000Z\",\"Version\":\"1\",\"EventId\":\"91f71c8\",\"c\":{"
+      "\"RobotJoint1\":{\"friction\":78}},\"VWState\":{\"m\":\"N/"
+      "A\"},\"_skipLearn\":true}\n"
+      "{\"_label_ca\":{\"cost\":-1.5,\"pdf_value\":0.4755050539970398,"
+      "\"action\":12.464624404907227},\"Timestamp\":\"2021-08-25T15:36:54."
+      "000000Z\",\"Version\":\"1\",\"EventId\":\"75d50657\",\"c\":{"
+      "\"RobotJoint1\":{\"friction\":78}},\"VWState\":{\"m\":\"N/A\"}}\n"
+      "{\"_label_ca\":{\"cost\":-1.5,\"pdf_value\":0.4755050539970398,"
+      "\"action\":12.43958568572998},\"Timestamp\":\"2021-08-25T15:36:54."
+      "000000Z\",\"Version\":\"1\",\"EventId\":\"e28a9ae6\",\"c\":{"
+      "\"RobotJoint1\":{\"friction\":78}},\"VWState\":{\"m\":\"N/A\"}}\n";
+
+  BOOST_CHECK_EQUAL(converted_json, expected_json);
+}
+
 BOOST_AUTO_TEST_CASE(ca_deferred_action_without_activation) {
   std::string infile_path =
       "skip_learn/ca/deferred_action_without_activation.fb";
@@ -162,3 +236,22 @@ BOOST_AUTO_TEST_CASE(ca_deferred_action_without_activation) {
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_CASE(log_converter_slates_format) {
+  std::string infile_path = "valid_joined_logs/slates_simple.log";
+  std::string outfile_path = "valid_joined_logs/slates_simple.dsjson";
+
+  std::string converted_json = get_json_event(infile_path, outfile_path, v2::ProblemType_SLATES);
+  std::string expected_json = "{\"Timestamp\":\"2021-08-20T22:07:29.000000Z\","
+  "\"Version\":\"1\",\"EventId\":\"abcdefghijklm\",\"_label_cost\":-1.5,"
+  "\"o\":[{\"v\":1.5,\"EventId\":\"abcdefghijklm\",\"ActionTaken\":false}],"
+  "\"_outcomes\":[{\"_a\":[0,1],\"_p\":[1,0]},{\"_a\":[0,1,2],\"_p\":[1,0,0]}],"
+  "\"c\":{\"GUser\":{\"id\":\"a\",\"major\":\"eng\",\"hobby\":\"hiking\"},"
+  "\"_multi\":[{\"TAction\":{\"a1\":\"f1\"},\"_slot_id\":0},{\"TAction\":"
+  "{\"a2\":\"f2\"},\"_slot_id\":0},{\"TAction\":{\"a3\":\"f3\"},\"_slot_id\":1},"
+  "{\"TAction\":{\"a4\":\"f4\"},\"_slot_id\":1},{\"TAction\":{\"a5\":\"f5\"},"
+  "\"_slot_id\":1}],\"_slots\":[{\"Slot\":{\"a1\":\"f1\"}},{\"Slot\":{\"a2\":\"f2\"}}]},"
+  "\"VWState\":{\"m\":\"N/A\"}}\n";
+
+  BOOST_CHECK_EQUAL(converted_json, expected_json);
+}

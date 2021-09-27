@@ -4,11 +4,13 @@
 #endif
 
 #include <boost/test/unit_test.hpp>
-#include "logger/eventhub_client.h"
+#include "logger/http_transport_client.h"
 #include "mock_http_client.h"
 #include "err_constants.h"
 #include "utility/data_buffer_streambuf.h"
 #include "logger/preamble.h"
+#include "utility/apim_http_authorization.h"
+#include "utility/eventhub_http_authorization.h"
 
 namespace reinforcement_learning {namespace utility {
   class data_buffer_streambuf;
@@ -30,13 +32,39 @@ void error_counter_func(const r::api_status&, void* counter) {
   static_cast<error_counter*>(counter)->_error_handler();
 }
 
-
-BOOST_AUTO_TEST_CASE(send_something)
+BOOST_AUTO_TEST_CASE(send_something_apim_authorization)
 {
   mock_http_client* http_client = new mock_http_client("localhost:8080");
 
   //create a client
-  r::eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, 1, nullptr, nullptr);
+  r::http_transport_client<r::apim_http_authorization> eh(http_client, 1, 1, nullptr, nullptr);
+  r::api_status ret;
+
+  std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
+  u::data_buffer_streambuf sbuff1(db1.get());
+  std::ostream message1(&sbuff1);
+
+  message1 << "message 1";
+
+  std::shared_ptr<u::data_buffer> db2(new u::data_buffer());
+  u::data_buffer_streambuf sbuff2(db2.get());
+  std::ostream message2(&sbuff2);
+
+  message2 << "message 2";
+
+  //send events
+  sbuff1.finalize();
+  sbuff2.finalize();
+  BOOST_CHECK_EQUAL(eh.send(db1, &ret), r::error_code::success);
+  BOOST_CHECK_EQUAL(eh.send(db2, &ret), r::error_code::success);
+}
+
+BOOST_AUTO_TEST_CASE(send_something_eventhub_authorization)
+{
+  mock_http_client* http_client = new mock_http_client("localhost:8080");
+
+  //create a client  
+  r::http_transport_client<r::eventhub_http_authorization> eh(http_client, 1, 1, nullptr, nullptr);
   r::api_status ret;
 
   std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
@@ -81,7 +109,7 @@ BOOST_AUTO_TEST_CASE(retry_http_send_success)
   // Use scope to force destructor and therefore flushing of buffers.
   {
     //create a client
-    reinforcement_learning::eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, 8 /* retries */, nullptr, &error_callback);
+    r::http_transport_client<r::eventhub_http_authorization> eh(http_client, 1, 8 /* retries */, nullptr, &error_callback);
     reinforcement_learning::api_status ret;
 
     std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
@@ -115,7 +143,7 @@ BOOST_AUTO_TEST_CASE(retry_http_send_fail)
   // Use scope to force destructor and therefore flushing of buffers.
   {
     //create a client
-    r::eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, MAX_RETRIES, nullptr, &error_callback);
+    r::http_transport_client<r::eventhub_http_authorization> eh(http_client, 1, MAX_RETRIES, nullptr, &error_callback);
 
     r::api_status ret;
     std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
@@ -160,7 +188,7 @@ BOOST_AUTO_TEST_CASE(http_in_order_after_retry)
   // Use scope to force destructor and therefore flushing of buffers.
   {
     //create a client
-    r::eventhub_client eh(http_client, "localhost:8080", "", "", "", 1, MAX_RETRIES, nullptr, &error_callback);
+    r::http_transport_client<r::eventhub_http_authorization> eh(http_client, 1, MAX_RETRIES, nullptr, &error_callback);
 
     r::api_status ret;
     std::shared_ptr<u::data_buffer> db1(new u::data_buffer());

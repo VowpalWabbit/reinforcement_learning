@@ -6,7 +6,9 @@
 #include "parser.h"
 #include "v_array.h"
 
+#include <algorithm>
 #include <iostream>
+#include <iterator>
 namespace mm = reinforcement_learning::model_management;
 
 namespace reinforcement_learning {
@@ -77,7 +79,7 @@ namespace reinforcement_learning {
   {
     DecisionServiceInteraction interaction;
 
-    auto examples = v_init<example*>();
+    v_array<example*> examples;
     examples.push_back(get_or_create_example());
 
     std::vector<char> line_vec(context, context + strlen(context) + 1);
@@ -99,14 +101,11 @@ namespace reinforcement_learning {
     for (auto&& ex : examples) {
       _example_pool.emplace_back(ex);
     }
-
-    // cleanup
-    examples.delete_v();
   }
 
   void safe_vw::rank(const char* context, std::vector<int>& actions, std::vector<float>& scores)
   {
-    auto examples = v_init<example*>();
+    v_array<example*> examples;
     examples.push_back(get_or_create_example());
 
     std::vector<char> line_vec(context, context + strlen(context) + 1);
@@ -132,17 +131,14 @@ namespace reinforcement_learning {
 
     // clean up examples and push examples back into pool for re-use
     for (auto&& ex : examples) {
-      ex->pred.a_s.delete_v();
+      ex->pred.a_s.clear();
       _example_pool.emplace_back(ex);
     }
-
-    // cleanup
-    examples.delete_v();
   }
 
   void safe_vw::choose_continuous_action(const char* context, float& action, float& pdf_value)
   {
-    auto examples = v_init<example*>();
+    v_array<example*> examples;
     examples.push_back(get_or_create_example());
 
     std::vector<char> line_vec(context, context + strlen(context) + 1);
@@ -158,17 +154,14 @@ namespace reinforcement_learning {
     pdf_value = examples[0]->pred.pdf_value.pdf_value;
 
     for (auto&& ex : examples) {
-      ex->l.cb_cont.costs.delete_v();
+      ex->l.cb_cont.costs.clear();
       _example_pool.emplace_back(ex);
     }
-
-    // cleanup
-    examples.delete_v();
   }
 
   void safe_vw::rank_decisions(const std::vector<const char*>& event_ids, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
   {
-    auto examples = v_init<example*>();
+    v_array<example*> examples;
     examples.push_back(get_or_create_example());
 
     std::vector<char> line_vec(context, context + strlen(context) + 1);
@@ -179,8 +172,9 @@ namespace reinforcement_learning {
     for(int i = 0; i < event_ids.size(); i++)
     {
       const size_t slot_example_indx = examples.size() - event_ids.size() + i;
-      push_many(examples[slot_example_indx]->tag, SEED_TAG.c_str(), SEED_TAG.size());
-      push_many(examples[slot_example_indx]->tag, event_ids[i], strlen(event_ids[i]));
+      auto& tag = examples[slot_example_indx]->tag;
+      std::copy(SEED_TAG.begin(), SEED_TAG.end(), std::back_inserter(tag));
+      std::copy(event_ids[i], event_ids[i]+strlen(event_ids[i]), std::back_inserter(tag));
     }
 
     // finalize example
@@ -209,14 +203,11 @@ namespace reinforcement_learning {
     for (auto&& ex : examples) {
       _example_pool.emplace_back(ex);
     }
-
-    // cleanup
-    examples.delete_v();
   }
 
   void safe_vw::rank_multi_slot_decisions(const char* event_id, const std::vector<std::string>& slot_ids, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
   {
-    auto examples = v_init<example*>();
+    v_array<example*> examples;
     examples.push_back(get_or_create_example());
 
     std::vector<char> line_vec(context, context + strlen(context) + 1);
@@ -226,9 +217,10 @@ namespace reinforcement_learning {
     for(uint32_t i = 0; i < slot_ids.size(); i++)
     {
       const size_t slot_example_indx = examples.size() - slot_ids.size() + i;
-      push_many(examples[slot_example_indx]->tag, SEED_TAG.c_str(), SEED_TAG.size());
-      push_many(examples[slot_example_indx]->tag, event_id, strlen(event_id));
-      push_many(examples[slot_example_indx]->tag, slot_ids[i].c_str(), slot_ids[i].size());
+      auto& tag = examples[slot_example_indx]->tag;
+      std::copy(SEED_TAG.begin(), SEED_TAG.end(), std::back_inserter(tag));
+      std::copy(event_id, event_id+strlen(event_id), std::back_inserter(tag));
+      std::copy(slot_ids[i].begin(), slot_ids[i].end(), std::back_inserter(tag));
     }
 
     // finalize example
@@ -257,9 +249,6 @@ namespace reinforcement_learning {
     for (auto&& ex : examples) {
       _example_pool.emplace_back(ex);
     }
-
-    // cleanup
-    examples.delete_v();
   }
 
 const char* safe_vw::id() const {

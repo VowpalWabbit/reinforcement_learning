@@ -87,6 +87,56 @@ BOOST_AUTO_TEST_CASE(ccb_simple) {
   VW::finish(*vw);
 }
 
+BOOST_AUTO_TEST_CASE(slates_simple) {
+  std::string input_files = get_test_files_location();
+
+  auto buffer = read_file(input_files + "/valid_joined_logs/slates_simple.log");
+
+  auto vw = VW::initialize("--ccb_explore_adf --slates --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+
+  set_buffer_as_vw_input(buffer, vw);
+
+  bool read_payload = false;
+
+  while (vw->example_parser->reader(vw, examples) > 0) {
+    read_payload = true;
+
+    BOOST_CHECK_EQUAL(examples.size(), 9);
+    BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[0]->indices[0], 'G');
+    BOOST_CHECK_EQUAL(examples[1]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[1]->indices[0], 'T');
+    BOOST_CHECK_EQUAL(examples[2]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[2]->indices[0], 'T');
+    BOOST_CHECK_EQUAL(examples[3]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[3]->indices[0], 'T');
+    BOOST_CHECK_EQUAL(examples[4]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[4]->indices[0], 'T');
+    BOOST_CHECK_EQUAL(examples[5]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[5]->indices[0], 'T');
+    BOOST_CHECK_EQUAL(examples[6]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[6]->indices[0], 'S');
+    BOOST_CHECK_EQUAL(examples[7]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[7]->indices[0], 'S');
+    BOOST_CHECK_EQUAL(examples[8]->indices.size(), 0); // newline example
+
+    set_slates_label(examples);
+    // simulate next call to parser->read by clearing up examples
+    // and preparing one unused example
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  BOOST_CHECK_EQUAL(read_payload, true);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
 BOOST_AUTO_TEST_CASE(cb_dedup_compressed) {
   std::string input_files = get_test_files_location();
 
@@ -197,6 +247,128 @@ BOOST_AUTO_TEST_CASE(ccb_compare_dsjson_with_fb_models) {
                                 buffer_dsjson_model.end());
 }
 
+BOOST_AUTO_TEST_CASE(ca_compare_dsjson_with_fb_models_simple) {
+  std::string input_files = get_test_files_location();
+
+  std::string model_name = input_files + "/test_outputs/m_average";
+
+  std::string file_name = input_files + "/valid_joined_logs/ca_loop_simple";
+
+  generate_dsjson_and_fb_models(
+      model_name,
+      "--cats 4 --min_value 1 --max_value 100 --bandwidth 1 --id N/A ",
+      file_name);
+
+  // read the models and compare
+  auto buffer_fb_model = read_file(model_name + ".fb");
+  auto buffer_dsjson_model = read_file(model_name + ".json");
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
+                                buffer_dsjson_model.begin(),
+                                buffer_dsjson_model.end());
+}
+
+BOOST_AUTO_TEST_CASE(ca_compare_dsjson_with_fb_models_mixed_skip_learn) {
+  std::string input_files = get_test_files_location();
+
+  std::string model_name = input_files + "/test_outputs/m_average";
+
+  std::string file_name =
+      input_files + "/valid_joined_logs/ca_loop_mixed_skip_learn";
+
+  generate_dsjson_and_fb_models(
+      model_name,
+      "--cats 4 --min_value 1 --max_value 100 --bandwidth 1 --id N/A ",
+      file_name);
+  
+  // read the models and compare
+  auto buffer_fb_model = read_file(model_name + ".fb");
+  auto buffer_dsjson_model = read_file(model_name + ".json");
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
+                                buffer_dsjson_model.begin(),
+                                buffer_dsjson_model.end());
+}
+
+BOOST_AUTO_TEST_CASE(slates_compare_dsjson_with_fb_models) {
+  std::string input_files = get_test_files_location();
+
+  std::string model_name = input_files + "/test_outputs/slates_m_average";
+
+  std::string file_name =
+      input_files + "/valid_joined_logs/slates_average_reward_100_interactions";
+
+  generate_dsjson_and_fb_models(model_name, "--ccb_explore_adf --slates ", file_name);
+
+  // read the models and compare
+  auto buffer_fb_model = read_file(model_name + ".fb");
+  auto buffer_dsjson_model = read_file(model_name + ".json");
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
+                                buffer_dsjson_model.begin(),
+                                buffer_dsjson_model.end());
+}
+
+BOOST_AUTO_TEST_CASE(slates_skip_learn_w_activations) {
+  std::string input_files = get_test_files_location();
+
+  // this datafile contains 10 joined events with the 5 first interactions being
+  // deferred actions but 2 of those 5 have activations reported (event_id's:
+  // [e28a9ae6,bbf5c404])
+
+  auto buffer = read_file(
+      input_files + "/valid_joined_logs/"
+                    "slates_deferred_actions_w_activations_10.fb");
+
+  auto vw = VW::initialize("--ccb_explore_adf --slates --binary_parser --quiet", nullptr,
+                           false, nullptr, nullptr);
+
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+
+  set_buffer_as_vw_input(buffer, vw);
+
+  size_t joined_events_count = 0;
+  while (vw->example_parser->reader(vw, examples) > 0) {
+    joined_events_count++;
+
+    set_slates_label(examples);
+    // simulate next call to parser->read by clearing up examples
+    // and preparing one unused example
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+
+  // this file contains 10 joined events 5 deferred but 2 of those activated
+  BOOST_CHECK_EQUAL(joined_events_count, 7);
+
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
+BOOST_AUTO_TEST_CASE(
+    slates_compare_dsjson_with_fb_models_deferred_actions_w_activations) {
+  std::string input_files = get_test_files_location();
+
+  std::string model_name =
+      input_files +
+      "/test_outputs/slates_deferred_actions_w_activations";
+
+  std::string file_name =
+      input_files +
+      "/valid_joined_logs/slates_deferred_actions_w_activations_10";
+
+  generate_dsjson_and_fb_models(model_name, "--ccb_explore_adf --slates ", file_name);
+
+  // read the models and compare
+  auto buffer_fb_model = read_file(model_name + ".fb");
+  auto buffer_dsjson_model = read_file(model_name + ".json");
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
+                                buffer_dsjson_model.begin(),
+                                buffer_dsjson_model.end());
+}
+
 BOOST_AUTO_TEST_CASE(rrcr_ignore_examples_before_checkpoint) {
   std::string input_files = get_test_files_location();
 
@@ -275,7 +447,7 @@ BOOST_AUTO_TEST_CASE(cb_apprentice_mode) {
     if (joined_events_count == event_without_baseline) {
       // non-baseline action, find the label and check that cost is -0.0 (i.e.
       // -1*default_reward)
-      v_array<CB::cb_class> costs;
+      std::vector<CB::cb_class> costs;
       for (auto *ex : examples) {
         if (ex->l.cb.costs.size() > 0 &&
             ex->l.cb.costs[0].probability != -1.f /*shared example*/) {
@@ -446,7 +618,7 @@ BOOST_AUTO_TEST_CASE(ccb_apprentice_mode) {
     }
     // learn/predict isn't called in the unit test but cleanup examples expects
     // shared pred to be set
-    examples[0]->pred.decision_scores = {v_init<ACTION_SCORE::action_score>()};
+    examples[0]->pred.decision_scores.resize(1);
     examples[0]->pred.decision_scores[0].push_back({0, 0.f});
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
@@ -638,7 +810,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes) {
         BOOST_CHECK_EQUAL(examples[1]->l.cb.weight, 1);
         BOOST_CHECK_EQUAL(examples[2]->l.cb.costs.size(), 0);
         BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 1);
-        break;         
+        break;
     }
 
     clear_examples(examples, vw);
@@ -713,11 +885,11 @@ BOOST_AUTO_TEST_CASE(multistep_3_deferred_episodes) {
 
       case 'E':
         seenE = true;
-        break;  
+        break;
 
       case 'F':
         seenF = true;
-        break;             
+        break;
     }
 
     clear_examples(examples, vw);
@@ -731,6 +903,80 @@ BOOST_AUTO_TEST_CASE(multistep_3_deferred_episodes) {
   BOOST_CHECK_EQUAL(seenE, false);
   BOOST_CHECK_EQUAL(seenF, false);
 
+  clear_examples(examples, vw);
+  VW::finish(*vw);
+}
+
+BOOST_AUTO_TEST_CASE(multistep_unordered_episodes) {
+  std::string input_files = get_test_files_location();
+
+  auto buffer =
+      read_file(input_files + "/valid_joined_logs/multistep_unordered_episodes.fb");
+
+  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet --multistep", nullptr,
+                           false, nullptr, nullptr);
+
+  v_array<example *> examples;
+  examples.push_back(&VW::get_unused_example(vw));
+  set_buffer_as_vw_input(buffer, vw);
+
+  size_t counter = 0;
+  while (vw->example_parser->reader(vw, examples) > 0) {
+    BOOST_CHECK_EQUAL(examples.size(), 4);
+    BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
+    BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
+
+    BOOST_CHECK_EQUAL(examples[1]->l.cb.weight, 1);
+    BOOST_CHECK_EQUAL(examples[2]->l.cb.costs.size(), 0);
+    BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 1);   
+
+    switch (counter++) {
+      case 0:
+        BOOST_CHECK_EQUAL(examples[0]->indices[0], 'A');
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, -1);
+        break;
+      case 1:
+        BOOST_CHECK_EQUAL(examples[0]->indices[0], 'B');
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, -2);
+        break;
+      case 2:
+        BOOST_CHECK_EQUAL(examples[0]->indices[0], 'C');
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, -1);
+        break;
+      case 3:
+        BOOST_CHECK_EQUAL(examples[0]->indices[0], 'D');
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, -2);
+        break;
+      case 4:
+        BOOST_CHECK_EQUAL(examples[0]->indices[0], 'E');
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, -3);
+        break;
+      case 5:
+        BOOST_CHECK_EQUAL(examples[0]->indices[0], 'F');
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, -4);
+        break;
+      case 6:
+        BOOST_CHECK_EQUAL(examples[0]->indices[0], 'G');
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, -5);
+        break;
+      case 7:
+        BOOST_CHECK_EQUAL(examples[0]->indices[0], 'H');
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
+        BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, -6);
+        break;
+    }
+
+    clear_examples(examples, vw);
+    examples.push_back(&VW::get_unused_example(vw));
+  }
+  
   clear_examples(examples, vw);
   VW::finish(*vw);
 }

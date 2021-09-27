@@ -31,6 +31,7 @@ public:
   virtual void set_default_reward(float default_reward, bool sticky = false) = 0;
   virtual void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky = false) = 0;
   virtual void set_problem_type_config(v2::ProblemType problem_type, bool sticky = false) = 0;
+  virtual void set_use_client_time(bool use_client_time, bool sticky = false) = 0;
 
   /**
    * @brief Tells whether config was provided such that it can start joining examples.

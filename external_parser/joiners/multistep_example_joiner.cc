@@ -9,6 +9,10 @@
 
 #include <limits.h>
 #include <time.h>
+#include <map>
+#include <stack>
+#include <queue>
+#include <tuple>
 
 // VW headers
 #include "example.h"
@@ -31,7 +35,9 @@ multistep_example_joiner::~multistep_example_joiner() {
 bool multistep_example_joiner::process_event(const v2::JoinedEvent &joined_event) {
   auto event = flatbuffers::GetRoot<v2::Event>(joined_event.event()->data());
   const v2::Metadata& meta = *event->meta();
-  auto enqueued_time_utc = timestamp_to_chrono(*joined_event.timestamp());
+  auto enqueued_time_utc = get_enqueued_time(joined_event.timestamp(),
+                                               meta.client_time_utc(),
+                                               _loop_info.use_client_time);
   switch (meta.payload_type()) {
     case v2::PayloadType_MultiStep:
     {
@@ -69,6 +75,10 @@ void multistep_example_joiner::set_problem_type_config(v2::ProblemType problem_t
   _loop_info.problem_type_config.set(problem_type, sticky);
 }
 
+void multistep_example_joiner::set_use_client_time(bool use_client_time, bool sticky) {
+  _loop_info.use_client_time.set(use_client_time, sticky);
+}
+
 bool multistep_example_joiner::joiner_ready() {
   return _loop_info.is_configured() && _reward_calculation.is_valid();
 }
@@ -103,26 +113,76 @@ void multistep_example_joiner::set_reward_function(const v2::RewardFunctionType 
   default:
     break;
   }
-  
+
   if(reward_calculation) {
     _reward_calculation.set(reward_calculation, sticky);
   }
 }
 
-void multistep_example_joiner::populate_order() {
-  //TODO: topological sort
-  for (const auto it: _interactions) {
-    _order.push(it.first);
+/*
+take forest of tuples <id, secondary> as input.
+Edges are defined using optional previous_id parameter.
+get return list of ids ordered topologically with respect to <previous_id, id> edges and 
+according to comp_t comparison for vertices that are not connected
+*/
+template<typename id_t, typename secondary_t, typename comp_t = std::greater<std::tuple<secondary_t, id_t>>>
+class topo_sorter {
+public:
+  using elem_t = std::tuple<secondary_t, id_t>;
+  using layer_t = std::priority_queue<elem_t, std::vector<elem_t>, comp_t>;
+
+private:
+  std::map<id_t, layer_t> next;
+  layer_t roots;
+
+public:
+  void push(const id_t& id, const secondary_t& secondary) {
+    roots.push(std::make_tuple(secondary, id));
   }
+
+  void push(const id_t& id, const secondary_t& secondary, const id_t& previous_id) {
+    next[previous_id].push(std::make_tuple(secondary, id));
+  }
+
+  void get(std::queue<id_t>& result) {
+    std::stack<layer_t*> states;
+    states.emplace(&roots);
+    while (!states.empty()) {
+      auto& top = *(states.top());
+      if (!top.empty()) {
+        const auto& cur = top.top();
+        const auto& cur_id = std::get<1>(cur); 
+        result.push(cur_id);
+        states.push(&next[cur_id]);
+        top.pop();
+      }
+      else {
+        states.pop();
+      }
+    }
+  } 
+};
+
+bool multistep_example_joiner::populate_order() {
+  topo_sorter<std::string, TimePoint> sorter;
+  for (const auto& it: _interactions) {
+    const auto& parsed = it.second[0];
+    if (parsed.event.previous_id() == nullptr) {
+      sorter.push(it.first, parsed.timestamp);
+    } else {
+      sorter.push(it.first, parsed.timestamp, parsed.event.previous_id()->str());
+    }
+  }
+  sorter.get(_order);
   _sorted = true;
+  return true;
 }
 
 reward::outcome_event multistep_example_joiner::process_outcome(const multistep_example_joiner::Parsed<v2::OutcomeEvent> &event_meta) {
   const auto& metadata = event_meta.meta;
   const auto& event = event_meta.event;
   reward::outcome_event o_event;
-  o_event.metadata = {timestamp_to_chrono(*metadata.client_time_utc()),
-                      metadata.app_id() ? metadata.app_id()->str() : "",
+  o_event.metadata = {metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(),
                       metadata.pass_probability(),
                       metadata.encoding(),
@@ -142,9 +202,7 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
     v_array<example *> &examples) {
   const auto& metadata = event_meta.meta;
   const auto& event = event_meta.event;
-  metadata::event_metadata_info meta = {metadata.client_time_utc()
-                         ? timestamp_to_chrono(*metadata.client_time_utc())
-                         : TimePoint(),
+  metadata::event_metadata_info meta = {
                         metadata.app_id() ? metadata.app_id()->str() : "",
                         metadata.payload_type(),
                         metadata.pass_probability(),
@@ -182,23 +240,19 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
       std::move(cb_data));
 }
 
-void try_set_label(const joined_event::joined_event &je, float reward,
-                                   v_array<example *> &examples) {
-  je.fill_in_label(examples);
-  je.set_cost(examples, reward);
-}
-
 bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
   _current_je_is_skip_learn = false;
 
   if (!_sorted) {
-    populate_order();
+    if (!populate_order()) {
+      return false;
+    }
   }
   const auto& id = _order.front();
 
   const auto& interactions = _interactions[id];
   if (interactions.size() != 1) {
-    return -1;
+    return false;
   }
   const auto& interaction = interactions[0];
   auto joined = process_interaction(interaction, examples);
@@ -226,8 +280,8 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
-  const auto reward = _reward_calculation(joined.outcome_events);
-  try_set_label(joined, reward, examples);
+  joined.calc_reward(_loop_info.default_reward, _reward_calculation.value());
+  joined.fill_in_label(examples);
 
   // add an empty example to signal end-of-multiline
   examples.push_back(&VW::get_unused_example(_vw));

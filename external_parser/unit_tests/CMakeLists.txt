@@ -13,6 +13,7 @@ set(TEST_SOURCES
   test_log_converter.cc
   test_skip_learn.cc
   test_metrics.cc
+  test_client_and_enqueued_time.cc
 )
 
 add_executable(binary_parser_unit_tests ${TEST_SOURCES})
@@ -31,4 +32,4 @@ target_link_libraries(binary_parser_unit_tests
     Boost::filesystem
 )
 
-add_test(binary_parser_unit_tests binary_parser_unit_tests)
+add_test(NAME binary_parser_unit_tests COMMAND binary_parser_unit_tests -- ${CMAKE_CURRENT_LIST_DIR}/test_files/)

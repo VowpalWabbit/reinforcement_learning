@@ -39,8 +39,10 @@ static const char *options[] = {
   "ss-reward",
   "action-taken",
   "cb-loop",
+  "ca-loop",
   "ccb-loop",
   "ccb-baseline-loop",
+  "slates-loop",
   nullptr
 };
 
@@ -63,8 +65,10 @@ enum options{
   S_S_REWARD,
   ACTION_TAKEN,
   CB_LOOP,
+  CA_LOOP,
   CCB_LOOP,
-  CCB_BASELINE_ACTION_LOOP
+  CCB_BASELINE_ACTION_LOOP,
+  SLATES_LOOP
 };
 
 void load_config_from_json(int action, u::configuration& config, bool enable_apprentice_mode, float epsilon = 0.0f)
@@ -112,12 +116,10 @@ void load_config_from_json(int action, u::configuration& config, bool enable_app
   if(action == CCB_ACTION || action == CCB_BASELINE_ACTION || action == CCB_WITH_SLOT_ID_ACTION || action == CCB_LOOP || action == CCB_BASELINE_ACTION_LOOP) {
     std::string args = "--ccb_explore_adf --json --quiet --epsilon " + std::to_string(epsilon) + " --first_only --id N/A";
     config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, args.c_str());
-  } else if (action == SLATES_ACTION) {
+  } else if (action == SLATES_ACTION || action == SLATES_LOOP) {
     std::string args = "--slates --ccb_explore_adf --json --quiet --epsilon " + std::to_string(epsilon) + " --first_only --id N/A";
     config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, args.c_str());
-  }
-  else if (action == CA_ACTION)
-  {
+  } else if (action == CA_ACTION || action == CA_LOOP) {
     config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--cats 4 --min_value 1 --max_value 100 --bandwidth 1 --json --quiet --id N/A");
   }
 }
@@ -248,7 +250,9 @@ void send_ccb_outcome(std::mt19937& rng, bool gen_random_reward, const char * ev
       }
 }
 
-int take_action(r::live_model& rl, const char *event_id, int action, unsigned int action_flag, bool gen_random_reward, std::mt19937& rng) {
+int take_action(r::live_model &rl, const char *event_id, int action,
+                unsigned int action_flag, bool gen_random_reward,
+                std::mt19937 &rng) {
   r::api_status status;
   float reward = gen_random_reward ? get_random_number(rng) : 1.5f;
 
@@ -407,6 +411,35 @@ int take_action(r::live_model& rl, const char *event_id, int action, unsigned in
 
       break;
     };
+    case CA_LOOP: { // "ca_loop",
+      r::continuous_action_response response;
+      if (rl.request_continuous_action(event_id, JSON_CA_CONTEXT, action_flag,
+                                       response, &status) != err::success)
+        std::cout << status.get_error_msg() << std::endl;
+      size_t num_of_rewards = get_random_number(rng);
+      for (size_t i = 0; i < num_of_rewards; i++) {
+        float reward = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
+        std::cout << "report outcome: " << reward << " for event: " << event_id
+                  << std::endl;
+        if (rl.report_outcome(event_id, reward, &status) != err::success)
+          std::cout << status.get_error_msg() << std::endl;
+      }
+
+      if (action_flag == r::action_flags::DEFERRED) {
+        size_t rand_num = get_random_number(rng, 0 /*min*/);
+        if (rand_num % 2)
+        {
+          // send activation
+          std::cout << "sending activation for event_id: " << event_id
+                    << std::endl;
+          if (rl.report_action_taken(event_id, &status) != err::success) {
+            std::cout << status.get_error_msg() << std::endl;
+          }
+        }
+      }
+
+      break;
+    };
     case CCB_LOOP: { // "ccb action and random number of float rewards and mix of slot ids / non slot ids / float / string rewards"
       // randomly decide to send either ccb with slot id's provided or random slot id's
       // the ccb interactions that are non-random are the ones we can use to send observations for the slot id using the slot-id string
@@ -478,6 +511,36 @@ int take_action(r::live_model& rl, const char *event_id, int action, unsigned in
 
       break;
     };
+    case SLATES_LOOP: { // "slates action and random number of float rewards"
+      std::cout << "request multi-slot decision with baseline for event: " << event_id << std::endl;
+      r::multi_slot_response response;
+      if(rl.request_multi_slot_decision(event_id, JSON_SLATES_CONTEXT, action_flag, response, &status) != err::success) {
+        std::cout << status.get_error_msg() << std::endl;
+      }
+
+      size_t num_of_rewards = get_random_number(rng);
+      for (size_t i = 0; i < num_of_rewards; i++) {
+        float reward = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
+        std::cout << "report outcome: " << reward << " for event: " << event_id << std::endl;
+        if( rl.report_outcome(event_id, reward, &status) != err::success ) {
+          std::cout << status.get_error_msg() << std::endl;
+        }
+      }
+
+      if (action_flag == r::action_flags::DEFERRED) {
+        size_t rand_num = get_random_number(rng, 0 /*min*/);
+        if (rand_num % 2)
+        {
+          // send activation
+          std::cout << "sending activation for event_id: " << event_id << std::endl;
+          if (rl.report_action_taken(event_id, &status) != err::success ) {
+            std::cout << status.get_error_msg() << std::endl;
+          }
+        }
+      }
+
+      break;
+    };
 
     default:
       std::cout << "Invalid action " << action << std::endl;
@@ -495,7 +558,9 @@ int pseudo_random(int seed) {
   return (int)(val & 0xFFFFFFFF);
 }
 
-int run_config(int action, int count, int initial_seed, bool gen_random_reward, bool enable_apprentice_mode, int deferred_action_count, std::string config_file, std::mt19937& rng, float epsilon = 0.0f) {
+int run_config(int action, int count, int initial_seed, bool gen_random_reward,
+               bool enable_apprentice_mode, int deferred_action_count,
+               std::string config_file, std::mt19937 &rng, float epsilon = 0.0f) {
   u::configuration config;
 
   if (config_file.empty())
@@ -528,7 +593,8 @@ int run_config(int action, int count, int initial_seed, bool gen_random_reward, 
     auto action_flag = i < deferred_action_count
       ? r::action_flags::DEFERRED : r::action_flags::DEFAULT;
 
-    int r = take_action(rl, event_id, action, action_flag, gen_random_reward, rng);
+    int r = take_action(rl, event_id, action, action_flag, gen_random_reward,
+                        rng);
     if(r)
       return r;
   }
@@ -555,7 +621,7 @@ int main(int argc, char *argv[]) {
     ("count", po::value<int>(), "Number of events to produce")
     ("seed", po::value<int>(), "Initial seed used to produce event ids")
     ("epsilon", po::value<float>(), "epsilon to be used in command line args for VW")
-    ("kind", po::value<std::string>(), "which kind of example to generate (cb,invalid-cb,ccb,ccb-with-slot-id,ccb-baseline,slates,ca,cb-loop,ccb-loop,ccb-baseline-loop,(f|s)(s|i|mix|i-out-of-bound)?-reward,action-taken)")
+    ("kind", po::value<std::string>(), "which kind of example to generate (cb,invalid-cb,ccb,ccb-with-slot-id,ccb-baseline,slates,ca,cb-loop,ca-loop,ccb-loop,ccb-baseline-loop,slates-loop,(f|s)(s|i|mix|i-out-of-bound)?-reward,action-taken)")
     ("random_reward", "Generate random float reward for observation event")
     ("config_file", po::value<std::string>(), "json config file for rlclinetlib")
     ("apprentice", "Enable apprentice mode")
@@ -575,7 +641,7 @@ int main(int argc, char *argv[]) {
 
     std::vector<std::string> deferrable_interactions {
       "cb", "invalid-cb", "ccb", "ccb-baseline", "slates", "ca", "cb-loop",
-      "ccb-with-slot-id", "ccb-loop", "ccb-baseline-loop"
+      "ca-loop", "ccb-with-slot-id", "ccb-loop", "ccb-baseline-loop", "slates-loop"
     };
 
     if(vm.count("kind") > 0)
@@ -614,7 +680,8 @@ int main(int argc, char *argv[]) {
 
   if(gen_all) {
     for(int i = 0; options[i]; ++i) {
-      if(run_config(i, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file, rng, epsilon))
+      if (run_config(i, count, seed, gen_random_reward, enable_apprentice_mode,
+                     deferred_action_count, config_file, rng, epsilon))
         return -1;
     }
     return 0;
@@ -634,5 +701,7 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  return run_config(action, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file, rng, epsilon);
+  return run_config(action, count, seed, gen_random_reward,
+                    enable_apprentice_mode, deferred_action_count, config_file,
+                    rng, epsilon);
 }

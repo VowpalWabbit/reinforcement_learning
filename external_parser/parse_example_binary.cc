@@ -195,6 +195,7 @@ bool binary_parser::read_checkpoint_msg(io_buf *input) {
       checkpoint_info->learning_mode_config());
   _example_joiner->set_problem_type_config(
       checkpoint_info->problem_type_config());
+  _example_joiner->set_use_client_time(checkpoint_info->use_client_time());
 
   return true;
 }
