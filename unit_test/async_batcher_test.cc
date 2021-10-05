@@ -10,6 +10,7 @@
 #include "serialization/json_serializer.h"
 #include "logger/async_batcher.h"
 #include "sender.h"
+#include "vw_math.h"
 
 using namespace reinforcement_learning;
 //This class simply implement a 'send' method, in order to be used as a template in the async_batcher
@@ -78,12 +79,12 @@ public:
   }
 
   bool try_drop(float drop_prob, int _drop_pass) override {
-    auto prob = std::atof(_seed_id.c_str());
+    auto prob = static_cast<float>(std::atof(_seed_id.c_str()));
 
     // logic because floating point comparison is dumb. In this case, 0.7 > 0.7 == true
     const float tol = 1e-5f;
     bool is_equal = (prob-drop_prob)*(prob-drop_prob) < tol*tol;
-    return (prob > drop_prob) && !is_equal;
+    return (prob > drop_prob) && !VW::math::are_same(prob, drop_prob, 1e-5f);
   }
   std::string get_event_id() { return _seed_id; }
 };
