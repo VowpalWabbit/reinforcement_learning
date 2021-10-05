@@ -76,6 +76,7 @@ namespace reinforcement_learning { namespace logger {
     std::mutex _m;
     utility::object_pool<utility::data_buffer> _buffer_pool;
     const char* _batch_content_encoding;
+    float _subsample_rate;
   };
 
   template<typename TEvent, template<typename> class TSerializer>
@@ -86,6 +87,16 @@ namespace reinforcement_learning { namespace logger {
 
   template<typename TEvent, template<typename> class TSerializer>
   int async_batcher<TEvent, TSerializer>::append(TEvent&& evt, api_status* status) {
+
+    // If subsampling rate is < 1, then run subsampling logic
+    if(_subsample_rate < 1) {
+      // try_drop uses drop_pass of -1 to avoid collision with the queue's pruning function
+      if(evt.try_drop(_subsample_rate, -1)) {
+        // If the event is dropped, just get out of here
+        return error_code::success;
+      }
+    }
+    
     _queue.push(std::move(evt), TSerializer<TEvent>::serializer_t::size_estimate(evt));
 
     //block or drop events if the queue if full
@@ -179,6 +190,7 @@ namespace reinforcement_learning { namespace logger {
     , _pass_prob(0.5)
     , _queue_mode(config.queue_mode)
     , _batch_content_encoding(config.batch_content_encoding)
+    , _subsample_rate(config.subsample_rate)
   {}
 
   template<typename TEvent, template<typename> class TSerializer>
