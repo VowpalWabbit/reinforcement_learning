@@ -1,4 +1,5 @@
 #include "joiners/multistep_example_joiner.h"
+#include "parse_example_external.h"
 
 #include "generated/v2/DedupInfo_generated.h"
 #include "generated/v2/Event_generated.h"
@@ -6,6 +7,7 @@
 #include "generated/v2/OutcomeEvent_generated.h"
 #include "io/logger.h"
 #include "event_processors/typed_events.h"
+#include "utils.h"
 
 #include <limits.h>
 #include <time.h>
@@ -23,7 +25,9 @@
 
 
 multistep_example_joiner::multistep_example_joiner(vw *vw)
-    : _vw(vw), _reward_calculation(&reward::earliest) {}
+    : _vw(vw)
+    , _reward_calculation(&reward::earliest)
+    , _multistep_reward_calculation(&multistep_reward_suffix_mean) {}
 
 multistep_example_joiner::~multistep_example_joiner() {
   // cleanup examples
@@ -50,9 +54,9 @@ bool multistep_example_joiner::process_event(const v2::JoinedEvent &joined_event
       auto outcome = flatbuffers::GetRoot<v2::OutcomeEvent>(event->payload()->data());
       const char* id =  outcome->index_type() == v2::IndexValue_literal ? outcome->index_as_literal()->c_str() : nullptr;
       if (id == nullptr) {
-        _episodic_outcomes.push_back({enqueued_time_utc, meta, *outcome});
+        _episodic_outcomes.push_back(process_outcome(enqueued_time_utc, meta, *outcome));
       } else {
-        _outcomes[std::string(id)].push_back({enqueued_time_utc, meta, *outcome});
+        _outcomes[std::string(id)].push_back(process_outcome(enqueued_time_utc, meta, *outcome));
       }
       break;
     }
@@ -119,6 +123,28 @@ void multistep_example_joiner::set_reward_function(const v2::RewardFunctionType 
   }
 }
 
+void multistep_example_joiner::set_multistep_reward_function(const multistep_reward_funtion_type type, bool sticky) {
+
+  MultistepRewardFunctionType result = nullptr;
+  switch (type) {
+  case multistep_reward_funtion_type::SuffixMean:
+    result = &multistep_reward_suffix_mean;
+    break;
+  case multistep_reward_funtion_type::SuffixSum:
+    result = &multistep_reward_suffix_sum;
+    break;
+  case multistep_reward_funtion_type::Identity:
+    result = &multistep_reward_identity;
+    break;
+  default:
+    break;
+  }
+
+  if(result) {
+    _multistep_reward_calculation.set(result, sticky);
+  }
+}
+
 /*
 take forest of tuples <id, secondary> as input.
 Edges are defined using optional previous_id parameter.
@@ -144,7 +170,7 @@ public:
     next[previous_id].push(std::make_tuple(secondary, id));
   }
 
-  void get(std::queue<id_t>& result) {
+  void get(std::deque<id_t>& result) {
     std::stack<layer_t*> states;
     states.emplace(&roots);
     while (!states.empty()) {
@@ -152,7 +178,7 @@ public:
       if (!top.empty()) {
         const auto& cur = top.top();
         const auto& cur_id = std::get<1>(cur); 
-        result.push(cur_id);
+        result.push_back(cur_id);
         states.push(&next[cur_id]);
         top.pop();
       }
@@ -178,9 +204,8 @@ bool multistep_example_joiner::populate_order() {
   return true;
 }
 
-reward::outcome_event multistep_example_joiner::process_outcome(const multistep_example_joiner::Parsed<v2::OutcomeEvent> &event_meta) {
-  const auto& metadata = event_meta.meta;
-  const auto& event = event_meta.event;
+reward::outcome_event multistep_example_joiner::process_outcome(
+  const TimePoint& timestamp, const v2::Metadata &metadata, const v2::OutcomeEvent& event) {
   reward::outcome_event o_event;
   o_event.metadata = {metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(),
@@ -197,7 +222,7 @@ reward::outcome_event multistep_example_joiner::process_outcome(const multistep_
   return o_event;
 }
 
-joined_event::joined_event multistep_example_joiner::process_interaction(
+joined_event::multistep_joined_event multistep_example_joiner::process_interaction(
     const multistep_example_joiner::Parsed<v2::MultiStepEvent> &event_meta,
     v_array<example *> &examples) {
   const auto& metadata = event_meta.meta;
@@ -234,10 +259,7 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
         reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
   }
 
-  return joined_event::joined_event(
-      TimePoint(event_meta.timestamp), std::move(meta), std::string(line_vec),
-      std::string(event.model_id() ? event.model_id()->c_str() : "N/A"),
-      std::move(cb_data));
+  return joined_event::multistep_joined_event(std::move(meta), std::move(cb_data));
 }
 
 bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
@@ -249,7 +271,7 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
     }
   }
   const auto& id = _order.front();
-
+  const float reward = _rewards.front();
   const auto& interactions = _interactions[id];
   if (interactions.size() != 1) {
     return false;
@@ -258,16 +280,18 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
   auto joined = process_interaction(interaction, examples);
 
   const auto outcomes = _outcomes[id];
+  
   for (const auto& o: outcomes) {
-    joined.outcome_events.push_back(process_outcome(o));
+    joined.outcome_events.push_back(o);
   }
   for (const auto& o: _episodic_outcomes) {
-    joined.outcome_events.push_back(process_outcome(o));
+    joined.outcome_events.push_back(o);
   }
 
   bool clear_examples = false;
   auto guard = VW::scope_exit([&] {
-    _order.pop();
+    _order.pop_front();
+    _rewards.pop_front();
     if (clear_examples) {
       VW::return_multiple_example(*_vw, examples);
       examples.push_back(&VW::get_unused_example(_vw));
@@ -280,7 +304,7 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
-  joined.calc_reward(_loop_info.default_reward, _reward_calculation.value());
+  joined.cb_data->reward = reward;
   joined.fill_in_label(examples);
 
   // add an empty example to signal end-of-multiline
@@ -299,12 +323,25 @@ void multistep_example_joiner::on_new_batch() {
   _interactions.clear();
   _outcomes.clear();
   _episodic_outcomes.clear();
+  _rewards.clear();
   _sorted = false;
+}
+
+void multistep_example_joiner::populate_episodic_rewards() {
+  for (const std::string& id: _order) {
+    std::vector<reward::outcome_event> outcomes = _episodic_outcomes;
+    const auto outcomes_per_step = _outcomes[id];
+    outcomes.insert(outcomes.end(), std::make_move_iterator(outcomes_per_step.begin()), 
+                    std::make_move_iterator(outcomes_per_step.end()));
+    _rewards.push_back(_reward_calculation.value()(outcomes, _loop_info.default_reward));
+  }
+  _multistep_reward_calculation.value()(_rewards);
 }
 
 void multistep_example_joiner::on_batch_read() {
   populate_order();
   _sorted = true;
+  populate_episodic_rewards();
 }
 
 metrics::joiner_metrics multistep_example_joiner::get_metrics()
@@ -314,4 +351,15 @@ metrics::joiner_metrics multistep_example_joiner::get_metrics()
 
 bool multistep_example_joiner::current_event_is_skip_learn() {
   return _current_je_is_skip_learn;
+}
+
+void multistep_example_joiner::apply_cli_overrides(vw *all, const input_options &parsed_options) {
+  if(all->options->was_supplied("multistep_reward")) {
+    multistep_reward_funtion_type multistep_reward_func;
+
+    if(!VW::external::str_to_enum(parsed_options.ext_opts->multistep_reward, multistep_reward_functions, multistep_reward_funtion_type::Identity, multistep_reward_func)) {
+      throw std::runtime_error("Invalid argument to --multistep_reward " + parsed_options.ext_opts->reward_function);
+    }
+    set_multistep_reward_function(multistep_reward_func, true);
+  }
 }

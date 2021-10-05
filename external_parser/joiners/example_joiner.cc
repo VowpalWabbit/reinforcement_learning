@@ -570,3 +570,6 @@ void example_joiner::on_batch_read() {}
 metrics::joiner_metrics example_joiner::get_metrics() {
   return _joiner_metrics;
 }
+
+void example_joiner::apply_cli_overrides(vw *all, const input_options &parsed_options) {
+}

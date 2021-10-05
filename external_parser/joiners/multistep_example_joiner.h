@@ -13,6 +13,7 @@
 
 #include <list>
 #include <queue>
+#include <deque>
 #include <unordered_map>
 // VW headers
 // vw.h has to come before json_utils.h
@@ -22,6 +23,36 @@
 // clang-format on
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
+
+enum multistep_reward_funtion_type {
+  Identity = 0,
+  SuffixSum = 1,
+  SuffixMean = 2
+};
+
+std::map<const char *, multistep_reward_funtion_type> const multistep_reward_functions = {{
+  { "identity", multistep_reward_funtion_type::Identity },
+  { "suffix_sum", multistep_reward_funtion_type::SuffixSum },
+  { "suffix_mean", multistep_reward_funtion_type::SuffixMean },
+}};
+
+using MultistepRewardFunctionType = void (*)(std::deque<float> &);
+
+inline void multistep_reward_identity(std::deque<float> &rewards) {}
+
+inline void multistep_reward_suffix_sum(std::deque<float> &rewards) {
+  for (size_t i = 1; i < rewards.size(); ++i) {
+    rewards[rewards.size() - 1 - i] += rewards[rewards.size() - i];
+  }
+}
+
+inline void multistep_reward_suffix_mean(std::deque<float> &rewards) {
+  multistep_reward_suffix_sum(rewards);
+  for (size_t i = 0; i < rewards.size(); ++i) {
+    rewards[i] /= rewards.size() - i;
+  }
+}
+
 
 class multistep_example_joiner : public i_joiner {
 public:
@@ -34,6 +65,7 @@ public:
   void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky) override;
   void set_problem_type_config(v2::ProblemType problem_type, bool sticky) override;
   void set_use_client_time(bool use_client_time, bool sticky = false) override;
+  void apply_cli_overrides(vw *all, const input_options &parsed_options) override;
   bool joiner_ready() override;
 
   bool current_event_is_skip_learn() override;
@@ -52,14 +84,16 @@ private:
     const v2::Metadata &meta;
     const event_t &event;
   };
+  void set_multistep_reward_function(const multistep_reward_funtion_type type, bool sticky);
 
 private:
   bool populate_order();
   reward::outcome_event
-  process_outcome(const Parsed<v2::OutcomeEvent> &event_meta);
-  joined_event::joined_event
+  process_outcome(const TimePoint& timestamp, const v2::Metadata &metadata, const v2::OutcomeEvent& event);
+  joined_event::multistep_joined_event
   process_interaction(const Parsed<v2::MultiStepEvent> &event_meta,
                       v_array<example *> &examples);
+  void populate_episodic_rewards();
 
 private:
   std::vector<example *> _example_pool;
@@ -68,15 +102,17 @@ private:
   flatbuffers::DetachedBuffer _detached_buffer;
 
   loop::sticky_value<reward::RewardFunctionType> _reward_calculation;
+  loop::sticky_value<MultistepRewardFunctionType> _multistep_reward_calculation;
   loop::loop_info _loop_info;
 
   std::unordered_map<std::string, std::vector<Parsed<v2::MultiStepEvent>>>
       _interactions;
-  std::unordered_map<std::string, std::vector<Parsed<v2::OutcomeEvent>>>
+  std::unordered_map<std::string, std::vector<reward::outcome_event>>
       _outcomes;
-  std::vector<Parsed<v2::OutcomeEvent>> _episodic_outcomes;
+  std::vector<reward::outcome_event> _episodic_outcomes;
 
-  std::queue<std::string> _order;
+  std::deque<std::string> _order;
+  std::deque<float> _rewards;
 
   bool _sorted = false;
 
