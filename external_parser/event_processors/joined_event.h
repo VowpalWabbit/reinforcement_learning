@@ -30,6 +30,7 @@ struct typed_joined_event {
 
   virtual void calculate_metrics(dsjson_metrics*) {}
   virtual float get_sum_original_reward() const = 0;
+  virtual float get_sum_original_reward_first_slot() const = 0;
 };
 
 struct cb_joined_event : public typed_joined_event {
@@ -119,6 +120,10 @@ struct cb_joined_event : public typed_joined_event {
   }
 
   float get_sum_original_reward() const override {
+    return original_reward;
+  }
+
+  float get_sum_original_reward_first_slot() const override {
     return original_reward;
   }
 };
@@ -258,6 +263,15 @@ struct ccb_joined_event : public typed_joined_event {
     }
     return ret;
   }
+
+  float get_sum_original_reward_first_slot() const override {
+    float ret = 0.f;
+    if (original_rewards.size() > 0) {
+      ret = original_rewards[0];
+    }
+    
+    return ret;
+  }
 };
 
 struct slates_joined_event : public typed_joined_event {
@@ -329,6 +343,10 @@ struct slates_joined_event : public typed_joined_event {
   }
 
   float get_sum_original_reward() const override {
+    return original_reward;
+  }
+
+  float get_sum_original_reward_first_slot() const override {
     return original_reward;
   }
 }; // slates_joined_event
@@ -412,6 +430,10 @@ struct ca_joined_event : public typed_joined_event {
   float get_sum_original_reward() const override {
     return original_reward;
   }
+
+  float get_sum_original_reward_first_slot() const override {
+    return original_reward;
+  }
 };
 
 struct joined_event {
@@ -470,6 +492,10 @@ struct joined_event {
 
   float get_sum_original_reward() const {
     return typed_data->get_sum_original_reward();
+  }
+
+  float get_sum_original_reward_first_slot() const {
+    return typed_data->get_sum_original_reward_first_slot();
   }
 };
 
