@@ -542,6 +542,7 @@ void example_joiner::persist_metrics() {
 
     _vw->example_parser->metrics->DsjsonSumCostOriginal = _joiner_metrics.sum_cost_original;
     _vw->example_parser->metrics->DsjsonSumCostOriginal = _joiner_metrics.sum_cost_original_first_slot;
+    //todo update to variable DsjsonSumCostOriginalFirstSlot
 
     if (!_joiner_metrics.first_event_id.empty()) {
       _vw->example_parser->metrics->FirstEventId =

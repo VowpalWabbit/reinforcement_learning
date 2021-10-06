@@ -30,6 +30,7 @@ struct typed_joined_event {
 
   virtual void calculate_metrics(dsjson_metrics*) {}
   virtual float get_sum_original_reward() const = 0;
+  // Assumes all reductions have atleast one slot
   virtual float get_sum_original_reward_first_slot() const = 0;
 };
 
@@ -253,6 +254,20 @@ struct ccb_joined_event : public typed_joined_event {
       set_apprentice_reward();
     } else {
       rewards.assign(original_rewards.begin(), original_rewards.end());
+    }
+  }
+
+  void calculate_metrics(dsjson_metrics* metrics) override {
+    if (metrics && 
+        !multi_slot_interaction.interaction_data.empty() &&
+        !multi_slot_interaction.interaction_data[0].actions.empty() &&
+        !multi_slot_interaction.baseline_actions.empty()) {
+      if (multi_slot_interaction.interaction_data[0].actions[0] == multi_slot_interaction.baseline_actions[0])  {
+        //todo add metrics DsjsonNumberOfLabelEqualBaselineFirstSlot, DsjsonSumCostOriginalLabelEqualBaselineFirstSlot 
+      }
+      else {
+        //todo add metrics DsjsonNumberOfLabelNotEqualBaselineFirstSlot
+      }
     }
   }
 
