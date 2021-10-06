@@ -38,7 +38,7 @@ std::map<const char *, multistep_reward_funtion_type> const multistep_reward_fun
 
 using MultistepRewardFunctionType = void (*)(std::deque<float> &);
 
-inline void multistep_reward_identity(std::deque<float> &rewards) {}
+inline void multistep_reward_identity(std::deque<float> &) {}
 
 inline void multistep_reward_suffix_sum(std::deque<float> &rewards) {
   for (size_t i = 1; i < rewards.size(); ++i) {
