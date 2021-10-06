@@ -505,6 +505,10 @@ struct joined_event {
     typed_data->calc_cost(default_reward, reward_function, interaction_metadata, outcome_events);
   }
 
+  void calculate_metrics(dsjson_metrics *metrics) {
+    return typed_data->calculate_metrics(metrics);
+  }
+
   float get_sum_original_reward() const {
     return typed_data->get_sum_original_reward();
   }
