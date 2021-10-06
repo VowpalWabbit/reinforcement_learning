@@ -82,9 +82,8 @@ public:
     auto prob = static_cast<float>(std::atof(_seed_id.c_str()));
 
     // logic because floating point comparison is dumb. In this case, 0.7 > 0.7 == true
-    const float tol = 1e-5f;
-    bool is_equal = (prob-drop_prob)*(prob-drop_prob) < tol*tol;
-    return (prob > drop_prob) && !VW::math::are_same(prob, drop_prob, 1e-5f);
+    constexpr float FLOAT_TOL= 1e-5f;
+    return (prob > drop_prob) && !VW::math::are_same(prob, drop_prob, FLOAT_TOL);
   }
   std::string get_event_id() { return _seed_id; }
 };
