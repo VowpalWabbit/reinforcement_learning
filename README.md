@@ -164,9 +164,3 @@ The workaround is to specify where to search
 ```
 cmake .. -DCMAKE_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake
 ```
-
-## Make targets
-- `doc` - Python and C++ docs
-- `_rl_client` - Python bindings
-- `rlclientlib` - rlclient library
-- `rltest` - unit tests
