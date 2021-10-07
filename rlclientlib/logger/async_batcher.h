@@ -14,6 +14,9 @@
 #include "utility/config_helper.h"
 #include "utility/object_pool.h"
 
+// float comparisons
+#include "vw_math.h"
+
 namespace reinforcement_learning {
   class error_callback_fn;
 };
@@ -82,6 +85,12 @@ namespace reinforcement_learning { namespace logger {
   template<typename TEvent, template<typename> class TSerializer>
   int async_batcher<TEvent, TSerializer>::init(api_status* status) {
     RETURN_IF_FAIL(_periodic_background_proc.init(this, status));
+    bool subsample_lte_zero = _subsample_rate < 0.f || VW::math::are_same(_subsample_rate, 0.f);
+    bool subsample_gt_one = _subsample_rate > 1.f && !VW::math::are_same(_subsample_rate, 1.f);
+    if(subsample_lte_zero || subsample_gt_one) {
+      // invalid subsample rate
+      RETURN_ERROR_ARG(nullptr, status, invalid_argument, "subsampling rate must be within (0, 1]");
+    }
     return error_code::success;
   }
 
