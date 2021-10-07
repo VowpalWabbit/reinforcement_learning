@@ -30,8 +30,6 @@ struct typed_joined_event {
 
   virtual void calculate_metrics(dsjson_metrics*) {}
   virtual float get_sum_original_reward() const = 0;
-  // Assumes all reductions have atleast one slot
-  virtual float get_sum_original_reward_first_slot() const = 0;
 };
 
 struct cb_joined_event : public typed_joined_event {
@@ -121,10 +119,6 @@ struct cb_joined_event : public typed_joined_event {
   }
 
   float get_sum_original_reward() const override {
-    return original_reward;
-  }
-
-  float get_sum_original_reward_first_slot() const override {
     return original_reward;
   }
 };
@@ -258,15 +252,22 @@ struct ccb_joined_event : public typed_joined_event {
   }
 
   void calculate_metrics(dsjson_metrics* metrics) override {
-    if (metrics && 
-        !multi_slot_interaction.interaction_data.empty() &&
-        !multi_slot_interaction.interaction_data[0].actions.empty() &&
-        !multi_slot_interaction.baseline_actions.empty()) {
-      if (multi_slot_interaction.interaction_data[0].actions[0] == multi_slot_interaction.baseline_actions[0])  {
-        //todo add metrics DsjsonNumberOfLabelEqualBaselineFirstSlot, DsjsonSumCostOriginalLabelEqualBaselineFirstSlot 
+    if (metrics) {
+      if (!original_rewards.empty()) {
+        //todo update metrics DsjsonSumCostOriginalFirstSlot 
+        metrics->DsjsonSumCostOriginal += original_rewards[0];
       }
-      else {
-        //todo add metrics DsjsonNumberOfLabelNotEqualBaselineFirstSlot
+
+      if (!multi_slot_interaction.interaction_data.empty() &&
+          !multi_slot_interaction.interaction_data[0].actions.empty() &&
+          !multi_slot_interaction.baseline_actions.empty()) {
+
+        if (multi_slot_interaction.interaction_data[0].actions[0] == multi_slot_interaction.baseline_actions[0])  {
+          //todo add metrics DsjsonNumberOfLabelEqualBaselineFirstSlot, DsjsonSumCostOriginalLabelEqualBaselineFirstSlot 
+        }
+        else {
+          //todo add metrics DsjsonNumberOfLabelNotEqualBaselineFirstSlot
+        }
       }
     }
   }
@@ -276,15 +277,6 @@ struct ccb_joined_event : public typed_joined_event {
     for(auto reward : original_rewards) {
       ret += reward;
     }
-    return ret;
-  }
-
-  float get_sum_original_reward_first_slot() const override {
-    float ret = 0.f;
-    if (original_rewards.size() > 0) {
-      ret = original_rewards[0];
-    }
-    
     return ret;
   }
 };
@@ -357,11 +349,12 @@ struct slates_joined_event : public typed_joined_event {
     }
   }
 
-  float get_sum_original_reward() const override {
-    return original_reward;
+  void calculate_metrics(dsjson_metrics* metrics) override {
+    //todo update metrics DsjsonSumCostOriginalFirstSlot 
+    metrics->DsjsonSumCostOriginal += original_reward;
   }
 
-  float get_sum_original_reward_first_slot() const override {
+  float get_sum_original_reward() const override {
     return original_reward;
   }
 }; // slates_joined_event
@@ -445,10 +438,6 @@ struct ca_joined_event : public typed_joined_event {
   float get_sum_original_reward() const override {
     return original_reward;
   }
-
-  float get_sum_original_reward_first_slot() const override {
-    return original_reward;
-  }
 };
 
 struct joined_event {
@@ -511,10 +500,6 @@ struct joined_event {
 
   float get_sum_original_reward() const {
     return typed_data->get_sum_original_reward();
-  }
-
-  float get_sum_original_reward_first_slot() const {
-    return typed_data->get_sum_original_reward_first_slot();
   }
 };
 
