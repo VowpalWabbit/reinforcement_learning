@@ -28,7 +28,7 @@ void should_not_add_examples(std::string &infile,
   v_array<example *> examples;
   examples.push_back(&VW::get_unused_example(vw));
 
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     continue;
   }
 
@@ -66,7 +66,7 @@ void should_add_examples(std::string &infile,
   v_array<example *> examples;
   examples.push_back(&VW::get_unused_example(vw));
 
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     continue;
   }
 
