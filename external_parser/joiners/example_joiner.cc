@@ -461,7 +461,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
           _joiner_metrics.number_of_skipped_events++;
         } else {
           je->calculate_metrics(_vw->example_parser->metrics.get());
-          //_joiner_metrics.sum_cost_original += -1. * je->get_sum_original_reward();
+          _joiner_metrics.sum_cost_original += -1. * je->get_sum_original_reward();
           if (_joiner_metrics.first_event_id.empty()) {
             _joiner_metrics.first_event_id =
                 std::move(je->interaction_metadata.event_id);

@@ -252,23 +252,26 @@ struct ccb_joined_event : public typed_joined_event {
   }
 
   void calculate_metrics(dsjson_metrics* metrics) override {
-    if (metrics) {
-      if (!original_rewards.empty()) {
-        //todo update metrics DsjsonSumCostOriginalFirstSlot 
-        metrics->DsjsonSumCostOriginal += original_rewards[0];
-      }
+    float first_slot_original_reward = 0.f;
+    if (!original_rewards.empty()) {        
+      first_slot_original_reward = original_rewards[0];
+    }
 
+    if (metrics) {
+      metrics->DsjsonSumCostOriginalFirstSlot += first_slot_original_reward;
+      
       if (!multi_slot_interaction.interaction_data.empty() &&
           !multi_slot_interaction.interaction_data[0].actions.empty() &&
           !multi_slot_interaction.baseline_actions.empty()) {
 
         if (multi_slot_interaction.interaction_data[0].actions[0] == multi_slot_interaction.baseline_actions[0])  {
-          //todo add metrics DsjsonNumberOfLabelEqualBaselineFirstSlot, DsjsonSumCostOriginalLabelEqualBaselineFirstSlot 
+          metrics->DsjsonNumberOfLabelEqualBaselineFirstSlot++;
+          metrics->DsjsonSumCostOriginalLabelEqualBaselineFirstSlot += first_slot_original_reward;          
         }
         else {
-          //todo add metrics DsjsonNumberOfLabelNotEqualBaselineFirstSlot
+          metrics->DsjsonNumberOfLabelNotEqualBaselineFirstSlot++;
         }
-      }
+      }      
     }
   }
 
@@ -349,9 +352,23 @@ struct slates_joined_event : public typed_joined_event {
     }
   }
 
-  void calculate_metrics(dsjson_metrics* metrics) override {
-    //todo update metrics DsjsonSumCostOriginalFirstSlot 
-    metrics->DsjsonSumCostOriginal += original_reward;
+  void calculate_metrics(dsjson_metrics* metrics) override {    
+    if (metrics) {
+      metrics->DsjsonSumCostOriginalFirstSlot += original_reward;
+      
+      if (!multi_slot_interaction.interaction_data.empty() &&
+          !multi_slot_interaction.interaction_data[0].actions.empty() &&
+          !multi_slot_interaction.baseline_actions.empty()) {
+
+        if (multi_slot_interaction.interaction_data[0].actions[0] == multi_slot_interaction.baseline_actions[0])  {
+          metrics->DsjsonNumberOfLabelEqualBaselineFirstSlot++;
+          metrics->DsjsonSumCostOriginalLabelEqualBaselineFirstSlot += original_reward;          
+        }
+        else {
+          metrics->DsjsonNumberOfLabelNotEqualBaselineFirstSlot++;
+        }
+      }      
+    }
   }
 
   float get_sum_original_reward() const override {
