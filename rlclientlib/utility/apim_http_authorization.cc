@@ -1,5 +1,3 @@
-#pragma once
-
 #include "apim_http_authorization.h"
 
 namespace reinforcement_learning {
