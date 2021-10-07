@@ -99,8 +99,7 @@ namespace reinforcement_learning { namespace logger {
 
     // If subsampling rate is < 1, then run subsampling logic
     if(_subsample_rate < 1) {
-      // try_drop uses drop_pass of -1 to avoid collision with the queue's pruning function
-      if(evt.try_drop(_subsample_rate, -1)) {
+      if(evt.try_drop(_subsample_rate, constants::SUBSAMPLE_RATE_DROP_PASS)) {
         // If the event is dropped, just get out of here
         return error_code::success;
       }

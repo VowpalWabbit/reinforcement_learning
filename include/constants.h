@@ -108,3 +108,8 @@ namespace reinforcement_learning {  namespace value {
       const char *get_default_data_transport();
       const char *get_default_time_provider();
 }}
+
+namespace reinforcement_learning {  namespace constants {
+      // subsampling uses drop_pass of -1 to avoid collision with the queue's pruning function
+      constexpr int SUBSAMPLE_RATE_DROP_PASS = -1;
+}}
