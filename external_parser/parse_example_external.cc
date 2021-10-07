@@ -156,8 +156,8 @@ void parser::persist_metrics(std::vector<std::pair<std::string, size_t>>& metric
 
 parser::~parser() {}
 
-int parse_examples(vw *all, v_array<example *> &examples) {
-  return static_cast<int>(all->external_parser->parse_examples(all, examples));
+int parse_examples(vw *all, io_buf& io_buf, v_array<example *> &examples) {
+  return static_cast<int>(all->external_parser->parse_examples(all, io_buf, examples));
 }
 } // namespace external
 } // namespace VW

@@ -205,7 +205,7 @@ bool multistep_example_joiner::populate_order() {
 }
 
 reward::outcome_event multistep_example_joiner::process_outcome(
-  const TimePoint& timestamp, const v2::Metadata &metadata, const v2::OutcomeEvent& event) {
+  const TimePoint&, const v2::Metadata &metadata, const v2::OutcomeEvent& event) {
   reward::outcome_event o_event;
   o_event.metadata = {metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(),
@@ -250,12 +250,12 @@ joined_event::multistep_joined_event multistep_example_joiner::process_interacti
                         event.context()->size());
 
   if (_vw->audit || _vw->hash_inv) {
-    VW::template read_line_json<true>(
-        *_vw, examples, const_cast<char *>(line_vec.c_str()),
+    VW::template read_line_json_s<true>(
+        *_vw, examples, const_cast<char *>(line_vec.c_str()), line_vec.size(),
         reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
   } else {
-    VW::template read_line_json<false>(
-        *_vw, examples, const_cast<char *>(line_vec.c_str()),
+    VW::template read_line_json_s<false>(
+        *_vw, examples, const_cast<char *>(line_vec.c_str()), line_vec.size(),
         reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
   }
 

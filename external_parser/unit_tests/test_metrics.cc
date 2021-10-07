@@ -214,7 +214,8 @@ BOOST_AUTO_TEST_CASE(
 
   std::map<std::string, float> expected_float_metrics = {
       {"cbea_sum_cost", -16.0}, {"cbea_sum_cost_baseline", -5.0},
-      {"dsjson_sum_cost_original", -27.0},
+    //   {"dsjson_sum_cost_original", -57.0},
+    {"dsjson_sum_cost_original_first_slot", 0.0},
       // TODO uncomment when some interaction work is pulled in from VW
       //   {"cbea_avg_feat_per_event", 18.0},
       //   {"cbea_avg_actions_per_event", 1.0},

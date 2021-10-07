@@ -23,7 +23,7 @@ struct parser_options {
   bool use_client_time;
 };
 
-int parse_examples(vw *all, v_array<example *> &examples);
+int parse_examples(vw *all, io_buf &io_buf, v_array<example *> &examples);
 
 class parser {
 public:
@@ -32,8 +32,10 @@ public:
   static void set_parse_args(VW::config::option_group_definition &in_options,
                              input_options &parsed_options);
   virtual ~parser();
-  virtual bool parse_examples(vw *all, v_array<example *> &examples) = 0;
-  virtual void persist_metrics(std::vector<std::pair<std::string, size_t>>& list_metrics);
+  virtual bool parse_examples(vw *all, io_buf &io_buf,
+                              v_array<example *> &examples) = 0;
+  virtual void
+  persist_metrics(std::vector<std::pair<std::string, size_t>> &list_metrics);
 };
 
 } // namespace external

@@ -237,8 +237,9 @@ bool example_joiner::process_interaction(const v2::Event &event,
              metadata.payload_type() == v2::PayloadType_Slates) {
     const v2::MultiSlotEvent *multislot = nullptr;
     if (!typed_event::process_compression<v2::MultiSlotEvent>(
-            event.payload()->data(), event.payload()->size(), metadata, multislot,
-            _detached_buffer) || multislot == nullptr) {
+            event.payload()->data(), event.payload()->size(), metadata,
+            multislot, _detached_buffer) ||
+        multislot == nullptr) {
       return false;
     }
 
@@ -253,7 +254,8 @@ bool example_joiner::process_interaction(const v2::Event &event,
 
     je = typed_event::event_processor<v2::MultiSlotEvent>::fill_in_joined_event(
         *multislot, metadata, enqueued_time_utc,
-        typed_event::event_processor<v2::MultiSlotEvent>::get_context(*multislot));
+        typed_event::event_processor<v2::MultiSlotEvent>::get_context(
+            *multislot));
   } else if (metadata.payload_type() == v2::PayloadType_CA) {
     const v2::CaEvent *ca = nullptr;
     if (!typed_event::process_compression<v2::CaEvent>(
@@ -286,13 +288,13 @@ bool example_joiner::process_interaction(const v2::Event &event,
     std::string context(je.context);
     try {
       if (_vw->audit || _vw->hash_inv) {
-        VW::template read_line_json<true>(
-            *_vw, examples, const_cast<char *>(context.c_str()),
+        VW::template read_line_json_s<true>(
+            *_vw, examples, const_cast<char *>(context.c_str()), context.size(),
             reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example),
             _vw, &_dedup_cache.dedup_examples);
       } else {
-        VW::template read_line_json<false>(
-            *_vw, examples, const_cast<char *>(context.c_str()),
+        VW::template read_line_json_s<false>(
+            *_vw, examples, const_cast<char *>(context.c_str()), context.size(),
             reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example),
             _vw, &_dedup_cache.dedup_examples);
       }
@@ -386,15 +388,15 @@ bool example_joiner::process_dedup(const v2::Event &event,
 
       try {
         if (_vw->audit || _vw->hash_inv) {
-          VW::template read_line_json<true>(
+          VW::template read_line_json_s<true>(
               *_vw, examples,
               const_cast<char *>(dedup->values()->Get(i)->c_str()),
-              get_or_create_example_f, this);
+              dedup->values()->Get(i)->size(), get_or_create_example_f, this);
         } else {
-          VW::template read_line_json<false>(
+          VW::template read_line_json_s<false>(
               *_vw, examples,
               const_cast<char *>(dedup->values()->Get(i)->c_str()),
-              get_or_create_example_f, this);
+              dedup->values()->Get(i)->size(), get_or_create_example_f, this);
         }
       } catch (VW::vw_exception &e) {
         VW::io::logger::log_error("JSON parsing during dedup processing failed "
@@ -461,7 +463,8 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
           _joiner_metrics.number_of_skipped_events++;
         } else {
           je->calculate_metrics(_vw->example_parser->metrics.get());
-          _joiner_metrics.sum_cost_original += -1. * je->get_sum_original_reward();
+          _joiner_metrics.sum_cost_original +=
+              -1. * je->get_sum_original_reward();
           if (_joiner_metrics.first_event_id.empty()) {
             _joiner_metrics.first_event_id =
                 std::move(je->interaction_metadata.event_id);
@@ -540,7 +543,8 @@ void example_joiner::persist_metrics() {
     _vw->example_parser->metrics->NumberOfSkippedEvents =
         _joiner_metrics.number_of_skipped_events;
 
-    _vw->example_parser->metrics->DsjsonSumCostOriginal = _joiner_metrics.sum_cost_original;
+    _vw->example_parser->metrics->DsjsonSumCostOriginal =
+        _joiner_metrics.sum_cost_original;
 
     if (!_joiner_metrics.first_event_id.empty()) {
       _vw->example_parser->metrics->FirstEventId =
@@ -572,5 +576,5 @@ metrics::joiner_metrics example_joiner::get_metrics() {
   return _joiner_metrics;
 }
 
-void example_joiner::apply_cli_overrides(vw *all, const input_options &parsed_options) {
-}
+void example_joiner::apply_cli_overrides(vw *all,
+                                         const input_options &parsed_options) {}
