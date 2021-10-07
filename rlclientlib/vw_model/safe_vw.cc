@@ -57,7 +57,7 @@ namespace reinforcement_learning {
   {
     // alloc new element if we don't have any left
     if (_example_pool.size() == 0) {
-      auto ex = VW::alloc_examples(0, 1);
+      auto ex = VW::alloc_examples(1);
       _vw->example_parser->lbl_parser.default_label(&ex->l);
 
       return ex;
@@ -110,12 +110,12 @@ namespace reinforcement_learning {
 
     std::vector<char> line_vec(context, context + strlen(context) + 1);
 
-    VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
+    VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
 
     // finalize example
     VW::setup_examples(*_vw, examples);
 
-    // TODO: refactor setup_examples/read_line_json to take in multi_ex
+    // TODO: refactor setup_examples/read_line_json_s to take in multi_ex
     multi_ex examples2(examples.begin(), examples.end());
 
     _vw->predict(examples2);
@@ -143,7 +143,7 @@ namespace reinforcement_learning {
 
     std::vector<char> line_vec(context, context + strlen(context) + 1);
 
-    VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
+    VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
 
     // finalize example
     VW::setup_examples(*_vw, examples);
@@ -166,7 +166,7 @@ namespace reinforcement_learning {
 
     std::vector<char> line_vec(context, context + strlen(context) + 1);
 
-    VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
+    VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
 
     // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the example tag.
     for(int i = 0; i < event_ids.size(); i++)
@@ -180,7 +180,7 @@ namespace reinforcement_learning {
     // finalize example
     VW::setup_examples(*_vw, examples);
 
-    // TODO: refactor setup_examples/read_line_json to take in multi_ex
+    // TODO: refactor setup_examples/read_line_json_s to take in multi_ex
     multi_ex examples2(examples.begin(), examples.end());
 
     _vw->predict(examples2);
@@ -212,7 +212,7 @@ namespace reinforcement_learning {
 
     std::vector<char> line_vec(context, context + strlen(context) + 1);
 
-    VW::read_line_json<false>(*_vw, examples, &line_vec[0], get_or_create_example_f, this);
+    VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
     // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the example tag.
     for(uint32_t i = 0; i < slot_ids.size(); i++)
     {
@@ -226,7 +226,7 @@ namespace reinforcement_learning {
     // finalize example
     VW::setup_examples(*_vw, examples);
 
-    // TODO: refactor setup_examples/read_line_json to take in multi_ex
+    // TODO: refactor setup_examples/read_line_json_s to take in multi_ex
     multi_ex examples2(examples.begin(), examples.end());
 
     _vw->predict(examples2);

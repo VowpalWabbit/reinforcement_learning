@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(cb_simple) {
   set_buffer_as_vw_input(buffer, vw);
 
   bool read_payload = false;
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     read_payload = true;
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(ccb_simple) {
   set_buffer_as_vw_input(buffer, vw);
 
   bool read_payload = false;
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     read_payload = true;
     BOOST_CHECK_EQUAL(examples.size(), 6);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(slates_simple) {
 
   bool read_payload = false;
 
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     read_payload = true;
 
     BOOST_CHECK_EQUAL(examples.size(), 9);
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(cb_dedup_compressed) {
   set_buffer_as_vw_input(buffer, vw);
 
   bool read_payload = false;
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     read_payload = true;
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
@@ -329,7 +329,7 @@ BOOST_AUTO_TEST_CASE(slates_skip_learn_w_activations) {
   set_buffer_as_vw_input(buffer, vw);
 
   size_t joined_events_count = 0;
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     joined_events_count++;
 
     set_slates_label(examples);
@@ -383,7 +383,7 @@ BOOST_AUTO_TEST_CASE(rrcr_ignore_examples_before_checkpoint) {
   set_buffer_as_vw_input(buffer, vw);
 
   int count = 0;
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     ++count;
     clear_examples(examples, vw);
     examples.push_back(&VW::get_unused_example(vw));
@@ -409,7 +409,7 @@ BOOST_AUTO_TEST_CASE(rcrrmr_file_magic_and_header_in_the_middle_works) {
   set_buffer_as_vw_input(buffer, vw);
 
   int count = 0;
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     ++count;
     clear_examples(examples, vw);
     examples.push_back(&VW::get_unused_example(vw));
@@ -442,7 +442,7 @@ BOOST_AUTO_TEST_CASE(cb_apprentice_mode) {
   set_buffer_as_vw_input(buffer, vw);
 
   size_t joined_events_count = 0;
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     joined_events_count++;
     if (joined_events_count == event_without_baseline) {
       // non-baseline action, find the label and check that cost is -0.0 (i.e.
@@ -501,7 +501,7 @@ BOOST_AUTO_TEST_CASE(cb_skip_learn_w_activations_and_apprentice) {
   set_buffer_as_vw_input(buffer, vw);
 
   size_t joined_events_count = 0;
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     joined_events_count++;
 
     // simulate next call to parser->read by clearing up examples
@@ -560,7 +560,7 @@ BOOST_AUTO_TEST_CASE(ccb_apprentice_mode) {
   set_buffer_as_vw_input(buffer, vw);
 
   size_t joined_events_count = 0;
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     joined_events_count++;
     if (joined_events_count == 2 || joined_events_count == 5) {
       // baseline sent by example_gen is {1, 0}
@@ -653,7 +653,7 @@ BOOST_AUTO_TEST_CASE(ccb_skip_learn_w_activations_and_apprentice) {
   set_buffer_as_vw_input(buffer, vw);
 
   size_t joined_events_count = 0;
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     joined_events_count++;
 
     // simulate next call to parser->read by clearing up examples
@@ -706,7 +706,7 @@ BOOST_AUTO_TEST_CASE(cb_pdrop_05_parse) {
   set_buffer_as_vw_input(buffer, vw);
 
   bool read_payload = false;
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     read_payload = true;
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 0);
@@ -737,7 +737,7 @@ BOOST_AUTO_TEST_CASE(cb_pdrop_1_parse) {
   set_buffer_as_vw_input(buffer, vw);
 
   bool read_payload = false;
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     read_payload = true;
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
@@ -771,7 +771,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes) {
   bool seenB = false;
   bool seenC = false;
   bool seenD = false;
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
     BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
@@ -846,7 +846,7 @@ BOOST_AUTO_TEST_CASE(multistep_3_deferred_episodes) {
   bool seenE = false;
   bool seenF = false;
 
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
     BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
@@ -921,7 +921,7 @@ BOOST_AUTO_TEST_CASE(multistep_unordered_episodes) {
   set_buffer_as_vw_input(buffer, vw);
 
   size_t counter = 0;
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
     BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
@@ -999,7 +999,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_mean) {
   bool seenB = false;
   bool seenC = false;
   bool seenD = false;
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
     BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
@@ -1057,7 +1057,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_sum) {
   bool seenD = false;
 
   size_t index = 0;
-  while (vw->example_parser->reader(vw, examples) > 0) {
+  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
     BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
