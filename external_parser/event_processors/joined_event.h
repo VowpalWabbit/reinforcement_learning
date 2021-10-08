@@ -277,7 +277,6 @@ struct ccb_joined_event : public typed_joined_event {
       if (!original_rewards.empty()) {
         first_slot_original_reward_neg = -1. * original_rewards[0];
       }
-
       calculate_multislot_interaction_metrics(metrics, multi_slot_interaction, first_slot_original_reward_neg);
     }
   }
