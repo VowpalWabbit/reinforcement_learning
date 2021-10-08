@@ -36,7 +36,9 @@ struct typed_joined_event {
 
   virtual void calculate_metrics(dsjson_metrics*) {}
   virtual float get_sum_original_reward() const = 0;
-  void calculate_multislot_interaction_metrics(dsjson_metrics* metrics, MultiSlotInteraction multi_slot_interaction, float first_slot_original_reward_neg) {
+  void calculate_multislot_interaction_metrics(dsjson_metrics* metrics, 
+                                                       MultiSlotInteraction multi_slot_interaction,
+                                                       float first_slot_original_reward_neg) {
     if(metrics) {
       metrics->DsjsonSumCostOriginalFirstSlot += first_slot_original_reward_neg;
 
@@ -276,7 +278,7 @@ struct ccb_joined_event : public typed_joined_event {
         first_slot_original_reward_neg = -1. * original_rewards[0];
       }
 
-	    calculate_multislot_interaction_metrics(metrics, multi_slot_interaction, first_slot_original_reward_neg);
+      calculate_multislot_interaction_metrics(metrics, multi_slot_interaction, first_slot_original_reward_neg);
     }
   }
 
