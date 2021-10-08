@@ -20,23 +20,7 @@ namespace joined_event {
   float probability_of_drop {0.f};
 };
 
-struct typed_joined_event {
-  virtual ~typed_joined_event() = default;
-  virtual bool is_skip_learn() const = 0;
-  virtual void set_skip_learn(bool sl) = 0;
-  virtual void set_apprentice_reward() = 0;
-  virtual bool fill_in_label(v_array<example *> &examples) const = 0;
-  virtual void
-  calc_cost(float default_reward,
-                    reward::RewardFunctionType reward_function,
-                    const metadata::event_metadata_info &interaction_metadata,
-                    // TODO outcome_events should also idealy be const here but
-                    // we currently need it for ccb calculation
-                    std::vector<reward::outcome_event> &outcome_events) = 0;
-
-  virtual void calculate_metrics(dsjson_metrics*) {}
-  virtual float get_sum_original_reward() const = 0;
-  void calculate_multislot_interaction_metrics(dsjson_metrics* metrics, 
+inline void calculate_multislot_interaction_metrics(dsjson_metrics* metrics, 
                                                        MultiSlotInteraction multi_slot_interaction,
                                                        float first_slot_original_reward_neg) {
     if(metrics) {
@@ -57,6 +41,23 @@ struct typed_joined_event {
       }
     }
   }
+
+struct typed_joined_event {
+  virtual ~typed_joined_event() = default;
+  virtual bool is_skip_learn() const = 0;
+  virtual void set_skip_learn(bool sl) = 0;
+  virtual void set_apprentice_reward() = 0;
+  virtual bool fill_in_label(v_array<example *> &examples) const = 0;
+  virtual void
+  calc_cost(float default_reward,
+                    reward::RewardFunctionType reward_function,
+                    const metadata::event_metadata_info &interaction_metadata,
+                    // TODO outcome_events should also idealy be const here but
+                    // we currently need it for ccb calculation
+                    std::vector<reward::outcome_event> &outcome_events) = 0;
+
+  virtual void calculate_metrics(dsjson_metrics*) {}
+  virtual float get_sum_original_reward() const = 0;
 };
 
 struct cb_joined_event : public typed_joined_event {

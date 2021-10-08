@@ -213,12 +213,11 @@ BOOST_AUTO_TEST_CASE(
       {"cbea_max_actions", 2}};
 
   std::map<std::string, float> expected_float_metrics = {
-      {"cbea_sum_cost", -16.0}, {"cbea_sum_cost_baseline", -5.0},
-    //   {"dsjson_sum_cost_original", -57.0},    
-    {"dsjson_sum_cost_original_first_slot", -27.0},
-    {"dsjson_number_label_equal_baseline_first_slot", 5},
-    {"dsjson_number_label_not_equal_baseline_first_slot", 12},
-    {"dsjson_sum_cost_original_label_equal_baseline_first_slot", -11.0}
+      {"cbea_sum_cost", -16.0}, {"cbea_sum_cost_baseline", -5.0},        
+      {"dsjson_sum_cost_original_first_slot", -27.0},
+      {"dsjson_number_label_equal_baseline_first_slot", 5},
+      {"dsjson_number_label_not_equal_baseline_first_slot", 12},
+      {"dsjson_sum_cost_original_label_equal_baseline_first_slot", -11.0}
       // TODO uncomment when some interaction work is pulled in from VW
       //   {"cbea_avg_feat_per_event", 18.0},
       //   {"cbea_avg_actions_per_event", 1.0},
