@@ -35,8 +35,7 @@ public:
   test_undroppable_event(const std::string& id)
     : event(id.c_str(), timestamp{}) {}
 
-  test_undroppable_event(test_undroppable_event&& other)
-    : event(std::move(other)) {}
+  test_undroppable_event(test_undroppable_event&& other) = default;
 
   test_undroppable_event& operator=(test_undroppable_event&& other) = default;
 
@@ -51,8 +50,7 @@ public:
   test_droppable_event(const std::string& id)
     : event(id.c_str(), timestamp{}) {}
 
-  test_droppable_event(test_droppable_event&& other)
-    : event(std::move(other)) {}
+  test_droppable_event(test_droppable_event&& other) = default;
 
   test_droppable_event& operator=(test_droppable_event&& other) = default;
 
@@ -65,15 +63,14 @@ public:
   config_drop_event() {}
   config_drop_event(const std::string& id) : event(id.c_str(), timestamp{}) {}
 
-  config_drop_event(config_drop_event&& other) : event(std::move(other)) {}
+  config_drop_event(config_drop_event&& other) = default;
   config_drop_event& operator=(config_drop_event&& other) = default;
 
   bool try_drop(float drop_prob, int _drop_pass) override {
     auto prob = static_cast<float>(std::atof(_seed_id.c_str()));
 
     // logic because floating point comparison is dumb. In this case, atof(0.7) > 0.7 == true
-    constexpr float FLOAT_TOL= 1e-5f;
-    return (prob > drop_prob) && !VW::math::are_same(prob, drop_prob, FLOAT_TOL);
+    return (prob > drop_prob) && !VW::math::are_same(prob, drop_prob);
   }
   std::string get_event_id() { return _seed_id; }
 };
