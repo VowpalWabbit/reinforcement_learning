@@ -13,6 +13,34 @@
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 namespace joined_event {
+  struct MultiSlotInteraction {
+  std::vector<DecisionServiceInteraction> interaction_data;
+  std::vector<unsigned> baseline_actions;
+  bool skip_learn;
+  float probability_of_drop {0.f};
+};
+
+inline void calculate_multislot_interaction_metrics(dsjson_metrics* metrics, 
+                                                       MultiSlotInteraction multi_slot_interaction,
+                                                       float first_slot_original_reward_neg) {
+    if(metrics) {
+      metrics->DsjsonSumCostOriginalFirstSlot += first_slot_original_reward_neg;
+
+      if (!multi_slot_interaction.interaction_data.empty() &&
+          !multi_slot_interaction.interaction_data[0].actions.empty() &&
+          !multi_slot_interaction.baseline_actions.empty()) {
+
+        if (multi_slot_interaction.interaction_data[0].actions[0] 
+            == multi_slot_interaction.baseline_actions[0])  {
+          metrics->DsjsonNumberOfLabelEqualBaselineFirstSlot++;
+          metrics->DsjsonSumCostOriginalLabelEqualBaselineFirstSlot += first_slot_original_reward_neg;
+        }
+        else {
+          metrics->DsjsonNumberOfLabelNotEqualBaselineFirstSlot++;
+        }
+      }
+    }
+  }
 
 struct typed_joined_event {
   virtual ~typed_joined_event() = default;
@@ -121,13 +149,6 @@ struct cb_joined_event : public typed_joined_event {
   float get_sum_original_reward() const override {
     return original_reward;
   }
-};
-
-struct MultiSlotInteraction {
-  std::vector<DecisionServiceInteraction> interaction_data;
-  std::vector<unsigned> baseline_actions;
-  bool skip_learn;
-  float probability_of_drop {0.f};
 };
 
 struct ccb_joined_event : public typed_joined_event {
@@ -251,6 +272,16 @@ struct ccb_joined_event : public typed_joined_event {
     }
   }
 
+  void calculate_metrics(dsjson_metrics* metrics) override {
+    if (metrics) {
+      float first_slot_original_reward_neg = 0.f;
+      if (!original_rewards.empty()) {
+        first_slot_original_reward_neg = -1. * original_rewards[0];
+      }
+      calculate_multislot_interaction_metrics(metrics, multi_slot_interaction, first_slot_original_reward_neg);
+    }
+  }
+
   float get_sum_original_reward() const override {
     float ret = 0.f;
     for(auto reward : original_rewards) {
@@ -325,6 +356,13 @@ struct slates_joined_event : public typed_joined_event {
       VW::io::logger::log_warn( "Apprentice mode is not implmeneted for slates.");
     } else {
       reward = original_reward;
+    }
+  }
+
+  void calculate_metrics(dsjson_metrics* metrics) override {
+    if (metrics) {
+      float original_reward_neg = -1. * original_reward;
+      calculate_multislot_interaction_metrics(metrics, multi_slot_interaction, original_reward_neg);
     }
   }
 
@@ -466,6 +504,10 @@ struct joined_event {
   void calc_reward(float default_reward, reward::RewardFunctionType reward_function)
   {
     typed_data->calc_cost(default_reward, reward_function, interaction_metadata, outcome_events);
+  }
+
+  void calculate_metrics(dsjson_metrics *metrics) {
+    return typed_data->calculate_metrics(metrics);
   }
 
   float get_sum_original_reward() const {
