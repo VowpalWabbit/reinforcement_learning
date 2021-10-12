@@ -47,6 +47,19 @@ static const char* get_str(const configuration &config, const char *section, con
   return config.get(property, defval);
 }
 
+static float get_float(const configuration &config, const char *section, const char *property, float defval)
+{
+
+  std::stringstream ss;
+  ss << section << "." << property;
+  auto tmp = ss.str();
+  const char *key = tmp.c_str();
+  if(config.get(key, NULL) != nullptr) {
+    return config.get_float(key, defval);
+  }
+  return config.get_float(property, defval);
+}
+
 async_batcher_config get_batcher_config(const configuration &config, const char *section)
 {
   async_batcher_config res;
@@ -55,6 +68,7 @@ async_batcher_config get_batcher_config(const configuration &config, const char 
   res.send_queue_max_capacity = get_int(config, section, name::SEND_QUEUE_MAX_CAPACITY_KB, 16 * 1024) * 1024;
   res.queue_mode = to_queue_mode_enum(get_str(config, section, name::QUEUE_MODE, value::QUEUE_MODE_DROP));
   res.batch_content_encoding = config.get_bool(section, name::USE_DEDUP, false) ? value::CONTENT_ENCODING_DEDUP : value::CONTENT_ENCODING_IDENTITY;
+  res.subsample_rate = get_float(config, section, name::SUBSAMPLE_RATE, 1.f);
   return res;
 }
 
