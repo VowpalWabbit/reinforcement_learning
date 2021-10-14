@@ -141,8 +141,13 @@ struct cb_joined_event : public typed_joined_event {
   }
 
   void calculate_metrics(dsjson_metrics* metrics) override {
-    if (metrics && interaction_data.actions.size() == 0) {
-      metrics->NumberOfEventsZeroActions++;
+    if (metrics) {
+      if (interaction_data.actions.size() == 0) {
+        metrics->NumberOfEventsZeroActions++;
+      }
+      else if (interaction_data.actions[0] == CB_BASELINE_ACTION) {
+        metrics->DsjsonSumCostOriginalBaseline += original_reward;
+      }
     }
   }
 
