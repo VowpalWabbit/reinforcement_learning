@@ -146,7 +146,7 @@ struct cb_joined_event : public typed_joined_event {
         metrics->NumberOfEventsZeroActions++;
       }
       else if (interaction_data.actions[0] == CB_BASELINE_ACTION) {
-        metrics->DsjsonSumCostOriginalBaseline += original_reward;
+        metrics->DsjsonSumCostOriginalBaseline += -1. * original_reward;
       }
     }
   }
