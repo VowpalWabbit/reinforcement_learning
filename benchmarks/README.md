@@ -5,8 +5,8 @@ by default google benchmark is built in Debug mode so you might want to specify 
 build rl benchmarks:
 
 ```
-cmake .. -DBUILD_BENCHMARKS=ON
-make -j $(nproc) rl_benchmarks
+cmake -S . -B build -DRL_BUILD_BENCHMARKS=ON
+cmake --build build --target rl_benchmarks -j $(nproc)
 ```
 
 run rl benchmarks:
