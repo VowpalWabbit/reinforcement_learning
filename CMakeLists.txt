@@ -14,7 +14,7 @@ project(reinforcement_learning)
 
 set(CMAKE_CXX_STANDARD 11)
 
-option(BUILD_PYTHON "Build the Python bindings" OFF)
+option(RL_BUILD_PYTHON "Build the Python bindings" OFF)
 option(USE_ZSTD "Whether to enable usage of zstandard compression" ON)
 option(RL_STATIC_DEPS "Only use static dependencies" OFF)
 
