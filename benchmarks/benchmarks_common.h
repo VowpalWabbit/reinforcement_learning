@@ -3,11 +3,11 @@
 #include <vector>
 
 class prng {
-  int val;
+  uint64_t val;
 
 public:
-  prng(int initial_seed);
-  uint32_t next_uint();
+  prng(uint64_t initial_seed);
+  uint64_t next_uint();
 };
 
 class cb_decision_gen {

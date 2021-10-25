@@ -1,21 +1,13 @@
 #include "benchmarks_common.h"
+#include "rand48.h"
 
 #include <set>
 
-// We use this instead of rand to ensure it's xplat
-int pseudo_random(int seed) {
-  constexpr uint64_t CONSTANT_A = 0xeece66d5deece66dULL;
-  constexpr uint64_t CONSTANT_C = 2147483647;
+prng::prng(uint64_t initial_seed) : val(merand48(initial_seed)) {}
 
-  uint64_t val = CONSTANT_A * seed + CONSTANT_C;
-  return static_cast<int>(val & 0xFFFFFFFF);
-}
-
-prng::prng(int initial_seed) : val(pseudo_random(initial_seed)) {}
-uint32_t prng::next_uint() {
-  uint32_t res = val & 0x7FFFFFFF;
-  val = pseudo_random(val);
-  return res;
+uint64_t prng::next_uint() {
+  merand48(val);
+  return val;
 }
 
 std::string cb_decision_gen::mk_feature_vector(int count, uint32_t max_idx) {
