@@ -10,6 +10,7 @@
 #include "live_model_impl.h"
 #include "err_constants.h"
 #include "constants.h"
+#include "internal_constants.h"
 #include "vw_model/safe_vw.h"
 #include "trace_logger.h"
 #include "explore_internal.h"
@@ -428,8 +429,9 @@ namespace reinforcement_learning {
     i_sender* ranking_data_sender;
 
     // Use the name to create an instance of raw data sender for interactions
+    _configuration.set(config_constants::CONFIG_SECTION, config_constants::INTERACTION);
     RETURN_IF_FAIL(_sender_factory->create(&ranking_data_sender, ranking_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
-    RETURN_IF_FAIL(ranking_data_sender->init(status));
+    RETURN_IF_FAIL(ranking_data_sender->init(_configuration, status));
 
     // Create a message sender that will prepend the message with a preamble and send the raw data using the
     // factory created raw data sender
@@ -457,8 +459,9 @@ namespace reinforcement_learning {
     i_sender* outcome_sender;
 
     // Use the name to create an instance of raw data sender for observations
+    _configuration.set(config_constants::CONFIG_SECTION, config_constants::OBSERVATION);
     RETURN_IF_FAIL(_sender_factory->create(&outcome_sender, outcome_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
-    RETURN_IF_FAIL(outcome_sender->init(status));
+    RETURN_IF_FAIL(outcome_sender->init(_configuration, status));
 
     // Create a message sender that will prepend the message with a preamble and send the raw data using the
     // factory created raw data sender

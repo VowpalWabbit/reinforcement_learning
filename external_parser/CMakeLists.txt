@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
-cmake_policy(SET CMP0074 NEW)
+if(POLICY CMP0074)
+    cmake_policy(SET CMP0074 NEW)
+endif()
 project(vw_binary_parser)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -40,7 +42,7 @@ set(RL_FLAT_BUFFER_FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/Event.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/LearningModeType.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/ProblemType.fbs"
-  "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/MultiStepEvent.fbs"   
+  "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/MultiStepEvent.fbs"
   )
 
 # set vw cmake flags
@@ -67,6 +69,7 @@ set(external_parser_headers ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.h
   ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_converter.h
   ${CMAKE_CURRENT_SOURCE_DIR}/event_processors/timestamp_helper.h
   ${CMAKE_CURRENT_SOURCE_DIR}/log_converter.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils.h
 )
 set(external_parser_sources ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/joiners/example_joiner.cc
@@ -76,6 +79,7 @@ set(external_parser_sources ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_converter.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/event_processors/timestamp_helper.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/log_converter.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils.cc
 )
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/zstd/build/cmake ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser/zstd EXCLUDE_FROM_ALL)

@@ -6,6 +6,7 @@
 #include "generated/v2/Event_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
 #include "zstd.h"
+#include <boost/algorithm/string.hpp>
 
 #include <limits.h>
 #include <time.h>
@@ -116,6 +117,10 @@ void example_joiner::set_problem_type_config(v2::ProblemType problem_type,
   _loop_info.problem_type_config.set(problem_type, sticky);
 }
 
+void example_joiner::set_use_client_time(bool use_client_time, bool sticky) {
+  _loop_info.use_client_time.set(use_client_time, sticky);
+}
+
 bool example_joiner::joiner_ready() {
   return _loop_info.is_configured() && _reward_calculation.is_valid();
 }
@@ -193,8 +198,10 @@ bool example_joiner::process_interaction(const v2::Event &event,
                                          const TimePoint &enqueued_time_utc,
                                          v_array<example *> &examples) {
 
-  if (EnumNamePayloadType(metadata.payload_type()) !=
-      EnumNameProblemType(_loop_info.problem_type_config)) {
+  std::string payload_type(EnumNamePayloadType(metadata.payload_type()));
+  std::string loop_type(EnumNameProblemType(_loop_info.problem_type_config));
+
+  if (!boost::iequals(payload_type, loop_type)) {
     VW::io::logger::log_warn(
         "Online Trainer mode [{}] "
         "and Interaction event type [{}] "
@@ -208,7 +215,6 @@ bool example_joiner::process_interaction(const v2::Event &event,
   joined_event::joined_event je;
 
   if (metadata.payload_type() == v2::PayloadType_CB) {
-
     const v2::CbEvent *cb = nullptr;
     if (!typed_event::process_compression<v2::CbEvent>(
             event.payload()->data(), event.payload()->size(), metadata, cb,
@@ -224,34 +230,52 @@ bool example_joiner::process_interaction(const v2::Event &event,
       return false;
     }
 
-    je = std::move(
-        typed_event::event_processor<v2::CbEvent>::fill_in_joined_event(
-            *cb, metadata, enqueued_time_utc,
-            typed_event::event_processor<v2::CbEvent>::get_context(*cb)));
-  } else if (metadata.payload_type() == v2::PayloadType_CCB) {
-    const v2::MultiSlotEvent *ccb = nullptr;
+    je = typed_event::event_processor<v2::CbEvent>::fill_in_joined_event(
+        *cb, metadata, enqueued_time_utc,
+        typed_event::event_processor<v2::CbEvent>::get_context(*cb));
+  } else if (metadata.payload_type() == v2::PayloadType_CCB ||
+             metadata.payload_type() == v2::PayloadType_Slates) {
+    const v2::MultiSlotEvent *multislot = nullptr;
     if (!typed_event::process_compression<v2::MultiSlotEvent>(
-            event.payload()->data(), event.payload()->size(), metadata, ccb,
-            _detached_buffer) ||
-        ccb == nullptr) {
+            event.payload()->data(), event.payload()->size(), metadata,
+            multislot, _detached_buffer) ||
+        multislot == nullptr) {
       return false;
     }
 
     if (!typed_event::event_processor<v2::MultiSlotEvent>::is_valid(
-            *ccb, _loop_info)) {
-      VW::io::logger::log_warn("CCB payload with event id [{}] is malformed. "
+            *multislot, _loop_info)) {
+      VW::io::logger::log_warn("[{}] payload with event id [{}] is malformed. "
+                               "Skipping interaction from processing.",
+                               EnumNamePayloadType(metadata.payload_type()),
+                               metadata.id()->c_str());
+      return false;
+    }
+
+    je = typed_event::event_processor<v2::MultiSlotEvent>::fill_in_joined_event(
+        *multislot, metadata, enqueued_time_utc,
+        typed_event::event_processor<v2::MultiSlotEvent>::get_context(
+            *multislot));
+  } else if (metadata.payload_type() == v2::PayloadType_CA) {
+    const v2::CaEvent *ca = nullptr;
+    if (!typed_event::process_compression<v2::CaEvent>(
+            event.payload()->data(), event.payload()->size(), metadata, ca,
+            _detached_buffer) ||
+        ca == nullptr) {
+      return false;
+    }
+
+    if (!typed_event::event_processor<v2::CaEvent>::is_valid(*ca, _loop_info)) {
+      VW::io::logger::log_warn("CA payload with event id [{}] is malformed. "
                                "Skipping interaction from processing.",
                                metadata.id()->c_str());
       return false;
     }
-    je = std::move(
-        typed_event::event_processor<v2::MultiSlotEvent>::fill_in_joined_event(
-            *ccb, metadata, enqueued_time_utc,
-            typed_event::event_processor<v2::MultiSlotEvent>::get_context(
-                *ccb)));
-  }
 
-  else {
+    je = typed_event::event_processor<v2::CaEvent>::fill_in_joined_event(
+        *ca, metadata, enqueued_time_utc,
+        typed_event::event_processor<v2::CaEvent>::get_context(*ca));
+  } else {
     // for now only CB is supported so log and return false
     VW::io::logger::log_error("Interaction event learning mode [{}] not "
                               "currently supported, skipping interaction "
@@ -260,26 +284,27 @@ bool example_joiner::process_interaction(const v2::Event &event,
     return false;
   }
 
-  std::string context(je.context);
-
-  try {
-    if (_vw->audit || _vw->hash_inv) {
-      VW::template read_line_json<true>(
-          *_vw, examples, const_cast<char *>(context.c_str()),
-          reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
-          &_dedup_cache.dedup_examples);
-    } else {
-      VW::template read_line_json<false>(
-          *_vw, examples, const_cast<char *>(context.c_str()),
-          reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw,
-          &_dedup_cache.dedup_examples);
+  if (!_binary_to_json) {
+    std::string context(je.context);
+    try {
+      if (_vw->audit || _vw->hash_inv) {
+        VW::template read_line_json_s<true>(
+            *_vw, examples, const_cast<char *>(context.c_str()), context.size(),
+            reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example),
+            _vw, &_dedup_cache.dedup_examples);
+      } else {
+        VW::template read_line_json_s<false>(
+            *_vw, examples, const_cast<char *>(context.c_str()), context.size(),
+            reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example),
+            _vw, &_dedup_cache.dedup_examples);
+      }
+    } catch (VW::vw_exception &e) {
+      VW::io::logger::log_warn(
+          "JSON parsing during interaction processing failed "
+          "with error: [{}] for event with id: [{}]",
+          e.what(), metadata.id()->c_str());
+      return false;
     }
-  } catch (VW::vw_exception &e) {
-    VW::io::logger::log_warn(
-        "JSON parsing during interaction processing failed "
-        "with error: [{}] for event with id: [{}]",
-        e.what(), metadata.id()->c_str());
-    return false;
   }
 
   _batch_grouped_examples.emplace(
@@ -292,14 +317,13 @@ bool example_joiner::process_outcome(const v2::Event &event,
                                      const v2::Metadata &metadata,
                                      const TimePoint &enqueued_time_utc) {
   reward::outcome_event o_event;
-  o_event.metadata = {metadata.client_time_utc()
-                          ? timestamp_to_chrono(*metadata.client_time_utc())
-                          : TimePoint(),
-                      metadata.app_id() ? metadata.app_id()->str() : "",
+  o_event.metadata = {metadata.app_id() ? metadata.app_id()->str() : "",
                       metadata.payload_type(),
                       metadata.pass_probability(),
                       metadata.encoding(),
-                      metadata.id()->str()};
+                      metadata.id()->str(),
+                      v2::LearningModeType_Online};
+
   o_event.enqueued_time_utc = enqueued_time_utc;
 
   const v2::OutcomeEvent *outcome = nullptr;
@@ -317,6 +341,8 @@ bool example_joiner::process_outcome(const v2::Event &event,
   } else if (outcome->value_type() == v2::OutcomeValue_numeric) {
     o_event.value = outcome->value_as_numeric()->value();
   }
+
+  o_event.index_type = outcome->index_type();
 
   if (outcome->index_type() == v2::IndexValue_literal) {
     o_event.s_index = outcome->index_as_literal()->c_str();
@@ -352,7 +378,7 @@ bool example_joiner::process_dedup(const v2::Event &event,
     return false;
   }
 
-  auto examples = v_init<example *>();
+  v_array<example *> examples;
 
   for (size_t i = 0; i < dedup->ids()->size(); i++) {
     auto dedup_id = dedup->ids()->Get(i);
@@ -362,15 +388,15 @@ bool example_joiner::process_dedup(const v2::Event &event,
 
       try {
         if (_vw->audit || _vw->hash_inv) {
-          VW::template read_line_json<true>(
+          VW::template read_line_json_s<true>(
               *_vw, examples,
               const_cast<char *>(dedup->values()->Get(i)->c_str()),
-              get_or_create_example_f, this);
+              dedup->values()->Get(i)->size(), get_or_create_example_f, this);
         } else {
-          VW::template read_line_json<false>(
+          VW::template read_line_json_s<false>(
               *_vw, examples,
               const_cast<char *>(dedup->values()->Get(i)->c_str()),
-              get_or_create_example_f, this);
+              dedup->values()->Get(i)->size(), get_or_create_example_f, this);
         }
       } catch (VW::vw_exception &e) {
         VW::io::logger::log_error("JSON parsing during dedup processing failed "
@@ -408,7 +434,9 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   for (auto &joined_event : _batch_grouped_events[id]) {
     auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
     auto metadata = event->meta();
-    auto enqueued_time_utc = timestamp_to_chrono(*joined_event->timestamp());
+    auto enqueued_time_utc = get_enqueued_time(joined_event->timestamp(),
+                                               metadata->client_time_utc(),
+                                               _loop_info.use_client_time);
     const auto &payload_type = metadata->payload_type();
 
     if (payload_type == v2::PayloadType_Outcome) {
@@ -434,8 +462,9 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
         if (!je->is_joined_event_learnable()) {
           _joiner_metrics.number_of_skipped_events++;
         } else {
-          // TODO does this potentially need to check and set client time utc if
-          // that option is on?
+          je->calculate_metrics(_vw->example_parser->metrics.get());
+          _joiner_metrics.sum_cost_original +=
+              -1. * je->get_sum_original_reward();
           if (_joiner_metrics.first_event_id.empty()) {
             _joiner_metrics.first_event_id =
                 std::move(je->interaction_metadata.event_id);
@@ -450,9 +479,8 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
         }
       }
 
-      if (_binary_to_json &&
-          je->interaction_metadata.payload_type == v2::PayloadType_CB) {
-        log_converter::build_cb_json(_outfile, *je);
+      if (_binary_to_json) {
+        log_converter::build_json(_outfile, *je);
       }
     }
 
@@ -482,10 +510,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
     return false;
   }
 
-  je->fill_in_label(examples);
-
-  je->calc_and_set_reward(examples, _loop_info.default_reward,
-                          _reward_calculation.value());
+  je->calc_reward(_loop_info.default_reward, _reward_calculation.value());
 
   if (!je->is_joined_event_learnable()) {
     _current_je_is_skip_learn = true;
@@ -496,6 +521,11 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
   if (_binary_to_json) {
     clear_examples = true;
     return true;
+  }
+
+  if (!je->fill_in_label(examples)) {
+    clear_examples = true;
+    return false;
   }
 
   if (multiline) {
@@ -512,6 +542,9 @@ void example_joiner::persist_metrics() {
   if (_vw->example_parser->metrics) {
     _vw->example_parser->metrics->NumberOfSkippedEvents =
         _joiner_metrics.number_of_skipped_events;
+
+    _vw->example_parser->metrics->DsjsonSumCostOriginal =
+        _joiner_metrics.sum_cost_original;
 
     if (!_joiner_metrics.first_event_id.empty()) {
       _vw->example_parser->metrics->FirstEventId =
@@ -542,3 +575,6 @@ void example_joiner::on_batch_read() {}
 metrics::joiner_metrics example_joiner::get_metrics() {
   return _joiner_metrics;
 }
+
+void example_joiner::apply_cli_overrides(vw *all,
+                                         const input_options &parsed_options) {}

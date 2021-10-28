@@ -14,6 +14,9 @@
 #include "utility/config_helper.h"
 #include "utility/object_pool.h"
 
+// float comparisons
+#include "vw_math.h"
+
 namespace reinforcement_learning {
   class error_callback_fn;
 };
@@ -76,16 +79,32 @@ namespace reinforcement_learning { namespace logger {
     std::mutex _m;
     utility::object_pool<utility::data_buffer> _buffer_pool;
     const char* _batch_content_encoding;
+    float _subsample_rate;
   };
 
   template<typename TEvent, template<typename> class TSerializer>
   int async_batcher<TEvent, TSerializer>::init(api_status* status) {
     RETURN_IF_FAIL(_periodic_background_proc.init(this, status));
+    bool subsample_lte_zero = _subsample_rate < 0.f || VW::math::are_same(_subsample_rate, 0.f);
+    bool subsample_gt_one = _subsample_rate > 1.f && !VW::math::are_same(_subsample_rate, 1.f);
+    if(subsample_lte_zero || subsample_gt_one) {
+      // invalid subsample rate
+      RETURN_ERROR_ARG(nullptr, status, invalid_argument, "subsampling rate must be within (0, 1]");
+    }
     return error_code::success;
   }
 
   template<typename TEvent, template<typename> class TSerializer>
   int async_batcher<TEvent, TSerializer>::append(TEvent&& evt, api_status* status) {
+
+    // If subsampling rate is < 1, then run subsampling logic
+    if(_subsample_rate < 1) {
+      if(evt.try_drop(_subsample_rate, constants::SUBSAMPLE_RATE_DROP_PASS)) {
+        // If the event is dropped, just get out of here
+        return error_code::success;
+      }
+    }
+    
     _queue.push(std::move(evt), TSerializer<TEvent>::serializer_t::size_estimate(evt));
 
     //block or drop events if the queue if full
@@ -179,6 +198,7 @@ namespace reinforcement_learning { namespace logger {
     , _pass_prob(0.5)
     , _queue_mode(config.queue_mode)
     , _batch_content_encoding(config.batch_content_encoding)
+    , _subsample_rate(config.subsample_rate)
   {}
 
   template<typename TEvent, template<typename> class TSerializer>

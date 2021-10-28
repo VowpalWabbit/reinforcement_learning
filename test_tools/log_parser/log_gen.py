@@ -4,25 +4,12 @@ from reinforcement_learning.messages.flatbuff.v2.EventBatch import *
 from reinforcement_learning.messages.flatbuff.v2.BatchMetadata import *
 from reinforcement_learning.messages.flatbuff.v2.EventBatch import *
 from reinforcement_learning.messages.flatbuff.v2.LearningModeType import LearningModeType
-from reinforcement_learning.messages.flatbuff.v2.PayloadType import PayloadType
-from reinforcement_learning.messages.flatbuff.v2.OutcomeValue import OutcomeValue
-from reinforcement_learning.messages.flatbuff.v2.NumericOutcome import NumericOutcome
-from reinforcement_learning.messages.flatbuff.v2.NumericIndex import NumericIndex
-
-from reinforcement_learning.messages.flatbuff.v2.Metadata import *
-from reinforcement_learning.messages.flatbuff.v2.CbEvent import *
-from reinforcement_learning.messages.flatbuff.v2.OutcomeEvent import OutcomeEvent
-from reinforcement_learning.messages.flatbuff.v2.MultiSlotEvent import MultiSlotEvent
-from reinforcement_learning.messages.flatbuff.v2.CaEvent import CaEvent
-from reinforcement_learning.messages.flatbuff.v2.DedupInfo import DedupInfo
 
 from reinforcement_learning.messages.flatbuff.v2.KeyValue import *
 from reinforcement_learning.messages.flatbuff.v2.TimeStamp import *
 from reinforcement_learning.messages.flatbuff.v2.FileHeader import *
 from reinforcement_learning.messages.flatbuff.v2.JoinedEvent import *
 from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *
-from reinforcement_learning.messages.flatbuff.v2.Metadata import *
-from reinforcement_learning.messages.flatbuff.v2.Event import *
 from reinforcement_learning.messages.flatbuff.v2.CheckpointInfo import *
 from reinforcement_learning.messages.flatbuff.v2.RewardFunctionType import *
 from reinforcement_learning.messages.flatbuff.v2.ProblemType import *
@@ -30,27 +17,31 @@ from reinforcement_learning.messages.flatbuff.v2.EventEncoding import *
 
 import flatbuffers
 import sys
-import json
 import struct
 from datetime import datetime
 import numpy as np
-import argparse
-
 
 MSG_TYPE_HEADER = 0x55555555
 MSG_TYPE_CHECKPOINT = 0x11111111
 MSG_TYPE_REGULAR = 0xFFFFFFFF
 MSG_TYPE_EOF = 0xAAAAAAAA
 
+def EndVector(builder, size):
+    from packaging import version
+    if version.parse(flatbuffers.__version__).major >= 2:
+        return builder.EndVector()
+    else:
+        return builder.EndVector(size)
+
 def mk_timestamp(builder):
-    time = datetime.utcnow()
+    time = datetime(2021, 1, 1, 0, 0, 0)
     return CreateTimeStamp(builder, time.year, time.month, time.day, time.hour, time.minute, time.second, int(time.microsecond))
 
 def mk_offsets_vector(builder, arr, startFun):
     startFun(builder, len(arr))
     for i in reversed(range(len(arr))):
         builder.PrependUOffsetTRelative(arr[i])
-    return builder.EndVector(len(arr))
+    return EndVector(builder, len(arr))
 
 def mk_bytes_vector(builder, arr):
     return builder.CreateNumpyVector(np.array(list(arr), dtype='b'))
@@ -87,16 +78,12 @@ class BinLogWriter:
         builder.Finish(header_off)
         self._write_message(MSG_TYPE_HEADER, builder.Output())
 
-    def write_regular_message(self, events):
+    def write_regular_message(self, joined_events):
         builder = flatbuffers.Builder(0)
 
         evt_offsets = []
-        for evt in events:
-            payload_off = mk_bytes_vector(builder, evt)
-            JoinedEventStart(builder)
-            JoinedEventAddEvent(builder, payload_off)
-            JoinedEventAddTimestamp(builder, mk_timestamp(builder))
-            evt_offsets.append(JoinedEventEnd(builder))
+        for evt in joined_events:
+            evt_offsets.append(evt.to(builder))
 
         evt_array_offset = mk_offsets_vector(builder, evt_offsets, JoinedPayloadStartEventsVector)
 
@@ -107,7 +94,7 @@ class BinLogWriter:
         builder.Finish(joined_payload_off)
         self._write_message(MSG_TYPE_REGULAR, builder.Output())
 
-    def write_checkpoint_info(self, reward_fun = RewardFunctionType.Earliest, default_reward = 0.0, learning_mode = LearningModeType.Online, problem_type = ProblemType.CB):
+    def write_checkpoint_info(self, reward_fun = RewardFunctionType.Earliest, default_reward = 0.0, learning_mode = LearningModeType.Online, problem_type = ProblemType.CB, use_client_time = False):
         builder = flatbuffers.Builder(0)
 
         CheckpointInfoStart(builder)
@@ -115,6 +102,7 @@ class BinLogWriter:
         CheckpointInfoAddDefaultReward(builder, default_reward)
         CheckpointInfoAddLearningModeConfig(builder, learning_mode)
         CheckpointInfoAddProblemTypeConfig(builder, problem_type)
+        CheckpointInfoAddUseClientTime(builder, use_client_time)
 
         checkpoint_info_off = CheckpointInfoEnd(builder)
         builder.Finish(checkpoint_info_off)
@@ -132,80 +120,37 @@ class BinLogWriter:
         if padding_bytes > 0:
             self.file.write(bytes([0] * padding_bytes))
 
+    def __enter__(self):
+        return self
 
-def mk_long_vector(builder, arr):
-    return builder.CreateNumpyVector(np.array(list(arr), dtype=np.int64))
+    def __exit__(self, type, value, traceback):
+        return self.file.__exit__(type, value, traceback)
 
-def mk_float_vector(builder, arr):
-    return builder.CreateNumpyVector(np.array(list(arr), dtype=np.float))
+def main():
+    if len(sys.argv) != 2:
+        print("""Usage: log_gen.py <XXXX>
+    Where XXXX is a sequence of letters telling which kind of message to output next:
+    m -> File Magic
+    h -> File Header
+    c -> Checkpoint message
+    r -> Single CB message with no observation
+    For example: ./log_gen.py mhcrr
+    This writes to output.fb five messages in sequence: file magic, file header, checkpoint, CB and CB.
+        """)
+    else:
+        foo = BinLogWriter('output.fb')
 
+        for c in sys.argv[1]:
+            if   c == 'm':
+                foo.write_file_magic()
+            elif c == 'h':
+                foo.write_file_header({ 'foo': 'bar'})
+            elif c == 'c':
+                foo.write_checkpoint_info()
+            elif c == 'r':
+                foo.write_regular_message([mk_cb_payload()])
+            else:
+                print(f'Invalid character \'{c}\'. Ignoring it.')
 
-
-CB_STR = """{"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"}},{"TAction":{"a2":"f2"}}]}"""
-
-def mk_cb_payload():
-    # first gen the CB payload
-    builder = flatbuffers.Builder(0)
-
-    actions = mk_long_vector(builder, [1,3])
-    ctx = mk_bytes_vector(builder, bytes(CB_STR, 'utf-8'))
-    probs = mk_float_vector(builder, [0.1,0.9])
-    model_id = builder.CreateString("the model")
-
-    CbEventStart(builder)
-    CbEventAddDeferredAction(builder, False)
-    CbEventAddActionIds(builder, actions)
-    CbEventAddContext(builder, ctx)
-    CbEventAddProbabilities(builder, probs)
-    CbEventAddModelId(builder, model_id)
-    CbEventAddLearningMode(builder, LearningModeType.Online)
-    builder.Finish(CbEventEnd(builder))
-    
-    cb_payload = builder.Output()
-
-    builder = flatbuffers.Builder(0)
-    event_id = builder.CreateString("event_id_0")
-
-    MetadataStart(builder)
-    MetadataAddId(builder, event_id)
-    MetadataAddClientTimeUtc(builder, mk_timestamp(builder))
-    MetadataAddPayloadType(builder, PayloadType.CB)
-    MetadataAddEncoding(builder, EventEncoding.Identity)
-
-    md_off = MetadataEnd(builder)
-    payload_off = mk_bytes_vector(builder, cb_payload)
-
-    EventStart(builder)
-    EventAddMeta(builder, md_off)
-    EventAddPayload(builder, payload_off)
-    builder.Finish(EventEnd(builder))
-
-    return builder.Output()
-
-
-
-
-if len(sys.argv) != 2:
-    print("""Usage: log_gen.py <XXXX>
-Where XXXX is a sequence of letters telling which kind of message to output next:
-m -> File Magic
-h -> File Header
-c -> Checkpoint message
-r -> Single CB message with no observation
-For example: ./log_gen.py mhcrr
-This writes to output.fb five messages in sequence: file magic, file header, checkpoint, CB and CB.
-    """)
-else:
-    foo = BinLogWriter('output.fb')
-
-    for c in sys.argv[1]:
-        if   c == 'm':
-            foo.write_file_magic()
-        elif c == 'h':
-            foo.write_file_header({ 'foo': 'bar'})
-        elif c == 'c':
-            foo.write_checkpoint_info()
-        elif c == 'r':
-            foo.write_regular_message([mk_cb_payload()])
-        else:
-            print(f'Invalid character \'{c}\'. Ignoring it.')
+if __name__ == "__main__":
+    main()

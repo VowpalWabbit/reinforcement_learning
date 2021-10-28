@@ -10,6 +10,7 @@
 #include "serialization/json_serializer.h"
 #include "logger/async_batcher.h"
 #include "sender.h"
+#include "vw_math.h"
 
 using namespace reinforcement_learning;
 //This class simply implement a 'send' method, in order to be used as a template in the async_batcher
@@ -26,6 +27,7 @@ public:
   int init(api_status* status) override { return error_code::success; };
   i_sender* sender;
 };
+
 class test_undroppable_event : public event {
 public:
   test_undroppable_event() {}
@@ -33,17 +35,14 @@ public:
   test_undroppable_event(const std::string& id)
     : event(id.c_str(), timestamp{}) {}
 
-  test_undroppable_event(test_undroppable_event&& other)
-    : event(std::move(other)) {}
+  test_undroppable_event(test_undroppable_event&& other) = default;
 
-  test_undroppable_event& operator=(test_undroppable_event&& other) {
-    if (&other != this) event::operator=(std::move(other));
-    return *this;
-  }
+  test_undroppable_event& operator=(test_undroppable_event&& other) = default;
 
   bool try_drop(float drop_prob, int _drop_pass) override { return false; }
   std::string get_event_id() { return _seed_id; }
 };
+
 class test_droppable_event : public event {
 public:
   test_droppable_event() {}
@@ -51,16 +50,31 @@ public:
   test_droppable_event(const std::string& id)
     : event(id.c_str(), timestamp{}) {}
 
-  test_droppable_event(test_droppable_event&& other)
-    : event(std::move(other)) {}
+  test_droppable_event(test_droppable_event&& other) = default;
 
-  test_droppable_event& operator=(test_droppable_event&& other) {
-    if (&other != this) event::operator=(std::move(other));
-    return *this;
-  }
+  test_droppable_event& operator=(test_droppable_event&& other) = default;
 
   bool try_drop(float drop_prob, int _drop_pass) override { return true; }
 };
+
+// event that converts the event_id into a float used for the drop probability
+class config_drop_event : public event {
+public:
+  config_drop_event() {}
+  config_drop_event(const std::string& id) : event(id.c_str(), timestamp{}) {}
+
+  config_drop_event(config_drop_event&& other) = default;
+  config_drop_event& operator=(config_drop_event&& other) = default;
+
+  bool try_drop(float drop_prob, int _drop_pass) override {
+    auto prob = static_cast<float>(std::atof(_seed_id.c_str()));
+
+    // logic because floating point comparison is dumb. In this case, atof(0.7) > 0.7 == true
+    return (prob > drop_prob) && !VW::math::are_same(prob, drop_prob);
+  }
+  std::string get_event_id() { return _seed_id; }
+};
+
 namespace reinforcement_learning { namespace logger {
   template <>
   struct json_event_serializer<test_droppable_event> {
@@ -84,12 +98,26 @@ namespace reinforcement_learning { namespace logger {
 
     static size_t size_estimate(const test_undroppable_event& evt) { return 1; }
   };
+    
+  template <>
+  struct json_event_serializer<config_drop_event> {
+    using serializer_t = json_event_serializer<config_drop_event>;
+
+    static int serialize(config_drop_event& evt, std::ostream& out, api_status* status) {
+      out << evt.get_event_id();
+      return error_code::success;
+    }
+
+    static size_t size_estimate(const config_drop_event& evt) { return 1; }
+  };
 }}
 
 void expect_no_error(const api_status& s, void* cntxt) {
   BOOST_ASSERT(s.get_error_code() == error_code::success);
   BOOST_FAIL("Should not get background error notifications");
-} //test the flush mechanism based on a timer
+}
+
+//test the flush mechanism based on a timer
 BOOST_AUTO_TEST_CASE(flush_timeout) {
   std::vector<std::string> items;
   auto s = new message_sender(items);
@@ -117,7 +145,9 @@ BOOST_AUTO_TEST_CASE(flush_timeout) {
   std::string result;
   for (auto item : items) { result.append(item.begin(), item.end()); }
   BOOST_CHECK_EQUAL(result, expected);
-} //test that the batcher split batches as expected
+}
+
+//test that the batcher split batches as expected
 BOOST_AUTO_TEST_CASE(flush_batches) {
   std::vector<std::string> items;
   auto s = new message_sender(items);
@@ -149,7 +179,9 @@ BOOST_AUTO_TEST_CASE(flush_batches) {
   BOOST_REQUIRE_EQUAL(items.size(), 2);
   BOOST_CHECK_EQUAL(items[0], expected_batch_0);
   BOOST_CHECK_EQUAL(items[1], expected_batch_1);
-} //test that the batcher flushes everything before deletion
+}
+
+//test that the batcher flushes everything before deletion
 BOOST_AUTO_TEST_CASE(flush_after_deletion) {
   std::vector<std::string> items;
   auto s = new message_sender(items);
@@ -169,7 +201,9 @@ BOOST_AUTO_TEST_CASE(flush_after_deletion) {
   BOOST_REQUIRE_EQUAL(items.size(), 1);
   std::string expected = foo + "\n" + bar + "\n";
   BOOST_CHECK_EQUAL(items[0], expected);
-} //test that events are not dropped using the queue_dropping_disable option, even if the queue max capacity is reached
+}
+
+//test that events are not dropped using the queue_dropping_disable option, even if the queue max capacity is reached
 BOOST_AUTO_TEST_CASE(queue_overflow_do_not_drop_event) {
   std::vector<std::string> items;
   auto s = new message_sender(items);
@@ -200,4 +234,37 @@ BOOST_AUTO_TEST_CASE(queue_overflow_do_not_drop_event) {
   std::string actual_output;
   for (const auto& item : items) { actual_output.append(item); }
   BOOST_CHECK_EQUAL(expected_output, actual_output);
+}
+
+BOOST_AUTO_TEST_CASE(queue_config_drop_rate_test)
+{
+  std::vector<std::string> items;
+  auto s = new message_sender(items);
+  size_t timeout_ms = 100;
+  size_t queue_max_size = 10;
+  queue_mode_enum queue_mode = queue_mode_enum::BLOCK;
+  error_callback_fn error_fn(expect_no_error, nullptr);
+  utility::watchdog watchdog(nullptr);
+  utility::async_batcher_config config;
+  config.send_high_water_mark = 262143;
+  config.send_batch_interval_ms = timeout_ms;
+  config.send_queue_max_capacity = queue_max_size;
+  config.queue_mode = queue_mode;
+  config.subsample_rate = 0.7f;
+  int dummy = 0;
+  auto batcher = new logger::async_batcher<config_drop_event>(s, watchdog, dummy, &error_fn, config);
+  batcher->init(nullptr);
+  // Allow periodic_background_proc to start waiting
+  std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+  batcher->append(config_drop_event("0.00"));
+  batcher->append(config_drop_event("1.00"));
+  batcher->append(config_drop_event("0.69"));
+  batcher->append(config_drop_event("0.70"));
+  batcher->append(config_drop_event("0.71"));
+
+  delete batcher;
+
+  BOOST_REQUIRE(!items.empty());
+  BOOST_CHECK_EQUAL(items[0], "0.00\n0.69\n0.70\n");
 }

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
-cmake_policy(SET CMP0074 NEW)
+if(POLICY CMP0074)
+    cmake_policy(SET CMP0074 NEW)
+endif()
 
 if(WIN32)
   # Due to needing to configure the CMAKE platform, this needs to be included before the
@@ -12,9 +14,10 @@ project(reinforcement_learning)
 
 set(CMAKE_CXX_STANDARD 11)
 
-option(BUILD_PYTHON "Build the Python bindings" OFF)
+option(RL_BUILD_PYTHON "Build the Python bindings" OFF)
 option(USE_ZSTD "Whether to enable usage of zstandard compression" ON)
 option(RL_STATIC_DEPS "Only use static dependencies" OFF)
+option(RL_BUILD_BENCHMARKS "Build benchmarks" OFF)
 
 option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" ON)
 
@@ -75,3 +78,6 @@ add_subdirectory(bindings)
 
 add_subdirectory(unit_test)
 add_subdirectory(unit_test/extensions)
+if(RL_BUILD_BENCHMARKS)
+  add_subdirectory(benchmarks)
+endif()
