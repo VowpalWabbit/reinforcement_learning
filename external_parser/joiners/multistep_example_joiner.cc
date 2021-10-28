@@ -211,7 +211,8 @@ reward::outcome_event multistep_example_joiner::process_outcome(
                       metadata.payload_type(),
                       metadata.pass_probability(),
                       metadata.encoding(),
-                      metadata.id()->str()};
+                      metadata.id()->str(),
+                      v2::LearningModeType::LearningModeType_Online};
 
   if (event.value_type() == v2::OutcomeValue_literal) {
     o_event.s_value = event.value_as_literal()->c_str();

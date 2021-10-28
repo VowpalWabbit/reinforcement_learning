@@ -20,7 +20,7 @@ namespace joined_event {
   float probability_of_drop {0.f};
 };
 
-inline void calculate_multislot_interaction_metrics(dsjson_metrics* metrics,
+inline void calculate_multislot_interaction_metrics(dsjson_metrics* metrics, 
                                                        MultiSlotInteraction multi_slot_interaction,
                                                        float first_slot_original_reward_neg) {
     if(metrics) {
@@ -30,7 +30,7 @@ inline void calculate_multislot_interaction_metrics(dsjson_metrics* metrics,
           !multi_slot_interaction.interaction_data[0].actions.empty() &&
           !multi_slot_interaction.baseline_actions.empty()) {
 
-        if (multi_slot_interaction.interaction_data[0].actions[0]
+        if (multi_slot_interaction.interaction_data[0].actions[0] 
             == multi_slot_interaction.baseline_actions[0])  {
           metrics->DsjsonNumberOfLabelEqualBaselineFirstSlot++;
           metrics->DsjsonSumCostOriginalLabelEqualBaselineFirstSlot += first_slot_original_reward_neg;
@@ -153,43 +153,6 @@ struct cb_joined_event : public typed_joined_event {
 
   float get_sum_original_reward() const override {
     return original_reward;
-  }
-
-  bool should_calculate_reward(
-      const std::vector<reward::outcome_event> &outcome_events) {
-    return outcome_events.size() > 0 &&
-           std::any_of(outcome_events.begin(), outcome_events.end(),
-                       [](const reward::outcome_event &o) {
-                         return o.action_taken != true;
-                       });
-  }
-
-  void calc_and_set_cost(
-      v_array<example *> &examples, float default_reward,
-      reward::RewardFunctionType reward_function,
-      const metadata::event_metadata_info &interaction_metadata,
-      std::vector<reward::outcome_event> &outcome_events) override {
-    reward = default_reward;
-    // original reward is used to record the observed reward of apprentice mode
-    original_reward = default_reward;
-
-    if (should_calculate_reward(outcome_events)) {
-      original_reward = reward_function(outcome_events);
-
-      if (interaction_metadata.learning_mode == v2::LearningModeType_Apprentice) {
-        set_apprentice_reward();
-      } else {
-        reward = original_reward;
-      }
-    }
-
-    set_cost(examples, reward);
-  }
-
-  void calculate_metrics(dsjson_metrics* metrics) override {
-    if (metrics && interaction_data.actions.size() == 0) {
-      metrics->NumberOfEventsZeroActions++;
-    }
   }
 };
 
