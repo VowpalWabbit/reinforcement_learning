@@ -265,6 +265,10 @@ namespace reinforcement_learning {
     RL_DEPRECATED("New unified example builder interface is coming")
     int request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status = nullptr);
 
+    //multistep
+    int request_episodic_decision(const char *event_id, const char *previous_id, const char *context_json, ranking_response &resp, episode_state &episode, api_status *status = nullptr);
+    int request_episodic_decision(const char *event_id, const char *previous_id, const char *context_json, unsigned int flags, ranking_response &resp, episode_state &episode, api_status *status = nullptr);
+
     /**
     * @brief Report that action was taken.
     *
@@ -423,10 +427,6 @@ namespace reinforcement_learning {
     live_model& operator=(live_model&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
 
     ~live_model();
-
-    //multistep
-    int request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, ranking_response& resp, episode_state& episode, api_status* status = nullptr);
-    int request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, unsigned int flags, ranking_response& resp, episode_state& episode, api_status* status = nullptr);
 
   private:
     std::unique_ptr<live_model_impl> _pimpl;  //! The actual implementation details are forwarded to this object (PIMPL pattern)

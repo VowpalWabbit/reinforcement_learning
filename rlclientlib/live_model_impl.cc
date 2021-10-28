@@ -483,8 +483,9 @@ namespace reinforcement_learning {
       i_sender* episode_sender;
 
       // Use the name to create an instance of raw data sender for episodes
+      _configuration.set(config_constants::CONFIG_SECTION, config_constants::EPISODE);
       RETURN_IF_FAIL(_sender_factory->create(&episode_sender, episode_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
-      RETURN_IF_FAIL(episode_sender->init(status));
+      RETURN_IF_FAIL(episode_sender->init(_configuration, status));
 
       // Create a message sender that will prepend the message with a preamble and send the raw data using the
       // factory created raw data sender
