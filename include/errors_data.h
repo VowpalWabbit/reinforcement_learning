@@ -48,4 +48,5 @@ ERROR_CODE_DEFINITION(46, inference_configuration_error, "Unable to configure mo
 ERROR_CODE_DEFINITION(47, serialize_error, "Unknown error while serializing.")
 ERROR_CODE_DEFINITION(48, extension_error, "Error from extension: ")
 ERROR_CODE_DEFINITION(49, baseline_actions_not_defined, "Baseline Actions must be defined in apprentice mode")
+ERROR_CODE_DEFINITION(50, http_api_key_not_provided, "Http api key must be provided")
 //! [Error Definitions]

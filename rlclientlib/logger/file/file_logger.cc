@@ -10,7 +10,7 @@ namespace reinforcement_learning { namespace logger { namespace file {
   _trace(trace)
   {}
 
-  int file_logger::init(api_status* status) {
+  int file_logger::init(const utility::configuration& config, api_status* status) {
     _file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     try {
       _file.open(_file_name, std::ios::binary);

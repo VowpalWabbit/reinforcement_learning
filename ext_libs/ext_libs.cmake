@@ -1,6 +1,8 @@
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/fakeit)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/date)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/pybind11)
+if (RL_BUILD_PYTHON)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/pybind11)
+endif()
 
 set(VW_INSTALL OFF CACHE BOOL "")
 set(BUILD_TESTS OFF CACHE BOOL "")

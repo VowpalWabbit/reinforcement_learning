@@ -8,36 +8,22 @@
 #include "io/logger.h"
 #include "joiners/example_joiner.h"
 #include "joiners/multistep_example_joiner.h"
+#include "utils.h"
 
 #include <memory>
 #include <cstdio>
 
-#ifndef _WIN32
-#define _stricmp strcasecmp
-#endif
-
 namespace VW {
 namespace external {
 
-std::array<std::pair<const char *, v2::ProblemType>, 4> const problem_types = {{
+std::map<const char *, v2::ProblemType> const problem_types = {{
   { "cb", v2::ProblemType_CB },
   { "ccb", v2::ProblemType_CCB },
   { "slates", v2::ProblemType_SLATES },
   { "ca", v2::ProblemType_CA },
 }};
 
-bool str_to_problem_type(const std::string &str, v2::ProblemType &type) {
-  for(auto p : problem_types) {
-    if(!_stricmp(p.first, str.c_str())) {
-      type = p.second;
-      return true;
-    }
-  }
-  type = v2::ProblemType_UNKNOWN;
-  return false;
-}
-
-std::array<std::pair<const char *, v2::RewardFunctionType>, 6> const reward_functions = {{
+std::map<const char *, v2::RewardFunctionType> const reward_functions = {{
   { "earliest", v2::RewardFunctionType_Earliest },
   { "average", v2::RewardFunctionType_Average },
   { "median", v2::RewardFunctionType_Median },
@@ -46,35 +32,46 @@ std::array<std::pair<const char *, v2::RewardFunctionType>, 6> const reward_func
   { "max", v2::RewardFunctionType_Max },
 }};
 
-bool str_to_reward_function(const std::string &str, v2::RewardFunctionType &reward_function) {
-  for(auto p : reward_functions) {
-    if(!_stricmp(p.first, str.c_str())) {
-      reward_function = p.second;
-      return true;
-    }
-  }
-  reward_function = v2::RewardFunctionType_MIN;
-  return false;
-}
-
-std::array<std::pair<const char *, v2::LearningModeType>, 3> const learning_modes = {{
+std::map<const char *, v2::LearningModeType> const learning_modes = {{
   { "online", v2::LearningModeType_Online },
   { "apprentice", v2::LearningModeType_Apprentice },
   { "loggingonly", v2::LearningModeType_LoggingOnly },
 }};
 
-bool str_to_learning_mode(const std::string &str, v2::LearningModeType &mode) {
-  for(auto p : learning_modes) {
-    if(!_stricmp(p.first, str.c_str())) {
-      mode = p.second;
-      return true;
-    }
-  }
-  mode = v2::LearningModeType_MIN;
-  return false;
-}
-
 bool parser_options::is_enabled() { return binary; }
+
+void apply_cli_overrides(std::unique_ptr<i_joiner>& joiner, vw *all, const input_options &parsed_options)
+{
+  if(all->options->was_supplied("default_reward")) {
+    joiner->set_default_reward(parsed_options.ext_opts->default_reward, true);
+  }
+
+  if(all->options->was_supplied("problem_type")) {
+    v2::ProblemType problem_type;
+    if(!str_to_enum(parsed_options.ext_opts->problem_type, problem_types, v2::ProblemType_UNKNOWN, problem_type)) {
+      throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.ext_opts->problem_type);
+    }
+    joiner->set_problem_type_config(problem_type, true);
+  }
+  if(all->options->was_supplied("use_client_time")) {
+    joiner->set_use_client_time(parsed_options.ext_opts->use_client_time, true);
+  }
+  if(all->options->was_supplied("learning_mode")) {
+    v2::LearningModeType learning_mode;
+    if(!str_to_enum(parsed_options.ext_opts->learning_mode, learning_modes, v2::LearningModeType_MIN, learning_mode)) {
+      throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.ext_opts->learning_mode);
+    }
+    joiner->set_learning_mode_config(learning_mode, true);
+  }
+  if(all->options->was_supplied("reward_function")) {
+    v2::RewardFunctionType reward_function;
+    if(!str_to_enum(parsed_options.ext_opts->reward_function, reward_functions, v2::RewardFunctionType_MIN, reward_function)) {
+      throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.ext_opts->reward_function);
+    }
+    joiner->set_reward_function(reward_function, true);
+  }
+  joiner->apply_cli_overrides(all, parsed_options);
+}
 
 std::unique_ptr<parser>
 parser::get_external_parser(vw *all, const input_options &parsed_options) {
@@ -95,6 +92,7 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
 
       std::string outfile_name = infile_name + ".dsjson";
       joiner = VW::make_unique<example_joiner>(all, binary_to_json, outfile_name);
+      apply_cli_overrides(joiner, all, parsed_options);
 
       return VW::make_unique<binary_json_converter>(std::move(joiner));
 
@@ -105,36 +103,12 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
       joiner = VW::make_unique<multistep_example_joiner>(all);
     }
 
-    if(all->options->was_supplied("default_reward")) {
-      joiner->set_default_reward(parsed_options.ext_opts->default_reward, true);
-    }
-
-    if(all->options->was_supplied("problem_type")) {
-      v2::ProblemType problem_type;
-      if(!str_to_problem_type(parsed_options.ext_opts->problem_type, problem_type)) {
-        throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.ext_opts->problem_type);
-      }
-      joiner->set_problem_type_config(problem_type, true);
-    }
-    if(all->options->was_supplied("learning_mode")) {
-      v2::LearningModeType learning_mode;
-      if(!str_to_learning_mode(parsed_options.ext_opts->learning_mode, learning_mode)) {
-        throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.ext_opts->learning_mode);
-      }
-      joiner->set_learning_mode_config(learning_mode, true);
-    }
-    if(all->options->was_supplied("reward_function")) {
-      v2::RewardFunctionType reward_function;
-      if(!str_to_reward_function(parsed_options.ext_opts->reward_function, reward_function)) {
-        throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.ext_opts->reward_function);
-      }
-      joiner->set_reward_function(reward_function, true);
-    }
+    apply_cli_overrides(joiner, all, parsed_options);
 
     if (all->options->was_supplied("extra_metrics")) {
       all->example_parser->metrics = VW::make_unique<dsjson_metrics>();
     }
-    
+
     return VW::make_unique<binary_parser>(std::move(joiner));
   }
   throw std::runtime_error("external parser type not recognised");
@@ -156,11 +130,17 @@ void parser::set_parse_args(VW::config::option_group_definition &in_options,
       VW::config::make_option("multistep", parsed_options.ext_opts->multistep)
         .help("multistep binary joiner"))
     .add(
+      VW::config::make_option("multistep_reward", parsed_options.ext_opts->multistep_reward)
+        .help("Override multistep reward function to be used, valid values: suffix_mean (default), suffix_sum, identity"))
+    .add(
       VW::config::make_option("default_reward", parsed_options.ext_opts->default_reward)
         .help("Override the default reward from the file"))
     .add(
       VW::config::make_option("problem_type", parsed_options.ext_opts->problem_type)
         .help("Override the problem type trying to be solved, valid values: CB, CCB, SLATES, CA"))
+    .add(
+      VW::config::make_option("use_client_time", parsed_options.ext_opts->use_client_time)
+        .help("Override use_client_time to define whether client time or enqueued time will be used for reward calculation"))
     .add(
       VW::config::make_option("reward_function", parsed_options.ext_opts->reward_function)
         .help("Override the reward function to be used, valid values: earliest, average, median, sum, min, max"))
@@ -176,8 +156,8 @@ void parser::persist_metrics(std::vector<std::pair<std::string, size_t>>& metric
 
 parser::~parser() {}
 
-int parse_examples(vw *all, v_array<example *> &examples) {
-  return static_cast<int>(all->external_parser->parse_examples(all, examples));
+int parse_examples(vw *all, io_buf& io_buf, v_array<example *> &examples) {
+  return static_cast<int>(all->external_parser->parse_examples(all, io_buf, examples));
 }
 } // namespace external
 } // namespace VW

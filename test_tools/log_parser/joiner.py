@@ -41,7 +41,7 @@ Incremental join instead of loading all interactions at once
 Respect EUD.
 """
 
-# 
+#
 fb_api_version = 1
 if flatbuffers.Builder.EndVector.__code__.co_argcount == 1:
     fb_api_version = 2
@@ -73,6 +73,11 @@ arg_parser.add_argument(
     help = 'problem type:  0-Unknown, 1-CB, 2-CCB, 3-SLATES, 4-CA'
 )
 arg_parser.add_argument(
+    '--use_client_time',
+    type=bool,
+    help = 'use client time utc when joining/calculating reward, defaults to off'
+)
+arg_parser.add_argument(
     '--observations',
     type=str,
     help = 'observations file (defaults to observatins.fb '
@@ -90,6 +95,7 @@ arg_parser.add_argument(
 arg_parser.add_argument(
     '--verbose',
     type=bool,
+    default=False,
     help = 'verbose output of each message parsed (default to off)'
 )
 
@@ -105,6 +111,7 @@ interaction_file_name = 'interactions.fb'
 observations_file_name = 'observations.fb'
 result_file = 'merged.log'
 verbose = False
+use_client_time = False
 
 
 if args.reward_function:
@@ -130,6 +137,9 @@ if args.output:
 
 if args.verbose:
     verbose = args.verbose
+
+if args.use_client_time:
+    use_client_time = True
 
 class PreambleStreamReader:
     def __init__(self, file_name):
@@ -164,7 +174,7 @@ def mk_offsets_vector(builder, arr, startFun):
     startFun(builder, len(arr))
     for i in reversed(range(len(arr))):
         builder.PrependUOffsetTRelative(arr[i])
-    
+
     return end_vector_shim(builder, len(arr))
 
 def mk_bytes_vector(builder, arr):
@@ -254,6 +264,7 @@ class BinLogWriter:
             print("default reward: ", default_reward)
             print("learning_mode_config: ", learning_mode_config)
             print("problem_type_config: ", problem_type_config)
+            print("use_client_time: ", use_client_time)
         builder = flatbuffers.Builder(0)
 
         CheckpointInfoStart(builder)
@@ -261,6 +272,7 @@ class BinLogWriter:
         CheckpointInfoAddDefaultReward(builder, default_reward)
         CheckpointInfoAddLearningModeConfig(builder, learning_mode_config)
         CheckpointInfoAddProblemTypeConfig(builder, problem_type_config)
+        CheckpointInfoAddUseClientTime(builder, use_client_time)
 
         checkpoint_info_off = CheckpointInfoEnd(builder)
         builder.Finish(checkpoint_info_off)

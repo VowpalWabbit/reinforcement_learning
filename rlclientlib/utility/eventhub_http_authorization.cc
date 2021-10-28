@@ -1,7 +1,7 @@
 #define OPENSSL_API_COMPAT 0x0908
 #include "error_callback_fn.h"
 #include "err_constants.h"
-#include "http_authorization.h"
+#include "eventhub_http_authorization.h"
 #include "http_client.h"
 #include "trace_logger.h"
 
@@ -13,32 +13,35 @@ using namespace std::chrono;
 using namespace utility; // Common utilities like string conversions
 
 namespace reinforcement_learning {
-  http_authorization::http_authorization(
-    const std::string& host,
-    const std::string& key_name,
-    const std::string& key,
-    const std::string& name,
-    i_trace* trace)
-    : _eventhub_host(host)
-    , _shared_access_key_name(key_name)
-    , _shared_access_key(key)
-    , _eventhub_name(name)
-    , _valid_until(0)
-    , _trace(trace) {
-  }
+  int eventhub_http_authorization::init(const utility::configuration& config, api_status* status, i_trace* trace) {
+    std::string config_section = config.get(config_constants::CONFIG_SECTION, config_constants::INTERACTION);
+    _eventhub_host = config.get((config_section + config_constants::EH_HOST).c_str(), "localhost:8080");
+    _shared_access_key_name = config.get((config_section + config_constants::EH_KEY_NAME).c_str(), "");
+    _shared_access_key = config.get((config_section + config_constants::EH_KEY).c_str(), "");
+    _eventhub_name = config.get((config_section + config_constants::EH_NAME).c_str(), config_constants::INTERACTION);
+    _valid_until = 0;
+    _trace = trace;
 
-  int http_authorization::init(api_status* status) {
     return check_authorization_validity_generate_if_needed(status);
   }
 
-  int http_authorization::get(std::string& authorization, api_status* status) {
+  int eventhub_http_authorization::get_http_headers(http_headers& headers, api_status* status) {
+    std::string auth_str;
+    RETURN_IF_FAIL(get_authorization_token(auth_str, status));
+
+    headers.add(_XPLATSTR("Authorization"), auth_str.c_str());
+    headers.add(_XPLATSTR("Host"), _eventhub_host.c_str());
+    return error_code::success;
+  }
+
+  int eventhub_http_authorization::get_authorization_token(std::string& authorization, api_status* status) {
     RETURN_IF_FAIL(check_authorization_validity_generate_if_needed(status));
     std::lock_guard<std::mutex> lock(_mutex);
     authorization = _authorization;
     return error_code::success;
   }
 
-  int http_authorization::check_authorization_validity_generate_if_needed(api_status* status) {
+  int eventhub_http_authorization::check_authorization_validity_generate_if_needed(api_status* status) {
     const auto now = duration_cast<std::chrono::seconds>(system_clock::now().time_since_epoch());
     std::lock_guard<std::mutex> lock(_mutex);
     // re-create authorization token if needed
@@ -50,7 +53,7 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int http_authorization::generate_authorization_string(
+  int eventhub_http_authorization::generate_authorization_string(
     std::chrono::seconds now,
     const std::string& shared_access_key,
     const std::string& shared_access_key_name,

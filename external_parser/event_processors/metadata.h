@@ -10,7 +10,6 @@ namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 namespace metadata {
 // used both for interactions and observations
 struct event_metadata_info {
-  TimePoint client_time_utc;
   std::string app_id;
   v2::PayloadType payload_type;
   float pass_probability;
