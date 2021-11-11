@@ -31,18 +31,18 @@ namespace reinforcement_learning {
       i_message_sender* sender,
       utility::watchdog& watchdog,
       i_time_provider* time_provider,
-      i_logger_extensions& ext,
+      i_logger_extensions* ext,
       error_callback_fn* perror_cb)
     : _model_type(model_type)
     , _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
     , _serializer_shared_state(0)
-    , _ext(ext)
+    , _ext_p(ext)
     , _v1_cb(_version == 1 && _model_type == model_type_t::CB ? new interaction_logger(time_provider, create_legacy_async_batcher<ranking_event>(c, sender, watchdog, perror_cb, INTERACTION_SECTION, _serializer_shared_state)) : nullptr)
     , _v1_ccb(_version == 1 && _model_type == model_type_t::CCB ? new ccb_logger(time_provider, create_legacy_async_batcher<decision_ranking_event>(c, sender, watchdog, perror_cb, INTERACTION_SECTION, _serializer_shared_state)) : nullptr)
     , _v1_multislot(_version == 1 && _model_type == model_type_t::SLATES ? new multi_slot_logger(time_provider, create_legacy_async_batcher<multi_slot_decision_event>(c, sender, watchdog, perror_cb, INTERACTION_SECTION, _serializer_shared_state)) : nullptr)
     , _v2(_version == 2 ? new generic_event_logger(
       time_provider,
-      ext.create_batcher(sender, watchdog, perror_cb, INTERACTION_SECTION),
+      ext->create_batcher(sender, watchdog, perror_cb, INTERACTION_SECTION),
       c.get(name::APP_ID, "")) : nullptr) {
     }
 
@@ -88,7 +88,7 @@ namespace reinforcement_learning {
           generic_event::payload_buffer_t payload;
           event_content_type content_type;
 
-          RETURN_IF_FAIL(wrap_log_call(_ext, _serializer_cb, context, actions, payload, content_type, status, flags, lmt, response));
+          RETURN_IF_FAIL(wrap_log_call(*_ext_p, _serializer_cb, context, actions, payload, content_type, status, flags, lmt, response));
           return _v2->log(response.get_event_id(), std::move(payload), _serializer_cb.type, content_type, std::move(actions), status);
         }
         default: return protocol_not_supported(status);
@@ -138,7 +138,7 @@ namespace reinforcement_learning {
         generic_event::payload_buffer_t payload;
         event_content_type content_type;
 
-        RETURN_IF_FAIL(wrap_log_call(_ext, _serializer_multislot, context, actions, payload, content_type, status, flags, action_ids, pdfs, model_version, slot_ids, baseline_actions, lmt));
+        RETURN_IF_FAIL(wrap_log_call(*_ext_p, _serializer_multislot, context, actions, payload, content_type, status, flags, action_ids, pdfs, model_version, slot_ids, baseline_actions, lmt));
         return _v2->log(event_id.c_str(), std::move(payload), payload_type, content_type, std::move(actions), status);
       }
       default: return protocol_not_supported(status);
@@ -152,7 +152,7 @@ namespace reinforcement_learning {
         generic_event::payload_buffer_t payload;
         event_content_type content_type;
 
-        RETURN_IF_FAIL(wrap_log_call(_ext, _serializer_ca, context, actions, payload, content_type, status, flags, response));
+        RETURN_IF_FAIL(wrap_log_call(*_ext_p, _serializer_ca, context, actions, payload, content_type, status, flags, response));
         return _v2->log(response.get_event_id(), std::move(payload), _serializer_ca.type, content_type, std::move(actions), status);
       }
       default: return protocol_not_supported(status);

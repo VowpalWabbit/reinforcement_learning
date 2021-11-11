@@ -19,6 +19,13 @@
 namespace reinforcement_learning
 {
   namespace logger {
+    // WARNING: This interface is a bit complex in its usage. It currently lives in the live_model_impl, but is passed
+    // into the interaction logger and is eventually called in the logger thread. However, it (currently) does not
+    // need any form of locking because the object is ONLY called in the SINGLE logger thead.
+    // The workflow looks like:
+    //   live_model_impl (owner) CONTAINS interaction_logger_facade CONTAINS generic_event_logger CONTAINS
+    //     async_batcher CONTROLS logger thread AND CONTAINS a queue of generic_event. generic_event will hold a pointer to this object
+    // If this condition changes, then the relevant calls must be locked!
     class i_logger_extensions {
     protected:
       const utility::configuration& _config;
@@ -41,7 +48,7 @@ namespace reinforcement_learning
     public:
       interaction_logger_facade(reinforcement_learning::model_management::model_type_t model_type,
         const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog,
-        i_time_provider* time_provider, i_logger_extensions& ext, error_callback_fn* perror_cb = nullptr);
+        i_time_provider* time_provider, i_logger_extensions* ext, error_callback_fn* perror_cb = nullptr);
 
       interaction_logger_facade(const interaction_logger_facade& other) = delete;
       interaction_logger_facade& operator=(const interaction_logger_facade& other) = delete;
@@ -70,7 +77,8 @@ namespace reinforcement_learning
       const reinforcement_learning::model_management::model_type_t _model_type;
       const int _version;
       int _serializer_shared_state;
-      i_logger_extensions& _ext;
+      // _ext_p is owned by live_model_impl
+      i_logger_extensions* _ext_p;
 
       const std::unique_ptr<interaction_logger> _v1_cb;
       const std::unique_ptr<ccb_logger> _v1_ccb;
