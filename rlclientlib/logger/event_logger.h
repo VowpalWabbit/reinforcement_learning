@@ -1,6 +1,8 @@
 #pragma once
 
 #include <stddef.h>
+#include <functional>
+#include <memory>
 
 #include "sender.h"
 #include "utility/versioned_object_pool.h"
@@ -22,49 +24,49 @@
 
 namespace reinforcement_learning { namespace logger {
   // This class wraps logging event to event_hub in a generic way that live_model can consume.
-  template<typename TEvent>
+  template<typename TFunc>
   class event_logger {
   public:
-    event_logger(i_time_provider* time_provider, i_async_batcher<TEvent>* batcher);
+    event_logger(i_time_provider* time_provider, i_async_batcher<TFunc>* batcher);
 
-    event_logger(i_time_provider* time_provider, i_async_batcher<TEvent>* batcher, const char* app_id);
+    event_logger(i_time_provider* time_provider, i_async_batcher<TFunc>* batcher, const char* app_id);
 
     int init(api_status* status);
 
   protected:
-    int append(TEvent&& item, api_status* status);
-    int append(TEvent& item, api_status* status);
+    int append(TFunc&& func, const char* evt_id, size_t size_estimate, api_status* status);
+    int append(TFunc& func, const char* evt_id, size_t size_estimate, api_status* status);
 
   protected:
     bool _initialized = false;
     std::unique_ptr<i_time_provider> _time_provider;
 
     // Handle batching for the data sent to the eventhub client
-    std::unique_ptr<i_async_batcher<TEvent>> _batcher;
+    std::unique_ptr<i_async_batcher<TFunc>> _batcher;
 
     const char* _app_id;
   };  
 
-  template<typename TEvent>
-  event_logger<TEvent>::event_logger(i_time_provider* time_provider, i_async_batcher<TEvent>* batcher) : event_logger(time_provider, batcher, "") {}
+  template<typename TFunc>
+  event_logger<TFunc>::event_logger(i_time_provider* time_provider, i_async_batcher<TFunc>* batcher) : event_logger(time_provider, batcher, "") {}
 
-  template<typename TEvent>
-  event_logger<TEvent>::event_logger(i_time_provider* time_provider, i_async_batcher<TEvent>* batcher, const char* app_id):
+  template<typename TFunc>
+  event_logger<TFunc>::event_logger(i_time_provider* time_provider, i_async_batcher<TFunc>* batcher, const char* app_id):
     _time_provider(time_provider),
     _batcher(batcher),
     _app_id(app_id)
   {
   }
 
-  template<typename TEvent>
-  int event_logger<TEvent>::init(api_status* status) {
+  template<typename TFunc>
+  int event_logger<TFunc>::init(api_status* status) {
     RETURN_IF_FAIL(_batcher->init(status));
     _initialized = true;
     return error_code::success;
   }
 
-  template<typename TEvent>
-  int event_logger<TEvent>::append(TEvent&& item, api_status* status) {
+  template<typename TFunc>
+  int event_logger<TFunc>::append(TFunc&& func, const char* evt_id, size_t size_estimate, api_status* status) {
     if (!_initialized) {
       api_status::try_update(status, error_code::not_initialized,
         "Logger not initialized. Call init() first.");
@@ -72,26 +74,26 @@ namespace reinforcement_learning { namespace logger {
     }
 
     // Add item to the batch (will be sent later)
-    return _batcher->append(item, status);
+    return _batcher->append(item, evt_id, size_estimate, status);
   }
 
-  template<typename TEvent>
-  int event_logger<TEvent>::append(TEvent& item, api_status* status) {
-    return append(std::move(item), status);
+  template<typename TFunc>
+  int event_logger<TFunc>::append(TFunc& func, const char* evt_id, size_t size_estimate, api_status* status) {
+    return append(std::move(item), evt_id, size_estimate, status);
   }
 
-  class interaction_logger : public event_logger<ranking_event> {
+  class interaction_logger : public event_logger<std::function<int(ranking_event&, api_status*)>> {
   public:
-    interaction_logger(i_time_provider* time_provider, i_async_batcher<ranking_event>* batcher)
+    interaction_logger(i_time_provider* time_provider, i_async_batcher<std::function<int(ranking_event&, api_status*)>>* batcher)
       : event_logger(time_provider, batcher)
     {}
 
     int log(const char* event_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
   };
 
-class ccb_logger : public event_logger<decision_ranking_event> {
+class ccb_logger : public event_logger<std::function<int(decision_ranking_event&, api_status*)>> {
   public:
-    ccb_logger(i_time_provider* time_provider, i_async_batcher<decision_ranking_event>* batcher)
+    ccb_logger(i_time_provider* time_provider, i_async_batcher<std::function<int(decision_ranking_event&, api_status*)>>* batcher)
       : event_logger(time_provider, batcher)
     {}
 
@@ -99,9 +101,9 @@ class ccb_logger : public event_logger<decision_ranking_event> {
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
   };
 
-class multi_slot_logger : public event_logger<multi_slot_decision_event> {
+class multi_slot_logger : public event_logger<std::function<int(multi_slot_decision_event&, api_status*)>> {
   public:
-    multi_slot_logger(i_time_provider* time_provider, i_async_batcher<multi_slot_decision_event>* batcher)
+    multi_slot_logger(i_time_provider* time_provider, i_async_batcher<std::function<int(multi_slot_decision_event&, api_status*)>>* batcher)
       : event_logger(time_provider, batcher)
     {}
 
@@ -109,9 +111,9 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
   };
 
-  class observation_logger : public event_logger<outcome_event> {
+  class observation_logger : public event_logger<std::function<int(outcome_event&, api_status*)>> {
   public:
-    observation_logger(i_time_provider* time_provider, i_async_batcher<outcome_event>* batcher)
+    observation_logger(i_time_provider* time_provider, i_async_batcher<std::function<int(outcome_event&, api_status*)>>* batcher)
       : event_logger(time_provider, batcher)
     {}
 
@@ -124,9 +126,9 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
     int report_action_taken(const char* event_id, api_status* status);
   };
 
-  class generic_event_logger : public event_logger<generic_event> {
+  class generic_event_logger : public event_logger<std::function<int(generic_event&, api_status*)>> {
   public:
-    generic_event_logger(i_time_provider* time_provider, i_async_batcher<generic_event>* batcher, const char* app_id)
+    generic_event_logger(i_time_provider* time_provider, i_async_batcher<std::function<int(generic_event&, api_status*)>>* batcher, const char* app_id)
       : event_logger(time_provider, batcher, app_id)
     {}
 

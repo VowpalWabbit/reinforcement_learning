@@ -75,7 +75,9 @@ namespace reinforcement_learning {
   class decision_ranking_event : public event {
   public:
     decision_ranking_event();
+    decision_ranking_event(const decision_ranking_event& other) = default;
     decision_ranking_event(decision_ranking_event&& other) = default;
+    decision_ranking_event& operator=(const decision_ranking_event& other) = default;
     decision_ranking_event& operator=(decision_ranking_event&& other) = default;
 
     const std::vector<unsigned char>& get_context() const;
@@ -107,7 +109,9 @@ namespace reinforcement_learning {
   class multi_slot_decision_event : public event {
   public:
     multi_slot_decision_event() = default;
+    multi_slot_decision_event(const multi_slot_decision_event& other) = default;
     multi_slot_decision_event(multi_slot_decision_event&& other) = default;
+    multi_slot_decision_event& operator=(const multi_slot_decision_event& other) = default;
     multi_slot_decision_event& operator=(multi_slot_decision_event&& other) = default;
 
     const std::vector<unsigned char>& get_context() const;
@@ -139,8 +143,9 @@ namespace reinforcement_learning {
   public:
   outcome_event() {}
     outcome_event(const outcome_event& other) = default;
-    outcome_event& operator=(const outcome_event& other) = default;
+    outcome_event(const outcome_event& other) = default;
     outcome_event(outcome_event&& other) = default;
+    outcome_event& operator=(const outcome_event& other) = default;
     outcome_event& operator=(outcome_event&& other) = default;
     ~outcome_event() = default;
 

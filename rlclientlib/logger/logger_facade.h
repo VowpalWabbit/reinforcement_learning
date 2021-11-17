@@ -16,6 +16,8 @@
 
 #include "serialization/payload_serializer.h"
 
+#include <functional>
+
 namespace reinforcement_learning
 {
   namespace logger {
@@ -37,7 +39,7 @@ namespace reinforcement_learning
       virtual bool is_object_extraction_enabled() const = 0;
       virtual bool is_serialization_transform_enabled() const = 0;
 
-      virtual i_async_batcher<generic_event>* create_batcher(i_message_sender* sender, utility::watchdog& watchdog, error_callback_fn* perror_cb, const char* section) = 0;
+      virtual i_async_batcher<std::function<int(generic_event&, api_status*)>>* create_batcher(i_message_sender* sender, utility::watchdog& watchdog, error_callback_fn* perror_cb, const char* section) = 0;
       virtual int transform_payload_and_extract_objects(const char* context, std::string& edited_payload, generic_event::object_list_t& objects, api_status* status) = 0;
       virtual int transform_serialized_payload(generic_event::payload_buffer_t& input, event_content_type &content_type, api_status* status) const = 0;
 
