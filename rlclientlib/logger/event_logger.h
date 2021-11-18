@@ -23,6 +23,8 @@
 #include "time_helper.h"
 
 namespace reinforcement_learning { namespace logger {
+  class i_logger_extensions;
+
   // This class wraps logging event to event_hub in a generic way that live_model can consume.
   template<typename TFunc>
   class event_logger {
@@ -132,7 +134,28 @@ class multi_slot_logger : public event_logger<std::function<int(multi_slot_decis
       : event_logger(time_provider, batcher, app_id)
     {}
 
-    int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, api_status* status);
-    int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, generic_event::object_list_t&& objects, api_status* status);
+    template<typename TSerializer, typename... Args>
+    int log(const char* event_id, const char* context, generic_event::payload_type_t type, i_logger_extensions* ext, TSerializer& serializer, api_status* status, Args... args) {
+      const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
+      // using std::bind for the in_evt to get in-place construction.
+      // We can replace this with a pure lambda in C++14
+      using namespace std::placeholders;
+      std::function<int(generic_event&, api_status*)> evt_fn =
+        std::bind(
+          [type, ext, serializer, args...](generic_event& out_evt, api_status* status, generic_event in_evt)->int
+          {
+            RETURN_IF_FAIL(in_evt.transform(ext, serializer, status, args...));
+            out_evt = std::move(in_evt);
+            return error_code::success;
+          },
+          _1,
+          _2,
+          generic_event(event_id, now, type, context, _app_id)
+        );
+      return append(std::move(evt_fn), event_id, 1, status);
+    }
+    // deprecated
+    //int log(const char* event_id, generic_event::payload_type_t type, event_content_type content_type, api_status* status);
+    //int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, generic_event::object_list_t&& objects, api_status* status);
   };
 }}
