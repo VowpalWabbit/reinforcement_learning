@@ -23,9 +23,12 @@
 **/packages
 
 build
+ext_deps
 /rlclientlib/generated
 /external_parser/generated
 /.vscode
 /bindings/cs/rl.net/InternalsVisibleToTest.cs
 /bindings/cs/rl.net.cli/InternalsVisibleToTest.cs
 /test_tools/log_parser/reinforcement_learning/
+_build
+.idea

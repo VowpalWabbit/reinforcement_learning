@@ -1,5 +1,9 @@
-pr:
+trigger:
 - master
+- 'releases/**'
+
+pr:
+- '*'
 
 pool:
   name: Hosted VS2017

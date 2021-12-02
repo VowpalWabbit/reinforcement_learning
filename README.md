@@ -12,7 +12,7 @@ git submodule update --init --recursive
 
 ### Dependencies
 
-```
+```sh
 sudo apt-get install libboost-all-dev libssl-dev
 ```
 
@@ -34,14 +34,13 @@ cd ../../../
 rm -rf cpprestsdk
 ```
 
-
 #### Install Flatbuffers
 ```bash
 cd ~
 git clone https://github.com/google/flatbuffers.git flatbuffers
 cd ./flatbuffers
-# 1.10.0 release commit
-git checkout 925c1d77fcc72636924c3c13428a34180c30f96f
+# 2.0.0 release commit
+git checkout a9a295fecf3fbd5a4f571f53b01f63202a3e2113
 mkdir build
 cd build
 cmake .. -DFLATBUFFERS_BUILD_TESTS=Off -DFLATBUFFERS_INSTALL=On -DCMAKE_BUILD_TYPE=Release -DFLATBUFFERS_BUILD_FLATHASH=Off
@@ -51,16 +50,78 @@ cd ../../
 rm -rf flatbuffers
 ```
 
-### Build
+### Configure +  Build
+
+```sh
+cmake -S . -B build
+cmake --build build --target all -j 4 # $(nproc)
+
+# Test
+cmake --build build --target rltest -j 4 # $(nproc)
+cmake --build build --target test
+```
+
+## MacOS
+
+### Dependencies
+
+MacOS dependencies can be managed through homebrew.
+
+```sh
+brew install cpprestsdk flatbuffers openssl
+```
+
+### Configure +  Build
+
+In order to build using homebrew dependencies, you must invoke cmake this way:
+
+```sh
+cmake -S . -B build -DOPENSSL_ROOT_DIR=`brew --prefix openssl` -DOPENSSL_LIBRARIES=`brew --prefix openssl`/lib
+cmake --build build --target all -j 4
+```
+
+## Windows
+### CMake (recommended)
+
+**Note:** The C# targets are not yet available in the CMake project. If those are required instructions for (Checked in solution)[#Checked-in-solution] should be used.
+
+#### Dependencies
+```cmd
+vcpkg install --triplet x64-windows zlib boost-system boost-program-options boost-test boost-align boost-foreach boost-math boost-uuid cpprestsdk flatbuffers
+```
+
+Add the flatbuffers tool directory to your PATH: `<vcpkg_root>\installed\x64-windows\tools\flatbuffers`
+
+#### Configure
+```cmd
+cmake -S . -B build  -DCMAKE_TOOLCHAIN_FILE=<vcpkg_root>\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -A x64 -G "Visual Studio 16 2019"
+rem Generates a solution you can open and use in Visual Studio
+.\build\reinforcement_learning.sln
+```
+
+### Checked in solution
+Windows dependencies are managed through Vcpkg and Nuget.
 
 ```
-mkdir build
-cd build
-cmake ..
-make
+vcpkg install cpprestsdk:x64-windows
+vcpkg install flatbuffers:x64-windows
 ```
 
-#### Troubleshooting
+You'll need to add the flatbuffers tool directory to your PATH aswell: `<vcpkg_root>\installed\x64-windows\tools\flatbuffers`
+
+#### Build + Test
+
+Set VcpkgIntegration environment variable to `vcpkg.targets` file on your machine
+
+Example:
+`VcpkgIntegration=c:\s\vcpkg\scripts\buildsystems\msbuild\vcpkg.targets`
+
+Ensure that the v140 toolset is installed in Visual Studio 2017.
+
+Open `rl.sln` in Visual Studio 2017.
+Build Release or Debug x64 configuration.
+
+## Troubleshooting
 If you get an error similar to the following on MacOS when running `cmake ..`, then you may be able to fix it by supplying the OpenSSL path to CMake.
 ```
 Make Error at /usr/local/Cellar/cmake/3.14.4/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:137 (message):
@@ -103,78 +164,3 @@ The workaround is to specify where to search
 ```
 cmake .. -DCMAKE_PREFIX_PATH=/usr/lib/x86_64-linux-gnu/cmake
 ```
-
-### Test
-```
-mkdir build
-cd build
-cmake ..
-make rltest
-make test
-```
-
-## Windows
-Windows dependencies are managed through Vcpkg and Nuget.
-
-```
-vcpkg install cpprestsdk:x64-windows
-vcpkg install flatbuffers:x64-windows
-```
-
-You'll need to add the flatbuffers tool directory to your PATH aswell: `<vcpkg_root>\installed\x64-windows\tools\flatbuffers`
-
-## MacOS
-
-MacOS dependencies can be managed through homebrew.
-
-```
-brew install cpprestsdk flatbuffers openssl
-```
-
-In order to build using homebrew dependencies, you must invoke cmake this way:
-
-```
-mkdir build
-cd build
-cmake -DOPENSSL_ROOT_DIR=`brew --prefix openssl` -DOPENSSL_LIBRARIES=`brew --prefix openssl`/lib ..
-```
-
-
-### Build + Test
-
-Set VcpkgIntegration environment variable to vcpkg.targets file on your machine
-
-Example:
-VcpkgIntegration=c:\s\vcpkg\scripts\buildsystems\msbuild\vcpkg.targets
-
-Ensure that the v140 toolset is installed in Visual Studio 2017.
-
-Open `rl.sln` in Visual Studio 2017.
-Build Release or Debug x64 configuration.
-
-### Experimental - CMake on Windows (Do not mix with checked in solution)
-Using CMake is an alternate way to configure and build the project. Currently it only supports the C++ projects.
-All dependencies are managed through Vcpkg:
-```
-# Warning only use if generating solution with CMake)
-vcpkg install cpprestsdk:x64-windows
-vcpkg install zlib:x64-windows
-vcpkg install boost-system:x64-windows
-vcpkg install boost-program-options:x64-windows
-vcpkg install boost-test:x64-windows
-vcpkg install boost-uuid:x64-windows
-```
-
-Run the following to generate a solution file to open in Visual Studio 2017:
-```
-mkdir build
-cd build
-cmake .. -G "Visual Studio 15 2017 Win64" -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
-.\reinforcement_learning.sln
-```
-
-## Make targets
-- `doc` - Python and C++ docs
-- `_rl_client` - Python bindings
-- `rlclientlib` - rlclient library
-- `rltest` - unit tests

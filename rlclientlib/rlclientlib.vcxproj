@@ -80,7 +80,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(SkipAzureFactories)'!='true'">
     <ClCompile>
-      <PreprocessorDefinitions>USE_AZURE_FACTORIES;$(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_AZURE_FACTORIES;FLATBUFFERS_SPAN_MINIMAL;$(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -88,9 +88,9 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;SPDLOG_NO_TLS;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\zstd\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\zstd\lib;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\fmt\include;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -108,9 +108,9 @@ $(flatcPath) -o "$(SolutionDir)rlclientlib\generated\v2" --cpp "$(SolutionDir)rl
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;SPDLOG_NO_TLS;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\zstd\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\zstd\lib;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\fmt\include;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -130,9 +130,9 @@ $(flatcPath) -o "$(SolutionDir)rlclientlib\generated\v2" --cpp "$(SolutionDir)rl
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;SPDLOG_NO_TLS;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\zstd\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\zstd\lib;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\fmt\include;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -154,9 +154,9 @@ $(flatcPath) -o "$(SolutionDir)rlclientlib\generated\v2" --cpp "$(SolutionDir)rl
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;SPDLOG_NO_TLS;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\zstd\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\zstd\lib;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\fmt\include;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -192,6 +192,7 @@ $(flatcPath) -o "$(SolutionDir)rlclientlib\generated\v2" --cpp "$(SolutionDir)rl
     <ClInclude Include="..\include\decision_response.h" />
     <ClInclude Include="..\include\config_utility.h" />
     <ClInclude Include="..\include\constants.h" />
+    <ClInclude Include="..\include\internal_constants.h" />
     <ClInclude Include="..\include\err_constants.h" />
     <ClInclude Include="..\include\factory_resolver.h" />
     <ClInclude Include="..\include\model_mgmt.h" />
@@ -292,17 +293,18 @@ $(flatcPath) -o "$(SolutionDir)rlclientlib\generated\v2" --cpp "$(SolutionDir)rl
   </ItemGroup>
   <ItemGroup Condition="'$(SkipAzureFactories)' != 'true'">
     <ClInclude Include="azure_factories.h" />
-    <ClInclude Include="logger\eventhub_client.h" />
+    <ClInclude Include="logger\http_transport_client.h" />
     <ClInclude Include="model_mgmt\restapi_data_transport.h" />
     <ClInclude Include="utility\http_client.h" />
     <ClInclude Include="utility\http_helper.h" />
-    <ClInclude Include="utility\http_authorization.h" />
-    <ClCompile Include="azure_factories.cc" />
-    <ClCompile Include="logger\eventhub_client.cc" />
+    <ClInclude Include="utility\eventhub_http_authorization.h" />
+    <ClInclude Include="utility\apim_http_authorization.h" />
+    <ClCompile Include="azure_factories.cc" />    
     <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="utility\http_client.cc" />
     <ClCompile Include="utility\http_helper.cc" />
-    <ClCompile Include="utility\http_authorization.cc" />
+    <ClCompile Include="utility\eventhub_http_authorization.cc" />
+    <ClCompile Include="utility\apim_http_authorization.cc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ext_libs\libzstd.vcxproj">

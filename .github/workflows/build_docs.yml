@@ -1,0 +1,114 @@
+name: Build Documentation
+
+# Build documentation on:
+# - pushes to master and uploads to latest folder
+# - Released and uploads to folder that matches release tag
+on:
+  push:
+    branches:
+      - master
+  release:
+    types:
+      - created
+
+jobs:
+  cpp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Apt update
+        shell: bash
+        run: sudo apt update
+      - name: Install doxygen
+        shell: bash
+        run: sudo apt install -y doxygen
+      - name: Build docs
+        run: |
+          cd doc/cpp/
+          doxygen
+      - name: Upload built docs
+        uses: actions/upload-artifact@v1
+        with:
+          name: cxx_docs
+          path: doc/cpp/html/
+  python:
+    container:
+      image: vowpalwabbit/rlclientlib-manylinux2010-build:latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Clone submodules
+        shell: bash
+        run: git submodule update --init --recursive
+      - name: Install package
+        shell: bash
+        run: |
+          /opt/python/cp38-cp38/bin/python setup.py install
+      - name: Build docs
+        run: |
+          /opt/python/cp38-cp38/bin/pip install sphinx
+          cd bindings/python/docs
+          make html SPHINXBUILD=/opt/python/cp38-cp38/bin/sphinx-build
+      - name: Upload built docs
+        uses: actions/upload-artifact@v1
+        with:
+          name: python_docs
+          path: bindings/python/docs/build/
+  upload:
+    needs: [cpp, python]
+    runs-on: ubuntu-latest
+    # The upload step should only be run on the main repository.
+    if: github.repository == 'VowpalWabbit/reinforcement_learning'
+    steps:
+      - name: Set folder name to latest if push
+        if: github.event_name == 'push'
+        run: echo "FOLDER_NAME=latest" >> $GITHUB_ENV
+      - name: Set folder name to version if release
+        if: github.event_name == 'release'
+        run: echo "FOLDER_NAME=$(echo ${GITHUB_REF:10})" >> $GITHUB_ENV
+      - name: Download c++ Docs
+        uses: actions/download-artifact@v1
+        with:
+          name: cxx_docs
+      - name: Download Python Docs
+        uses: actions/download-artifact@v1
+        with:
+          name: python_docs
+      - uses: actions/checkout@v1
+        with:
+          repository: VowpalWabbit/docs
+          ref: master
+          # For some reason, path is relative to the directory above GITHUB_WORKSPACE
+          # To ensure the rest of the script makes sense, we need to place this under reinforcement_learning
+          path: reinforcement_learning/docs
+      - name: Copy c++ Docs
+        shell: bash
+        run: |
+          rm -rf docs/reinforcement_learning/cpp/$FOLDER_NAME/
+          mkdir -p docs/reinforcement_learning/cpp/$FOLDER_NAME/
+          cp -r cxx_docs/* docs/reinforcement_learning/cpp/$FOLDER_NAME/
+      - name: Copy Python Docs
+        shell: bash
+        run: |
+          rm -rf docs/reinforcement_learning/python/$FOLDER_NAME/
+          mkdir -p docs/reinforcement_learning/python/$FOLDER_NAME/
+          cp -r python_docs/html/* docs/reinforcement_learning/python/$FOLDER_NAME/
+      - name: Checkout master
+        shell: bash
+        run: |
+          cd docs
+          git checkout master
+      - name: Commit changes
+        shell: bash
+        run: |
+          cd docs
+          git add --all
+          git config --local user.email "WoboWabbit@hunch.net"
+          git config --local user.name "WoboWabbit"
+          git commit -m "Update documentation for commit: VowpalWabbit/reinforcement_learning@${{ github.sha }}"  || echo "Nothing to update"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          repository: VowpalWabbit/docs
+          directory: docs
+          github_token: ${{ secrets.automation_github_token }}

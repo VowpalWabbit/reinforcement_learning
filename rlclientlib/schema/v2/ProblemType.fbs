@@ -1,4 +1,4 @@
 // Problem Type Schema used by FlatBuffer
 namespace reinforcement_learning.messages.flatbuff.v2;
 
-enum ProblemType : ubyte { UNKNOWN, CB, CCB, SLATES, CA }
+enum ProblemType : ubyte { UNKNOWN, CB, CCB, SLATES, CA, MULTISTEP }

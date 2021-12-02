@@ -41,6 +41,16 @@ Incremental join instead of loading all interactions at once
 Respect EUD.
 """
 
+# 
+fb_api_version = 1
+if flatbuffers.Builder.EndVector.__code__.co_argcount == 1:
+    fb_api_version = 2
+
+def end_vector_shim(builder, len):
+    if fb_api_version == 2:
+        return builder.EndVector()
+    return builder.EndVector(len)
+
 arg_parser = argparse.ArgumentParser()
 
 arg_parser.add_argument(
@@ -62,6 +72,33 @@ arg_parser.add_argument(
     choices=[value for name, value in ProblemType.__dict__.items()],
     help = 'problem type:  0-Unknown, 1-CB, 2-CCB, 3-SLATES, 4-CA'
 )
+arg_parser.add_argument(
+    '--use_client_time',
+    type=bool,
+    help = 'use client time utc when joining/calculating reward, defaults to off'
+)
+arg_parser.add_argument(
+    '--observations',
+    type=str,
+    help = 'observations file (defaults to observatins.fb '
+)
+arg_parser.add_argument(
+    '--interactions',
+    type=str,
+    help = 'interaction file (defaults to interactions.fb)'
+)
+arg_parser.add_argument(
+    '--output',
+    type=str,
+    help = 'output file (defaults to merged.log)'
+)
+arg_parser.add_argument(
+    '--verbose',
+    type=bool,
+    default=False,
+    help = 'verbose output of each message parsed (default to off)'
+)
+
 arg_parser.add_argument('-c', action='store_true', help='generate corrupt files for binary parser unit tests')
 
 args = arg_parser.parse_args()
@@ -70,6 +107,12 @@ reward_function_type = RewardFunctionType.Earliest
 default_reward = 0
 learning_mode_config = LearningModeType.Online
 problem_type_config = ProblemType.UNKNOWN
+interaction_file_name = 'interactions.fb'
+observations_file_name = 'observations.fb'
+result_file = 'merged.log'
+verbose = False
+use_client_time = False
+
 
 if args.reward_function:
     reward_function_type = args.reward_function
@@ -82,6 +125,21 @@ if args.learning_mode_config:
 
 if args.problem_type_config:
     problem_type_config = args.problem_type_config
+
+if args.observations:
+    observations_file_name = args.observations
+
+if args.interactions:
+    interaction_file_name = args.interactions
+
+if args.output:
+    result_file = args.output
+
+if args.verbose:
+    verbose = args.verbose
+
+if args.use_client_time:
+    use_client_time = True
 
 class PreambleStreamReader:
     def __init__(self, file_name):
@@ -116,7 +174,8 @@ def mk_offsets_vector(builder, arr, startFun):
     startFun(builder, len(arr))
     for i in reversed(range(len(arr))):
         builder.PrependUOffsetTRelative(arr[i])
-    return builder.EndVector(len(arr))
+    
+    return end_vector_shim(builder, len(arr))
 
 def mk_bytes_vector(builder, arr):
     return builder.CreateNumpyVector(np.array(list(arr), dtype='b'))
@@ -125,6 +184,7 @@ MSG_TYPE_HEADER = 0x55555555
 MSG_TYPE_CHECKPOINT = 0x11111111
 MSG_TYPE_REGULAR = 0xFFFFFFFF
 MSG_TYPE_EOF = 0xAAAAAAAA
+MSG_TYPE_UNKNOWN = 0x1AAAAAAA
 
 class BinLogWriter:
     def __init__(self, file_name):
@@ -132,7 +192,8 @@ class BinLogWriter:
 
     def write_message(self, kind, payload):
         padding_bytes = len(payload) % 8
-        print(f'msg {kind:X} size: {len(payload)} padding {padding_bytes}')
+        if verbose:
+            print(f'msg {kind:X} size: {len(payload)} padding {padding_bytes}')
 
         self.file.write(struct.pack('I', kind))
         self.file.write(struct.pack('I', len(payload)))
@@ -166,7 +227,7 @@ class BinLogWriter:
             builder.Finish(header_off)
             self.write_message(MSG_TYPE_HEADER, builder.Output())
 
-    def write_join_msg(self, events, mess_with_payload = False):
+    def write_join_msg(self, events, mess_with_payload = False, empty_payload = False, one_invalid_msg_type = False):
         builder = flatbuffers.Builder(0)
 
         evt_offsets = []
@@ -178,7 +239,10 @@ class BinLogWriter:
             evt_offsets.append(JoinedEventEnd(builder))
             if mess_with_payload:
                 mess_with_payload = False
-                evt_offsets.append(0)
+                evt_offsets.append(0) # malformed
+            if empty_payload:
+                empty_payload = False
+                evt_offsets = [] # missing
 
 
         evt_array_offset = mk_offsets_vector(builder, evt_offsets, JoinedPayloadStartEventsVector)
@@ -188,13 +252,19 @@ class BinLogWriter:
         joined_payload_off = JoinedPayloadEnd(builder)
 
         builder.Finish(joined_payload_off)
-        self.write_message(MSG_TYPE_REGULAR, builder.Output())
+        if one_invalid_msg_type:
+            one_invalid_msg_type = False
+            self.write_message(MSG_TYPE_UNKNOWN, builder.Output())
+        else:
+            self.write_message(MSG_TYPE_REGULAR, builder.Output())
 
     def write_checkpoint_info(self):
-        print("reward function type: ", reward_function_type)
-        print("default reward: ", default_reward)
-        print("learning_mode_config: ", learning_mode_config)
-        print("problem_type_config: ", problem_type_config)
+        if verbose:
+            print("reward function type: ", reward_function_type)
+            print("default reward: ", default_reward)
+            print("learning_mode_config: ", learning_mode_config)
+            print("problem_type_config: ", problem_type_config)
+            print("use_client_time: ", use_client_time)
         builder = flatbuffers.Builder(0)
 
         CheckpointInfoStart(builder)
@@ -202,6 +272,7 @@ class BinLogWriter:
         CheckpointInfoAddDefaultReward(builder, default_reward)
         CheckpointInfoAddLearningModeConfig(builder, learning_mode_config)
         CheckpointInfoAddProblemTypeConfig(builder, problem_type_config)
+        CheckpointInfoAddUseClientTime(builder, use_client_time)
 
         checkpoint_info_off = CheckpointInfoEnd(builder)
         builder.Finish(checkpoint_info_off)
@@ -210,12 +281,9 @@ class BinLogWriter:
     def write_eof(self):
         self.write_message(MSG_TYPE_EOF, b'')
 
-interaction_file_name = 'cb_v2.fb'
-observations_file_name = 'f-reward_v2.fb'
 interactions_file = PreambleStreamReader(interaction_file_name)
 observations_file = PreambleStreamReader(observations_file_name)
 
-result_file = 'merged.log'
 
 def get_event_id(ser_evt):
     evt = Event.GetRootAsEvent(ser_evt.PayloadAsNumpy(), 0)
@@ -239,7 +307,8 @@ for msg in observations_file.messages():
         observations[evt_id].append(ser_evt.PayloadAsNumpy())
         obs_count +=1
 
-print(f'found {obs_count} observations with {obs_ids} ids')
+if verbose:
+    print(f'found {obs_count} observations with {obs_ids} ids')
 
 bin_f = BinLogWriter(result_file)
 bin_f.write_header({ 'eud': '-1', 'joiner': 'joiner.py'})
@@ -257,8 +326,9 @@ for msg in interactions_file.messages():
             for obs in observations[evt_id]:
                 events_to_serialize.append(obs)
 
-    print(f'batch with {len(events_to_serialize)} events')
-    print(f'joining iters with {batch.Metadata().ContentEncoding()}')
+    if verbose:
+        print(f'batch with {len(events_to_serialize)} events')
+        print(f'joining iters with {batch.Metadata().ContentEncoding()}')
     bin_f.write_join_msg(events_to_serialize)
 
 bin_f.write_eof()
@@ -294,32 +364,102 @@ if args.c:
     bin_f_umt = BinLogWriter(result_file_unknown_msg_type)
     bin_f_umt.write_header({ 'eud': '-1', 'joiner': 'joiner.py'})
     bin_f_umt.write_checkpoint_info()
-    MSG_TYPE_UNKNOWN = 0x1AAAAAAA
     bin_f_umt.write_message(MSG_TYPE_UNKNOWN, b'')
 
-    result_file_bad_payload = 'bad_joined_payload.log'
+    # string: name, string: i_file, string: o_file, bool: multiple_batches, bool: mess_with_payload, bool: mess_with_payload_while_writing,
+    #    bool: empty_payload_while_writing, bool: no_interaction, bool: no_observation, bool: first regular msg type replaced with invalid msg type)
+    bad_file_combinations = [
+        ('corrupt_joined_payload.log', 'cb_v2_size_2.fb', 'f-reward_v2_size_2.fb', True, False, True, False, False, False, False),
+        ('bad_event_in_joined_event.log', 'cb_v2_size_2.fb', 'f-reward_v2_size_2.fb', True, True, False, False, False, False, False),
+        ('dedup_payload_missing.log', 'cb_v2_dedup.fb', 'f-reward_v2_size_2.fb', False, False, False, True, False, False, False),
+        ('interaction_with_no_observation.log', 'cb_v2_size_2.fb', 'f-reward_v2_size_2.fb', False, False, False, False, False, True, False),
+        ('no_interaction_but_with_observation.log', 'cb_v2_size_2.fb', 'f-reward_v2_size_2.fb', True, False, False, False, True, False, False),
+        ('one_invalid_msg_type.log', 'cb_v2_size_2.fb', 'f-reward_v2_size_2.fb', True, False, False, False, False, False, True)
+    ]
 
-    bin_bad_payload = BinLogWriter(result_file_bad_payload)
-    bin_bad_payload.write_header({ 'eud': '-1', 'joiner': 'joiner.py'})
-    bin_bad_payload.write_checkpoint_info()
+    for f_name, interaction_file_name, observations_file_name, multiple_batches, mwp, mwpww, epww, ni, no, imt in bad_file_combinations:
+        print("---------")
+        print(f'generating {f_name} using interactions file {interaction_file_name}, observations file {observations_file_name}')
+        print("---------")
+        interactions_file = PreambleStreamReader(interaction_file_name)
+        observations_file = PreambleStreamReader(observations_file_name)
 
-    mess_with_payload = True
-    for msg in interactions_file.messages():
-        batch = EventBatch.GetRootAsEventBatch(msg, 0)
-        #collect all observations
-        for i in range(0, batch.EventsLength()):
+        observations = dict()
+        obs_count = 0
+        obs_ids = 0
+        for msg in observations_file.messages():
+            batch = EventBatch.GetRootAsEventBatch(msg, 0)
+            for i in range(0, batch.EventsLength()):
+                ser_evt = batch.Events(i)
+                evt_id = get_event_id(ser_evt)
+                if evt_id not in observations:
+                    observations[evt_id] = []
+                    obs_ids += 1
+                observations[evt_id].append(ser_evt.PayloadAsNumpy())
+                obs_count +=1
+
+        print(f'found {obs_count} observations with {obs_ids} ids')
+
+
+        result_file_bad_payload = f_name
+
+        bin_bad_payload = BinLogWriter(result_file_bad_payload)
+        bin_bad_payload.write_header({ 'eud': '-1', 'joiner': 'joiner.py'})
+        bin_bad_payload.write_checkpoint_info()
+
+        mess_with_payload = mwp
+        mess_with_payload_while_writing = mwpww
+        empty_payload_while_writing = epww
+        no_interaction = ni
+        no_observation = no
+        one_invalid_msg_type_while_writing = imt
+
+        for msg in interactions_file.messages():
+            batch = EventBatch.GetRootAsEventBatch(msg, 0)
+            #collect all observations
             events_to_serialize = []
-            ser_evt = batch.Events(i)
-            events_to_serialize.append(ser_evt.PayloadAsNumpy())
-            evt_id = get_event_id(ser_evt)
-            if evt_id in observations:
-                for obs in observations[evt_id]:
-                    events_to_serialize.append(obs)
+            for i in range(0, batch.EventsLength()):
+                if multiple_batches:
+                    events_to_serialize = []
+                ser_evt = batch.Events(i)
+                if mess_with_payload:
+                    mess_with_payload = False # only mess with the first payload
+                    events_to_serialize.append([0])
+                else:
+                    events_to_serialize.append(ser_evt.PayloadAsNumpy())
+                evt_id = get_event_id(ser_evt)
+                if evt_id in observations:
+                    for obs in observations[evt_id]:
+                        if no_observation:
+                            # skip this observation
+                            no_observation = False
+                        else:
+                            print("obs for event id")
+                            print(evt_id)
+                            events_to_serialize.append(obs)
 
-            # make two batches here
-            print(f'batch with {len(events_to_serialize)} events')
-            print(f'joining iters with {batch.Metadata().ContentEncoding()}')
-            bin_bad_payload.write_join_msg(events_to_serialize, mess_with_payload=mess_with_payload)
-            mess_with_payload = False # only mess with the first payload
+                        if no_interaction:
+                            no_interaction = False
+                            # replace interaction with observation so that we have 2 obs
+                            events_to_serialize[0] = obs
 
-    bin_bad_payload.write_eof()
+                if multiple_batches:
+                    print(f'batch with {len(events_to_serialize)} events')
+                    print(f'joining iters with {batch.Metadata().ContentEncoding()}')
+                    bin_bad_payload.write_join_msg(events_to_serialize, mess_with_payload=mess_with_payload_while_writing,
+                        empty_payload=empty_payload_while_writing, one_invalid_msg_type=one_invalid_msg_type_while_writing)
+                    mess_with_payload_while_writing = False # only mess with the first payload
+                    empty_payload_while_writing = False # only mess with the first payload
+                    one_invalid_msg_type_while_writing = False # only mess with the first payload
+
+            if not multiple_batches:
+                # make two batches here
+                print(f'batch with {len(events_to_serialize)} events')
+                print(f'joining iters with {batch.Metadata().ContentEncoding()}')
+                bin_bad_payload.write_join_msg(events_to_serialize, mess_with_payload=mess_with_payload_while_writing,
+                    empty_payload=empty_payload_while_writing, one_invalid_msg_type=one_invalid_msg_type_while_writing)
+                mess_with_payload_while_writing = False # only mess with the first payload
+                empty_payload_while_writing = False # only mess with the first payload
+                one_invalid_msg_type_while_writing = False # only mess with the first payload
+
+        bin_bad_payload.write_eof()

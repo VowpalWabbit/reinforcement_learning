@@ -232,7 +232,8 @@ int action_dict_builder::finalize(generic_event& evt, api_status* status)
     now,
     generic_event::payload_type_t::PayloadType_DedupInfo,
     std::move(payload),
-    content_type);
+    content_type, 
+    evt.get_app_id());
 
   return error_code::success;
 }
@@ -292,11 +293,10 @@ public:
           perror_cb,
           config);
     } else {
-      int _dummy = 0;
       return new logger::async_batcher<generic_event, logger::fb_collection_serializer>(
           sender,
           watchdog,
-          _dummy,
+          _dummy_state,
           perror_cb,
           config);
     }
@@ -315,6 +315,7 @@ public:
 	}
 private:
 	dedup_state _dedup_state;
+  int _dummy_state = 0;
   bool _use_compression;
   bool _use_dedup;
 };

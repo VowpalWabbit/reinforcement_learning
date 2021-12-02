@@ -95,6 +95,32 @@ BOOST_AUTO_TEST_CASE(configuration_parse_eventhub_connection_string) {
   BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::INTERACTION_EH_KEY, "DefaultValue"), "<SAKey>");
 }
 
+BOOST_AUTO_TEST_CASE(configuration_parse_interaction_observation_config) {
+  const auto json = R"({
+    "http.api.key": "api_key",
+    "interaction.http.api.host": "http://localhost:8080",
+    "interaction.apim.tasks_limit": 5,
+    "interaction.apim.max_http_retries": 3,
+    "observation.http.api.host": "http://localhost:8080",
+    "observation.apim.tasks_limit": 6,
+    "observation.apim.max_http_retries": 4,
+    "interaction.sender.implementation": "INTERACTION_HTTP_API_SENDER",
+    "observation.sender.implementation": "OBSERVATION_HTTP_API_SENDER"
+  })";
+
+  util::configuration config;
+  BOOST_CHECK_EQUAL(util::config::create_from_json(json, config), err::success);
+  BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::HTTP_API_KEY, "DefaultValue"), "api_key");
+  BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::INTERACTION_HTTP_API_HOST, "DefaultValue"), "http://localhost:8080");
+  BOOST_CHECK_EQUAL(config.get_int(reinforcement_learning::name::INTERACTION_APIM_TASKS_LIMIT, 0), 5);
+  BOOST_CHECK_EQUAL(config.get_int(reinforcement_learning::name::INTERACTION_APIM_MAX_HTTP_RETRIES, 0), 3);
+  BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::OBSERVATION_HTTP_API_HOST, "DefaultValue"), "http://localhost:8080");
+  BOOST_CHECK_EQUAL(config.get_int(reinforcement_learning::name::OBSERVATION_APIM_TASKS_LIMIT, 0), 6);
+  BOOST_CHECK_EQUAL(config.get_int(reinforcement_learning::name::OBSERVATION_APIM_MAX_HTTP_RETRIES, 0), 4);
+  BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::INTERACTION_SENDER_IMPLEMENTATION, "DefaultValue"), "INTERACTION_HTTP_API_SENDER");
+  BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::OBSERVATION_SENDER_IMPLEMENTATION, "DefaultValue"), "OBSERVATION_HTTP_API_SENDER");
+}
+
 BOOST_AUTO_TEST_CASE(configuration_parse_malformed_eventhub_connection_string_expect_error) {
   util::configuration config;
 

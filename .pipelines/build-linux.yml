@@ -1,11 +1,15 @@
-pr:
+trigger:
 - master
+- 'releases/**'
+
+pr:
+- '*'
 
 pool:
-  vmImage: 'ubuntu-16.04'
+  vmImage: 'ubuntu-18.04'
 
 container:
-  image: vowpalwabbit/rl-ubuntu-1604:0.6.0
+  image: vowpalwabbit/rl-ubuntu-1804:latest
   endpoint: DockerHub
 
 steps:

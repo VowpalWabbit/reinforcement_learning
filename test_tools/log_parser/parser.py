@@ -17,6 +17,10 @@ def fmt_payload(payload):
         return payload
     return json.dumps(json.loads(payload), indent = 1)
 
+def get_json(payload):
+    payload = bytearray(payload).decode('utf-8')
+    return json.loads(payload)
+
 def parse_preamble(buf):
     reserved = buf[0]
     version = buf[1]
@@ -58,10 +62,21 @@ def cast(table, tmp_type):
     return tmp
 
 
-def parse_cb(payload):
+def parse_cb(payload, verbose):
     evt = CbEvent.GetRootAsCbEvent(payload, 0)
-    print(f'\tcb: actions:{evt.ActionIdsLength()} chosen_action:{evt.ActionIds(0)} model:{evt.ModelId()} lm:{learning_mode_name(evt.LearningMode())} deferred:{evt.DeferredAction()}')
-    print(f'\t\tcontext: {fmt_payload(evt.ContextAsNumpy())}')
+    if not verbose:
+        print(f'\tcb: actions:{evt.ActionIdsLength()} chosen_action:{evt.ActionIds(0)} model:{evt.ModelId()} lm:{learning_mode_name(evt.LearningMode())} deferred:{evt.DeferredAction()}')
+    else:
+        print(f'\tcb: actions:{evt.ActionIdsAsNumpy()} probs: {evt.ProbabilitiesAsNumpy()} model:{evt.ModelId()} lm:{learning_mode_name(evt.LearningMode())} deferred:{evt.DeferredAction()}')
+        print(f'\t\tcontext: {fmt_payload(evt.ContextAsNumpy())}')   
+
+def fill_cb(payload, message):
+    evt = CbEvent.GetRootAsCbEvent(payload, 0)
+    message['actions'] = evt.ActionIdsAsNumpy()
+    message['probs'] = evt.ProbabilitiesAsNumpy()
+    message['model'] = evt.ModelId()
+    message['learning_mode'] = learning_mode_name(evt.LearningMode())
+    message['deferred'] = evt.DeferredAction()       
 
 def parse_outcome(payload):
     evt = OutcomeEvent.GetRootAsOutcomeEvent(payload, 0)
@@ -80,6 +95,25 @@ def parse_outcome(payload):
 
     print(f'\toutcome: value:{value} index:{index} action-taken:{evt.ActionTaken()}')
 
+def fill_outcome(payload, message):
+    evt = OutcomeEvent.GetRootAsOutcomeEvent(payload, 0)
+
+    value = evt.Value()
+    if evt.ValueType() == OutcomeValue.literal:
+        value = getString(value)
+    elif evt.ValueType() == OutcomeValue.numeric:
+        value = cast(value, NumericOutcome).Value()
+
+    index = evt.Index()
+    if evt.IndexType() == OutcomeValue.literal:
+        index = getString(index)
+    elif evt.IndexType() == OutcomeValue.numeric:
+        index = cast(index, NumericIndex).Index()
+
+    message['reward'] = value
+    message['index'] = index
+    message['action_taken'] = evt.ActionTaken()
+
 def parse_multislot(payload):
     evt = MultiSlotEvent.GetRootAsMultiSlotEvent(payload, 0)
 
@@ -95,6 +129,14 @@ def parse_multistep(payload):
     print(f'\t\tcontext: {fmt_payload(evt.ContextAsNumpy())}')
 
 
+def fill_multistep(payload, message):
+    evt = MultiStepEvent.GetRootAsMultiStepEvent(payload, 0)
+    c = get_json(evt.ContextAsNumpy())
+    message['index'] = evt.EventId()
+    message['actions'] = evt.ActionIdsAsNumpy()
+    message['probs'] = evt.ProbabilitiesAsNumpy()
+    message['model'] = evt.ModelId()
+
 def parse_continuous_action(payload):
     evt = CaEvent.GetRootAsCaEvent(payload, 0)
 
@@ -107,7 +149,7 @@ def parse_dedup_info(payload):
     for i in range(0, evt.ValuesLength()):
         print(f'\t\t[{evt.Ids(i)}]: "{evt.Values(i).decode("utf-8")}"')
 
-def dump_event(event_payload, idx, timestamp=None):
+def dump_event(event_payload, idx, timestamp=None, verbose=False):
     evt = Event.GetRootAsEvent(event_payload, 0)
     m = evt.Meta()
 
@@ -118,7 +160,7 @@ def dump_event(event_payload, idx, timestamp=None):
         payload = zstd.decompress(evt.PayloadAsNumpy())
 
     if m.PayloadType() == PayloadType.CB:
-        parse_cb(payload)
+        parse_cb(payload, verbose)
     elif m.PayloadType() == PayloadType.CCB or m.PayloadType() == PayloadType.Slates:
         parse_multislot(payload)
     elif m.PayloadType() == PayloadType.Outcome:
@@ -131,6 +173,39 @@ def dump_event(event_payload, idx, timestamp=None):
         parse_multistep(payload)
     else:
         print('unknown payload type')
+
+def dump_event_csv(event_payload, idx, timestamp=None, verbose=False):
+    evt = Event.GetRootAsEvent(event_payload, 0)
+    m = evt.Meta()
+    message = {
+        'id': m.Id().decode("utf-8"),
+        'payload-size': evt.PayloadLength(),
+        'encoding': event_encoding_name(m.Encoding()),
+        't': timestamp_to_datetime(timestamp)
+        }
+
+    payload = evt.PayloadAsNumpy()
+    if m.Encoding() == EventEncoding.Zstd:
+        payload = zstd.decompress(evt.PayloadAsNumpy())
+
+    if m.PayloadType() == PayloadType.CB:
+        fill_cb(payload, message)
+    elif m.PayloadType() == PayloadType.CCB or m.PayloadType() == PayloadType.Slates:
+        ...
+    elif m.PayloadType() == PayloadType.Outcome:
+        fill_outcome(payload, message)
+    elif m.PayloadType() == PayloadType.CA:
+        ...
+    elif m.PayloadType() == PayloadType.DedupInfo:
+        ...
+    elif m.PayloadType() == PayloadType.MultiStep:
+        fill_multistep(payload, message)
+    else:
+        ...
+    return {
+        'type': payload_name(m.PayloadType()),
+        'message': message
+    }
 
 
 def dump_event_batch(buf):
@@ -145,10 +220,14 @@ def dump_event_batch(buf):
 
 
 def dump_preamble_file(file_name, buf):
-    preamble = parse_preamble(buf)
-    print(f'parsing preamble file {file_name}\n\tpreamble:{preamble}')
-    dump_event_batch(buf[PREAMBLE_LENGTH : PREAMBLE_LENGTH + preamble["msg_size"]])
+    while len(buf) > 8:
+        preamble = parse_preamble(buf)
+        print(f'parsing preamble file {file_name}\n\tpreamble:{preamble}')
+        dump_event_batch(buf[PREAMBLE_LENGTH : PREAMBLE_LENGTH + preamble["msg_size"]])
+        buf = buf[PREAMBLE_LENGTH + preamble["msg_size"]:]
 
+
+MSG_TYPE_FILEMAGIC = 0x42465756
 MSG_TYPE_HEADER = 0x55555555
 MSG_TYPE_CHECKPOINT = 0x11111111
 MSG_TYPE_REGULAR = 0xFFFFFFFF
@@ -158,18 +237,6 @@ class JoinedLogStreamReader:
     def __init__(self, buf):
         self.buf = buf
         self.offset = 0
-        self.headers = dict()
-        self.parse_header()
-        self.read_file_header()
-
-    def parse_header(self):
-        if self.buf[0:4] != b'VWFB':
-            raise Exception("Invalid file magic")
-
-        self.version = struct.unpack('I', self.buf[4:8])[0]
-        if self.version != 1:
-            raise Exception(f'Unsuported file version {self.version}')
-        self.offset = 8
 
     def read(self, size):
         if size == 0:
@@ -179,59 +246,100 @@ class JoinedLogStreamReader:
         return data
 
     def read_message(self):
+        if len(self.buf) <= self.offset:
+            return None
         kind = struct.unpack('I', self.read(4))[0]
         length = struct.unpack('I', self.read(4))[0]
+        # FILEMAGIC has inline payload, special case it here
+        if kind == MSG_TYPE_FILEMAGIC:
+            return (kind, length)
+
         payload = self.read(length)
         #discard padding
         self.read(length % 8)
         return (kind, payload)
 
-    def read_file_header(self):
-        msg = self.read_message()
-        if msg[0] != MSG_TYPE_HEADER:
-            raise f'Missing file header, found message of type {msg[0]} instead'
-
-        header = FileHeader.GetRootAsFileHeader(msg[1], 0)
-        for i in range(header.PropertiesLength()):
-            p = header.Properties(i)
-            self.headers[p.Key().decode('utf-8')] = p.Value().decode('utf-8')
-
-    def checkpoint_info(self):
-        msg = self.read_message()
-        if msg[0] != MSG_TYPE_CHECKPOINT:
-            raise f'Missing checkpoint info, found message type of {msg[0]} instead'
-        return CheckpointInfo.GetRootAsCheckpointInfo(msg[1], 0)
-
     def messages(self):
         while True:
             msg = self.read_message()
-            if msg[0] == MSG_TYPE_EOF:
+            if msg == None or msg[0] == MSG_TYPE_EOF:
                 break
-            yield JoinedPayload.GetRootAsJoinedPayload(msg[1], 0)
+            if msg[0] == MSG_TYPE_REGULAR:
+                yield (msg[0], JoinedPayload.GetRootAsJoinedPayload(msg[1], 0))
+            elif msg[0] == MSG_TYPE_CHECKPOINT:
+                yield (msg[0], CheckpointInfo.GetRootAsCheckpointInfo(msg[1], 0))
+            elif msg[0] == MSG_TYPE_HEADER:
+                yield (msg[0], FileHeader.GetRootAsFileHeader(msg[1], 0))
+            else:
+                yield (msg[0], msg[1])
 
-def dump_joined_log_file(file_name, buf):
+def dump_joined_log_file(file_name, buf, verbose):
+    print(f'Parsing binary-log file:{file_name}')
+
     reader = JoinedLogStreamReader(buf)
-    print(f'parsing joined log:{file_name} header:')
-    for k in reader.headers:
-        print(f'\t{k} = {reader.headers[k]}')
-
-    checkpoint_info = reader.checkpoint_info()
-    print(f'reward function type is: {checkpoint_info.RewardFunctionType()}')
-    print(f'default reward is: {checkpoint_info.DefaultReward()}')
-    print(f'learning mode config is: {checkpoint_info.LearningModeConfig()}')
-    print(f'problem type config is: {checkpoint_info.ProblemTypeConfig()}')
-
     for msg in reader.messages():
-        print(f'joined-batch events: {msg.EventsLength()}')
-        for i in range(msg.EventsLength()):
-            joined_event = msg.Events(i)
-            dump_event(joined_event.EventAsNumpy(), i, joined_event.Timestamp())
+        if msg[0] == MSG_TYPE_REGULAR:
+            msg = msg[1]
+            print(f'joined-batch events: {msg.EventsLength()}')
+            for i in range(msg.EventsLength()):
+                joined_event = msg.Events(i)
+                dump_event(joined_event.EventAsNumpy(), i, joined_event.Timestamp(), verbose)
+        elif msg[0] == MSG_TYPE_CHECKPOINT:
+            checkpoint_info = msg[1]
+            print('Parsing checkpoint info:')
+            print(f'\treward function type is: {checkpoint_info.RewardFunctionType()}')
+            print(f'\tdefault reward is: {checkpoint_info.DefaultReward()}')
+            print(f'\tlearning mode config is: {checkpoint_info.LearningModeConfig()}')
+            print(f'\tproblem type config is: {checkpoint_info.ProblemTypeConfig()}')            
+        elif msg[0] == MSG_TYPE_HEADER:
+            print(f'Parsing File Header:')
+            header = msg[1]
+            for i in range(header.PropertiesLength()):
+                p = header.Properties(i)
+                key = p.Key().decode('utf-8')
+                value = p.Value().decode('utf-8')
+                print('\t{key} :: {value}')
+        elif msg[0] == MSG_TYPE_FILEMAGIC:
+            print(f' File Version: {msg[1]}')
+        else:
+            print(f'unknown message type: {msg[0]}')
 
-def dump_file(f):
+def get_records(file_name):
+    buf = bytearray(open(file_name, 'rb').read())
+
+    reader = JoinedLogStreamReader(buf)
+    for msg in reader.messages():
+        if msg[0] == MSG_TYPE_REGULAR:
+            msg = msg[1]
+            for i in range(msg.EventsLength()):
+                joined_event = msg.Events(i)
+                yield dump_event_csv(joined_event.EventAsNumpy(), i, joined_event.Timestamp())
+        elif msg[0] == MSG_TYPE_CHECKPOINT:
+            checkpoint_info = msg[1]
+            yield  {'type': 'checkpoint', 
+                'message': {
+                    'reward_function': checkpoint_info.RewardFunctionType(),
+                    'default_reward': checkpoint_info.DefaultReward(),
+                    'learning_mode': checkpoint_info.LearningModeConfig(),
+                    'problem_type': checkpoint_info.ProblemTypeConfig()}}       
+        elif msg[0] == MSG_TYPE_HEADER:
+            header = msg[1]
+            yield {'type': 'header',
+                'message': {header.Properties(i).Key().decode('utf-8') : header.Properties(i).Value().decode('utf-8') for i in range(header.PropertiesLength())}}
+        elif msg[0] == MSG_TYPE_FILEMAGIC:
+            yield {'type': 'magic', 'message': {'version': msg[1]}}
+        else:
+            yield {'type': 'unknown', 'message': None}
+
+def is_binary_log_msg(buf):
+    msg_id = struct.unpack('I', buf)[0]
+    return msg_id == MSG_TYPE_FILEMAGIC or msg_id == MSG_TYPE_HEADER or msg_id == MSG_TYPE_CHECKPOINT or msg_id == MSG_TYPE_REGULAR or msg_id == MSG_TYPE_EOF
+
+def dump_file(f, verbose=False):
     buf = bytearray(open(f, 'rb').read())
 
-    if buf[0:4] == b'VWFB':
-        dump_joined_log_file(f, buf)
+    if is_binary_log_msg(buf[0:4]):
+        dump_joined_log_file(f, buf, verbose)
     else:
         dump_preamble_file(f, buf)
 
@@ -273,5 +381,16 @@ from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *
 from reinforcement_learning.messages.flatbuff.v2.CheckpointInfo import *
 from reinforcement_learning.messages.flatbuff.v2.ProblemType import *
 
-for input_file in sys.argv[1:]:
-    dump_file(input_file)
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('files', metavar='N', type=str, nargs='+', help='files to parse')
+    parser.add_argument('--verbose', dest='verbose', action='store_true', help='verbose output')
+
+    args = parser.parse_args()
+    for input_file in args.files:
+        dump_file(input_file, args.verbose)
+
+if __name__ == "__main__":
+    main()

@@ -158,7 +158,7 @@ namespace reinforcement_learning { namespace utility { namespace config {
     try {
       obj.Parse<rj::kParseNumbersAsStringsFlag | rj::kParseDefaultFlags>(config_json.c_str());
       if (obj.HasParseError()) {
-        RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << rj::GetParseError_En(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";
+        RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << rj::GetParseError_En(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")" << "\nFailed to initialize rlclientlib, please check config file for accuracy.";
       }
     }
     catch (const std::exception& e) {
@@ -180,7 +180,7 @@ namespace reinforcement_learning { namespace utility { namespace config {
         string_value = prop_value.GetBool() ? "true" : "false";
       }
       else {
-        RETURN_ERROR_LS(trace, status, json_parse_error) << "Invalid json type found: " << prop_value.GetType();
+        RETURN_ERROR_LS(trace, status, json_parse_error) << "Invalid json type found: " << prop_value.GetType() << "\nFailed to initialize rlclientlib, please check config file for accuracy.";
       }
 
       RETURN_IF_FAIL(translate_property(prop_name, string_value, cc, trace, status));

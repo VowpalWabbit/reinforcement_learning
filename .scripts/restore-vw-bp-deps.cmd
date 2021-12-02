@@ -16,6 +16,7 @@ REM x64-windows-static-md is a community triplet that sets CRT to dynamic but al
 %vcpkgPath% install boost-program-options:x64-windows-static-md
 %vcpkgPath% install boost-test:x64-windows-static-md
 %vcpkgPath% install boost-align:x64-windows-static-md
+%vcpkgPath% install boost-math:x64-windows-static-md
 
 POPD
 

@@ -13,6 +13,11 @@
 #include "vw.h"
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
+constexpr float FLOAT_TOL = 0.0001f;
+
+// learn/predict isn't called in the unit test but cleanup examples
+// expects shared pred to be set for slates
+void set_slates_label(v_array<example *> &examples);
 
 void clear_examples(v_array<example *> &examples, vw *vw);
 
