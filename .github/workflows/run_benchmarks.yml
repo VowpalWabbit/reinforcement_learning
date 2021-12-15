@@ -38,9 +38,9 @@ jobs:
       - name: Install benchmark compare requirements
         shell: bash
         run: pip3 install -r benchmark/tools/requirements.txt
-      - name: Install pandas
+      - name: See requirements.txt
         shell: bash
-        run: pip3 install pandas
+        run: cat benchmark/tools/requirements.txt
       - run: rm -rf benchmark build rlclientlib/generated/ # generated or downloaded files
       - uses: actions/checkout@v1
         with:
