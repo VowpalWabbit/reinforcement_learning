@@ -80,4 +80,23 @@ using namespace std::placeholders;
     );
     return append(std::move(evt_fn), event_id, 1, status);
   }
+
+  int generic_event_logger::log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, api_status* status) {
+    generic_event::object_list_t objects;
+    return log(event_id, std::move(payload), type, content_type, std::move(objects), status);
+  }
+
+  int generic_event_logger::log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, generic_event::object_list_t&& objects, api_status* status) {
+    const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
+    auto evt_fn = std::bind(
+      [](generic_event& out_evt, api_status* status, generic_event in_evt)->int {
+        out_evt = std::move(in_evt);
+        return error_code::success;
+      },
+      _1,
+      _2,
+      generic_event(event_id, now, type, std::move(payload), content_type, std::move(objects), _app_id)
+    );
+    return append(std::move(evt_fn), event_id, 1, status);
+  }
 }}

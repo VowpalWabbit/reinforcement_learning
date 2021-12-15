@@ -118,7 +118,7 @@ namespace reinforcement_learning { namespace logger {
       }
     }
     
-    _queue.push(std::move(evt), TSerializer<TEvent>::serializer_t::size_estimate(evt));
+    _queue.push(std::move(func), size_estimate);
 
     //block or drop events if the queue if full
     if (_queue.is_full()) {

@@ -140,7 +140,7 @@ class multi_slot_logger : public event_logger<std::function<int(multi_slot_decis
       // using std::bind for the in_evt to get in-place construction.
       // We can replace this with a pure lambda in C++14
       using namespace std::placeholders;
-      std::function<int(generic_event&, api_status*)> evt_fn =
+      auto evt_fn =
         std::bind(
           [type, ext, serializer, args...](generic_event& out_evt, api_status* status, generic_event in_evt)->int
           {
@@ -154,8 +154,11 @@ class multi_slot_logger : public event_logger<std::function<int(multi_slot_decis
         );
       return append(std::move(evt_fn), event_id, 1, status);
     }
-    // deprecated
-    //int log(const char* event_id, generic_event::payload_type_t type, event_content_type content_type, api_status* status);
-    //int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, generic_event::object_list_t&& objects, api_status* status);
+
+    // TODO: used for observations for now.. may want to change that later
+    // These functions will take in fully transformed generic_event objects, and should only be used
+    // when the creation of those types are very cheap
+    int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, api_status* status);
+    int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, generic_event::object_list_t&& objects, api_status* status);
   };
 }}

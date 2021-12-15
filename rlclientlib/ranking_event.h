@@ -143,7 +143,6 @@ namespace reinforcement_learning {
   public:
   outcome_event() {}
     outcome_event(const outcome_event& other) = default;
-    outcome_event(const outcome_event& other) = default;
     outcome_event(outcome_event&& other) = default;
     outcome_event& operator=(const outcome_event& other) = default;
     outcome_event& operator=(outcome_event&& other) = default;

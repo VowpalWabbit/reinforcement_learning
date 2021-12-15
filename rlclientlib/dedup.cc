@@ -3,6 +3,7 @@
 #include "serialization/payload_serializer.h"
 #include "utility/context_helper.h"
 #include "utility/config_helper.h"
+#include "logger/async_batcher.h"
 
 #include "zstd.h"
 #include <sstream>
