@@ -37,10 +37,7 @@ jobs:
           path: benchmark/tools/
       - name: Install benchmark compare requirements
         shell: bash
-        run: pip3 install -r benchmark/tools/requirements.txt
-      - name: See requirements.txt
-        shell: bash
-        run: cat benchmark/tools/requirements.txt
+        run: python3 -m pip install -r benchmark/tools/requirements.txt
       - run: rm -rf benchmark build rlclientlib/generated/ # generated or downloaded files
       - uses: actions/checkout@v1
         with:
