@@ -630,11 +630,10 @@ namespace reinforcement_learning {
     std::vector<float> action_pdf;
     std::string model_version;
 
-    //todo:fix
     const auto history = episode.get_history();
     const std::string context_patched = history.get_context(previous_id, context_json);
 
-    RETURN_IF_FAIL(_model->choose_rank_multistep(seed, context_patched.c_str(), &history, action_ids, action_pdf, model_version, status));
+    RETURN_IF_FAIL(_model->choose_rank_multistep(seed, context_patched.c_str(), history, action_ids, action_pdf, model_version, status));
     RETURN_IF_FAIL(sample_and_populate_response(seed, action_ids, action_pdf, std::move(model_version), resp, _trace_logger.get(), status));
 
     resp.set_event_id(event_id);

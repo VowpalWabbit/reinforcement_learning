@@ -92,7 +92,7 @@ std::unique_ptr<fakeit::Mock<m::i_model>> get_mock_model(m::model_type_t model_t
   };
 
   const auto choose_rank_multistep_fn =
-    [](uint64_t, const char*, const r::episode_history*, std::vector<int>&, std::vector<float>&, std::string& model_version, r::api_status*) {
+    [](uint64_t, const char*, const r::episode_history&, std::vector<int>&, std::vector<float>&, std::string& model_version, r::api_status*) {
     model_version = "model_id";
     return r::error_code::success;
   };

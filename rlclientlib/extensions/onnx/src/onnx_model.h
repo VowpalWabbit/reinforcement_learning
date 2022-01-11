@@ -32,13 +32,13 @@ namespace reinforcement_learning { namespace onnx {
       return error_code::not_supported;
     }
 
-    int choose_rank_multistep(uint64_t rnd_seed, const char* features, const episode_history* history, std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) override
+    int choose_rank_multistep(uint64_t rnd_seed, const char* features, const episode_history& history, std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) override
     {
       return error_code::not_supported;
     }
 
     model_management::model_type_t model_type() const { return model_management::model_type_t::CB; }
-      
+
   private:
     i_trace* _trace_logger;
     std::string _output_name;
