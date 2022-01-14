@@ -13,6 +13,8 @@
 #include "message_sender.h"
 #include "utility/config_helper.h"
 #include "utility/object_pool.h"
+#include "explore_internal.h"
+#include "hash.h"
 
 // float comparisons
 #include "vw_math.h"
@@ -24,15 +26,15 @@ namespace reinforcement_learning {
 };
 
 namespace reinforcement_learning { namespace logger {
-  template<typename TFunc>
+  template<typename TEvent, typename TFunc>
   class i_async_batcher {
   public:
     virtual ~i_async_batcher() = default;
 
     virtual int init(api_status* status) = 0;
 
-    virtual int append(TFunc&& func, const char* evt_id, size_t size_estimate, api_status* status = nullptr) = 0;
-    virtual int append(TFunc& func, const char* evt_id, size_t size_estimate, api_status* status = nullptr) = 0;
+    virtual int append(TFunc&& func, const char* evt_id, size_t size_estimate, TEvent* event, api_status* status = nullptr) = 0;
+    virtual int append(TFunc& func, const char* evt_id, size_t size_estimate, TEvent* event, api_status* status = nullptr) = 0;
 
     virtual int run_iteration(api_status* status) = 0;
   };
@@ -44,14 +46,14 @@ namespace reinforcement_learning { namespace logger {
   //       evt    : Event type out-param
   //       status : Optional status object
   template<typename TEvent, template<typename> class TSerializer = json_collection_serializer, typename TFunc = std::function<int(TEvent&, api_status*)>>
-  class async_batcher: public i_async_batcher<TFunc> {
+  class async_batcher: public i_async_batcher<TEvent, TFunc> {
   public:
     using shared_state_t = typename TSerializer<TEvent>::shared_state_t;
 
     int init(api_status* status) override;
 
-    int append(TFunc&& func, const char* evt_id, size_t size_estimate, api_status* status = nullptr) override;
-    int append(TFunc& func, const char* evt_id, size_t size_estimate, api_status* status = nullptr) override;
+    int append(TFunc&& func, const char* evt_id, size_t size_estimate, TEvent* event, api_status* status = nullptr) override;
+    int append(TFunc& func, const char* evt_id, size_t size_estimate, TEvent* event, api_status* status = nullptr) override;
 
     int run_iteration(api_status* status) override;
 
@@ -73,7 +75,7 @@ namespace reinforcement_learning { namespace logger {
   private:
     std::unique_ptr<i_message_sender> _sender;
 
-    event_queue<TFunc> _queue;       // A queue to accumulate batch of events.
+    event_queue<TEvent, TFunc> _queue;       // A queue to accumulate batch of events.
     size_t _send_high_water_mark;
     error_callback_fn* _perror_cb;
     shared_state_t& _shared_state;
@@ -101,7 +103,7 @@ namespace reinforcement_learning { namespace logger {
   }
 
   template<typename TEvent, template<typename> class TSerializer, typename TFunc>
-  int async_batcher<TEvent, TSerializer, TFunc>::append(TFunc&& func, const char* evt_id, size_t size_estimate, api_status* status) {
+  int async_batcher<TEvent, TSerializer, TFunc>::append(TFunc&& func, const char* evt_id, size_t size_estimate, TEvent* event, api_status* status) {
 
     // If subsampling rate is < 1, then run subsampling logic
     if(_subsample_rate < 1.f) {
@@ -118,7 +120,7 @@ namespace reinforcement_learning { namespace logger {
       }
     }
     
-    _queue.push(std::move(func), size_estimate);
+    _queue.push(std::move(func), size_estimate, event);
 
     //block or drop events if the queue if full
     if (_queue.is_full()) {
@@ -135,8 +137,8 @@ namespace reinforcement_learning { namespace logger {
   }
 
   template<typename TEvent, template<typename> class TSerializer, typename TFunc>
-  int async_batcher<TEvent, TSerializer, TFunc>::append(TFunc& func, const char* evt_id, size_t size_estimate, api_status* status) {
-    return append(std::move(evt), evt_id, size_estimate, status);
+  int async_batcher<TEvent, TSerializer, TFunc>::append(TFunc& func, const char* evt_id, size_t size_estimate, TEvent* event, api_status* status) {
+    return append(std::move(func), evt_id, size_estimate, status);
   }
 
   template<typename TEvent, template<typename> class TSerializer, typename TFunc>

@@ -4,6 +4,7 @@
 #include "utility/context_helper.h"
 #include "utility/config_helper.h"
 #include "logger/async_batcher.h"
+#include "logger/logger_extensions.h"
 
 #include "zstd.h"
 #include <sstream>
@@ -289,7 +290,8 @@ public:
     _use_dedup(use_dedup),
     _use_compression(use_compression) {}
 
-  logger::i_async_batcher<generic_event>* create_batcher(logger::i_message_sender* sender, utility::watchdog& watchdog,
+  logger::i_async_batcher<std::function<int(generic_event&, api_status*)>>* 
+  create_batcher(logger::i_message_sender* sender, utility::watchdog& watchdog,
                                                          error_callback_fn* perror_cb, const char* section) override {
     auto config = utility::get_batcher_config(_config, section);
 
