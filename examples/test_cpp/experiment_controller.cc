@@ -1,14 +1,9 @@
 #include "experiment_controller.h"
+
 #include <iostream>
 
-void throw_if_conflicting(const boost::program_options::variables_map& vm, const std::string first, const std::string& second) {
-  if (vm.count(first) && !vm[first].defaulted() &&
-    vm.count(second) && !vm[second].defaulted())
-  {
-    throw std::logic_error(std::string("Conflicting options '") +
-      first + "' and '" + second + "'.");
-  }
-}
+#include "options.h"
+
 void experiment_controller::restart() {
   _iteration = 0;
   _is_running = true;
@@ -32,7 +27,7 @@ void experiment_controller::stop() {
   _is_running = false;
 }
 
-void experiment_controller::progress_bar() {
+void experiment_controller::show_progress_bar() const {
   if (_iteration % 100 == 0) std::cout << "\r" << _iteration << " sent";
 }
 

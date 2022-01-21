@@ -280,7 +280,7 @@ BOOST_AUTO_TEST_CASE(ca_compare_dsjson_with_fb_models_mixed_skip_learn) {
       model_name,
       "--cats 4 --min_value 1 --max_value 100 --bandwidth 1 --id N/A ",
       file_name);
-  
+
   // read the models and compare
   auto buffer_fb_model = read_file(model_name + ".fb");
   auto buffer_dsjson_model = read_file(model_name + ".json");
@@ -811,7 +811,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes) {
         BOOST_CHECK_EQUAL(examples[1]->l.cb.weight, 1);
         BOOST_CHECK_EQUAL(examples[2]->l.cb.costs.size(), 0);
         BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 1);
-        break;         
+        break;
     }
     clear_examples(examples, vw);
     examples.push_back(&VW::get_unused_example(vw));
@@ -928,7 +928,7 @@ BOOST_AUTO_TEST_CASE(multistep_unordered_episodes) {
 
     BOOST_CHECK_EQUAL(examples[1]->l.cb.weight, 1);
     BOOST_CHECK_EQUAL(examples[2]->l.cb.costs.size(), 0);
-    BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 1);   
+    BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 1);
 
     switch (counter++) {
       case 0:
@@ -976,7 +976,7 @@ BOOST_AUTO_TEST_CASE(multistep_unordered_episodes) {
     clear_examples(examples, vw);
     examples.push_back(&VW::get_unused_example(vw));
   }
-  
+
   clear_examples(examples, vw);
   VW::finish(*vw);
 }

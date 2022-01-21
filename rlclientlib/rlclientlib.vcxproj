@@ -183,6 +183,7 @@ $(flatcPath) -o "$(SolutionDir)rlclientlib\generated\v2" --cpp "$(SolutionDir)rl
     <ClInclude Include="..\include\errors_data.h" />
     <ClInclude Include="..\include\future_compat.h" />
     <ClInclude Include="..\include\live_model.h" />
+    <ClInclude Include="..\include\multistep.h" />
     <ClInclude Include="..\include\multi_slot_response_detailed.h" />
     <ClInclude Include="..\include\sender.h" />
     <ClInclude Include="..\include\multi_slot_response.h" />
@@ -255,6 +256,7 @@ $(flatcPath) -o "$(SolutionDir)rlclientlib\generated\v2" --cpp "$(SolutionDir)rl
     <ClCompile Include="model_mgmt\file_model_loader.cc" />
     <ClCompile Include="model_mgmt\model_downloader.cc" />
     <ClCompile Include="model_mgmt\model_mgmt.cc" />
+    <ClCompile Include="multistep.cc" />
     <ClCompile Include="multi_slot_response_detailed.cc" />
     <ClCompile Include="serialization\payload_serializer.cc" />
     <ClCompile Include="slot_ranking.cc" />

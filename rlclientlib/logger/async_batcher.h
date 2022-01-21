@@ -51,7 +51,7 @@ namespace reinforcement_learning { namespace logger {
 
   private:
     int fill_buffer(std::shared_ptr<utility::data_buffer>& retbuffer,
-      size_t& remaining, 
+      size_t& remaining,
       api_status* status);
 
     void flush(); //flush all batches
@@ -134,8 +134,8 @@ namespace reinforcement_learning { namespace logger {
 
   template<typename TEvent, template<typename> class TSerializer>
   int async_batcher<TEvent, TSerializer>::fill_buffer(
-                                                      std::shared_ptr<utility::data_buffer>& buffer, 
-                                                      size_t& remaining, 
+                                                      std::shared_ptr<utility::data_buffer>& buffer,
+                                                      size_t& remaining,
                                                       api_status* status)
   {
     TEvent evt;

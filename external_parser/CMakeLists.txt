@@ -42,7 +42,7 @@ set(RL_FLAT_BUFFER_FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/Event.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/LearningModeType.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/ProblemType.fbs"
-  "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/MultiStepEvent.fbs"   
+  "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/MultiStepEvent.fbs"
   )
 
 # set vw cmake flags

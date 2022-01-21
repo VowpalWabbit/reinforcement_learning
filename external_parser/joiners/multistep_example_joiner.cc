@@ -148,7 +148,7 @@ void multistep_example_joiner::set_multistep_reward_function(const multistep_rew
 /*
 take forest of tuples <id, secondary> as input.
 Edges are defined using optional previous_id parameter.
-get return list of ids ordered topologically with respect to <previous_id, id> edges and 
+get return list of ids ordered topologically with respect to <previous_id, id> edges and
 according to comp_t comparison for vertices that are not connected
 */
 template<typename id_t, typename secondary_t, typename comp_t = std::greater<std::tuple<secondary_t, id_t>>>
@@ -177,7 +177,7 @@ public:
       auto& top = *(states.top());
       if (!top.empty()) {
         const auto& cur = top.top();
-        const auto& cur_id = std::get<1>(cur); 
+        const auto& cur_id = std::get<1>(cur);
         result.push_back(cur_id);
         states.push(&next[cur_id]);
         top.pop();
@@ -186,7 +186,7 @@ public:
         states.pop();
       }
     }
-  } 
+  }
 };
 
 bool multistep_example_joiner::populate_order() {
@@ -211,7 +211,8 @@ reward::outcome_event multistep_example_joiner::process_outcome(
                       metadata.payload_type(),
                       metadata.pass_probability(),
                       metadata.encoding(),
-                      metadata.id()->str()};
+                      metadata.id()->str(),
+                      v2::LearningModeType::LearningModeType_Online};
 
   if (event.value_type() == v2::OutcomeValue_literal) {
     o_event.s_value = event.value_as_literal()->c_str();
@@ -280,7 +281,7 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
   auto joined = process_interaction(interaction, examples);
 
   const auto outcomes = _outcomes[id];
-  
+
   for (const auto& o: outcomes) {
     joined.outcome_events.push_back(o);
   }
@@ -331,7 +332,7 @@ void multistep_example_joiner::populate_episodic_rewards() {
   for (const std::string& id: _order) {
     std::vector<reward::outcome_event> outcomes = _episodic_outcomes;
     const auto outcomes_per_step = _outcomes[id];
-    outcomes.insert(outcomes.end(), std::make_move_iterator(outcomes_per_step.begin()), 
+    outcomes.insert(outcomes.end(), std::make_move_iterator(outcomes_per_step.begin()),
                     std::make_move_iterator(outcomes_per_step.end()));
     _rewards.push_back(_reward_calculation.value()(outcomes, _loop_info.default_reward));
   }

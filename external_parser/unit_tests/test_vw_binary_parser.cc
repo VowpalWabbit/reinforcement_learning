@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_version) {
                       vw->example_parser->input, payload_type),
                   true);
   BOOST_CHECK_EQUAL(payload_type, MSG_TYPE_FILEMAGIC);
-  
+
   BOOST_CHECK_EQUAL(bp.read_version(vw->example_parser->input), false);
 
   VW::finish(*vw);
