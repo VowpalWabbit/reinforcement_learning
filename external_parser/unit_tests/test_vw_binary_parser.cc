@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_magic) {
 
   set_buffer_as_vw_input(buffer, vw);
   unsigned int payload_type;
-  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
+  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
   BOOST_CHECK_EQUAL(bp.advance_to_next_payload_type(
                       vw->example_parser->input, payload_type),
                   true);
@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_version) {
   set_buffer_as_vw_input(buffer, vw);
   unsigned int payload_type;
 
-  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
+  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
   BOOST_CHECK_EQUAL(bp.advance_to_next_payload_type(
                       vw->example_parser->input, payload_type),
                   true);
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_empty_msg_header) {
   set_buffer_as_vw_input(buffer, vw);
   unsigned int payload_type;
 
-  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
+  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
   BOOST_CHECK_EQUAL(bp.advance_to_next_payload_type(
                       vw->example_parser->input, payload_type),
                   true);
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_no_msg_header) {
   set_buffer_as_vw_input(buffer, vw);
   unsigned int payload_type;
 
-  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
+  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
   BOOST_CHECK_EQUAL(bp.advance_to_next_payload_type(
                       vw->example_parser->input, payload_type),
                   true);
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
                              nullptr, false, nullptr, nullptr);
     set_buffer_as_vw_input(buffer, vw);
 
-    VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
+    VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
     unsigned int payload_type;
 
     BOOST_CHECK_EQUAL(bp.advance_to_next_payload_type(
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
     auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet",
                              nullptr, false, nullptr, nullptr);
     set_buffer_as_vw_input(buffer, vw);
-    VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
+    VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
     v_array<example *> examples;
     examples.push_back(&VW::get_unused_example(vw));
 
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_corrupt_joined_event_payload) {
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
   set_buffer_as_vw_input(buffer, vw);
-  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
+  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
   v_array<example *> examples;
   examples.push_back(&VW::get_unused_example(vw));
 
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_mismatched_payload_types) {
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
   set_buffer_as_vw_input(buffer, vw);
-  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
+  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
   v_array<example *> examples;
   examples.push_back(&VW::get_unused_example(vw));
 
@@ -253,7 +253,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_event_in_joined_event) {
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
   set_buffer_as_vw_input(buffer, vw);
-  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
+  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw),vw->logger);
   v_array<example *> examples;
   examples.push_back(&VW::get_unused_example(vw));
 
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_dedup_payload_missing) {
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
   set_buffer_as_vw_input(buffer, vw);
-  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
+  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
   v_array<example *> examples;
   examples.push_back(&VW::get_unused_example(vw));
 
@@ -313,7 +313,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_interaction_but_no_observation) {
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
   set_buffer_as_vw_input(buffer, vw);
-  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
+  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
   v_array<example *> examples;
   examples.push_back(&VW::get_unused_example(vw));
 
@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_no_interaction_with_observation) {
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
   set_buffer_as_vw_input(buffer, vw);
-  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
+  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
   v_array<example *> examples;
   examples.push_back(&VW::get_unused_example(vw));
 
@@ -389,7 +389,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_invalid_cb_context) {
   auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
                            false, nullptr, nullptr);
   set_buffer_as_vw_input(buffer, vw);
-  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw));
+  VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
   v_array<example *> examples;
   examples.push_back(&VW::get_unused_example(vw));
 

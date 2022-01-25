@@ -171,15 +171,11 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cbb) {
   // first example is shared example
   BOOST_CHECK_EQUAL(CCB::ec_is_example_header(*examples[0]), true);
   // next two examples are actions
-  BOOST_CHECK_EQUAL(examples[1]->l.conditional_contextual_bandit.type,
-                    CCB::example_type::action);
-  BOOST_CHECK_EQUAL(examples[2]->l.conditional_contextual_bandit.type,
-                    CCB::example_type::action);
+  BOOST_CHECK_EQUAL(examples[1]->l.conditional_contextual_bandit.type == CCB::example_type::action, true);
+  BOOST_CHECK_EQUAL(examples[2]->l.conditional_contextual_bandit.type == CCB::example_type::action, true);
   // next two examples are slots
-  BOOST_CHECK_EQUAL(examples[3]->l.conditional_contextual_bandit.type,
-                    CCB::example_type::slot);
-  BOOST_CHECK_EQUAL(examples[4]->l.conditional_contextual_bandit.type,
-                    CCB::example_type::slot);
+  BOOST_CHECK_EQUAL(examples[3]->l.conditional_contextual_bandit.type == CCB::example_type::slot, true);
+  BOOST_CHECK_EQUAL(examples[4]->l.conditional_contextual_bandit.type == CCB::example_type::slot, true);
   // last example is empty
   BOOST_CHECK_EQUAL(example_is_newline(*examples[5]), true);
 

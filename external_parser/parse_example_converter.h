@@ -13,10 +13,10 @@ namespace external {
 
 class binary_json_converter : public parser {
 public:
-  binary_json_converter(std::unique_ptr<i_joiner>&& joiner);  //taking ownership of joiner
+  binary_json_converter(std::unique_ptr<i_joiner>&& joiner, VW::io::logger logger);  //taking ownership of joiner
   ~binary_json_converter();
   bool parse_examples(vw *all, io_buf& io_buf, v_array<example *> &examples) override;
-  void persist_metrics(std::vector<std::pair<std::string, size_t>>& list_metrics) override;
+  void persist_metrics(metric_sink& metrics_sink) override;
 
 private:
   binary_parser _parser;

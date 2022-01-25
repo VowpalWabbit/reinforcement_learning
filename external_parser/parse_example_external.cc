@@ -94,7 +94,7 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
       joiner = VW::make_unique<example_joiner>(all, binary_to_json, outfile_name);
       apply_cli_overrides(joiner, all, parsed_options);
 
-      return VW::make_unique<binary_json_converter>(std::move(joiner));
+      return VW::make_unique<binary_json_converter>(std::move(joiner), all->logger);
 
     } else {
       joiner = VW::make_unique<example_joiner>(all);
@@ -109,7 +109,7 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
       all->example_parser->metrics = VW::make_unique<dsjson_metrics>();
     }
 
-    return VW::make_unique<binary_parser>(std::move(joiner));
+    return VW::make_unique<binary_parser>(std::move(joiner), all->logger);
   }
   throw std::runtime_error("external parser type not recognised");
 }
@@ -150,8 +150,8 @@ void parser::set_parse_args(VW::config::option_group_definition &in_options,
     ;
 }
 
-void parser::persist_metrics(std::vector<std::pair<std::string, size_t>>& metrics) {
-  metrics.emplace_back("external_parser", 1);
+void parser::persist_metrics(metric_sink& metric_sink) {
+  metric_sink.set_uint("external_parser", 1);
 }
 
 parser::~parser() {}

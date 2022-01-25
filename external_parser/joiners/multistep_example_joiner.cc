@@ -24,8 +24,9 @@
 #include "v_array.h"
 
 
-multistep_example_joiner::multistep_example_joiner(vw *vw)
-    : _vw(vw)
+multistep_example_joiner::multistep_example_joiner(vw *vw) : 
+    i_joiner(vw->logger)
+    , _vw(vw)
     , _reward_calculation(&reward::earliest)
     , _multistep_reward_calculation(&multistep_reward_suffix_mean) {}
 
@@ -41,7 +42,7 @@ bool multistep_example_joiner::process_event(const v2::JoinedEvent &joined_event
   const v2::Metadata& meta = *event->meta();
   auto enqueued_time_utc = get_enqueued_time(joined_event.timestamp(),
                                                meta.client_time_utc(),
-                                               _loop_info.use_client_time);
+                                               _loop_info.use_client_time, logger);
   switch (meta.payload_type()) {
     case v2::PayloadType_MultiStep:
     {
@@ -306,11 +307,11 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
   }
 
   joined.cb_data->reward = reward;
-  joined.fill_in_label(examples);
+  joined.fill_in_label(examples, logger);
 
   // add an empty example to signal end-of-multiline
   examples.push_back(&VW::get_unused_example(_vw));
-  _vw->example_parser->lbl_parser.default_label(&examples.back()->l);
+  _vw->example_parser->lbl_parser.default_label(examples.back()->l);
   examples.back()->is_newline = true;
 
   return true;

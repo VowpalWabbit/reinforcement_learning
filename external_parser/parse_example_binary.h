@@ -21,7 +21,7 @@ namespace external {
 class binary_parser : public parser {
 public:
   binary_parser(
-      std::unique_ptr<i_joiner> &&joiner); // taking ownership of joiner
+      std::unique_ptr<i_joiner> &&joiner, VW::io::logger logger); // taking ownership of joiner
   ~binary_parser();
   bool parse_examples(vw *all, io_buf &io_buf,
                       v_array<example *> &examples) override;
@@ -32,8 +32,7 @@ public:
                         bool &ignore_msg);
   bool skip_over_unknown_payload(io_buf &input);
   bool advance_to_next_payload_type(io_buf &input, unsigned int &payload_type);
-  void persist_metrics(
-      std::vector<std::pair<std::string, size_t>> &list_metrics) override;
+  void persist_metrics(metric_sink &metrics) override;
 
 private:
   bool process_next_in_batch(v_array<example *> &examples);

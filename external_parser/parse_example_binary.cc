@@ -78,9 +78,10 @@ bool read_padding(io_buf &input, uint32_t previous_payload_size,
 
 namespace VW {
 namespace external {
-binary_parser::binary_parser(std::unique_ptr<i_joiner> &&joiner)
-    : _example_joiner(std::move(joiner)), _payload(nullptr), _payload_size(0),
-      _total_size_read(0) {}
+binary_parser::binary_parser(std::unique_ptr<i_joiner> &&joiner,
+                             VW::io::logger logger)
+    : parser(logger), _example_joiner(std::move(joiner)), _payload(nullptr),
+      _payload_size(0), _total_size_read(0) {}
 
 binary_parser::~binary_parser() {}
 
@@ -88,7 +89,7 @@ bool binary_parser::read_version(io_buf &input) {
   _payload = nullptr;
   const uint32_t buffer_length = 4 * sizeof(char);
   if (!read_payload(input, _payload, buffer_length)) {
-    VW::io::logger::log_critical("Failed to read payload while reading file "
+    logger.out_critical("Failed to read payload while reading file "
                                  "version, after having read [{}] "
                                  "bytes from the file",
                                  _total_size_read);
@@ -100,7 +101,7 @@ bool binary_parser::read_version(io_buf &input) {
       0; // this is used but the padding code, make it do the right thing.
 
   if (*_payload != BINARY_PARSER_VERSION) {
-    VW::io::logger::log_critical(
+    logger.out_critical(
         "File version [{}] does not match the parser version [{}]",
         static_cast<size_t>(*_payload), BINARY_PARSER_VERSION);
     return false;
@@ -113,7 +114,7 @@ bool binary_parser::read_header(io_buf &input) {
 
   // read header size
   if (!read_payload_size(input, _payload_size)) {
-    VW::io::logger::log_critical(
+    logger.out_critical(
         "Failed to read header message payload size, after having read "
         "[{}] bytes from the file",
         _total_size_read);
@@ -124,7 +125,7 @@ bool binary_parser::read_header(io_buf &input) {
 
   // read the payload
   if (!read_payload(input, _payload, _payload_size)) {
-    VW::io::logger::log_critical(
+    logger.out_critical(
         "Failed to read header message payload of size [{}], after having read "
         "[{}] bytes from the file",
         _payload_size, _total_size_read);
@@ -141,7 +142,7 @@ bool binary_parser::read_header(io_buf &input) {
 bool binary_parser::skip_over_unknown_payload(io_buf &input) {
   _payload = nullptr;
   if (!read_payload_size(input, _payload_size)) {
-    VW::io::logger::log_critical(
+    logger.out_critical(
         "Failed to read unknown message payload size, after having read "
         "[{}] bytes from the file",
         _total_size_read);
@@ -151,7 +152,7 @@ bool binary_parser::skip_over_unknown_payload(io_buf &input) {
   _total_size_read += sizeof(_payload_size);
 
   if (!read_payload(input, _payload, _payload_size)) {
-    VW::io::logger::log_critical("Failed to read unknown message payload of "
+    logger.out_critical("Failed to read unknown message payload of "
                                  "size [{}], after having read "
                                  "[{}] bytes from the file",
                                  _payload_size, _total_size_read);
@@ -166,7 +167,7 @@ bool binary_parser::skip_over_unknown_payload(io_buf &input) {
 bool binary_parser::read_checkpoint_msg(io_buf &input) {
   _payload = nullptr;
   if (!read_payload_size(input, _payload_size)) {
-    VW::io::logger::log_critical(
+    logger.out_critical(
         "Failed to read checkpoint message payload size, after having read "
         "[{}] bytes from the file",
         _total_size_read);
@@ -176,7 +177,7 @@ bool binary_parser::read_checkpoint_msg(io_buf &input) {
   _total_size_read += sizeof(_payload_size);
 
   if (!read_payload(input, _payload, _payload_size)) {
-    VW::io::logger::log_critical(
+    logger.out_critical(
         "Failed to read reward message payload of size [{}], after having read "
         "[{}] bytes from the file",
         _payload_size, _total_size_read);
@@ -206,7 +207,7 @@ bool binary_parser::read_regular_msg(io_buf &input,
   ignore_msg = false;
 
   if (!read_payload_size(input, _payload_size)) {
-    VW::io::logger::log_warn(
+    logger.out_warn(
         "Failed to read regular message payload size, after having read "
         "[{}] bytes from the file",
         _total_size_read);
@@ -216,7 +217,7 @@ bool binary_parser::read_regular_msg(io_buf &input,
   _total_size_read += sizeof(_payload_size);
 
   if (!read_payload(input, _payload, _payload_size)) {
-    VW::io::logger::log_warn("Failed to read regular message payload of "
+    logger.out_warn("Failed to read regular message payload of "
                              "size [{}], after having read "
                              "[{}] bytes from the file",
                              _payload_size, _total_size_read);
@@ -226,7 +227,7 @@ bool binary_parser::read_regular_msg(io_buf &input,
   _total_size_read += _payload_size;
 
   if (!_example_joiner->joiner_ready()) {
-    VW::io::logger::log_warn(
+    logger.out_warn(
         "Read regular message before any checkpoint data "
         "after having read [{}] bytes from the file. Events will be ignored.",
         _total_size_read);
@@ -239,7 +240,7 @@ bool binary_parser::read_regular_msg(io_buf &input,
       flatbuffers::Verifier(reinterpret_cast<const uint8_t *>(_payload),
                             static_cast<size_t>(_payload_size));
   if (!joined_payload->Verify(verifier)) {
-    VW::io::logger::log_warn(
+    logger.out_warn(
         "JoinedPayload of size [{}] verification failed after having read [{}] "
         "bytes from the file, skipping JoinedPayload",
         _payload_size, _total_size_read);
@@ -250,7 +251,7 @@ bool binary_parser::read_regular_msg(io_buf &input,
   for (const auto *event : *joined_payload->events()) {
     // process and group events in batch
     if (!_example_joiner->process_event(*event)) {
-      VW::io::logger::log_error("Processing of an event from JoinedPayload "
+      logger.out_error("Processing of an event from JoinedPayload "
                                 "failed after having read [{}] "
                                 "bytes from the file, skipping JoinedPayload",
                                 _total_size_read);
@@ -268,7 +269,7 @@ bool binary_parser::process_next_in_batch(v_array<example *> &examples) {
     if (_example_joiner->process_joined(examples)) {
       return true;
     } else if (!_example_joiner->current_event_is_skip_learn()) {
-      VW::io::logger::log_warn(
+      logger.out_warn(
           "Processing of a joined event from a JoinedEvent "
           "failed after having read [{}] "
           "bytes from the file, proceeding to next message",
@@ -286,7 +287,7 @@ bool binary_parser::advance_to_next_payload_type(io_buf &input,
   // read potential excess padding after last payload read
   uint32_t padding;
   if (!read_padding(input, _payload_size, padding)) {
-    VW::io::logger::log_critical(
+    logger.out_critical(
         "Failed to read padding of size [{}], after having read "
         "[{}] bytes from the file",
         padding, _total_size_read);
@@ -296,7 +297,7 @@ bool binary_parser::advance_to_next_payload_type(io_buf &input,
   _total_size_read += padding;
 
   if (!read_payload_type(input, payload_type)) {
-    VW::io::logger::log_critical(
+    logger.out_critical(
         "Failed to read next payload type from file, after having read "
         "[{}] bytes from the file",
         _total_size_read);
@@ -306,8 +307,7 @@ bool binary_parser::advance_to_next_payload_type(io_buf &input,
   return true;
 }
 
-void binary_parser::persist_metrics(
-    std::vector<std::pair<std::string, size_t>> &) {
+void binary_parser::persist_metrics(metric_sink &) {
   _example_joiner->persist_metrics();
 }
 
@@ -352,7 +352,7 @@ bool binary_parser::parse_examples(vw *, io_buf &io_buf,
     }
 
     default: {
-      VW::io::logger::log_warn(
+      logger.out_warn(
           "Payload type not recognized [0x{:x}], after having read [{}] "
           "bytes from the file, attempting to skip payload",
           payload_type, _total_size_read);

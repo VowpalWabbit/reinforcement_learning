@@ -37,7 +37,7 @@ void set_slates_label(v_array<example *> &examples) {
 }
 
 void clear_examples(v_array<example *> &examples, vw *vw) {
-  if (vw->l->is_multiline) {
+  if (vw->l->is_multiline()) {
     multi_ex multi_exs;
     for (auto *ex : examples) {
       multi_exs.push_back(ex);

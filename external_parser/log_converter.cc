@@ -8,19 +8,19 @@ namespace log_converter {
 namespace rj = rapidjson;
 
 void build_json(std::ofstream &outfile,
-                joined_event::joined_event &je) {
+                joined_event::joined_event &je, VW::io::logger& logger) {
   switch (je.interaction_metadata.payload_type) {
   case v2::PayloadType_CB:
-    build_cb_json(outfile, je);
+    build_cb_json(outfile, je, logger);
     break;
   case v2::PayloadType_CCB:
-    build_ccb_json(outfile, je);
+    build_ccb_json(outfile, je, logger);
     break;
   case v2::PayloadType_CA:
-    build_ca_json(outfile, je);
+    build_ca_json(outfile, je, logger);
     break;
   case v2::PayloadType_Slates:
-    build_slates_json(outfile, je);
+    build_slates_json(outfile, je, logger);
     break;
   default:
     break;
@@ -28,7 +28,7 @@ void build_json(std::ofstream &outfile,
 }
 
 void build_cb_json(std::ofstream &outfile,
-                   joined_event::joined_event &je) {
+                   joined_event::joined_event &je, VW::io::logger& logger) {
   auto cb_je = reinterpret_cast<const joined_event::cb_joined_event *>(
       je.get_hold_of_typed_data());
   float cost = -1.f * cb_je->reward;
@@ -136,14 +136,14 @@ void build_cb_json(std::ofstream &outfile,
 
     outfile << out_buffer.GetString() << std::endl;
   } catch (const std::exception &e) {
-    VW::io::logger::log_error(
+    logger.out_error(
         "convert event: [{}] from binary to json format failed: [{}].",
         interaction_data.eventId, e.what());
   }
 }
 
 void build_ccb_json(std::ofstream &outfile,
-                    joined_event::joined_event &je) {
+                    joined_event::joined_event &je, VW::io::logger& logger) {
   const std::string &event_id = je.interaction_metadata.event_id;
 
   auto ccb_joined_event = reinterpret_cast<const joined_event::ccb_joined_event *>(
@@ -276,13 +276,13 @@ void build_ccb_json(std::ofstream &outfile,
     outfile << out_buffer.GetString() << std::endl;
 
   } catch (const std::exception &e) {
-    VW::io::logger::log_error(
+    logger.out_error(
       "convert event: [{}] from binary to json format failed: [{}].",
       event_id, e.what());
   }
 }
 
-void build_ca_json(std::ofstream &outfile, joined_event::joined_event &je) {
+void build_ca_json(std::ofstream &outfile, joined_event::joined_event &je, VW::io::logger& logger) {
   auto ca_je = reinterpret_cast<const joined_event::ca_joined_event *>(
       je.get_hold_of_typed_data());
   float cost = -1.f * ca_je->reward;
@@ -343,13 +343,13 @@ void build_ca_json(std::ofstream &outfile, joined_event::joined_event &je) {
 
     outfile << out_buffer.GetString() << std::endl;
   } catch (const std::exception &e) {
-    VW::io::logger::log_error(
+    logger.out_error(
         "convert event: [{}] from binary to json format failed: [{}].",
         interaction_data.eventId, e.what());
   }
 }
 
-void build_slates_json(std::ofstream &outfile, joined_event::joined_event &je) {
+void build_slates_json(std::ofstream &outfile, joined_event::joined_event &je, VW::io::logger& logger) {
   const std::string &event_id = je.interaction_metadata.event_id;
 
   auto slates_je = reinterpret_cast<const joined_event::slates_joined_event *>(
@@ -452,7 +452,7 @@ void build_slates_json(std::ofstream &outfile, joined_event::joined_event &je) {
     outfile << out_buffer.GetString() << std::endl;
 
   } catch (const std::exception &e) {
-    VW::io::logger::log_error(
+    logger.out_error(
       "convert event: [{}] from binary to json format failed: [{}].",
       event_id, e.what());
   }

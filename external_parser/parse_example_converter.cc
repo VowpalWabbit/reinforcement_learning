@@ -9,8 +9,9 @@
 namespace VW {
 namespace external {
 
-binary_json_converter::binary_json_converter(std::unique_ptr<i_joiner> &&joiner)
-    : _parser(std::move(joiner)) {}
+binary_json_converter::binary_json_converter(std::unique_ptr<i_joiner> &&joiner,
+                                             VW::io::logger logger)
+    : parser(logger), _parser(std::move(joiner), logger) {}
 
 binary_json_converter::~binary_json_converter() = default;
 
@@ -24,7 +25,7 @@ bool binary_json_converter::parse_examples(vw *all, io_buf &io_buf,
 }
 
 void binary_json_converter::persist_metrics(
-    std::vector<std::pair<std::string, size_t>> &) {
+    metric_sink&) {
   // do we want metrics here?
 }
 
