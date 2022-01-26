@@ -208,7 +208,7 @@ void build_ccb_json(std::ofstream &outfile,
       writer.StartArray();
 
       for (auto &p : interaction_data[i].probabilities) {
-        writer.Uint(static_cast<unsigned int>(p));
+        writer.Double(p);
       }
       writer.EndArray();
 
@@ -419,7 +419,7 @@ void build_slates_json(std::ofstream &outfile, joined_event::joined_event &je, V
       writer.StartArray();
 
       for (auto &p : interaction.probabilities) {
-        writer.Uint(static_cast<unsigned int>(p));
+        writer.Double(p);
       }
       writer.EndArray();
       writer.EndObject();
