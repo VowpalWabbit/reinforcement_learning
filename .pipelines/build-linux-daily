@@ -1,9 +1,10 @@
 schedules:
 - cron: "0 8 * * *"
-  displayName: Latest VW
+  displayName: Integration with latest VW
   branches:
     include:
     - master
+  always: true
 
 pr: none
 trigger: none
