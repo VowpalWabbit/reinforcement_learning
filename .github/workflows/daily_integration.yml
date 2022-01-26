@@ -10,7 +10,7 @@ on:
       - '*'
 
 jobs:
-  build:
+  LatestVW:
     container:
       image: vowpalwabbit/rl-ubuntu-1804:latest
     runs-on: ubuntu-latest
@@ -23,8 +23,6 @@ jobs:
         shell: bash
         run: |
           pushd ext_libs/vowpal_wabbit
-          ls
-          pwd
           git pull origin master
           popd
       - name: Build
