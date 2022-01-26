@@ -15,9 +15,6 @@ container:
 steps:
 - checkout: self
   submodules: true
-- bash: |
-    cd ext_libs/vowpal_wabbit
-    git pull origin master
 - bash: ./.scripts/linux/build.sh
   displayName: Build C++
 - bash: ./.scripts/linux/test.sh
