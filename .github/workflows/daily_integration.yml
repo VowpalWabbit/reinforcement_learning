@@ -20,6 +20,8 @@ jobs:
       - name: Update VW to latest
         shell: bash
         run: |
+          ls
+          pwd
           pushd ext_libs/vowpal_wabbit
           git pull origin master
           popd
