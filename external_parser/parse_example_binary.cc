@@ -311,7 +311,7 @@ void binary_parser::persist_metrics(metric_sink &) {
   _example_joiner->persist_metrics();
 }
 
-bool binary_parser::parse_examples(vw *, io_buf &io_buf,
+bool binary_parser::parse_examples(VW::workspace*, io_buf &io_buf,
                                    v_array<example *> &examples) {
   if (process_next_in_batch(examples)) {
     return true;
