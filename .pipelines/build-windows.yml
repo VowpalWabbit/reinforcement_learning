@@ -28,7 +28,7 @@ steps:
     #netShare: # Required when packageFeedSelector == NetShare
 - task: Cache@2
   inputs:
-    key: 'vcpkg | archives'
+    key: 'vcpkg | archives | reinforcement_learning\.scripts\restore.cmd'
     path: $(VCPKG_ARCHIVE_DIR)
     restoreKeys: |
       vcpkg | archives
