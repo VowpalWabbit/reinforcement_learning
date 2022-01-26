@@ -147,7 +147,7 @@ struct cb_joined_event : public typed_joined_event {
         metrics->NumberOfEventsZeroActions++;
       }
       else if (interaction_data.actions[0] == CB_BASELINE_ACTION) {
-        metrics->DsjsonSumCostOriginalBaseline += -1. * original_reward;
+        metrics->DsjsonSumCostOriginalBaseline += -1.f * original_reward;
       }
     }
   }
@@ -264,7 +264,7 @@ struct ccb_joined_event : public typed_joined_event {
     rewards = std::vector<float>(num_of_slots, default_reward);
     original_rewards = std::vector<float>(num_of_slots, default_reward);
 
-    for (size_t i = 0; i < num_of_slots; i++) {
+    for (int i = 0; i < static_cast<int>(num_of_slots); i++) {
       if (outcomes_map.find(i) != outcomes_map.end()) {
         original_rewards[i] = reward_function(outcomes_map[i], default_reward);
       }
@@ -281,7 +281,7 @@ struct ccb_joined_event : public typed_joined_event {
     if (metrics) {
       float first_slot_original_reward_neg = 0.f;
       if (!original_rewards.empty()) {
-        first_slot_original_reward_neg = -1. * original_rewards[0];
+        first_slot_original_reward_neg = -1.f * original_rewards[0];
       }
       calculate_multislot_interaction_metrics(metrics, multi_slot_interaction, first_slot_original_reward_neg);
     }
@@ -367,7 +367,7 @@ struct slates_joined_event : public typed_joined_event {
 
   void calculate_metrics(dsjson_metrics* metrics) override {
     if (metrics) {
-      float original_reward_neg = -1. * original_reward;
+      float original_reward_neg = -1.f * original_reward;
       calculate_multislot_interaction_metrics(metrics, multi_slot_interaction, original_reward_neg);
     }
   }

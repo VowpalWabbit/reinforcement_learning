@@ -2,7 +2,7 @@
 #include "test_common.h"
 #include <boost/test/unit_test.hpp>
 
-void process(vw *vw, example_joiner &joiner, v_array<example *> &examples,
+void process(VW::workspace *vw, example_joiner &joiner, v_array<example *> &examples,
              std::string int_file, std::string obs_file) {
   std::string input_files = get_test_files_location();
 

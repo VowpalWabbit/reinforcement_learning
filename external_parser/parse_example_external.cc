@@ -40,7 +40,7 @@ std::map<const char *, v2::LearningModeType> const learning_modes = {{
 
 bool parser_options::is_enabled() { return binary; }
 
-void apply_cli_overrides(std::unique_ptr<i_joiner>& joiner, vw *all, const input_options &parsed_options)
+void apply_cli_overrides(std::unique_ptr<i_joiner>& joiner, VW::workspace *all, const input_options &parsed_options)
 {
   if(all->options->was_supplied("default_reward")) {
     joiner->set_default_reward(parsed_options.ext_opts->default_reward, true);
@@ -74,7 +74,7 @@ void apply_cli_overrides(std::unique_ptr<i_joiner>& joiner, vw *all, const input
 }
 
 std::unique_ptr<parser>
-parser::get_external_parser(vw *all, const input_options &parsed_options) {
+parser::get_external_parser(VW::workspace *all, const input_options &parsed_options) {
   if (parsed_options.ext_opts->binary) {
     bool binary_to_json = parsed_options.ext_opts->binary_to_json;
     std::unique_ptr<i_joiner> joiner(nullptr);
@@ -156,7 +156,7 @@ void parser::persist_metrics(metric_sink& metric_sink) {
 
 parser::~parser() {}
 
-int parse_examples(vw *all, io_buf& io_buf, v_array<example *> &examples) {
+int parse_examples(VW::workspace *all, io_buf& io_buf, v_array<example *> &examples) {
   return static_cast<int>(all->external_parser->parse_examples(all, io_buf, examples));
 }
 } // namespace external

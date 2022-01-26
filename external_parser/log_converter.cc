@@ -42,41 +42,41 @@ void build_cb_json(std::ofstream &outfile,
 
     writer.StartObject();
 
-    writer.Key("_label_cost", strlen("_label_cost"), true);
+    writer.Key("_label_cost", static_cast<rapidjson::SizeType>(strlen("_label_cost")), true);
     writer.Double(cost);
 
     float label_p =
         probabilities.size() > 0
             ? probabilities[0] * je.interaction_metadata.pass_probability
             : 0.f;
-    writer.Key("_label_probability", strlen("_label_probability"), true);
+    writer.Key("_label_probability", static_cast<rapidjson::SizeType>(strlen("_label_probability")), true);
     writer.Double(label_p);
 
-    writer.Key("_label_Action", strlen("_label_Action"), true);
+    writer.Key("_label_Action", static_cast<rapidjson::SizeType>(strlen("_label_Action")), true);
     writer.Uint(actions[0]);
 
-    writer.Key("_labelIndex", strlen("_labelIndex"), true);
+    writer.Key("_labelIndex", static_cast<rapidjson::SizeType>(strlen("_labelIndex")), true);
     writer.Uint(actions[0] - 1);
 
     bool skip_learn = !je.is_joined_event_learnable();
     if (skip_learn) {
-      writer.Key("_skipLearn", strlen("_skipLearn"), true);
+      writer.Key("_skipLearn", static_cast<rapidjson::SizeType>(strlen("_skipLearn")), true);
       writer.Bool(skip_learn);
     }
 
-    writer.Key("o", strlen("o"), true);
+    writer.Key("o", static_cast<rapidjson::SizeType>(strlen("o")), true);
 
     writer.StartArray();
     for (auto &o : je.outcome_events) {
       writer.StartObject();
       if (!o.action_taken) {
-        writer.Key("v", strlen("v"), true);
+        writer.Key("v", static_cast<rapidjson::SizeType>(strlen("v")), true);
         writer.Double(o.value);
       }
-      writer.Key("EventId", strlen("EventId"), true);
+      writer.Key("EventId", static_cast<rapidjson::SizeType>(strlen("EventId")), true);
       writer.String(o.metadata.event_id.c_str(), o.metadata.event_id.length(), true);
 
-      writer.Key("ActionTaken", strlen("ActionTaken"), true);
+      writer.Key("ActionTaken", static_cast<rapidjson::SizeType>(strlen("ActionTaken")), true);
       writer.Bool(o.action_taken);
 
       writer.EndObject();
@@ -88,16 +88,16 @@ void build_cb_json(std::ofstream &outfile,
         "%FT%TZ",
         date::floor<std::chrono::microseconds>(je.joined_event_timestamp));
 
-    writer.Key("Timestamp", strlen("Timestamp"), true);
+    writer.Key("Timestamp", static_cast<rapidjson::SizeType>(strlen("Timestamp")), true);
     writer.String(ts_str.c_str(), ts_str.length(), true);
 
-    writer.Key("Version", strlen("Version"), true);
-    writer.String("1", strlen("1"), true);
+    writer.Key("Version", static_cast<rapidjson::SizeType>(strlen("Version")), true);
+    writer.String("1", static_cast<rapidjson::SizeType>(strlen("1")), true);
 
-    writer.Key("EventId", strlen("EventId"), true);
+    writer.Key("EventId", static_cast<rapidjson::SizeType>(strlen("EventId")), true);
     writer.String(interaction_data.eventId.c_str(), interaction_data.eventId.length(), true);
 
-    writer.Key("a", strlen("a"), true);
+    writer.Key("a", static_cast<rapidjson::SizeType>(strlen("a")), true);
     writer.StartArray();
 
     for (auto &action_id : actions) {
@@ -110,7 +110,7 @@ void build_cb_json(std::ofstream &outfile,
     std::replace(je.context.begin(), je.context.end(), '\n', ' ');
     writer.RawValue(je.context.c_str(), je.context.length(), rj::kObjectType);
 
-    writer.Key("p", strlen("p"), true);
+    writer.Key("p", static_cast<rapidjson::SizeType>(strlen("p")), true);
     writer.StartArray();
     for (auto &p : probabilities) {
       writer.Double(p);
@@ -118,9 +118,9 @@ void build_cb_json(std::ofstream &outfile,
 
     writer.EndArray();
 
-    writer.Key("VWState", strlen("VWState"), true);
+    writer.Key("VWState", static_cast<rapidjson::SizeType>(strlen("VWState")), true);
     writer.StartObject();
-    writer.Key("m", strlen("m"), true);
+    writer.Key("m", static_cast<rapidjson::SizeType>(strlen("m")), true);
     writer.String(je.model_id.c_str(), je.model_id.length(), true);
     writer.EndObject();
 
@@ -129,7 +129,7 @@ void build_cb_json(std::ofstream &outfile,
       writer.Double(interaction_data.probabilityOfDrop);
     }
 
-    writer.Key("_original_label_cost", strlen("_original_label_cost"), true);
+    writer.Key("_original_label_cost", static_cast<rapidjson::SizeType>(strlen("_original_label_cost")), true);
     writer.Double(original_cost);
 
     writer.EndObject();
@@ -294,13 +294,13 @@ void build_ca_json(std::ofstream &outfile, joined_event::joined_event &je, VW::i
 
     writer.StartObject();
 
-    writer.Key("_label_ca", strlen("_label_ca"), true);
+    writer.Key("_label_ca", static_cast<rapidjson::SizeType>(strlen("_label_ca")), true);
     writer.StartObject();
-    writer.Key("cost", strlen("cost"), true);
+    writer.Key("cost", static_cast<rapidjson::SizeType>(strlen("cost")), true);
     writer.Double(cost);
-    writer.Key("pdf_value", strlen("pdf_value"), true);
+    writer.Key("pdf_value", static_cast<rapidjson::SizeType>(strlen("pdf_value")), true);
     writer.Double(interaction_data.pdf_value);
-    writer.Key("action", strlen("action"), true);
+    writer.Key("action", static_cast<rapidjson::SizeType>(strlen("action")), true);
     writer.Double(interaction_data.action);
     writer.EndObject();
 
@@ -308,34 +308,34 @@ void build_ca_json(std::ofstream &outfile, joined_event::joined_event &je, VW::i
         "%FT%TZ",
         date::floor<std::chrono::microseconds>(je.joined_event_timestamp));
 
-    writer.Key("Timestamp", strlen("Timestamp"), true);
+    writer.Key("Timestamp", static_cast<rapidjson::SizeType>(strlen("Timestamp")), true);
     writer.String(ts_str.c_str(), ts_str.length(), true);
 
-    writer.Key("Version", strlen("Version"), true);
-    writer.String("1", strlen("1"), true);
+    writer.Key("Version", static_cast<rapidjson::SizeType>(strlen("Version")), true);
+    writer.String("1", static_cast<rapidjson::SizeType>(strlen("1")), true);
 
-    writer.Key("EventId", strlen("EventId"), true);
+    writer.Key("EventId", static_cast<rapidjson::SizeType>(strlen("EventId")), true);
     writer.String(interaction_data.eventId.c_str(),
                   interaction_data.eventId.length(), true);
 
-    writer.Key("c", strlen("c"), true);
+    writer.Key("c", static_cast<rapidjson::SizeType>(strlen("c")), true);
     std::replace(je.context.begin(), je.context.end(), '\n', ' ');
     writer.RawValue(je.context.c_str(), je.context.length(), rj::kObjectType);
 
-    writer.Key("VWState", strlen("VWState"), true);
+    writer.Key("VWState", static_cast<rapidjson::SizeType>(strlen("VWState")), true);
     writer.StartObject();
-    writer.Key("m", strlen("m"), true);
+    writer.Key("m", static_cast<rapidjson::SizeType>(strlen("m")), true);
     writer.String(je.model_id.c_str(), je.model_id.length(), true);
     writer.EndObject();
 
     if (interaction_data.probabilityOfDrop != 0.f) {
-      writer.Key("pdrop", strlen("pdrop"), true);
+      writer.Key("pdrop", static_cast<rapidjson::SizeType>(strlen("pdrop")), true);
       writer.Double(interaction_data.probabilityOfDrop);
     }
 
     bool skip_learn = !je.is_joined_event_learnable();
     if (skip_learn) {
-      writer.Key("_skipLearn", strlen("_skipLearn"), true);
+      writer.Key("_skipLearn", static_cast<rapidjson::SizeType>(strlen("_skipLearn")), true);
       writer.Bool(skip_learn);
     }
 
@@ -379,22 +379,22 @@ void build_slates_json(std::ofstream &outfile, joined_event::joined_event &je, V
       writer.String(event_id.c_str());
     }
 
-    writer.Key("_label_cost", strlen("_label_cost"), true);
+    writer.Key("_label_cost", static_cast<rapidjson::SizeType>(strlen("_label_cost")), true);
     writer.Double(cost);
 
-    writer.Key("o", strlen("o"), true);
+    writer.Key("o", static_cast<rapidjson::SizeType>(strlen("o")), true);
 
     writer.StartArray();
     for (auto &o : je.outcome_events) {
       writer.StartObject();
       if (!o.action_taken) {
-        writer.Key("v", strlen("v"), true);
+        writer.Key("v", static_cast<rapidjson::SizeType>(strlen("v")), true);
         writer.Double(o.value);
       }
-      writer.Key("EventId", strlen("EventId"), true);
+      writer.Key("EventId", static_cast<rapidjson::SizeType>(strlen("EventId")), true);
       writer.String(o.metadata.event_id.c_str(), o.metadata.event_id.length(), true);
 
-      writer.Key("ActionTaken", strlen("ActionTaken"), true);
+      writer.Key("ActionTaken", static_cast<rapidjson::SizeType>(strlen("ActionTaken")), true);
       writer.Bool(o.action_taken);
 
       writer.EndObject();
@@ -402,7 +402,7 @@ void build_slates_json(std::ofstream &outfile, joined_event::joined_event &je, V
 
     writer.EndArray();
 
-    writer.Key("_outcomes", strlen("_outcomes"), true);
+    writer.Key("_outcomes", static_cast<rapidjson::SizeType>(strlen("_outcomes")), true);
 
     writer.StartArray();
     for (auto &interaction : interaction_data) {
@@ -444,7 +444,7 @@ void build_slates_json(std::ofstream &outfile, joined_event::joined_event &je, V
     }
 
     if (skip_learn) {
-      writer.Key("_skipLearn", strlen("_skipLearn"), true);
+      writer.Key("_skipLearn", static_cast<rapidjson::SizeType>(strlen("_skipLearn")), true);
       writer.Bool(skip_learn);
     }
 

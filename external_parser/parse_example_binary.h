@@ -23,7 +23,7 @@ public:
   binary_parser(
       std::unique_ptr<i_joiner> &&joiner, VW::io::logger logger); // taking ownership of joiner
   ~binary_parser();
-  bool parse_examples(vw *all, io_buf &io_buf,
+  bool parse_examples(VW::workspace *all, io_buf &io_buf,
                       v_array<example *> &examples) override;
   bool read_version(io_buf &input);
   bool read_header(io_buf &input);

@@ -36,7 +36,7 @@ void set_slates_label(v_array<example *> &examples) {
   examples[0]->pred.decision_scores[1].push_back({1, 0.f});
 }
 
-void clear_examples(v_array<example *> &examples, vw *vw) {
+void clear_examples(v_array<example *> &examples, VW::workspace *vw) {
   if (vw->l->is_multiline()) {
     multi_ex multi_exs;
     for (auto *ex : examples) {
@@ -52,7 +52,7 @@ void clear_examples(v_array<example *> &examples, vw *vw) {
   examples.clear();
 }
 
-void set_buffer_as_vw_input(const std::vector<char> &buffer, vw *vw) {
+void set_buffer_as_vw_input(const std::vector<char> &buffer, VW::workspace *vw) {
   vw->example_parser->input.close_files();
   vw->example_parser->input.add_file(
       VW::io::create_buffer_view(buffer.data(), buffer.size()));
@@ -116,7 +116,7 @@ std::vector<const v2::JoinedEvent *> wrap_into_joined_events(
     int day = 30;
     v2::TimeStamp ts(2020, 3, day, 10, 20, 30, 0);
 
-    for (size_t i = 0; i < event_batch->events()->size(); i++) {
+    for (flatbuffers::uoffset_t i = 0; i < event_batch->events()->size(); i++) {
       const auto *event_payload = event_batch->events()->Get(i)->payload();
       auto vec = fbb.CreateVector(event_payload->data(), event_payload->size());
 

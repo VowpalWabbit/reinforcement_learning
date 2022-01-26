@@ -69,7 +69,7 @@ std::vector<float> get_float_rewards(
     {
       for (auto *example : examples) {
         if (!CB::ec_is_example_header(*example) && example->l.cb.costs.size() > 0) {
-          rewards.push_back(-1.0 * example->l.cb.costs[0].cost);
+          rewards.push_back(-1.f * example->l.cb.costs[0].cost);
         }
       }
     }
@@ -84,13 +84,13 @@ std::vector<float> get_float_rewards(
         if (example->l.conditional_contextual_bandit.type ==
             CCB::example_type::slot) {
           rewards.push_back(
-              -1.0 * example->l.conditional_contextual_bandit.outcome->cost);
+              -1.f * example->l.conditional_contextual_bandit.outcome->cost);
         }
       }
     } break;
     case v2::ProblemType_CA: {
       if (examples.size() == 1) {
-        rewards.push_back(-1.0 * examples[0]->l.cb_cont.costs[0].cost);
+        rewards.push_back(-1.f * examples[0]->l.cb_cont.costs[0].cost);
       }
     } break;
     case v2::ProblemType_SLATES: {
@@ -98,7 +98,7 @@ std::vector<float> get_float_rewards(
 
       for (auto *example : examples) {
         if (example->l.slates.type == VW::slates::example_type::shared) {
-          rewards.push_back(-1.0 * example->l.slates.cost);
+          rewards.push_back(-1.f * example->l.slates.cost);
         }
       }
     } break;

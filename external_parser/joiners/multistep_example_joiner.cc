@@ -24,7 +24,7 @@
 #include "v_array.h"
 
 
-multistep_example_joiner::multistep_example_joiner(vw *vw) : 
+multistep_example_joiner::multistep_example_joiner(VW::workspace *vw) : 
     i_joiner(vw->logger)
     , _vw(vw)
     , _reward_calculation(&reward::earliest)
@@ -355,7 +355,7 @@ bool multistep_example_joiner::current_event_is_skip_learn() {
   return _current_je_is_skip_learn;
 }
 
-void multistep_example_joiner::apply_cli_overrides(vw *all, const input_options &parsed_options) {
+void multistep_example_joiner::apply_cli_overrides(VW::workspace *all, const input_options &parsed_options) {
   if(all->options->was_supplied("multistep_reward")) {
     multistep_reward_funtion_type multistep_reward_func;
 

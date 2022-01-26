@@ -17,8 +17,8 @@
 
 class example_joiner : public i_joiner {
 public:
-  example_joiner(vw *vw); // TODO rule of 5
-  example_joiner(vw *vw, bool binary_to_json, std::string outfile_name);
+  example_joiner(VW::workspace *vw); // TODO rule of 5
+  example_joiner(VW::workspace *vw, bool binary_to_json, std::string outfile_name);
 
   virtual ~example_joiner();
 
@@ -27,7 +27,7 @@ public:
   void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky = false) override;
   void set_problem_type_config(v2::ProblemType problem_type, bool sticky = false) override;
   void set_use_client_time(bool use_client_time, bool sticky = false) override;
-  void apply_cli_overrides(vw *all, const input_options &parsed_options) override;
+  void apply_cli_overrides(VW::workspace *all, const input_options &parsed_options) override;
   bool joiner_ready() override;
 
   float default_reward() const { return _loop_info.default_reward; }
@@ -123,7 +123,7 @@ private:
 
   std::vector<example *> _example_pool;
 
-  vw *_vw;
+  VW::workspace *_vw;
   flatbuffers::DetachedBuffer _detached_buffer;
 
   loop::sticky_value<reward::RewardFunctionType> _reward_calculation;

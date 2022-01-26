@@ -16,11 +16,11 @@
 #include "parser.h"
 #include "scope_exit.h"
 
-example_joiner::example_joiner(vw *vw)
+example_joiner::example_joiner(VW::workspace *vw)
     : i_joiner(vw->logger), _vw(vw), _reward_calculation(&reward::earliest),
       _binary_to_json(false) {}
 
-example_joiner::example_joiner(vw *vw, bool binary_to_json,
+example_joiner::example_joiner(VW::workspace *vw, bool binary_to_json,
                                std::string outfile_name)
     : i_joiner(vw->logger), _vw(vw), _reward_calculation(&reward::earliest),
       _binary_to_json(binary_to_json) {
@@ -379,7 +379,7 @@ bool example_joiner::process_dedup(const v2::Event &event,
 
   v_array<example *> examples;
 
-  for (size_t i = 0; i < dedup->ids()->size(); i++) {
+  for (flatbuffers::uoffset_t i = 0; i < dedup->ids()->size(); i++) {
     auto dedup_id = dedup->ids()->Get(i);
     if (!_dedup_cache.exists(dedup_id)) {
 
@@ -463,7 +463,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
         } else {
           je->calculate_metrics(_vw->example_parser->metrics.get());
           _joiner_metrics.sum_cost_original +=
-              -1. * je->get_sum_original_reward();
+              -1.f * je->get_sum_original_reward();
           if (_joiner_metrics.first_event_id.empty()) {
             _joiner_metrics.first_event_id =
                 std::move(je->interaction_metadata.event_id);
@@ -575,4 +575,4 @@ metrics::joiner_metrics example_joiner::get_metrics() {
   return _joiner_metrics;
 }
 
-void example_joiner::apply_cli_overrides(vw *, const input_options &) {}
+void example_joiner::apply_cli_overrides(VW::workspace *, const input_options &) {}
