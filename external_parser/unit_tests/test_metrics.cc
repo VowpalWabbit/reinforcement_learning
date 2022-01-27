@@ -56,8 +56,7 @@ void should_match_expected_metrics(
     }
 
   } catch (const std::exception &e) {
-    VW::io::logger::log_error("parse metrics_spec.json failed: [{}].",
-                              e.what());
+    std::cout << "parse metrics_spec.json failed: " << e.what() << std::endl;
   }
 }
 
@@ -130,8 +129,7 @@ BOOST_AUTO_TEST_CASE(check_metrics_deferred_actions_without_activations) {
       {"cbea_sum_cost", 0},
       {"cbea_sum_cost_baseline", 0},
       {"dsjson_sum_cost_original", 0},
-      {"dsjson_sum_cost_original_baseline", 0}
-  };
+      {"dsjson_sum_cost_original_baseline", 0}};
 
   std::map<std::string, std::string> expected_string_metrics = {
       {"first_event_id", ""},
@@ -169,7 +167,8 @@ BOOST_AUTO_TEST_CASE(
       {"cbea_max_actions", 2}};
 
   std::map<std::string, float> expected_float_metrics = {
-      {"cbea_sum_cost", -9.0}, {"cbea_sum_cost_baseline", -9.0},
+      {"cbea_sum_cost", -9.0},
+      {"cbea_sum_cost_baseline", -9.0},
       {"dsjson_sum_cost_original", -19.0},
       {"dsjson_sum_cost_original_baseline", -9.0}
       // TODO uncomment and fix when some interaction work is pulled in from VW
@@ -216,7 +215,8 @@ BOOST_AUTO_TEST_CASE(
       {"cbea_max_actions", 2}};
 
   std::map<std::string, float> expected_float_metrics = {
-      {"cbea_sum_cost", -16.0}, {"cbea_sum_cost_baseline", -5.0},
+      {"cbea_sum_cost", -16.0},
+      {"cbea_sum_cost_baseline", -5.0},
       {"dsjson_sum_cost_original", -57.0},
       {"dsjson_sum_cost_original_first_slot", -27.0},
       {"dsjson_number_label_equal_baseline_first_slot", 5},
@@ -241,12 +241,10 @@ BOOST_AUTO_TEST_CASE(
                                 expected_string_metrics);
 }
 
-BOOST_AUTO_TEST_CASE(
-    check_metrics_ca_mixed_deferred_action_events) {
+BOOST_AUTO_TEST_CASE(check_metrics_ca_mixed_deferred_action_events) {
   std::string infile_name =
       "valid_joined_logs/ca_mixed_deferred_action_events_20.log";
-  std::string outfile_name =
-      "ca_mixed_deferred_action_events.json";
+  std::string outfile_name = "ca_mixed_deferred_action_events.json";
 
   std::map<std::string, int> expected_int_metrics = {
       {"total_predict_calls", 0},
@@ -265,8 +263,8 @@ BOOST_AUTO_TEST_CASE(
       {"last_event_id", "1a997865"},
       {"last_event_time", "2021-08-10T01:29:55.000000Z"}};
 
-  should_match_expected_metrics("--cats 4 --min_value 1 --max_value 100 --bandwidth 1",
-                                infile_name, outfile_name,
-                                expected_int_metrics, expected_float_metrics,
-                                expected_string_metrics);
+  should_match_expected_metrics(
+      "--cats 4 --min_value 1 --max_value 100 --bandwidth 1", infile_name,
+      outfile_name, expected_int_metrics, expected_float_metrics,
+      expected_string_metrics);
 }
