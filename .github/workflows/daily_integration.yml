@@ -1,0 +1,35 @@
+name: Integration with latest VW
+
+on:
+  push:
+    branches:
+      - master
+      - 'releases/**'
+  pull_request:
+    branches:
+      - '*'
+  schedule:
+    - cron: "0 8 * * *"
+
+jobs:
+  LatestVW:
+    container:
+      image: vowpalwabbit/rl-ubuntu-1804:latest
+    runs-on: ubuntu-latest
+    steps:
+      # v1 must be used because newer versions require a node.js version that will not run on this old image.
+      - uses: actions/checkout@v1
+        with:
+          submodules: 'true'
+      - name: Update VW to latest
+        shell: bash
+        run: |
+          pushd ext_libs/vowpal_wabbit
+          git pull origin master
+          popd
+      - name: Build
+        shell: bash
+        run: ./.scripts/linux/build.sh
+      - name: Test
+        shell: bash
+        run: ./.scripts/linux/test.sh
