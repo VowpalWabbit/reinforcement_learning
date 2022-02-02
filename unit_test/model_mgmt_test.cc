@@ -18,7 +18,10 @@
 #include "config_utility.h"
 #include "configuration.h"
 #include "utility/watchdog.h"
-#include<Windows.h>
+
+#ifdef _WIN32
+#   include<Windows.h>
+#endif
 
 #ifdef USE_AZURE_FACTORIES
 #   include "model_mgmt/restapi_data_transport.h"
