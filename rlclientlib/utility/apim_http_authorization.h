@@ -24,5 +24,6 @@ namespace reinforcement_learning {
 
   private:
     std::string _api_key;
+    std::string _auth_type;
   };
 }

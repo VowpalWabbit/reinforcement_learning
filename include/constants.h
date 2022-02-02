@@ -4,6 +4,7 @@ namespace reinforcement_learning {  namespace name {
       const char *const  APP_ID                  = "appid";
       const char *const  MODEL_SRC               = "model.source";
       const char *const  MODEL_BLOB_URI          = "model.blob.uri";
+      const char* const  MODEL_HTTP_APPI_HOST = "model.http.api.host";
       const char *const  MODEL_REFRESH_INTERVAL_MS = "model.refreshintervalms";
       const char *const  MODEL_IMPLEMENTATION    = "model.implementation";       // VW vs other ML
       const char *const  MODEL_BACKGROUND_REFRESH = "model.backgroundrefresh";
@@ -14,6 +15,7 @@ namespace reinforcement_learning {  namespace name {
       const char *const  LEARNING_MODE           = "rank.learning.mode";
       const char* const  PROTOCOL_VERSION             = "protocol.version";
       const char* const  HTTP_API_KEY            = "http.api.key";
+      const char* const  HTTP_KEY_TYPE           = "http.key.type";
 
       // Episode
       const char *const EPISODE_EH_HOST     = "episode.eventhub.host";

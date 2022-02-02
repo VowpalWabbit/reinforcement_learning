@@ -31,13 +31,35 @@ namespace reinforcement_learning {
   }
 
   int restapi_data_transport_create(m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status) {
-    const auto uri = config.get(name::MODEL_BLOB_URI, nullptr);
-    if (uri == nullptr) {
-      RETURN_ERROR(trace_logger, status, http_uri_not_provided);
-    }
-    i_http_client* client;
-    RETURN_IF_FAIL(create_http_client(uri, config, &client, status));
-    *retval = new m::restapi_data_transport(client, trace_logger);
+      auto uri = config.get(name::MODEL_BLOB_URI, nullptr);
+      auto api = false;
+
+      if (uri == nullptr) {
+          uri = config.get(name::MODEL_HTTP_APPI_HOST, nullptr);
+          api = true;
+
+          if (uri == nullptr)
+          {
+              RETURN_ERROR(trace_logger, status, http_uri_not_provided);
+          }
+      }
+      i_http_client* client;
+      RETURN_IF_FAIL(create_http_client(uri, config, &client, status));
+
+      if (!api)
+      {
+          *retval = new m::restapi_data_transport(client, trace_logger);
+      }
+      else
+      {
+          //Initialize header
+          http_headers header;
+          apim_http_authorization* apiObj = new apim_http_authorization();
+          RETURN_IF_FAIL(apiObj->init(config, status, trace_logger));
+          RETURN_IF_FAIL(apiObj->get_http_headers(header, status));
+
+          *retval = new m::restapi_data_transport(client, header, api, trace_logger);
+      }
     return error_code::success;
   }
 
