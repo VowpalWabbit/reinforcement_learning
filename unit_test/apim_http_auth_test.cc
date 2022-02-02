@@ -14,6 +14,7 @@ namespace u = reinforcement_learning::utility;
 namespace err = reinforcement_learning::error_code;
 using namespace std::chrono;
 
+#ifdef USE_AZURE_FACTORIES
 
 u::configuration config;
 r::apim_http_authorization* apiObj = new r::apim_http_authorization();
@@ -71,3 +72,4 @@ BOOST_AUTO_TEST_CASE(key_type_random_configuration_test) {
     std::string iter = utility::conversions::to_utf8string(header.find(U("Ocp-Apim-Subscription-Key"))->second);
     BOOST_CHECK_EQUAL(iter, "apikey1234");
 }
+#endif
