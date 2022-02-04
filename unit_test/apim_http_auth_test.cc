@@ -4,7 +4,7 @@
 #endif
 
 #include <boost/test/unit_test.hpp>
-#include "utility/apim_http_authorization.h"
+#include "utility/header_authorization.h"
 #include "constants.h"
 #include "config_utility.h"
 #include <cpprest/http_headers.h>
@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE(apiKey_configuration_test) {
        "http.key.type": "apiKey"
   })";
     u::configuration config;
-    r::apim_http_authorization* apiObj = new r::apim_http_authorization();
+    r::header_authorization* apiObj = new r::header_authorization();
     r::api_status status;
     http_headers header;
     BOOST_CHECK_EQUAL(u::config::create_from_json(config_json, config), err::success);
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(token_configuration_test) {
        "http.key.type": "bearertoken"
   })";
     u::configuration config;
-    r::apim_http_authorization* apiObj = new r::apim_http_authorization();
+    r::header_authorization* apiObj = new r::header_authorization();
     r::api_status status;
     http_headers header;
     BOOST_CHECK_EQUAL(u::config::create_from_json(config_json, config), err::success);
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(key_type_missing_configuration_test) {
         "http.api.key": "token1234"
   })";
     u::configuration config;
-    r::apim_http_authorization* apiObj = new r::apim_http_authorization();
+    r::header_authorization* apiObj = new r::header_authorization();
     r::api_status status;
     http_headers header;
     BOOST_CHECK_EQUAL(u::config::create_from_json(config_json, config), err::success);
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(key_missing_configuration_test) {
        "http.key.type": "APIKEY"
   })";
     u::configuration config;
-    r::apim_http_authorization* apiObj = new r::apim_http_authorization();
+    r::header_authorization* apiObj = new r::header_authorization();
     r::api_status status;
     http_headers header;
     BOOST_CHECK_EQUAL(u::config::create_from_json(config_json, config), err::success);
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(key_type_random_configuration_test) {
        "http.key.type": "default"
   })";
     u::configuration config;
-    r::apim_http_authorization* apiObj = new r::apim_http_authorization();
+    r::header_authorization* apiObj = new r::header_authorization();
     r::api_status status;
     http_headers header;
     BOOST_CHECK_EQUAL(u::config::create_from_json(config_json, config), err::success);

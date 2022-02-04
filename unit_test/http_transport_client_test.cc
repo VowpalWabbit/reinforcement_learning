@@ -9,7 +9,7 @@
 #include "err_constants.h"
 #include "utility/data_buffer_streambuf.h"
 #include "logger/preamble.h"
-#include "utility/apim_http_authorization.h"
+#include "utility/header_authorization.h"
 #include "utility/eventhub_http_authorization.h"
 
 namespace reinforcement_learning {namespace utility {
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(send_something_apim_authorization)
   mock_http_client* http_client = new mock_http_client("localhost:8080");
 
   //create a client
-  r::http_transport_client<r::apim_http_authorization> eh(http_client, 1, 1, nullptr, nullptr);
+  r::http_transport_client<r::header_authorization> eh(http_client, 1, 1, nullptr, nullptr);
   r::api_status ret;
 
   std::shared_ptr<u::data_buffer> db1(new u::data_buffer());

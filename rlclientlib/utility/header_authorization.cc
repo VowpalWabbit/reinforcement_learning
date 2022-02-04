@@ -1,4 +1,4 @@
-#include "apim_http_authorization.h"
+#include "header_authorization.h"
 #include <boost/algorithm/string.hpp>
 
 using namespace utility;
@@ -12,7 +12,7 @@ namespace reinforcement_learning {
         return "apikey";
     }
   }
-  int apim_http_authorization::init(const utility::configuration& config, api_status* status, i_trace* trace) {
+  int header_authorization::init(const utility::configuration& config, api_status* status, i_trace* trace) {
     const auto api_key = config.get(name::HTTP_API_KEY, nullptr);
     if (api_key == nullptr) {
       RETURN_ERROR(trace, status, http_api_key_not_provided);
@@ -28,7 +28,7 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int apim_http_authorization::get_http_headers(http_headers& headers, api_status* status) {
+  int header_authorization::get_http_headers(http_headers& headers, api_status* status) {
       const utility::configuration config;
       if (boost::iequals(_auth_type, enum_to_string(authenticatinType::BearerToken)))
       {
@@ -37,7 +37,7 @@ namespace reinforcement_learning {
       }
       else
       {
-          headers.add(_XPLATSTR("Ocp-Apim-Subscription-Key"), _api_key.c_str());
+          headers.add(_XPLATSTR("Ocp - Apim - Subscription - Key"), _api_key.c_str());
       }
     return error_code::success;
   }

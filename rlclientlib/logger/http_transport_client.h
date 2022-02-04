@@ -10,7 +10,7 @@
 #include "str_util.h"
 
 #include "utility/http_client.h"
-#include "utility/apim_http_authorization.h"
+#include "utility/header_authorization.h"
 #include "utility/eventhub_http_authorization.h"
 #include "utility/stl_container_adapter.h"
 
