@@ -37,7 +37,6 @@ namespace reinforcement_learning {
     if (uri == nullptr) {
       uri = config.get(name::MODEL_HTTP_APPI_HOST, nullptr);
       usingAPI = true;
-
       if (uri == nullptr)
       {
         RETURN_ERROR(trace_logger, status, http_model_uri_not_provided);
@@ -85,16 +84,16 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int create_apim_http_api_sender(i_sender** retval, const u::configuration& cfg, const char* api_host, int tasks_limit, int max_http_retries, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
+  int create_apim_http_api_sender(i_sender **retval, const u::configuration &cfg, const char *api_host, int tasks_limit, int max_http_retries, error_callback_fn *error_cb, i_trace *trace_logger, api_status *status)
   {
     i_http_client* client;
     RETURN_IF_FAIL(create_http_client(api_host, cfg, &client, status));
     *retval = new http_transport_client<header_authorization>(
-        client,
-        tasks_limit,
-        max_http_retries,
-        trace_logger,
-        error_cb);
+      client,
+      tasks_limit,
+      max_http_retries,
+      trace_logger,
+      error_cb);
     return error_code::success;
   }
 
@@ -118,11 +117,11 @@ namespace reinforcement_learning {
     i_http_client* client;
     RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
     *retval = new http_transport_client<eventhub_http_authorization>(
-        client,
-        cfg.get_int(name::OBSERVATION_EH_TASKS_LIMIT, 16),
-        cfg.get_int(name::OBSERVATION_EH_MAX_HTTP_RETRIES, 4),
-        trace_logger,
-        error_cb);
+      client,
+      cfg.get_int(name::OBSERVATION_EH_TASKS_LIMIT, 16),
+      cfg.get_int(name::OBSERVATION_EH_MAX_HTTP_RETRIES, 4),
+      trace_logger,
+      error_cb);
     return error_code::success;
   }
 
@@ -134,11 +133,11 @@ namespace reinforcement_learning {
     i_http_client* client;
     RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
     *retval = new http_transport_client<eventhub_http_authorization>(
-        client,
-        cfg.get_int(name::INTERACTION_EH_TASKS_LIMIT, 16),
-        cfg.get_int(name::INTERACTION_EH_MAX_HTTP_RETRIES, 4),
-        trace_logger,
-        error_cb);
+      client,
+      cfg.get_int(name::INTERACTION_EH_TASKS_LIMIT, 16),
+      cfg.get_int(name::INTERACTION_EH_MAX_HTTP_RETRIES, 4),
+      trace_logger,
+      error_cb);
     return error_code::success;
   }
 }

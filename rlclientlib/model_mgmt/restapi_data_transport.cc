@@ -49,12 +49,12 @@ namespace reinforcement_learning { namespace model_management {
     if ( response.status_code() != 200 )
        RETURN_ERROR_ARG(_trace, status, http_bad_status_code, _httpcli->get_url());
 
-    const auto iter = response.headers().find(U("Last-Modified"));
+      const auto iter = response.headers().find(U("Last-Modified"));
       if ( iter == response.headers().end() )
         RETURN_ERROR_ARG(_trace, status, last_modified_not_found, _httpcli->get_url());
 
       last_modified = ::utility::datetime::from_string(iter->second);
-      if ( last_modified.to_interval() == 0 )
+      if( last_modified.to_interval() == 0)
         RETURN_ERROR_ARG(_trace, status, last_modified_invalid, _httpcli->get_url());
 
       sz = response.headers().content_length();
@@ -66,8 +66,8 @@ namespace reinforcement_learning { namespace model_management {
     try {
       return request_task.get();
     }
-    catch (const std::exception& e) {
-      RETURN_ERROR_LS(_trace, status, exception_during_http_req) << e.what() << "\n URL: " << _httpcli->get_url();
+    catch ( const std::exception &e ) {
+      RETURN_ERROR_LS(_trace, status,exception_during_http_req) << e.what() << "\n URL: " << _httpcli->get_url();
     }
   }
 
@@ -98,7 +98,7 @@ namespace reinforcement_learning { namespace model_management {
       .then([&](pplx::task<http_response> resp_task) {
       auto response = resp_task.get();
       if ( response.status_code() != 200 )
-         RETURN_ERROR_ARG(_trace, status, http_bad_status_code, "Found: ", response.status_code(), _httpcli->get_url());
+        RETURN_ERROR_ARG(_trace, status, http_bad_status_code, "Found: ", response.status_code(), _httpcli->get_url());
 
       const auto iter = response.headers().find(U("Last-Modified"));
       if ( iter == response.headers().end() )
@@ -133,11 +133,11 @@ namespace reinforcement_learning { namespace model_management {
     try {
       request_task.wait();
     }
-    catch (const std::exception& e) {
+    catch ( const std::exception &e ) {
       ret.free();
-      RETURN_ERROR_LS(_trace, status, exception_during_http_req) << e.what();
+      RETURN_ERROR_LS(_trace, status, exception_during_http_req) <<  e.what();
     }
-    catch (...) {
+    catch ( ... ) {
       ret.free();
       RETURN_ERROR_LS(_trace, status, exception_during_http_req) << error_code::unknown_s;
     }
