@@ -80,9 +80,6 @@ BOOST_AUTO_TEST_CASE(key_type_random_configuration_test) {
     r::api_status status;
     http_headers header;
     BOOST_CHECK_EQUAL(u::config::create_from_json(config_json, config), err::success);
-    BOOST_CHECK_EQUAL(apiObj->init(config, &status, nullptr), r::error_code::success);
-    BOOST_CHECK_EQUAL(apiObj->get_http_headers(header, &status), r::error_code::success);
-    std::string iter = utility::conversions::to_utf8string(header.find(U("Ocp-Apim-Subscription-Key"))->second);
-    BOOST_CHECK_EQUAL(iter, "apikey1234");
+    BOOST_CHECK_EQUAL(apiObj->init(config, &status, nullptr), r::error_code::http_auth_type_not_provided);
 }
 

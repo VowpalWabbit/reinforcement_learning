@@ -27,6 +27,6 @@ namespace reinforcement_learning {
     i_trace* _trace;
     http_headers _header;
     http_request request;
-    bool _api = false;
+    bool _usingAPI = false;
   };
 }}

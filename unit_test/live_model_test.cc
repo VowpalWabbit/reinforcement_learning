@@ -1622,7 +1622,7 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_uri) {
     r::api_status status;
     std::unique_ptr<reinforcement_learning::live_model> _rl = std::unique_ptr<r::live_model>(new r::live_model(config, nullptr));
 
-    BOOST_CHECK_EQUAL(_rl->init(&status), r::error_code::http_uri_not_provided);
+    BOOST_CHECK_EQUAL(_rl->init(&status), r::error_code::http_model_uri_not_provided);
 }
 
 BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_apikey) {

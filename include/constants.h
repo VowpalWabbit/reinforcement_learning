@@ -109,6 +109,7 @@ namespace reinforcement_learning {  namespace value {
       const char *const LEARNING_MODE_LOGGINGONLY = "LOGGINGONLY";
       const char *const CONTENT_ENCODING_IDENTITY = "IDENTITY";
       const char *const CONTENT_ENCODING_DEDUP = "DEDUP";
+      const char* const BEARER = "Bearer ";
 
       const char *const QUEUE_MODE_DROP = "DROP";
       const char *const QUEUE_MODE_BLOCK = "BLOCK";

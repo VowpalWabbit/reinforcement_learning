@@ -161,7 +161,6 @@ BOOST_AUTO_TEST_CASE(mock_azure_storage_model_api_data)
     BOOST_CHECK_EQUAL(scode, r::error_code::success);
     BOOST_CHECK_EQUAL(md.refresh_count(), 1);
     BOOST_CHECK_EQUAL(scode, r::error_code::success);
-    //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     Sleep(1000);
     scode = data_transport->get_data(md, &status);
     BOOST_CHECK_EQUAL(md.refresh_count(), 2);
