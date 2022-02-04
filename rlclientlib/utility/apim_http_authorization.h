@@ -9,6 +9,11 @@
 using namespace web::http;
 
 namespace reinforcement_learning {
+  enum class authenticatinType
+  {
+     BearerToken,
+     ApiKey
+  };
   class apim_http_authorization {
   public:
     apim_http_authorization() = default;

@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(apiKey_configuration_test) {
 BOOST_AUTO_TEST_CASE(token_configuration_test) {
     const auto config_json = R"({
         "http.api.key": "token1234",
-       "http.key.type": "Bearer"
+       "http.key.type": "bearertoken"
   })";
     u::configuration config;
     r::apim_http_authorization* apiObj = new r::apim_http_authorization();
