@@ -37,7 +37,7 @@ namespace reinforcement_learning {
       }
       else
       {
-          headers.add(_XPLATSTR("Ocp - Apim - Subscription - Key"), _api_key.c_str());
+          headers.add(_XPLATSTR("Ocp-Apim-Subscription-Key"), _api_key.c_str());
       }
     return error_code::success;
   }
