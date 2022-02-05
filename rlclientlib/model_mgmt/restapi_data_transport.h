@@ -31,6 +31,6 @@ namespace reinforcement_learning {
     uint64_t _datasz;
     i_trace* _trace;
     http_headers _header;
-    BlobURIType _blobURIType = BlobURIType::BlobURI;
+    BlobURIType _model_uri_type = BlobURIType::BlobURI;
   };
 }}

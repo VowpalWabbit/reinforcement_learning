@@ -17,8 +17,8 @@ namespace reinforcement_learning { namespace model_management {
   restapi_data_transport::restapi_data_transport(i_http_client* httpcli, i_trace* trace)
     : _httpcli(httpcli), _datasz{ 0 }, _trace{ trace }
   {}
-  restapi_data_transport::restapi_data_transport(i_http_client* httpcli, ::web::http::http_headers& header, BlobURIType blobURIType, i_trace* trace)
-   : _httpcli(httpcli), _header(header), _blobURIType(blobURIType), _datasz{ 0 }, _trace{ trace }
+  restapi_data_transport::restapi_data_transport(i_http_client* httpcli, ::web::http::http_headers& header, BlobURIType model_uri_type, i_trace* trace)
+   : _httpcli(httpcli), _header(header), _model_uri_type(model_uri_type), _datasz{ 0 }, _trace{ trace }
   {}
 
   /*
@@ -76,7 +76,7 @@ namespace reinforcement_learning { namespace model_management {
     ::utility::datetime curr_last_modified;
     ::utility::size64_t curr_datasz;
 
-    if (_blobURIType == BlobURIType::ModelEndPoint)
+    if (_model_uri_type == BlobURIType::ModelEndPoint)
     {
       http_request data_request(methods::GET);
       RETURN_IF_FAIL(get_data_info(curr_last_modified, curr_datasz, status, data_request));

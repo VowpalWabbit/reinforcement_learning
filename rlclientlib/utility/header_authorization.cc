@@ -19,7 +19,7 @@ namespace reinforcement_learning {
     }
     const auto auth_type = config.get(name::HTTP_KEY_TYPE, nullptr);
     if (auth_type == nullptr || !(boost::iequals(auth_type, enum_to_string(authenticatinType::BearerToken)) || boost::iequals(auth_type, enum_to_string(authenticatinType::ApiKey))) ) {
-        RETURN_ERROR(trace, status, http_auth_type_not_provided);
+        RETURN_ERROR(trace, status, http_api_key_type_not_provided);
     }
 
     _api_key = api_key;

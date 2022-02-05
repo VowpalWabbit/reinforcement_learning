@@ -31,21 +31,21 @@ namespace reinforcement_learning {
   }
 
   int restapi_data_transport_create(m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status) {
-    auto uri = config.get(name::MODEL_BLOB_URI, nullptr);
-    auto usingAPI = false;
+    auto model_uri = config.get(name::MODEL_BLOB_URI, nullptr);
+    auto using_api_endpoint = false;
 
-    if (uri == nullptr) {
-      uri = config.get(name::MODEL_HTTP_APPI_HOST, nullptr);
-      usingAPI = true;
-      if (uri == nullptr)
+    if (model_uri == nullptr) {
+      model_uri = config.get(name::MODEL_HTTP_API_HOST, nullptr);
+      if (model_uri == nullptr)
       {
         RETURN_ERROR(trace_logger, status, http_model_uri_not_provided);
       }
+      using_api_endpoint = true;
     }
     i_http_client* client;
-    RETURN_IF_FAIL(create_http_client(uri, config, &client, status));
+    RETURN_IF_FAIL(create_http_client(model_uri, config, &client, status));
 
-    if (!usingAPI)
+    if (using_api_endpoint == false)
     {
       *retval = new m::restapi_data_transport(client, trace_logger);
     }
@@ -53,9 +53,9 @@ namespace reinforcement_learning {
     {
       //Initialize header
       http_headers header;
-      header_authorization* apiObj = new header_authorization();
-      RETURN_IF_FAIL(apiObj->init(config, status, trace_logger));
-      RETURN_IF_FAIL(apiObj->get_http_headers(header, status));
+      header_authorization* api_obj = new header_authorization();
+      RETURN_IF_FAIL(api_obj->init(config, status, trace_logger));
+      RETURN_IF_FAIL(api_obj->get_http_headers(header, status));
 
       *retval = new m::restapi_data_transport(client, header, m::BlobURIType::ModelEndPoint, trace_logger);
     }

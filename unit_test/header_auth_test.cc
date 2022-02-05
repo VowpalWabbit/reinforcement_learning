@@ -20,12 +20,12 @@ BOOST_AUTO_TEST_CASE(apiKey_configuration_test) {
        "http.key.type": "apiKey"
   })";
     u::configuration config;
-    r::header_authorization* apiObj = new r::header_authorization();
+    r::header_authorization* api_obj = new r::header_authorization();
     r::api_status status;
     http_headers header;
     BOOST_CHECK_EQUAL(u::config::create_from_json(config_json, config), err::success);
-    BOOST_CHECK_EQUAL(apiObj->init(config, &status, nullptr), r::error_code::success);
-    BOOST_CHECK_EQUAL(apiObj->get_http_headers(header, &status), r::error_code::success);
+    BOOST_CHECK_EQUAL(api_obj->init(config, &status, nullptr), r::error_code::success);
+    BOOST_CHECK_EQUAL(api_obj->get_http_headers(header, &status), r::error_code::success);
     std::string iter = utility::conversions::to_utf8string(header.find(U("Ocp-Apim-Subscription-Key"))->second);
     BOOST_CHECK_EQUAL(iter, "apikey1234");
 }
@@ -36,12 +36,12 @@ BOOST_AUTO_TEST_CASE(token_configuration_test) {
        "http.key.type": "bearertoken"
   })";
     u::configuration config;
-    r::header_authorization* apiObj = new r::header_authorization();
+    r::header_authorization* api_obj = new r::header_authorization();
     r::api_status status;
     http_headers header;
     BOOST_CHECK_EQUAL(u::config::create_from_json(config_json, config), err::success);
-    BOOST_CHECK_EQUAL(apiObj->init(config, &status, nullptr), r::error_code::success);
-    BOOST_CHECK_EQUAL(apiObj->get_http_headers(header, &status), r::error_code::success);
+    BOOST_CHECK_EQUAL(api_obj->init(config, &status, nullptr), r::error_code::success);
+    BOOST_CHECK_EQUAL(api_obj->get_http_headers(header, &status), r::error_code::success);
     std::string iter = utility::conversions::to_utf8string(header.find(U("Authorization"))->second);
     BOOST_CHECK_EQUAL(iter, "Bearer token1234");
 }
@@ -51,11 +51,11 @@ BOOST_AUTO_TEST_CASE(key_type_missing_configuration_test) {
         "http.api.key": "token1234"
   })";
     u::configuration config;
-    r::header_authorization* apiObj = new r::header_authorization();
+    r::header_authorization* api_obj = new r::header_authorization();
     r::api_status status;
     http_headers header;
     BOOST_CHECK_EQUAL(u::config::create_from_json(config_json, config), err::success);
-    BOOST_CHECK_EQUAL(apiObj->init(config, &status, nullptr), r::error_code::http_auth_type_not_provided);
+    BOOST_CHECK_EQUAL(api_obj->init(config, &status, nullptr), r::error_code::http_api_key_type_not_provided);
 }
 
 BOOST_AUTO_TEST_CASE(key_missing_configuration_test) {
@@ -63,11 +63,11 @@ BOOST_AUTO_TEST_CASE(key_missing_configuration_test) {
        "http.key.type": "APIKEY"
   })";
     u::configuration config;
-    r::header_authorization* apiObj = new r::header_authorization();
+    r::header_authorization* api_obj = new r::header_authorization();
     r::api_status status;
     http_headers header;
     BOOST_CHECK_EQUAL(u::config::create_from_json(config_json, config), err::success);
-    BOOST_CHECK_EQUAL(apiObj->init(config, &status, nullptr), r::error_code::http_api_key_not_provided);
+    BOOST_CHECK_EQUAL(api_obj->init(config, &status, nullptr), r::error_code::http_api_key_not_provided);
 }
 
 BOOST_AUTO_TEST_CASE(key_type_random_configuration_test) {
@@ -76,10 +76,10 @@ BOOST_AUTO_TEST_CASE(key_type_random_configuration_test) {
        "http.key.type": "default"
   })";
     u::configuration config;
-    r::header_authorization* apiObj = new r::header_authorization();
+    r::header_authorization* api_obj = new r::header_authorization();
     r::api_status status;
     http_headers header;
     BOOST_CHECK_EQUAL(u::config::create_from_json(config_json, config), err::success);
-    BOOST_CHECK_EQUAL(apiObj->init(config, &status, nullptr), r::error_code::http_auth_type_not_provided);
+    BOOST_CHECK_EQUAL(api_obj->init(config, &status, nullptr), r::error_code::http_api_key_type_not_provided);
 }
 
