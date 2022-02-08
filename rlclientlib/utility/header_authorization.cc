@@ -1,6 +1,8 @@
 #include "header_authorization.h"
 #include <boost/algorithm/string.hpp>
+#include <string>
 #include <codecvt>
+#include <locale>
 
 using namespace utility;
 using convert_t = std::codecvt_utf8<wchar_t>;
