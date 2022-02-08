@@ -21,7 +21,7 @@ namespace reinforcement_learning {
     int get_data(model_data& data, api_status* status) override;
   private:
     using time_t = std::chrono::time_point<std::chrono::system_clock>;
-    int get_data_info(::utility::datetime& last_modified, ::utility::size64_t& sz, api_status* status, http_request request);
+    int get_data_info(::utility::datetime& last_modified, ::utility::size64_t& sz, api_status* status, http_request request, bool retry_get_on_fail);
     std::unique_ptr<i_http_client> _httpcli;
     ::utility::datetime _last_modified;
     uint64_t _datasz;

@@ -16,7 +16,7 @@ namespace reinforcement_learning {
     _api_key = api_key;
     std::wstring_convert<convert_t, wchar_t> strconverter; 
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    _http_api_header_key_name = converter.from_bytes(config.get(value::HTTP_API_HEADER_KEY_NAME, value::HTTP_API_DEFAULT_HEADER_KEY_NAME));
+    _http_api_header_key_name = strconverter.from_bytes(config.get(value::HTTP_API_HEADER_KEY_NAME, value::HTTP_API_DEFAULT_HEADER_KEY_NAME));
     return error_code::success;
   }
 
