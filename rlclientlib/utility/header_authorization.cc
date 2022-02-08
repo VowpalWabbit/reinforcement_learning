@@ -10,7 +10,7 @@ namespace reinforcement_learning {
       RETURN_ERROR(trace, status, http_api_key_not_provided);
     }
     _api_key = api_key;
-    _http_api_header_key_name = boost::locale::conv::utf_to_utf<wchar_t>(config.get(value::HTTP_API_HEADER_KEY_NAME, value::HTTP_API_DEFAULT_HEADER_KEY_NAME));
+    _http_api_header_key_name = boost::locale::conv::utf_to_utf<char_t>(config.get(value::HTTP_API_HEADER_KEY_NAME, value::HTTP_API_DEFAULT_HEADER_KEY_NAME));
     return error_code::success;
   }
 
