@@ -11,16 +11,12 @@ using namespace web::http;
 namespace reinforcement_learning {
   class i_trace;
   namespace model_management {
-  enum class BlobURIType
-  {
-    BlobURI,
-    ModelEndPoint
-  };
+
   class restapi_data_transport : public i_data_transport {
   public:
     // Takes the ownership of the i_http_client and delete it at the end of lifetime
     restapi_data_transport(i_http_client* httpcli, i_trace* trace);
-    restapi_data_transport(i_http_client* httpcli, http_headers& header, BlobURIType api, i_trace* trace);
+    restapi_data_transport(i_http_client* httpcli, http_headers& header, i_trace* trace);
 
     int get_data(model_data& data, api_status* status) override;
   private:
@@ -31,6 +27,5 @@ namespace reinforcement_learning {
     uint64_t _datasz;
     i_trace* _trace;
     http_headers _header;
-    BlobURIType _model_uri_type = BlobURIType::BlobURI;
   };
 }}

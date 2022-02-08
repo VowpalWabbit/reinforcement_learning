@@ -14,6 +14,7 @@ namespace reinforcement_learning {
   namespace u = utility;
 
   int restapi_data_transport_create(m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status);
+  int restapi_endpoint_data_transport_create(m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status);
   int episode_sender_create(i_sender** retval, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status);
   int observation_sender_create(i_sender** retval, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status);
   int interaction_sender_create(i_sender** retval, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status);
@@ -23,6 +24,7 @@ namespace reinforcement_learning {
 
   void register_azure_factories() {
     data_transport_factory.register_type(value::AZURE_STORAGE_BLOB, restapi_data_transport_create);
+    data_transport_factory.register_type(value::MODEL_HTTP_API, restapi_endpoint_data_transport_create);
     sender_factory.register_type(value::OBSERVATION_EH_SENDER, observation_sender_create);
     sender_factory.register_type(value::INTERACTION_EH_SENDER, interaction_sender_create);
     sender_factory.register_type(value::EPISODE_EH_SENDER, episode_sender_create);
@@ -31,34 +33,31 @@ namespace reinforcement_learning {
   }
 
   int restapi_data_transport_create(m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status) {
-    auto model_uri = config.get(name::MODEL_BLOB_URI, nullptr);
-    auto using_api_endpoint = false;
-
+    const auto model_uri = config.get(name::MODEL_BLOB_URI, nullptr);
     if (model_uri == nullptr) {
-      model_uri = config.get(name::MODEL_HTTP_API_HOST, nullptr);
-      if (model_uri == nullptr)
-      {
-        RETURN_ERROR(trace_logger, status, http_model_uri_not_provided);
-      }
-      using_api_endpoint = true;
+      RETURN_ERROR(trace_logger, status, http_uri_not_provided);
+    }
+    i_http_client* client;
+    RETURN_IF_FAIL(create_http_client(model_uri, config, &client, status));
+    *retval = new m::restapi_data_transport(client, trace_logger);
+    return error_code::success;
+  }
+
+  int restapi_endpoint_data_transport_create(m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status) {
+    const auto model_uri = config.get(name::MODEL_HTTP_API_HOST, nullptr);
+    if (model_uri == nullptr)
+    {
+      RETURN_ERROR(trace_logger, status, http_model_uri_not_provided);
     }
     i_http_client* client;
     RETURN_IF_FAIL(create_http_client(model_uri, config, &client, status));
 
-    if (using_api_endpoint == false)
-    {
-      *retval = new m::restapi_data_transport(client, trace_logger);
-    }
-    else
-    {
-      //Initialize header
-      http_headers header;
-      header_authorization* api_obj = new header_authorization();
-      RETURN_IF_FAIL(api_obj->init(config, status, trace_logger));
-      RETURN_IF_FAIL(api_obj->get_http_headers(header, status));
-
-      *retval = new m::restapi_data_transport(client, header, m::BlobURIType::ModelEndPoint, trace_logger);
-    }
+    //Initialize header
+    http_headers header;
+    header_authorization* api_obj = new header_authorization();
+    RETURN_IF_FAIL(api_obj->init(config, status, trace_logger));
+    RETURN_IF_FAIL(api_obj->get_http_headers(header, status));
+    *retval = new m::restapi_data_transport(client, header, trace_logger);
     return error_code::success;
   }
 

@@ -89,6 +89,7 @@ namespace reinforcement_learning {  namespace name {
 namespace reinforcement_learning {  namespace value {
       const char *const AZURE_STORAGE_BLOB = "AZURE_STORAGE_BLOB";
       const char *const NO_MODEL_DATA = "NO_MODEL_DATA";
+      const char* const MODEL_HTTP_API = "MODEL_HTTP_API";
       const char *const FILE_MODEL_DATA = "FILE_MODEL_DATA";
       const char *const VW                 = "VW";
       const char *const PASSTHROUGH_PDF_MODEL = "PASSTHROUGH_PDF";
@@ -109,7 +110,8 @@ namespace reinforcement_learning {  namespace value {
       const char *const LEARNING_MODE_LOGGINGONLY = "LOGGINGONLY";
       const char *const CONTENT_ENCODING_IDENTITY = "IDENTITY";
       const char *const CONTENT_ENCODING_DEDUP = "DEDUP";
-      const char* const BEARER = "Bearer ";
+      const char* const HEADER_NAME = "HEADER_NAME";
+      const char* const DEFAULT_HEADER = "Ocp-Apim-Subscription-Key";
 
       const char *const QUEUE_MODE_DROP = "DROP";
       const char *const QUEUE_MODE_BLOCK = "BLOCK";

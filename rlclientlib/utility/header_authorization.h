@@ -9,11 +9,6 @@
 using namespace web::http;
 
 namespace reinforcement_learning {
-  enum class authenticatinType
-  {
-     BearerToken,
-     ApiKey
-  };
   class header_authorization {
   public:
     header_authorization() = default;
@@ -29,6 +24,7 @@ namespace reinforcement_learning {
 
   private:
     std::string _api_key;
-    std::string _auth_type;
+    const char* _auth_type;
+    std::wstring _header_L_name;
   };
 }

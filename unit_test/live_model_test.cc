@@ -62,7 +62,7 @@ namespace {
     "IsExplorationEnabled": true,
     "InitialExplorationEpsilon": 1.0,
     "LearningMode": "Online",
-    "model.source": "AZURE_STORAGE_BLOB",
+    "model.source": "MODEL_HTTP_API",
     "observation.sender.implementation":"OBSERVATION_HTTP_API_SENDER",
     "interaction.sender.implementation":"INTERACTION_HTTP_API_SENDER",
     "protocol.version":"2"
