@@ -42,20 +42,20 @@ namespace reinforcement_learning { namespace model_management {
    * x-ms-version = 2017-04-17
    */
 
-  int restapi_data_transport::get_data_info(::utility::datetime& last_modified, ::utility::size64_t& sz, api_status* status, http_request request, bool retry_get_on_fail) {
+  int restapi_data_transport::get_data_info(::utility::datetime& last_modified, ::utility::size64_t& sz, api_status* status) {
     // Get request URI and start the request.
+    http_request request(methods::HEAD);
     request.headers() = _header;
     // Build request URI and start the request.
     auto request_task = _httpcli->request(request).then([&](http_response response) {
-      if (response.status_code() != 200)
+      if ( response.status_code() != 200)
       {
-        if (response.status_code() == 404 && retry_get_on_fail == true)
+        if ( response.status_code() == 404)
         {
-          http_request retry_get_http_request(methods::GET);
-          RETURN_IF_FAIL(get_data_info(last_modified, sz, status, retry_get_http_request, false));
+          RETURN_IF_FAIL(get_data_info_using_get(response, status));
           return error_code::success;
         }
-        else
+        if ( response.status_code() != 200 )
         {
             RETURN_ERROR_ARG(_trace, status, http_bad_status_code, "Found: ", response.status_code(), _httpcli->get_url());
         }
@@ -82,12 +82,31 @@ namespace reinforcement_learning { namespace model_management {
     }
   }
 
+  int restapi_data_transport::get_data_info_using_get(http_response& response, api_status* status) {
+      http_request request(methods::GET);
+      request.headers() = _header;
+      // Build request URI and start the request.
+      auto request_task = _httpcli->request(request).then([&](http_response get_response) {
+          if (get_response.status_code() != 200)
+          {
+              RETURN_ERROR_ARG(_trace, status, http_bad_status_code, "Found: ", response.status_code(), _httpcli->get_url());
+          }
+          response = get_response;
+          return error_code::success;
+      });
+      try {
+          return request_task.get();
+      }
+      catch (const std::exception& e) {
+          RETURN_ERROR_LS(_trace, status, exception_during_http_req) << e.what() << "\n URL: " << _httpcli->get_url();
+      }
+  }
   int restapi_data_transport::get_data(model_data& ret, api_status* status) {
 
     ::utility::datetime curr_last_modified;
     ::utility::size64_t curr_datasz;
     http_request data_request(methods::HEAD);
-    RETURN_IF_FAIL(get_data_info(curr_last_modified, curr_datasz, status, data_request, true));
+    RETURN_IF_FAIL(get_data_info(curr_last_modified, curr_datasz, status));
 
     if (curr_last_modified == _last_modified && curr_datasz == _datasz)
       return error_code::success;
