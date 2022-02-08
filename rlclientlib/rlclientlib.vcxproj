@@ -300,13 +300,13 @@ $(flatcPath) -o "$(SolutionDir)rlclientlib\generated\v2" --cpp "$(SolutionDir)rl
     <ClInclude Include="utility\http_client.h" />
     <ClInclude Include="utility\http_helper.h" />
     <ClInclude Include="utility\eventhub_http_authorization.h" />
-    <ClInclude Include="utility\apim_http_authorization.h" />
+    <ClInclude Include="utility\header_authorization.h" />
     <ClCompile Include="azure_factories.cc" />    
     <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="utility\http_client.cc" />
     <ClCompile Include="utility\http_helper.cc" />
     <ClCompile Include="utility\eventhub_http_authorization.cc" />
-    <ClCompile Include="utility\apim_http_authorization.cc" />
+    <ClCompile Include="utility\header_authorization.cc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ext_libs\libzstd.vcxproj">
