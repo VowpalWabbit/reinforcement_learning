@@ -1617,7 +1617,7 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_uri) {
     u::configuration config;
     cfg::create_from_json(JSON_CFG_API, config);
     config.set("http.api.key", "Bearer apiKey1234");
-    config.set("HTTP_API_HEADER_KEY_NAME" , "Authorization");
+    config.set("http.api.header.key.name" , "Authorization");
     r::api_status status;
     std::unique_ptr<reinforcement_learning::live_model> _rl = std::unique_ptr<r::live_model>(new r::live_model(config, nullptr));
 
