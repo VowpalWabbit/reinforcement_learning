@@ -1606,7 +1606,6 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_success) {
     u::configuration config;
     cfg::create_from_json(JSON_CFG_API, config);
     config.set("http.api.key", "apiKey1234");
-    config.set("http.key.type", "apiKey");
     config.set("model.http.api.host", "http://localhost:8080/personalizer/v1.1-preview.1/model");
     r::api_status status;
     std::unique_ptr<reinforcement_learning::live_model> _rl = std::unique_ptr<r::live_model>(new r::live_model(config, nullptr));
@@ -1617,8 +1616,8 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_success) {
 BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_uri) {
     u::configuration config;
     cfg::create_from_json(JSON_CFG_API, config);
-    config.set("http.api.key", "apiKey1234");
-    config.set("http.key.type", "bearertoken");
+    config.set("http.api.key", "Bearer apiKey1234");
+    config.set("HEADER_NAME" , "Authorization");
     r::api_status status;
     std::unique_ptr<reinforcement_learning::live_model> _rl = std::unique_ptr<r::live_model>(new r::live_model(config, nullptr));
 
@@ -1628,7 +1627,6 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_uri) {
 BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_apikey) {
     u::configuration config;
     cfg::create_from_json(JSON_CFG_API, config);
-    config.set("http.key.type", "apiKey");
     config.set("model.http.api.host", "http://localhost:8080/personalizer/v1.1-preview.1/model");
     r::api_status status;
     std::unique_ptr<reinforcement_learning::live_model> _rl = std::unique_ptr<r::live_model>(new r::live_model(config, nullptr));

@@ -15,7 +15,6 @@ namespace reinforcement_learning {  namespace name {
       const char *const  LEARNING_MODE           = "rank.learning.mode";
       const char* const  PROTOCOL_VERSION             = "protocol.version";
       const char* const  HTTP_API_KEY            = "http.api.key";
-      const char* const  HTTP_KEY_TYPE           = "http.key.type";
 
       // Episode
       const char *const EPISODE_EH_HOST     = "episode.eventhub.host";
