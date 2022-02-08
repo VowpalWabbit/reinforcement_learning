@@ -13,13 +13,12 @@ namespace reinforcement_learning {
     }
     _api_key = api_key;
     std::wstring_convert<convert_t, wchar_t> strconverter;
-    _header_L_name = strconverter.from_bytes(config.get(value::HEADER_NAME, value::DEFAULT_HEADER));
+    _http_api_header_key_name = strconverter.from_bytes(config.get(value::HTTP_API_HEADER_KEY_NAME, value::HTTP_API_DEFAULT_HEADER_KEY_NAME));
     return error_code::success;
   }
 
   int header_authorization::get_http_headers(http_headers& headers, api_status* status) {
-    const utility::configuration config;
-    headers.add(_header_L_name, _api_key.c_str()); 
+    headers.add(_http_api_header_key_name, _api_key.c_str());
     return error_code::success;
   }
 }

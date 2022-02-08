@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(apiKey_configuration_test) {
 BOOST_AUTO_TEST_CASE(token_configuration_test) {
     const auto config_json = R"({
         "http.api.key": "Bearer token1234",
-        "HEADER_NAME" : "Authorization"
+        "HTTP_API_HEADER_KEY_NAME" : "Authorization"
   })";
     u::configuration config;
     r::header_authorization* api_obj = new r::header_authorization();
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(key_type_missing_configuration_test) {
 
 BOOST_AUTO_TEST_CASE(key_missing_configuration_test) {
     const auto config_json = R"({
-        "HEADER_NAME" : "Authorization"
+        "HTTP_API_HEADER_KEY_NAME" : "Authorization"
   })";
     u::configuration config;
     r::header_authorization* api_obj = new r::header_authorization();
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(key_missing_configuration_test) {
 BOOST_AUTO_TEST_CASE(key_type_random_configuration_test) {
     const auto config_json = R"({
         "http.api.key": "apikey1234",
-        "HEADER_NAME" : "random"
+        "HTTP_API_HEADER_KEY_NAME" : "random"
   })";
     u::configuration config;
     r::header_authorization* api_obj = new r::header_authorization();

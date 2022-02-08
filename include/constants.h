@@ -4,7 +4,6 @@ namespace reinforcement_learning {  namespace name {
       const char *const  APP_ID                  = "appid";
       const char *const  MODEL_SRC               = "model.source";
       const char *const  MODEL_BLOB_URI          = "model.blob.uri";
-      const char* const  MODEL_HTTP_API_HOST    = "model.http.api.host";
       const char *const  MODEL_REFRESH_INTERVAL_MS = "model.refreshintervalms";
       const char *const  MODEL_IMPLEMENTATION    = "model.implementation";       // VW vs other ML
       const char *const  MODEL_BACKGROUND_REFRESH = "model.backgroundrefresh";
@@ -88,7 +87,7 @@ namespace reinforcement_learning {  namespace name {
 namespace reinforcement_learning {  namespace value {
       const char *const AZURE_STORAGE_BLOB = "AZURE_STORAGE_BLOB";
       const char *const NO_MODEL_DATA = "NO_MODEL_DATA";
-      const char* const MODEL_HTTP_API = "MODEL_HTTP_API";
+      const char* const HTTP_MODEL_DATA = "HTTP_MODEL_DATA";
       const char *const FILE_MODEL_DATA = "FILE_MODEL_DATA";
       const char *const VW                 = "VW";
       const char *const PASSTHROUGH_PDF_MODEL = "PASSTHROUGH_PDF";
@@ -109,8 +108,8 @@ namespace reinforcement_learning {  namespace value {
       const char *const LEARNING_MODE_LOGGINGONLY = "LOGGINGONLY";
       const char *const CONTENT_ENCODING_IDENTITY = "IDENTITY";
       const char *const CONTENT_ENCODING_DEDUP = "DEDUP";
-      const char* const HEADER_NAME = "HEADER_NAME";
-      const char* const DEFAULT_HEADER = "Ocp-Apim-Subscription-Key";
+      const char* const HTTP_API_HEADER_KEY_NAME = "HTTP_API_HEADER_KEY_NAME";
+      const char* const HTTP_API_DEFAULT_HEADER_KEY_NAME = "Ocp-Apim-Subscription-Key";
 
       const char *const QUEUE_MODE_DROP = "DROP";
       const char *const QUEUE_MODE_BLOCK = "BLOCK";
