@@ -1,7 +1,8 @@
 #include "header_authorization.h"
-#include <boost/locale.hpp>
+#include <codecvt>
 
 using namespace utility;
+using convert_t = std::codecvt_utf8<char_t>;
 
 namespace reinforcement_learning {
   int header_authorization::init(const utility::configuration& config, api_status* status, i_trace* trace) {
@@ -10,7 +11,9 @@ namespace reinforcement_learning {
       RETURN_ERROR(trace, status, http_api_key_not_provided);
     }
     _api_key = api_key;
-    _http_api_header_key_name = boost::locale::conv::utf_to_utf<char_t>(config.get(name::HTTP_API_HEADER_KEY_NAME, value::HTTP_API_DEFAULT_HEADER_KEY_NAME));
+    std::wstring_convert<convert_t, wchar_t> strconverter;
+    _http_api_header_key_name = strconverter.from_bytes(config.get(name::HTTP_API_HEADER_KEY_NAME, value::HTTP_API_DEFAULT_HEADER_KEY_NAME));
+    //_http_api_header_key_name = boost::locale::conv::utf_to_utf<char_t>(config.get(name::HTTP_API_HEADER_KEY_NAME, value::HTTP_API_DEFAULT_HEADER_KEY_NAME));
     return error_code::success;
   }
 
