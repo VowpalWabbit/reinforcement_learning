@@ -22,6 +22,11 @@
 
 #include "mock_util.h"
 
+#ifdef USE_AZURE_FACTORIES
+#   include "model_mgmt/restapi_data_transport.h"
+#   include "mock_http_client.h"
+#endif
+
 constexpr float FLOAT_TOL = 0.0001f;
 #ifdef __GNUG__
 
@@ -1602,6 +1607,7 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids_and_slot_ns) {
   BOOST_CHECK(it == response.end());
 }
 
+#ifdef USE_AZURE_FACTORIES
 BOOST_AUTO_TEST_CASE(live_model_using_endpoint_success) {
     u::configuration config;
     cfg::create_from_json(JSON_CFG_API, config);
@@ -1633,3 +1639,4 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_apikey) {
 
     BOOST_CHECK_EQUAL(_rl->init(&status), r::error_code::http_api_key_not_provided);
 }
+#endif
