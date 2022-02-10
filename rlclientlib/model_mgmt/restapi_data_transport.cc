@@ -83,8 +83,7 @@ namespace reinforcement_learning { namespace model_management {
 
   int restapi_data_transport::add_authentiction_header(http_headers& header, api_status* status)
   {
-    if (_model_source != model_source::AZURE)
-    {
+    if (_model_source != model_source::AZURE){
       RETURN_IF_FAIL(_headerimpl->init(_cfg, status, _trace));
       RETURN_IF_FAIL(_headerimpl->insert_authorization_header(header, status));
     }
