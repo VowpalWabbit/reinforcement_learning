@@ -200,7 +200,7 @@ namespace reinforcement_learning {
   template <typename TAuthorization>
   int http_transport_client<TAuthorization>::v_send(const buffer& post_data, api_status* status) {
     http_headers headers;
-    RETURN_IF_FAIL(_authorization.insert_authorization_header(headers, status));
+    RETURN_IF_FAIL(_authorization.insert_authorization_header(headers, status, _trace));
 
     try {
       // Before creating the task, ensure that it is allowed to be created.

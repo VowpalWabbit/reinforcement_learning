@@ -19,8 +19,8 @@ namespace reinforcement_learning { namespace model_management {
   restapi_data_transport::restapi_data_transport(i_http_client* httpcli, i_trace* trace)
     : _httpcli(httpcli), _datasz{ 0 }, _trace{ trace }
   {}
-  restapi_data_transport::restapi_data_transport(i_http_client* httpcli, const utility::configuration& cfg, model_source model_source, i_trace* trace)
-   : _httpcli(httpcli), _cfg(cfg), _model_source(model_source), _datasz{ 0 }, _trace{ trace }
+  restapi_data_transport::restapi_data_transport(std::unique_ptr<i_http_client>&& httpcli, const utility::configuration& cfg, model_source model_source, i_trace* trace)
+   : _httpcli(std::move(httpcli)), _cfg(cfg), _model_source(model_source), _datasz{ 0 }, _trace{ trace }
   {}
 
   /*
@@ -43,6 +43,7 @@ namespace reinforcement_learning { namespace model_management {
    * x-ms-version = 2017-04-17
    */
 
+
   int restapi_data_transport::get_data_info(::utility::datetime& last_modified, ::utility::size64_t& sz, api_status* status) {
     // Get request URI and start the request.
     http_request request(_method_type);
@@ -50,6 +51,7 @@ namespace reinforcement_learning { namespace model_management {
     // Build request URI and start the request.
     auto request_task = _httpcli->request(request).then([&](http_response response) {
       if (response.status_code() != 200){
+        //if the call using HEAD fails with 404 try with GET only once and return the results of GET request call
         if (response.status_code() == 404 && _retry_get_data){
           _retry_get_data = false;
           _method_type = methods::GET;
@@ -85,7 +87,7 @@ namespace reinforcement_learning { namespace model_management {
   {
     if (_model_source != model_source::AZURE){
       RETURN_IF_FAIL(_headerimpl->init(_cfg, status, _trace));
-      RETURN_IF_FAIL(_headerimpl->insert_authorization_header(header, status));
+      RETURN_IF_FAIL(_headerimpl->insert_authorization_header(header, status, _trace));
     }
     return error_code::success;
   }

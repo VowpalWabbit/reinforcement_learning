@@ -19,9 +19,6 @@
 #include "configuration.h"
 #include "utility/watchdog.h"
 
-#ifdef _WIN32
-#   include<Windows.h>
-#endif
 
 #ifdef USE_AZURE_FACTORIES
 #   include "model_mgmt/restapi_data_transport.h"
@@ -151,7 +148,7 @@ BOOST_AUTO_TEST_CASE(mock_azure_storage_model_api_data)
     cc.set("http.api.key", "apikey1234");
 
     auto http_client = new mock_http_client("http://test.com");
-    std::unique_ptr<m::i_data_transport> data_transport(new m::restapi_data_transport(http_client, cc , m::model_source::HTTPAPI, nullptr));
+    std::unique_ptr<m::i_data_transport> data_transport(new m::restapi_data_transport(std::move(std::unique_ptr<mock_http_client>(http_client)), cc , m::model_source::HTTP_API, nullptr));
 
     r::api_status status;
 
@@ -161,7 +158,6 @@ BOOST_AUTO_TEST_CASE(mock_azure_storage_model_api_data)
     BOOST_CHECK_EQUAL(scode, r::error_code::success);
     BOOST_CHECK_EQUAL(md.refresh_count(), 1);
     BOOST_CHECK_EQUAL(scode, r::error_code::success);
-    Sleep(1000);
     scode = data_transport->get_data(md, &status);
     BOOST_CHECK_EQUAL(md.refresh_count(), 2);
 }

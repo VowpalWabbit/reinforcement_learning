@@ -51,8 +51,7 @@ namespace reinforcement_learning {
     }
     i_http_client* client;
     RETURN_IF_FAIL(create_http_client(model_uri, config, &client, status));
-
-    *retval = new m::restapi_data_transport(client, config, m::model_source::HTTPAPI, trace_logger);
+    *retval = new m::restapi_data_transport(std::move(std::unique_ptr<i_http_client>(client)), config, m::model_source::HTTP_API, trace_logger);
     return error_code::success;
   }
 
