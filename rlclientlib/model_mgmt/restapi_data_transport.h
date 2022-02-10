@@ -30,5 +30,6 @@ namespace reinforcement_learning {
     model_source _model_source = model_source::AZURE;
     method _method_type = methods::HEAD;
     bool _retry_get_data = true;
+    std::unique_ptr<header_authorization> _headerimpl = std::unique_ptr<header_authorization>(new header_authorization());
   };
 }}
