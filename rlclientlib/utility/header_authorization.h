@@ -15,7 +15,7 @@ namespace reinforcement_learning {
     ~header_authorization() = default;
 
     int init(const utility::configuration& config, api_status* status, i_trace* trace);
-    int get_http_headers(http_headers& headers, api_status* status);
+    int insert_authorization_header(http_headers& headers, api_status* status);
 
     header_authorization(const header_authorization&) = delete;
     header_authorization(header_authorization&&) = delete;

@@ -71,6 +71,10 @@ namespace reinforcement_learning { namespace model_management {
       CA
     };
 
+    enum class model_source {
+        AZURE,
+        HTTPAPI
+    };
     //! The i_model interfaces provides the resolution from the raw model_data to a consumable object.
     class i_model {
     public:

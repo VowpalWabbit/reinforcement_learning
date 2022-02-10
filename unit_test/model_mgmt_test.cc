@@ -146,13 +146,12 @@ BOOST_AUTO_TEST_CASE(mock_azure_storage_model_api_data)
     u::configuration cc;
     auto scode = cfg::create_from_json(JSON_CFG, cc);
     BOOST_CHECK_EQUAL(scode, r::error_code::success);
-    http_headers header;
-    header.add(_XPLATSTR("Ocp-Apim-Subscription-Key"), "apiKey123");
     cc.set(r::name::EH_TEST, "true"); // local test event hub
     cc.set("model.source", "HTTP_MODEL_DATA");
+    cc.set("http.api.key", "apikey1234");
 
     auto http_client = new mock_http_client("http://test.com");
-    std::unique_ptr<m::i_data_transport> data_transport(new m::restapi_data_transport(http_client, header , nullptr));
+    std::unique_ptr<m::i_data_transport> data_transport(new m::restapi_data_transport(http_client, cc , m::model_source::HTTPAPI, nullptr));
 
     r::api_status status;
 
