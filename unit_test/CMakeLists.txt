@@ -1,4 +1,5 @@
 set(TEST_SOURCES
+  header_auth_test.cc
   async_batcher_test.cc
   configuration_test.cc
   data_buffer_test.cc

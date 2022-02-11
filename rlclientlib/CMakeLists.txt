@@ -81,7 +81,7 @@ if(vw_USE_AZURE_FACTORIES)
     utility/http_client.cc
     utility/http_helper.cc
     utility/eventhub_http_authorization.cc
-    utility/apim_http_authorization.cc
+    utility/header_authorization.cc
   )
 endif()
 
@@ -152,7 +152,7 @@ if(vw_USE_AZURE_FACTORIES)
     utility/http_client.h
     utility/http_helper.h    
     utility/eventhub_http_authorization.h
-    utility/apim_http_authorization.h
+    utility/header_authorization.h
   )
 endif()
 

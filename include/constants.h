@@ -14,6 +14,8 @@ namespace reinforcement_learning {  namespace name {
       const char *const  LEARNING_MODE           = "rank.learning.mode";
       const char* const  PROTOCOL_VERSION             = "protocol.version";
       const char* const  HTTP_API_KEY            = "http.api.key";
+      const char* const HTTP_API_HEADER_KEY_NAME = "http.api.header.key.name";
+      
 
       // Episode
       const char *const EPISODE_EH_HOST     = "episode.eventhub.host";
@@ -87,6 +89,7 @@ namespace reinforcement_learning {  namespace name {
 namespace reinforcement_learning {  namespace value {
       const char *const AZURE_STORAGE_BLOB = "AZURE_STORAGE_BLOB";
       const char *const NO_MODEL_DATA = "NO_MODEL_DATA";
+      const char* const HTTP_MODEL_DATA = "HTTP_MODEL_DATA";
       const char *const FILE_MODEL_DATA = "FILE_MODEL_DATA";
       const char *const VW                 = "VW";
       const char *const PASSTHROUGH_PDF_MODEL = "PASSTHROUGH_PDF";
@@ -107,6 +110,8 @@ namespace reinforcement_learning {  namespace value {
       const char *const LEARNING_MODE_LOGGINGONLY = "LOGGINGONLY";
       const char *const CONTENT_ENCODING_IDENTITY = "IDENTITY";
       const char *const CONTENT_ENCODING_DEDUP = "DEDUP";
+      const char* const HTTP_API_DEFAULT_HEADER_KEY_NAME = "Ocp-Apim-Subscription-Key";
+      
 
       const char *const QUEUE_MODE_DROP = "DROP";
       const char *const QUEUE_MODE_BLOCK = "BLOCK";

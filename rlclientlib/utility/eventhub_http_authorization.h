@@ -20,7 +20,10 @@ namespace reinforcement_learning {
     ~eventhub_http_authorization() = default;
 
     int init(const utility::configuration& config, api_status* status, i_trace* trace);
-    int get_http_headers(http_headers& headers, api_status* status);
+    int insert_authorization_header(http_headers& headers, api_status* status);
+    int insert_authorization_header(http_headers& headers, api_status* status, i_trace* trace) {
+        return insert_authorization_header(headers, status);
+    }
 
     // cannot be copied or assigned
     eventhub_http_authorization(const eventhub_http_authorization&) = delete;

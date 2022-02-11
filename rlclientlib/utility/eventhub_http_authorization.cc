@@ -25,7 +25,7 @@ namespace reinforcement_learning {
     return check_authorization_validity_generate_if_needed(status);
   }
 
-  int eventhub_http_authorization::get_http_headers(http_headers& headers, api_status* status) {
+  int eventhub_http_authorization::insert_authorization_header(http_headers& headers, api_status* status) {
     std::string auth_str;
     RETURN_IF_FAIL(get_authorization_token(auth_str, status));
 
