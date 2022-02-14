@@ -53,7 +53,7 @@ namespace reinforcement_learning { namespace logger {
     int fill_buffer(std::shared_ptr<utility::data_buffer>& retbuffer,
       size_t& remaining,
       api_status* status,
-      unsigned int* original_count = (unsigned int)0);
+      unsigned int* original_count);
 
     void flush(); //flush all batches
     void increment_counter();
@@ -146,7 +146,7 @@ namespace reinforcement_learning { namespace logger {
                                                       std::shared_ptr<utility::data_buffer>& buffer,
                                                       size_t& remaining,
                                                       api_status* status,
-                                                      unsigned int* original_count = 0)
+                                                      unsigned int* original_count)
   {
     TEvent evt;
     TSerializer<TEvent> collection_serializer(*buffer.get(), _batch_content_encoding, _shared_state);
