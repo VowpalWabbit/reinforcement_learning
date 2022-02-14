@@ -31,7 +31,11 @@ namespace reinforcement_learning {
 
   const char* generic_event::get_id() const { return _id.c_str(); }
 
-  const char* generic_event::get_app_id() const { return _app_id.c_str(); }  
+  const char* generic_event::get_app_id() const { return _app_id.c_str(); } 
+
+  const unsigned int generic_event::get_event_number() { return _event_number; }
+
+  void generic_event::set_event_number(unsigned int event_number) { _event_number = event_number; }
 
   float generic_event::get_pass_prob() const { return _pass_prob; }
   const generic_event::object_list_t& generic_event::get_object_list() const { return _objects; }

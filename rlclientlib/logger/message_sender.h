@@ -16,6 +16,9 @@ namespace reinforcement_learning {
       using buffer = std::shared_ptr<utility::data_buffer>;
       virtual ~i_message_sender() = default;
       virtual int send(const uint16_t msg_type, const buffer& db, api_status* status = nullptr) = 0;
+      virtual int send(const uint16_t msg_type, const buffer& db, unsigned int number_of_events, api_status* status = nullptr) {
+          return send(msg_type, db, status);
+      }
       virtual int init(api_status* status = nullptr) = 0;
     };
   }

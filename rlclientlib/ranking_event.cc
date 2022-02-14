@@ -16,6 +16,8 @@ namespace reinforcement_learning {
 
   float event::get_pass_prob() const { return _pass_prob; }
   timestamp event::get_client_time_gmt() const { return _client_time_gmt; }
+  const unsigned int event::get_event_number() { return _event_number; }
+  void event::set_event_number(unsigned int event_number) { _event_number = event_number; }
 
   float event::prg(int drop_pass) const {
     const auto seed_str = _seed_id + std::to_string(drop_pass);

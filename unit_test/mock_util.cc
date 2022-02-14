@@ -18,7 +18,8 @@ std::unique_ptr<fakeit::Mock<r::i_sender>> get_mock_sender(int send_return_code)
     new fakeit::Mock<r::i_sender>());
 
   When(Method((*mock), init)).AlwaysReturn(r::error_code::success);
-  When(Method((*mock), send)).AlwaysReturn(send_return_code);
+  When(OverloadedMethod((*mock), send, int(const buffer_t&, r::api_status*))).AlwaysReturn(send_return_code);
+  When(OverloadedMethod((*mock), send, int(const buffer_t&, unsigned int, r::api_status*))).AlwaysReturn(send_return_code);
   Fake(Dtor((*mock)));
 
   return mock;
@@ -37,8 +38,16 @@ std::unique_ptr<fakeit::Mock<r::i_sender>> get_mock_sender(std::vector<buffer_da
       recorded_messages.push_back(*message.get());
       return r::error_code::success;
     };
+  const std::function<int(const buffer_t&, unsigned int&, r::api_status*&)> send_fn_with_count =
+
+      [&recorded_messages](const buffer_t& message, unsigned int& events_count, r::api_status*& status) {
+      recorded_messages.push_back(*message.get());
+      return r::error_code::success;
+  };
+
   When(Method((*mock), init)).AlwaysReturn(r::error_code::success);
-  When(Method((*mock), send)).AlwaysDo(send_fn);
+  When(OverloadedMethod((*mock), send, int(const buffer_t&, r::api_status*))).AlwaysDo(send_fn);
+  When(OverloadedMethod((*mock), send, int(const buffer_t&, unsigned int, r::api_status*))).AlwaysDo(send_fn_with_count);
   Fake(Dtor((*mock)));
 
   return mock;

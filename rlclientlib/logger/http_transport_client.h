@@ -8,6 +8,7 @@
 #include "err_constants.h"
 #include "trace_logger.h"
 #include "str_util.h"
+#include "utility/config_helper.h"
 
 #include "utility/http_client.h"
 #include "utility/header_authorization.h"
@@ -41,6 +42,8 @@ namespace reinforcement_learning {
     ~http_transport_client();
   protected:
     int v_send(const buffer& data, api_status* status) override;
+    int v_send(const buffer& data, unsigned int event_counts, api_status* status) override;
+    int v_send(const buffer& data, i_http_client* client, api_status* status);
 
   private:
     class http_request_task {
@@ -98,6 +101,8 @@ namespace reinforcement_learning {
     const size_t _max_retries;
     i_trace* _trace;
     error_callback_fn* _error_callback;
+    const utility::configuration* _config;
+    events_counter_status _event_counter_status = events_counter_status::DISABLE;
   };
 
   template <typename TAuthorization>
@@ -174,6 +179,9 @@ namespace reinforcement_learning {
   template <typename TAuthorization>
   int http_transport_client<TAuthorization>::init(const utility::configuration& config, api_status* status) {
     RETURN_IF_FAIL(_authorization.init(config, status, _trace));
+    _config = new utility::configuration(config);
+    const char* section = _config->get(config_constants::CONFIG_SECTION, config_constants::INTERACTION);
+    if (u::get_counter_status(config, section) == events_counter_status::ENABLE) { _event_counter_status = events_counter_status::ENABLE; }
     return error_code::success;
   }
 
@@ -199,6 +207,22 @@ namespace reinforcement_learning {
 
   template <typename TAuthorization>
   int http_transport_client<TAuthorization>::v_send(const buffer& post_data, api_status* status) {
+      return v_send(post_data, _client.get(), status);
+  }
+
+  template <typename TAuthorization>
+  int http_transport_client<TAuthorization>::v_send(const buffer& post_data, unsigned int event_counts, api_status* status) {
+    if (event_counts != 0 &&  _event_counter_status == events_counter_status::ENABLE) {
+      i_http_client* new_client;
+      std::string finalurl = u::concat(_client.get()->get_url(), "?originalCount=", std::to_string(event_counts));
+      RETURN_IF_FAIL(create_http_client(finalurl.c_str(), *_config, &new_client, status));
+      return v_send(post_data, new_client, status);
+    }
+    return v_send(post_data, status);
+  }
+
+  template <typename TAuthorization>
+  int http_transport_client<TAuthorization>::v_send(const buffer& post_data, i_http_client* client, api_status* status) {
     http_headers headers;
     RETURN_IF_FAIL(_authorization.insert_authorization_header(headers, status, _trace));
 
@@ -208,7 +232,7 @@ namespace reinforcement_learning {
         RETURN_IF_FAIL(pop_task(status));
       }
 
-      std::unique_ptr<http_request_task> request_task(new http_request_task(_client.get(), headers, post_data, _max_retries, _error_callback, _trace));
+      std::unique_ptr<http_request_task> request_task(new http_request_task(client, headers, post_data, _max_retries, _error_callback, _trace));
       _tasks.push(std::move(request_task));
     }
     catch (const std::exception& e) {
