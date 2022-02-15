@@ -58,7 +58,6 @@ namespace reinforcement_learning { namespace logger {
     void flush(); //flush all batches
     void increment_counter();
     unsigned int reset_counter_get_count();
-    std::mutex _counter_mutex;
 
   public:
     async_batcher(i_message_sender* sender,
@@ -81,6 +80,7 @@ namespace reinforcement_learning { namespace logger {
     queue_mode_enum _queue_mode;
     std::condition_variable _cv;
     std::mutex _m;
+    std::mutex _counter_mutex;
     utility::object_pool<utility::data_buffer> _buffer_pool;
     const char* _batch_content_encoding;
     float _subsample_rate;
@@ -163,14 +163,14 @@ namespace reinforcement_learning { namespace logger {
     RETURN_IF_FAIL(collection_serializer.finalize(status));
 
     if (_events_counter_status == events_counter_status::ENABLE) {
-      unsigned int _buffer_start_event_number;
-      _buffer_start_event_number = _buffer_end_event_number;
+      unsigned int buffer_start_event_number;
+      buffer_start_event_number = _buffer_end_event_number;
       _buffer_end_event_number = evt.get_number_of_events();
-      *original_count = (_buffer_end_event_number - _buffer_start_event_number);
+      *original_count = (_buffer_end_event_number - buffer_start_event_number);
       if (_queue.size() == 0) {
         //reset counter values if queue is empty to prevent overflow incase of too many events
         *original_count += reset_counter_get_count() - _buffer_end_event_number;
-        _buffer_start_event_number = 0;
+        buffer_start_event_number = 0;
         _buffer_end_event_number = 0;
       }
     }

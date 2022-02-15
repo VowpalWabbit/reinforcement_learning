@@ -7,7 +7,7 @@
 using namespace std;
 namespace reinforcement_learning {
   event::event(const char* seed_id, const timestamp& ts, float pass_prob)
-    : _seed_id(seed_id), _pass_prob(pass_prob), _client_time_gmt(ts) {}
+    : _seed_id(seed_id), _pass_prob(pass_prob), _client_time_gmt(ts), _number_of_events(0) {}
 
   bool event::try_drop(float pass_prob, int drop_pass) {
     _pass_prob *= pass_prob;

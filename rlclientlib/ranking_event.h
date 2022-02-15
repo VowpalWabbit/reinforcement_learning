@@ -37,7 +37,7 @@ namespace reinforcement_learning {
     std::string _seed_id;
     float _pass_prob = 1.0;
     timestamp _client_time_gmt;
-    unsigned int _number_of_events = 0;
+    unsigned int _number_of_events;
   };
 
   class ranking_response;
