@@ -18,8 +18,8 @@ std::unique_ptr<fakeit::Mock<r::i_sender>> get_mock_sender(int send_return_code)
     new fakeit::Mock<r::i_sender>());
 
   When(Method((*mock), init)).AlwaysReturn(r::error_code::success);
-  When(OverloadedMethod((*mock), send, int(const buffer_t&, r::api_status*))).AlwaysReturn(send_return_code);
-  When(OverloadedMethod((*mock), send, int(const buffer_t&, unsigned int, r::api_status*))).AlwaysReturn(send_return_code);
+  When(OverloadedMethod((*mock), send, int(const std::shared_ptr<u::data_buffer>&, r::api_status*))).AlwaysReturn(send_return_code);
+  When(OverloadedMethod((*mock), send, int(const std::shared_ptr<u::data_buffer>&, unsigned int, r::api_status*))).AlwaysReturn(send_return_code);
   Fake(Dtor((*mock)));
 
   return mock;
