@@ -21,6 +21,7 @@
 #include <memory>
 #include <sstream>
 #include "data_buffer.h"
+#include <iostream>
 
 using namespace web::http;
 using namespace std::chrono;
@@ -43,7 +44,7 @@ namespace reinforcement_learning {
   protected:
     int v_send(const buffer& data, api_status* status) override;
     int v_send(const buffer& data, unsigned int event_counts, api_status* status) override;
-    int v_send(const buffer& data, i_http_client* client, api_status* status);
+    int v_send(const buffer& data, std::unique_ptr<i_http_client>& client, api_status* status);
 
   private:
     class http_request_task {
@@ -207,7 +208,7 @@ namespace reinforcement_learning {
 
   template <typename TAuthorization>
   int http_transport_client<TAuthorization>::v_send(const buffer& post_data, api_status* status) {
-      return v_send(post_data, _client.get(), status);
+      return v_send(post_data, _client, status);
   }
 
   template <typename TAuthorization>
@@ -216,23 +217,23 @@ namespace reinforcement_learning {
       i_http_client* new_client;
       std::string finalurl = u::concat(_client.get()->get_url(), "?originalCount=", std::to_string(event_counts));
       RETURN_IF_FAIL(create_http_client(finalurl.c_str(), *_config, &new_client, status));
-      return v_send(post_data, new_client, status);
+      return v_send(post_data, std::unique_ptr<i_http_client>(new_client), status);
     }
     return v_send(post_data, status);
   }
 
   template <typename TAuthorization>
-  int http_transport_client<TAuthorization>::v_send(const buffer& post_data, i_http_client* client, api_status* status) {
+  int http_transport_client<TAuthorization>::v_send(const buffer& post_data, std::unique_ptr<i_http_client>& client, api_status* status) {
     http_headers headers;
     RETURN_IF_FAIL(_authorization.insert_authorization_header(headers, status, _trace));
-
+    std::cout << "Url is :" << client->get_url() << std::endl;
     try {
       // Before creating the task, ensure that it is allowed to be created.
       if (_tasks.size() >= _max_tasks_count) {
         RETURN_IF_FAIL(pop_task(status));
       }
 
-      std::unique_ptr<http_request_task> request_task(new http_request_task(client, headers, post_data, _max_retries, _error_callback, _trace));
+      std::unique_ptr<http_request_task> request_task(new http_request_task(client.get(), headers, post_data, _max_retries, _error_callback, _trace));
       _tasks.push(std::move(request_task));
     }
     catch (const std::exception& e) {

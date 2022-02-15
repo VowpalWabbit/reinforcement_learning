@@ -53,7 +53,7 @@ namespace reinforcement_learning { namespace logger {
     int fill_buffer(std::shared_ptr<utility::data_buffer>& retbuffer,
       size_t& remaining,
       api_status* status,
-      unsigned int* original_count);
+      unsigned int& original_count);
 
     void flush(); //flush all batches
     void increment_counter();
@@ -145,7 +145,7 @@ namespace reinforcement_learning { namespace logger {
                                                       std::shared_ptr<utility::data_buffer>& buffer,
                                                       size_t& remaining,
                                                       api_status* status,
-                                                      unsigned int* original_count)
+                                                      unsigned int& original_count)
   {
     TEvent evt;
     TSerializer<TEvent> collection_serializer(*buffer.get(), _batch_content_encoding, _shared_state);
@@ -166,10 +166,10 @@ namespace reinforcement_learning { namespace logger {
       unsigned int buffer_start_event_number;
       buffer_start_event_number = _buffer_end_event_number;
       _buffer_end_event_number = evt.get_number_of_events();
-      *original_count = (_buffer_end_event_number - buffer_start_event_number);
+      original_count = (_buffer_end_event_number - buffer_start_event_number);
       if (_queue.size() == 0) {
         //reset counter values if queue is empty to prevent overflow incase of too many events
-        *original_count += reset_counter_get_count() - _buffer_end_event_number;
+        original_count += reset_counter_get_count() - _buffer_end_event_number;
         buffer_start_event_number = 0;
         _buffer_end_event_number = 0;
       }
@@ -212,7 +212,7 @@ namespace reinforcement_learning { namespace logger {
       auto buffer = _buffer_pool.acquire();
       unsigned int original_count = 0;
 
-      if (fill_buffer(buffer, remaining, &status, &original_count) != error_code::success) {
+      if (fill_buffer(buffer, remaining, &status, original_count) != error_code::success) {
         ERROR_CALLBACK(_perror_cb, status);
       }
       if (original_count > 0 && _events_counter_status == events_counter_status::ENABLE) {
