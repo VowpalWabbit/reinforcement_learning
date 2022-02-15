@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(flush_timeout_with_counter_ENABLE) {
   config.send_high_water_mark = 262143;
   config.send_batch_interval_ms = timeout_ms;
   config.send_queue_max_capacity = 8192;
-  config.events_counter_status = events_counter_status::ENABLE;
+  config.event_counter_status = events_counter_status::ENABLE;
   config.subsample_rate = 0.7f;
 
   int dummy = 0;
@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE(flush_batches_with_counter_ENABLE) {
   utility::async_batcher_config config;
   config.send_high_water_mark = send_high_water_mark;
   config.send_batch_interval_ms = 100000;
-  config.events_counter_status = events_counter_status::ENABLE;
+  config.event_counter_status = events_counter_status::ENABLE;
   config.subsample_rate = 0.7f;
 
   int dummy = 0;
@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE(flush_after_deletion_with_counter_ENABLE) {
   auto s = new message_sender(items, events_count);
   utility::watchdog watchdog(nullptr);
   utility::async_batcher_config config;
-  config.events_counter_status = events_counter_status::ENABLE;
+  config.event_counter_status = events_counter_status::ENABLE;
   config.subsample_rate = 0.7f;
 
   int dummy = 0;
@@ -379,7 +379,7 @@ BOOST_AUTO_TEST_CASE(queue_overflow_do_not_drop_event_with_counter_ENABLE) {
   config.send_batch_interval_ms = timeout_ms;
   config.send_queue_max_capacity = queue_max_size;
   config.queue_mode = queue_mode;
-  config.events_counter_status = events_counter_status::ENABLE;
+  config.event_counter_status = events_counter_status::ENABLE;
   config.subsample_rate = 0.7f;
   int dummy = 0;
   auto batcher = new logger::async_batcher<config_drop_event>(s, watchdog, dummy, &error_fn, config);
@@ -453,7 +453,7 @@ BOOST_AUTO_TEST_CASE(queue_config_drop_rate_test_with_counter_ENABLE)
   config.send_batch_interval_ms = timeout_ms;
   config.send_queue_max_capacity = queue_max_size;
   config.queue_mode = queue_mode;
-  config.events_counter_status = events_counter_status::ENABLE;
+  config.event_counter_status = events_counter_status::ENABLE;
   config.subsample_rate = 0.7f;
   int dummy = 0;
   auto batcher = new logger::async_batcher<config_drop_event>(s, watchdog, dummy, &error_fn, config);
@@ -479,26 +479,26 @@ BOOST_AUTO_TEST_CASE(get_batcher_config_counter_status_test)
 {
   utility::configuration config;
   utility::async_batcher_config batcher_config = utility::get_batcher_config(config, INTERACTION_SECTION);
-  BOOST_ASSERT(batcher_config.events_counter_status == events_counter_status::DISABLE);
+  BOOST_ASSERT(batcher_config.event_counter_status == events_counter_status::DISABLE);
   config.set("interaction.sender.implementation", "INTERACTION_HTTP_API_SENDER");
   batcher_config = utility::get_batcher_config(config, INTERACTION_SECTION);
-  BOOST_ASSERT(batcher_config.events_counter_status == events_counter_status::DISABLE);
+  BOOST_ASSERT(batcher_config.event_counter_status == events_counter_status::DISABLE);
   config.set("protocol.version","2");
   batcher_config = utility::get_batcher_config(config, INTERACTION_SECTION);
-  BOOST_ASSERT(batcher_config.events_counter_status == events_counter_status::ENABLE);
+  BOOST_ASSERT(batcher_config.event_counter_status == events_counter_status::ENABLE);
   config.set("interaction.sender.implementation", "INTERACTION_FILE_SENDER");
   batcher_config = utility::get_batcher_config(config, INTERACTION_SECTION);
-  BOOST_ASSERT(batcher_config.events_counter_status == events_counter_status::DISABLE);
+  BOOST_ASSERT(batcher_config.event_counter_status == events_counter_status::DISABLE);
   config.set("interaction.sender.implementation", "INTERACTION_EH_SENDER");
   batcher_config = utility::get_batcher_config(config, INTERACTION_SECTION);
-  BOOST_ASSERT(batcher_config.events_counter_status == events_counter_status::DISABLE);
+  BOOST_ASSERT(batcher_config.event_counter_status == events_counter_status::DISABLE);
   config.set("observation.sender.implementation", "OBSERVATION_EH_SENDER");
   batcher_config = utility::get_batcher_config(config, OBSERVATION_SECTION);
-  BOOST_ASSERT(batcher_config.events_counter_status == events_counter_status::DISABLE);
+  BOOST_ASSERT(batcher_config.event_counter_status == events_counter_status::DISABLE);
   config.set("observation.sender.implementation", "OBSERVATION_FILE_SENDER");
   batcher_config = utility::get_batcher_config(config, OBSERVATION_SECTION);
-  BOOST_ASSERT(batcher_config.events_counter_status == events_counter_status::DISABLE);
+  BOOST_ASSERT(batcher_config.event_counter_status == events_counter_status::DISABLE);
   config.set("observation.sender.implementation", "OBSERVATION_HTTP_API_SENDER");
   batcher_config = utility::get_batcher_config(config, OBSERVATION_SECTION);
-  BOOST_ASSERT(batcher_config.events_counter_status == events_counter_status::DISABLE);
+  BOOST_ASSERT(batcher_config.event_counter_status == events_counter_status::DISABLE);
 }

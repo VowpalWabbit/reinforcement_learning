@@ -91,7 +91,7 @@ async_batcher_config get_batcher_config(const configuration &config, const char 
   res.queue_mode = to_queue_mode_enum(get_str(config, section, name::QUEUE_MODE, value::QUEUE_MODE_DROP));
   res.batch_content_encoding = config.get_bool(section, name::USE_DEDUP, false) ? value::CONTENT_ENCODING_DEDUP : value::CONTENT_ENCODING_IDENTITY;
   res.subsample_rate = get_float(config, section, name::SUBSAMPLE_RATE, 1.f);
-  res.events_counter_status = get_counter_status(config,section);
+  res.event_counter_status = get_counter_status(config,section);
   return res;
 }
 
@@ -100,5 +100,5 @@ async_batcher_config::async_batcher_config():
   send_batch_interval_ms(1000),
   send_queue_max_capacity(16 * 1024 * 1024),
   queue_mode(queue_mode_enum::DROP),
-  events_counter_status(events_counter_status::DISABLE){}
+  event_counter_status(events_counter_status::DISABLE){}
 }}

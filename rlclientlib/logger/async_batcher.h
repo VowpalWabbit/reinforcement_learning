@@ -245,7 +245,7 @@ namespace reinforcement_learning { namespace logger {
     , _queue_mode(config.queue_mode)
     , _batch_content_encoding(config.batch_content_encoding)
     , _subsample_rate(config.subsample_rate)
-    , _events_counter_status(config.events_counter_status)
+    , _events_counter_status(config.event_counter_status)
   {}
 
   template<typename TEvent, template<typename> class TSerializer>

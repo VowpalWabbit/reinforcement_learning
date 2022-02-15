@@ -29,7 +29,7 @@ namespace utility {
     // bool use_dedup;
     const char *batch_content_encoding;
     float subsample_rate = 1.f;   // percentage of kept events. 0 = drop all events, 1 = keep all events
-    events_counter_status events_counter_status;
+    events_counter_status event_counter_status;
   };
 
   async_batcher_config get_batcher_config(const configuration& config, const char* section);
