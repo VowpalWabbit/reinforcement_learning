@@ -49,7 +49,7 @@ static const char* get_str(const configuration &config, const char *section, con
 
 static const char* get_default_sender_implmentation(const char* section)
 {
-  if (section == OBSERVATION_SECTION) {
+  if (std::strcmp(section, OBSERVATION_SECTION)) {
       return value::get_default_observation_sender();
   }
   return value::get_default_interaction_sender();
@@ -101,5 +101,4 @@ async_batcher_config::async_batcher_config():
   send_queue_max_capacity(16 * 1024 * 1024),
   queue_mode(queue_mode_enum::DROP),
   events_counter_status(events_counter_status::DISABLE){}
-
 }}

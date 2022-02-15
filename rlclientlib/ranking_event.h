@@ -23,8 +23,8 @@ namespace reinforcement_learning {
     virtual ~event() = default;
     float get_pass_prob() const;
     timestamp get_client_time_gmt() const; 
-    const unsigned int get_event_number();
-    void set_event_number(unsigned int event_number);
+    const unsigned int get_number_of_events();
+    void set_number_of_events(unsigned int number_of_events);
     virtual bool try_drop(float pass_prob, int drop_pass);
     const std::string& get_seed_id() const {
       return _seed_id;
@@ -37,7 +37,7 @@ namespace reinforcement_learning {
     std::string _seed_id;
     float _pass_prob = 1.0;
     timestamp _client_time_gmt;
-    unsigned int _event_number = 0;
+    unsigned int _number_of_events = 0;
   };
 
   class ranking_response;

@@ -40,9 +40,9 @@ namespace reinforcement_learning {
 
     const char* get_app_id() const;
 
-    const unsigned int get_event_number();
+    const unsigned int get_number_of_events();
 
-    void set_event_number(unsigned int event_number);
+    void set_number_of_events(unsigned int number_of_events);
 
     payload_type_t get_payload_type() const;
 
@@ -61,6 +61,6 @@ namespace reinforcement_learning {
     float _pass_prob = 1.0;
     event_content_type _content_type;
     std::string _app_id;
-    unsigned int _event_number = 0;
+    unsigned int _number_of_events = 0;
   };
 }

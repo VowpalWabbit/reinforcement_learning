@@ -17,7 +17,7 @@ namespace reinforcement_learning { namespace logger {
     int preamble_message_sender::send(const uint16_t msg_type, const buffer& db, unsigned int number_of_events, api_status* status) {
       if (number_of_events > 0) {
         RETURN_IF_FAIL(set_preamble_message(msg_type, db, status));
-            // Send message with preamble
+        // Send message with preamble
         return _sender->send(db, number_of_events, status);
       }
       return send(msg_type, db, status);
