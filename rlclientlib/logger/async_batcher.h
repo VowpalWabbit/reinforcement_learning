@@ -55,6 +55,8 @@ namespace reinforcement_learning { namespace logger {
       api_status* status);
 
     void flush(); //flush all batches
+    void increment_counter();
+    unsigned int reset_counter_get_count();
 
   public:
     async_batcher(i_message_sender* sender,
@@ -77,9 +79,13 @@ namespace reinforcement_learning { namespace logger {
     queue_mode_enum _queue_mode;
     std::condition_variable _cv;
     std::mutex _m;
+    std::mutex _counter_mutex;
     utility::object_pool<utility::data_buffer> _buffer_pool;
     const char* _batch_content_encoding;
     float _subsample_rate;
+    events_counter_status _events_counter_status;
+    unsigned int _number_of_events = 0;
+    unsigned int _buffer_end_event_number = 0;
   };
 
   template<typename TEvent, template<typename> class TSerializer>
@@ -96,7 +102,7 @@ namespace reinforcement_learning { namespace logger {
 
   template<typename TEvent, template<typename> class TSerializer>
   int async_batcher<TEvent, TSerializer>::append(TEvent&& evt, api_status* status) {
-
+    increment_counter();
     // If subsampling rate is < 1, then run subsampling logic
     if(_subsample_rate < 1) {
       if(evt.try_drop(_subsample_rate, constants::SUBSAMPLE_RATE_DROP_PASS)) {
@@ -105,6 +111,7 @@ namespace reinforcement_learning { namespace logger {
       }
     }
     
+    if (_events_counter_status == events_counter_status::ENABLE) { evt.set_number_of_events(_number_of_events); }
     _queue.push(std::move(evt), TSerializer<TEvent>::serializer_t::size_estimate(evt));
 
     //block or drop events if the queue if full
@@ -140,7 +147,7 @@ namespace reinforcement_learning { namespace logger {
   {
     TEvent evt;
     TSerializer<TEvent> collection_serializer(*buffer.get(), _batch_content_encoding, _shared_state);
-
+    
     while (remaining > 0 && collection_serializer.size() < _send_high_water_mark) {
       if (_queue.pop(&evt)) {
         if (queue_mode_enum::BLOCK == _queue_mode) {
@@ -151,9 +158,41 @@ namespace reinforcement_learning { namespace logger {
       }
     }
 
-    RETURN_IF_FAIL(collection_serializer.finalize(status));
-
+    if (_events_counter_status == events_counter_status::ENABLE) {
+      unsigned int buffer_start_event_number;
+      unsigned int original_count;
+      buffer_start_event_number = _buffer_end_event_number;
+      _buffer_end_event_number = evt.get_number_of_events();
+      original_count = (_buffer_end_event_number - buffer_start_event_number);
+      if (_queue.size() == 0) {
+        //reset counter values if queue is empty to prevent overflow incase of too many events
+        original_count += reset_counter_get_count() - _buffer_end_event_number;
+        buffer_start_event_number = 0;
+        _buffer_end_event_number = 0;
+      }
+      RETURN_IF_FAIL(collection_serializer.finalize(status, original_count));
+    }
+    else {
+      RETURN_IF_FAIL(collection_serializer.finalize(status));
+    }
     return error_code::success;
+  }
+
+  template<typename TEvent, template<typename> class TSerializer>
+  void async_batcher<TEvent, TSerializer>::increment_counter()  {
+    std::unique_lock<std::mutex> mlock(_counter_mutex);
+    if (_events_counter_status == events_counter_status::ENABLE) { ++_number_of_events; }
+  }
+
+  template<typename TEvent, template<typename> class TSerializer>
+  unsigned int async_batcher<TEvent, TSerializer>::reset_counter_get_count() {
+    std::unique_lock<std::mutex> mlock(_counter_mutex);
+    if (_events_counter_status == events_counter_status::ENABLE) { 
+      unsigned int current_events_count = _number_of_events;
+      _number_of_events = 0;
+      return current_events_count;
+    }
+    return 0;
   }
 
   template<typename TEvent, template<typename> class TSerializer>
@@ -171,11 +210,11 @@ namespace reinforcement_learning { namespace logger {
       api_status status;
 
       auto buffer = _buffer_pool.acquire();
-
+      
       if (fill_buffer(buffer, remaining, &status) != error_code::success) {
         ERROR_CALLBACK(_perror_cb, status);
       }
-
+     
       if (_sender->send(TSerializer<TEvent>::message_id(), buffer, &status) != error_code::success) {
         ERROR_CALLBACK(_perror_cb, status);
       }
@@ -199,6 +238,7 @@ namespace reinforcement_learning { namespace logger {
     , _queue_mode(config.queue_mode)
     , _batch_content_encoding(config.batch_content_encoding)
     , _subsample_rate(config.subsample_rate)
+    , _events_counter_status(config.event_counter_status)
   {}
 
   template<typename TEvent, template<typename> class TSerializer>

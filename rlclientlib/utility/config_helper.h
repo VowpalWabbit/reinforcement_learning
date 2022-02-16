@@ -8,6 +8,12 @@ namespace reinforcement_learning {
     BLOCK//queue block if it is full
   };
 
+  //this enum sets the counter for number of events behaviour in aysnc_batcher
+  enum class events_counter_status {
+      ENABLE, //counter is enabled only if number of actual events received have to be counted
+      DISABLE //counter by default is disabled
+  };
+
   // Section constants to be used with get_batcher_config
   const char *const OBSERVATION_SECTION = "observation";
   const char *const INTERACTION_SECTION = "interaction";
@@ -23,7 +29,9 @@ namespace utility {
     // bool use_dedup;
     const char *batch_content_encoding;
     float subsample_rate = 1.f;   // percentage of kept events. 0 = drop all events, 1 = keep all events
+    events_counter_status event_counter_status;
   };
 
   async_batcher_config get_batcher_config(const configuration& config, const char* section);
+  events_counter_status get_counter_status(const configuration& config, const char* section);
 }}

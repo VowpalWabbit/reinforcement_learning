@@ -60,6 +60,28 @@ static float get_float(const configuration &config, const char *section, const c
   return config.get_float(property, defval);
 }
 
+static const char* get_default_sender_implmentation(const char* section)
+{
+  if (std::strcmp(section, OBSERVATION_SECTION)) {
+    return value::get_default_observation_sender();
+  }
+  return value::get_default_interaction_sender();
+}
+
+events_counter_status get_counter_status(const utility::configuration& config, const char* section)
+{
+  int version = config.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION);
+  const char* sender_implmentation = get_str(config, section, name::SENDER_IMPLEMENTATION, get_default_sender_implmentation(section));
+  //In future validation can be extended based on requirement
+  if (version == 2 && _stricmp(sender_implmentation, value::INTERACTION_HTTP_API_SENDER) == 0) {
+    //only when protocol version is 2 and sender implmentation is INTERACTION_HTTP_API_HOST
+    return events_counter_status::ENABLE;
+  }
+  else {
+    return events_counter_status::DISABLE;
+  }
+}
+
 async_batcher_config get_batcher_config(const configuration &config, const char *section)
 {
   async_batcher_config res;
@@ -69,6 +91,7 @@ async_batcher_config get_batcher_config(const configuration &config, const char 
   res.queue_mode = to_queue_mode_enum(get_str(config, section, name::QUEUE_MODE, value::QUEUE_MODE_DROP));
   res.batch_content_encoding = config.get_bool(section, name::USE_DEDUP, false) ? value::CONTENT_ENCODING_DEDUP : value::CONTENT_ENCODING_IDENTITY;
   res.subsample_rate = get_float(config, section, name::SUBSAMPLE_RATE, 1.f);
+  res.event_counter_status = get_counter_status(config, section);
   return res;
 }
 
@@ -76,6 +99,6 @@ async_batcher_config::async_batcher_config():
   send_high_water_mark(198 * 1024),
   send_batch_interval_ms(1000),
   send_queue_max_capacity(16 * 1024 * 1024),
-  queue_mode(queue_mode_enum::DROP) {}
-
+  queue_mode(queue_mode_enum::DROP),
+  event_counter_status(events_counter_status::DISABLE) {}
 }}
