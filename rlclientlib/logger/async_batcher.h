@@ -13,7 +13,6 @@
 #include "message_sender.h"
 #include "utility/config_helper.h"
 #include "utility/object_pool.h"
-#include <iostream>
 
 // float comparisons
 #include "vw_math.h"
@@ -105,11 +104,11 @@ namespace reinforcement_learning { namespace logger {
     TEvent evt_with_index;
     update_event_with_index(std::move(evt), &evt_with_index);
     // If subsampling rate is < 1, then run subsampling logic
-    if (_subsample_rate < 1) {
-        if (evt_with_index.try_drop(_subsample_rate, constants::SUBSAMPLE_RATE_DROP_PASS)) {
-            // If the event is dropped, just get out of here
-            return error_code::success;;
-        }
+    if(_subsample_rate < 1) {
+      if(evt_with_index.try_drop(_subsample_rate, constants::SUBSAMPLE_RATE_DROP_PASS)) {
+        // If the event is dropped, just get out of here
+        return error_code::success;;
+      }
     }
     _queue.push(std::move(evt_with_index), TSerializer<TEvent>::serializer_t::size_estimate(evt_with_index));
 
@@ -194,7 +193,6 @@ namespace reinforcement_learning { namespace logger {
       api_status status;
 
       auto buffer = _buffer_pool.acquire();
-      
       if (fill_buffer(buffer, remaining, &status) != error_code::success) {
         ERROR_CALLBACK(_perror_cb, status);
       }

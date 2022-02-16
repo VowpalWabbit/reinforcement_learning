@@ -61,6 +61,6 @@ namespace reinforcement_learning {
     float _pass_prob = 1.0;
     event_content_type _content_type;
     std::string _app_id;
-    unsigned long long int _event_index;
+    uint64_t _event_index;
   };
 }
