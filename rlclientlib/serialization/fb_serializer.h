@@ -248,7 +248,7 @@ namespace reinforcement_learning { namespace logger {
       return;
     }
 
-    int finalize(api_status* status, unsigned long long int original_event_count) {
+    int finalize(api_status* status, uint64_t original_event_count) {
       _original_event_count = original_event_count;
       return finalize(status);
     }

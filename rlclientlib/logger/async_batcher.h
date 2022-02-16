@@ -82,8 +82,8 @@ namespace reinforcement_learning { namespace logger {
     const char* _batch_content_encoding;
     float _subsample_rate;
     events_counter_status _events_counter_status;
-    unsigned long long int _event_index = 0;
-    unsigned long long int _buffer_end_event_number = 0;
+    std::atomic<uint64_t> _event_index = 0;
+    uint64_t _buffer_end_event_number = 0;
   };
 
   template<typename TEvent, template<typename> class TSerializer>
@@ -157,9 +157,9 @@ namespace reinforcement_learning { namespace logger {
     }
 
     if (_events_counter_status == events_counter_status::ENABLE) {
-      unsigned long long int buffer_start_event_number = _buffer_end_event_number;
+      uint64_t buffer_start_event_number = _buffer_end_event_number;
       _buffer_end_event_number = evt.get_event_index();
-      unsigned long long int original_count = (_buffer_end_event_number - buffer_start_event_number);
+      uint64_t original_count = (_buffer_end_event_number - buffer_start_event_number);
       RETURN_IF_FAIL(collection_serializer.finalize(status, original_count));
     }
     else {
@@ -192,6 +192,7 @@ namespace reinforcement_learning { namespace logger {
       if (fill_buffer(buffer, remaining, &status) != error_code::success) {
         ERROR_CALLBACK(_perror_cb, status);
       }
+
       if (_sender->send(TSerializer<TEvent>::message_id(), buffer, &status) != error_code::success) {
         ERROR_CALLBACK(_perror_cb, status);
       }

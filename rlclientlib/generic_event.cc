@@ -33,9 +33,9 @@ namespace reinforcement_learning {
 
   const char* generic_event::get_app_id() const { return _app_id.c_str(); }  
 
-  unsigned long long int generic_event::get_event_index() { return _event_index; }
+  uint64_t generic_event::get_event_index() { return _event_index; }
 
-  void generic_event::set_event_index(unsigned long long int event_index) { _event_index = event_index; }
+  void generic_event::set_event_index(uint64_t event_index) { _event_index = event_index; }
 
   float generic_event::get_pass_prob() const { return _pass_prob; }
   const generic_event::object_list_t& generic_event::get_object_list() const { return _objects; }
