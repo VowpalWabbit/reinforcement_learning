@@ -10,7 +10,7 @@ table Event {
 
 table BatchMetadata {
     content_encoding: string; //valid values: IDENTITY and DEDUP
-	original_event_count: uint32;
+	original_event_count: uint64;
 }
 
 table SerializedEvent {

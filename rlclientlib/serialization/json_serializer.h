@@ -117,7 +117,7 @@ namespace reinforcement_learning { namespace logger {
       return error_code::success;
     }
 
-    int finalize(api_status* status, unsigned int original_event_count) { return finalize(status); }
+    int finalize(api_status* status, unsigned long long int original_event_count) { return finalize(status); }
 
     buffer_t& _buffer;
     streambuf_t _streambuf;

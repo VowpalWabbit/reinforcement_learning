@@ -248,7 +248,7 @@ namespace reinforcement_learning { namespace logger {
       return;
     }
 
-    int finalize(api_status* status, unsigned int original_event_count) {
+    int finalize(api_status* status, unsigned long long int original_event_count) {
       _original_event_count = original_event_count;
       return finalize(status);
     }
@@ -274,7 +274,7 @@ namespace reinforcement_learning { namespace logger {
     flatbuffer_allocator _allocator;
     flatbuffers::FlatBufferBuilder _builder;
     buffer_t& _buffer;
-    uint32_t _original_event_count;
+    uint64_t _original_event_count;
     const char* _content_encoding;
     flatbuffers::Offset<v2::BatchMetadata> _batch_metadata_offset;
   };
