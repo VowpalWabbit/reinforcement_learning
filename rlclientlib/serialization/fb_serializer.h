@@ -220,7 +220,7 @@ namespace reinforcement_learning { namespace logger {
     static int message_id() { return message_type::UNKNOWN; }
 
     fb_collection_serializer(buffer_t& buffer, const char* content_encoding)
-      : _allocator(buffer), _builder(buffer.body_capacity(), &_allocator), _buffer(buffer), _content_encoding(content_encoding) {}
+      : _allocator(buffer), _builder(buffer.body_capacity(), &_allocator), _buffer(buffer), _content_encoding(content_encoding), _number_of_events(0) {}
 
     fb_collection_serializer(buffer_t& buffer, const char* content_encoding, int /*dummy*/) : fb_collection_serializer(buffer, content_encoding) {}
 
@@ -248,6 +248,11 @@ namespace reinforcement_learning { namespace logger {
       return;
     }
 
+    int finalize(api_status* status, unsigned int number_of_events) {
+      _number_of_events = number_of_events;
+      finalize(status);
+    }
+
     int finalize(api_status* status) {
       auto event_offsets = _builder.CreateVector(_event_offsets);
       create_header();
@@ -269,6 +274,7 @@ namespace reinforcement_learning { namespace logger {
     flatbuffer_allocator _allocator;
     flatbuffers::FlatBufferBuilder _builder;
     buffer_t& _buffer;
+    uint32_t _number_of_events;
     const char* _content_encoding;
     flatbuffers::Offset<v2::BatchMetadata> _batch_metadata_offset;
   };
@@ -329,7 +335,8 @@ namespace reinforcement_learning { namespace logger {
 
   template <>
   inline void fb_collection_serializer<generic_event>::create_header() {
-    _batch_metadata_offset = v2::CreateBatchMetadataDirect(_builder, _content_encoding);
+    if(_number_of_events == 0 ) { _batch_metadata_offset = v2::CreateBatchMetadataDirect(_builder, _content_encoding); }
+    else { _batch_metadata_offset = v2::CreateBatchMetadataDirect(_builder, _content_encoding, _number_of_events); }
     return;
   }
 
