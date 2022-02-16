@@ -13,6 +13,7 @@
 #include "message_sender.h"
 #include "utility/config_helper.h"
 #include "utility/object_pool.h"
+#include <iostream>
 
 // float comparisons
 #include "vw_math.h"
@@ -55,7 +56,7 @@ namespace reinforcement_learning { namespace logger {
       api_status* status);
 
     void flush(); //flush all batches
-    void increment_counter();
+    void update_event_with_index(TEvent evt,TEvent* item);
 
   public:
     async_batcher(i_message_sender* sender,
@@ -78,11 +79,12 @@ namespace reinforcement_learning { namespace logger {
     queue_mode_enum _queue_mode;
     std::condition_variable _cv;
     std::mutex _m;
+    std::mutex _counter_mutex;
     utility::object_pool<utility::data_buffer> _buffer_pool;
     const char* _batch_content_encoding;
     float _subsample_rate;
     events_counter_status _events_counter_status;
-    std::atomic<uint64_t> _event_index = 0;
+    uint64_t _event_index = 0;
     uint64_t _buffer_end_event_number = 0;
   };
 
@@ -100,17 +102,16 @@ namespace reinforcement_learning { namespace logger {
 
   template<typename TEvent, template<typename> class TSerializer>
   int async_batcher<TEvent, TSerializer>::append(TEvent&& evt, api_status* status) {
-    increment_counter();
+    TEvent evt_with_index;
+    update_event_with_index(std::move(evt), &evt_with_index);
     // If subsampling rate is < 1, then run subsampling logic
-    if(_subsample_rate < 1) {
-      if(evt.try_drop(_subsample_rate, constants::SUBSAMPLE_RATE_DROP_PASS)) {
-        // If the event is dropped, just get out of here
-        return error_code::success;
-      }
+    if (_subsample_rate < 1) {
+        if (evt_with_index.try_drop(_subsample_rate, constants::SUBSAMPLE_RATE_DROP_PASS)) {
+            // If the event is dropped, just get out of here
+            return error_code::success;;
+        }
     }
-    
-    if (_events_counter_status == events_counter_status::ENABLE) { evt.set_event_index(_event_index); }
-    _queue.push(std::move(evt), TSerializer<TEvent>::serializer_t::size_estimate(evt));
+    _queue.push(std::move(evt_with_index), TSerializer<TEvent>::serializer_t::size_estimate(evt_with_index));
 
     //block or drop events if the queue if full
     if (_queue.is_full()) {
@@ -169,8 +170,13 @@ namespace reinforcement_learning { namespace logger {
   }
 
   template<typename TEvent, template<typename> class TSerializer>
-  void async_batcher<TEvent, TSerializer>::increment_counter()  {
-    if (_events_counter_status == events_counter_status::ENABLE) { ++_event_index; }
+  void  async_batcher<TEvent, TSerializer>::update_event_with_index(TEvent evt,TEvent* item)  {
+    std::unique_lock<std::mutex> mlock(_counter_mutex);
+    if (_events_counter_status == events_counter_status::ENABLE) { 
+      ++_event_index; 
+      evt.set_event_index(_event_index); 
+    }
+    *item = std::move(evt);
   }
 
   template<typename TEvent, template<typename> class TSerializer>
