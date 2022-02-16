@@ -70,7 +70,7 @@ namespace reinforcement_learning {  namespace name {
       const char *const USE_COMPRESSION             = "send.use_compression";
       const char *const USE_DEDUP                   = "send.use_dedup";
       const char *const QUEUE_MODE                  = "queue.mode";
-      const char *const SUBSAMPLE_RATE              = "subsample.rate";
+      const char *const SUBSAMPLE_RATE              = "subsample.rate" ;
 
       const char *const  EH_TEST                 = "eventhub.mock";
       const char *const  TRACE_LOG_IMPLEMENTATION = "trace.logger.implementation";
