@@ -1,5 +1,6 @@
 #pragma once
 
+#define OPENSSL_API_COMPAT 0x0908
 #include "api_status.h"
 #include "configuration.h"
 #include "internal_constants.h"
