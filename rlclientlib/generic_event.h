@@ -40,7 +40,7 @@ namespace reinforcement_learning {
 
     const char* get_app_id() const;
 
-    uint64_t get_event_index();
+    uint64_t get_event_index() const;
 
     void set_event_index(uint64_t event_index);
 

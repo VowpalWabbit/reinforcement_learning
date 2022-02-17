@@ -22,7 +22,7 @@ namespace reinforcement_learning {
     event& operator=(event&&) = default;
     virtual ~event() = default;
     float get_pass_prob() const;
-    uint64_t get_event_index();
+    uint64_t get_event_index() const;
     void set_event_index(uint64_t event_index);
     timestamp get_client_time_gmt() const; ;
     virtual bool try_drop(float pass_prob, int drop_pass);

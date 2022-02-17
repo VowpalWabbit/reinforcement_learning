@@ -33,7 +33,7 @@ namespace reinforcement_learning {
 
   const char* generic_event::get_app_id() const { return _app_id.c_str(); }  
 
-  uint64_t generic_event::get_event_index() { return _event_index; }
+  uint64_t generic_event::get_event_index() const { return _event_index; }
 
   void generic_event::set_event_index(uint64_t event_index) { _event_index = event_index; }
 

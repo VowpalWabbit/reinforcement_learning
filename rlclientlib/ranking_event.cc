@@ -16,7 +16,7 @@ namespace reinforcement_learning {
 
   float event::get_pass_prob() const { return _pass_prob; }
   timestamp event::get_client_time_gmt() const { return _client_time_gmt; }
-  uint64_t event::get_event_index() { return _event_index; }
+  uint64_t event::get_event_index() const { return _event_index; }
   void event::set_event_index(uint64_t event_index) { _event_index = event_index; }
 
   float event::prg(int drop_pass) const {
