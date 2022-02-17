@@ -6,6 +6,7 @@
 #include "data_buffer.h"
 #include "logger/event_queue.h"
 #include <boost/test/unit_test.hpp>
+#include <thread>
 
 using namespace reinforcement_learning;
 using namespace std;
@@ -148,11 +149,11 @@ BOOST_AUTO_TEST_CASE(queue_push_pop_subsample)
 BOOST_AUTO_TEST_CASE(queue_push_pop_threads)
 {
   reinforcement_learning::event_queue<test_event> queue(30, events_counter_status::ENABLE);
-  std::vector<std::thread> _threads;
+  std::vector<thread> _threads;
 
   int n = 10;
   for (int i = 0; i < n; ++i) {
-    _threads.push_back(std::thread([&] { queue.push(test_event(std::to_string(i + 1)), 10); }));
+    _threads.push_back(thread([&] { queue.push(test_event(std::to_string(i + 1)), 10); }));
     std::this_thread::sleep_for(std::chrono::milliseconds(5)); //safe timeout 
   }
     
@@ -173,12 +174,12 @@ BOOST_AUTO_TEST_CASE(queue_push_pop_threads)
 BOOST_AUTO_TEST_CASE(queue_push_pop_threads_subsampling)
 {
   reinforcement_learning::event_queue<test_event> queue(30, events_counter_status::ENABLE,0.5);
-  std::vector<std::thread> _threads;
+  std::vector<thread> _threads;
 
   int n = 10;
   for (int i = 0; i < n; ++i) {
-    if (i % 2 == 0) { _threads.push_back(std::thread([&] { queue.push(test_event("drop_" + std::to_string(i + 1)), 10); })); }
-    else { _threads.push_back(std::thread([&] { queue.push(test_event("no_drop_" + std::to_string(i + 1)), 10); })); }
+    if (i % 2 == 0) { _threads.push_back(thread([&] { queue.push(test_event("drop_" + std::to_string(i + 1)), 10); })); }
+    else { _threads.push_back(thread([&] { queue.push(test_event("no_drop_" + std::to_string(i + 1)), 10); })); }
     std::this_thread::sleep_for(std::chrono::milliseconds(5)); //safe timeout 
   }
     
