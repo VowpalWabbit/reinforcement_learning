@@ -7,6 +7,7 @@
 #include <mutex>
 #include <type_traits>
 #include "utility/config_helper.h"
+#include "constants.h"
 
 namespace reinforcement_learning {
 

@@ -11,7 +11,6 @@
 #include "logger/async_batcher.h"
 #include "sender.h"
 #include "vw_math.h"
-#include "constants.h"
 
 using namespace reinforcement_learning;
 //This class simply implement a 'send' method, in order to be used as a template in the async_batcher
