@@ -77,7 +77,6 @@ namespace reinforcement_learning { namespace logger {
     queue_mode_enum _queue_mode;
     std::condition_variable _cv;
     std::mutex _m;
-    std::mutex _counter_mutex;
     utility::object_pool<utility::data_buffer> _buffer_pool;
     const char* _batch_content_encoding;
     float _subsample_rate;
