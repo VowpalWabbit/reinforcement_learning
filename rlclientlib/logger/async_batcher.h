@@ -55,7 +55,6 @@ namespace reinforcement_learning { namespace logger {
       api_status* status);
 
     void flush(); //flush all batches
-    void update_event_with_index(TEvent&& evt);
 
   public:
     async_batcher(i_message_sender* sender,
@@ -83,7 +82,6 @@ namespace reinforcement_learning { namespace logger {
     const char* _batch_content_encoding;
     float _subsample_rate;
     events_counter_status _events_counter_status;
-    uint64_t _event_index = 0;
     uint64_t _buffer_end_event_index = 0;
   };
 
@@ -101,15 +99,11 @@ namespace reinforcement_learning { namespace logger {
 
   template<typename TEvent, template<typename> class TSerializer>
   int async_batcher<TEvent, TSerializer>::append(TEvent&& evt, api_status* status) {
-    update_event_with_index(std::move(evt));
-    // If subsampling rate is < 1, then run subsampling logic
-    if(_subsample_rate < 1) {
-      if(evt.try_drop(_subsample_rate, constants::SUBSAMPLE_RATE_DROP_PASS)) {
-        // If the event is dropped, just get out of here
-        return error_code::success;
-      }
+    //increment event_index if counter is enabled, check subsampling and push to queue
+    if (_queue.update_event_index_subsample_and_push(std::move(evt), TSerializer<TEvent>::serializer_t::size_estimate(evt))) {
+      //Event is dropped as part of subsampling return
+      return error_code::success;
     }
-    _queue.push(std::move(evt), TSerializer<TEvent>::serializer_t::size_estimate(evt));
 
     //block or drop events if the queue if full
     if (_queue.is_full()) {
@@ -168,15 +162,6 @@ namespace reinforcement_learning { namespace logger {
   }
 
   template<typename TEvent, template<typename> class TSerializer>
-  void  async_batcher<TEvent, TSerializer>::update_event_with_index(TEvent&& evt)  {
-    std::unique_lock<std::mutex> mlock(_counter_mutex);
-    if (_events_counter_status == events_counter_status::ENABLE) { 
-      ++_event_index; 
-      evt.set_event_index(_event_index); 
-    }
-  }
-
-  template<typename TEvent, template<typename> class TSerializer>
   void async_batcher<TEvent, TSerializer>::flush() {
     const auto queue_size = _queue.size();
 
@@ -208,7 +193,7 @@ namespace reinforcement_learning { namespace logger {
     error_callback_fn* perror_cb,
     const utility::async_batcher_config& config)
     : _sender(sender)
-    , _queue(config.send_queue_max_capacity)
+    , _queue(config.send_queue_max_capacity, config.event_counter_status, config.subsample_rate)
     , _send_high_water_mark(config.send_high_water_mark)
     , _perror_cb(perror_cb)
     , _shared_state(shared_state)

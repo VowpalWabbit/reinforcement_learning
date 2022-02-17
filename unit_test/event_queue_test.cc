@@ -6,6 +6,7 @@
 #include "data_buffer.h"
 #include "logger/event_queue.h"
 #include <boost/test/unit_test.hpp>
+#include "constants.h"
 
 using namespace reinforcement_learning;
 using namespace std;
@@ -32,31 +33,34 @@ public:
 };
 
 BOOST_AUTO_TEST_CASE(push_pop_test) {
-  event_queue<test_event> queue(30);
-  queue.push(test_event("1"),10);
-  queue.push(test_event("2"),10);
-  queue.push(test_event("3"),10);
+  event_queue<test_event> queue(30,events_counter_status::ENABLE);
+  queue.update_event_index_subsample_and_push(test_event("1"),10);
+  queue.update_event_index_subsample_and_push(test_event("2"),10);
+  queue.update_event_index_subsample_and_push(test_event("3"),10);
 
   test_event val;
 
   BOOST_CHECK_EQUAL(queue.size(), 3);
   queue.pop(&val);
   BOOST_CHECK_EQUAL(val.get_event_id(), "1");
+  BOOST_CHECK_EQUAL(val.get_event_index(), 1);
 
   BOOST_CHECK_EQUAL(queue.size(), 2);
   queue.pop(&val);
   BOOST_CHECK_EQUAL(val.get_event_id(), "2");
+  BOOST_CHECK_EQUAL(val.get_event_index(), 2);
 
   BOOST_CHECK_EQUAL(queue.size(), 1);
   queue.pop(&val);
   BOOST_CHECK_EQUAL(val.get_event_id(), "3");
+  BOOST_CHECK_EQUAL(val.get_event_index(), 3);
   BOOST_CHECK_EQUAL(queue.size(), 0);
 }
 
 BOOST_AUTO_TEST_CASE(prune_test) {
-  event_queue<test_event> queue(30);
-  queue.push(test_event("no_drop_1"),10);
-  queue.push(test_event("drop_1"),10);
+  event_queue<test_event> queue(30, events_counter_status::ENABLE);
+  queue.update_event_index_subsample_and_push(test_event("no_drop_1"),10);
+  queue.update_event_index_subsample_and_push(test_event("drop_1"),10);
 
   BOOST_CHECK_EQUAL(queue.size(), 2);
   BOOST_CHECK_EQUAL(queue.capacity(), 20);
@@ -64,9 +68,9 @@ BOOST_AUTO_TEST_CASE(prune_test) {
   BOOST_CHECK_EQUAL(queue.size(), 2);
   BOOST_CHECK_EQUAL(queue.capacity(), 20);
 
-  queue.push(test_event("no_drop_2"),10);
-  queue.push(test_event("drop_2"),10);
-  queue.push(test_event("no_drop_3"),10);
+  queue.update_event_index_subsample_and_push(test_event("no_drop_2"),10);
+  queue.update_event_index_subsample_and_push(test_event("drop_2"),10);
+  queue.update_event_index_subsample_and_push(test_event("no_drop_3"),10);
 
   test_event val;
 
@@ -79,12 +83,15 @@ BOOST_AUTO_TEST_CASE(prune_test) {
 
   queue.pop(&val);
   BOOST_CHECK_EQUAL(val.get_event_id(), "no_drop_1");
+  BOOST_CHECK_EQUAL(val.get_event_index(), 1);
 
   queue.pop(&val);
   BOOST_CHECK_EQUAL(val.get_event_id(), "no_drop_2");
+  BOOST_CHECK_EQUAL(val.get_event_index(), 3);
 
   queue.pop(&val);
   BOOST_CHECK_EQUAL(val.get_event_id(), "no_drop_3");
+  BOOST_CHECK_EQUAL(val.get_event_index(), 5);
 }
 
 BOOST_AUTO_TEST_CASE(queue_push_pop)
@@ -94,7 +101,7 @@ BOOST_AUTO_TEST_CASE(queue_push_pop)
   //push n elements in the queue
   int n = 10;
   for (int i=0; i<n; ++i)
-      queue.push(test_event(std::to_string(i+1)),10);
+      queue.update_event_index_subsample_and_push(test_event(std::to_string(i+1)),10);
 
   BOOST_CHECK_EQUAL(queue.size(), n);
 
@@ -114,6 +121,31 @@ BOOST_AUTO_TEST_CASE(queue_push_pop)
   BOOST_CHECK_EQUAL(queue.size(), 0);
 }
 
+BOOST_AUTO_TEST_CASE(queue_push_pop_subsample)
+{
+    reinforcement_learning::event_queue<test_event> queue(30,events_counter_status::ENABLE,0.5);
+  
+    //push n elements in the queue
+    int n = 10;
+    for (int i = 0; i < n; ++i) {
+      if(i%2==0){ queue.update_event_index_subsample_and_push(test_event("drop_"+std::to_string(i + 1)), 10); }
+      else{ queue.update_event_index_subsample_and_push(test_event("no_drop_"+std::to_string(i + 1)), 10); }
+    }
+
+    BOOST_CHECK_EQUAL(queue.size(), n/2);
+
+    test_event item;
+   
+    //pop all
+    for (int i = 0; i < n; ++i) {
+      if (i % 2 != 0) {
+        queue.pop(&item);
+        BOOST_CHECK_EQUAL(item.get_event_id(), "no_drop_"+std::to_string(i + 1));
+        BOOST_CHECK_EQUAL(item.get_event_index(), i + 1);
+      }
+    }
+}
+
 BOOST_AUTO_TEST_CASE(queue_pop_empty)
 {
   reinforcement_learning::event_queue<test_event> queue(30);
@@ -131,7 +163,7 @@ BOOST_AUTO_TEST_CASE(queue_move_push)
   reinforcement_learning::event_queue<test_event> queue(30);
 
   // Contents of string moved into queue
-  queue.push(test,10);
+  queue.update_event_index_subsample_and_push(test,10);
   BOOST_CHECK_EQUAL(test.get_event_id(), "");
 
   // Contents of queue string moved into passed in string
@@ -147,7 +179,7 @@ BOOST_AUTO_TEST_CASE(queue_capacity_test)
 
   BOOST_CHECK_EQUAL(queue.capacity(), 0);
   // Contents of string moved into queue
-  queue.push(test,10);
+  queue.update_event_index_subsample_and_push(test,10);
   BOOST_CHECK_EQUAL(queue.capacity(), 10);
 
   // Contents of queue string moved into passed in string
