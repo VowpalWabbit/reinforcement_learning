@@ -51,8 +51,8 @@ namespace reinforcement_learning { namespace model_management {
     // Build request URI and start the request.
     auto request_task = _httpcli->request(request).then([&](http_response response) {
       if (response.status_code() != 200){
-        //if the call using HEAD fails with 404 try with GET only once and return the results of GET request call
-        if (response.status_code() == 404 && _retry_get_data){
+        //if the call using HEAD fails, try with GET only once and return the results of GET request call
+        if (_retry_get_data){
           _retry_get_data = false;
           _method_type = methods::GET;
           RETURN_IF_FAIL(get_data_info(last_modified,sz,status));

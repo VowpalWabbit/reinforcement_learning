@@ -268,3 +268,31 @@ BOOST_AUTO_TEST_CASE(queue_config_drop_rate_test)
   BOOST_REQUIRE(!items.empty());
   BOOST_CHECK_EQUAL(items[0], "0.00\n0.69\n0.70\n");
 }
+
+BOOST_AUTO_TEST_CASE(get_batcher_config_counter_status_test)
+{
+    utility::configuration config;
+    utility::async_batcher_config batcher_config = utility::get_batcher_config(config, INTERACTION_SECTION);
+    BOOST_ASSERT(batcher_config.event_counter_status == events_counter_status::DISABLE);
+    config.set("interaction.sender.implementation", "INTERACTION_HTTP_API_SENDER");
+    batcher_config = utility::get_batcher_config(config, INTERACTION_SECTION);
+    BOOST_ASSERT(batcher_config.event_counter_status == events_counter_status::DISABLE);
+    config.set("protocol.version", "2");
+    batcher_config = utility::get_batcher_config(config, INTERACTION_SECTION);
+    BOOST_ASSERT(batcher_config.event_counter_status == events_counter_status::ENABLE);
+    config.set("interaction.sender.implementation", "INTERACTION_FILE_SENDER");
+    batcher_config = utility::get_batcher_config(config, INTERACTION_SECTION);
+    BOOST_ASSERT(batcher_config.event_counter_status == events_counter_status::DISABLE);
+    config.set("interaction.sender.implementation", "INTERACTION_EH_SENDER");
+    batcher_config = utility::get_batcher_config(config, INTERACTION_SECTION);
+    BOOST_ASSERT(batcher_config.event_counter_status == events_counter_status::DISABLE);
+    config.set("observation.sender.implementation", "OBSERVATION_EH_SENDER");
+    batcher_config = utility::get_batcher_config(config, OBSERVATION_SECTION);
+    BOOST_ASSERT(batcher_config.event_counter_status == events_counter_status::DISABLE);
+    config.set("observation.sender.implementation", "OBSERVATION_FILE_SENDER");
+    batcher_config = utility::get_batcher_config(config, OBSERVATION_SECTION);
+    BOOST_ASSERT(batcher_config.event_counter_status == events_counter_status::DISABLE);
+    config.set("observation.sender.implementation", "OBSERVATION_HTTP_API_SENDER");
+    batcher_config = utility::get_batcher_config(config, OBSERVATION_SECTION);
+    BOOST_ASSERT(batcher_config.event_counter_status == events_counter_status::DISABLE);
+}
