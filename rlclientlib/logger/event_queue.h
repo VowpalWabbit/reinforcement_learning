@@ -46,11 +46,11 @@ namespace reinforcement_learning {
       return false;
     }
 
-    void update_event_index_subsample_and_push(T& item, size_t item_size) {
-      update_event_index_subsample_and_push(std::move(item), item_size);
+    bool push(T& item, size_t item_size) {
+      return push(std::move(item), item_size);
     }
 
-    bool update_event_index_subsample_and_push(T&& item, size_t item_size) {
+    bool push(T&& item, size_t item_size) {
       std::unique_lock<std::mutex> mlock(_mutex);
       if (_event_counter_status == events_counter_status::ENABLE) {
         ++_event_index;
@@ -60,11 +60,12 @@ namespace reinforcement_learning {
       if (_subsample_rate < 1) {
         if (item.try_drop(_subsample_rate, constants::SUBSAMPLE_RATE_DROP_PASS)) {
           // If the event is dropped, just get out of here
-          return true;
+          return false;
         }
       }
-      push(item, item_size);
-      return false;
+      _capacity += item_size;
+      _queue.push_back({ std::forward<T>(item),item_size });
+      return true;
     }
 
     void prune(float pass_prob)
@@ -98,16 +99,6 @@ namespace reinforcement_learning {
     iterator_t erase(iterator_t it) {
       _capacity = (std::max)(0, static_cast<int>(_capacity) - static_cast<int>(it->second));
       return _queue.erase(it);
-    }
-
-    void push(T& item, size_t item_size) {
-        push(std::move(item), item_size);
-    }
-
-    void push(T&& item, size_t item_size)
-    {
-        _capacity += item_size;
-        _queue.push_back({ std::forward<T>(item),item_size });
     }
   };
 }

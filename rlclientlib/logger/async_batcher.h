@@ -99,7 +99,7 @@ namespace reinforcement_learning { namespace logger {
   template<typename TEvent, template<typename> class TSerializer>
   int async_batcher<TEvent, TSerializer>::append(TEvent&& evt, api_status* status) {
     //increment event_index if counter is enabled, check subsampling and push to queue
-    if (_queue.update_event_index_subsample_and_push(std::move(evt), TSerializer<TEvent>::serializer_t::size_estimate(evt))) {
+    if (_queue.push(std::move(evt), TSerializer<TEvent>::serializer_t::size_estimate(evt)) == false) {
       //Event is dropped as part of subsampling return
       return error_code::success;
     }
