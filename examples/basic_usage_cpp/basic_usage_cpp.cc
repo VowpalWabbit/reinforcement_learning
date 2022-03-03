@@ -179,7 +179,6 @@ int basic_usage_ccb() {
   //! [(3) Choose an action]
 
   //! [(4) Use the response / report outcome]
-  size_t chosen_action;
   for (const auto& r : response) {
     const auto chosen_action = r.get_action_id();
     if (rl.report_outcome(r.get_slot_id(), 1.0f, &status) != err::success) {
@@ -229,7 +228,6 @@ int basic_usage_slates() {
   //! [(3) Choose an action]
 
   //! [(4) Use the response]
-  size_t chosen_action;
   for (const auto& r : response) {
     const auto chosen_action = r.get_action_id();
   }
