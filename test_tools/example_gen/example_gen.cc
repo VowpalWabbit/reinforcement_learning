@@ -586,9 +586,9 @@ int run_config(int action, int count, int initial_seed, bool gen_random_reward,
   for(int i = 0; i < count; ++i) {
     char event_id[128];
     if(initial_seed == -1)
-      strcpy_s(event_id, "abcdefghijklm");
+      strcpy(event_id, "abcdefghijklm");
     else
-      sprintf_s(event_id, "%x", pseudo_random(initial_seed + i * 997739));
+      sprintf(event_id, "%x", pseudo_random(initial_seed + i * 997739));
 
     auto action_flag = i < deferred_action_count
       ? r::action_flags::DEFERRED : r::action_flags::DEFAULT;
