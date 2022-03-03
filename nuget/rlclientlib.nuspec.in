@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<package>
+  <metadata>
+    <id>RLClientLib-v@MSVC_TOOLSET_VERSION@</id>
+    <version>@PACKAGE_VERSION@</version>
+    <title>Reinforcement Learning Client Library</title>
+    <authors>John Langford et al</authors>
+    <license type="expression">BSD-3-Clause</license>
+    <description>RLClientLib is an Interaction-side integration library for Reinforcement Learning loops: Predict, Log, Learn, Update</description>
+    <copyright>Copyright (c) by respective owners including Yahoo!, Microsoft, and individual contributors.</copyright>
+    <tags>native</tags>
+  </metadata>
+  <files>
+      <file src="rlclientlib.targets" target="build" />
+      <file src="include\**\*.*" target="include" />
+      <file src="lib\x64\*.lib" target="lib\x64" />
+      <file src="lib\x86\*.lib" target="lib\x86" />
+      <file src="bin\x64\vw.exe" target="bin\x64" />
+      <file src="bin\x86\vw.exe" target="bin\x86" />
+  </files>
+</package>
