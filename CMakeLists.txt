@@ -81,3 +81,5 @@ add_subdirectory(unit_test/extensions)
 if(RL_BUILD_BENCHMARKS)
   add_subdirectory(benchmarks)
 endif()
+
+configure_file(nuget/rlclientlib.nuspec.in nuget/rlclientlib.nuspec @ONLY)

@@ -1,0 +1,101 @@
+name: Windows Nuget
+
+on:
+  push:
+    branches:
+      - master
+      - 'releases/**'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build_nuget_windows:
+    name: nuget.${{ matrix.toolset }}.${{ matrix.arch_config.arch }}
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: ["windows-2019"]
+        toolset: ["v141", "v142"]
+        arch_config:
+        - { arch: x64, generator_arch: x64}
+        - { arch: x86, generator_arch: Win32}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Configure
+        run: >
+          cmake -S . -B build
+          -G "Visual Studio 16 2019" -A ${{ matrix.arch_config.generator_arch }}
+          -T ${{ matrix.toolset }}
+          -DNATIVE_NUGET_PLATFORM_TAG="${{ matrix.arch_config.arch }}"
+          -DUSE_ZSTD=ON
+      - name: Build and install
+        run: |
+          cmake --build build --config Debug -t rl.net.native
+          cmake --build build --config Release -t rl.net.native
+          # Install debug first so that release overwrites the exe and nothing else
+          cmake --install build --prefix ./nuget_staging --config Debug
+          cmake --install build --prefix ./nuget_staging --config Release
+      - if: ${{ matrix.arch_config.arch == 'x64' }}
+        run: cp nuget\rlclientlib-x64.targets nuget_staging\rlclientlib.targets
+      - if: ${{ matrix.arch_config.arch == 'x86' }}
+        run: cp nuget\rlclientlib-x86.targets nuget_staging\rlclientlib.targets
+      - name: Package
+        shell: powershell
+        id: generate-nuget
+        run: |
+          cp build\nuget\rlclientlib.nuspec nuget_staging\rlclientlib.nuspec
+          cd nuget_staging
+          ..\.nuget\NuGet.exe pack .\rlclientlib.nuspec
+          $NugetFileName = Get-ChildItem *.nupkg -name
+          echo "::set-output name=NugetFileName::$NugetFileName"
+      - name: Upload
+        uses: actions/upload-artifact@v1
+        with:
+          name: ${{ steps.generate-nuget.outputs.NugetFileName }}
+          path: nuget_staging/${{ steps.generate-nuget.outputs.NugetFileName }}
+  test_nuget_windows:
+    needs: [build_nuget_windows]
+    name: nuget-test.${{ matrix.toolset }}
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: ["windows-2019"]
+        toolset: ["v141", "v142"]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - uses: ilammy/msvc-dev-cmd@v1
+      - id: fetch-rl-version
+        run: |
+          $version = Get-Content version.txt -Raw
+          $version = $version.Trim()
+          echo "::set-output name=RLVersion::$version"
+      - uses: actions/download-artifact@v1
+        with:
+          name: RLClientLibNative-${{matrix.toolset}}-x64.${{ steps.fetch-rl-version.outputs.RLVersion }}.nupkg
+          path: downloaded_nugets
+      - uses: actions/download-artifact@v1
+        with:
+          name: RLClientLibNative-${{matrix.toolset}}-x86.${{ steps.fetch-rl-version.outputs.RLVersion }}.nupkg
+          path: downloaded_nugets
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+      - name: Test nuget
+        run: |
+          ls downloaded_nugets
+          .\.nuget\NuGet.exe install -Source ${{ github.workspace }}\downloaded_nugets -OutputDirectory ${{ github.workspace }}\nuget\test\packages\ RLClientLibNative-${{ matrix.toolset }}-x64
+          .\.nuget\NuGet.exe install -Source ${{ github.workspace }}\downloaded_nugets -OutputDirectory ${{ github.workspace }}\nuget\test\packages\ RLClientLibNative-${{ matrix.toolset }}-x86
+          cd nuget\test
+          msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=Release;Platform=x64"
+          msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=Debug;Platform=x64"
+          msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=Release;Platform=Win32"
+          msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=Debug;Platform=Win32"
+          .\bin\x64\Release\test-${{ matrix.toolset }}.exe
+          .\bin\x64\Debug\test-${{ matrix.toolset }}.exe
+          .\bin\x86\Release\test-${{ matrix.toolset }}.exe
+          .\bin\x86\Debug\test-${{ matrix.toolset }}.exe
