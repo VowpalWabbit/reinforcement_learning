@@ -27,6 +27,7 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Dependencies
         run: |
+          bootstrap-vcpkg
           vcpkg install install cpprestsdk:${{ matrix.arch_config.arch }}-windows
       - name: Configure
         run: >
