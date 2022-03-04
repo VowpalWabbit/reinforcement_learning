@@ -28,6 +28,7 @@ jobs:
       - name: Dependencies
         run: |
           vcpkg install cpprestsdk cpprestsdk:${{ matrix.arch_config.arch }}-windows
+          vcpkg install openssl
       - name: Configure
         run: >
           cmake -S . -B build
