@@ -32,6 +32,7 @@ jobs:
           -T ${{ matrix.toolset }}
           -DNATIVE_NUGET_PLATFORM_TAG="${{ matrix.arch_config.arch }}"
           -DUSE_ZSTD=ON
+          -Dvw_USE_AZURE_FACTORIES=OFF
       - name: Build and install
         run: |
           cmake --build build --config Debug -t rl.net.native
