@@ -26,8 +26,9 @@ jobs:
           submodules: 'recursive'
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Configure
-        run: >
+        run: |
           vcpkg install install cpprestsdk:${{ matrix.arch_config.arch }}-windows
+        run: >
           cmake -S . -B build
           -G "Visual Studio 16 2019" -A ${{ matrix.arch_config.generator_arch }}
           -T ${{ matrix.toolset }}
