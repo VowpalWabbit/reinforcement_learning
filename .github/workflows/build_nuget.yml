@@ -33,6 +33,15 @@ jobs:
           -DNATIVE_NUGET_PLATFORM_TAG="${{ matrix.arch_config.arch }}"
           -DUSE_ZSTD=ON
           -Dvw_USE_AZURE_FACTORIES=OFF
+          -DBUILD_FLATBUFFERS=Off
+          -DBUILD_TESTING=Off
+          -DRAPIDJSON_SYS_DEP=Off
+          -DFMT_SYS_DEP=Off
+          -DSPDLOG_SYS_DEP=Off
+          -DVW_ZLIB_SYS_DEP=Off
+          -DVW_BOOST_MATH_SYS_DEP=Off
+          -DDO_NOT_BUILD_VW_C_WRAPPER=On
+          -DVW_INSTALL=On
       - name: Build and install
         run: |
           cmake --build build --config Debug -t rl.net.native
