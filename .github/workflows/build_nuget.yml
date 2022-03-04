@@ -27,12 +27,12 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Configure
         run: >
+          vcpkg install install cpprestsdk:${{ matrix.arch_config.arch }}-windows
           cmake -S . -B build
           -G "Visual Studio 16 2019" -A ${{ matrix.arch_config.generator_arch }}
           -T ${{ matrix.toolset }}
           -DNATIVE_NUGET_PLATFORM_TAG="${{ matrix.arch_config.arch }}"
           -DUSE_ZSTD=ON
-          -Dvw_USE_AZURE_FACTORIES=OFF
           -DBUILD_FLATBUFFERS=Off
           -DBUILD_TESTING=Off
           -DRAPIDJSON_SYS_DEP=Off
