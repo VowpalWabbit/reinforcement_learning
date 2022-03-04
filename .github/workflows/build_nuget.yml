@@ -28,7 +28,7 @@ jobs:
       - name: Dependencies
         run: |
           bootstrap-vcpkg
-          vcpkg install install cpprestsdk:${{ matrix.arch_config.arch }}-windows
+          vcpkg install cpprestsdk:${{ matrix.arch_config.arch }}-windows
       - name: Configure
         run: >
           cmake -S . -B build
