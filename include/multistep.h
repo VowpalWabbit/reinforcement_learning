@@ -10,7 +10,7 @@
 #include <memory>
 
 #include "ranking_response.h"
-#include "../rlclientlib/rl_string_view.h"
+#include "rl_string_view.h"
 
 namespace reinforcement_learning {
   class episode_history {

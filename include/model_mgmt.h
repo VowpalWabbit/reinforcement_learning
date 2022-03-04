@@ -7,7 +7,6 @@
 #include <string>
 
 #include "multistep.h"
-#include "rl_string_view.h"
 
 // Declare const pointer for internal linkage
 namespace reinforcement_learning {
