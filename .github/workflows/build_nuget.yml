@@ -25,7 +25,7 @@ jobs:
           submodules: 'recursive'
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Dependencies
-        run: CALL .scripts/restore.cmd
+        run: .scripts/restore.cmd
       - name: Configure
         run: >
           cmake -S . -B build
