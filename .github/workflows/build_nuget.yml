@@ -24,9 +24,11 @@ jobs:
         with:
           submodules: 'recursive'
       - uses: ilammy/msvc-dev-cmd@v1
-      - name: Dependencies
-        run: |
-          vcpkg install openssl openssl:${{ matrix.arch_config.arch }}-windows
+      - script: CALL .scripts/restore.cmd
+        displayName: 'Restore dependencies'
+        env:
+          nugetPath: $(Build.SourcesDirectory)\.nuget\nuget.exe
+        failOnStderr: true
       - name: Configure
         run: >
           cmake -S . -B build
