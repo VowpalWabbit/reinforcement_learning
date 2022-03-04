@@ -24,11 +24,8 @@ jobs:
         with:
           submodules: 'recursive'
       - uses: ilammy/msvc-dev-cmd@v1
-      - script: CALL .scripts/restore.cmd
-        displayName: 'Restore dependencies'
-        env:
-          nugetPath: $(Build.SourcesDirectory)\.nuget\nuget.exe
-        failOnStderr: true
+      - name: Dependencies
+        run: CALL .scripts/restore.cmd
       - name: Configure
         run: >
           cmake -S . -B build
