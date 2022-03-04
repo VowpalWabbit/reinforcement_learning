@@ -26,7 +26,6 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Dependencies
         run: |
-          vcpkg install cpprestsdk cpprestsdk:${{ matrix.arch_config.arch }}-windows
           vcpkg install openssl openssl:${{ matrix.arch_config.arch }}-windows
       - name: Configure
         run: >
@@ -44,6 +43,7 @@ jobs:
           -DVW_BOOST_MATH_SYS_DEP=Off
           -DDO_NOT_BUILD_VW_C_WRAPPER=On
           -DVW_INSTALL=On
+          -Dvw_USE_AZURE_FACTORIES=Off
       - name: Build and install
         run: |
           cmake --build build --config Debug -t rl.net.native
