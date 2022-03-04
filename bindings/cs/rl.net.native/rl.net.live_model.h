@@ -31,7 +31,7 @@ extern "C" {
 
   API int LiveModelInit(livemodel_context_t* livemodel, reinforcement_learning::api_status* status = nullptr);
 
-  API int LiveModelChooseRank(livemodel_context_t* livemodel, const char * event_id, const char * context_json, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelChooseRank(livemodel_context_t* livemodel, const char * event_id, const char * context_json, int byte_count, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status = nullptr);
   API int LiveModelChooseRankWithFlags(livemodel_context_t* livemodel, const char * event_id, const char * context_json, unsigned int flags, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status = nullptr);
 
   API int LiveModelRequestContinuousAction(livemodel_context_t* livemodel, const char * event_id, const char * context_json, reinforcement_learning::continuous_action_response* resp, reinforcement_learning::api_status* status = nullptr);

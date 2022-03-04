@@ -168,7 +168,7 @@ PYBIND11_MODULE(rl_client, m) {
            py::arg("callback"))
       .def(
           "choose_rank",
-          [](rl::live_model &lm, const char *context, const char *event_id,
+          [](rl::live_model &lm, reinforcement_learning::string_view context, const char *event_id,
              bool deferred) {
             rl::ranking_response response;
             rl::api_status status;
@@ -188,7 +188,7 @@ PYBIND11_MODULE(rl_client, m) {
     )pbdoc")
       .def(
           "choose_rank",
-          [](rl::live_model &lm, const char *context, bool deferred) {
+          [](rl::live_model &lm, reinforcement_learning::string_view context, bool deferred) {
             rl::ranking_response response;
             rl::api_status status;
             unsigned int flags = deferred ? rl::action_flags::DEFERRED
@@ -205,7 +205,7 @@ PYBIND11_MODULE(rl_client, m) {
     )pbdoc")
       .def(
           "request_episodic_decision",
-          [](rl::live_model &lm, const char* event_id, const char* previous_id, const char* context, rl::episode_state& episode) {
+          [](rl::live_model &lm, const char* event_id, const char* previous_id, reinforcement_learning::string_view context, rl::episode_state& episode) {
             rl::ranking_response response;
             rl::api_status status;
             THROW_IF_FAIL(lm.request_episodic_decision(event_id, previous_id, context, response, episode, &status));

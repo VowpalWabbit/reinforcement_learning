@@ -3,18 +3,18 @@
 #include "err_constants.h"
 #include "time_helper.h"
 namespace reinforcement_learning { namespace logger {
-  int interaction_logger::log(const char* event_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode) {
+  int interaction_logger::log(const char* event_id, string_view context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode) {
     const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
     return append(ranking_event::choose_rank(event_id, context, flags, response, now, 1.0f, learning_mode), status);
   }
 
-  int ccb_logger::log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+  int ccb_logger::log_decisions(std::vector<const char*>& event_ids, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
     const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
     const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
     return append(std::move(decision_ranking_event::request_decision(event_ids, context, flags, action_ids, pdfs, model_version, now)), status);
   }
 
-  int multi_slot_logger::log_decision(const std::string &event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+  int multi_slot_logger::log_decision(const std::string &event_id, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
 
     const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();

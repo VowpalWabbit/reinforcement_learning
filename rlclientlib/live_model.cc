@@ -59,21 +59,21 @@ namespace reinforcement_learning
     return std::vector<int> (c_array, c_array + array_size);
   }
 
-  int live_model::choose_rank(const char* event_id, const char* context_json, ranking_response& response,
+  int live_model::choose_rank(const char* event_id, string_view context_json, ranking_response& response,
                               api_status* status)
   {
     INIT_CHECK();
     return choose_rank(event_id, context_json, action_flags::DEFAULT, response, status);
   }
 
-  int live_model::choose_rank(const char* context_json, ranking_response& response, api_status* status)
+  int live_model::choose_rank(string_view context_json, ranking_response& response, api_status* status)
   {
     INIT_CHECK();
     return choose_rank(context_json, action_flags::DEFAULT, response, status);
   }
 
   //not implemented yet
-  int live_model::choose_rank(const char* event_id, const char* context_json, unsigned int flags, ranking_response& response,
+  int live_model::choose_rank(const char* event_id, string_view context_json, unsigned int flags, ranking_response& response,
     api_status* status)
   {
     INIT_CHECK();
@@ -81,71 +81,71 @@ namespace reinforcement_learning
   }
 
   //not implemented yet
-  int live_model::choose_rank(const char* context_json, unsigned int flags, ranking_response& response, api_status* status)
+  int live_model::choose_rank(string_view context_json, unsigned int flags, ranking_response& response, api_status* status)
   {
     INIT_CHECK();
     return _pimpl->choose_rank(context_json, flags, response, status);
   }
 
-  int live_model::request_continuous_action(const char * event_id, const char * context_json, unsigned int flags, continuous_action_response& response, api_status* status)
+  int live_model::request_continuous_action(const char * event_id, string_view context_json, unsigned int flags, continuous_action_response& response, api_status* status)
   {
     INIT_CHECK();
     return _pimpl->request_continuous_action(event_id, context_json, flags, response, status);
   }
 
-  int live_model::request_continuous_action(const char * event_id, const char * context_json, continuous_action_response& response, api_status* status)
+  int live_model::request_continuous_action(const char * event_id, string_view context_json, continuous_action_response& response, api_status* status)
   {
     INIT_CHECK();
     return _pimpl->request_continuous_action(event_id, context_json, action_flags::DEFAULT, response, status);
   }
 
-  int live_model::request_continuous_action(const char * context_json, unsigned int flags, continuous_action_response& response, api_status* status)
+  int live_model::request_continuous_action(string_view context_json, unsigned int flags, continuous_action_response& response, api_status* status)
   {
     INIT_CHECK();
     return _pimpl->request_continuous_action(context_json, flags, response, status);
   }
 
-  int live_model::request_continuous_action(const char * context_json, continuous_action_response& response, api_status* status)
+  int live_model::request_continuous_action(string_view context_json, continuous_action_response& response, api_status* status)
   {
     INIT_CHECK();
     return _pimpl->request_continuous_action(context_json, action_flags::DEFAULT, response, status);
   }
 
-  int live_model::request_decision(const char * context_json, unsigned int flags, decision_response& resp, api_status* status)
+  int live_model::request_decision(string_view context_json, unsigned int flags, decision_response& resp, api_status* status)
   {
     INIT_CHECK();
     return _pimpl->request_decision(context_json, flags, resp, status);
   }
 
-  int live_model::request_decision(const char * context_json, decision_response& resp, api_status* status)
+  int live_model::request_decision(string_view context_json, decision_response& resp, api_status* status)
   {
     INIT_CHECK();
     return request_decision(context_json, action_flags::DEFAULT, resp, status);
   }
 
-  int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
+  int live_model::request_multi_slot_decision(const char * event_id, string_view context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
   {
     INIT_CHECK();
     return _pimpl->request_multi_slot_decision(event_id, context_json, flags, resp, live_model::default_baseline_vector, status);
   }
 
-  int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, multi_slot_response& resp, api_status* status)
+  int live_model::request_multi_slot_decision(const char * event_id, string_view context_json, multi_slot_response& resp, api_status* status)
   {
     return request_multi_slot_decision(event_id, context_json, action_flags::DEFAULT, resp, status);
   }
 
-  int live_model::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
+  int live_model::request_multi_slot_decision(string_view context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
   {
     INIT_CHECK();
     return _pimpl->request_multi_slot_decision(context_json, flags, resp, live_model::default_baseline_vector, status);
   }
 
-  int live_model::request_multi_slot_decision(const char * context_json, multi_slot_response& resp, api_status* status)
+  int live_model::request_multi_slot_decision(string_view context_json, multi_slot_response& resp, api_status* status)
   {
     return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, status);
   }
 
-  int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
+  int live_model::request_multi_slot_decision(const char * event_id, string_view context_json, unsigned int flags, multi_slot_response& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
   {
     INIT_CHECK();
     std::vector<int> baseline_vector = c_array_to_vector(baseline_actions, baseline_actions_size);
@@ -156,29 +156,29 @@ namespace reinforcement_learning
     return _pimpl->request_multi_slot_decision(event_id, context_json, flags, resp, baseline_vector, status);
   }
 
-  int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
+  int live_model::request_multi_slot_decision(const char * event_id, string_view context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
   {
 	  INIT_CHECK();
 	  return _pimpl->request_multi_slot_decision(event_id, context_json, flags, resp, live_model::default_baseline_vector, status);
   }
 
-  int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, multi_slot_response_detailed& resp, api_status* status)
+  int live_model::request_multi_slot_decision(const char * event_id, string_view context_json, multi_slot_response_detailed& resp, api_status* status)
   {
 	  return request_multi_slot_decision(event_id, context_json, action_flags::DEFAULT, resp, status);
   }
 
-  int live_model::request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
+  int live_model::request_multi_slot_decision(string_view context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
   {
 		INIT_CHECK();
     return _pimpl->request_multi_slot_decision(context_json, flags, resp, live_model::default_baseline_vector, status);
   }
 
-  int live_model::request_multi_slot_decision(const char * context_json, multi_slot_response_detailed& resp, api_status* status)
+  int live_model::request_multi_slot_decision(string_view context_json, multi_slot_response_detailed& resp, api_status* status)
   {
   	return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, status);
   }
 
-  int live_model::request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
+  int live_model::request_multi_slot_decision(const char * event_id, string_view context_json, unsigned int flags, multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
   {
 	  INIT_CHECK();
     std::vector<int> baseline_vector = c_array_to_vector(baseline_actions, baseline_actions_size);
@@ -237,12 +237,12 @@ namespace reinforcement_learning
     return _pimpl->refresh_model(status);
   }
 
-  int live_model::request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, ranking_response& resp, episode_state& episode, api_status* status) {
+  int live_model::request_episodic_decision(const char* event_id, const char* previous_id, string_view context_json, ranking_response& resp, episode_state& episode, api_status* status) {
     INIT_CHECK();
     return _pimpl->request_episodic_decision(event_id, previous_id, context_json, action_flags::DEFAULT, resp, episode, status);
   }
 
-  int live_model::request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, unsigned int flags, ranking_response& resp, episode_state& episode, api_status* status) {
+  int live_model::request_episodic_decision(const char* event_id, const char* previous_id, string_view context_json, unsigned int flags, ranking_response& resp, episode_state& episode, api_status* status) {
     INIT_CHECK();
     return _pimpl->request_episodic_decision(event_id, previous_id, context_json, flags, resp, episode, status);
   }

@@ -31,7 +31,7 @@ namespace reinforcement_learning
       virtual bool is_serialization_transform_enabled() const = 0;
 
       virtual i_async_batcher<generic_event>* create_batcher(i_message_sender* sender, utility::watchdog& watchdog, error_callback_fn* perror_cb, const char* section) = 0;
-      virtual int transform_payload_and_extract_objects(const char* context, std::string& edited_payload, generic_event::object_list_t& objects, api_status* status) = 0;
+      virtual int transform_payload_and_extract_objects(string_view context, std::string& edited_payload, generic_event::object_list_t& objects, api_status* status) = 0;
       virtual int transform_serialized_payload(generic_event::payload_buffer_t& input, event_content_type &content_type, api_status* status) const = 0;
 
       static i_logger_extensions* get_extensions(const utility::configuration& config, i_time_provider* time_provider);
@@ -53,20 +53,20 @@ namespace reinforcement_learning
       int init(api_status* status);
 
       //CB v1/v2
-      int log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
+      int log(string_view context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
 
-      int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+      int log_decisions(std::vector<const char*>& event_ids, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
 
       //Multislot (Slates v1/v2 + CCB v2)
-      int log_decision(const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+      int log_decision(const std::string& event_id, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids, api_status* status, const std::vector<int>& baseline_actions, learning_mode learning_mode = ONLINE);
 
       //Continuous
-      int log_continuous_action(const char* context, unsigned int flags, const continuous_action_response& response, api_status* status);
+      int log_continuous_action(string_view context, unsigned int flags, const continuous_action_response& response, api_status* status);
 
       //Multistep
-      int log(const char* episode_id, const char* previous_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status);
+      int log(const char* episode_id, const char* previous_id, string_view context, unsigned int flags, const ranking_response& response, api_status* status);
 
     private:
       const reinforcement_learning::model_management::model_type_t _model_type;

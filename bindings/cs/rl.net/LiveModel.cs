@@ -20,33 +20,33 @@ namespace Rl.Net
             public static extern int LiveModelInit(IntPtr liveModel, IntPtr apiStatus);
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelChooseRank")]
-            private static extern int LiveModelChooseRankNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr rankingResponse, IntPtr apiStatus);
+            private static extern int LiveModelChooseRankNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int byteCount, IntPtr rankingResponse, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelChooseRankOverride { get; set; }
 
-            public static int LiveModelChooseRank(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr rankingResponse, IntPtr apiStatus)
+            public static int LiveModelChooseRank(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int byteCount, IntPtr rankingResponse, IntPtr apiStatus)
             {
                 if (LiveModelChooseRankOverride != null)
                 {
                     return LiveModelChooseRankOverride(liveModel, eventId, contextJson, rankingResponse, apiStatus);
                 }
 
-                return LiveModelChooseRankNative(liveModel, eventId, contextJson, rankingResponse, apiStatus);
+                return LiveModelChooseRankNative(liveModel, eventId, contextJson, byteCount, rankingResponse, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelChooseRankWithFlags")]
-            private static extern int LiveModelChooseRankWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr rankingResponse, IntPtr apiStatus);
+            private static extern int LiveModelChooseRankWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonByteCount, uint flags, IntPtr rankingResponse, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, int> LiveModelChooseRankWithFlagsOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> LiveModelChooseRankWithFlagsOverride { get; set; }
 
-            public static int LiveModelChooseRankWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr rankingResponse, IntPtr apiStatus)
+            public static int LiveModelChooseRankWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonByteCount, uint flags, IntPtr rankingResponse, IntPtr apiStatus)
             {
                 if (LiveModelChooseRankWithFlagsOverride != null)
                 {
-                    return LiveModelChooseRankWithFlagsOverride(liveModel, eventId, contextJson, flags, rankingResponse, apiStatus);
+                    return LiveModelChooseRankWithFlagsOverride(liveModel, eventId, contextJson, contextJsonByteCount, flags, rankingResponse, apiStatus);
                 }
 
-                return LiveModelChooseRankWithFlagsNative(liveModel, eventId, contextJson, flags, rankingResponse, apiStatus);
+                return LiveModelChooseRankWithFlagsNative(liveModel, eventId, contextJson, contextJsonByteCount, flags, rankingResponse, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestContinuousAction")]
@@ -370,18 +370,19 @@ namespace Rl.Net
 
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
             {
+                int byteCount = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
 
                 // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
                 // eventId and use supplied eventId at the rl.net.native layer.
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelChooseRank(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, rankingResponse, apiStatus);
+                    return NativeMethods.LiveModelChooseRank(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, byteCount, rankingResponse, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelChooseRank(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, rankingResponse, apiStatus);
+                    return NativeMethods.LiveModelChooseRank(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, byteCount, rankingResponse, apiStatus);
                 }
             }
         }
@@ -394,12 +395,13 @@ namespace Rl.Net
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
             {
                 IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
+                int contextJsonByteCount = NativeMethods.StringEncoding.GetByteCount(contextJson);
 
                 // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
                 // eventId and use supplied eventId at the rl.net.native layer.
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelChooseRankWithFlags(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, flags, rankingResponse, apiStatus);
+                    return NativeMethods.LiveModelChooseRankWithFlags(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, int contextJsonByteCount, flags, rankingResponse, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
@@ -754,9 +756,9 @@ namespace Rl.Net
             return this.TryChooseRank(eventId, contextJson, response, apiStatus);
         }
 
-        public bool TryChooseRank(string eventId, string contextJson, RankingResponse response, ApiStatus apiStatus = null)
+        public bool TryChooseRank(string eventId, string contextJson, int byteCount, RankingResponse response, ApiStatus apiStatus = null)
         {
-            int result = LiveModelChooseRank(this.DangerousGetHandle(), eventId, contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+            int result = LiveModelChooseRank(this.DangerousGetHandle(), eventId, contextJson, byteCount, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
 
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;

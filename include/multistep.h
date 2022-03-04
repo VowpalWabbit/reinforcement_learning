@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "ranking_response.h"
+#include "../rlclientlib/rl_string_view.h"
 
 namespace reinforcement_learning {
   class episode_history {
@@ -23,8 +24,8 @@ namespace reinforcement_learning {
     episode_history(episode_history&& other) = default;
     episode_history& operator=(episode_history&& other) = default;
 
-    void update(const char* event_id, const char* previous_event_id, const char* context, const ranking_response& resp);
-    std::string get_context(const char* previous_event_id, const char* context) const;
+    void update(const char* event_id, const char* previous_event_id, string_view context, const ranking_response& resp);
+    std::string get_context(const char* previous_event_id, string_view context) const;
 
     size_t size() const;
 
@@ -49,7 +50,7 @@ namespace reinforcement_learning {
     const episode_history& get_history() const;
     size_t size() const;
 
-    int update(const char* event_id, const char* previous_event_id, const char* context, const ranking_response& response, api_status* error = nullptr);
+    int update(const char* event_id, const char* previous_event_id, string_view context, const ranking_response& response, api_status* error = nullptr);
 
   private:
     const std::string _episode_id;
