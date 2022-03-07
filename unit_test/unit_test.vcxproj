@@ -186,6 +186,7 @@
     <ClCompile Include="model_mgmt_test.cc" />
     <ClCompile Include="event_queue_test.cc" />
     <ClCompile Include="moving_queue_test.cc" />
+    <ClCompile Include="multistep_test.cc" />
     <ClCompile Include="multi_slot_response_detailed_test.cc" />
     <ClCompile Include="object_pool_test.cc" />
     <ClCompile Include="payload_serializer_test.cc" />
