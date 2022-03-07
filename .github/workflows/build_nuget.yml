@@ -25,7 +25,8 @@ jobs:
           submodules: 'recursive'
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Dependencies
-        run: vcpkg install --triplet x64-windows openssl
+        run: |
+          vcpkg install --triplet x64-windows openssl
       - name: Configure
         run: >
           cmake -S . -B build
@@ -43,8 +44,7 @@ jobs:
           -DDO_NOT_BUILD_VW_C_WRAPPER=On
           -DVW_INSTALL=On
           -Dvw_USE_AZURE_FACTORIES=Off
-          -DOPENSSL_ROOT_DIR='brew --prefix openssl'
-          -DOPENSSL_LIBRARIES='brew --prefix openssl'/lib
+          -DOPENSSL_ROOT_DIR='C:/vcpkg/packages/openssl_x64-windows/'
       - name: Build and install
         run: |
           cmake --build build --config Debug -t rl.net.native
