@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
-# if(POLICY CMP0074)
-#     cmake_policy(SET CMP0074 NEW)
-# endif()
+if(POLICY CMP0074)
+    cmake_policy(SET CMP0074 NEW)
+endif()
 project(vw_binary_parser)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -29,7 +29,7 @@ if(WIN32 AND (STATIC_LINK_BINARY_PARSER))
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/Modules/")
-find_package(flatbuffers REQUIRED)
+find_package(flatbuffers_x64-windows-static-md REQUIRED)
 
 set(RL_FLAT_BUFFER_FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/DedupInfo.fbs"
