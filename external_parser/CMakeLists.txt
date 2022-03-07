@@ -29,7 +29,7 @@ if(WIN32 AND (STATIC_LINK_BINARY_PARSER))
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/Modules/")
-find_package(flatbuffers REQUIRED)
+find_package(flatbuffers CONFIG REQUIRED)
 
 set(RL_FLAT_BUFFER_FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/DedupInfo.fbs"
