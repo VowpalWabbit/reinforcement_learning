@@ -16,6 +16,7 @@ set(TEST_SOURCES
   main.cc
   mock_util.cc
   model_mgmt_test.cc
+  multistep_test.cc
   object_pool_test.cc
   payload_serializer_test.cc
   ranking_response_test.cc
