@@ -26,7 +26,7 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Dependencies
         run: |
-          vcpkg install --triplet x64-windows zlib boost-system boost-program-options boost-test boost-align boost-foreach boost-math boost-uuid cpprestsdk flatbuffers openssl
+          vcpkg install --host-triplet=x64-windows-static --triplet x64-windows-static  openssl
       - name: Configure
         run: >
           cmake -S . -B build
@@ -45,8 +45,6 @@ jobs:
           -DVW_INSTALL=On
           -Dvw_USE_AZURE_FACTORIES=Off
           -DVCPKG_TARGET_TRIPLET="x64-windows"
-          --debug-find
-          -DOPENSSL_ROOT_DIR='C:/vcpkg/packages/openssl_x64-windows/'
       - name: Build and install
         run: |
           cmake --build build --config Debug -t rl.net.native
