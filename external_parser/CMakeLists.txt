@@ -28,7 +28,7 @@ if(WIN32 AND (STATIC_LINK_BINARY_PARSER))
   message(FATAL_ERROR "Unsupported option enabled on Windows build")
 endif()
 
-# set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/Modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/Modules/")
 find_package(flatbuffers REQUIRED)
 
 set(RL_FLAT_BUFFER_FILES

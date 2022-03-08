@@ -30,7 +30,7 @@ find_program(FLATBUFFERS_FLATC_EXECUTABLE NAMES flatc)
 find_path(FLATBUFFERS_INCLUDE_DIR NAMES flatbuffers/flatbuffers.h)
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(flatbuffers
+find_package_handle_standard_args(FlatBuffers
   DEFAULT_MSG FLATBUFFERS_FLATC_EXECUTABLE FLATBUFFERS_INCLUDE_DIR)
 
 if(FLATBUFFERS_FOUND)
@@ -45,6 +45,7 @@ if(FLATBUFFERS_FOUND)
       add_custom_command(OUTPUT ${FLATC_OUTPUT}
         COMMAND ${FLATBUFFERS_FLATC_EXECUTABLE}
         ARGS -c -o "${CMAKE_CURRENT_BINARY_DIR}/" ${FILE}
+        DEPENDS ${FILE}
         COMMENT "Building C++ header for ${FILE}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     endforeach()
