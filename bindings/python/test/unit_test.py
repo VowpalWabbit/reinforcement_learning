@@ -40,7 +40,7 @@ class LiveModelTests(unittest.TestCase):
         model = rl_client.LiveModel(self.config)
 
         event_id = "event_id"
-        context = "{\"_multi\":[{},{}]}"
+        context = '{"_multi":[{},{}]}'
         model.choose_rank(context, event_id=event_id)
 
     def test_choose_rank_invalid_context(self):
@@ -54,7 +54,7 @@ class LiveModelTests(unittest.TestCase):
         model = rl_client.LiveModel(self.config)
 
         invalid_event_id = ""
-        context = "{\"_multi\":[{},{}]}"
+        context = '{"_multi":[{},{}]}'
         self.assertRaises(rl_client.RLException, model.choose_rank, invalid_event_id, context)
 
     def test_exception_contains_code(self):
@@ -73,7 +73,7 @@ class LiveModelTests(unittest.TestCase):
         model = rl_client.LiveModel(self.config)
 
         event_id = "event_id"
-        context = "{\"_multi\":[{},{}]}"
+        context = '{"_multi":[{},{}]}'
         model.choose_rank(context, event_id=event_id)
         model.report_outcome(event_id, 1.0)
         model.report_outcome(event_id,"{'result':'res'}")
