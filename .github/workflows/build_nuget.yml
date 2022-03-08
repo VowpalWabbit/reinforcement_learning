@@ -45,6 +45,7 @@ jobs:
           -DVW_INSTALL=On
           -Dvw_USE_AZURE_FACTORIES=Off
           -DVCPKG_TARGET_TRIPLET="x64-windows"
+          --debug-find
       - name: Build and install
         run: |
           cmake --build build --config Debug -t rl.net.native
