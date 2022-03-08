@@ -1,4 +1,3 @@
-#define OPENSSL_API_COMPAT 0x0908
 #include "error_callback_fn.h"
 #include "err_constants.h"
 #include "eventhub_http_authorization.h"
