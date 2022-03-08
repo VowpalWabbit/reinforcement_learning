@@ -8,6 +8,7 @@ SETLOCAL
 CALL %~dp0init.cmd
 PUSHD %~dp0
 
+SET "flatcPath=%VcpkgInstallRoot%installed\x64-windows-static\tools\flatbuffers\flatc.exe"
 %vcpkgPath% install zlib:x64-windows-static
 %vcpkgPath% install flatbuffers:x64-windows-static
 %vcpkgPath% install boost-filesystem:x64-windows-static
