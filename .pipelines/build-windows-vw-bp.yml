@@ -26,22 +26,18 @@ steps:
     #username: # Optional
     #password: # Optional
     #netShare: # Required when packageFeedSelector == NetShare
-# - task: Cache@2
-#   inputs:
-#     key: 'vcpkg | archives'
-#     path: $(VCPKG_ARCHIVE_DIR)
-#     restoreKeys: |
-#       vcpkg | archives
-#   displayName: Cache vcpkg dependencies
+- task: Cache@2
+  inputs:
+    key: 'vcpkg | archives'
+    path: $(VCPKG_ARCHIVE_DIR)
+    restoreKeys: |
+      vcpkg | archives
+  displayName: Cache vcpkg dependencies
 - script: CALL .scripts/restore-vw-bp-deps.cmd
   displayName: 'Restore dependencies for vw binary parser'
   failOnStderr: true
 - script: |
-    ls C:/vcpkg/installed/
-    ls C:/vcpkg/installed/x64-windows-static-md/
-    ls C:/vcpkg/installed/x64-windows-static-md/tools
-    ls C:/vcpkg/installed/x64-windows-static-md/tools/flatbuffers/
-    ls C:/vcpkg/installed/x64-windows-static-md/include
+    ls C:/vcpkg/installed/x64-windows-static-md/include/flatbuffers/
   displayName: 'ls everything'
 - script: CALL .scripts/build-vw-bp.cmd
   displayName: 'Build vw_binary_parser'
