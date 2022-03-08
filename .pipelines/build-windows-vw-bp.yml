@@ -36,7 +36,7 @@ steps:
 - script: CALL .scripts/restore-vw-bp-deps.cmd
   displayName: 'Restore dependencies for vw binary parser'
   failOnStderr: true
-- run: |
+- script: |
     ls C:/vcpkg/installed/
     ls C:/vcpkg/installed/x64-windows-static-md/
     ls C:/vcpkg/installed/x64-windows-static-md/tools
