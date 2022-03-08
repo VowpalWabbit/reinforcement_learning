@@ -44,7 +44,7 @@ jobs:
           -DDO_NOT_BUILD_VW_C_WRAPPER=On
           -DVW_INSTALL=On
           -Dvw_USE_AZURE_FACTORIES=Off
-          -DVCPKG_TARGET_TRIPLET="x64-windows"
+          -DVCPKG_TARGET_TRIPLET="x64-windows-static"
       - name: Build and install
         run: |
           cmake --build build --config Debug -t rl.net.native
