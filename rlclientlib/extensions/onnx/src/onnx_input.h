@@ -74,5 +74,5 @@ namespace reinforcement_learning { namespace onnx {
     i_trace* _trace_logger;
   };
 
-  int read_tensor_notation(const char* tensor_notation, onnx_input_builder& input_context, api_status* status = nullptr);
+  int read_tensor_notation(string_view tensor_notation, onnx_input_builder& input_context, api_status* status = nullptr);
 }}
