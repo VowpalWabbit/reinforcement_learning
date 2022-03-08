@@ -67,7 +67,7 @@ int onnx_input_builder::allocate_inputs(std::vector<Ort::Value>& result, const O
   return error_code::success;
 }
 
-int read_tensor_notation(string_view tensor_notation, onnx_input_builder& input_context, api_status* status)
+int read_tensor_notation(reinforcement_learning::string_view tensor_notation, onnx_input_builder& input_context, api_status* status)
 {
   if (tensor_notation == nullptr)
   {

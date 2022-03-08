@@ -6,6 +6,7 @@
 #include <core/session/onnxruntime_cxx_api.h>
 
 #include "api_status.h"
+#include "rl_string_view.h"
 
 namespace reinforcement_learning { namespace onnx {
   using byte_t = unsigned char;
@@ -74,5 +75,5 @@ namespace reinforcement_learning { namespace onnx {
     i_trace* _trace_logger;
   };
 
-  int read_tensor_notation(string_view tensor_notation, onnx_input_builder& input_context, api_status* status = nullptr);
+  int read_tensor_notation(reinforcement_learning::string_view tensor_notation, onnx_input_builder& input_context, api_status* status = nullptr);
 }}
