@@ -37,7 +37,7 @@ steps:
   displayName: 'Restore dependencies for vw binary parser'
   failOnStderr: true
 - script: |
-    ls C:/vcpkg/installed/x64-windows-static-md/include/flatbuffers/
+    ls C:/vcpkg/installed/x64-windows-static-md/debug
   displayName: 'ls everything'
 - script: CALL .scripts/build-vw-bp.cmd
   displayName: 'Build vw_binary_parser'
