@@ -26,7 +26,7 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Dependencies
         run: |
-          vcpkg install --triplet x64-windows zlib boost-system boost-program-options boost-test boost-align boost-foreach boost-math boost-uuid cpprestsdk flatbuffers openssl
+          .scripts/restore.cmd
       - name: Configure
         run: >
           cmake -S . -B build
