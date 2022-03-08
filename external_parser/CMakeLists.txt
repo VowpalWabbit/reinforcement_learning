@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15)
 if(POLICY CMP0074)
     cmake_policy(SET CMP0074 NEW)
 endif()
@@ -88,6 +88,9 @@ set(EXTERNAL_PARSER_LIBS libzstd_static)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/../ext_libs/vowpal_wabbit ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser)
 add_dependencies(vw fbgen)
+
+set_property(TARGET vw-bin PROPERTY
+  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 if (BUILD_BINARY_PARSER_TESTS)
   enable_testing()
