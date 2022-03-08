@@ -46,6 +46,7 @@ jobs:
           -Dvw_USE_AZURE_FACTORIES=Off
           -DVCPKG_TARGET_TRIPLET="x64-windows"
           --debug-find
+          -DOPENSSL_ROOT_DIR='C:/vcpkg/packages/openssl_x64-windows/'
       - name: Build and install
         run: |
           cmake --build build --config Debug -t rl.net.native
