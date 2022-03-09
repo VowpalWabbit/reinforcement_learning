@@ -22,7 +22,7 @@
     <ProjectGuid>{C40E3263-B6FF-46D5-92F7-D67E6F9FCEDD}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>rlclientlib</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
     <ProjectName>rlclientlib</ProjectName>
     <flatcPath Condition="'$(flatcPath)'==''">flatc.exe</flatcPath>
   </PropertyGroup>
@@ -299,7 +299,7 @@ $(flatcPath) -o "$(SolutionDir)rlclientlib\generated\v2" --cpp "$(SolutionDir)rl
     <ClInclude Include="utility\http_helper.h" />
     <ClInclude Include="utility\eventhub_http_authorization.h" />
     <ClInclude Include="utility\apim_http_authorization.h" />
-    <ClCompile Include="azure_factories.cc" />    
+    <ClCompile Include="azure_factories.cc" />
     <ClCompile Include="model_mgmt\restapi_data_transport.cc" />
     <ClCompile Include="utility\http_client.cc" />
     <ClCompile Include="utility\http_helper.cc" />
