@@ -7,8 +7,7 @@ namespace reinforcement_learning {
   }
 
   std::string episode_history::get_context(const char* previous_event_id, string_view context) const {
-    // is the +1 here important?
-    return R"({"episode":{"depth":")" + std::to_string(this->get_depth(previous_event_id) + 1) + "\"}," + std::string(context);
+    return R"({"episode":{"depth":")" + std::to_string(this->get_depth(previous_event_id) + 1) + "\"}," + std::string(context.data() + 1);
   }
 
   int episode_history::get_depth(const char* id) const {

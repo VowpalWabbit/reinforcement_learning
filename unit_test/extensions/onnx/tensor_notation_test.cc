@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(null_pointer) {
 
   // Act
   r::api_status status;
-  o::read_tensor_notation(nullptr, ic, &status);
+  o::read_tensor_notation({}, ic, &status);
 
   // Assert
   require_success(status);
@@ -103,7 +103,7 @@ inline void run_tensor_notation_test(const Ort::MemoryInfo& memory_info, expecta
 
   // Act
   r::api_status status;
-  o::read_tensor_notation(tensor_notation.c_str(), ic, &status);
+  o::read_tensor_notation(tensor_notation, ic, &status);
 
   // Assert
   require_success(status);
