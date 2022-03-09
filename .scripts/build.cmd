@@ -23,7 +23,7 @@ IF NOT DEFINED flatcPath (
 
 REM TODO: Figure out how to parametrize this script?! (is there a standard, or do we actually need parse args?)
 ECHO Building "%rlRoot%\rl.sln" for Release x64
-"%msbuildPath%" /verbosity:normal /m /p:Configuration=Release;Platform=x64 "%rlRoot%\rl.sln"
+"%msbuildPath%" /verbosity:normal /m /p:Configuration=Release;Platform=x64;VcpkgTriplet=x64-windows-v141 "%rlRoot%\rl.sln"
 
 POPD
 
