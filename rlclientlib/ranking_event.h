@@ -6,6 +6,8 @@
 #include "decision_response.h"
 #include "multi_slot_response.h"
 
+#include <flatbuffers/flatbuffers.h>
+
 namespace reinforcement_learning {
   struct timestamp;
   namespace utility { class data_buffer; }
@@ -20,6 +22,8 @@ namespace reinforcement_learning {
     event& operator=(event&&) = default;
     virtual ~event() = default;
     float get_pass_prob() const;
+    uint64_t get_event_index() const;
+    void set_event_index(uint64_t event_index);
     timestamp get_client_time_gmt() const; ;
     virtual bool try_drop(float pass_prob, int drop_pass);
     const std::string& get_seed_id() const {
@@ -33,6 +37,7 @@ namespace reinforcement_learning {
     std::string _seed_id;
     float _pass_prob = 1.0;
     timestamp _client_time_gmt;
+    uint64_t _event_index;
   };
 
   class ranking_response;

@@ -2,6 +2,7 @@
 
 #include "date.h"
 #include "generated/v2/Metadata_generated.h"
+#include "io/logger.h"
 
 #include <chrono>
 
@@ -11,4 +12,4 @@ TimePoint timestamp_to_chrono(const v2::TimeStamp &ts);
 bool is_empty_timestamp(const v2::TimeStamp &ts);
 TimePoint get_enqueued_time(const v2::TimeStamp *enqueued_time_utc,
                             const v2::TimeStamp *client_time_utc,
-                            bool use_client_time);
+                            bool use_client_time, VW::io::logger &logger);

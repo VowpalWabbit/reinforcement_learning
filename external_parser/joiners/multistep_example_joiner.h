@@ -56,7 +56,7 @@ inline void multistep_reward_suffix_mean(std::deque<float> &rewards) {
 
 class multistep_example_joiner : public i_joiner {
 public:
-  multistep_example_joiner(vw *vw); // TODO rule of 5
+  multistep_example_joiner(VW::workspace *vw); // TODO rule of 5
 
   virtual ~multistep_example_joiner();
 
@@ -65,7 +65,7 @@ public:
   void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky) override;
   void set_problem_type_config(v2::ProblemType problem_type, bool sticky) override;
   void set_use_client_time(bool use_client_time, bool sticky = false) override;
-  void apply_cli_overrides(vw *all, const input_options &parsed_options) override;
+  void apply_cli_overrides(VW::workspace *all, const input_options &parsed_options) override;
   bool joiner_ready() override;
 
   bool current_event_is_skip_learn() override;
@@ -98,7 +98,7 @@ private:
 private:
   std::vector<example *> _example_pool;
 
-  vw *_vw;
+  VW::workspace *_vw;
   flatbuffers::DetachedBuffer _detached_buffer;
 
   loop::sticky_value<reward::RewardFunctionType> _reward_calculation;

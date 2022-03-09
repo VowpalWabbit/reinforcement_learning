@@ -14,18 +14,18 @@ namespace typed_event {
 template <typename T> struct event_processor;
 template <> struct event_processor<v2::MultiSlotEvent> {
   static bool is_valid(const v2::MultiSlotEvent &evt,
-                       const loop::loop_info &loop_info) {
+                       const loop::loop_info &loop_info,
+                       VW::io::logger &logger) {
     if (evt.context() == nullptr || evt.slots() == nullptr) {
       return false;
     }
 
     if (evt.learning_mode() != loop_info.learning_mode_config) {
-      VW::io::logger::log_warn(
-          "Online Trainer learning mode [{}] "
-          "and Interaction event learning mode [{}]"
-          "don't match.",
-          EnumNameLearningModeType(loop_info.learning_mode_config),
-          EnumNameLearningModeType(evt.learning_mode()));
+      logger.out_warn("Online Trainer learning mode [{}] "
+                      "and Interaction event learning mode [{}]"
+                      "don't match.",
+                      EnumNameLearningModeType(loop_info.learning_mode_config),
+                      EnumNameLearningModeType(evt.learning_mode()));
       return false;
     }
     return true;
@@ -107,20 +107,19 @@ template <> struct event_processor<v2::MultiSlotEvent> {
 };
 
 template <> struct event_processor<v2::CbEvent> {
-  static bool is_valid(const v2::CbEvent &evt,
-                       const loop::loop_info &loop_info) {
+  static bool is_valid(const v2::CbEvent &evt, const loop::loop_info &loop_info,
+                       VW::io::logger &logger) {
     if (evt.context() == nullptr || evt.action_ids() == nullptr ||
         evt.probabilities() == nullptr) {
       return false;
     }
 
     if (evt.learning_mode() != loop_info.learning_mode_config) {
-      VW::io::logger::log_warn(
-          "Online Trainer learning mode [{}] "
-          "and Interaction event learning mode [{}]"
-          "don't match.",
-          EnumNameLearningModeType(loop_info.learning_mode_config),
-          EnumNameLearningModeType(evt.learning_mode()));
+      logger.out_warn("Online Trainer learning mode [{}] "
+                      "and Interaction event learning mode [{}]"
+                      "don't match.",
+                      EnumNameLearningModeType(loop_info.learning_mode_config),
+                      EnumNameLearningModeType(evt.learning_mode()));
       return false;
     }
     return true;
@@ -170,19 +169,18 @@ template <> struct event_processor<v2::CbEvent> {
 };
 
 template <> struct event_processor<v2::CaEvent> {
-  static bool is_valid(const v2::CaEvent &evt,
-                       const loop::loop_info &loop_info) {
+  static bool is_valid(const v2::CaEvent &evt, const loop::loop_info &loop_info,
+                       VW::io::logger &logger) {
     if (evt.context() == nullptr) {
       return false;
     }
 
     if (evt.learning_mode() != loop_info.learning_mode_config) {
-      VW::io::logger::log_warn(
-          "Online Trainer learning mode [{}] "
-          "and Interaction event learning mode [{}]"
-          "don't match.",
-          EnumNameLearningModeType(loop_info.learning_mode_config),
-          EnumNameLearningModeType(evt.learning_mode()));
+      logger.out_warn("Online Trainer learning mode [{}] "
+                      "and Interaction event learning mode [{}]"
+                      "don't match.",
+                      EnumNameLearningModeType(loop_info.learning_mode_config),
+                      EnumNameLearningModeType(evt.learning_mode()));
       return false;
     }
     return true;
@@ -223,22 +221,23 @@ template <> struct event_processor<v2::CaEvent> {
 template <typename T>
 bool process_compression(const uint8_t *data, size_t size,
                          const v2::Metadata &metadata, const T *&payload,
-                         flatbuffers::DetachedBuffer &detached_buffer) {
+                         flatbuffers::DetachedBuffer &detached_buffer,
+                         VW::io::logger &logger) {
 
   if (metadata.encoding() == v2::EventEncoding_Zstd) {
     size_t buff_size = ZSTD_getFrameContentSize(data, size);
     if (buff_size == ZSTD_CONTENTSIZE_ERROR) {
-      VW::io::logger::log_warn("Received ZSTD_CONTENTSIZE_ERROR while "
-                               "decompressing event with id: "
-                               "[{}] of type: [{}]",
-                               metadata.id()->c_str(), metadata.payload_type());
+      logger.out_warn("Received ZSTD_CONTENTSIZE_ERROR while "
+                      "decompressing event with id: "
+                      "[{}] of type: [{}]",
+                      metadata.id()->c_str(), metadata.payload_type());
       return false;
     }
     if (buff_size == ZSTD_CONTENTSIZE_UNKNOWN) {
-      VW::io::logger::log_warn("Received ZSTD_CONTENTSIZE_UNKNOWN while "
-                               "decompressing event with id: "
-                               "[{}] of type: [{}]",
-                               metadata.id()->c_str(), metadata.payload_type());
+      logger.out_warn("Received ZSTD_CONTENTSIZE_UNKNOWN while "
+                      "decompressing event with id: "
+                      "[{}] of type: [{}]",
+                      metadata.id()->c_str(), metadata.payload_type());
       return false;
     }
 
@@ -247,11 +246,10 @@ bool process_compression(const uint8_t *data, size_t size,
     size_t res = ZSTD_decompress(buff_data.get(), buff_size, data, size);
 
     if (ZSTD_isError(res)) {
-      VW::io::logger::log_warn(
-          "Received [{}] error while decompressing event with id: "
-          "[{}] of type: [{}]",
-          ZSTD_getErrorName(res), metadata.id()->c_str(),
-          metadata.payload_type());
+      logger.out_warn("Received [{}] error while decompressing event with id: "
+                      "[{}] of type: [{}]",
+                      ZSTD_getErrorName(res), metadata.id()->c_str(),
+                      metadata.payload_type());
       return false;
     }
 

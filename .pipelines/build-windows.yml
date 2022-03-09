@@ -27,10 +27,10 @@ steps:
     #netShare: # Required when packageFeedSelector == NetShare
 - task: Cache@2
   inputs:
-    key: 'vcpkg | archives'
+    key: 'vcpkg | archives | test'
     path: $(VCPKG_ARCHIVE_DIR)
     restoreKeys: |
-      vcpkg | archives
+      vcpkg | archives | test
   displayName: Cache vcpkg dependencies
 - script: CALL .scripts/restore.cmd
   displayName: 'Restore dependencies'

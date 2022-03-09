@@ -19,6 +19,7 @@
 #include "configuration.h"
 #include "utility/watchdog.h"
 
+
 #ifdef USE_AZURE_FACTORIES
 #   include "model_mgmt/restapi_data_transport.h"
 #   include "mock_http_client.h"
@@ -134,6 +135,31 @@ BOOST_AUTO_TEST_CASE(mock_azure_storage_model_data)
   BOOST_CHECK_EQUAL(md.refresh_count(), 1);
   scode = data_transport->get_data(md, &status);
   BOOST_CHECK_EQUAL(md.refresh_count(), 2);
+}
+
+BOOST_AUTO_TEST_CASE(mock_azure_storage_model_api_data)
+{
+    //create a simple ds configuration
+    u::configuration cc;
+    auto scode = cfg::create_from_json(JSON_CFG, cc);
+    BOOST_CHECK_EQUAL(scode, r::error_code::success);
+    cc.set(r::name::EH_TEST, "true"); // local test event hub
+    cc.set("model.source", "HTTP_MODEL_DATA");
+    cc.set("http.api.key", "apikey1234");
+
+    auto http_client = new mock_http_client("http://test.com");
+    std::unique_ptr<m::i_data_transport> data_transport(new m::restapi_data_transport(std::unique_ptr<mock_http_client>(http_client), cc , m::model_source::HTTP_API, nullptr));
+
+    r::api_status status;
+
+    m::model_data md;
+    BOOST_CHECK_EQUAL(md.refresh_count(), 0);
+    scode = data_transport->get_data(md, &status);
+    BOOST_CHECK_EQUAL(scode, r::error_code::success);
+    BOOST_CHECK_EQUAL(md.refresh_count(), 1);
+    BOOST_CHECK_EQUAL(scode, r::error_code::success);
+    scode = data_transport->get_data(md, &status);
+    BOOST_CHECK_EQUAL(md.refresh_count(), 2);
 }
 #endif // USE_AZURE_FACTORIES
 #endif //_WIN32 (http_server http protocol issues in linux)

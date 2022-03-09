@@ -114,6 +114,8 @@ namespace reinforcement_learning { namespace utility { namespace config {
     };
 
     static const std::unordered_map<std::string, std::string> parsed_translation_mapping = {
+      { "EventHubEpisodeConnectionString" , "episode" },
+      { "eventHubEpisodeConnectionString" , "episode" },
       { "EventHubInteractionConnectionString" , "interaction" },
       { "eventHubInteractionConnectionString" , "interaction" },
       { "EventHubObservationConnectionString" , "observation" },
@@ -121,7 +123,7 @@ namespace reinforcement_learning { namespace utility { namespace config {
     };
 
     static const std::unordered_set<std::string> deprecated = {
-     "QueueMaxSize", 
+     "QueueMaxSize",
      "queueMaxSize"
     };
 
@@ -131,7 +133,7 @@ namespace reinforcement_learning { namespace utility { namespace config {
       prop_name = legacy_it->second;
     }
 
-    if (trace != nullptr && deprecated.find(prop_name) != deprecated.end()) 
+    if (trace != nullptr && deprecated.find(prop_name) != deprecated.end())
     {
       auto message = concat("Field '", prop_name, "' is unresponsive.");
       TRACE_WARN(trace, message);
@@ -148,7 +150,7 @@ namespace reinforcement_learning { namespace utility { namespace config {
         // Otherwise, just set the value in the config collection.
         cc.set(prop_name.c_str(), string_value);
     }
-    
+
     return error_code::success;
   }
 

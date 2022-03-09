@@ -32,3 +32,5 @@ ext_deps
 /test_tools/log_parser/reinforcement_learning/
 _build
 .idea
+dist/
+rl_client.egg-info/

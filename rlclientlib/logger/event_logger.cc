@@ -13,6 +13,7 @@ namespace reinforcement_learning { namespace logger {
     const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
     return append(std::move(decision_ranking_event::request_decision(event_ids, context, flags, action_ids, pdfs, model_version, now)), status);
   }
+
   int multi_slot_logger::log_decision(const std::string &event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
 

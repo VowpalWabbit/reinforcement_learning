@@ -37,6 +37,7 @@ namespace reinforcement_learning
     _initialized = other._initialized;
     return *this;
   }
+
   int live_model::init(api_status* status) {
     if (_initialized)
       return error_code::success;
@@ -235,4 +236,20 @@ namespace reinforcement_learning
     INIT_CHECK();
     return _pimpl->refresh_model(status);
   }
+
+  int live_model::request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, ranking_response& resp, episode_state& episode, api_status* status) {
+    INIT_CHECK();
+    return _pimpl->request_episodic_decision(event_id, previous_id, context_json, action_flags::DEFAULT, resp, episode, status);
+  }
+
+  int live_model::request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, unsigned int flags, ranking_response& resp, episode_state& episode, api_status* status) {
+    INIT_CHECK();
+    return _pimpl->request_episodic_decision(event_id, previous_id, context_json, flags, resp, episode, status);
+  }
+
+  int live_model::report_action_taken(const char* primary_id, const char* secondary_id, api_status* status) {
+    INIT_CHECK();
+    return _pimpl->report_action_taken(primary_id, secondary_id, status);
+  }
+
 }

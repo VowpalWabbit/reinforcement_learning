@@ -6,6 +6,8 @@
 #include <queue>
 #include <mutex>
 #include <type_traits>
+#include "utility/config_helper.h"
+#include "constants.h"
 
 namespace reinforcement_learning {
 
@@ -21,10 +23,13 @@ namespace reinforcement_learning {
     int _drop_pass{ 0 };
     size_t _capacity{ 0 };
     size_t _max_capacity{ 0 };
+    uint64_t _event_index{ 0 };
+    events_counter_status _event_counter_status{ events_counter_status::DISABLE };
+    float _subsample_rate{ 1.0f };
 
   public:
-    event_queue(size_t max_capacity) 
-      : _max_capacity(max_capacity) {
+    event_queue(size_t max_capacity, events_counter_status event_counter_status = events_counter_status::DISABLE, float subsample_rate = 1.0f)
+      : _max_capacity(max_capacity), _event_counter_status(event_counter_status), _subsample_rate(subsample_rate) {
     }
 
     bool pop(T* item)
@@ -41,15 +46,26 @@ namespace reinforcement_learning {
       return false;
     }
 
-    void push(T& item, size_t item_size) {
-      push(std::move(item), item_size);
+    bool push(T& item, size_t item_size) {
+      return push(std::move(item), item_size);
     }
 
-    void push(T&& item, size_t item_size)
-    {
+    bool push(T&& item, size_t item_size) {
       std::unique_lock<std::mutex> mlock(_mutex);
+      if (_event_counter_status == events_counter_status::ENABLE) {
+        ++_event_index;
+        item.set_event_index(_event_index);
+      }
+      // If subsampling rate is < 1, then run subsampling logic
+      if (_subsample_rate < 1) {
+        if (item.try_drop(_subsample_rate, constants::SUBSAMPLE_RATE_DROP_PASS)) {
+          // If the event is dropped, just get out of here
+          return false;
+        }
+      }
       _capacity += item_size;
-      _queue.push_back({std::forward<T>(item),item_size});
+      _queue.push_back({ std::forward<T>(item),item_size });
+      return true;
     }
 
     void prune(float pass_prob)

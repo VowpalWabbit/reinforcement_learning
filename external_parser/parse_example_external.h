@@ -23,19 +23,22 @@ struct parser_options {
   bool use_client_time;
 };
 
-int parse_examples(vw *all, io_buf &io_buf, v_array<example *> &examples);
+int parse_examples(VW::workspace *all, io_buf &io_buf, v_array<example *> &examples);
 
 class parser {
 public:
+  explicit parser(VW::io::logger logger_) : logger(std::move(logger_)) {}
   static std::unique_ptr<parser>
-  get_external_parser(vw *all, const input_options &parsed_options);
+  get_external_parser(VW::workspace *all, const input_options &parsed_options);
   static void set_parse_args(VW::config::option_group_definition &in_options,
                              input_options &parsed_options);
   virtual ~parser();
-  virtual bool parse_examples(vw *all, io_buf &io_buf,
+  virtual bool parse_examples(VW::workspace *all, io_buf &io_buf,
                               v_array<example *> &examples) = 0;
-  virtual void
-  persist_metrics(std::vector<std::pair<std::string, size_t>> &list_metrics);
+  virtual void persist_metrics(metric_sink &metrics);
+
+  protected:
+  VW::io::logger logger;
 };
 
 } // namespace external
