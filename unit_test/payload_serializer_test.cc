@@ -21,14 +21,14 @@ using namespace reinforcement_learning::messages::flatbuff;
 
 namespace r = reinforcement_learning;
 
-const float tolerance = 0.00001;
+const float tolerance = 0.00001f;
 
 BOOST_AUTO_TEST_CASE(cb_payload_serializer_test) {
   cb_serializer serializer;
   ranking_response rr("event_id");
   rr.set_model_id("model_id");
-  rr.push_back(1, 0.2);
-  rr.push_back(0, 0.8);
+  rr.push_back(1, 0.2f);
+  rr.push_back(0, 0.8f);
 
   const auto buffer = serializer.event("my_context", action_flags::DEFERRED, v2::LearningModeType_Apprentice, rr);
 
@@ -54,8 +54,8 @@ BOOST_AUTO_TEST_CASE(cb_payload_serializer_test) {
 BOOST_AUTO_TEST_CASE(ca_payload_serializer_test)
 {
   ca_serializer serializer;
-  float action = 158.1;
-  float pdf_value = 6.09909948e-05;
+  float action = 158.1f;
+  float pdf_value = 6.09909948e-05f;
   continuous_action_response response;
   response.set_chosen_action(action);
   response.set_chosen_action_pdf_value(pdf_value);
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_payload_serializer_test){
   multi_slot_serializer serializer;
 
   vector<vector<uint32_t>> actions{ { 2, 1, 0 }, { 1, 0 }};
-  vector<vector<float>> probs{ { 0.5, 0.3, 0.2 }, { 0.8, 0.2 }};
+  vector<vector<float>> probs{ { 0.5f, 0.3f, 0.2f }, { 0.8f, 0.2f }};
   vector<std::string> slot_ids = {"0", "1"};
   vector<int> baseline_actions = { 1, 0 };
   const auto buffer = serializer.event("my_context", action_flags::DEFAULT, actions, probs, "model_id", slot_ids, baseline_actions, v2::LearningModeType_Apprentice);
@@ -93,20 +93,20 @@ BOOST_AUTO_TEST_CASE(multi_slot_payload_serializer_test){
   BOOST_CHECK_EQUAL("model_id", event->model_id()->c_str());
 
   const auto& slots = *event->slots();
-  for (size_t i = 0; i < slots.size(); ++i) {
+  for (flatbuffers::uoffset_t i = 0; i < slots.size(); ++i) {
     BOOST_CHECK_EQUAL(slot_ids[i], slots[i]->id()->str());
     BOOST_CHECK_EQUAL(actions[i].size(), slots[i]->action_ids()->size());
     BOOST_CHECK_EQUAL(probs[i].size(), slots[i]->probabilities()->size());
-    for (size_t j = 0; j < actions[i].size(); ++j) {
+    for (flatbuffers::uoffset_t j = 0; j < actions[i].size(); ++j) {
         BOOST_CHECK_EQUAL(actions[i][j], (*slots[i]->action_ids())[j]);
     }
-    for (size_t j = 0; j < probs[i].size(); ++j) {
+    for (flatbuffers::uoffset_t j = 0; j < probs[i].size(); ++j) {
         BOOST_CHECK_CLOSE(probs[i][j], (*slots[i]->probabilities())[j], tolerance);
     }
   }
 
   const auto& baseline = *event->baseline_actions();
-  for (size_t i = 0; i < baseline_actions.size(); ++i) {
+  for (flatbuffers::uoffset_t i = 0; i < baseline_actions.size(); ++i) {
     BOOST_CHECK_EQUAL(baseline_actions[i], baseline[i]);
   }
 
