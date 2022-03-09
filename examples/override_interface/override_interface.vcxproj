@@ -22,7 +22,7 @@
     <ProjectGuid>{8FF15F05-0D62-4B54-92B8-70A0EE2363AF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>override_interface</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
