@@ -40,9 +40,7 @@ jobs:
           -DFMT_SYS_DEP=Off
           -DSPDLOG_SYS_DEP=Off
           -DVW_ZLIB_SYS_DEP=Off
-          -DVW_BOOST_MATH_SYS_DEP=Off
-          -DDO_NOT_BUILD_VW_C_WRAPPER=On
-          -Dvw_USE_AZURE_FACTORIES=Off
+          -DVW_INSTALL=ON
           -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
           -DVCPKG_TARGET_TRIPLET="x64-windows"
       - name: Build and install
