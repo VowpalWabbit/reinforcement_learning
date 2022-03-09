@@ -53,7 +53,7 @@ namespace reinforcement_learning {
     int update(const char* event_id, const char* previous_event_id, string_view context, const ranking_response& response, api_status* error = nullptr);
 
   private:
-    const std::string _episode_id;
+    std::string _episode_id;
 
     episode_history _history;
   };
