@@ -375,7 +375,6 @@ BOOST_AUTO_TEST_CASE(live_model_request_decision) {
   // request ranking
   BOOST_CHECK_EQUAL(ds.request_decision(JSON_CONTEXT_WITH_SLOTS, response, &status), err::success);
   BOOST_CHECK_EQUAL(response.size(), 1);
-  size_t chosen;
   BOOST_CHECK_EQUAL((*response.begin()).get_action_id(), 0);
   BOOST_CHECK_EQUAL(status.get_error_code(), 0);
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
