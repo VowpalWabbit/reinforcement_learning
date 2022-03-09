@@ -47,7 +47,8 @@ jobs:
           -DOPENSSL_ROOT_DIR="C:/vcpkg/packages/openssl_x64-windows/"
           -DBoost_INCLUDE_DIR="C:/vcpkg/installed/x64-windows/include/"
           -DZLIB_LIBRARY="C:/vcpkg/installed/x64-windows/lib/"
-          -DflatcPath="C:/vcpkg/installed/x64-windows/tools/flatbuffers/flatc.exe"
+          -DFLATBUFFERS_FLATC_EXECUTABLE="C:/vcpkg/installed/x64-windows/tools/flatbuffers/flatc.exe"
+          -DFLATBUFFERS_INCLUDE_DIR="C:/vcpkg/installed/x64-windows/include/"
       - name: Build and install
         run: |
           cmake --build build --config Debug -t rl.net.native
