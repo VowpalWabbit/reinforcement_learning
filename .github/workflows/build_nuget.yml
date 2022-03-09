@@ -26,7 +26,6 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Dependencies
         run: |
-          vkpkg --version
           .scripts/restore.cmd
       - name: Configure
         run: >
@@ -44,12 +43,8 @@ jobs:
           -DVW_BOOST_MATH_SYS_DEP=Off
           -DDO_NOT_BUILD_VW_C_WRAPPER=On
           -Dvw_USE_AZURE_FACTORIES=Off
-          -DVCPKG_TARGET_TRIPLET=x64-windows
-          -DOPENSSL_ROOT_DIR="C:/vcpkg/packages/openssl_x64-windows/"
-          -DBoost_INCLUDE_DIR="C:/vcpkg/installed/x64-windows/include/"
-          -DZLIB_LIBRARY="C:/vcpkg/installed/x64-windows/lib/"
-          -DFLATBUFFERS_FLATC_EXECUTABLE="C:/vcpkg/installed/x64-windows/tools/flatbuffers/flatc.exe"
-          -DFLATBUFFERS_INCLUDE_DIR="C:/vcpkg/installed/x64-windows/include/"
+          -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          -DVCPKG_TARGET_TRIPLET="x64-windows"
       - name: Build and install
         run: |
           cmake --build build --config Debug -t rl.net.native
