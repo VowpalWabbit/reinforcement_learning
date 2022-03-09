@@ -45,9 +45,9 @@ IF NOT DEFINED VCPKG_INSTALLATION_ROOT (
 SET "vcpkgPath=%VCPKG_INSTALLATION_ROOT%\vcpkg.exe"
 SET "VcpkgIntegration=%VCPKG_INSTALLATION_ROOT%\scripts\buildsystems\msbuild\vcpkg.targets"
 SET "VcpkgCmake=%VCPKG_INSTALLATION_ROOT%\scripts\buildsystems\vcpkg.cmake"
-SET "flatcPath=%VCPKG_INSTALLATION_ROOT%\installed\x64-windows\tools\flatbuffers\flatc.exe"
+SET "flatcPath=%VCPKG_INSTALLATION_ROOT%\installed\x64-windows-v141\tools\flatbuffers\flatc.exe"
 
-REM The correct way to integrate this is to use msbuild targets and contribute them back to flatbuff, 
+REM The correct way to integrate this is to use msbuild targets and contribute them back to flatbuff,
 REM rather than a command line execution
 IF NOT DEFINED flatcPath (
     IF NOT DEFINED VcpkgInstallRoot (
@@ -55,7 +55,7 @@ IF NOT DEFINED flatcPath (
         EXIT /b 1
     )
 
-    SET "flatcPath=%VcpkgInstallRoot%installed\x64-windows\tools\flatbuffers\flatc.exe"
+    SET "flatcPath=%VcpkgInstallRoot%installed\x64-windows-v141\tools\flatbuffers\flatc.exe"
 )
 
 REM Repo-specific paths
