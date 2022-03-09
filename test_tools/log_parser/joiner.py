@@ -41,7 +41,7 @@ Incremental join instead of loading all interactions at once
 Respect EUD.
 """
 
-# 
+#
 fb_api_version = 1
 if flatbuffers.Builder.EndVector.__code__.co_argcount == 1:
     fb_api_version = 2
@@ -174,7 +174,7 @@ def mk_offsets_vector(builder, arr, startFun):
     startFun(builder, len(arr))
     for i in reversed(range(len(arr))):
         builder.PrependUOffsetTRelative(arr[i])
-    
+
     return end_vector_shim(builder, len(arr))
 
 def mk_bytes_vector(builder, arr):

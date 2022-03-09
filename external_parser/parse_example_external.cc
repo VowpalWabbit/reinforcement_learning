@@ -40,7 +40,7 @@ std::map<const char *, v2::LearningModeType> const learning_modes = {{
 
 bool parser_options::is_enabled() { return binary; }
 
-void apply_cli_overrides(std::unique_ptr<i_joiner>& joiner, vw *all, const input_options &parsed_options)
+void apply_cli_overrides(std::unique_ptr<i_joiner>& joiner, VW::workspace *all, const input_options &parsed_options)
 {
   if(all->options->was_supplied("default_reward")) {
     joiner->set_default_reward(parsed_options.ext_opts->default_reward, true);
@@ -74,7 +74,7 @@ void apply_cli_overrides(std::unique_ptr<i_joiner>& joiner, vw *all, const input
 }
 
 std::unique_ptr<parser>
-parser::get_external_parser(vw *all, const input_options &parsed_options) {
+parser::get_external_parser(VW::workspace *all, const input_options &parsed_options) {
   if (parsed_options.ext_opts->binary) {
     bool binary_to_json = parsed_options.ext_opts->binary_to_json;
     std::unique_ptr<i_joiner> joiner(nullptr);
@@ -94,7 +94,7 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
       joiner = VW::make_unique<example_joiner>(all, binary_to_json, outfile_name);
       apply_cli_overrides(joiner, all, parsed_options);
 
-      return VW::make_unique<binary_json_converter>(std::move(joiner));
+      return VW::make_unique<binary_json_converter>(std::move(joiner), all->logger);
 
     } else {
       joiner = VW::make_unique<example_joiner>(all);
@@ -108,8 +108,8 @@ parser::get_external_parser(vw *all, const input_options &parsed_options) {
     if (all->options->was_supplied("extra_metrics")) {
       all->example_parser->metrics = VW::make_unique<dsjson_metrics>();
     }
-    
-    return VW::make_unique<binary_parser>(std::move(joiner));
+
+    return VW::make_unique<binary_parser>(std::move(joiner), all->logger);
   }
   throw std::runtime_error("external parser type not recognised");
 }
@@ -150,13 +150,13 @@ void parser::set_parse_args(VW::config::option_group_definition &in_options,
     ;
 }
 
-void parser::persist_metrics(std::vector<std::pair<std::string, size_t>>& metrics) {
-  metrics.emplace_back("external_parser", 1);
+void parser::persist_metrics(metric_sink& metric_sink) {
+  metric_sink.set_uint("external_parser", 1);
 }
 
 parser::~parser() {}
 
-int parse_examples(vw *all, io_buf& io_buf, v_array<example *> &examples) {
+int parse_examples(VW::workspace *all, io_buf& io_buf, v_array<example *> &examples) {
   return static_cast<int>(all->external_parser->parse_examples(all, io_buf, examples));
 }
 } // namespace external

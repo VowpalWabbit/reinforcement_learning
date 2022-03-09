@@ -9,8 +9,9 @@
 #include "err_constants.h"
 #include "utility/data_buffer_streambuf.h"
 #include "logger/preamble.h"
-#include "utility/apim_http_authorization.h"
+#include "utility/header_authorization.h"
 #include "utility/eventhub_http_authorization.h"
+#include "config_utility.h"
 
 namespace reinforcement_learning {namespace utility {
   class data_buffer_streambuf;
@@ -35,11 +36,16 @@ void error_counter_func(const r::api_status&, void* counter) {
 BOOST_AUTO_TEST_CASE(send_something_apim_authorization)
 {
   mock_http_client* http_client = new mock_http_client("localhost:8080");
-
+  //initalize authorization
+  const auto config_json = R"({
+        "http.api.key": "apikey1234"
+  })";
+  u::configuration config;
+  BOOST_CHECK_EQUAL(u::config::create_from_json(config_json, config), r::error_code::success);
   //create a client
-  r::http_transport_client<r::apim_http_authorization> eh(http_client, 1, 1, nullptr, nullptr);
+  r::http_transport_client<r::header_authorization> eh(http_client, 1, 1, nullptr, nullptr);
   r::api_status ret;
-
+  eh.init(config, &ret);
   std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
   u::data_buffer_streambuf sbuff1(db1.get());
   std::ostream message1(&sbuff1);

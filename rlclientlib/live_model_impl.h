@@ -1,6 +1,7 @@
 #pragma once
 #include "learning_mode.h"
 #include "logger/logger_facade.h"
+#include "multistep.h"
 #include "model_mgmt.h"
 #include "model_mgmt/data_callback_fn.h"
 #include "model_mgmt/model_downloader.h"
@@ -37,8 +38,10 @@ namespace reinforcement_learning
     int request_multi_slot_decision(const char* context_json, unsigned int flags, multi_slot_response& resp, const std::vector<int>& baseline_actions, api_status* status = nullptr);
     int request_multi_slot_decision(const char* event_id, const char* context_json, unsigned int flags, multi_slot_response_detailed& resp, const std::vector<int>& baseline_actions, api_status* status = nullptr);
     int request_multi_slot_decision(const char* context_json, unsigned int flags, multi_slot_response_detailed& resp, const std::vector<int>& baseline_actions, api_status* status = nullptr);
+    int request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, unsigned int flags, ranking_response& resp, episode_state& episode, api_status* status = nullptr);
 
     int report_action_taken(const char* event_id, api_status* status);
+    int report_action_taken(const char* primary_id, const char *secondary_id, api_status* status);
 
     int report_outcome(const char* event_id, const char* outcome_data, api_status* status);
     int report_outcome(const char* event_id, float reward, api_status* status);
@@ -104,6 +107,7 @@ namespace reinforcement_learning
     std::unique_ptr<logger::i_logger_extensions> _logger_extensions{nullptr};
     std::unique_ptr<logger::interaction_logger_facade> _interaction_logger{nullptr};
     std::unique_ptr<logger::observation_logger_facade> _outcome_logger{nullptr};
+    std::unique_ptr<logger::observation_logger_facade> _episode_logger{nullptr};
 
     std::unique_ptr<model_management::model_downloader> _model_download{nullptr};
     std::unique_ptr<i_trace> _trace_logger{nullptr};

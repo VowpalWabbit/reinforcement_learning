@@ -269,6 +269,8 @@ struct dedup_collection_serializer
     return error_code::success;
   }
 
+  int finalize(api_status* status, uint64_t original_event_count) { return finalize(status); }
+
   int _dummy;
   shared_state_t& _state;
   action_dict_builder _builder;

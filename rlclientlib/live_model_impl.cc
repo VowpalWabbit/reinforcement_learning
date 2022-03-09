@@ -54,7 +54,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(init_loggers(status));
 
     if (_protocol_version == 1) {
-      if(_configuration.get_bool("interaction", name::USE_COMPRESSION, false) || 
+      if(_configuration.get_bool("interaction", name::USE_COMPRESSION, false) ||
         _configuration.get_bool("interaction", name::USE_DEDUP, false) ||
         _configuration.get_bool("observation", name::USE_COMPRESSION, false)) {
         RETURN_ERROR_LS(_trace_logger.get(), status, content_encoding_error);
@@ -309,6 +309,13 @@ namespace reinforcement_learning {
     return _outcome_logger->report_action_taken(event_id, status);
   }
 
+  int live_model_impl::report_action_taken(const char* primary_id, const char* secondary_id, api_status* status) {
+    // Clear previous errors if any
+    api_status::try_clear(status);
+    // Send the outcome event to the backend
+    return _outcome_logger->report_action_taken(primary_id, secondary_id, status);
+  }
+
   int live_model_impl::report_outcome(const char* event_id, const char* outcome, api_status* status) {
     // Check arguments
     RETURN_IF_FAIL(check_null_or_empty(event_id, outcome, _trace_logger.get(), status));
@@ -437,7 +444,7 @@ namespace reinforcement_learning {
     i_time_provider* logger_extensions_time_provider;
     RETURN_IF_FAIL(_time_provider_factory->create(&logger_extensions_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
-    //Create the logger extension
+    // Create the logger extension
     _logger_extensions.reset(logger::i_logger_extensions::get_extensions(_configuration, logger_extensions_time_provider));
 
     i_time_provider* ranking_time_provider;
@@ -468,6 +475,31 @@ namespace reinforcement_learning {
     // Create a logger for observations that will use msg sender to send observation messages
     _outcome_logger.reset(new logger::observation_logger_facade(_configuration, outcome_msg_sender, _watchdog, observation_time_provider, &_error_cb));
     RETURN_IF_FAIL(_outcome_logger->init(status));
+
+    // TODO: Use a specific episode message type (for now it is the same with the observation logger, using observation_logger_facade).
+    if (_configuration.get(name::EPISODE_EH_HOST, nullptr) != nullptr) {
+      // Get the name of raw data (as opposed to message) sender for episodes.
+      const auto* const episode_sender_impl = _configuration.get(name::EPISODE_SENDER_IMPLEMENTATION, value::get_default_episode_sender());
+      i_sender* episode_sender;
+
+      // Use the name to create an instance of raw data sender for episodes
+      _configuration.set(config_constants::CONFIG_SECTION, config_constants::EPISODE);
+      RETURN_IF_FAIL(_sender_factory->create(&episode_sender, episode_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
+      RETURN_IF_FAIL(episode_sender->init(_configuration, status));
+
+      // Create a message sender that will prepend the message with a preamble and send the raw data using the
+      // factory created raw data sender
+      l::i_message_sender* episode_msg_sender = new l::preamble_message_sender(episode_sender);
+      RETURN_IF_FAIL(episode_msg_sender->init(status));
+
+      // Get time provider implementation
+      i_time_provider* episode_time_provider;
+      RETURN_IF_FAIL(_time_provider_factory->create(&episode_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
+
+      // Create a logger for episodes that will use msg sender to send episode messages
+      _episode_logger.reset(new logger::observation_logger_facade(_configuration, episode_msg_sender, _watchdog, episode_time_provider, &_error_cb));
+      RETURN_IF_FAIL(_episode_logger->init(status));
+    }
 
     return error_code::success;
   }
@@ -583,6 +615,38 @@ namespace reinforcement_learning {
     }
 
     return refresh_model(status);
+  }
+
+  int live_model_impl::request_episodic_decision(const char* event_id, const char* previous_id, const char* context_json, unsigned int flags, ranking_response& resp, episode_state& episode, api_status* status) {
+    resp.clear();
+    //clear previous errors if any
+    api_status::try_clear(status);
+
+    //check arguments
+    RETURN_IF_FAIL(check_null_or_empty(event_id, context_json, _trace_logger.get(), status));
+    const uint64_t seed = uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
+
+    std::vector<int> action_ids;
+    std::vector<float> action_pdf;
+    std::string model_version;
+
+    const auto history = episode.get_history();
+    const std::string context_patched = history.get_context(previous_id, context_json);
+
+    RETURN_IF_FAIL(_model->choose_rank_multistep(seed, context_patched.c_str(), history, action_ids, action_pdf, model_version, status));
+    RETURN_IF_FAIL(sample_and_populate_response(seed, action_ids, action_pdf, std::move(model_version), resp, _trace_logger.get(), status));
+
+    resp.set_event_id(event_id);
+
+    RETURN_IF_FAIL(episode.update(event_id, previous_id, context_json, resp, status));
+
+    if (episode.size() == 1) {
+      // Log the episode id when starting a new episode
+      RETURN_IF_FAIL(_episode_logger->log(episode.get_episode_id(), "", status));
+    }
+    RETURN_IF_FAIL(_interaction_logger->log(episode.get_episode_id(), previous_id, context_patched.c_str(), flags, resp, status));
+
+    return error_code::success;
   }
 
   //helper: check if at least one of the arguments is null or empty

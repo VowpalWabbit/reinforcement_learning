@@ -94,7 +94,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)rlclientlib;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\fmt\include;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\fakeit;%(AdditionalIncludeDirectories);$(VcpkgRoot)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)rlclientlib;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\fmt\include;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\spdlog\include;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\fakeit;%(AdditionalIncludeDirectories);$(VcpkgRoot)include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -111,7 +111,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)rlclientlib;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\fmt\include;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\fakeit;%(AdditionalIncludeDirectories);$(VcpkgRoot)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)rlclientlib;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\fmt\include;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\spdlog\include;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\fakeit;%(AdditionalIncludeDirectories);$(VcpkgRoot)include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -130,7 +130,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)rlclientlib;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\fmt\include;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\fakeit;%(AdditionalIncludeDirectories);$(VcpkgRoot)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)rlclientlib;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\fmt\include;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\spdlog\include;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\fakeit;%(AdditionalIncludeDirectories);$(VcpkgRoot)include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -150,7 +150,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)rlclientlib;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\fmt\include;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\fakeit;%(AdditionalIncludeDirectories);$(VcpkgRoot)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)rlclientlib;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\fmt\include;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\spdlog\include;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\fakeit;%(AdditionalIncludeDirectories);$(VcpkgRoot)include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -186,6 +186,7 @@
     <ClCompile Include="model_mgmt_test.cc" />
     <ClCompile Include="event_queue_test.cc" />
     <ClCompile Include="moving_queue_test.cc" />
+    <ClCompile Include="multistep_test.cc" />
     <ClCompile Include="multi_slot_response_detailed_test.cc" />
     <ClCompile Include="object_pool_test.cc" />
     <ClCompile Include="payload_serializer_test.cc" />

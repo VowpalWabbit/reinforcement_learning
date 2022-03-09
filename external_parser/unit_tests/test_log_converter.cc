@@ -114,9 +114,9 @@ BOOST_AUTO_TEST_CASE(ccb_payload_with_slot_index) {
     "{\"TAction\":{\"a2\":\"f2\"}}],\"_slots\":[{\"Slot\":{\"a1\":\"f1\"}},"
     "{\"Slot\":{\"a1\":\"f1\"}}]},\"_outcomes\":[{\"_label_cost\":-0.0,"
     "\"_id\":\"4a3de951-e9e6-487b-8891-547c9a3fb2480\",\"_a\":[0,1],"
-    "\"_p\":[1,0],\"_original_label_cost\":-0.0},"
+    "\"_p\":[1.0,0.0],\"_original_label_cost\":-0.0},"
     "{\"_label_cost\":-1.5,\"_id\":\"4f064c85-a04b-4f3f-bc0e-43aef8ad96530\","
-    "\"_a\":[1],\"_p\":[1],\"_o\":[{\"v\":1.5,\"EventId\":\"91f71c8\","
+    "\"_a\":[1],\"_p\":[1.0],\"_o\":[{\"v\":1.5,\"EventId\":\"91f71c8\","
     "\"Index\":\"1\",\"ActionTaken\":false}],\"_original_label_cost\":-1.5}],"
     "\"VWState\":{\"m\":\"N/A\"}}\n";
   BOOST_CHECK_EQUAL(converted_json, expected_joined_json);
@@ -133,9 +133,9 @@ BOOST_AUTO_TEST_CASE(ccb_payload_with_slot_id) {
     "{\"a1\":\"f1\"}},{\"TAction\":{\"a2\":\"f2\"}}],\"_slots\":[{\"Slot\":"
     "{\"a1\":\"f1\"}, \"_id\": \"slot_0\"},{\"Slot\":{\"a1\":\"f1\"}, \"_id\":"
     "\"slot_1\"}]},\"_outcomes\":[{\"_label_cost\":-1.5,\"_id\":\"slot_0\","
-    "\"_a\":[0,1],\"_p\":[1,0],\"_o\":[{\"v\":1.5,\"EventId\":\"91f71c8\","
+    "\"_a\":[0,1],\"_p\":[1.0,0.0],\"_o\":[{\"v\":1.5,\"EventId\":\"91f71c8\","
     "\"Index\":\"slot_0\",\"ActionTaken\":false}],\"_original_label_cost\":-1.5},"
-    "{\"_label_cost\":-1.5,\"_id\":\"slot_1\",\"_a\":[1],\"_p\":[1],\"_o\":["
+    "{\"_label_cost\":-1.5,\"_id\":\"slot_1\",\"_a\":[1],\"_p\":[1.0],\"_o\":["
     "{\"v\":1.5,\"EventId\":\"91f71c8\",\"Index\":\"slot_1\",\"ActionTaken\":false}],"
     "\"_original_label_cost\":-1.5}],\"VWState\":{\"m\":\"N/A\"}}\n";
 
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(log_converter_slates_format) {
   std::string expected_json = "{\"Timestamp\":\"2021-08-20T22:07:29.000000Z\","
   "\"Version\":\"1\",\"EventId\":\"abcdefghijklm\",\"_label_cost\":-1.5,"
   "\"o\":[{\"v\":1.5,\"EventId\":\"abcdefghijklm\",\"ActionTaken\":false}],"
-  "\"_outcomes\":[{\"_a\":[0,1],\"_p\":[1,0]},{\"_a\":[0,1,2],\"_p\":[1,0,0]}],"
+  "\"_outcomes\":[{\"_a\":[0,1],\"_p\":[1.0,0.0]},{\"_a\":[0,1,2],\"_p\":[1.0,0.0,0.0]}],"
   "\"c\":{\"GUser\":{\"id\":\"a\",\"major\":\"eng\",\"hobby\":\"hiking\"},"
   "\"_multi\":[{\"TAction\":{\"a1\":\"f1\"},\"_slot_id\":0},{\"TAction\":"
   "{\"a2\":\"f2\"},\"_slot_id\":0},{\"TAction\":{\"a3\":\"f3\"},\"_slot_id\":1},"

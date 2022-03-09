@@ -19,9 +19,9 @@ constexpr float FLOAT_TOL = 0.0001f;
 // expects shared pred to be set for slates
 void set_slates_label(v_array<example *> &examples);
 
-void clear_examples(v_array<example *> &examples, vw *vw);
+void clear_examples(v_array<example *> &examples, VW::workspace *vw);
 
-void set_buffer_as_vw_input(const std::vector<char> &buffer, vw *vw);
+void set_buffer_as_vw_input(const std::vector<char> &buffer, VW::workspace *vw);
 
 std::vector<char> read_file(std::string file_name);
 

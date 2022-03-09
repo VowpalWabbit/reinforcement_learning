@@ -5,17 +5,22 @@
 #include "api_status.h"
 #include "factory_resolver.h"
 #include "trace_logger.h"
+#include "utility/header_authorization.h"
 
 using namespace web; // Common features like URIs.
 using namespace web::http; // Common HTTP functionality
 using namespace std::chrono;
 
 namespace u = reinforcement_learning::utility;
+namespace e = reinforcement_learning::error_code;
 
 namespace reinforcement_learning { namespace model_management {
 
   restapi_data_transport::restapi_data_transport(i_http_client* httpcli, i_trace* trace)
     : _httpcli(httpcli), _datasz{ 0 }, _trace{ trace }
+  {}
+  restapi_data_transport::restapi_data_transport(std::unique_ptr<i_http_client>&& httpcli, const utility::configuration& cfg, model_source model_source, i_trace* trace)
+   : _httpcli(std::move(httpcli)), _cfg(cfg), _model_source(model_source), _datasz{ 0 }, _trace{ trace }
   {}
 
   /*
@@ -38,15 +43,24 @@ namespace reinforcement_learning { namespace model_management {
    * x-ms-version = 2017-04-17
    */
 
+
   int restapi_data_transport::get_data_info(::utility::datetime& last_modified, ::utility::size64_t& sz, api_status* status) {
-
+    // Get request URI and start the request.
+    http_request request(_method_type);
+    RETURN_IF_FAIL(add_authentiction_header(request.headers(), status));
     // Build request URI and start the request.
-    auto request_task = _httpcli->request(methods::HEAD)
-      // Handle response headers arriving.
-      .then([&](http_response response) {
-      if ( response.status_code() != 200 )
-        RETURN_ERROR_ARG(_trace, status, http_bad_status_code, _httpcli->get_url());
-
+    auto request_task = _httpcli->request(request).then([&](http_response response) {
+      if (response.status_code() != 200){
+        //if the call using HEAD fails, try with GET only once and return the results of GET request call
+        if (_retry_get_data){
+          _retry_get_data = false;
+          _method_type = methods::GET;
+          RETURN_IF_FAIL(get_data_info(last_modified,sz,status));
+          return error_code::success;
+        }
+        else
+          RETURN_ERROR_ARG(_trace, status, http_bad_status_code, "Found: ", response.status_code(), _httpcli->get_url());
+      }
       const auto iter = response.headers().find(U("Last-Modified"));
       if ( iter == response.headers().end() )
         RETURN_ERROR_ARG(_trace, status, last_modified_not_found, _httpcli->get_url());
@@ -69,17 +83,30 @@ namespace reinforcement_learning { namespace model_management {
     }
   }
 
+  int restapi_data_transport::add_authentiction_header(http_headers& header, api_status* status)
+  {
+    if (_model_source != model_source::AZURE){
+      RETURN_IF_FAIL(_headerimpl->init(_cfg, status, _trace));
+      RETURN_IF_FAIL(_headerimpl->insert_authorization_header(header, status, _trace));
+    }
+    return error_code::success;
+  }
+
   int restapi_data_transport::get_data(model_data& ret, api_status* status) {
 
     ::utility::datetime curr_last_modified;
     ::utility::size64_t curr_datasz;
+    _method_type = methods::HEAD;
+    _retry_get_data = true;
     RETURN_IF_FAIL(get_data_info(curr_last_modified, curr_datasz, status));
 
-    if ( curr_last_modified == _last_modified && curr_datasz == _datasz )
+    if (curr_last_modified == _last_modified && curr_datasz == _datasz)
       return error_code::success;
-
+    _method_type = methods::GET;
+    http_request request(_method_type);
+    RETURN_IF_FAIL(add_authentiction_header(request.headers(), status));
     // Build request URI and start the request.
-    auto request_task = _httpcli->request(methods::GET)
+    auto request_task = _httpcli->request(request)
       // Handle response headers arriving.
       .then([&](pplx::task<http_response> resp_task) {
       auto response = resp_task.get();

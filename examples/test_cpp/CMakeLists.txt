@@ -1,5 +1,6 @@
 add_executable(rl_test.out
   main.cc
+  options.cc
   experiment_controller.cc
   test_data_provider.cc
   test_loop.cc
