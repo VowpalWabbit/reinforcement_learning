@@ -69,7 +69,7 @@ int onnx_input_builder::allocate_inputs(std::vector<Ort::Value>& result, const O
 
 int read_tensor_notation(reinforcement_learning::string_view tensor_notation, onnx_input_builder& input_context, api_status* status)
 {
-  if (tensor_notation == nullptr)
+  if (tensor_notation.empty())
   {
     // Treat empty lines as empty examples, similar to VW
     return error_code::success;
