@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(flush_timeout) {
   utility::watchdog watchdog(nullptr);
   utility::async_batcher_config config;
   config.send_high_water_mark = 262143;
-  config.send_batch_interval_ms = timeout_ms;
+  config.send_batch_interval_ms = static_cast<int>(timeout_ms);
   config.send_queue_max_capacity = 8192;
   int dummy = 0;
   logger::async_batcher<test_undroppable_event> batcher(s, watchdog, dummy, &error_fn, config);
@@ -155,8 +155,8 @@ BOOST_AUTO_TEST_CASE(flush_batches) {
   error_callback_fn error_fn(expect_no_error, nullptr);
   utility::watchdog watchdog(nullptr);
   utility::async_batcher_config config;
-  config.send_high_water_mark = send_high_water_mark;
-  config.send_batch_interval_ms = 100000;
+  config.send_high_water_mark = static_cast<int>(send_high_water_mark);
+  config.send_batch_interval_ms = static_cast<int>(100000);
   int dummy = 0;
   auto batcher = new logger::async_batcher<test_undroppable_event>
       (s, watchdog, dummy, &error_fn, config);
@@ -214,8 +214,8 @@ BOOST_AUTO_TEST_CASE(queue_overflow_do_not_drop_event) {
   utility::watchdog watchdog(nullptr);
   utility::async_batcher_config config;
   config.send_high_water_mark = 262143;
-  config.send_batch_interval_ms = timeout_ms;
-  config.send_queue_max_capacity = queue_max_size;
+  config.send_batch_interval_ms = static_cast<int>(timeout_ms);
+  config.send_queue_max_capacity = static_cast<int>(queue_max_size);
   config.queue_mode = queue_mode;
   int dummy = 0;
   auto batcher = new logger::async_batcher<test_droppable_event>(s, watchdog, dummy, &error_fn, config);
@@ -247,8 +247,8 @@ BOOST_AUTO_TEST_CASE(queue_config_drop_rate_test)
   utility::watchdog watchdog(nullptr);
   utility::async_batcher_config config;
   config.send_high_water_mark = 262143;
-  config.send_batch_interval_ms = timeout_ms;
-  config.send_queue_max_capacity = queue_max_size;
+  config.send_batch_interval_ms = static_cast<int>(timeout_ms);
+  config.send_queue_max_capacity = static_cast<int>(queue_max_size);
   config.queue_mode = queue_mode;
   config.subsample_rate = 0.7f;
   int dummy = 0;

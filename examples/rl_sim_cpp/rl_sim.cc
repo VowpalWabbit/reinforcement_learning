@@ -397,7 +397,7 @@ bool rl_sim::init_sim_world() {
 bool rl_sim::init_continuous_sim_world() {
   // initialize continuous actions robot joints
 
-  _friction = {25.4, 41.2, 66.5, 81.9, 104.4};
+  _friction = {25.4f, 41.2f, 66.5f, 81.9f, 104.4f};
 
   // temperature (C) range: 20.f to 45.f
   // angular velocity range: 0.f to 200.f
