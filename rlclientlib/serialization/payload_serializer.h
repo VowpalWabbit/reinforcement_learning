@@ -36,7 +36,7 @@ namespace reinforcement_learning {
     };
 
     struct cb_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CB> {
-      static generic_event::payload_buffer_t event(const char* context, unsigned int flags, v2::LearningModeType learning_mode, const ranking_response& response) {
+      static generic_event::payload_buffer_t event(string_view context, unsigned int flags, v2::LearningModeType learning_mode, const ranking_response& response) {
         flatbuffers::FlatBufferBuilder fbb;
         std::vector<uint64_t> action_ids;
         std::vector<float> probabilities;
@@ -55,7 +55,7 @@ namespace reinforcement_learning {
     };
 
     struct ca_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CA> {
-      static generic_event::payload_buffer_t event(const char* context, unsigned int flags, const continuous_action_response& response) {
+      static generic_event::payload_buffer_t event(string_view context, unsigned int flags, const continuous_action_response& response) {
         flatbuffers::FlatBufferBuilder fbb;
 
         std::vector<unsigned char> _context;
@@ -69,7 +69,7 @@ namespace reinforcement_learning {
     };
 
     struct multi_slot_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_Slates> {
-      static generic_event::payload_buffer_t event(const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+      static generic_event::payload_buffer_t event(string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids,
         const std::vector<int>& baseline_actions, v2::LearningModeType learning_mode) {
         flatbuffers::FlatBufferBuilder fbb;
@@ -176,7 +176,7 @@ namespace reinforcement_learning {
     };
 
     struct multistep_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_MultiStep> {
-      static generic_event::payload_buffer_t event(const char* context, const char* previous_id, unsigned int flags, const ranking_response& response) {
+      static generic_event::payload_buffer_t event(string_view context, const char* previous_id, unsigned int flags, const ranking_response& response) {
         flatbuffers::FlatBufferBuilder fbb;
         std::vector<uint64_t> action_ids;
         std::vector<float> probabilities;

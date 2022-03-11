@@ -20,7 +20,7 @@ namespace reinforcement_learning { namespace model_management {
 
   int pdf_model::choose_rank(
     uint64_t rnd_seed,
-    const char* features,
+    string_view features,
     std::vector<int>& action_ids,
     std::vector<float>& action_pdf,
     std::string& model_version,
@@ -44,18 +44,18 @@ namespace reinforcement_learning { namespace model_management {
     }
   }
 
-  int pdf_model::choose_continuous_action(const char* features, float& action, float& pdf_value, std::string& model_version, api_status* status)
+  int pdf_model::choose_continuous_action(string_view features, float& action, float& pdf_value, std::string& model_version, api_status* status)
   {
     return error_code::not_supported;
   }
 
   // Not supported.
-  int pdf_model::request_decision(const std::vector<const char*>& event_ids, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string & model_version, api_status * status)
+  int pdf_model::request_decision(const std::vector<const char*>& event_ids, string_view features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string & model_version, api_status * status)
   {
     return error_code::not_supported;
   }
 
-  int pdf_model::request_multi_slot_decision(const char *event_id, const std::vector<std::string>& slot_ids, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
+  int pdf_model::request_multi_slot_decision(const char *event_id, const std::vector<std::string>& slot_ids, string_view features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
     return error_code::not_supported;
   }
@@ -67,7 +67,7 @@ namespace reinforcement_learning { namespace model_management {
 
   int pdf_model::choose_rank_multistep(
     uint64_t rnd_seed,
-    const char* features,
+    string_view features,
     const episode_history& history,
     std::vector<int>& action_ids,
     std::vector<float>& action_pdf,

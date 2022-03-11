@@ -64,12 +64,12 @@ string_view dedup_dict::get_object(generic_event::object_id_t aid) const
   return string_view(it->second._content.data(), it->second._length);
 }
 
-int dedup_dict::transform_payload_and_add_objects(const char* payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status)
+int dedup_dict::transform_payload_and_add_objects(string_view payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status)
 {
   u::ContextInfo context_info;
   RETURN_IF_FAIL(u::get_context_info(payload, context_info, nullptr, status));
 
-  edited_payload = payload;
+  edited_payload = std::string(payload);
   object_ids.clear();
   object_ids.reserve(context_info.actions.size());
 
@@ -165,9 +165,9 @@ int dedup_state::compress(generic_event::payload_buffer_t& input, event_content_
   return error_code::success;
 }
 
-int dedup_state::transform_payload_and_add_objects(const char* payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status){
+int dedup_state::transform_payload_and_add_objects(string_view payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status){
   if(!_use_dedup) {
-    edited_payload = payload;
+    edited_payload = std::string(payload);
     return error_code::success;
   } else {
     std::unique_lock<std::mutex> mlock(_mutex);
@@ -308,7 +308,7 @@ public:
   bool is_object_extraction_enabled() const override { return _use_dedup; }
   bool is_serialization_transform_enabled() const override { return _use_compression; }
 
-	int transform_payload_and_extract_objects(const char* context, std::string& edited_payload, generic_event::object_list_t& objects, api_status* status) override {
+	int transform_payload_and_extract_objects(string_view context, std::string& edited_payload, generic_event::object_list_t& objects, api_status* status) override {
     return _dedup_state.transform_payload_and_add_objects(context, edited_payload, objects, status);
 	}
 

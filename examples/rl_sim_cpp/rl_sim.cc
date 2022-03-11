@@ -147,7 +147,7 @@ int rl_sim::ca_loop(){
     const auto req_id = create_event_id();
     r::api_status status;
 
-    if (_rl->request_continuous_action(req_id.c_str(), context_json.c_str(), response, &status) != err::success)
+    if (_rl->request_continuous_action(req_id.c_str(), context_json, response, &status) != err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
       continue;
@@ -184,7 +184,7 @@ int rl_sim::ccb_loop() {
     r::api_status status;
 
     // Choose an action
-    if ( _rl->request_multi_slot_decision(event_id.c_str(), context_json.c_str(), decision, &status) != err::success) {
+    if ( _rl->request_multi_slot_decision(event_id.c_str(), context_json, decision, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
