@@ -39,16 +39,13 @@ jobs:
           -DRAPIDJSON_SYS_DEP=Off
           -DFMT_SYS_DEP=Off
           -DSPDLOG_SYS_DEP=Off
-          -DVW_ZLIB_SYS_DEP=Off
           -DVW_INSTALL=ON
           -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
           -DVCPKG_TARGET_TRIPLET="x64-windows"
       - name: Build and install
         run: |
-          cmake --build build --config Debug -t rl.net.native
           cmake --build build --config Release -t rl.net.native
           # Install debug first so that release overwrites the exe and nothing else
-          cmake --install build --prefix ./nuget_staging --config Debug
           cmake --install build --prefix ./nuget_staging --config Release
       - if: ${{ matrix.arch_config.arch == 'x64' }}
         run: cp nuget\rlclientlib-x64.targets nuget_staging\rlclientlib.targets
