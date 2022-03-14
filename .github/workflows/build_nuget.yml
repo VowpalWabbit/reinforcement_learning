@@ -38,6 +38,8 @@ jobs:
           -DRAPIDJSON_SYS_DEP=Off
           -DFMT_SYS_DEP=Off
           -DSPDLOG_SYS_DEP=Off
+          -DBUILD_FLATBUFFERS=Off
+          -DVW_ZLIB_SYS_DEP=Off
           -DVW_INSTALL=ON
           -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
           -DVCPKG_TARGET_TRIPLET="x64-windows"
