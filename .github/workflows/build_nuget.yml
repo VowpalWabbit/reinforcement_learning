@@ -43,6 +43,7 @@ jobs:
           -DVW_INSTALL=ON
           -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
           -DVCPKG_TARGET_TRIPLET="x64-windows"
+          -DFLATBUFFERS_FLATC_EXECUTABLE="C:/vcpkg/installed/x64-windows/tools/flatbuffers/flatc.exe"
       - name: Build and install
         run: |
           cmake --build build --config Release -t rl.net.native
