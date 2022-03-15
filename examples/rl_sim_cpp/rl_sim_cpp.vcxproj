@@ -14,7 +14,7 @@
     <ProjectGuid>{E86A833A-514D-424D-9FE7-154225031662}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>rl_sim_cpp</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
