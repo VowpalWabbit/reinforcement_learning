@@ -46,9 +46,11 @@ jobs:
           -DFLATBUFFERS_FLATC_EXECUTABLE="C:/vcpkg/installed/x64-windows/tools/flatbuffers/flatc.exe"
       - name: Build and install
         run: |
-          cmake --build build --config Release -t rl.net.native
+          cmake --version
+          cmake --build build --config Release -t rl.net.native -v
           # Install debug first so that release overwrites the exe and nothing else
-          cmake --install build --prefix ./nuget_staging --config Release
+          echo "!!!!!INSTALL"
+          cmake --install build --prefix ./nuget_staging --config Release -v
       - if: ${{ matrix.arch_config.arch == 'x64' }}
         run: cp nuget\rlclientlib-x64.targets nuget_staging\rlclientlib.targets
       - if: ${{ matrix.arch_config.arch == 'x86' }}
