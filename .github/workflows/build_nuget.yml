@@ -19,6 +19,10 @@ jobs:
         toolset: ["v141", "v142"]
         arch_config:
         - { arch: x64, generator_arch: x64}
+        - { arch: x86, generator_arch: Win32}
+    env:
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+  
     steps:
       - uses: actions/checkout@v2
         with:
@@ -32,7 +36,7 @@ jobs:
           cmake -S . -B build
           -G "Visual Studio 16 2019" -A ${{ matrix.arch_config.generator_arch }}
           -T ${{ matrix.toolset }}
-          -DNATIVE_NUGET_PLATFORM_TAG="${{ matrix.arch_config.arch }}"
+          -DNATIVE_NUGET_PLATFORM_TAG=${{ matrix.arch_config.arch }}
           -DUSE_ZSTD=ON
           -DBUILD_TESTING=Off
           -DRAPIDJSON_SYS_DEP=Off
@@ -41,16 +45,16 @@ jobs:
           -DBUILD_FLATBUFFERS=Off
           -DVW_ZLIB_SYS_DEP=Off
           -DVW_INSTALL=ON
-          -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
-          -DVCPKG_TARGET_TRIPLET="x64-windows"
-          -DFLATBUFFERS_FLATC_EXECUTABLE="C:/vcpkg/installed/x64-windows/tools/flatbuffers/flatc.exe"
+          -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.generator_arch }}-windows
+          -DFLATBUFFERS_FLATC_EXECUTABLE=${{ env.VCPKG_ROOT }}/installed/${{ matrix.arch_config.generator_arch }}-windows/tools/flatbuffers/flatc.exe
       - name: Build and install
         run: |
-          cmake --version
-          cmake --build build --config Release -t rl.net.native -v
+          cmake --build build --config Debug -t rl.net.native
+          cmake --build build --config Release -t rl.net.native
           # Install debug first so that release overwrites the exe and nothing else
-          echo "!!!!!INSTALL"
-          cmake --install build --prefix ./nuget_staging --config Release -v
+          cmake --install build --prefix ./nuget_staging --config Debug
+          cmake --install build --prefix ./nuget_staging --config Release
       - if: ${{ matrix.arch_config.arch == 'x64' }}
         run: cp nuget\rlclientlib-x64.targets nuget_staging\rlclientlib.targets
       - if: ${{ matrix.arch_config.arch == 'x86' }}
