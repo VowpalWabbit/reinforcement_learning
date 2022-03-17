@@ -83,6 +83,7 @@ jobs:
         with:
           name: ${{ steps.generate-nuget.outputs.NugetFileName }}
           path: nuget_staging/${{ steps.generate-nuget.outputs.NugetFileName }}
+
   test_nuget_windows:
     needs: [build_nuget_windows]
     name: nuget-test.${{ matrix.toolset }}
