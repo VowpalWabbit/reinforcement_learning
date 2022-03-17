@@ -88,6 +88,7 @@ set(EXTERNAL_PARSER_LIBS libzstd_static)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/../ext_libs/vowpal_wabbit ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser)
 add_dependencies(vw fbgen)
+target_include_directories(vw PRIVATE ${FLATBUFFERS_INCLUDE_DIR})
 
 if (BUILD_BINARY_PARSER_TESTS)
   enable_testing()

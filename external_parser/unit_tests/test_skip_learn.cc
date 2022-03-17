@@ -98,7 +98,7 @@ void should_add_examples(std::string &infile,
       BOOST_CHECK_EQUAL(examples[3]->l.conditional_contextual_bandit.type == CCB::example_type::slot, true);
       BOOST_CHECK_EQUAL(examples[4]->l.conditional_contextual_bandit.type == CCB::example_type::slot, true);
       // last example is empty
-      BOOST_CHECK_EQUAL(example_is_newline(*examples[5]), true);
+      BOOST_CHECK_EQUAL(VW::example_is_newline(*examples[5]), true);
       break;
     case v2::ProblemType_CA:
       BOOST_CHECK_EQUAL(examples.size(), 1);

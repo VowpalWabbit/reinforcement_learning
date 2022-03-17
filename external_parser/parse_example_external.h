@@ -4,7 +4,8 @@
 
 #pragma once
 #include "memory.h"
-#include "options.h"
+#include "parse_args.h"
+#include "config/option_group_definition.h"
 #include "vw.h"
 
 namespace VW {
