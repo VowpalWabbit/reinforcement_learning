@@ -27,8 +27,20 @@ jobs:
           submodules: 'recursive'
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Dependencies
-        run: |
-          .scripts/restore.cmd
+        run: >
+          vcpkg install
+          --host-triplet=${{ matrix.arch_config.arch }}-windows
+          --triplet=${{ matrix.arch_config.arch }}-windows
+          cpprestsdk
+          openssl-windows
+          zlib flatbuffers
+          boost-filesystem
+          boost-thread
+          boost-program-options
+          boost-test
+          boost-align
+          boost-math
+          boost-uuid
       - name: Configure
         run: >
           cmake -S . -B build
@@ -44,8 +56,8 @@ jobs:
           -DVW_ZLIB_SYS_DEP=Off
           -DVW_INSTALL=ON
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
-          -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.generator_arch }}-windows
-          -DFLATBUFFERS_FLATC_EXECUTABLE=C:/vcpkg/installed/${{ matrix.arch_config.generator_arch }}-windows/tools/flatbuffers/flatc.exe
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.arch }}-windows
+          -DFLATBUFFERS_FLATC_EXECUTABLE=C:/vcpkg/installed/${{ matrix.arch_config.arch }}-windows/tools/flatbuffers/flatc.exe
       - name: Build and install
         run: |
           cmake --build build --config Debug -t rl.net.native
