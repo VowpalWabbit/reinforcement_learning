@@ -55,7 +55,7 @@ jobs:
           -DVW_ZLIB_SYS_DEP=Off
           -DVW_INSTALL=ON
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
-          -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.arch }}-windows
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.arch }}-windows-static
           -DFLATBUFFERS_FLATC_EXECUTABLE=C:/vcpkg/installed/${{ matrix.arch_config.arch }}-windows/tools/flatbuffers/flatc.exe
       - name: Build and install
         run: |
