@@ -19,7 +19,6 @@ jobs:
         toolset: ["v141", "v142"]
         arch_config:
         - { arch: x64, generator_arch: x64}
-        - { arch: x86, generator_arch: Win32}
   
     steps:
       - uses: actions/checkout@v2
@@ -29,8 +28,8 @@ jobs:
       - name: Dependencies
         run: >
           vcpkg install
-          --host-triplet=${{ matrix.arch_config.arch }}-windows
-          --triplet=${{ matrix.arch_config.arch }}-windows
+          --host-triplet=${{ matrix.arch_config.arch }}-windows-static
+          --triplet=${{ matrix.arch_config.arch }}-windows-static
           cpprestsdk
           openssl-windows
           zlib flatbuffers
@@ -67,8 +66,6 @@ jobs:
           cmake --install build --prefix ./nuget_staging --config Release
       - if: ${{ matrix.arch_config.arch == 'x64' }}
         run: cp nuget\rlclientlib-x64.targets nuget_staging\rlclientlib.targets
-      - if: ${{ matrix.arch_config.arch == 'x86' }}
-        run: cp nuget\rlclientlib-x86.targets nuget_staging\rlclientlib.targets
       - name: Package
         shell: powershell
         id: generate-nuget
@@ -106,23 +103,14 @@ jobs:
         with:
           name: RLClientLibNative-${{matrix.toolset}}-x64.${{ steps.fetch-rl-version.outputs.RLVersion }}.nupkg
           path: downloaded_nugets
-      - uses: actions/download-artifact@v1
-        with:
-          name: RLClientLibNative-${{matrix.toolset}}-x86.${{ steps.fetch-rl-version.outputs.RLVersion }}.nupkg
-          path: downloaded_nugets
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
       - name: Test nuget
         run: |
           ls downloaded_nugets
           .\.nuget\NuGet.exe install -Source ${{ github.workspace }}\downloaded_nugets -OutputDirectory ${{ github.workspace }}\nuget\test\packages\ RLClientLibNative-${{ matrix.toolset }}-x64
-          .\.nuget\NuGet.exe install -Source ${{ github.workspace }}\downloaded_nugets -OutputDirectory ${{ github.workspace }}\nuget\test\packages\ RLClientLibNative-${{ matrix.toolset }}-x86
           cd nuget\test
           msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=Release;Platform=x64"
           msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=Debug;Platform=x64"
-          msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=Release;Platform=Win32"
-          msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=Debug;Platform=Win32"
           .\bin\x64\Release\test-${{ matrix.toolset }}.exe
           .\bin\x64\Debug\test-${{ matrix.toolset }}.exe
-          .\bin\x86\Release\test-${{ matrix.toolset }}.exe
-          .\bin\x86\Debug\test-${{ matrix.toolset }}.exe
