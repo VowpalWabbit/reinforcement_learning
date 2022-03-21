@@ -16,6 +16,7 @@ set(RL_FLAT_BUFFER_FILES_V2
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CaEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/FileFormat.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiSlotEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiStepEvent.fbs"  
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Event.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/LearningModeType.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiStepEvent.fbs")
@@ -49,6 +50,7 @@ set(PROJECT_SOURCES
   model_mgmt/model_downloader.cc
   model_mgmt/model_mgmt.cc
   model_mgmt/file_model_loader.cc
+  multistep.cc
   generic_event.cc
   ranking_event.cc
   ranking_response.cc
@@ -79,7 +81,7 @@ if(vw_USE_AZURE_FACTORIES)
     utility/http_client.cc
     utility/http_helper.cc
     utility/eventhub_http_authorization.cc
-    utility/apim_http_authorization.cc
+    utility/header_authorization.cc
   )
 endif()
 
@@ -100,6 +102,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/future_compat.h
   ../include/live_model.h
   ../include/model_mgmt.h
+  ../include/multistep.h
   ../include/object_factory.h
   ../include/personalization.h
   ../include/ranking_response.h
@@ -109,6 +112,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/trace_logger.h
   ../include/data_buffer.h
   ../include/slot_ranking.h
+  ../include/rl_string_view.h
   ../include/multi_slot_response_detailed.h
 )
 
@@ -126,7 +130,6 @@ set(PROJECT_PRIVATE_HEADERS
   moving_queue.h
   generic_event.h
   ranking_event.h
-  rl_string_view.h
   sampling.h
   serialization/fb_serializer.h
   serialization/json_serializer.h
@@ -149,7 +152,7 @@ if(vw_USE_AZURE_FACTORIES)
     utility/http_client.h
     utility/http_helper.h    
     utility/eventhub_http_authorization.h
-    utility/apim_http_authorization.h
+    utility/header_authorization.h
   )
 endif()
 

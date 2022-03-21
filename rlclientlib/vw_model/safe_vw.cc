@@ -58,7 +58,7 @@ namespace reinforcement_learning {
     // alloc new element if we don't have any left
     if (_example_pool.size() == 0) {
       auto ex = VW::alloc_examples(1);
-      _vw->example_parser->lbl_parser.default_label(&ex->l);
+      _vw->example_parser->lbl_parser.default_label(ex->l);
 
       return ex;
     }
@@ -68,21 +68,22 @@ namespace reinforcement_learning {
     _example_pool.pop_back();
 
     VW::empty_example(*_vw, *ex);
-    _vw->example_parser->lbl_parser.default_label(&ex->l);
+    _vw->example_parser->lbl_parser.default_label(ex->l);
 
     return ex;
   }
 
   example& safe_vw::get_or_create_example_f(void* vw) { return *(((safe_vw*)vw)->get_or_create_example()); }
 
-  void safe_vw::parse_context_with_pdf(const char* context, std::vector<int>& actions, std::vector<float>& scores)
+  void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& actions, std::vector<float>& scores)
   {
     DecisionServiceInteraction interaction;
 
     v_array<example*> examples;
     examples.push_back(get_or_create_example());
 
-    std::vector<char> line_vec(context, context + strlen(context) + 1);
+    //copy due to destructive parsing by rapidjson
+    std::string line_vec(context);
 
     VW::read_line_decision_service_json<false>(*_vw, examples, &line_vec[0], line_vec.size(), false, get_or_create_example_f, this, &interaction);
 
@@ -103,12 +104,13 @@ namespace reinforcement_learning {
     }
   }
 
-  void safe_vw::rank(const char* context, std::vector<int>& actions, std::vector<float>& scores)
+  void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<float>& scores)
   {
     v_array<example*> examples;
     examples.push_back(get_or_create_example());
 
-    std::vector<char> line_vec(context, context + strlen(context) + 1);
+    //copy due to destructive parsing by rapidjson
+    std::string line_vec(context);
 
     VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
 
@@ -136,12 +138,13 @@ namespace reinforcement_learning {
     }
   }
 
-  void safe_vw::choose_continuous_action(const char* context, float& action, float& pdf_value)
+  void safe_vw::choose_continuous_action(string_view context, float& action, float& pdf_value)
   {
     v_array<example*> examples;
     examples.push_back(get_or_create_example());
 
-    std::vector<char> line_vec(context, context + strlen(context) + 1);
+    //copy due to destructive parsing by rapidjson
+    std::string line_vec(context);
 
     VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
 
@@ -159,12 +162,13 @@ namespace reinforcement_learning {
     }
   }
 
-  void safe_vw::rank_decisions(const std::vector<const char*>& event_ids, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
+  void safe_vw::rank_decisions(const std::vector<const char*>& event_ids, string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
   {
     v_array<example*> examples;
     examples.push_back(get_or_create_example());
 
-    std::vector<char> line_vec(context, context + strlen(context) + 1);
+    //copy due to destructive parsing by rapidjson
+    std::string line_vec(context);
 
     VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
 
@@ -205,12 +209,13 @@ namespace reinforcement_learning {
     }
   }
 
-  void safe_vw::rank_multi_slot_decisions(const char* event_id, const std::vector<std::string>& slot_ids, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
+  void safe_vw::rank_multi_slot_decisions(const char* event_id, const std::vector<std::string>& slot_ids, string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
   {
     v_array<example*> examples;
     examples.push_back(get_or_create_example());
 
-    std::vector<char> line_vec(context, context + strlen(context) + 1);
+    //copy due to destructive parsing by rapidjson
+    std::string line_vec(context);
 
     VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
     // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the example tag.

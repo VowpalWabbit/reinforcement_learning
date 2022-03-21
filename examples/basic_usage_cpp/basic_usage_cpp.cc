@@ -14,10 +14,11 @@
  */
 
 int main() {
-  return basic_usage_cb();
-// return basic_usage_ca();
-//  return basic_usage_ccb();
-//  return basic_usage_slates();
+  // return basic_usage_cb();
+  // return basic_usage_ca();
+  // return basic_usage_ccb();
+  // return basic_usage_slates();
+  return basic_usage_multistep();
 }
 
 int basic_usage_cb() {
@@ -29,7 +30,7 @@ int basic_usage_cb() {
   u::configuration config;
 
   //! Helper method to initialize config from a json file
-  if( load_config_from_json("client.json", config) != err::success ) {
+  if (load_config_from_json("client.json", config) != err::success) {
     std::cout << "Unable to Load file: client.json" << std::endl;
     return -1;
   }
@@ -44,7 +45,7 @@ int basic_usage_cb() {
   //! [(1) Instantiate Inference API using config]
 
   //! [(2) Initialize the API]
-  if( rl.init(&status) != err::success ) {
+  if (rl.init(&status) != err::success) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
@@ -54,7 +55,7 @@ int basic_usage_cb() {
   // Response class
   r::ranking_response response;
 
-  if( rl.choose_rank(event_id, context, response, &status) != err::success ) {
+  if (rl.choose_rank(event_id, context, response, &status) != err::success) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
@@ -62,7 +63,7 @@ int basic_usage_cb() {
 
   //! [(4) Use the response]
   size_t chosen_action;
-  if( response.get_chosen_action_id(chosen_action, &status) != err::success ) {
+  if (response.get_chosen_action_id(chosen_action, &status) != err::success) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
@@ -72,7 +73,7 @@ int basic_usage_cb() {
   //! [(5) Report outcome]
   //     Report received outcome (Optional: if this call is not made, default missing outcome is applied)
   //     Missing outcome can be thought of as negative reinforcement
-  if( rl.report_outcome(event_id, outcome, &status) != err::success ) {
+  if (rl.report_outcome(event_id, outcome, &status) != err::success) {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
@@ -83,7 +84,7 @@ int basic_usage_cb() {
 
 int basic_usage_ca() {
   char const * const  event_id = "event_id";
-  char const * const context = R"({"f1":1,"f2":1,"f3":1,"f4":1,"f5":1})";
+  std::string context = R"({"f1":1,"f2":1,"f3":1,"f4":1,"f5":1})";
   float outcome  = 1.0f;
 
   //! name, value based config object used to initialise the API
@@ -178,7 +179,6 @@ int basic_usage_ccb() {
   //! [(3) Choose an action]
 
   //! [(4) Use the response / report outcome]
-  size_t chosen_action;
   for (const auto& r : response) {
     const auto chosen_action = r.get_action_id();
     if (rl.report_outcome(r.get_slot_id(), 1.0f, &status) != err::success) {
@@ -190,7 +190,7 @@ int basic_usage_ccb() {
 }
 
 int basic_usage_slates() {
-  char const* const context = R"({"shared":{"sf":1},"_multi":[ {"_slot_id":0,"TAction":{"af":1} },{"_slot_id":0,"TAction":{"af":2}},{"_slot_id":1,"TAction":{"af":3}},{"_slot_id":1,"TAction":{"af":4}}],"_slots":[{"f":1}, {"f":2}]})";
+  std::string context = R"({"shared":{"sf":1},"_multi":[ {"_slot_id":0,"TAction":{"af":1} },{"_slot_id":0,"TAction":{"af":2}},{"_slot_id":1,"TAction":{"af":3}},{"_slot_id":1,"TAction":{"af":4}}],"_slots":[{"f":1}, {"f":2}]})";
 
   //! name, value based config object used to initialise the API
   u::configuration config;
@@ -228,7 +228,6 @@ int basic_usage_slates() {
   //! [(3) Choose an action]
 
   //! [(4) Use the response]
-  size_t chosen_action;
   for (const auto& r : response) {
     const auto chosen_action = r.get_action_id();
   }
@@ -238,6 +237,81 @@ int basic_usage_slates() {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
+  return 0;
+}
+
+int basic_usage_multistep() {
+  //! name, value based config object used to initialise the API
+  u::configuration config;
+
+  //! Helper method to initialize config from a json file
+  if (load_config_from_json("client.json", config) != err::success) {
+    std::cout << "Unable to Load file: client.json" << std::endl;
+    return -1;
+  }
+
+  r::api_status status;
+
+  r::live_model rl(config);
+
+  if (rl.init(&status) != err::success) {
+    std::cout << status.get_error_msg() << std::endl;
+    return -1;
+  }
+
+  r::episode_state episode1("my_episode_id_1");
+  r::episode_state episode2("my_episode_id_2");
+
+  {
+    const std::string context1 = R"({"shared":{"F1": 1.0}, "_multi": [{"AF1": 2.0}, {"AF1": 3.0}]})";
+    r::ranking_response response1;
+    if (rl.request_episodic_decision("event1", nullptr, context1.c_str(), response1, episode1, &status) != err::success) {
+      std::cout << status.get_error_msg() << std::endl;
+      return -1;
+    }
+  }
+
+  {
+    const std::string context1 = R"({"shared":{"F2": 1.0}, "_multi": [{"AF2": 2.0}, {"AF2": 3.0}]})";
+    r::ranking_response response1;
+    if (rl.request_episodic_decision("event1", nullptr, context1.c_str(), response1, episode2, &status) != err::success) {
+      std::cout << status.get_error_msg() << std::endl;
+      return -1;
+    }
+  }
+
+  {
+    const std::string context2 = R"({"shared":{"F1": 4.0}, "_multi": [{"AF1": 2.0}, {"AF1": 3.0}]})";
+    r::ranking_response response2;
+    if (rl.request_episodic_decision("event2", "event1", context2.c_str(), response2, episode1, &status) != err::success) {
+      std::cout << status.get_error_msg() << std::endl;
+      return -1;
+    }
+  }
+
+  {
+    const std::string context2 = R"({"shared":{"F2": 4.0}, "_multi": [{"AF2": 2.0}, {"AF2": 3.0}]})";
+    r::ranking_response response2;
+    if (rl.request_episodic_decision("event2", "event1", context2.c_str(), response2, episode2, &status) != err::success) {
+      std::cout << status.get_error_msg() << std::endl;
+      return -1;
+    }
+  }
+
+  {
+    if (rl.report_outcome(episode1.get_episode_id(), "event1", 1.0f, &status) != err::success) {
+      std::cout << status.get_error_msg() << std::endl;
+      return -1;
+    }
+  }
+
+  {
+    if (rl.report_outcome(episode2.get_episode_id(), "event2", 1.0f, &status) != err::success) {
+      std::cout << status.get_error_msg() << std::endl;
+      return -1;
+    }
+  }
+
   return 0;
 }
 

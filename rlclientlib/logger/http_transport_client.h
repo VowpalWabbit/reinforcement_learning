@@ -1,5 +1,4 @@
 #pragma once
-#define OPENSSL_API_COMPAT 0x0908
 
 #include "api_status.h"
 #include "moving_queue.h"
@@ -10,7 +9,7 @@
 #include "str_util.h"
 
 #include "utility/http_client.h"
-#include "utility/apim_http_authorization.h"
+#include "utility/header_authorization.h"
 #include "utility/eventhub_http_authorization.h"
 #include "utility/stl_container_adapter.h"
 
@@ -200,7 +199,7 @@ namespace reinforcement_learning {
   template <typename TAuthorization>
   int http_transport_client<TAuthorization>::v_send(const buffer& post_data, api_status* status) {
     http_headers headers;
-    RETURN_IF_FAIL(_authorization.get_http_headers(headers, status));
+    RETURN_IF_FAIL(_authorization.insert_authorization_header(headers, status, _trace));
 
     try {
       // Before creating the task, ensure that it is allowed to be created.

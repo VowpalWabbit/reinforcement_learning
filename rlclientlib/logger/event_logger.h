@@ -21,6 +21,7 @@
 #include "serialization/fb_serializer.h"
 #include "message_sender.h"
 #include "time_helper.h"
+#include "rl_string_view.h"
 
 namespace reinforcement_learning { namespace logger {
   class i_logger_extensions;
@@ -90,7 +91,7 @@ namespace reinforcement_learning { namespace logger {
       : event_logger(time_provider, batcher)
     {}
 
-    int log(const char* event_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
+    int log(const char* event_id, string_view context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
   };
 
 class ccb_logger : public event_logger<decision_ranking_event> {
@@ -99,7 +100,7 @@ class ccb_logger : public event_logger<decision_ranking_event> {
       : event_logger(time_provider, batcher)
     {}
 
-    int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+    int log_decisions(std::vector<const char*>& event_ids, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
   };
 
@@ -109,7 +110,7 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
       : event_logger(time_provider, batcher)
     {}
 
-    int log_decision(const std::string &event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+    int log_decision(const std::string &event_id, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
   };
 

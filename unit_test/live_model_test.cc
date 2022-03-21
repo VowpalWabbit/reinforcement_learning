@@ -54,6 +54,21 @@ namespace {
   }
   )";
 
+  const auto JSON_CFG_API = R"(
+    {
+    "ApplicationID": "rnc-123456-b",
+    "interaction.http.api.host": "http://localhost:8080/personalizer/v1.1-preview.2/logs/interactions",
+    "observation.http.api.host": "http://localhost:8080/personalizer/v1.1-preview.2/logs/observations",
+    "IsExplorationEnabled": true,
+    "InitialExplorationEpsilon": 1.0,
+    "LearningMode": "Online",
+    "model.source": "HTTP_MODEL_DATA",
+    "observation.sender.implementation":"OBSERVATION_HTTP_API_SENDER",
+    "interaction.sender.implementation":"INTERACTION_HTTP_API_SENDER",
+    "protocol.version":"2"
+  }
+  )";
+
   const auto JSON_CONTEXT = R"({"_multi":[{},{}]})";
   const auto JSON_CONTEXT_WITH_SLOTS = R"({"_multi":[{},{}],"_slots":[{}]})";
   const auto JSON_CONTEXT_WITH_SLOTS_WITH_SLOT_IDS = R"({"_multi":[{},{}],"_slots":[{"_id":"provided_slot_id_1"}, {}]})";
@@ -360,7 +375,6 @@ BOOST_AUTO_TEST_CASE(live_model_request_decision) {
   // request ranking
   BOOST_CHECK_EQUAL(ds.request_decision(JSON_CONTEXT_WITH_SLOTS, response, &status), err::success);
   BOOST_CHECK_EQUAL(response.size(), 1);
-  size_t chosen;
   BOOST_CHECK_EQUAL((*response.begin()).get_action_id(), 0);
   BOOST_CHECK_EQUAL(status.get_error_code(), 0);
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
@@ -1586,3 +1600,39 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids_and_slot_ns) {
   ++it;
   BOOST_CHECK(it == response.end());
 }
+
+BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_uri) {
+    u::configuration config;
+    cfg::create_from_json(JSON_CFG_API, config);
+    config.set("http.api.key", "Bearer apiKey1234");
+    config.set("http.api.header.key.name", "Authorization");
+    r::api_status status;
+    std::unique_ptr<reinforcement_learning::live_model> _rl = std::unique_ptr<r::live_model>(new r::live_model(config, nullptr));
+
+    BOOST_CHECK_EQUAL(_rl->init(&status), r::error_code::http_model_uri_not_provided);
+}
+
+#ifdef _WIN32
+#ifdef USE_AZURE_FACTORIES
+BOOST_AUTO_TEST_CASE(live_model_using_endpoint_success) {
+    u::configuration config;
+    cfg::create_from_json(JSON_CFG_API, config);
+    config.set("http.api.key", "apiKey1234");
+    config.set("model.blob.uri", "http://localhost:8080/personalizer/v1.1-preview.1/model");
+    r::api_status status;
+    std::unique_ptr<reinforcement_learning::live_model> _rl = std::unique_ptr<r::live_model>(new r::live_model(config, nullptr));
+
+    BOOST_CHECK_EQUAL(_rl->init(&status), err::success);
+}
+
+BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_apikey) {
+    u::configuration config;
+    cfg::create_from_json(JSON_CFG_API, config);
+    config.set("model.blob.uri", "http://localhost:8080/personalizer/v1.1-preview.1/model");
+    r::api_status status;
+    std::unique_ptr<reinforcement_learning::live_model> _rl = std::unique_ptr<r::live_model>(new r::live_model(config, nullptr));
+
+    BOOST_CHECK_EQUAL(_rl->init(&status), r::error_code::http_api_key_not_provided);
+}
+#endif
+#endif

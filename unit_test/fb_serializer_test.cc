@@ -122,8 +122,8 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_content_encoding) {
   cb_serializer serializer;
   ranking_response rr(event_id);
   rr.set_model_id("model_id");
-  rr.push_back(1, 0.2);
-  rr.push_back(0, 0.8);
+  rr.push_back(1, 0.2f);
+  rr.push_back(0, 0.8f);
 
   auto buffer = serializer.event("my_context", action_flags::DEFERRED, v2::LearningModeType_Apprentice, rr);
 
@@ -136,6 +136,33 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_content_encoding) {
   BOOST_CHECK(event_batch->Verify(v));
   const auto& batch_metadata = *(event_batch->metadata());
   BOOST_CHECK_EQUAL(batch_metadata.content_encoding()->c_str(), value::CONTENT_ENCODING_DEDUP);
+  BOOST_CHECK_EQUAL(batch_metadata.original_event_count(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_content_encoding_with_number_of_events) {
+    data_buffer db;
+    fb_collection_serializer<generic_event> collection_serializer(db, value::CONTENT_ENCODING_DEDUP);
+    const char* event_id("event_id");
+    const timestamp ts;
+
+    cb_serializer serializer;
+    ranking_response rr(event_id);
+    rr.set_model_id("model_id");
+    rr.push_back(1, 0.2f);
+    rr.push_back(0, 0.8f);
+
+    auto buffer = serializer.event("my_context", action_flags::DEFERRED, v2::LearningModeType_Apprentice, rr);
+
+    generic_event ge(event_id, ts, v2::PayloadType_CB, std::move(buffer), event_content_type::IDENTITY, "app_id");
+    collection_serializer.add(ge);
+    BOOST_CHECK_EQUAL(reinforcement_learning::error_code::success, collection_serializer.finalize(nullptr,10));
+
+    flatbuffers::Verifier v(db.body_begin(), db.body_filled_size());
+    const v2::EventBatch* event_batch = v2::GetEventBatch(db.body_begin());
+    BOOST_CHECK(event_batch->Verify(v));
+    const auto& batch_metadata = *(event_batch->metadata());
+    BOOST_CHECK_EQUAL(batch_metadata.content_encoding()->c_str(), value::CONTENT_ENCODING_DEDUP);
+    BOOST_CHECK_EQUAL(batch_metadata.original_event_count(), 10);
 }
 
 BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_metadata) {
@@ -146,8 +173,8 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_metadata) {
  cb_serializer serializer;
  ranking_response rr(event_id);
  rr.set_model_id("model_id");
- rr.push_back(1, 0.2);
- rr.push_back(0, 0.8);
+ rr.push_back(1, 0.2f);
+ rr.push_back(0, 0.8f);
 
  auto buffer = serializer.event("my_context", action_flags::DEFERRED, v2::LearningModeType_Apprentice, rr);
 
@@ -162,7 +189,7 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_metadata) {
  const auto& events = *(event_batch->events());
 
  for (size_t i = 0; i < events.size(); ++i) {
-  const auto* serialized_event = events.Get(i); 
+  const auto* serialized_event = events.Get(static_cast<flatbuffers::uoffset_t>(i)); 
   const v2::Event *event = flatbuffers::GetRoot<v2::Event>(serialized_event->payload()->data());
   const auto& metadata = *(event->meta());
   BOOST_CHECK_EQUAL(metadata.app_id()->c_str(), "app_id");

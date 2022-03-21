@@ -87,7 +87,7 @@ median(const std::vector<outcome_event> &outcome_events, float default_reward) {
     }
   }
 
-  int outcome_events_size = values.size();
+  auto outcome_events_size = values.size();
 
   if (outcome_events_size > 0) {
     sort(values.begin(), values.end());

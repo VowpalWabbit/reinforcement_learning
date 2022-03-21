@@ -6,6 +6,8 @@
 #include <vector>
 #include <string>
 
+#include "multistep.h"
+
 // Declare const pointer for internal linkage
 namespace reinforcement_learning {
   class ranking_response;
@@ -69,14 +71,19 @@ namespace reinforcement_learning { namespace model_management {
       CA
     };
 
+    enum class model_source {
+        AZURE,
+        HTTP_API
+    };
     //! The i_model interfaces provides the resolution from the raw model_data to a consumable object.
     class i_model {
     public:
       virtual int update(const model_data& data, bool& model_ready, api_status* status = nullptr) = 0;
-      virtual int choose_rank(uint64_t rnd_seed, const char* features, std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) = 0;
-      virtual int choose_continuous_action(const char* features, float& action, float& pdf_value, std::string& model_version, api_status* status = nullptr) = 0;
-      virtual int request_decision(const std::vector<const char*>& event_ids, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status = nullptr) = 0;
-      virtual int request_multi_slot_decision(const char* event_id, const std::vector<std::string>& slot_ids, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status = nullptr) = 0;
+      virtual int choose_rank(uint64_t rnd_seed, string_view features, std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) = 0;
+      virtual int choose_continuous_action(string_view features, float& action, float& pdf_value, std::string& model_version, api_status* status = nullptr) = 0;
+      virtual int request_decision(const std::vector<const char*>& event_ids, string_view features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status = nullptr) = 0;
+      virtual int request_multi_slot_decision(const char* event_id, const std::vector<std::string>& slot_ids, string_view features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status = nullptr) = 0;
+      virtual int choose_rank_multistep(uint64_t rnd_seed, string_view features, const episode_history& history, std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) = 0;
       virtual model_type_t model_type() const = 0;
       virtual ~i_model() = default;
     };

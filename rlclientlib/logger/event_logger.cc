@@ -7,7 +7,7 @@
 #include <memory>
 namespace reinforcement_learning { namespace logger {
 using namespace std::placeholders;
-  int interaction_logger::log(const char* event_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode) {
+  int interaction_logger::log(const char* event_id, string_view context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode) {
     const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
     // using shared_ptr because we can't move a unique_ptr in C++11
     // We should replace them in C++14
@@ -25,7 +25,7 @@ using namespace std::placeholders;
     
   }
 
-  int ccb_logger::log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+  int ccb_logger::log_decisions(std::vector<const char*>& event_ids, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
     const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
     const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
     auto evt_sp = std::make_shared<decision_ranking_event>();
@@ -40,7 +40,7 @@ using namespace std::placeholders;
     return append(std::move(evt_fn), evt_id, 1, evt_sp.get(), status);
   }
 
-  int multi_slot_logger::log_decision(const std::string &event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+  int multi_slot_logger::log_decision(const std::string &event_id, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
 
     const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();

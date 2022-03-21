@@ -49,4 +49,5 @@ ERROR_CODE_DEFINITION(47, serialize_error, "Unknown error while serializing.")
 ERROR_CODE_DEFINITION(48, extension_error, "Error from extension: ")
 ERROR_CODE_DEFINITION(49, baseline_actions_not_defined, "Baseline Actions must be defined in apprentice mode")
 ERROR_CODE_DEFINITION(50, http_api_key_not_provided, "Http api key must be provided")
+ERROR_CODE_DEFINITION(51, http_model_uri_not_provided, "Model Blob URI parameter was not passed in via configuration")
 //! [Error Definitions]

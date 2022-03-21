@@ -15,25 +15,30 @@ namespace reinforcement_learning { namespace onnx {
   public:
     onnx_model(i_trace* trace_logger, const char* app_id, const char* output_name, bool use_unstructured_input);
     int update(const model_management::model_data& data, bool& model_ready, api_status* status = nullptr) override;
-    int choose_rank(uint64_t rnd_seed, const char* features, std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) override;
+    int choose_rank(uint64_t rnd_seed, string_view features, std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) override;
 
-    int choose_continuous_action(const char* features, float& action, float& pdf_value, std::string& model_version, api_status* status = nullptr) override
+    int choose_continuous_action(string_view features, float& action, float& pdf_value, std::string& model_version, api_status* status = nullptr) override
     {
       return error_code::not_supported;
     }
 
-    int request_decision(const std::vector<const char*>& event_ids, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status = nullptr) override
+    int request_decision(const std::vector<const char*>& event_ids, string_view features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status = nullptr) override
     {
       return error_code::not_supported;
     }
 
-    int request_multi_slot_decision(const char* event_id, const std::vector<std::string>& slot_ids, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status = nullptr) override
+    int request_multi_slot_decision(const char* event_id, const std::vector<std::string>& slot_ids, string_view features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status = nullptr) override
+    {
+      return error_code::not_supported;
+    }
+
+    int choose_rank_multistep(uint64_t rnd_seed, string_view features, const episode_history& history, std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) override
     {
       return error_code::not_supported;
     }
 
     model_management::model_type_t model_type() const { return model_management::model_type_t::CB; }
-      
+
   private:
     i_trace* _trace_logger;
     std::string _output_name;

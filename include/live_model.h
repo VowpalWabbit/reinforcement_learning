@@ -17,6 +17,8 @@
 #include "sender.h"
 #include "future_compat.h"
 
+#include "multistep.h"
+
 #include <memory>
 
 namespace reinforcement_learning {
@@ -100,7 +102,7 @@ namespace reinforcement_learning {
      * @param status  Optional field with detailed string description if there is an error
      * @return int Return error code.  This will also be returned in the api_status object
      */
-    int choose_rank(const char * event_id, const char * context_json, ranking_response& resp, api_status* status= nullptr);
+    int choose_rank(const char * event_id, string_view context_json, ranking_response& resp, api_status* status= nullptr);
 
     /**
      * @brief Choose an action, given a list of actions, action features and context features. The
@@ -113,7 +115,7 @@ namespace reinforcement_learning {
      * @param status  Optional field with detailed string description if there is an error
      * @return int Return error code.  This will also be returned in the api_status object
      */
-    int choose_rank(const char * context_json, ranking_response& resp, api_status* status= nullptr); //event_id is auto-generated
+    int choose_rank(string_view context_json, ranking_response& resp, api_status* status= nullptr); //event_id is auto-generated
 
     /**
     * @brief Choose an action, given a list of actions, action features and context features. The
@@ -127,7 +129,7 @@ namespace reinforcement_learning {
     * @param status  Optional field with detailed string description if there is an error
     * @return int Return error code.  This will also be returned in the api_status object
     */
-    int choose_rank(const char * event_id, const char * context_json, unsigned int flags, ranking_response& resp, api_status* status = nullptr);
+    int choose_rank(const char * event_id, string_view context_json, unsigned int flags, ranking_response& resp, api_status* status = nullptr);
 
     /**
     * @brief Choose an action, given a list of actions, action features and context features. The
@@ -140,9 +142,9 @@ namespace reinforcement_learning {
     * @param status  Optional field with detailed string description if there is an error
     * @return int Return error code.  This will also be returned in the api_status object
     */
-    int choose_rank(const char * context_json, unsigned int flags, ranking_response& resp, api_status* status = nullptr); //event_id is auto-generated
+    int choose_rank(string_view context_json, unsigned int flags, ranking_response& resp, api_status* status = nullptr); //event_id is auto-generated
 
-  /**
+    /**
     * @brief (DEPRECATED) Choose an action from a continuous range, given a list of context features
     * The inference library chooses an action by sampling the probability density function produced per continuous action range.
     * The corresponding event_id should be used when reporting the outcome for the continuous action.
@@ -155,7 +157,7 @@ namespace reinforcement_learning {
     * @return int Return error code.  This will also be returned in the api_status object
     */
     RL_DEPRECATED("New unified example builder interface is coming")
-    int request_continuous_action(const char * event_id, const char * context_json, unsigned int flags, continuous_action_response& response, api_status* status = nullptr);
+    int request_continuous_action(const char * event_id, string_view context_json, unsigned int flags, continuous_action_response& response, api_status* status = nullptr);
 
     /**
     * @brief (DEPRECATED) Choose an action from a continuous range, given a list of context features
@@ -169,7 +171,7 @@ namespace reinforcement_learning {
     * @return int Return error code.  This will also be returned in the api_status object
     */
     RL_DEPRECATED("New unified example builder interface is coming")
-    int request_continuous_action(const char * event_id, const char * context_json, continuous_action_response& response, api_status* status = nullptr);
+    int request_continuous_action(const char * event_id, string_view context_json, continuous_action_response& response, api_status* status = nullptr);
 
     /**
     * @brief (DEPRECATED) Choose an action from a continuous range, given a list of context features
@@ -183,7 +185,7 @@ namespace reinforcement_learning {
     * @return int Return error code.  This will also be returned in the api_status object
     */
     RL_DEPRECATED("New unified example builder interface is coming")
-    int request_continuous_action(const char * context_json, unsigned int flags, continuous_action_response& response, api_status* status = nullptr);
+    int request_continuous_action(string_view context_json, unsigned int flags, continuous_action_response& response, api_status* status = nullptr);
 
     /**
     * @brief (DEPRECATED) Choose an action from a continuous range, given a list of context features
@@ -196,7 +198,7 @@ namespace reinforcement_learning {
     * @return int Return error code.  This will also be returned in the api_status object
     */
     RL_DEPRECATED("New unified example builder interface is coming")
-    int request_continuous_action(const char * context_json, continuous_action_response& response, api_status* status = nullptr);
+    int request_continuous_action(string_view context_json, continuous_action_response& response, api_status* status = nullptr);
 
     /**
     * @brief (DEPRECATED) Choose an action from the given set for each slot, given a list of actions, slots,
@@ -211,7 +213,7 @@ namespace reinforcement_learning {
     * @return int Return error code.  This will also be returned in the api_status object
     */
     RL_DEPRECATED("New interface unifying CB with CCB is coming")
-    int request_decision(const char * context_json, unsigned int flags, decision_response& resp, api_status* status = nullptr);
+    int request_decision(string_view context_json, unsigned int flags, decision_response& resp, api_status* status = nullptr);
 
     /**
     * @brief (DEPRECATED) Choose an action from the given set for each slot, given a list of actions, slots,
@@ -225,9 +227,9 @@ namespace reinforcement_learning {
     * @return int Return error code.  This will also be returned in the api_status object
     */
     RL_DEPRECATED("New interface unifying CB with CCB is coming")
-    int request_decision(const char * context_json, decision_response& resp, api_status* status = nullptr);
+    int request_decision(string_view context_json, decision_response& resp, api_status* status = nullptr);
 
-  /**
+    /**
     * @brief (DEPRECATED) Choose an action from the given set for each slot, given a list of actions, slots,
     * action features, slot features and context features. The inference library chooses an action
     * per slot by sampling the probability distribution produced per slot. The corresponding event_id should be used when reporting the outcome for each slot.
@@ -240,28 +242,32 @@ namespace reinforcement_learning {
     * @return int Return error code.  This will also be returned in the api_status object
     */
     RL_DEPRECATED("New unified example builder interface is coming")
-    int request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
+    int request_multi_slot_decision(const char * event_id, string_view context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
     RL_DEPRECATED("New unified example builder interface is coming")
-    int request_multi_slot_decision(const char * event_id, const char * context_json, multi_slot_response& resp, api_status* status = nullptr);
+    int request_multi_slot_decision(const char * event_id, string_view context_json, multi_slot_response& resp, api_status* status = nullptr);
     RL_DEPRECATED("New unified example builder interface is coming")
-    int request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
+    int request_multi_slot_decision(string_view context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
     RL_DEPRECATED("New unified example builder interface is coming")
-    int request_multi_slot_decision(const char * context_json, multi_slot_response& resp, api_status* status = nullptr);
+    int request_multi_slot_decision(string_view context_json, multi_slot_response& resp, api_status* status = nullptr);
 
     RL_DEPRECATED("New unified example builder interface is coming")
-    int request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status = nullptr);
+    int request_multi_slot_decision(const char * event_id, string_view context_json, unsigned int flags, multi_slot_response& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status = nullptr);
 
     RL_DEPRECATED("New unified example builder interface is coming")
-    int request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
+    int request_multi_slot_decision(const char * event_id, string_view context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
     RL_DEPRECATED("New unified example builder interface is coming")
-    int request_multi_slot_decision(const char * event_id, const char * context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
+    int request_multi_slot_decision(const char * event_id, string_view context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
     RL_DEPRECATED("New unified example builder interface is coming")
-    int request_multi_slot_decision(const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
+    int request_multi_slot_decision(string_view context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
     RL_DEPRECATED("New unified example builder interface is coming")
-    int request_multi_slot_decision(const char * context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
+    int request_multi_slot_decision(string_view context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
 
     RL_DEPRECATED("New unified example builder interface is coming")
-    int request_multi_slot_decision(const char * event_id, const char * context_json, unsigned int flags, multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status = nullptr);
+    int request_multi_slot_decision(const char * event_id, string_view context_json, unsigned int flags, multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status = nullptr);
+
+    //multistep
+    int request_episodic_decision(const char *event_id, const char *previous_id, string_view context_json, ranking_response &resp, episode_state &episode, api_status *status = nullptr);
+    int request_episodic_decision(const char *event_id, const char *previous_id, string_view context_json, unsigned int flags, ranking_response &resp, episode_state &episode, api_status *status = nullptr);
 
     /**
     * @brief Report that action was taken.
@@ -272,6 +278,17 @@ namespace reinforcement_learning {
     * @return int Return error code.  This will also be returned in the api_status object
     */
     int report_action_taken(const char* event_id, api_status* status = nullptr);
+
+    /**
+    * @brief Report that action was taken.
+    *
+    * @param primary_id  The unique primary_id used when choosing an action should be presented here.  This is so that
+    *                  the action taken can be matched with feedback received.
+    * @param secondary_id Index of the partial outcome.
+    * @param status  Optional field with detailed string description if there is an error
+    * @return int Return error code.  This will also be returned in the api_status object
+    */
+    int report_action_taken(const char* primary_id, const char* secondary_id, api_status* status = nullptr);
 
     /**
      * @brief Report the outcome for the top action.
@@ -410,6 +427,7 @@ namespace reinforcement_learning {
     live_model& operator=(live_model&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
 
     ~live_model();
+
   private:
     std::unique_ptr<live_model_impl> _pimpl;  //! The actual implementation details are forwarded to this object (PIMPL pattern)
     bool _initialized = false;                //! Guard to ensure that live_model is properly initialized. i.e. init() was called and successfully initialized.

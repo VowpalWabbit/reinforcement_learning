@@ -22,7 +22,7 @@ namespace reinforcement_learning { namespace model_management {
       {
         std::unique_ptr<safe_vw> init_vw(new safe_vw(data.data(), data.data_sz()));
 
-        std::unique_ptr<safe_vw_factory> factory;		  
+        std::unique_ptr<safe_vw_factory> factory;
         if (init_vw->is_CB_to_CCB_model_upgrade(_initial_command_line))
         {
           factory.reset(new safe_vw_factory(std::move(data), _upgrade_to_CCB_vw_commandline_options));
@@ -56,7 +56,7 @@ namespace reinforcement_learning { namespace model_management {
 
   int vw_model::choose_rank(
     uint64_t rnd_seed,
-    const char* features,
+    string_view features,
     std::vector<int>& action_ids,
     std::vector<float>& action_pdf,
     std::string& model_version,
@@ -79,7 +79,18 @@ namespace reinforcement_learning { namespace model_management {
     }
   }
 
-  int vw_model::choose_continuous_action(const char* features, float& action, float& pdf_value, std::string& model_version, api_status* status)
+  int vw_model::choose_rank_multistep(
+    uint64_t rnd_seed,
+    string_view features,
+    const episode_history& history,
+    std::vector<int>& action_ids,
+    std::vector<float>& action_pdf,
+    std::string& model_version,
+    api_status* status) {
+    return choose_rank(rnd_seed, features, action_ids, action_pdf, model_version, status);
+  }
+
+  int vw_model::choose_continuous_action(string_view features, float& action, float& pdf_value, std::string& model_version, api_status* status)
   {
     try
     {
@@ -99,7 +110,7 @@ namespace reinforcement_learning { namespace model_management {
     }
   }
 
-  int vw_model::request_decision(const std::vector<const char*>& event_ids, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
+  int vw_model::request_decision(const std::vector<const char*>& event_ids, string_view features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
     try {
       pooled_vw vw(_vw_pool, _vw_pool.get_or_create());
@@ -120,7 +131,7 @@ namespace reinforcement_learning { namespace model_management {
   }
 
 
-  int vw_model::request_multi_slot_decision(const char *event_id, const std::vector<std::string>& slot_ids, const char* features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
+  int vw_model::request_multi_slot_decision(const char *event_id, const std::vector<std::string>& slot_ids, string_view features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
     try {
       pooled_vw vw(_vw_pool, _vw_pool.get_or_create());

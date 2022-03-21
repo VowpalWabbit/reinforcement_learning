@@ -10,7 +10,7 @@ namespace reinforcement_learning {
   class safe_vw {
     // we need to keep a reference to the master around, so it's still valid even if the factory is deleted
     std::shared_ptr<safe_vw> _master;
-    vw* _vw;
+    VW::workspace* _vw;
     std::vector<example*> _example_pool;
 
     example* get_or_create_example();
@@ -24,13 +24,13 @@ namespace reinforcement_learning {
 
     ~safe_vw();
 
-    void parse_context_with_pdf(const char* context, std::vector<int>& actions, std::vector<float>& scores);
-    void rank(const char* context, std::vector<int>& actions, std::vector<float>& scores);
-    void choose_continuous_action(const char* context, float& action, float& pdf_value);
+    void parse_context_with_pdf(string_view context, std::vector<int>& actions, std::vector<float>& scores);
+    void rank(string_view context, std::vector<int>& actions, std::vector<float>& scores);
+    void choose_continuous_action(string_view context, float& action, float& pdf_value);
     // Used for CCB
-    void rank_decisions(const std::vector<const char*>& event_ids, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores);
+    void rank_decisions(const std::vector<const char*>& event_ids, string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores);
     // Used for slates
-    void rank_multi_slot_decisions(const char* event_id, const std::vector<std::string>& slot_ids, const char* context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores);
+    void rank_multi_slot_decisions(const char* event_id, const std::vector<std::string>& slot_ids, string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores);
 
     const char* id() const;
 

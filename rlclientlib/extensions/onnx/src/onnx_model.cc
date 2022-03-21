@@ -148,7 +148,7 @@ namespace reinforcement_learning { namespace onnx {
   }
 
   int onnx_model::choose_rank(uint64_t rnd_seed,
-    const char* features,
+    string_view features,
     std::vector<int>& action_ids,
     std::vector<float>& action_pdf,
     std::string& model_version,

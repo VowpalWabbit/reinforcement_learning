@@ -2,14 +2,14 @@
 
 #include "error_constants.h"
 
+#include "event_processors/reward.h"
 #include "example.h"
-#include "parse_args.h"
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "lru_dedup_cache.h"
 #include "metrics/metrics.h"
-#include "event_processors/reward.h"
+#include "parse_args.h"
 #include "v_array.h"
 
 #include <list>
@@ -26,6 +26,7 @@ namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 class i_joiner {
 public:
+  explicit i_joiner(VW::io::logger logger_) : logger(std::move(logger_)) {}
   virtual ~i_joiner() = default;
 
   virtual void set_reward_function(const v2::RewardFunctionType type, bool sticky = false) = 0;
@@ -33,7 +34,7 @@ public:
   virtual void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky = false) = 0;
   virtual void set_problem_type_config(v2::ProblemType problem_type, bool sticky = false) = 0;
   virtual void set_use_client_time(bool use_client_time, bool sticky = false) = 0;
-  virtual void apply_cli_overrides(vw *all, const input_options &parsed_options) = 0;
+  virtual void apply_cli_overrides(VW::workspace *all, const input_options &parsed_options) = 0;
 
   /**
    * @brief Tells whether config was provided such that it can start joining examples.
@@ -68,4 +69,7 @@ public:
   virtual void persist_metrics() {}
 
   virtual metrics::joiner_metrics get_metrics() = 0;
+
+protected:
+  VW::io::logger logger;
 };

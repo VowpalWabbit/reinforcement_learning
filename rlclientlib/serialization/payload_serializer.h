@@ -21,6 +21,7 @@
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/CaEvent_generated.h"
 #include "generated/v2/MultiSlotEvent_generated.h"
+#include "generated/v2/MultiStepEvent_generated.h"
 #include "generated/v2/DedupInfo_generated.h"
 
 namespace reinforcement_learning {
@@ -35,7 +36,7 @@ namespace reinforcement_learning {
     };
 
     struct cb_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CB> {
-      static generic_event::payload_buffer_t event(const char* context, unsigned int flags, v2::LearningModeType learning_mode, const ranking_response& response) {
+      static generic_event::payload_buffer_t event(string_view context, unsigned int flags, v2::LearningModeType learning_mode, const ranking_response& response) {
         flatbuffers::FlatBufferBuilder fbb;
         std::vector<uint64_t> action_ids;
         std::vector<float> probabilities;
@@ -54,7 +55,7 @@ namespace reinforcement_learning {
     };
 
     struct ca_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CA> {
-      static generic_event::payload_buffer_t event(const char* context, unsigned int flags, const continuous_action_response& response) {
+      static generic_event::payload_buffer_t event(string_view context, unsigned int flags, const continuous_action_response& response) {
         flatbuffers::FlatBufferBuilder fbb;
 
         std::vector<unsigned char> _context;
@@ -68,7 +69,7 @@ namespace reinforcement_learning {
     };
 
     struct multi_slot_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_Slates> {
-      static generic_event::payload_buffer_t event(const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+      static generic_event::payload_buffer_t event(string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids,
         const std::vector<int>& baseline_actions, v2::LearningModeType learning_mode) {
         flatbuffers::FlatBufferBuilder fbb;
@@ -161,6 +162,34 @@ namespace reinforcement_learning {
       static generic_event::payload_buffer_t report_action_taken() {
         flatbuffers::FlatBufferBuilder fbb;
         auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_NONE, 0, v2::IndexValue_NONE, 0, true);
+        fbb.Finish(fb);
+        return fbb.Release();
+      }
+
+      static generic_event::payload_buffer_t report_action_taken(const char* index) {
+        flatbuffers::FlatBufferBuilder fbb;
+        const auto idx = fbb.CreateString(index).Union();
+        auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_NONE, 0, v2::IndexValue_literal, idx, true);
+        fbb.Finish(fb);
+        return fbb.Release();
+      }      
+    };
+
+    struct multistep_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_MultiStep> {
+      static generic_event::payload_buffer_t event(string_view context, const char* previous_id, unsigned int flags, const ranking_response& response) {
+        flatbuffers::FlatBufferBuilder fbb;
+        std::vector<uint64_t> action_ids;
+        std::vector<float> probabilities;
+        for (auto const& r : response) {
+          action_ids.push_back(r.action_id + 1);
+          probabilities.push_back(r.probability);
+        }
+        std::vector<unsigned char> _context;
+        std::string context_str(context);
+        copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
+
+        auto fb = v2::CreateMultiStepEventDirect(fbb, response.get_event_id(), previous_id, &action_ids,
+          &_context, &probabilities, response.get_model_id(), flags & action_flags::DEFERRED);
         fbb.Finish(fb);
         return fbb.Release();
       }

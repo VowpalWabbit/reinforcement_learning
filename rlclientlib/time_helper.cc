@@ -13,8 +13,8 @@ namespace reinforcement_learning
     ts.day = unsigned(ymd.day());
     ts.hour = time.hours().count();
 	  ts.minute = time.minutes().count();
-	  ts.second = time.seconds().count();
-    ts.sub_second = time.subseconds().count();
+	  ts.second = static_cast<uint8_t>(time.seconds().count());
+    ts.sub_second = static_cast<uint32_t>(time.subseconds().count());
     return ts;
   }
 }

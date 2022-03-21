@@ -66,32 +66,38 @@ std::unique_ptr<fakeit::Mock<m::i_data_transport>> get_mock_failing_data_transpo
 
 std::unique_ptr<fakeit::Mock<m::i_model>> get_mock_model(m::model_type_t model_type) {
   auto mock = std::unique_ptr<Mock<m::i_model>>(new fakeit::Mock<m::i_model>());
-  const std::function<int(uint64_t, const char*, std::vector<int>&, std::vector<float>&, std::string&, r::api_status*)> choose_rank_fn =
-    [](uint64_t, const char*, std::vector<int>&, std::vector<float>&, std::string& model_version, r::api_status*) {
+
+  const auto choose_rank_fn =
+    [](uint64_t, r::string_view, std::vector<int>&, std::vector<float>&, std::string& model_version, r::api_status*) {
     model_version = "model_id";
     return r::error_code::success;
   };
 
-  const std::function<int(const char*, float&, float&, std::string&, r::api_status*)> choose_continuous_action_fn =
-    [](const char*, float&, float&, std::string& model_version, r::api_status*) {
+  const auto choose_continuous_action_fn =
+    [](r::string_view, float&, float&, std::string& model_version, r::api_status*) {
     model_version = "model_id";
     return r::error_code::success;
   };
 
-  const std::function<int(const std::vector<const char*>& event_ids, const char*, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string&, r::api_status*)> request_decision_fn =
-    [](const std::vector<const char*>& event_ids, const char*, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string& model_version, r::api_status*) {
+  const auto request_decision_fn =
+    [](const std::vector<const char*>& event_ids, r::string_view, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string& model_version, r::api_status*) {
     model_version = "model_id";
     return r::error_code::success;
   };
-  
-  const std::function<int(const char*, const std::vector<std::string>&, const char*, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string&, r::api_status*)> request_multi_slot_decision_fn =
-      [](const char*, const std::vector<std::string>&, const char*, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string& model_version, r::api_status*) {
+
+  const auto request_multi_slot_decision_fn =
+      [](const char*, const std::vector<std::string>&, r::string_view, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string& model_version, r::api_status*) {
       model_version = "model_id";
       return r::error_code::success;
   };
 
+  const auto choose_rank_multistep_fn =
+    [](uint64_t, r::string_view, const r::episode_history&, std::vector<int>&, std::vector<float>&, std::string& model_version, r::api_status*) {
+    model_version = "model_id";
+    return r::error_code::success;
+  };
 
-  const std::function<m::model_type_t()> get_model_type = [model_type]() {
+  const auto get_model_type = [model_type]() {
     return model_type;
   };
 
@@ -100,6 +106,7 @@ std::unique_ptr<fakeit::Mock<m::i_model>> get_mock_model(m::model_type_t model_t
   When(Method((*mock), choose_continuous_action)).AlwaysDo(choose_continuous_action_fn);
   When(Method((*mock), request_decision)).AlwaysDo(request_decision_fn);
   When(Method((*mock), request_multi_slot_decision)).AlwaysDo(request_multi_slot_decision_fn);
+  When(Method((*mock), choose_rank_multistep)).AlwaysDo(choose_rank_multistep_fn);
   When(Method((*mock), model_type)).AlwaysDo(get_model_type);
 
   Fake(Dtor((*mock)));
