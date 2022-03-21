@@ -102,7 +102,7 @@ namespace reinforcement_learning {
           generic_event::payload_buffer_t payload;
           event_content_type content_type;
 
-          RETURN_IF_FAIL(wrap_log_call(_ext, _multistep_serializer, context, actions, payload, content_type, status, previous_id, flags, response));
+          RETURN_IF_FAIL(wrap_log_call(*_ext_p, _multistep_serializer, context, actions, payload, content_type, status, previous_id, flags, response));
           return _v2->log(episode_id, std::move(payload), _multistep_serializer.type, content_type, std::move(actions), status);
         }
         default: return protocol_not_supported(status);

@@ -15,6 +15,7 @@
 #include "utility/object_pool.h"
 #include "explore_internal.h"
 #include "hash.h"
+#include "rl_string_view.h"
 
 // float comparisons
 #include "vw_math.h"
@@ -33,8 +34,8 @@ namespace reinforcement_learning { namespace logger {
 
     virtual int init(api_status* status) = 0;
 
-    virtual int append(TFunc&& func, const char* evt_id, size_t size_estimate, TEvent* event, api_status* status = nullptr) = 0;
-    virtual int append(TFunc& func, const char* evt_id, size_t size_estimate, TEvent* event, api_status* status = nullptr) = 0;
+    virtual int append(TFunc&& func, string_view evt_id, size_t size_estimate, TEvent* event, api_status* status = nullptr) = 0;
+    virtual int append(TFunc& func, string_view evt_id, size_t size_estimate, TEvent* event, api_status* status = nullptr) = 0;
 
     virtual int run_iteration(api_status* status) = 0;
   };
@@ -52,8 +53,8 @@ namespace reinforcement_learning { namespace logger {
 
     int init(api_status* status) override;
 
-    int append(TFunc&& func, const char* evt_id, size_t size_estimate, TEvent* event, api_status* status = nullptr) override;
-    int append(TFunc& func, const char* evt_id, size_t size_estimate, TEvent* event, api_status* status = nullptr) override;
+    int append(TFunc&& func, string_view evt_id, size_t size_estimate, TEvent* event, api_status* status = nullptr) override;
+    int append(TFunc& func, string_view evt_id, size_t size_estimate, TEvent* event, api_status* status = nullptr) override;
 
     int run_iteration(api_status* status) override;
 
@@ -105,7 +106,7 @@ namespace reinforcement_learning { namespace logger {
   }
 
   template<typename TEvent, template<typename> class TSerializer, typename TFunc>
-  int async_batcher<TEvent, TSerializer, TFunc>::append(TFunc&& func, const char* evt_id, size_t size_estimate, TEvent* event, api_status* status) {
+  int async_batcher<TEvent, TSerializer, TFunc>::append(TFunc&& func, string_view evt_id, size_t size_estimate, TEvent* event, api_status* status) {
 
     // If subsampling rate is < 1, then run subsampling logic
     if(_subsample_rate < 1.f) {
@@ -116,7 +117,7 @@ namespace reinforcement_learning { namespace logger {
         const auto seed = uniform_hash(seed_str.c_str(), seed_str.length(), 0);
         return exploration::uniform_random_merand48(seed);
       };
-      if(prg(evt_id, constants::SUBSAMPLE_RATE_DROP_PASS) > _subsample_rate) {
+      if(prg(to_string(evt_id), constants::SUBSAMPLE_RATE_DROP_PASS) > _subsample_rate) {
           // If the event is dropped, just get out of here
         return error_code::success;
       }
@@ -139,8 +140,8 @@ namespace reinforcement_learning { namespace logger {
   }
 
   template<typename TEvent, template<typename> class TSerializer, typename TFunc>
-  int async_batcher<TEvent, TSerializer, TFunc>::append(TFunc& func, const char* evt_id, size_t size_estimate, TEvent* event, api_status* status) {
-    return append(std::move(func), evt_id, size_estimate, status);
+  int async_batcher<TEvent, TSerializer, TFunc>::append(TFunc& func, string_view evt_id, size_t size_estimate, TEvent* event, api_status* status) {
+    return append(std::move(func), evt_id, size_estimate, event, status);
   }
 
   template<typename TEvent, template<typename> class TSerializer, typename TFunc>
@@ -156,6 +157,7 @@ namespace reinforcement_learning { namespace logger {
                                                       api_status* status)
   {
     TFunc f_evt;
+    TEvent evt;
     TSerializer<TEvent> collection_serializer(*buffer.get(), _batch_content_encoding, _shared_state);
     
     while (remaining > 0 && collection_serializer.size() < _send_high_water_mark) {
@@ -163,7 +165,6 @@ namespace reinforcement_learning { namespace logger {
         if (queue_mode_enum::BLOCK == _queue_mode) {
           _cv.notify_one();
         }
-        TEvent evt;
         RETURN_IF_FAIL(f_evt(evt, status));
         RETURN_IF_FAIL(collection_serializer.add(evt, status));
         --remaining;

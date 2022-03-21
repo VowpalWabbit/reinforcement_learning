@@ -47,26 +47,26 @@ namespace reinforcement_learning {
       return false;
     }
 
-    void push(TFunc& item, size_t item_size, T* event) {
-      push(std::move(item), item_size, event);
+    bool push(TFunc& item, size_t item_size, T* event) {
+      return push(std::move(item), item_size, event);
     }
 
-    void push(TFunc&& item, size_t item_size, T* event)
+    bool push(TFunc&& item, size_t item_size, T* event)
     {
       std::unique_lock<std::mutex> mlock(_mutex);
       if (_event_counter_status == events_counter_status::ENABLE) {
         ++_event_index;
-        item.set_event_index(_event_index);
+        event->set_event_index(_event_index);
       }
       // If subsampling rate is < 1, then run subsampling logic
       if (_subsample_rate < 1) {
-        if (item.try_drop(_subsample_rate, constants::SUBSAMPLE_RATE_DROP_PASS)) {
+        if (event->try_drop(_subsample_rate, constants::SUBSAMPLE_RATE_DROP_PASS)) {
           // If the event is dropped, just get out of here
           return false;
         }
       }
       _capacity += item_size;
-      _queue.push_back({std::forward<T>(item),item_size,event});
+      _queue.push_back({std::forward<TFunc>(item),item_size,event});
       return true;
     }
 
