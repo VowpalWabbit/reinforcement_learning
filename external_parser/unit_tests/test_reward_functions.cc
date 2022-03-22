@@ -4,6 +4,7 @@
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 const int DEFAULT_REWARD = -1000;
+const int DEFAULT_REWARD_APPRENTICE = 0;
 
 std::vector<float> get_float_rewards(
   std::string int_file_name,
@@ -466,8 +467,8 @@ BOOST_AUTO_TEST_CASE(first_action_not_matching_baseline_action_returns_default_r
   );
 
   BOOST_CHECK_EQUAL(rewards.size(), 2);
-  BOOST_CHECK_EQUAL(rewards.at(0), DEFAULT_REWARD);
-  BOOST_CHECK_EQUAL(rewards.at(1), DEFAULT_REWARD);
+  BOOST_CHECK_EQUAL(rewards.at(0), DEFAULT_REWARD_APPRENTICE);
+  BOOST_CHECK_EQUAL(rewards.at(1), DEFAULT_REWARD_APPRENTICE);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

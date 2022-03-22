@@ -1,6 +1,7 @@
 #include "ccb_label.h"
 #include "test_common.h"
 
+#include <boost/test/tools/old/interface.hpp>
 #include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE(cb_simple) {
@@ -584,7 +585,8 @@ BOOST_AUTO_TEST_CASE(ccb_apprentice_mode) {
                     .action,
                 0);
           }
-          BOOST_CHECK_NE(ex->l.conditional_contextual_bandit.outcome->cost,
+          // chosen action matches baseline, so we expect a reward of 1
+          BOOST_CHECK_EQUAL(ex->l.conditional_contextual_bandit.outcome->cost,
                          -1.f);
         }
       }

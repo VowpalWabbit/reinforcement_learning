@@ -81,6 +81,9 @@ struct cb_joined_event : public typed_joined_event {
       // Reward of 1 when we are match baseline and 0 otherwise
       reward = 1.0;
     }
+    else {
+      reward = 0.0;
+    }
   }
 
   bool fill_in_label(v_array<example *> &examples,
@@ -175,6 +178,9 @@ struct ccb_joined_event : public typed_joined_event {
       if (!multi_slot_interaction.interaction_data[i].actions.empty() &&
         multi_slot_interaction.interaction_data[i].actions[0] == multi_slot_interaction.baseline_actions[i]) {
         rewards[i] = 1.0;
+      }
+      else {
+        rewards[i] = 0.0;
       }
     }
   }
