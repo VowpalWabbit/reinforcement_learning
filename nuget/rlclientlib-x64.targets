@@ -8,7 +8,7 @@
       <AdditionalDependencies>rlclientlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release' And ('$(Platform)'=='x86' Or '$(Platform)'=='Win32')">
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release' And ('$(Platform)'=='x64')">
     <Link>
       <AdditionalDependencies>rlclientlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -16,7 +16,7 @@
       <AdditionalDependencies>rlclientlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Platform)'=='x86' Or '$(Platform)'=='Win32'">
+  <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
     <Link>
       <AdditionalLibraryDirectories>$(MSBuildThisFileDirectory)..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
