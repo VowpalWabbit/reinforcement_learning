@@ -32,7 +32,8 @@ jobs:
           --triplet=${{ matrix.arch_config.arch }}-windows-static
           cpprestsdk
           openssl-windows
-          zlib flatbuffers
+          zlib
+          flatbuffers
           boost-filesystem
           boost-thread
           boost-program-options
@@ -56,14 +57,14 @@ jobs:
           -DVW_INSTALL=ON
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.arch }}-windows-static
-          -DFLATBUFFERS_FLATC_EXECUTABLE=C:/vcpkg/installed/${{ matrix.arch_config.arch }}-windows/tools/flatbuffers/flatc.exe
+          -DFLATBUFFERS_FLATC_EXECUTABLE=C:/vcpkg/installed/${{ matrix.arch_config.arch }}-windows-static/tools/flatbuffers/flatc.exe
       - name: Build and install
         run: |
-          cmake --build build --config Debug -t rl.net.native
-          cmake --build build --config Release -t rl.net.native
+          cmake --build build --config Debug -t rlclientlib -v
+          cmake --build build --config Release -t rlclientlib -v
           # Install debug first so that release overwrites the exe and nothing else
-          cmake --install build --prefix ./nuget_staging --config Debug
-          cmake --install build --prefix ./nuget_staging --config Release
+          cmake --install build --prefix ./nuget_staging --config Debug -v
+          cmake --install build --prefix ./nuget_staging --config Release -v
       - if: ${{ matrix.arch_config.arch == 'x64' }}
         run: cp nuget\rlclientlib-x64.targets nuget_staging\rlclientlib.targets
       - name: Package
