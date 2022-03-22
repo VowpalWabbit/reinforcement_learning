@@ -43,8 +43,8 @@ inline void calculate_multislot_interaction_metrics(dsjson_metrics* metrics,
   }
 
 struct typed_joined_event {
-  constexpr static const float apprentice_matching_reward = 1.0f;
-  constexpr static const float apprentice_not_matching_reward = 0.0f;
+  constexpr static float apprentice_matching_reward = 1.0f;
+  constexpr static float apprentice_not_matching_reward = 0.0f;
   virtual ~typed_joined_event() = default;
   virtual bool is_skip_learn() const = 0;
   virtual void set_skip_learn(bool sl) = 0;
