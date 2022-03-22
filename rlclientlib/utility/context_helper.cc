@@ -31,10 +31,12 @@ namespace reinforcement_learning { namespace utility {
    * \return  error_code::success if there are no errors.  If there are errors then the error code is
    *          returned.
    */
-  int get_event_ids(const char* context, std::map<size_t, std::string>& event_ids, i_trace* trace, api_status* status) {
+  int get_event_ids(string_view context, std::map<size_t, std::string>& event_ids, i_trace* trace, api_status* status) {
     try {
       rj::Document obj;
-      obj.Parse(context);
+      // obj.Parse expects zero terminated c-style string
+      std::string copy(context);
+      obj.Parse(copy.c_str());
 
       if (obj.HasParseError()) {
         RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << rj::GetParseError_En(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";
@@ -127,7 +129,7 @@ namespace reinforcement_learning { namespace utility {
     }
   };
 
-  int get_context_info(const char *context, ContextInfo &info, i_trace* trace, api_status* status)
+  int get_context_info(string_view context, ContextInfo &info, i_trace* trace, api_status* status)
   {
     std::string copy(context);
     info.actions.clear();
@@ -146,13 +148,13 @@ namespace reinforcement_learning { namespace utility {
     return error_code::success;
   }
 
-  int get_slot_ids(const char* context, const ContextInfo::index_vector_t& slots, std::map<size_t, std::string>& slot_ids, i_trace* trace, api_status* status)
+  int get_slot_ids(string_view context, const ContextInfo::index_vector_t& slots, std::map<size_t, std::string>& slot_ids, i_trace* trace, api_status* status)
   {
     for(size_t i = 0; i < slots.size(); i++)
     {
       try {
         rj::Document obj;
-        obj.Parse(std::string(context + slots[i].first, slots[i].second).c_str());
+        obj.Parse(std::string(context.data() + slots[i].first, slots[i].second).c_str());
 
         if (obj.HasParseError()) {
           RETURN_ERROR_LS(trace, status, json_parse_error) << "JSON parse error: " << rj::GetParseError_En(obj.GetParseError()) << " (" << obj.GetErrorOffset() << ")";

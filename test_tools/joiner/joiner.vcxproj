@@ -23,7 +23,7 @@
     <ProjectGuid>{E6EFAF56-301D-492F-B7D1-10179895A0A3}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>joiner</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
     <ProjectName>joiner</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

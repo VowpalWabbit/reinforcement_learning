@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5135826B-116F-4E18-938E-F9B8D8C37F5A}</ProjectGuid>
     <RootNamespace>stdin2rllib</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -55,7 +55,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories);$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\rapidjson\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;%(AdditionalIncludeDirectories);$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\rapidjson\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -73,7 +73,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include;%(AdditionalIncludeDirectories);$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\rapidjson\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\include;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;%(AdditionalIncludeDirectories);$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\rapidjson\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

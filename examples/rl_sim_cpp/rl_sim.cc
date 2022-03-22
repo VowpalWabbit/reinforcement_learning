@@ -147,7 +147,7 @@ int rl_sim::ca_loop(){
     const auto req_id = create_event_id();
     r::api_status status;
 
-    if (_rl->request_continuous_action(req_id.c_str(), context_json.c_str(), response, &status) != err::success)
+    if (_rl->request_continuous_action(req_id.c_str(), context_json, response, &status) != err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
       continue;
@@ -184,7 +184,7 @@ int rl_sim::ccb_loop() {
     r::api_status status;
 
     // Choose an action
-    if ( _rl->request_multi_slot_decision(event_id.c_str(), context_json.c_str(), decision, &status) != err::success) {
+    if ( _rl->request_multi_slot_decision(event_id.c_str(), context_json, decision, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
@@ -397,7 +397,7 @@ bool rl_sim::init_sim_world() {
 bool rl_sim::init_continuous_sim_world() {
   // initialize continuous actions robot joints
 
-  _friction = {25.4, 41.2, 66.5, 81.9, 104.4};
+  _friction = {25.4f, 41.2f, 66.5f, 81.9f, 104.4f};
 
   // temperature (C) range: 20.f to 45.f
   // angular velocity range: 0.f to 200.f

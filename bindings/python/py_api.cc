@@ -8,6 +8,7 @@
 
 #include <exception>
 #include <memory>
+#include <cstring>
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
@@ -168,14 +169,14 @@ PYBIND11_MODULE(rl_client, m) {
            py::arg("callback"))
       .def(
           "choose_rank",
-          [](rl::live_model &lm, const char *context, const char *event_id,
+          [](rl::live_model &lm, const char* context, const char *event_id,
              bool deferred) {
             rl::ranking_response response;
             rl::api_status status;
             unsigned int flags = deferred ? rl::action_flags::DEFERRED
                                           : rl::action_flags::DEFAULT;
             THROW_IF_FAIL(
-                lm.choose_rank(event_id, context, flags, response, &status));
+                lm.choose_rank(event_id, {context, std::strlen(context)}, flags, response, &status));
             return response;
           },
           py::arg("context"),
@@ -188,12 +189,12 @@ PYBIND11_MODULE(rl_client, m) {
     )pbdoc")
       .def(
           "choose_rank",
-          [](rl::live_model &lm, const char *context, bool deferred) {
+          [](rl::live_model &lm, const char* context, bool deferred) {
             rl::ranking_response response;
             rl::api_status status;
             unsigned int flags = deferred ? rl::action_flags::DEFERRED
                                           : rl::action_flags::DEFAULT;
-            THROW_IF_FAIL(lm.choose_rank(context, flags, response, &status));
+            THROW_IF_FAIL(lm.choose_rank({context, std::strlen(context)}, flags, response, &status));
             return response;
           },
           py::arg("context"),
@@ -208,7 +209,7 @@ PYBIND11_MODULE(rl_client, m) {
           [](rl::live_model &lm, const char* event_id, const char* previous_id, const char* context, rl::episode_state& episode) {
             rl::ranking_response response;
             rl::api_status status;
-            THROW_IF_FAIL(lm.request_episodic_decision(event_id, previous_id, context, response, episode, &status));
+            THROW_IF_FAIL(lm.request_episodic_decision(event_id, previous_id, {context, std::strlen(context)}, response, episode, &status));
             return response;
           },
           py::arg("event_id"),

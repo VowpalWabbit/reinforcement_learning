@@ -84,7 +84,7 @@ int basic_usage_cb() {
 
 int basic_usage_ca() {
   char const * const  event_id = "event_id";
-  char const * const context = R"({"f1":1,"f2":1,"f3":1,"f4":1,"f5":1})";
+  std::string context = R"({"f1":1,"f2":1,"f3":1,"f4":1,"f5":1})";
   float outcome  = 1.0f;
 
   //! name, value based config object used to initialise the API
@@ -179,7 +179,6 @@ int basic_usage_ccb() {
   //! [(3) Choose an action]
 
   //! [(4) Use the response / report outcome]
-  size_t chosen_action;
   for (const auto& r : response) {
     const auto chosen_action = r.get_action_id();
     if (rl.report_outcome(r.get_slot_id(), 1.0f, &status) != err::success) {
@@ -191,7 +190,7 @@ int basic_usage_ccb() {
 }
 
 int basic_usage_slates() {
-  char const* const context = R"({"shared":{"sf":1},"_multi":[ {"_slot_id":0,"TAction":{"af":1} },{"_slot_id":0,"TAction":{"af":2}},{"_slot_id":1,"TAction":{"af":3}},{"_slot_id":1,"TAction":{"af":4}}],"_slots":[{"f":1}, {"f":2}]})";
+  std::string context = R"({"shared":{"sf":1},"_multi":[ {"_slot_id":0,"TAction":{"af":1} },{"_slot_id":0,"TAction":{"af":2}},{"_slot_id":1,"TAction":{"af":3}},{"_slot_id":1,"TAction":{"af":4}}],"_slots":[{"f":1}, {"f":2}]})";
 
   //! name, value based config object used to initialise the API
   u::configuration config;
@@ -229,7 +228,6 @@ int basic_usage_slates() {
   //! [(3) Choose an action]
 
   //! [(4) Use the response]
-  size_t chosen_action;
   for (const auto& r : response) {
     const auto chosen_action = r.get_action_id();
   }

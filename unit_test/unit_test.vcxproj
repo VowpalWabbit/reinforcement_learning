@@ -22,7 +22,7 @@
     <ProjectGuid>{18A3556E-493E-4DD5-8C33-760185B764D4}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>unit_test</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -186,6 +186,7 @@
     <ClCompile Include="model_mgmt_test.cc" />
     <ClCompile Include="event_queue_test.cc" />
     <ClCompile Include="moving_queue_test.cc" />
+    <ClCompile Include="multistep_test.cc" />
     <ClCompile Include="multi_slot_response_detailed_test.cc" />
     <ClCompile Include="object_pool_test.cc" />
     <ClCompile Include="payload_serializer_test.cc" />

@@ -6,8 +6,7 @@ pr:
 - '*'
 
 pool:
-  name: Hosted VS2017
-  demands: Cmd
+  vmImage: windows-2019
 
 variables:
   VCPKG_ARCHIVE_DIR: $(LOCALAPPDATA)\vcpkg\archives
@@ -28,10 +27,8 @@ steps:
     #netShare: # Required when packageFeedSelector == NetShare
 - task: Cache@2
   inputs:
-    key: 'vcpkg | archives'
+    key: 'vcpkg | archives | x64-windows-static-md-v141'
     path: $(VCPKG_ARCHIVE_DIR)
-    restoreKeys: |
-      vcpkg | archives
   displayName: Cache vcpkg dependencies
 - script: CALL .scripts/restore-vw-bp-deps.cmd
   displayName: 'Restore dependencies for vw binary parser'

@@ -68,31 +68,31 @@ std::unique_ptr<fakeit::Mock<m::i_model>> get_mock_model(m::model_type_t model_t
   auto mock = std::unique_ptr<Mock<m::i_model>>(new fakeit::Mock<m::i_model>());
 
   const auto choose_rank_fn =
-    [](uint64_t, const char*, std::vector<int>&, std::vector<float>&, std::string& model_version, r::api_status*) {
+    [](uint64_t, r::string_view, std::vector<int>&, std::vector<float>&, std::string& model_version, r::api_status*) {
     model_version = "model_id";
     return r::error_code::success;
   };
 
   const auto choose_continuous_action_fn =
-    [](const char*, float&, float&, std::string& model_version, r::api_status*) {
+    [](r::string_view, float&, float&, std::string& model_version, r::api_status*) {
     model_version = "model_id";
     return r::error_code::success;
   };
 
   const auto request_decision_fn =
-    [](const std::vector<const char*>& event_ids, const char*, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string& model_version, r::api_status*) {
+    [](const std::vector<const char*>& event_ids, r::string_view, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string& model_version, r::api_status*) {
     model_version = "model_id";
     return r::error_code::success;
   };
 
   const auto request_multi_slot_decision_fn =
-      [](const char*, const std::vector<std::string>&, const char*, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string& model_version, r::api_status*) {
+      [](const char*, const std::vector<std::string>&, r::string_view, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string& model_version, r::api_status*) {
       model_version = "model_id";
       return r::error_code::success;
   };
 
   const auto choose_rank_multistep_fn =
-    [](uint64_t, const char*, const r::episode_history&, std::vector<int>&, std::vector<float>&, std::string& model_version, r::api_status*) {
+    [](uint64_t, r::string_view, const r::episode_history&, std::vector<int>&, std::vector<float>&, std::string& model_version, r::api_status*) {
     model_version = "model_id";
     return r::error_code::success;
   };

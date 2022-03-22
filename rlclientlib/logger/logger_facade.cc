@@ -62,7 +62,7 @@ namespace reinforcement_learning {
 
 
     template<typename TSerializer, typename... Rest>
-    int wrap_log_call(i_logger_extensions& ext, TSerializer& serializer, const char* context, generic_event::object_list_t& objects, generic_event::payload_buffer_t& payload, event_content_type &content_type, api_status* status, const Rest&... rest) {
+    int wrap_log_call(i_logger_extensions& ext, TSerializer& serializer, string_view context, generic_event::object_list_t& objects, generic_event::payload_buffer_t& payload, event_content_type &content_type, api_status* status, const Rest&... rest) {
       if(!ext.is_object_extraction_enabled()) {
         payload = serializer.event(context, rest...);
       } else {
@@ -78,7 +78,7 @@ namespace reinforcement_learning {
       return error_code::success;
     }
 
-    int interaction_logger_facade::log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode) {
+    int interaction_logger_facade::log(string_view context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode) {
       switch (_version) {
         case 1: return _v1_cb->log(response.get_event_id(), context, flags, response, status, learning_mode);
         case 2: {
@@ -95,7 +95,7 @@ namespace reinforcement_learning {
       }
     }
 
-    int interaction_logger_facade::log(const char* episode_id, const char* previous_id, const char* context, unsigned int flags, const ranking_response& response, api_status* status) {
+    int interaction_logger_facade::log(const char* episode_id, const char* previous_id, string_view context, unsigned int flags, const ranking_response& response, api_status* status) {
       switch (_version) {
         case 2: {
           generic_event::object_list_t actions;
@@ -109,7 +109,7 @@ namespace reinforcement_learning {
       }
     }
 
-    int interaction_logger_facade::log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+    int interaction_logger_facade::log_decisions(std::vector<const char*>& event_ids, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
       switch (_version) {
       case 1: return _v1_ccb->log_decisions(event_ids, context, flags, action_ids, pdfs, model_version, status);
@@ -130,7 +130,7 @@ namespace reinforcement_learning {
     }
 
 
-    int interaction_logger_facade::log_decision(const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+    int interaction_logger_facade::log_decision(const std::string& event_id, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids, api_status* status,
       const std::vector<int>& baseline_actions, learning_mode learning_mode) {
       switch (_version) {
@@ -158,7 +158,7 @@ namespace reinforcement_learning {
       }
     }
 
-    int interaction_logger_facade::log_continuous_action(const char* context, unsigned int flags, const continuous_action_response& response, api_status* status) {
+    int interaction_logger_facade::log_continuous_action(string_view context, unsigned int flags, const continuous_action_response& response, api_status* status) {
       switch (_version) {
       case 2: {
         generic_event::object_list_t actions;

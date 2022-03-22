@@ -25,7 +25,7 @@ namespace reinforcement_learning {
     return exploration::uniform_random_merand48(seed);
   }
 
-  ranking_event::ranking_event(const char* event_id, bool deferred_action, float pass_prob, const char* context,
+  ranking_event::ranking_event(const char* event_id, bool deferred_action, float pass_prob, string_view context,
                                const ranking_response& response, const timestamp& ts, learning_mode learning_mode)
     : event(event_id, ts, pass_prob), _model_id(response.get_model_id()),
       _deferred_action(deferred_action), _learning_mode(learning_mode){
@@ -44,14 +44,14 @@ namespace reinforcement_learning {
   bool ranking_event::get_defered_action() const { return _deferred_action; }
   learning_mode ranking_event::get_learning_mode() const { return _learning_mode; }
 
-  ranking_event ranking_event::choose_rank(const char* event_id, const char* context, unsigned int flags,
+  ranking_event ranking_event::choose_rank(const char* event_id, string_view context, unsigned int flags,
                                            const ranking_response& resp, const timestamp& ts, float pass_prob, learning_mode learning_mode) {
     return ranking_event(event_id, flags & action_flags::DEFERRED, pass_prob, context, resp, ts, learning_mode);
   }
 
   decision_ranking_event::decision_ranking_event() { }
 
-  decision_ranking_event::decision_ranking_event(const std::vector<const char*>& event_ids, bool deferred_action, float pass_prob, const char* context,
+  decision_ranking_event::decision_ranking_event(const std::vector<const char*>& event_ids, bool deferred_action, float pass_prob, string_view context,
     const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts)
     : event(event_ids[0], ts, pass_prob)
     , _deferred_action(deferred_action)
@@ -73,11 +73,11 @@ namespace reinforcement_learning {
   bool decision_ranking_event::get_defered_action() const { return _deferred_action; }
   const std::vector<std::string>& decision_ranking_event::get_event_ids() const { return _event_ids; }
 
-  decision_ranking_event decision_ranking_event::request_decision(const std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts, float pass_prob) {
+  decision_ranking_event decision_ranking_event::request_decision(const std::vector<const char*>& event_ids, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts, float pass_prob) {
     return decision_ranking_event(event_ids, flags & action_flags::DEFERRED, pass_prob, context, action_ids, pdfs, model_version, ts);
   }
 
-  multi_slot_decision_event::multi_slot_decision_event(const std::string& event_id, bool deferred_action, float pass_prob, const char* context, const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts)
+  multi_slot_decision_event::multi_slot_decision_event(const std::string& event_id, bool deferred_action, float pass_prob, string_view context, const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts)
   : event(event_id.c_str(), ts, pass_prob),
   _event_id(event_id),
   _deferred_action(deferred_action),
@@ -96,7 +96,7 @@ namespace reinforcement_learning {
   bool multi_slot_decision_event::get_defered_action() const { return _deferred_action; }
   const std::string& multi_slot_decision_event::get_event_id() const { return _event_id; }
 
-  multi_slot_decision_event multi_slot_decision_event::request_decision(const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts, float pass_prob) {
+  multi_slot_decision_event multi_slot_decision_event::request_decision(const std::string& event_id, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts, float pass_prob) {
     return multi_slot_decision_event(event_id, (flags & action_flags::DEFERRED) != 0u, pass_prob, context, action_ids, pdfs, model_version, ts);
   }
 

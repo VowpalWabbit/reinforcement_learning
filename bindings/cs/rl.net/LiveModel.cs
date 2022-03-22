@@ -20,183 +20,183 @@ namespace Rl.Net
             public static extern int LiveModelInit(IntPtr liveModel, IntPtr apiStatus);
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelChooseRank")]
-            private static extern int LiveModelChooseRankNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr rankingResponse, IntPtr apiStatus);
+            private static extern int LiveModelChooseRankNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr rankingResponse, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelChooseRankOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, int, IntPtr, IntPtr, int> LiveModelChooseRankOverride { get; set; }
 
-            public static int LiveModelChooseRank(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr rankingResponse, IntPtr apiStatus)
+            public static int LiveModelChooseRank(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr rankingResponse, IntPtr apiStatus)
             {
                 if (LiveModelChooseRankOverride != null)
                 {
-                    return LiveModelChooseRankOverride(liveModel, eventId, contextJson, rankingResponse, apiStatus);
+                    return LiveModelChooseRankOverride(liveModel, eventId, contextJson, contextJsonSize, rankingResponse, apiStatus);
                 }
 
-                return LiveModelChooseRankNative(liveModel, eventId, contextJson, rankingResponse, apiStatus);
+                return LiveModelChooseRankNative(liveModel, eventId, contextJson, contextJsonSize, rankingResponse, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelChooseRankWithFlags")]
-            private static extern int LiveModelChooseRankWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr rankingResponse, IntPtr apiStatus);
+            private static extern int LiveModelChooseRankWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr rankingResponse, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, int> LiveModelChooseRankWithFlagsOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> LiveModelChooseRankWithFlagsOverride { get; set; }
 
-            public static int LiveModelChooseRankWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr rankingResponse, IntPtr apiStatus)
+            public static int LiveModelChooseRankWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr rankingResponse, IntPtr apiStatus)
             {
                 if (LiveModelChooseRankWithFlagsOverride != null)
                 {
-                    return LiveModelChooseRankWithFlagsOverride(liveModel, eventId, contextJson, flags, rankingResponse, apiStatus);
+                    return LiveModelChooseRankWithFlagsOverride(liveModel, eventId, contextJson, contextJsonSize, flags, rankingResponse, apiStatus);
                 }
 
-                return LiveModelChooseRankWithFlagsNative(liveModel, eventId, contextJson, flags, rankingResponse, apiStatus);
+                return LiveModelChooseRankWithFlagsNative(liveModel, eventId, contextJson, contextJsonSize, flags, rankingResponse, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestContinuousAction")]
-            private static extern int LiveModelRequestContinuousActionNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr continuousActionResponse, IntPtr apiStatus);
+            private static extern int LiveModelRequestContinuousActionNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr continuousActionResponse, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestContinuousActionOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, int, IntPtr, IntPtr, int> LiveModelRequestContinuousActionOverride { get; set; }
 
-            public static int LiveModelRequestContinuousAction(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr continuousActionResponse, IntPtr apiStatus)
+            public static int LiveModelRequestContinuousAction(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr continuousActionResponse, IntPtr apiStatus)
             {
                 if (LiveModelRequestContinuousActionOverride != null)
                 {
-                    return LiveModelRequestContinuousActionOverride(liveModel, eventId, contextJson, continuousActionResponse, apiStatus);
+                    return LiveModelRequestContinuousActionOverride(liveModel, eventId, contextJson, contextJsonSize, continuousActionResponse, apiStatus);
                 }
 
-                return LiveModelRequestContinuousActionNative(liveModel, eventId, contextJson, continuousActionResponse, apiStatus);
+                return LiveModelRequestContinuousActionNative(liveModel, eventId, contextJson, contextJsonSize, continuousActionResponse, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestContinuousActionWithFlags")]
-            private static extern int LiveModelRequestContinuousActionWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus);
+            private static extern int LiveModelRequestContinuousActionWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, int> LiveModelRequestContinuousActionWithFlagsOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> LiveModelRequestContinuousActionWithFlagsOverride { get; set; }
 
-            public static int LiveModelRequestContinuousActionWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus)
+            public static int LiveModelRequestContinuousActionWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus)
             {
                 if (LiveModelRequestContinuousActionWithFlagsOverride != null)
                 {
-                    return LiveModelRequestContinuousActionWithFlagsOverride(liveModel, eventId, contextJson, flags, continuousActionResponse, apiStatus);
+                    return LiveModelRequestContinuousActionWithFlagsOverride(liveModel, eventId, contextJson, contextJsonSize, flags, continuousActionResponse, apiStatus);
                 }
 
-                return LiveModelRequestContinuousActionWithFlagsNative(liveModel, eventId, contextJson, flags, continuousActionResponse, apiStatus);
+                return LiveModelRequestContinuousActionWithFlagsNative(liveModel, eventId, contextJson, contextJsonSize, flags, continuousActionResponse, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestDecision")]
-            private static extern int LiveModelRequestDecisionNative(IntPtr liveModel, IntPtr contextJson, IntPtr decisionResponse, IntPtr apiStatus);
+            private static extern int LiveModelRequestDecisionNative(IntPtr liveModel, IntPtr contextJson, int contextJsonSize, IntPtr decisionResponse, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestDecisionOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, int, IntPtr, IntPtr, int> LiveModelRequestDecisionOverride { get; set; }
 
-            public static int LiveModelRequestDecision(IntPtr liveModel, IntPtr contextJson, IntPtr decisionResponse, IntPtr apiStatus)
+            public static int LiveModelRequestDecision(IntPtr liveModel, IntPtr contextJson, int contextJsonSize, IntPtr decisionResponse, IntPtr apiStatus)
             {
                 if (LiveModelRequestDecisionOverride != null)
                 {
-                    return LiveModelRequestDecisionOverride(liveModel, contextJson, decisionResponse, apiStatus);
+                    return LiveModelRequestDecisionOverride(liveModel, contextJson, contextJsonSize, decisionResponse, apiStatus);
                 }
 
-                return LiveModelRequestDecisionNative(liveModel, contextJson, decisionResponse, apiStatus);
+                return LiveModelRequestDecisionNative(liveModel, contextJson, contextJsonSize, decisionResponse, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestDecisionWithFlags")]
-            private static extern int LiveModelRequestDecisionWithFlagsNative(IntPtr liveModel, IntPtr contextJson, uint flags, IntPtr decisionResponse, IntPtr apiStatus);
+            private static extern int LiveModelRequestDecisionWithFlagsNative(IntPtr liveModel, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr decisionResponse, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, uint, IntPtr, IntPtr, int> LiveModelRequestDecisionWithFlagsOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> LiveModelRequestDecisionWithFlagsOverride { get; set; }
 
-            public static int LiveModelRequestDecisionWithFlags(IntPtr liveModel, IntPtr contextJson, uint flags, IntPtr decisionResponse, IntPtr apiStatus)
+            public static int LiveModelRequestDecisionWithFlags(IntPtr liveModel, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr decisionResponse, IntPtr apiStatus)
             {
                 if (LiveModelRequestDecisionWithFlagsOverride != null)
                 {
-                    return LiveModelRequestDecisionWithFlagsOverride(liveModel, contextJson, flags, decisionResponse, apiStatus);
+                    return LiveModelRequestDecisionWithFlagsOverride(liveModel, contextJson, contextJsonSize, flags, decisionResponse, apiStatus);
                 }
 
-                return LiveModelRequestDecisionWithFlagsNative(liveModel, contextJson, flags, decisionResponse, apiStatus);
+                return LiveModelRequestDecisionWithFlagsNative(liveModel, contextJson, contextJsonSize, flags, decisionResponse, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestMultiSlotDecision")]
-            private static extern int LiveModelRequestMultiSlotDecisionNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr multiSlotResponse, IntPtr apiStatus);
+            private static extern int LiveModelRequestMultiSlotDecisionNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr multiSlotResponse, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, int, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionOverride { get; set; }
 
-            public static int LiveModelRequestMultiSlotDecision(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr multiSlotResponse, IntPtr apiStatus)
+            public static int LiveModelRequestMultiSlotDecision(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr multiSlotResponse, IntPtr apiStatus)
             {
                 if (LiveModelRequestMultiSlotDecisionOverride != null)
                 {
-                    return LiveModelRequestMultiSlotDecisionOverride(liveModel, eventId, contextJson, multiSlotResponse, apiStatus);
+                    return LiveModelRequestMultiSlotDecisionOverride(liveModel, eventId, contextJson, contextJsonSize, multiSlotResponse, apiStatus);
                 }
 
-                return LiveModelRequestMultiSlotDecisionNative(liveModel, eventId, contextJson, multiSlotResponse, apiStatus);
+                return LiveModelRequestMultiSlotDecisionNative(liveModel, eventId, contextJson, contextJsonSize, multiSlotResponse, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestMultiSlotDecisionWithFlags")]
-            private static extern int LiveModelRequestMultiSlotDecisionWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr multiSlotResponse, IntPtr apiStatus);
+            private static extern int LiveModelRequestMultiSlotDecisionWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr multiSlotResponse, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionWithFlagsOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionWithFlagsOverride { get; set; }
 
-            public static int LiveModelRequestMultiSlotDecisionWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr multiSlotResponse, IntPtr apiStatus)
+            public static int LiveModelRequestMultiSlotDecisionWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr multiSlotResponse, IntPtr apiStatus)
             {
                 if (LiveModelRequestMultiSlotDecisionWithFlagsOverride != null)
                 {
-                    return LiveModelRequestMultiSlotDecisionWithFlagsOverride(liveModel, eventId, contextJson, flags, multiSlotResponse, apiStatus);
+                    return LiveModelRequestMultiSlotDecisionWithFlagsOverride(liveModel, eventId, contextJson, contextJsonSize, flags, multiSlotResponse, apiStatus);
                 }
 
-                return LiveModelRequestMultiSlotDecisionWithFlagsNative(liveModel, eventId, contextJson, flags, multiSlotResponse, apiStatus);
+                return LiveModelRequestMultiSlotDecisionWithFlagsNative(liveModel, eventId, contextJson, contextJsonSize, flags, multiSlotResponse, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestMultiSlotDecisionWithBaselineAndFlags")]
-            private static extern int LiveModelRequestMultiSlotDecisionWithBaselineAndFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr multiSlotResponse, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus);
+            private static extern int LiveModelRequestMultiSlotDecisionWithBaselineAndFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr multiSlotResponse, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionWithBaselineAndFlagsOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionWithBaselineAndFlagsOverride { get; set; }
 
-            public static int LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr multiSlotResponse, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus)
+            public static int LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr multiSlotResponse, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus)
             {
                 if (LiveModelRequestMultiSlotDecisionWithBaselineAndFlagsOverride != null)
                 {
-                    return LiveModelRequestMultiSlotDecisionWithBaselineAndFlagsOverride(liveModel, eventId, contextJson, flags, multiSlotResponse, baselineActions, baselineActionsSize, apiStatus);
+                    return LiveModelRequestMultiSlotDecisionWithBaselineAndFlagsOverride(liveModel, eventId, contextJson, contextJsonSize, flags, multiSlotResponse, baselineActions, baselineActionsSize, apiStatus);
                 }
 
-                return LiveModelRequestMultiSlotDecisionWithBaselineAndFlagsNative(liveModel, eventId, contextJson, flags, multiSlotResponse, baselineActions, baselineActionsSize, apiStatus);
+                return LiveModelRequestMultiSlotDecisionWithBaselineAndFlagsNative(liveModel, eventId, contextJson, contextJsonSize, flags, multiSlotResponse, baselineActions, baselineActionsSize, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestMultiSlotDecisionDetailed")]
-            private static extern int LiveModelRequestMultiSlotDecisionDetailedNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr multiSlotResponseDetailed, IntPtr apiStatus);
+            private static extern int LiveModelRequestMultiSlotDecisionDetailedNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr multiSlotResponseDetailed, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionDetailedOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, int, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionDetailedOverride { get; set; }
 
-            public static int LiveModelRequestMultiSlotDecisionDetailed(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, IntPtr multiSlotResponseDetailed, IntPtr apiStatus)
+            public static int LiveModelRequestMultiSlotDecisionDetailed(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr multiSlotResponseDetailed, IntPtr apiStatus)
             {
                 if (LiveModelRequestMultiSlotDecisionDetailedOverride != null)
                 {
-                    return LiveModelRequestMultiSlotDecisionDetailedOverride(liveModel, eventId, contextJson, multiSlotResponseDetailed, apiStatus);
+                    return LiveModelRequestMultiSlotDecisionDetailedOverride(liveModel, eventId, contextJson, contextJsonSize, multiSlotResponseDetailed, apiStatus);
                 }
 
-                return LiveModelRequestMultiSlotDecisionDetailedNative(liveModel, eventId, contextJson, multiSlotResponseDetailed, apiStatus);
+                return LiveModelRequestMultiSlotDecisionDetailedNative(liveModel, eventId, contextJson, contextJsonSize, multiSlotResponseDetailed, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestMultiSlotDecisionDetailedWithFlags")]
-            private static extern int LiveModelRequestMultiSlotDecisionDetailedWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr multiSlotResponseDetailed, IntPtr apiStatus);
+            private static extern int LiveModelRequestMultiSlotDecisionDetailedWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson,  int contextJsonSize, uint flags, IntPtr multiSlotResponseDetailed, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionDetailedWithFlagsOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionDetailedWithFlagsOverride { get; set; }
 
-            public static int LiveModelRequestMultiSlotDecisionDetailedWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr multiSlotResponseDetailed, IntPtr apiStatus)
+            public static int LiveModelRequestMultiSlotDecisionDetailedWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr multiSlotResponseDetailed, IntPtr apiStatus)
             {
                 if (LiveModelRequestMultiSlotDecisionDetailedWithFlagsOverride != null)
                 {
-                    return LiveModelRequestMultiSlotDecisionDetailedWithFlagsOverride(liveModel, eventId, contextJson, flags, multiSlotResponseDetailed, apiStatus);
+                    return LiveModelRequestMultiSlotDecisionDetailedWithFlagsOverride(liveModel, eventId, contextJson, contextJsonSize, flags, multiSlotResponseDetailed, apiStatus);
                 }
 
-                return LiveModelRequestMultiSlotDecisionDetailedWithFlagsNative(liveModel, eventId, contextJson, flags, multiSlotResponseDetailed, apiStatus);
+                return LiveModelRequestMultiSlotDecisionDetailedWithFlagsNative(liveModel, eventId, contextJson, contextJsonSize, flags, multiSlotResponseDetailed, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags")]
-            private static extern int LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr multiSlotResponseDetailed, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus);
+            private static extern int LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr multiSlotResponseDetailed, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlagsOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlagsOverride { get; set; }
 
-            public static int LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, uint flags, IntPtr multiSlotResponseDetailed, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus)
+            public static int LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr multiSlotResponseDetailed, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus)
             {
                 if (LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlagsOverride != null)
                 {
-                    return LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlagsOverride(liveModel, eventId, contextJson, flags, multiSlotResponseDetailed, baselineActions, baselineActionsSize, apiStatus);
+                    return LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlagsOverride(liveModel, eventId, contextJson, contextJsonSize, flags, multiSlotResponseDetailed, baselineActions, baselineActionsSize, apiStatus);
                 }
 
-                return LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlagsNative(liveModel, eventId, contextJson, flags, multiSlotResponseDetailed, baselineActions, baselineActionsSize, apiStatus);
+                return LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlagsNative(liveModel, eventId, contextJson, contextJsonSize, flags, multiSlotResponseDetailed, baselineActions, baselineActionsSize, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelReportActionTaken")]
@@ -370,18 +370,19 @@ namespace Rl.Net
 
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
             {
+                int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
 
                 // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
                 // eventId and use supplied eventId at the rl.net.native layer.
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelChooseRank(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, rankingResponse, apiStatus);
+                    return NativeMethods.LiveModelChooseRank(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, contextJsonSize, rankingResponse, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelChooseRank(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, rankingResponse, apiStatus);
+                    return NativeMethods.LiveModelChooseRank(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, contextJsonSize, rankingResponse, apiStatus);
                 }
             }
         }
@@ -393,18 +394,19 @@ namespace Rl.Net
 
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
             {
+                int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
 
                 // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
                 // eventId and use supplied eventId at the rl.net.native layer.
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelChooseRankWithFlags(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, flags, rankingResponse, apiStatus);
+                    return NativeMethods.LiveModelChooseRankWithFlags(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, contextJsonSize, flags, rankingResponse, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelChooseRankWithFlags(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, flags, rankingResponse, apiStatus);
+                    return NativeMethods.LiveModelChooseRankWithFlags(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, contextJsonSize, flags, rankingResponse, apiStatus);
                 }
             }
         }
@@ -415,18 +417,19 @@ namespace Rl.Net
 
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
             {
+                int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
 
                 // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
                 // eventId and use supplied eventId at the rl.net.native layer.
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestContinuousAction(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, continuousActionResponse, apiStatus);
+                    return NativeMethods.LiveModelRequestContinuousAction(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, contextJsonSize, continuousActionResponse, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestContinuousAction(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, continuousActionResponse, apiStatus);
+                    return NativeMethods.LiveModelRequestContinuousAction(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, contextJsonSize, continuousActionResponse, apiStatus);
                 }
             }
         }
@@ -437,18 +440,19 @@ namespace Rl.Net
 
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
             {
+                int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
 
                 // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
                 // eventId and use supplied eventId at the rl.net.native layer.
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestContinuousActionWithFlags(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, flags, continuousActionResponse, apiStatus);
+                    return NativeMethods.LiveModelRequestContinuousActionWithFlags(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, contextJsonSize, flags, continuousActionResponse, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestContinuousActionWithFlags(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, flags, continuousActionResponse, apiStatus);
+                    return NativeMethods.LiveModelRequestContinuousActionWithFlags(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, contextJsonSize, flags, continuousActionResponse, apiStatus);
                 }
             }
         }
@@ -459,7 +463,8 @@ namespace Rl.Net
 
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
             {
-                return NativeMethods.LiveModelRequestDecision(liveModel, new IntPtr(contextJsonUtf8Bytes), decisionResponse, apiStatus);
+                int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
+                return NativeMethods.LiveModelRequestDecision(liveModel, new IntPtr(contextJsonUtf8Bytes), contextJsonSize, decisionResponse, apiStatus);
             }
         }
 
@@ -469,7 +474,8 @@ namespace Rl.Net
 
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
             {
-                return NativeMethods.LiveModelRequestDecisionWithFlags(liveModel, new IntPtr(contextJsonUtf8Bytes), flags, decisionResponse, apiStatus);
+                int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
+                return NativeMethods.LiveModelRequestDecisionWithFlags(liveModel, new IntPtr(contextJsonUtf8Bytes), contextJsonSize, flags, decisionResponse, apiStatus);
             }
         }
 
@@ -479,14 +485,15 @@ namespace Rl.Net
 
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
             {
+                int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecision(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, multiSlotResponse, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecision(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, multiSlotResponse, apiStatus);
                 }
 
                 fixed(byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecision(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, multiSlotResponse, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecision(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, multiSlotResponse, apiStatus);
                 }
             }
         }
@@ -497,14 +504,15 @@ namespace Rl.Net
 
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
             {
+                int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, flags, multiSlotResponse, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponse, apiStatus);
                 }
 
                 fixed(byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, flags, multiSlotResponse, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponse, apiStatus);
                 }
             }
         }
@@ -516,14 +524,15 @@ namespace Rl.Net
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
             fixed (int* baselineActionsFixed = baselineActions)
             {
+                int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, flags, multiSlotResponse, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponse, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, flags, multiSlotResponse, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponse, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
                 }
             }
         }
@@ -534,14 +543,15 @@ namespace Rl.Net
 
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
             {
+                int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailed(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, multiSlotResponseDetailed, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailed(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, multiSlotResponseDetailed, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailed(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, multiSlotResponseDetailed, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailed(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, multiSlotResponseDetailed, apiStatus);
                 }
             }
         }
@@ -552,14 +562,15 @@ namespace Rl.Net
 
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
             {
+                int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, flags, multiSlotResponseDetailed, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponseDetailed, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, flags, multiSlotResponseDetailed, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponseDetailed, apiStatus);
                 }
             }
         }
@@ -571,14 +582,15 @@ namespace Rl.Net
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
             fixed(int* baselineActionsFixed = baselineActions)
             {
+                int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, flags, multiSlotResponseDetailed, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponseDetailed, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, flags, multiSlotResponseDetailed, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponseDetailed, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
                 }
             }
         }

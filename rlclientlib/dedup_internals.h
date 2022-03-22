@@ -29,7 +29,7 @@ namespace reinforcement_learning
     string_view get_object(generic_event::object_id_t oid) const;
 
     size_t size() const;
-    int transform_payload_and_add_objects(const char* payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status);
+    int transform_payload_and_add_objects(string_view payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status);
   private:
     struct dict_entry {
       size_t _count;
@@ -81,7 +81,7 @@ namespace reinforcement_learning
 
     void update_ewma(float value);
     int compress(generic_event::payload_buffer_t& input, event_content_type& content_type, api_status* status) const;
-    int transform_payload_and_add_objects(const char* payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status);
+    int transform_payload_and_add_objects(string_view payload, std::string& edited_payload, generic_event::object_list_t& object_ids, api_status* status);
 
     i_time_provider* get_time_provider() { return _time_provider.get(); }
 
