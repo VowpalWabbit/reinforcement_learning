@@ -110,15 +110,9 @@ namespace reinforcement_learning { namespace logger {
 
     // If subsampling rate is < 1, then run subsampling logic
     if(_subsample_rate < 1.f) {
-      // This logic is copied from the try_drop function in the various event types
-      // However, this does NOT update the event-internal _pass_prob. I think this should be ok though
-      auto prg = [](std::string seed_str, int drop_pass){
-        seed_str += std::to_string(drop_pass);
-        const auto seed = uniform_hash(seed_str.c_str(), seed_str.length(), 0);
-        return exploration::uniform_random_merand48(seed);
-      };
-      if(prg(to_string(evt_id), constants::SUBSAMPLE_RATE_DROP_PASS) > _subsample_rate) {
-          // If the event is dropped, just get out of here
+      if(event->try_drop(_subsample_rate, constants::SUBSAMPLE_RATE_DROP_PASS))
+      {
+        // If the event is dropped, just get out of here
         return error_code::success;
       }
     }
