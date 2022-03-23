@@ -1,7 +1,6 @@
 #include "ccb_label.h"
 #include "test_common.h"
 
-#include <boost/test/tools/old/interface.hpp>
 #include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE(cb_simple) {
