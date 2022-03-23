@@ -158,7 +158,7 @@ struct cb_joined_event : public typed_joined_event {
 };
 
 struct ccb_joined_event : public typed_joined_event {
-  MultiSlotInteraction multi_slot_interaction;
+  MultiSlotInteraction multi_slot_interaction;   
   std::map<std::string, int> slot_id_to_index_map;
   std::vector<float> rewards;
   std::vector<float> original_rewards;
