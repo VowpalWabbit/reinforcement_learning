@@ -43,6 +43,7 @@ inline void calculate_multislot_interaction_metrics(dsjson_metrics* metrics,
   }
 
 struct typed_joined_event {
+  const int test_int = 42;
   virtual ~typed_joined_event() = default;
   virtual bool is_skip_learn() const = 0;
   virtual void set_skip_learn(bool sl) = 0;
