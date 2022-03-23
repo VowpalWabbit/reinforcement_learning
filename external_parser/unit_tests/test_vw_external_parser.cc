@@ -465,7 +465,8 @@ BOOST_AUTO_TEST_CASE(cb_apprentice_mode) {
       // 1st example is the example with cost in the baseline case (since
       // baseline is 1)
       BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 1);
-      BOOST_CHECK_CLOSE(examples[1]->l.cb.costs[0].cost, -1.5f, FLOAT_TOL);
+      // In apprentice mode, we use a reward of 1/0 for match/no match, regardless of the reward passed by the user.
+      BOOST_CHECK_CLOSE(examples[1]->l.cb.costs[0].cost, -1.0f, FLOAT_TOL);
     }
 
     // simulate next call to parser->read by clearing up examples
@@ -583,8 +584,9 @@ BOOST_AUTO_TEST_CASE(ccb_apprentice_mode) {
                     .action,
                 0);
           }
-          BOOST_CHECK_NE(ex->l.conditional_contextual_bandit.outcome->cost,
-                         -0.f);
+          // chosen action matches baseline, so we expect a reward of 1
+          BOOST_CHECK_EQUAL(ex->l.conditional_contextual_bandit.outcome->cost,
+                         -1.f);
         }
       }
     } else {
