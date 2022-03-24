@@ -97,7 +97,7 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
       - id: fetch-rl-version
         run: |
-          $version = Get-Content version.txt -Raw
+          $version = Get-Content nuget_version.txt -Raw
           $version = $version.Trim()
           echo "::set-output name=RLVersion::$version"
       - uses: actions/download-artifact@v1
