@@ -1,5 +1,5 @@
-#include "ranking_response.h"
-#include "explore.h"
+#include "rlclientlib/ranking_response.h"
+#include "rlclientlib/explore.h"
 #include <assert.h>
 
 const int NUM_ACTIONS = 10;
