@@ -31,31 +31,31 @@ extern "C" {
 
   API int LiveModelInit(livemodel_context_t* livemodel, reinforcement_learning::api_status* status = nullptr);
 
-  API int LiveModelChooseRank(livemodel_context_t* livemodel, const char * event_id, const char * context_json, int context_json_size, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status = nullptr);
-  API int LiveModelChooseRankWithFlags(livemodel_context_t* livemodel, const char * event_id, const char * context_json, int context_json_size, unsigned int flags, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelChooseRank(livemodel_context_t* livemodel, const char * event_id, int event_id_size, const char * context_json, int context_json_size, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelChooseRankWithFlags(livemodel_context_t* livemodel, const char * event_id, int event_id_size, const char * context_json, int context_json_size, unsigned int flags, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status = nullptr);
 
-  API int LiveModelRequestContinuousAction(livemodel_context_t* livemodel, const char * event_id, const char * context_json, int context_json_size, reinforcement_learning::continuous_action_response* resp, reinforcement_learning::api_status* status = nullptr);
-  API int LiveModelRequestContinuousActionWithFlags(livemodel_context_t* livemodel, const char * event_id, const char * context_json, int context_json_size, unsigned int flags, reinforcement_learning::continuous_action_response* resp, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelRequestContinuousAction(livemodel_context_t* livemodel, const char * event_id, int event_id_size, const char * context_json, int context_json_size, reinforcement_learning::continuous_action_response* resp, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelRequestContinuousActionWithFlags(livemodel_context_t* livemodel, const char * event_id, int event_id_size, const char * context_json, int context_json_size, unsigned int flags, reinforcement_learning::continuous_action_response* resp, reinforcement_learning::api_status* status = nullptr);
 
   API int LiveModelRequestDecision(livemodel_context_t* livemodel, const char * context_json, int context_json_size, reinforcement_learning::decision_response* resp, reinforcement_learning::api_status* status = nullptr);
   API int LiveModelRequestDecisionWithFlags(livemodel_context_t* livemodel, const char * context_json, int context_json_size, unsigned int flags, reinforcement_learning::decision_response* resp, reinforcement_learning::api_status* status = nullptr);
 
-  API int LiveModelRequestMultiSlotDecision(livemodel_context_t* context, const char * event_id, const char * context_json, int context_json_size, reinforcement_learning::multi_slot_response* resp, reinforcement_learning::api_status* status = nullptr);
-  API int LiveModelRequestMultiSlotDecisionWithFlags(livemodel_context_t* context, const char * event_id, const char * context_json, int context_json_size, unsigned int flags, reinforcement_learning::multi_slot_response* resp, reinforcement_learning::api_status* status = nullptr);
-  API int LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(livemodel_context_t* context, const char * event_id, const char * context_json, int context_json_size, unsigned int flags, reinforcement_learning::multi_slot_response* resp, const int* baseline_actions, const size_t baseline_actions_size, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelRequestMultiSlotDecision(livemodel_context_t* context, const char * event_id, int event_id_size, const char * context_json, int context_json_size, reinforcement_learning::multi_slot_response* resp, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelRequestMultiSlotDecisionWithFlags(livemodel_context_t* context, const char * event_id, int event_id_size, const char * context_json, int context_json_size, unsigned int flags, reinforcement_learning::multi_slot_response* resp, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(livemodel_context_t* context, const char * event_id, int event_id_size, const char * context_json, int context_json_size, unsigned int flags, reinforcement_learning::multi_slot_response* resp, const int* baseline_actions, const size_t baseline_actions_size, reinforcement_learning::api_status* status = nullptr);
 
-  API int LiveModelRequestMultiSlotDecisionDetailed(livemodel_context_t* context, const char * event_id, const char * context_json, int context_json_size, reinforcement_learning::multi_slot_response_detailed* resp, reinforcement_learning::api_status* status = nullptr);
-  API int LiveModelRequestMultiSlotDecisionDetailedWithFlags(livemodel_context_t* context, const char * event_id, const char * context_json, int context_json_size, unsigned int flags, reinforcement_learning::multi_slot_response_detailed* resp, reinforcement_learning::api_status* status = nullptr);
-  API int LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(livemodel_context_t* context, const char * event_id, const char * context_json, int context_json_size, unsigned int flags, reinforcement_learning::multi_slot_response_detailed* resp, const int* baseline_actions, size_t baseline_actions_size, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelRequestMultiSlotDecisionDetailed(livemodel_context_t* context, const char * event_id, int event_id_size, const char * context_json, int context_json_size, reinforcement_learning::multi_slot_response_detailed* resp, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelRequestMultiSlotDecisionDetailedWithFlags(livemodel_context_t* context, const char * event_id, int event_id_size, const char * context_json, int context_json_size, unsigned int flags, reinforcement_learning::multi_slot_response_detailed* resp, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(livemodel_context_t* context, const char * event_id, int event_id_size, const char * context_json, int context_json_size, unsigned int flags, reinforcement_learning::multi_slot_response_detailed* resp, const int* baseline_actions, size_t baseline_actions_size, reinforcement_learning::api_status* status = nullptr);
 
-  API int LiveModelReportActionTaken(livemodel_context_t* livemodel, const char * event_id, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelReportActionTaken(livemodel_context_t* livemodel, const char * event_id, int event_id_size, reinforcement_learning::api_status* status = nullptr);
 
-  API int LiveModelReportOutcomeF(livemodel_context_t* livemodel, const char * event_id, float outcome, reinforcement_learning::api_status* status = nullptr);
-  API int LiveModelReportOutcomeJson(livemodel_context_t* livemodel, const char * event_id, const char * outcomeJson, reinforcement_learning::api_status* status = nullptr);
-  API int LiveModelReportOutcomeSlotF(livemodel_context_t* context, const char* event_id, unsigned int slot_index, float outcome, reinforcement_learning::api_status* status = nullptr);
-  API int LiveModelReportOutcomeSlotJson(livemodel_context_t* context, const char* event_id, unsigned int slot_index, const char* outcome_json, reinforcement_learning::api_status* status = nullptr);
-  API int LiveModelReportOutcomeSlotStringIdF(livemodel_context_t* context, const char* event_id, const char* slot_id, float outcome, reinforcement_learning::api_status* status = nullptr);
-  API int LiveModelReportOutcomeSlotStringIdJson(livemodel_context_t* context, const char* event_id, const char* slot_id, const char* outcome_json, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelReportOutcomeF(livemodel_context_t* livemodel, const char * event_id, int event_id_size, float outcome, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelReportOutcomeJson(livemodel_context_t* livemodel, const char * event_id, int event_id_size, const char * outcome_json,, int outcome_json_size, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelReportOutcomeSlotF(livemodel_context_t* context, const char* event_id, int event_id_size, unsigned int slot_index, float outcome, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelReportOutcomeSlotJson(livemodel_context_t* context, const char* event_id, int event_id_size, unsigned int slot_index, const char* outcome_json, int outcome_json_size, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelReportOutcomeSlotStringIdF(livemodel_context_t* context, const char* event_id, int event_id_size, const char* slot_id, int slot_id_size, float outcome, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelReportOutcomeSlotStringIdJson(livemodel_context_t* context, const char* event_id, int event_id_size, const char* slot_id, int slot_id_size, const char* outcome_json, int outcome_json_size, reinforcement_learning::api_status* status = nullptr);
 
   API int LiveModelRefreshModel(livemodel_context_t* context, reinforcement_learning::api_status* status = nullptr);
 
