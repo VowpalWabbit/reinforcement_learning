@@ -207,7 +207,7 @@ namespace reinforcement_learning
     return _pimpl->report_outcome(event_id, outcome, status);
   }
 
-  int live_model::report_outcome(string_view primary_id, int secondary_id, const char* outcome, api_status* status)
+  int live_model::report_outcome(string_view primary_id, int secondary_id, string_view outcome, api_status* status)
   {
     INIT_CHECK();
     return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);

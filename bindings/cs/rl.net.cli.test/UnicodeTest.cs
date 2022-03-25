@@ -334,7 +334,7 @@ namespace Rl.Net.Cli.Test
         private void Run_LiveModelChooseRank_Test(LiveModel liveModel, string eventId, string contextJson)
         {
             NativeMethods.LiveModelChooseRankOverride =
-                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, int contextJsonSize, IntPtr rankingResponse, IntPtr apiStatus) =>
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, int eventIdSize, IntPtr contextJsonPtr, int contextJsonSize, IntPtr rankingResponse, IntPtr apiStatus) =>
                 {
                     string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
                     Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in LiveModelChooseRank");
@@ -351,7 +351,7 @@ namespace Rl.Net.Cli.Test
         private void Run_LiveModelChooseRankWithFlags_Test(LiveModel liveModel, string eventId, string contextJson)
         {
             NativeMethods.LiveModelChooseRankWithFlagsOverride =
-                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, int contextJsonSize, uint flags, IntPtr rankingResponse, IntPtr apiStatus) =>
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, int eventIdSize, IntPtr contextJsonPtr, int contextJsonSize, uint flags, IntPtr rankingResponse, IntPtr apiStatus) =>
                 {
                     string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
                     Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in LiveModelChooseRank");
@@ -414,7 +414,7 @@ namespace Rl.Net.Cli.Test
         private void Run_LiveModelRequestMultiSlotDetailed_Test(LiveModel liveModel, string contextJson, string eventId)
         {
             NativeMethods.LiveModelRequestMultiSlotDecisionDetailedOverride =
-                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, int contextJsonSize, IntPtr rankingResponse, IntPtr ApiStatus) =>
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, int eventIdSize, IntPtr contextJsonPtr, int contextJsonSize, IntPtr rankingResponse, IntPtr ApiStatus) =>
                 {
                     string contextJsonMarshalledBack = NativeMethods.StringMarshallingFunc(contextJsonPtr);
                     Assert.AreEqual(contextJson, contextJsonMarshalledBack, "Marshalling contextJson does not work properly in LiveModelRequestMultiSlotDecisionDetailed");
@@ -428,7 +428,7 @@ namespace Rl.Net.Cli.Test
         private void Run_LiveModelRequestMultiSlotDetailedWithFlags_Test(LiveModel liveModel, string contextJson, string eventId)
         {
             NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithFlagsOverride =
-                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, int contextJsonSize, uint flags, IntPtr rankingResponse, IntPtr ApiStatus) =>
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, int eventIdSize, IntPtr contextJsonPtr, int contextJsonSize, uint flags, IntPtr rankingResponse, IntPtr ApiStatus) =>
                 {
                     string contextJsonMarshalledBack = NativeMethods.StringMarshallingFunc(contextJsonPtr);
                     Assert.AreEqual(contextJson, contextJsonMarshalledBack, "Marshalling contextJson does not work properly in LiveModelRequestDecisionDetailedWithFlags");
@@ -451,7 +451,7 @@ namespace Rl.Net.Cli.Test
         private void Run_LiveModelRequestMultiSlot_Test(LiveModel liveModel, string contextJson, string eventId)
         {
             NativeMethods.LiveModelRequestMultiSlotDecisionOverride =
-                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, int contextJsonSize, IntPtr rankingResponse, IntPtr ApiStatus) =>
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, int eventIdSize, IntPtr contextJsonPtr, int contextJsonSize, IntPtr rankingResponse, IntPtr ApiStatus) =>
                 {
                     string contextJsonMarshalledBack = NativeMethods.StringMarshallingFunc(contextJsonPtr);
                     Assert.AreEqual(contextJson, contextJsonMarshalledBack, "Marshalling contextJson does not work properly in LiveModelRequestMultiSlotDecision");
@@ -465,7 +465,7 @@ namespace Rl.Net.Cli.Test
         private void Run_LiveModelRequestMultiSlotWithFlags_Test(LiveModel liveModel, string contextJson, string eventId)
         {
             NativeMethods.LiveModelRequestMultiSlotDecisionWithFlagsOverride =
-                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, int contextJsonSize, uint flags, IntPtr rankingResponse, IntPtr ApiStatus) =>
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, int eventIdSize, IntPtr contextJsonPtr, int contextJsonSize, uint flags, IntPtr rankingResponse, IntPtr ApiStatus) =>
                 {
                     string contextJsonMarshalledBack = NativeMethods.StringMarshallingFunc(contextJsonPtr);
                     Assert.AreEqual(contextJson, contextJsonMarshalledBack, "Marshalling contextJson does not work properly in LiveModelRequestDecisionWithFlags");
@@ -488,7 +488,7 @@ namespace Rl.Net.Cli.Test
         private void Run_LiveModelRequestContinuousAction_Test(LiveModel liveModel, string contextJson)
         {
             NativeMethods.LiveModelRequestContinuousActionOverride =
-                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, int contextJsonSize, IntPtr continuousActionResponse, IntPtr ApiStatus) =>
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, int eventIdSize, IntPtr contextJsonPtr, int contextJsonSize, IntPtr continuousActionResponse, IntPtr ApiStatus) =>
                 {
                     string contextJsonMarshalledBack = NativeMethods.StringMarshallingFunc(contextJsonPtr);
                     Assert.AreEqual(contextJson, contextJsonMarshalledBack, "Marshalling contextJson does not work properly in LiveModelRequestContinuousAction");
@@ -513,7 +513,7 @@ namespace Rl.Net.Cli.Test
         private void Run_LiveModelReportActionTaken_Test(LiveModel liveModel, string eventId)
         {
             NativeMethods.LiveModelReportActionTakenOverride =
-                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr apiStatus) =>
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, int eventIdSize, IntPtr apiStatus) =>
                 {
                     string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
                     Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in LiveModelReportActionTaken");
@@ -535,7 +535,7 @@ namespace Rl.Net.Cli.Test
         private void Run_LiveModelReportOutcomeF_Test(LiveModel liveModel, string eventId, float outcome)
         {
             NativeMethods.LiveModelReportOutcomeFOverride =
-                (IntPtr liveModelPtr, IntPtr eventIdPtr, float o, IntPtr apiStatus) =>
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, int eventIdSize, float o, IntPtr apiStatus) =>
                 {
                     string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
                     Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in LiveModelReportOutcomeF");
@@ -549,7 +549,7 @@ namespace Rl.Net.Cli.Test
         private void Run_LiveModelReportOutcomeJson_Test(LiveModel liveModel, string eventId, string outcomeJson)
         {
             NativeMethods.LiveModelReportOutcomeJsonOverride =
-                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr outcomeJsonPtr, IntPtr apiStatus) =>
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, int eventIdSize, IntPtr outcomeJsonPtr, int outcomeJsonSize, IntPtr apiStatus) =>
                 {
                     string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
                     Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in LiveModelReportOutcomeJson");
@@ -566,7 +566,7 @@ namespace Rl.Net.Cli.Test
         private void Run_LiveModelReportOutcomeSlotF_Test(LiveModel liveModel, string eventId, uint slotIndex, float outcome)
         {
             NativeMethods.LiveModelReportOutcomeSlotFOverride =
-                (IntPtr liveModelPtr, IntPtr eventIdPtr, uint slotI, float o, IntPtr apiStatus) =>
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, int eventIdSize, uint slotI, float o, IntPtr apiStatus) =>
                 {
                     string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
                     Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in LiveModelReportOutcomeSlotF");
@@ -580,7 +580,7 @@ namespace Rl.Net.Cli.Test
         private void Run_LiveModelReportOutcomeSlotJson_Test(LiveModel liveModel, string eventId, uint slotIndex, string outcomeJson)
         {
             NativeMethods.LiveModelReportOutcomeSlotJsonOverride =
-                (IntPtr liveModelPtr, IntPtr eventIdPtr, uint slotI, IntPtr outcomeJsonPtr, IntPtr apiStatus) =>
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, int eventIdSize, uint slotI, IntPtr outcomeJsonPtr, int outcomeJsonSize, IntPtr apiStatus) =>
                 {
                     string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
                     Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in LiveModelReportOutcomeSlotJson");
@@ -597,7 +597,7 @@ namespace Rl.Net.Cli.Test
         private void Run_LiveModelReportOutcomeSlotStringIdF_Test(LiveModel liveModel, string eventId, string slotId, float outcome)
         {
             NativeMethods.LiveModelReportOutcomeSlotStringIdFOverride =
-                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr slotIdPtr, float o, IntPtr apiStatus) =>
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, int eventIdSize, IntPtr slotIdPtr, int slotIdSize, float o, IntPtr apiStatus) =>
                 {
                     string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
                     Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in LiveModelReportOutcomeSlotStringIdF");
@@ -614,7 +614,7 @@ namespace Rl.Net.Cli.Test
         private void Run_LiveModelReportOutcomeSlotStringIdJson_Test(LiveModel liveModel, string eventId, string slotId, string outcomeJson)
         {
             NativeMethods.LiveModelReportOutcomeSlotStringIdJsonOverride =
-                (IntPtr liveModelPtr, IntPtr eventIdPtr, IntPtr slotIdPtr, IntPtr outcomeJsonPtr, IntPtr apiStatus) =>
+                (IntPtr liveModelPtr, IntPtr eventIdPtr, int eventIdSize, IntPtr slotIdPtr, int slotIdSize, IntPtr outcomeJsonPtr, int outcomeJsonSize, IntPtr apiStatus) =>
                 {
                     string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
                     Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in LiveModelReportOutcomeSlotStringIdJson");

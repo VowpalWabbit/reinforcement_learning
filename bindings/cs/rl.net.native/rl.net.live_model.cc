@@ -210,7 +210,7 @@ API int LiveModelReportOutcomeSlotStringIdF(livemodel_context_t* context, const 
   return context->livemodel->report_outcome({event_id, static_cast<size_t>(event_id_size)}, {slot_id, static_cast<size_t>(slot_id_size)}, outcome, status);
 }
 
-API int LiveModelReportOutcomeSlotStringIdJson(livemodel_context_t* context, const char* event_id, int event_id_size, const char* slot_id, int slot_id_size, const char* outcome_json int outcome_json_size, reinforcement_learning::api_status* status)
+API int LiveModelReportOutcomeSlotStringIdJson(livemodel_context_t* context, const char* event_id, int event_id_size, const char* slot_id, int slot_id_size, const char* outcome_json, int outcome_json_size, reinforcement_learning::api_status* status)
 {
   return context->livemodel->report_outcome({event_id, static_cast<size_t>(event_id_size)}, {slot_id, static_cast<size_t>(slot_id_size)}, {outcome_json, static_cast<size_t>(outcome_json_size)}, status);
 }

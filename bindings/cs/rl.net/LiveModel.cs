@@ -271,7 +271,7 @@ namespace Rl.Net
                     return LiveModelReportOutcomeSlotJsonOverride(liveModel, eventId, eventIdSize, slotIndex, outcomeJson, outcomeJsonSize, apiStatus);
                 }
 
-                return LiveModelReportOutcomeSlotJsonNative(liveModel, eventId, slotIdSize, slotIndex, outcomeJson, outcomeJsonSize, apiStatus);
+                return LiveModelReportOutcomeSlotJsonNative(liveModel, eventId, eventIdSize, slotIndex, outcomeJson, outcomeJsonSize, apiStatus);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "LiveModelReportOutcomeSlotStringIdF")]
@@ -377,12 +377,13 @@ namespace Rl.Net
                 // eventId and use supplied eventId at the rl.net.native layer.
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelChooseRank(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, contextJsonSize, rankingResponse, apiStatus);
+                    return NativeMethods.LiveModelChooseRank(liveModel, IntPtr.Zero, 0, contextJsonUtf8Ptr, contextJsonSize, rankingResponse, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelChooseRank(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, contextJsonSize, rankingResponse, apiStatus);
+                    int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                    return NativeMethods.LiveModelChooseRank(liveModel, new IntPtr(eventIdUtf8Bytes), eventIdSize, contextJsonUtf8Ptr, contextJsonSize, rankingResponse, apiStatus);
                 }
             }
         }
@@ -401,12 +402,13 @@ namespace Rl.Net
                 // eventId and use supplied eventId at the rl.net.native layer.
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelChooseRankWithFlags(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, contextJsonSize, flags, rankingResponse, apiStatus);
+                    return NativeMethods.LiveModelChooseRankWithFlags(liveModel, IntPtr.Zero, 0, contextJsonUtf8Ptr, contextJsonSize, flags, rankingResponse, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelChooseRankWithFlags(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, contextJsonSize, flags, rankingResponse, apiStatus);
+                    int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                    return NativeMethods.LiveModelChooseRankWithFlags(liveModel, new IntPtr(eventIdUtf8Bytes), eventIdSize, contextJsonUtf8Ptr, contextJsonSize, flags, rankingResponse, apiStatus);
                 }
             }
         }
@@ -424,12 +426,13 @@ namespace Rl.Net
                 // eventId and use supplied eventId at the rl.net.native layer.
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestContinuousAction(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, contextJsonSize, continuousActionResponse, apiStatus);
+                    return NativeMethods.LiveModelRequestContinuousAction(liveModel, IntPtr.Zero, 0, contextJsonUtf8Ptr, contextJsonSize, continuousActionResponse, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestContinuousAction(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, contextJsonSize, continuousActionResponse, apiStatus);
+                    int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                    return NativeMethods.LiveModelRequestContinuousAction(liveModel, new IntPtr(eventIdUtf8Bytes), eventIdSize, contextJsonUtf8Ptr, contextJsonSize, continuousActionResponse, apiStatus);
                 }
             }
         }
@@ -447,12 +450,13 @@ namespace Rl.Net
                 // eventId and use supplied eventId at the rl.net.native layer.
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestContinuousActionWithFlags(liveModel, IntPtr.Zero, contextJsonUtf8Ptr, contextJsonSize, flags, continuousActionResponse, apiStatus);
+                    return NativeMethods.LiveModelRequestContinuousActionWithFlags(liveModel, IntPtr.Zero, 0, contextJsonUtf8Ptr, contextJsonSize, flags, continuousActionResponse, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestContinuousActionWithFlags(liveModel, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, contextJsonSize, flags, continuousActionResponse, apiStatus);
+                    int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                    return NativeMethods.LiveModelRequestContinuousActionWithFlags(liveModel, new IntPtr(eventIdUtf8Bytes), eventIdSize, contextJsonUtf8Ptr, contextJsonSize, flags, continuousActionResponse, apiStatus);
                 }
             }
         }
@@ -488,12 +492,13 @@ namespace Rl.Net
                 int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecision(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, multiSlotResponse, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecision(liveModel, IntPtr.Zero, 0, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, multiSlotResponse, apiStatus);
                 }
 
                 fixed(byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecision(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, multiSlotResponse, apiStatus);
+                    int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                    return NativeMethods.LiveModelRequestMultiSlotDecision(liveModel, (IntPtr)eventIdUtf8Bytes, eventIdSize, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, multiSlotResponse, apiStatus);
                 }
             }
         }
@@ -507,12 +512,13 @@ namespace Rl.Net
                 int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponse, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithFlags(liveModel, IntPtr.Zero, 0, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponse, apiStatus);
                 }
 
                 fixed(byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponse, apiStatus);
+                    int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithFlags(liveModel, (IntPtr)eventIdUtf8Bytes, eventIdSize, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponse, apiStatus);
                 }
             }
         }
@@ -527,12 +533,13 @@ namespace Rl.Net
                 int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponse, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(liveModel, IntPtr.Zero, 0, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponse, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponse, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                    int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionWithBaselineAndFlags(liveModel, (IntPtr)eventIdUtf8Bytes, eventIdSize, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponse, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
                 }
             }
         }
@@ -546,12 +553,13 @@ namespace Rl.Net
                 int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailed(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, multiSlotResponseDetailed, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailed(liveModel, IntPtr.Zero, 0, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, multiSlotResponseDetailed, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailed(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, multiSlotResponseDetailed, apiStatus);
+                    int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailed(liveModel, (IntPtr)eventIdUtf8Bytes, eventIdSize, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, multiSlotResponseDetailed, apiStatus);
                 }
             }
         }
@@ -565,12 +573,13 @@ namespace Rl.Net
                 int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponseDetailed, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithFlags(liveModel, IntPtr.Zero, 0, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponseDetailed, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponseDetailed, apiStatus);
+                    int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithFlags(liveModel, (IntPtr)eventIdUtf8Bytes, eventIdSize, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponseDetailed, apiStatus);
                 }
             }
         }
@@ -585,12 +594,13 @@ namespace Rl.Net
                 int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 if (eventId == null)
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponseDetailed, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(liveModel, IntPtr.Zero, 0, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponseDetailed, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponseDetailed, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                    int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                    return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(liveModel, (IntPtr)eventIdUtf8Bytes, eventIdSize, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponseDetailed, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
                 }
             }
         }
@@ -604,7 +614,8 @@ namespace Rl.Net
 
             fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
             {
-                return NativeMethods.LiveModelReportActionTaken(liveModel, new IntPtr(eventIdUtf8Bytes), apiStatus);
+                int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                return NativeMethods.LiveModelReportActionTaken(liveModel, new IntPtr(eventIdUtf8Bytes), eventIdSize, apiStatus);
             }
         }
 
@@ -617,7 +628,8 @@ namespace Rl.Net
 
             fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
             {
-                return NativeMethods.LiveModelReportOutcomeF(liveModel, new IntPtr(eventIdUtf8Bytes), outcome, apiStatus);
+                int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                return NativeMethods.LiveModelReportOutcomeF(liveModel, new IntPtr(eventIdUtf8Bytes), eventIdSize, outcome, apiStatus);
             }
         }
 
@@ -633,7 +645,9 @@ namespace Rl.Net
             fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
             fixed (byte* outcomeJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(outcomeJson))
             {
-                return NativeMethods.LiveModelReportOutcomeJson(liveModel, new IntPtr(eventIdUtf8Bytes), new IntPtr(outcomeJsonUtf8Bytes), apiStatus);
+                int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                int outcomeJsonSize = NativeMethods.StringEncoding.GetByteCount(outcomeJson);
+                return NativeMethods.LiveModelReportOutcomeJson(liveModel, new IntPtr(eventIdUtf8Bytes), eventIdSize, new IntPtr(outcomeJsonUtf8Bytes), outcomeJsonSize, apiStatus);
             }
         }
 
@@ -646,7 +660,8 @@ namespace Rl.Net
 
             fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
             {
-                return NativeMethods.LiveModelReportOutcomeSlotF(liveModel, new IntPtr(eventIdUtf8Bytes), slotIndex, outcome, apiStatus);
+                int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                return NativeMethods.LiveModelReportOutcomeSlotF(liveModel, new IntPtr(eventIdUtf8Bytes), eventIdSize, slotIndex, outcome, apiStatus);
             }
         }
 
@@ -662,7 +677,9 @@ namespace Rl.Net
             fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
             fixed (byte* outcomeJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(outcomeJson))
             {
-                return NativeMethods.LiveModelReportOutcomeSlotJson(liveModel, new IntPtr(eventIdUtf8Bytes), slotIndex, new IntPtr(outcomeJsonUtf8Bytes), apiStatus);
+                int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                int outcomeJsonSize = NativeMethods.StringEncoding.GetByteCount(outcomeJson);
+                return NativeMethods.LiveModelReportOutcomeSlotJson(liveModel, new IntPtr(eventIdUtf8Bytes), eventIdSize, slotIndex, new IntPtr(outcomeJsonUtf8Bytes), outcomeJsonSize, apiStatus);
             }
         }
 
@@ -681,7 +698,9 @@ namespace Rl.Net
             fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
             fixed (byte* slotIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(slotId))
             {
-                return NativeMethods.LiveModelReportOutcomeSlotStringIdF(liveModel, new IntPtr(eventIdUtf8Bytes), new IntPtr(slotIdUtf8Bytes), outcome, apiStatus);
+                int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                int slotIdSize = NativeMethods.StringEncoding.GetByteCount(slotId);
+                return NativeMethods.LiveModelReportOutcomeSlotStringIdF(liveModel, new IntPtr(eventIdUtf8Bytes), eventIdSize, new IntPtr(slotIdUtf8Bytes), slotIdSize, outcome, apiStatus);
             }
 
         }
@@ -704,7 +723,10 @@ namespace Rl.Net
             fixed (byte* slotIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(slotId))
             fixed (byte* outcomeJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(outcomeJson))
             {
-                return NativeMethods.LiveModelReportOutcomeSlotStringIdJson(liveModel, new IntPtr(eventIdUtf8Bytes), new IntPtr(slotIdUtf8Bytes), new IntPtr(outcomeJsonUtf8Bytes), apiStatus);
+                int eventIdSize = NativeMethods.StringEncoding.GetByteCount(eventId);
+                int slotIdSize = NativeMethods.StringEncoding.GetByteCount(slotId);
+                int outcomeJsonSize = NativeMethods.StringEncoding.GetByteCount(outcomeJson);
+                return NativeMethods.LiveModelReportOutcomeSlotStringIdJson(liveModel, new IntPtr(eventIdUtf8Bytes), eventIdSize, new IntPtr(slotIdUtf8Bytes), slotIdSize, new IntPtr(outcomeJsonUtf8Bytes), outcomeJsonSize, apiStatus);
             }
         }
 

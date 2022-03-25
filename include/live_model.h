@@ -352,7 +352,7 @@ namespace reinforcement_learning {
      * @param status  Optional field with detailed string description if there is an error
      * @return int Return error code.  This will also be returned in the api_status object
      */
-    int report_outcome(string_view event_id, int secondary_id, const char* outcome, api_status* status= nullptr);
+    int report_outcome(string_view event_id, int secondary_id, string_view outcome, api_status* status= nullptr);
 
     /**
      * @brief Report outcome of a decision based on a pair of primary and secondary indentifiers.
