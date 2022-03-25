@@ -115,9 +115,10 @@ namespace reinforcement_learning {
         return fbb.Release();
       }
 
-      static generic_event::payload_buffer_t string_event(const char* outcome) {
+      static generic_event::payload_buffer_t string_event(string_view outcome) {
         flatbuffers::FlatBufferBuilder fbb;
-        const auto evt = fbb.CreateString(outcome).Union();
+        std::string o_s(outcome);
+        const auto evt = fbb.CreateString(o_s.c_str()).Union();
         auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_literal, evt);
         fbb.Finish(fb);
         return fbb.Release();
@@ -132,28 +133,32 @@ namespace reinforcement_learning {
         return fbb.Release();
       }
 
-      static generic_event::payload_buffer_t numeric_event(const char* index, float outcome) {
+      static generic_event::payload_buffer_t numeric_event(string_view index, float outcome) {
         flatbuffers::FlatBufferBuilder fbb;
+        std::string i_s(index);
         const auto evt = v2::CreateNumericOutcome(fbb, outcome).Union();
-        const auto idx = fbb.CreateString(index).Union();
+        const auto idx = fbb.CreateString(i_s.c_str()).Union();
         auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_numeric, evt, v2::IndexValue_literal, idx);
         fbb.Finish(fb);
         return fbb.Release();
       }
 
-      static generic_event::payload_buffer_t string_event(int index, const char* outcome) {
+      static generic_event::payload_buffer_t string_event(int index, string_view outcome) {
         flatbuffers::FlatBufferBuilder fbb;
-        const auto evt = fbb.CreateString(outcome).Union();
+        std::string o_s(outcome);
+        const auto evt = fbb.CreateString(o_s.c_str()).Union();
         const auto idx = v2::CreateNumericIndex(fbb, index).Union();
         auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_literal, evt, v2::IndexValue_numeric, idx);
         fbb.Finish(fb);
         return fbb.Release();
       }
 
-      static generic_event::payload_buffer_t string_event(const char* index, const char* outcome) {
+      static generic_event::payload_buffer_t string_event(string_view index, string_view outcome) {
         flatbuffers::FlatBufferBuilder fbb;
-        const auto evt = fbb.CreateString(outcome).Union();
-        const auto idx = fbb.CreateString(index).Union();
+        std::string o_s(outcome);
+        std::string i_s(index);
+        const auto evt = fbb.CreateString(o_s.c_str()).Union();
+        const auto idx = fbb.CreateString(i_s.c_str()).Union();
         auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_literal, evt, v2::IndexValue_literal, idx);
         fbb.Finish(fb);
         return fbb.Release();
@@ -166,9 +171,10 @@ namespace reinforcement_learning {
         return fbb.Release();
       }
 
-      static generic_event::payload_buffer_t report_action_taken(const char* index) {
+      static generic_event::payload_buffer_t report_action_taken(string_view index) {
         flatbuffers::FlatBufferBuilder fbb;
-        const auto idx = fbb.CreateString(index).Union();
+        std::string i_s(index);
+        const auto idx = fbb.CreateString(i_s.c_str()).Union();
         auto fb = v2::CreateOutcomeEvent(fbb, v2::OutcomeValue_NONE, 0, v2::IndexValue_literal, idx, true);
         fbb.Finish(fb);
         return fbb.Release();
@@ -176,7 +182,7 @@ namespace reinforcement_learning {
     };
 
     struct multistep_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_MultiStep> {
-      static generic_event::payload_buffer_t event(string_view context, const char* previous_id, unsigned int flags, const ranking_response& response) {
+      static generic_event::payload_buffer_t event(string_view context, string_view previous_id, unsigned int flags, const ranking_response& response) {
         flatbuffers::FlatBufferBuilder fbb;
         std::vector<uint64_t> action_ids;
         std::vector<float> probabilities;
@@ -188,7 +194,8 @@ namespace reinforcement_learning {
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-        auto fb = v2::CreateMultiStepEventDirect(fbb, response.get_event_id(), previous_id, &action_ids,
+        std::string pi_s(previous_id);
+        auto fb = v2::CreateMultiStepEventDirect(fbb, response.get_event_id(), pi_s.c_str(), &action_ids,
           &_context, &probabilities, response.get_model_id(), flags & action_flags::DEFERRED);
         fbb.Finish(fb);
         return fbb.Release();

@@ -55,18 +55,18 @@ namespace reinforcement_learning
       //CB v1/v2
       int log(string_view context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
 
-      int log_decisions(std::vector<const char*>& event_ids, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+      int log_decisions(std::vector<string_view>& event_ids, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
 
       //Multislot (Slates v1/v2 + CCB v2)
-      int log_decision(const std::string& event_id, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+      int log_decision(string_view event_id, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids, api_status* status, const std::vector<int>& baseline_actions, learning_mode learning_mode = ONLINE);
 
       //Continuous
       int log_continuous_action(string_view context, unsigned int flags, const continuous_action_response& response, api_status* status);
 
       //Multistep
-      int log(const char* episode_id, const char* previous_id, string_view context, unsigned int flags, const ranking_response& response, api_status* status);
+      int log(string_view episode_id, string_view previous_id, string_view context, unsigned int flags, const ranking_response& response, api_status* status);
 
     private:
       const reinforcement_learning::model_management::model_type_t _model_type;
@@ -100,16 +100,16 @@ namespace reinforcement_learning
 
       int init(api_status* status);
 
-      int log(const char* event_id, float outcome, api_status* status);
-      int log(const char* event_id, const char* outcome, api_status* status);
+      int log(string_view event_id, float outcome, api_status* status);
+      int log(string_view event_id, string_view outcome, api_status* status);
 
-      int log(const char* event_id, int index, float outcome, api_status* status);
-      int log(const char* event_id, int index, const char* outcome, api_status* status);
-      int log(const char* event_id, const char* index, float outcome, api_status* status);
-      int log(const char* event_id, const char* index, const char* outcome, api_status* status);
+      int log(string_view event_id, int index, float outcome, api_status* status);
+      int log(string_view event_id, int index, string_view outcome, api_status* status);
+      int log(string_view event_id, string_view index, float outcome, api_status* status);
+      int log(string_view event_id, string_view index, string_view outcome, api_status* status);
 
-      int report_action_taken(const char* event_id, api_status* status);
-      int report_action_taken(const char* event_id, const char* index, api_status* status);
+      int report_action_taken(string_view event_id, api_status* status);
+      int report_action_taken(string_view event_id, string_view index, api_status* status);
 
     private:
       const int _version;

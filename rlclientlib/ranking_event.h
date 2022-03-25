@@ -16,7 +16,7 @@ namespace reinforcement_learning {
   class event {
   public:
     event() {} ;
-    event(const char* seed_id, const timestamp& ts, float pass_prob = 1.f);
+    event(string_view seed_id, const timestamp& ts, float pass_prob = 1.f);
     event(const event&) = default;
     event(event&&) = default;
     event& operator=(const event&) = default;
@@ -62,11 +62,11 @@ namespace reinforcement_learning {
     learning_mode get_learning_mode() const;
 
   public:
-    static ranking_event choose_rank(const char* event_id, string_view context,
+    static ranking_event choose_rank(string_view event_id, string_view context,
       unsigned int flags, const ranking_response& resp, const timestamp& ts, float pass_prob = 1, learning_mode decision_mode = ONLINE);
 
   private:
-    ranking_event(const char* event_id, bool deferred_action, float pass_prob, string_view context,
+    ranking_event(string_view event_id, bool deferred_action, float pass_prob, string_view context,
     const ranking_response& response,const timestamp& ts, learning_mode decision_mode);
 
     std::vector<unsigned char> _context;
@@ -92,11 +92,11 @@ namespace reinforcement_learning {
     const std::vector<std::string>& get_event_ids() const;
 
   public:
-    static decision_ranking_event request_decision(const std::vector<const char*>& event_ids, string_view context,
+    static decision_ranking_event request_decision(const std::vector<string_view>& event_ids, string_view context,
       unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts, float pass_prob = 1.f);
 
   private:
-    decision_ranking_event(const std::vector<const char*>& event_ids, bool deferred_action, float pass_prob, string_view context,
+    decision_ranking_event(const std::vector<string_view>& event_ids, bool deferred_action, float pass_prob, string_view context,
       const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts);
 
     std::vector<unsigned char> _context;
@@ -124,11 +124,11 @@ namespace reinforcement_learning {
     const std::string& get_event_id() const;
 
   public:
-    static multi_slot_decision_event request_decision(const std::string& event_id, string_view context,
+    static multi_slot_decision_event request_decision(string_view event_id, string_view context,
       unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts, float pass_prob = 1.f);
 
   private:
-    multi_slot_decision_event(const std::string& event_id, bool deferred_action, float pass_prob, string_view context,
+    multi_slot_decision_event(string_view event_id, bool deferred_action, float pass_prob, string_view context,
       const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts);
 
     std::vector<unsigned char> _context;
@@ -162,13 +162,13 @@ namespace reinforcement_learning {
     unsigned int get_outcome_type() const { return _outcome_type; }
 
   public:
-    static outcome_event report_action_taken(const char* event_id, const timestamp& ts, float pass_prob = 1);
-    static outcome_event report_outcome(const char* event_id, const char* outcome, const timestamp& ts, float pass_prob = 1);
-    static outcome_event report_outcome(const char* event_id, float outcome, const timestamp& ts, float pass_prob = 1);
+    static outcome_event report_action_taken(string_view event_id, const timestamp& ts, float pass_prob = 1);
+    static outcome_event report_outcome(string_view event_id, string_view outcome, const timestamp& ts, float pass_prob = 1);
+    static outcome_event report_outcome(string_view event_id, float outcome, const timestamp& ts, float pass_prob = 1);
 
   private:
-    outcome_event(const char* event_id, float pass_prob, const char* outcome, bool action_taken, const timestamp& ts);
-    outcome_event(const char* event_id, float pass_prob, float outcome, bool action_taken, const timestamp& ts);
+    outcome_event(string_view event_id, float pass_prob, string_view outcome, bool action_taken, const timestamp& ts);
+    outcome_event(string_view event_id, float pass_prob, float outcome, bool action_taken, const timestamp& ts);
 
   private:
     std::string _outcome;

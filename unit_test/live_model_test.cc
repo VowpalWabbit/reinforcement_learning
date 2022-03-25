@@ -787,7 +787,7 @@ BOOST_AUTO_TEST_CASE(populate_response_same_size_test) {
     r::api_status status;
     std::vector<std::vector<uint32_t>> action_ids = {{0,1,2}, {1,2}, {2}};
     std::vector<std::vector<float>> pdfs = {{0.8667f, 0.0667f, 0.0667f}, {0.9f, 0.1f}, {1.0f}};
-    std::vector<const char*> event_ids = {"a", "b", "c"};
+    std::vector<r::string_view> event_ids = {"a", "b", "c"};
     std::string model_id = "id";
 
     r::decision_response resp;
@@ -821,7 +821,7 @@ BOOST_AUTO_TEST_CASE(populate_response_different_size_test) {
     r::api_status status;
     std::vector<std::vector<uint32_t>> action_ids = {{0,1,2}, {1,2}};
     std::vector<std::vector<float>> pdfs = {{0.8667f, 0.0667f, 0.0667f}, {0.9f, 0.1f}, {1.0f}};
-    std::vector<const char*> event_ids = {"a", "b", "c"};
+    std::vector<r::string_view> event_ids = {"a", "b", "c"};
     std::string model_id = "id";
 
     r::decision_response resp;
@@ -1021,7 +1021,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_apprentice_mode_with_baseline) {
 
   r::multi_slot_response response;
   int baseline_actions[2] = { 3, 1 };
-  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response,  baseline_actions, 2), err::success);
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision({}, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response,  baseline_actions, 2), err::success);
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1062,7 +1062,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_logging_only_with_baseline) {
   r::multi_slot_response response;
   //baseline actions are not valid action indicies, this is for testing purposes to make sure the action id is overriden in apprentice / logginonly mode.
   int baseline_actions[2] = { 3, 1 };
-  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision({}, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1101,7 +1101,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_logging_only_no_baseline) {
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
-  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, nullptr, 0), err::success);
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision({}, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, nullptr, 0), err::success);
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1140,7 +1140,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_with_baseline_null_eventId) {
 
   r::multi_slot_response response;
   int baseline_actions[2] = { 3, 1 };
-  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision({}, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1277,7 +1277,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_apprentice_mode_with_baseline)
 
   r::multi_slot_response_detailed response;
   int baseline_actions[2] = { 3, 1 };
-  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision({}, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1317,7 +1317,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_logging_only_with_baseline) {
 
   r::multi_slot_response_detailed response;
   int baseline_actions[2] = { 3, 1 };
-  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision({}, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1356,7 +1356,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_logging_only_no_baseline) {
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
-  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, nullptr, 0), err::success);
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision({}, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, nullptr, 0), err::success);
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1395,7 +1395,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_with_baseline_null_eventid) {
 
   r::multi_slot_response_detailed response;
   int baseline_actions[2] = { 3, 1 };
-  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision({}, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);

@@ -55,11 +55,11 @@ namespace reinforcement_learning {
 
     size_t size() const;
 
-    void set_event_id(const char* event_id);
+    void set_event_id(string_view event_id);
     void set_event_id(std::string&& event_id);
     const char* get_event_id() const;
 
-    void set_model_id(const char* model_id);
+    void set_model_id(string_view model_id);
     void set_model_id(std::string&& model_id);
     const char* get_model_id() const;
 

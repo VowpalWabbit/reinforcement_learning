@@ -7,8 +7,8 @@ namespace reinforcement_learning
 {
   using coll_t = std::vector<slot_ranking>;
 
-  void multi_slot_response_detailed::set_event_id(const char* event_id) {
-    _event_id = event_id;
+  void multi_slot_response_detailed::set_event_id(string_view event_id) {
+    _event_id = std::string(event_id);
   }
 
   void multi_slot_response_detailed::set_event_id(std::string&& event_id) {
@@ -19,8 +19,8 @@ namespace reinforcement_learning
     return _event_id.c_str();
   }
 
-  void multi_slot_response_detailed::set_model_id(const char* model_id) {
-    _model_id = model_id;
+  void multi_slot_response_detailed::set_model_id(string_view model_id) {
+    _model_id = std::string(model_id);
   }
 
   void multi_slot_response_detailed::set_model_id(std::string&& model_id) {

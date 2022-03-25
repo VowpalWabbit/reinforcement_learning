@@ -4,7 +4,7 @@
 
 namespace reinforcement_learning
 {
-  slot_response::slot_response(const char* _slot_id, uint32_t _action_id, float _probability)
+  slot_response::slot_response(string_view _slot_id, uint32_t _action_id, float _probability)
     : slot_id(_slot_id)
     , action_id(_action_id)
     , probability(_probability) {
@@ -22,7 +22,7 @@ namespace reinforcement_learning
     return probability;
   }
 
-  void decision_response::push_back(const char* event_id, uint32_t action_id, float prob) {
+  void decision_response::push_back(string_view event_id, uint32_t action_id, float prob) {
     _decision.emplace_back(event_id, action_id, prob);
   }
 
@@ -30,12 +30,14 @@ namespace reinforcement_learning
     return _decision.size();
   }
 
-  void decision_response::set_model_id(const char* model_id) {
-    _model_id = model_id;
+  void decision_response::set_model_id(string_view model_id) {
+    _model_id = std::string(model_id);
   }
+
   void decision_response::set_model_id(std::string&& model_id) {
     _model_id.assign(std::move(model_id));
   }
+
   const char* decision_response::get_model_id() const {
     return _model_id.c_str();
   }

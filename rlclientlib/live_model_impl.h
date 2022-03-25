@@ -27,29 +27,29 @@ namespace reinforcement_learning
 
     int init(api_status* status);
 
-    int choose_rank(const char* event_id, string_view context, unsigned int flags, ranking_response& response, api_status* status);
+    int choose_rank(string_view event_id, string_view context, unsigned int flags, ranking_response& response, api_status* status);
     //here the event_id is auto-generated
     int choose_rank(string_view context, unsigned int flags, ranking_response& response, api_status* status);
-    int request_continuous_action(const char* event_id, string_view context, unsigned int flags, continuous_action_response& response, api_status* status);
+    int request_continuous_action(string_view event_id, string_view context, unsigned int flags, continuous_action_response& response, api_status* status);
     //here the event_id is auto-generated
     int request_continuous_action(string_view context, unsigned int flags, continuous_action_response& response, api_status* status);
     int request_decision(string_view context_json, unsigned int flags, decision_response& resp, api_status* status);
-    int request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags, multi_slot_response& resp, const std::vector<int>& baseline_actions, api_status* status = nullptr);
+    int request_multi_slot_decision(string_view event_id, string_view context_json, unsigned int flags, multi_slot_response& resp, const std::vector<int>& baseline_actions, api_status* status = nullptr);
     int request_multi_slot_decision(string_view context_json, unsigned int flags, multi_slot_response& resp, const std::vector<int>& baseline_actions, api_status* status = nullptr);
-    int request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags, multi_slot_response_detailed& resp, const std::vector<int>& baseline_actions, api_status* status = nullptr);
+    int request_multi_slot_decision(string_view event_id, string_view context_json, unsigned int flags, multi_slot_response_detailed& resp, const std::vector<int>& baseline_actions, api_status* status = nullptr);
     int request_multi_slot_decision(string_view context_json, unsigned int flags, multi_slot_response_detailed& resp, const std::vector<int>& baseline_actions, api_status* status = nullptr);
-    int request_episodic_decision(const char* event_id, const char* previous_id, string_view context_json, unsigned int flags, ranking_response& resp, episode_state& episode, api_status* status = nullptr);
+    int request_episodic_decision(string_view event_id, string_view previous_id, string_view context_json, unsigned int flags, ranking_response& resp, episode_state& episode, api_status* status = nullptr);
 
-    int report_action_taken(const char* event_id, api_status* status);
-    int report_action_taken(const char* primary_id, const char *secondary_id, api_status* status);
+    int report_action_taken(string_view event_id, api_status* status);
+    int report_action_taken(string_view primary_id, string_view secondary_id, api_status* status);
 
-    int report_outcome(const char* event_id, const char* outcome_data, api_status* status);
-    int report_outcome(const char* event_id, float reward, api_status* status);
+    int report_outcome(string_view event_id, string_view outcome_data, api_status* status);
+    int report_outcome(string_view event_id, float reward, api_status* status);
 
-    int report_outcome(const char* primary_id, int secondary_id, float outcome, api_status* status= nullptr);
-    int report_outcome(const char* primary_id, const char *secondary_id, float outcome, api_status* status= nullptr);
-    int report_outcome(const char* primary_id, int secondary_id, const char* outcome, api_status* status= nullptr);
-    int report_outcome(const char* primary_id, const char *secondary_id, const char* outcome, api_status* status= nullptr);
+    int report_outcome(string_view primary_id, int secondary_id, float outcome, api_status* status= nullptr);
+    int report_outcome(string_view primary_id, string_view secondary_id, float outcome, api_status* status= nullptr);
+    int report_outcome(string_view primary_id, int secondary_id, string_view outcome, api_status* status= nullptr);
+    int report_outcome(string_view primary_id, string_view secondary_id, string_view outcome, api_status* status= nullptr);
 
     int refresh_model(api_status* status);
 
@@ -76,13 +76,13 @@ namespace reinforcement_learning
     int init_trace(api_status* status);
     static void _handle_model_update(const model_management::model_data& data, live_model_impl* ctxt);
     void handle_model_update(const model_management::model_data& data);
-    int explore_only(const char* event_id, string_view context, ranking_response& response, api_status* status) const;
-    int explore_exploit(const char* event_id, string_view context, ranking_response& response, api_status* status) const;
+    int explore_only(string_view event_id, string_view context, ranking_response& response, api_status* status) const;
+    int explore_exploit(string_view event_id, string_view context, ranking_response& response, api_status* status) const;
     template<typename D>
-    int report_outcome_internal(const char* event_id, D outcome, api_status* status);
+    int report_outcome_internal(string_view event_id, D outcome, api_status* status);
     template<typename D, typename I>
-    int report_outcome_internal(const char* primary_id, I secondary_id, D outcome, api_status* status);
-    int request_multi_slot_decision_impl(const char *event_id, string_view context_json, std::vector<std::string>& slot_ids, std::vector<std::vector<uint32_t>>& action_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status);
+    int report_outcome_internal(string_view primary_id, I secondary_id, D outcome, api_status* status);
+    int request_multi_slot_decision_impl(string_view event_id, string_view context_json, std::vector<std::string>& slot_ids, std::vector<std::vector<uint32_t>>& action_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status);
 
   private:
     // Internal implementation state
@@ -117,7 +117,7 @@ namespace reinforcement_learning
   };
 
   template <typename D>
-  int live_model_impl::report_outcome_internal(const char* event_id, D outcome, api_status* status) {
+  int live_model_impl::report_outcome_internal(string_view event_id, D outcome, api_status* status) {
     // Clear previous errors if any
     api_status::try_clear(status);
 
@@ -133,7 +133,7 @@ namespace reinforcement_learning
   }
 
   template <typename D, typename I>
-  int live_model_impl::report_outcome_internal(const char* primary_id, I secondary_id, D outcome, api_status* status) {
+  int live_model_impl::report_outcome_internal(string_view primary_id, I secondary_id, D outcome, api_status* status) {
     // Clear previous errors if any
     api_status::try_clear(status);
 

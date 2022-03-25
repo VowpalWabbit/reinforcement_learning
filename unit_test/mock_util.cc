@@ -80,13 +80,13 @@ std::unique_ptr<fakeit::Mock<m::i_model>> get_mock_model(m::model_type_t model_t
   };
 
   const auto request_decision_fn =
-    [](const std::vector<const char*>& event_ids, r::string_view, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string& model_version, r::api_status*) {
+    [](const std::vector<r::string_view>& event_ids, r::string_view, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string& model_version, r::api_status*) {
     model_version = "model_id";
     return r::error_code::success;
   };
 
   const auto request_multi_slot_decision_fn =
-      [](const char*, const std::vector<std::string>&, r::string_view, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string& model_version, r::api_status*) {
+      [](r::string_view, const std::vector<std::string>&, r::string_view, std::vector<std::vector<uint32_t>>&, std::vector<std::vector<float>>&, std::string& model_version, r::api_status*) {
       model_version = "model_id";
       return r::error_code::success;
   };

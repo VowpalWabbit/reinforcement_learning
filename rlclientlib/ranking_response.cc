@@ -4,14 +4,14 @@
 
 namespace reinforcement_learning {
   
-  ranking_response::ranking_response(char const* event_id)
+  ranking_response::ranking_response(string_view event_id)
     : _slot_impl { slot_ranking(event_id) } {}
 
-  char const* ranking_response::get_event_id() const {
+  const char* ranking_response::get_event_id() const {
     return _slot_impl.get_id();
   }
 
-  void ranking_response::set_event_id(char const* event_id) {
+  void ranking_response::set_event_id(string_view event_id) {
     _slot_impl.set_id(event_id);
   }
 
@@ -35,8 +35,8 @@ namespace reinforcement_learning {
     return _slot_impl.size();
   }
 
-  void ranking_response::set_model_id(const char* model_id) {
-    _model_id = model_id;
+  void ranking_response::set_model_id(string_view model_id) {
+    _model_id = std::string(model_id);
   }
 
   void ranking_response::set_model_id(std::string&& model_id) {

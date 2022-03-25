@@ -3,6 +3,8 @@
  */
 #pragma once
 #include "container_iterator.h"
+#include "rl_string_view.h"
+
 #include <cstddef>
 #include <iterator>
 #include <vector>
@@ -45,7 +47,7 @@ namespace reinforcement_learning {
       *
       * @param id The unique identifier for this interaction.  This id must be used when reporting the outcome for this action
       */
-    slot_ranking(char const* id);
+    slot_ranking(string_view id);
 
     /**
     * @brief Unique id for this slot detailed instance.
@@ -58,7 +60,7 @@ namespace reinforcement_learning {
     * @brief Set the id. (This is set internally by the API)
     * @param _id
     */
-    void set_id(const char* id);
+    void set_id(string_view id);
 
     /**
     * @brief Get the chosen action id.

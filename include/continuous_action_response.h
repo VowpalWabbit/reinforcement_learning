@@ -1,5 +1,7 @@
 #pragma once
 
+#include "rl_string_view.h"
+
 #include <cstddef>
 #include <iterator>
 #include <vector>
@@ -59,7 +61,7 @@ namespace reinforcement_learning {
      * @param event_id
      */
 
-    void set_event_id(const char* event_id);
+    void set_event_id(string_view event_id);
     /**
      * @brief Set the event_id. (This is set internally by the API)
      * Input event_id is left in an unspecified but valid state.
@@ -80,7 +82,7 @@ namespace reinforcement_learning {
      * is associated with each unique model. (This is set internally by the API)
      * @param model_id
      */
-    void set_model_id(const char* model_id);
+    void set_model_id(string_view model_id);
 
     /**
      * @brief Set the model_id.

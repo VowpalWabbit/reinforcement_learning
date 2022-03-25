@@ -36,7 +36,7 @@ namespace reinforcement_learning {
   *
   * @param event_id The unique identifier for this interaction.  This event_id must be used when reporting the outcome for this action
   */
-  ranking_response(char const* event_id);
+  ranking_response(string_view event_id);
 
     /**
      * @brief Unique event_id for this ranking request.
@@ -49,7 +49,7 @@ namespace reinforcement_learning {
      * @brief Set the event_id.  (This is set internally by the API)
      * @param event_id
      */
-    void set_event_id(const char* event_id);
+    void set_event_id(string_view event_id);
 
   /**
   * @brief Get the chosen action id.
@@ -100,7 +100,7 @@ namespace reinforcement_learning {
   * is associated with each unique model. (This is set internally by the API)
   * @param model_id
   */
-  void set_model_id(const char* model_id);
+  void set_model_id(string_view model_id);
 
   /**
   * @brief Set the model_id.
@@ -117,7 +117,7 @@ namespace reinforcement_learning {
   * is associated with each unique model. (This is set internally by the API)
   * @return const char*
   */
-  const char * get_model_id() const;
+  const char* get_model_id() const;
 
   /**
   * @brief Clear the ranking response object so that it can be reused.
