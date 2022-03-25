@@ -43,7 +43,7 @@ int rl_sim::cb_loop() {
     r::api_status status;
 
     // Choose an action
-    if ( _rl->choose_rank(req_id.c_str(), context_json.c_str(), response, &status) != err::success ) {
+    if ( _rl->choose_rank(req_id, context_json, response, &status) != err::success ) {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
@@ -59,7 +59,7 @@ int rl_sim::cb_loop() {
     const auto outcome = p.get_outcome(_topics[chosen_action]);
 
     // Report outcome received
-    if ( _rl->report_outcome(req_id.c_str(), outcome, &status) != err::success && outcome > 0.00001f ) {
+    if ( _rl->report_outcome(req_id, outcome, &status) != err::success && outcome > 0.00001f ) {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
@@ -90,7 +90,7 @@ int rl_sim::multistep_loop() {
   while (_run_loop) {
     const std::string episode_id = create_episode_id(episode_indx++);
     r::api_status status;
-    r::episode_state episode(episode_id.c_str());
+    r::episode_state episode(episode_id);
 
     std::string previous_id;
     float episodic_outcome = 0;
@@ -103,8 +103,8 @@ int rl_sim::multistep_loop() {
       const auto req_id = create_event_id();
 
       r::ranking_response response1;
-      if (_rl->request_episodic_decision(req_id.c_str(), i == 0 ? nullptr : previous_id.c_str(),
-        context_json.c_str(), response, episode, &status) != err::success) {
+      if (_rl->request_episodic_decision(req_id, i == 0 ? reinforcement_learning::string_view{} : previous_id,
+        context_json, response, episode, &status) != err::success) {
         std::cout << status.get_error_msg() << std::endl;
         return -1;
       }
@@ -147,14 +147,14 @@ int rl_sim::ca_loop(){
     const auto req_id = create_event_id();
     r::api_status status;
 
-    if (_rl->request_continuous_action(req_id.c_str(), context_json, response, &status) != err::success)
+    if (_rl->request_continuous_action(req_id, context_json, response, &status) != err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
     const auto chosen_action = response.get_chosen_action();
     const auto outcome = joint.get_outcome(chosen_action);
-    if (_rl->report_outcome(req_id.c_str(), outcome, &status) != err::success  && outcome > 0.00001f )
+    if (_rl->report_outcome(req_id, outcome, &status) != err::success  && outcome > 0.00001f )
     {
       std::cout << status.get_error_msg() << std::endl;
     }
@@ -184,7 +184,7 @@ int rl_sim::ccb_loop() {
     r::api_status status;
 
     // Choose an action
-    if ( _rl->request_multi_slot_decision(event_id.c_str(), context_json, decision, &status) != err::success) {
+    if ( _rl->request_multi_slot_decision(event_id, context_json, decision, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
@@ -196,7 +196,7 @@ int rl_sim::ccb_loop() {
       const auto outcome = p.get_outcome(_topics[chosen_action]);
 
       // Report outcome received
-      if ( _rl->report_outcome(event_id.c_str(), index, outcome, &status) != err::success && outcome > 0.00001f ) {
+      if ( _rl->report_outcome(event_id, index, outcome, &status) != err::success && outcome > 0.00001f ) {
         std::cout << status.get_error_msg() << std::endl;
         continue;
       }
@@ -242,7 +242,7 @@ int rl_sim::slates_loop() {
     r::api_status status;
 
     // Choose an action
-    if ( _rl->request_multi_slot_decision(event_id.c_str(), context_json.c_str(), decision, &status) != err::success ) {
+    if ( _rl->request_multi_slot_decision(event_id, context_json, decision, &status) != err::success ) {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
@@ -265,7 +265,7 @@ int rl_sim::slates_loop() {
     }
 
     // Report outcome received
-    if ( _rl->report_outcome(event_id.c_str(), outcome, &status) != err::success && outcome > 0.00001f ) {
+    if ( _rl->report_outcome(event_id, outcome, &status) != err::success && outcome > 0.00001f ) {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
