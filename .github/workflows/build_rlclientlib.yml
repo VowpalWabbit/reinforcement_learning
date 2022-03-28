@@ -102,5 +102,6 @@ jobs:
       - name: Build project
         run: cmake --build build --config Debug
       - name: Run tests
-        run: cd build
+        run: |
+          cd build
           ctest --verbose --output-on-failure
