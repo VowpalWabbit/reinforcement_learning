@@ -1,0 +1,96 @@
+name: Build RLClientLib
+
+on:
+  push:
+    branches:
+      - master
+      - 'releases/**'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build-linux:
+    name: rlclientlib.ubuntu18.04
+    container:
+      image: vowpalwabbit/rl-ubuntu-1804:latest
+    runs-on: ubuntu-latest
+    steps:
+      # v1 must be used because newer versions require a node.js version that will not run on this old image.
+      - uses: actions/checkout@v1
+        with:
+          submodules: 'true'
+      - name: Configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -Drlclientlib_BUILD_ONNXRUNTIME_EXTENSION=On
+          -DFMT_SYS_DEP=ON
+          -DSPDLOG_SYS_DEP=ON
+      - name: Build
+        run: |
+          cmake --build build --target all
+      - name: Test
+        run: |
+          cd build
+          ctest --verbose --output-on-failure
+  build-macos:
+    name: rlclientlib.macos-10.15
+    runs-on: macos-10.15
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Restore
+        run: |
+          brew install cmake boost cpprestsdk flatbuffers openssl ninja
+      - name: Configure
+        run: |
+          OPEN_SSL_DIR=`brew --prefix openssl`
+          cmake -S . -B build -DOPENSSL_ROOT_DIR=$OPEN_SSL_DIR -DOPENSSL_LIBRARIES=$OPEN_SSL_DIR/lib
+      - name: Build
+        run: |
+          cmake --build build --target all
+      - name: Test
+        run: |
+          cd build
+          ctest --verbose --output-on-failure
+  build-windows:
+    name: rlclientlib.windows-2019
+    runs-on: windows-2019
+    env:
+      SOURCE_DIR: ${{ github.workspace }}/reinforcement_learning
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      # 2022.03.10
+      VCPKG_REF: af2287382b1991dbdcb7e5112d236f3323b9dd7a
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: 'reinforcement_learning'
+          submodules: true
+      - uses: actions/checkout@v2
+        with:
+          path: 'vcpkg'
+          repository: 'microsoft/vcpkg'
+          ref: ${{ env.VCPKG_REF }}
+      - name: Restore vcpkg and build artifacts
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ env.VCPKG_ROOT }}/installed/
+          key: |
+            rl-${{ env.VCPKG_REF }}-windows-2019-vcpkg-cache-invalidate-0
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Bootstrap vcpkg
+        run: ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
+      - name: Install vcpkg dependencies
+        run: ${{ env.VCPKG_ROOT }}/vcpkg.exe install "--overlay-triplets=custom-triplets" --triplet=x64-windows-v141 --host-triplet=x64-windows-v141 cpprestsdk flatbuffers openssl-windows
+      - name: Generate project files
+        run: |
+          cmake -S "${{ env.SOURCE_DIR }}" -B build -A "x64" -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake"
+      - name: Build project
+        run: |
+          cmake --build build --config Debug
+      - name: Run tests
+        run: |
+          cd build
+          ctest --verbose --output-on-failure
