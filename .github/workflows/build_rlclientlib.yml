@@ -98,8 +98,8 @@ jobs:
       - name: Generate project files
         run: |
           cmake -S "${{ env.SOURCE_DIR }}" -B build -A "x64" -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-v141
-      # - name: Build project
-      #   run: cmake --build build --config Debug
-      # - name: Run tests
-      #   run: cd build
-      #     ctest --verbose --output-on-failure
+      - name: Build project
+        run: cmake --build build --config Debug
+      - name: Run tests
+        run: cd build
+          ctest --verbose --output-on-failure
