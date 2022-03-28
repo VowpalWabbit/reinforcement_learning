@@ -27,9 +27,11 @@ jobs:
           pushd ext_libs/vowpal_wabbit
           git pull origin master
           popd
+      - name: Configure
+        run: cmake -S . -B build -G Ninja  -Drlclientlib_BUILD_ONNXRUNTIME_EXTENSION=On -DFMT_SYS_DEP=ON -DSPDLOG_SYS_DEP=ON
       - name: Build
-        shell: bash
-        run: ./.scripts/linux/build.sh
+        run: cmake --build build --target all
       - name: Test
-        shell: bash
-        run: ./.scripts/linux/test.sh
+        run: |
+          cd build
+          ctest --verbose --output-on-failure
