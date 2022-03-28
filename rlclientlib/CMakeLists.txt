@@ -1,7 +1,16 @@
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-find_package(flatbuffers REQUIRED)
+
+# First try to find the config version. Newer, used by vcpkg etc
+find_package(flatbuffers CONFIG)
+if(flatbuffers_FOUND)
+  get_property(flatc_location TARGET flatbuffers::flatc PROPERTY LOCATION)
+else()
+  # Fallback to the old version
+  find_package(flatbuffers REQUIRED)
+  set(flatc_location ${FLATBUFFERS_FLATC_EXECUTABLE})
+endif()
+
 include(FlatbufferUtils)
-get_property(flatc_location TARGET flatbuffers::flatc PROPERTY LOCATION)
 
 set(RL_FLAT_BUFFER_FILES_V1
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/Metadata.fbs"
