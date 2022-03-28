@@ -83,7 +83,9 @@ jobs:
       - name: Bootstrap vcpkg
         run: ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
       - name: Install vcpkg dependencies
-        run: ${{ env.VCPKG_ROOT }}/vcpkg.exe install "--overlay-triplets=custom-triplets" --triplet=x64-windows-v141 --host-triplet=x64-windows-v141 cpprestsdk flatbuffers openssl-windows
+        run: |
+          cd ${{ env.SOURCE_DIR }}
+          ${{ env.VCPKG_ROOT }}/vcpkg.exe install "--overlay-triplets=custom-triplets" --triplet=x64-windows-v141 --host-triplet=x64-windows-v141 cpprestsdk flatbuffers openssl-windows
       - name: Generate project files
         run: |
           cmake -S "${{ env.SOURCE_DIR }}" -B build -A "x64" -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake"
