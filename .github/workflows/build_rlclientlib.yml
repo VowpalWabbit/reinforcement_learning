@@ -95,6 +95,7 @@ jobs:
         run: |
           cd ${{ env.SOURCE_DIR }}
           ${{ env.VCPKG_ROOT }}/vcpkg.exe install "--overlay-triplets=custom-triplets" --triplet=x64-windows-v141 --host-triplet=x64-windows-v141 zlib boost-system boost-program-options boost-test boost-align boost-foreach boost-math boost-uuid cpprestsdk flatbuffers openssl-windows
+          dotnet tool install -g dotnet-t4 --version 2.2.1
       - name: Generate project files
         run: |
           cmake -S "${{ env.SOURCE_DIR }}" -B build -A "x64" -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-v141
