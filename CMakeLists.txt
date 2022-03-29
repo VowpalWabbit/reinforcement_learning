@@ -21,9 +21,6 @@ option(RL_BUILD_BENCHMARKS "Build benchmarks" OFF)
 
 option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" ON)
 
-# HACK - remove once VW properly sets its module path
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/ext_libs/vowpal_wabbit/cmake/")
-
 # TODO Compile cpprest into its own separate lib so that it doesn't have to be consumed
 if (vw_USE_AZURE_FACTORIES)
     find_package(cpprestsdk REQUIRED)

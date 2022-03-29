@@ -28,8 +28,17 @@ if(WIN32 AND (STATIC_LINK_BINARY_PARSER))
   message(FATAL_ERROR "Unsupported option enabled on Windows build")
 endif()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/Modules/")
-find_package(flatbuffers REQUIRED)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/../cmake/Modules/")
+# First try to find the config version. Newer, used by vcpkg etc
+find_package(flatbuffers CONFIG)
+if(flatbuffers_FOUND)
+  get_property(flatc_location TARGET flatbuffers::flatc PROPERTY LOCATION)
+else()
+  # Fallback to the old version
+  find_package(flatbuffers REQUIRED)
+  set(flatc_location ${FLATBUFFERS_FLATC_EXECUTABLE})
+endif()
+include(FlatbufferUtils)
 
 set(RL_FLAT_BUFFER_FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/../rlclientlib/schema/v2/DedupInfo.fbs"
@@ -58,7 +67,13 @@ if(STATIC_LINK_BINARY_PARSER)
   set(STATIC_LINK_VW ON CACHE BOOL "" FORCE)
 endif()
 
-build_flatbuffers("${RL_FLAT_BUFFER_FILES}" "" fbgen "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v2/" "" "")
+
+add_flatbuffer_schema(
+  TARGET fbgen
+  SCHEMAS ${RL_FLAT_BUFFER_FILES}
+  OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generated/v2/
+  FLATC_EXE ${flatc_location}
+)
 
 set(external_parser_headers ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.h
   ${CMAKE_CURRENT_SOURCE_DIR}/joiners/i_joiner.h
