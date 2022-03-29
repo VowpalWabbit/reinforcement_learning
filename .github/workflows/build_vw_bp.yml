@@ -1,4 +1,4 @@
-name: Build RLClientLib
+name: Build Binary Parser
 
 on:
   push:
@@ -68,7 +68,7 @@ jobs:
           path: |
             ${{ env.VCPKG_ROOT }}/installed/
           key: |
-            rl-${{ env.VCPKG_REF }}-windows-2019-vcpkg-cache-invalidate-0
+            vw-bp-${{ env.VCPKG_REF }}-windows-2019-vcpkg-cache-invalidate-0
       - uses: ilammy/msvc-dev-cmd@v1
       - run: ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
       - run: ${{ env.SOURCE_DIR }}/.scripts/restore-vw-bp-deps.cmd
