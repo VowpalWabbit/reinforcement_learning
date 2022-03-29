@@ -70,8 +70,7 @@ jobs:
           key: |
             rl-${{ env.VCPKG_REF }}-windows-2019-vcpkg-cache-invalidate-0
       - uses: ilammy/msvc-dev-cmd@v1
-      - name: Bootstrap vcpkg
-        run: ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
-      - run: ./.scripts/restore-cmake.cmd
-      - run: ./.scripts/build-cmake.cmd
-      - run: ./.scripts/test-cmake.cmd
+      - run: ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
+      - run: ${{ env.SOURCE_DIR }}/.scripts/restore-cmake.cmd
+      - run: ${{ env.SOURCE_DIR }}/.scripts/build-cmake.cmd
+      - run: ${{ env.SOURCE_DIR }}/.scripts/test-cmake.cmd
