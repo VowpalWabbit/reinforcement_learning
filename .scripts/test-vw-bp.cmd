@@ -9,5 +9,6 @@ CALL %~dp0init.cmd
 
 ECHO Running vw binary parser unit tests
 "%vwBinaryParserRoot%\unit_tests\Release\binary_parser_unit_tests.exe"
+if %errorlevel% neq 0 exit /b %errorlevel%
 
 ENDLOCAL
