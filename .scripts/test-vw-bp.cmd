@@ -5,10 +5,13 @@ IF DEFINED DebugBuildScripts (
 
 SETLOCAL
 
-CALL %~dp0init.cmd
+CALL %~dp0init-cmake.cmd
+PUSHD %vwBinaryParserRoot%
 
 ECHO Running vw binary parser unit tests
-"%vwBinaryParserRoot%\unit_tests\Release\binary_parser_unit_tests.exe"
+ctest --verbose --output-on-failure -C Release
 if %errorlevel% neq 0 exit /b %errorlevel%
+
+POPD
 
 ENDLOCAL
