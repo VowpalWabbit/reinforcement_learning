@@ -5,8 +5,7 @@ IF DEFINED DebugBuildScripts (
 
 SETLOCAL
 
-CALL %~dp0init.cmd
-PUSHD %~dp0
+CALL %~dp0init-cmake.cmd
 PUSHD %vwBinaryParserRoot%
 
 ECHO Building %vwBinaryParserRoot% for Release x64
@@ -18,7 +17,6 @@ if %errorlevel% neq 0 exit /b %errorlevel%-DVCPKG_TARGET_TRIPLET=x64-windows-sta
 cmake --build build --config Release -t vw-bin binary_parser_unit_tests
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-POPD
 POPD
 
 ENDLOCAL
