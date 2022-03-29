@@ -30,12 +30,12 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/../cmake/Modules/")
 # First try to find the config version. Newer, used by vcpkg etc
-find_package(flatbuffers CONFIG)
+find_package(Flatbuffers CONFIG)
 if(flatbuffers_FOUND)
   get_property(flatc_location TARGET flatbuffers::flatc PROPERTY LOCATION)
 else()
   # Fallback to the old version
-  find_package(flatbuffers REQUIRED)
+  find_package(Flatbuffers REQUIRED)
   set(flatc_location ${FLATBUFFERS_FLATC_EXECUTABLE})
 endif()
 include(FlatbufferUtils)
