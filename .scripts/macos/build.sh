@@ -10,3 +10,4 @@ cd $REPO_DIR
 OPEN_SSL_DIR=`brew --prefix openssl`
 
 cmake -S . -B build -G Ninja -DOPENSSL_ROOT_DIR=$OPEN_SSL_DIR -DOPENSSL_LIBRARIES=$OPEN_SSL_DIR/lib
+cmake --build build --target all
