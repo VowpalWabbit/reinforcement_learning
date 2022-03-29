@@ -20,14 +20,8 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: 'true'
-      - name: Configure
-        run: cmake -S . -B build -G Ninja  -Drlclientlib_BUILD_ONNXRUNTIME_EXTENSION=On -DFMT_SYS_DEP=ON -DSPDLOG_SYS_DEP=ON
-      - name: Build
-        run: cmake --build build --target all
-      - name: Test
-        run: |
-          cd build
-          ctest --verbose --output-on-failure
+      - run: ./.scripts/linux/build.sh
+      - run: ./.scripts/linux/test.sh
   build-linux-valgrind:
     name: rlclientlib-valgrind.ubuntu18.04
     container:
@@ -38,12 +32,8 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: 'true'
-      - name: Configure
-        run: cmake -S . -B build -G Ninja  -Drlclientlib_BUILD_ONNXRUNTIME_EXTENSION=On -DFMT_SYS_DEP=ON -DSPDLOG_SYS_DEP=ON
-      - name: Build
-        run: cmake --build build --target rltest
-      - name: Test
-        run: valgrind --quiet --error-exitcode=100 --undef-value-errors=no --leak-check=full ./build/unit_test/rltest -- valgrind
+      - run: ./.scripts/linux/build.sh
+      - run: ./.scripts/linux/unit-tests-valgrind.sh
   build-macos:
     name: rlclientlib.macos-10.15
     runs-on: macos-10.15
@@ -51,18 +41,9 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-      - name: Restore
-        run: brew install cmake boost cpprestsdk flatbuffers openssl ninja
-      - name: Configure
-        run: |
-          OPEN_SSL_DIR=`brew --prefix openssl`
-          cmake -S . -B build -DOPENSSL_ROOT_DIR=$OPEN_SSL_DIR -DOPENSSL_LIBRARIES=$OPEN_SSL_DIR/lib
-      - name: Build
-        run: cmake --build build --target all
-      - name: Test
-        run: |
-          cd build
-          ctest --verbose --output-on-failure
+      - run: ./.scripts/macos/restore.sh
+      - run: ./.scripts/macos/build.sh
+      - run: ./.scripts/macos/test.sh
   build-windows:
     name: rlclientlib.windows-2019
     runs-on: windows-2019
@@ -91,17 +72,6 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Bootstrap vcpkg
         run: ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
-      - name: Install vcpkg dependencies
-        run: |
-          cd ${{ env.SOURCE_DIR }}
-          ${{ env.VCPKG_ROOT }}/vcpkg.exe install "--overlay-triplets=custom-triplets" --triplet=x64-windows-v141 --host-triplet=x64-windows-v141 zlib boost-system boost-program-options boost-test boost-align boost-foreach boost-math boost-uuid cpprestsdk flatbuffers openssl-windows
-          dotnet tool install -g dotnet-t4 --version 2.2.1
-      - name: Generate project files
-        run: |
-          cmake -S "${{ env.SOURCE_DIR }}" -B build -A "x64" -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-v141
-      - name: Build project
-        run: cmake --build build --config Debug
-      - name: Run tests
-        run: |
-          cd build
-          ctest --verbose --output-on-failure -C Debug
+      - run: ./.scripts/restore-cmake.cmd
+      - run: ./.scripts/build-cmake.cmd
+      - run: ./.scripts/test-cmake.cmd

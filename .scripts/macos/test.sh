@@ -8,5 +8,4 @@ REPO_DIR=$SCRIPT_DIR/../../
 
 cd $REPO_DIR/build
 
-# Run unit test suite
-./unit_test/rltest --log_format=JUNIT --log_sink=TEST-rlclientlib.xml
+ctest --verbose --output-on-failure

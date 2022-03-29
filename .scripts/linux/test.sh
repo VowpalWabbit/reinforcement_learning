@@ -10,7 +10,4 @@ cd $REPO_DIR/build
 
 # Run unit test suite
 
-# Cannot use JUNIT as this is not supported in Boost 1.58
-# ./unit_test/rltest --log_format=JUNIT --log_sink=TEST-rlclientlib.xml
-
 ctest --verbose --output-on-failure
