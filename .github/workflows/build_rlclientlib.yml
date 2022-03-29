@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: 'true'
-      - run: ./.scripts/linux/build.sh
+      - run: ./.scripts/linux/build-valgrind.sh
       - run: ./.scripts/linux/unit-tests-valgrind.sh
   build-macos:
     name: rlclientlib.macos-10.15
