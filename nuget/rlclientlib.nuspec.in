@@ -12,5 +12,6 @@
   <files>
       <file src="rlclientlib.targets" target="build" />
       <file src="lib\*.lib" target="lib" />
+      <file src="include\**\*.*" target="include" />
   </files>
 </package>

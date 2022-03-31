@@ -53,8 +53,8 @@ jobs:
           -DFMT_SYS_DEP=Off
           -DSPDLOG_SYS_DEP=Off
           -DBUILD_FLATBUFFERS=Off
-          -DVW_ZLIB_SYS_DEP=Off
-          -DVW_INSTALL=ON
+          -DVW_INSTALL=Off
+          -DRL_STATIC_DEPS=On
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.arch }}-windows-static
           -DFLATBUFFERS_FLATC_EXECUTABLE=C:/vcpkg/installed/${{ matrix.arch_config.arch }}-windows-static/tools/flatbuffers/flatc.exe
