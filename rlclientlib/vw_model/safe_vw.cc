@@ -5,6 +5,7 @@
 #include "parse_example_json.h"
 #include "parser.h"
 #include "v_array.h"
+#include "config/options.h"
 
 #include <algorithm>
 #include <iostream>
