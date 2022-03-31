@@ -43,6 +43,8 @@ inline void calculate_multislot_interaction_metrics(dsjson_metrics* metrics,
   }
 
 struct typed_joined_event {
+  constexpr static float apprentice_matching_reward = 1.0f;
+  constexpr static float apprentice_not_matching_reward = 0.0f;
   virtual ~typed_joined_event() = default;
   virtual bool is_skip_learn() const = 0;
   virtual void set_skip_learn(bool sl) = 0;
@@ -77,9 +79,12 @@ struct cb_joined_event : public typed_joined_event {
     if (!interaction_data.actions.empty() &&
         interaction_data.actions[0] == CB_BASELINE_ACTION)
     {
-      // TODO: default apprenticeReward should come from config
-      // setting to default reward matches current behavior for now
-      reward = original_reward;
+      // The goal of Apprentice mode is to successfully imitate the baseline system.
+      // Reward of 1 when we are match baseline and 0 otherwise
+      reward = apprentice_matching_reward;
+    }
+    else {
+      reward = apprentice_not_matching_reward;
     }
   }
 
@@ -170,9 +175,14 @@ struct ccb_joined_event : public typed_joined_event {
 
   void set_apprentice_reward() override {
     for (size_t i = 0; i < multi_slot_interaction.interaction_data.size(); i++) {
+      // The goal of Apprentice mode is to successfully imitate the baseline system.
+      // Reward of 1 when we are match baseline and 0 otherwise
       if (!multi_slot_interaction.interaction_data[i].actions.empty() &&
         multi_slot_interaction.interaction_data[i].actions[0] == multi_slot_interaction.baseline_actions[i]) {
-        rewards[i] = original_rewards[i];
+        rewards[i] = apprentice_matching_reward;
+      }
+      else {
+        rewards[i] = apprentice_not_matching_reward;
       }
     }
   }

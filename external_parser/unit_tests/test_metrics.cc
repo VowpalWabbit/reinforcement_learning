@@ -167,8 +167,8 @@ BOOST_AUTO_TEST_CASE(
       {"cbea_max_actions", 2}};
 
   std::map<std::string, float> expected_float_metrics = {
-      {"cbea_sum_cost", -9.0},
-      {"cbea_sum_cost_baseline", -9.0},
+      {"cbea_sum_cost", -3.0},
+      {"cbea_sum_cost_baseline", -3.0},
       {"dsjson_sum_cost_original", -19.0},
       {"dsjson_sum_cost_original_baseline", -9.0}
       // TODO uncomment and fix when some interaction work is pulled in from VW
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(
       {"cbea_label_first_action", 29},
       {"cbea_label_not_first", 5},
       // 5 instead of expected 20 since it's apprentice mode plus skip learn
-      {"cbea_non_zero_cost", 6},
+      {"cbea_non_zero_cost", 10},
       {"number_skipped_events", 3},
       {"number_events_zero_actions", 0},
       {"line_parse_error", 0},
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(
       {"cbea_max_actions", 2}};
 
   std::map<std::string, float> expected_float_metrics = {
-      {"cbea_sum_cost", -16.0},
+      {"cbea_sum_cost", -10.0},
       {"cbea_sum_cost_baseline", -5.0},
       {"dsjson_sum_cost_original", -57.0},
       {"dsjson_sum_cost_original_first_slot", -27.0},

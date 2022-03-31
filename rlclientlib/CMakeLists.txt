@@ -1,5 +1,15 @@
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-find_package(flatbuffers REQUIRED)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/../cmake/Modules/")
+# First try to find the config version. Newer, used by vcpkg etc
+find_package(Flatbuffers CONFIG QUIET)
+if(FLATBUFFERS_FOUND)
+  get_property(flatc_location TARGET flatbuffers::flatc PROPERTY LOCATION)
+else()
+  # Fallback to the old version
+  find_package(Flatbuffers MODULE REQUIRED)
+  set(flatc_location ${FLATBUFFERS_FLATC_EXECUTABLE})
+endif()
+
+include(FlatbufferUtils)
 
 set(RL_FLAT_BUFFER_FILES_V1
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/Metadata.fbs"
@@ -16,13 +26,24 @@ set(RL_FLAT_BUFFER_FILES_V2
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CaEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/FileFormat.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiSlotEvent.fbs"
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiStepEvent.fbs"  
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiStepEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Event.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/LearningModeType.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiStepEvent.fbs")
 
-build_flatbuffers("${RL_FLAT_BUFFER_FILES_V1}" "" fbgenerator_v1 "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v1/" "" "")
-build_flatbuffers("${RL_FLAT_BUFFER_FILES_V2}" "" fbgenerator_v2 "" "${CMAKE_CURRENT_SOURCE_DIR}/generated/v2/" "" "")
+add_flatbuffer_schema(
+  TARGET fbgenerator_v1
+  SCHEMAS ${RL_FLAT_BUFFER_FILES_V1}
+  OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generated/v1/
+  FLATC_EXE ${flatc_location}
+)
+
+add_flatbuffer_schema(
+  TARGET fbgenerator_v2
+  SCHEMAS ${RL_FLAT_BUFFER_FILES_V2}
+  OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/generated/v2/
+  FLATC_EXE ${flatc_location}
+)
 
 set(PROJECT_SOURCES
   constants.cc
@@ -76,7 +97,7 @@ set(PROJECT_SOURCES
 
 if(vw_USE_AZURE_FACTORIES)
   list(APPEND PROJECT_SOURCES
-    azure_factories.cc    
+    azure_factories.cc
     model_mgmt/restapi_data_transport.cc
     utility/http_client.cc
     utility/http_helper.cc
@@ -150,7 +171,7 @@ if(vw_USE_AZURE_FACTORIES)
     logger/http_transport_client.h
     model_mgmt/restapi_data_transport.h
     utility/http_client.h
-    utility/http_helper.h    
+    utility/http_helper.h
     utility/eventhub_http_authorization.h
     utility/header_authorization.h
   )
