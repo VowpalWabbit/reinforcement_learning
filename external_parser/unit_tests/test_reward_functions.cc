@@ -4,6 +4,7 @@
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 const int DEFAULT_REWARD = -1000;
+const int DEFAULT_REWARD_APPRENTICE = 0;
 
 std::vector<float> get_float_rewards(
   std::string int_file_name,
@@ -242,6 +243,7 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(reward_functions_with_cb_format_and_appentice_mode)
 BOOST_AUTO_TEST_CASE(apprentice_with_first_action_matching_baseline_action_returns_real_reward) {
   // 3 rewards in f-reward_3obs_v2.fb are: 5, 4, 3
+  // Apprentice mode assigns reward of 1.0/0.0 for match/no match.
   auto rewards = get_float_rewards(
     "cb/cb_apprentice_match_baseline_v2.fb",
     "cb/f-reward_3obs_v2.fb",
@@ -250,7 +252,7 @@ BOOST_AUTO_TEST_CASE(apprentice_with_first_action_matching_baseline_action_retur
   );
 
   BOOST_CHECK_EQUAL(rewards.size(), 1);
-  BOOST_CHECK_EQUAL(rewards.front(), 3 + 4 + 5);
+  BOOST_CHECK_EQUAL(rewards.front(), 1);
 }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -440,6 +442,7 @@ BOOST_AUTO_TEST_SUITE(ccb_reward_with_apprentice_mode)
 // for slot 1, rewards are: 2, 2, 5, 1
 BOOST_AUTO_TEST_CASE(first_action_matching_baseline_action_returns_real_reward)
 { // baseline actions: [0, 1] (set in example_gen.cc)
+  // in apprentice mode rewards are 1.0/0.0 for match/no match
   auto rewards = get_float_rewards(
     "ccb/ccb-apprentice-baseline-match_v2.fb",
     "ccb/fi-reward_v2.fb",
@@ -449,8 +452,8 @@ BOOST_AUTO_TEST_CASE(first_action_matching_baseline_action_returns_real_reward)
   );
 
   BOOST_CHECK_EQUAL(rewards.size(), 2);
-  BOOST_CHECK_EQUAL(rewards.at(0), 2 + 5 + 2 + 4);
-  BOOST_CHECK_EQUAL(rewards.at(1), 2 + 2 + 5 + 1);
+  BOOST_CHECK_EQUAL(rewards.at(0), 1);
+  BOOST_CHECK_EQUAL(rewards.at(1), 1);
 }
 
 BOOST_AUTO_TEST_CASE(first_action_not_matching_baseline_action_returns_default_reward)
@@ -464,8 +467,8 @@ BOOST_AUTO_TEST_CASE(first_action_not_matching_baseline_action_returns_default_r
   );
 
   BOOST_CHECK_EQUAL(rewards.size(), 2);
-  BOOST_CHECK_EQUAL(rewards.at(0), DEFAULT_REWARD);
-  BOOST_CHECK_EQUAL(rewards.at(1), DEFAULT_REWARD);
+  BOOST_CHECK_EQUAL(rewards.at(0), DEFAULT_REWARD_APPRENTICE);
+  BOOST_CHECK_EQUAL(rewards.at(1), DEFAULT_REWARD_APPRENTICE);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
