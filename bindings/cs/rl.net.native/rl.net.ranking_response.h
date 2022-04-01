@@ -14,8 +14,8 @@ extern "C" {
     // TODO: We should think about how to avoid extra string copies; ideally, err constants
     // should be able to be shared between native/managed, but not clear if this is possible
     // right now.
-    API const char* GetRankingEventId(reinforcement_learning::ranking_response* ranking);
-    API const char* GetRankingModelId(reinforcement_learning::ranking_response* ranking);
+    API const char* GetRankingEventId(reinforcement_learning::ranking_response* ranking, int& event_id_size);
+    API const char* GetRankingModelId(reinforcement_learning::ranking_response* ranking, int& model_id_size);
 
     API size_t GetRankingActionCount(reinforcement_learning::ranking_response* ranking);
 

@@ -52,9 +52,9 @@ namespace reinforcement_learning {
     /**
     * @brief Unique id for this slot detailed instance.
     * This id must be used when calling report_outcome so it can be joined with the chosen action
-    * @return const char*
+    * @return string_view
     */
-    const char* get_id() const;
+    string_view get_id() const;
 
     /**
     * @brief Set the id. (This is set internally by the API)

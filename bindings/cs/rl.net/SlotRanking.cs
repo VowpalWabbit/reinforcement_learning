@@ -20,18 +20,18 @@ namespace Rl.Net
             public static extern void DeleteSlotRanking(IntPtr slot);
 
             [DllImport("rl.net.native.dll", EntryPoint = "GetSlotId")]
-            private static extern IntPtr GetSlotIdNative(IntPtr slotRanking);
+            private static extern IntPtr GetSlotIdNative(IntPtr slotRanking, int slotIdSize);
 
-            internal static Func<IntPtr, IntPtr> GetSlotIdOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, int> GetSlotIdOverride { get; set; }
 
-            public static IntPtr GetSlotId(IntPtr slotRanking)
+            public static IntPtr GetSlotId(IntPtr slotRanking, out int slotIdSize)
             {
                 if (GetSlotIdOverride != null)
                 {
-                    return GetSlotIdOverride(slotRanking);
+                    return GetSlotIdOverride(slotRanking, slotIdSize);
                 }
 
-                return GetSlotIdNative(slotRanking);
+                return GetSlotIdNative(slotRanking, slotIdSize);
             }
 
             [DllImport("rl.net.native.dll")]
@@ -56,9 +56,10 @@ namespace Rl.Net
         {
             get
             {
-                IntPtr eventIdUtf8Ptr = NativeMethods.GetSlotId(this.DangerousGetHandle());
+                int slotIdSize;
+                IntPtr eventIdUtf8Ptr = NativeMethods.GetSlotId(this.DangerousGetHandle(), slotIdSize());
 
-                string result = NativeMethods.StringMarshallingFunc(eventIdUtf8Ptr);
+                string result = NativeMethods.StringMarshallingFunc(eventIdUtf8Ptr, slotIdSize);
 
                 GC.KeepAlive(this);
                 return result;

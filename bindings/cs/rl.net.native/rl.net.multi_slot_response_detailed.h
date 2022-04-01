@@ -11,8 +11,8 @@ extern "C" {
   API reinforcement_learning::multi_slot_response_detailed* CreateMultiSlotResponseDetailed();
   API void DeleteMultiSlotResponseDetailed(reinforcement_learning::multi_slot_response_detailed* multi_slot);
 
-  API const char* GetMultiSlotDetailedEventId(reinforcement_learning::multi_slot_response_detailed* slot);
-  API const char* GetMultiSlotDetailedModelId(reinforcement_learning::multi_slot_response_detailed* slot);
+  API const char* GetMultiSlotDetailedEventId(reinforcement_learning::multi_slot_response_detailed* slot, int& event_id_size);
+  API const char* GetMultiSlotDetailedModelId(reinforcement_learning::multi_slot_response_detailed* slot, int& model_id_size);
 
   API size_t GetMultiSlotDetailedSize(reinforcement_learning::multi_slot_response_detailed* multi_slot);
 

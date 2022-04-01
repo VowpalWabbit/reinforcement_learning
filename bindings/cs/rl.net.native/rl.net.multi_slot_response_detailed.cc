@@ -54,14 +54,18 @@ API size_t GetMultiSlotDetailedSize(reinforcement_learning::multi_slot_response_
   return multi_slot->size();
 }
 
-API const char* GetMultiSlotDetailedModelId(reinforcement_learning::multi_slot_response_detailed* multi_slot)
+API const char* GetMultiSlotDetailedModelId(reinforcement_learning::multi_slot_response_detailed* multi_slot, int& model_id_size)
 {
-  return multi_slot->get_model_id();
+  const auto model_id = multi_slot->get_model_id();
+  model_id_size = model_id.size();
+  return model_id.data();
 }
 
-API const char* GetMultiSlotDetailedEventId(reinforcement_learning::multi_slot_response_detailed* multi_slot)
+API const char* GetMultiSlotDetailedEventId(reinforcement_learning::multi_slot_response_detailed* multi_slot, int& event_id_size)
 {
-  return multi_slot->get_event_id();
+  const auto event_id = multi_slot->get_event_id();
+  event_id_size = event_id.size();
+  return event_id.data();
 }
 
 API multi_slot_detailed_enumerator_adapter* CreateMultiSlotDetailedEnumeratorAdapter(reinforcement_learning::multi_slot_response_detailed* multi_slot)

@@ -32,11 +32,11 @@ namespace reinforcement_learning {
 
     void set_event_id(string_view event_id);
     void set_event_id(std::string&& event_id);
-    const char* get_event_id() const;
+    string_view get_event_id() const;
 
     void set_model_id(string_view model_id);
     void set_model_id(std::string&& model_id);
-    const char* get_model_id() const;
+    string_view get_model_id() const;
 
     int set_slot_at_index(const unsigned int index, slot_ranking&& slot, api_status* status = nullptr);
 

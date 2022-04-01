@@ -10,14 +10,18 @@ API void DeleteContinuousActionResponse(reinforcement_learning::continuous_actio
     delete response;
 }
 
-API const char* GetContinuousActionEventId(reinforcement_learning::continuous_action_response* response)
+API const char* GetContinuousActionEventId(reinforcement_learning::continuous_action_response* response, int& event_id_size)
 {
-    return response->get_event_id();
+    const auto event_id = response->get_event_id();
+    event_id_size = event_id.size();
+    return event_id.data();
 }
 
-API const char* GetContinuousActionModelId(reinforcement_learning::continuous_action_response* response)
+API const char* GetContinuousActionModelId(reinforcement_learning::continuous_action_response* response, int& model_id_size)
 {
-    return response->get_model_id();
+    const auto model_id = response->get_model_id();
+    model_id_size = model_id.size();
+    return model_id.data();
 }
 
 API float GetContinuousActionChosenAction(reinforcement_learning::continuous_action_response* response)

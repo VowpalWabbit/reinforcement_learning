@@ -20,33 +20,33 @@ namespace Rl.Net
             public static extern void DeleteMultiSlotResponseDetailed(IntPtr multiSlotResponseDetailed);
 
             [DllImport("rl.net.native.dll", EntryPoint = "GetMultiSlotDetailedModelId")]
-            private static extern IntPtr GetMultiSlotDetailedModelIdNative(IntPtr multiSlotResponseDetailed);
+            private static extern IntPtr GetMultiSlotDetailedModelIdNative(IntPtr multiSlotResponseDetailed, int modelIdSize);
 
-            internal static Func<IntPtr, IntPtr> GetMultiSlotDetailedModelIdOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, int> GetMultiSlotDetailedModelIdOverride { get; set; }
 
-            public static IntPtr GetMultiSlotDetailedModelId(IntPtr multiSlotResponseDetailed)
+            public static IntPtr GetMultiSlotDetailedModelId(IntPtr multiSlotResponseDetailed, out int modelIdSize)
             {
                 if (GetMultiSlotDetailedModelIdOverride != null)
                 {
-                    return GetMultiSlotDetailedModelIdOverride(multiSlotResponseDetailed);
+                    return GetMultiSlotDetailedModelIdOverride(multiSlotResponseDetailed, modelIdSize);
                 }
 
-                return GetMultiSlotDetailedModelIdNative(multiSlotResponseDetailed);
+                return GetMultiSlotDetailedModelIdNative(multiSlotResponseDetailed, modelIdSize);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "GetMultiSlotDetailedEventID")]
-            private static extern IntPtr GetMultiSlotDetailedEventIDNative(IntPtr multiSlotResponseDetailed);
+            private static extern IntPtr GetMultiSlotDetailedEventIDNative(IntPtr multiSlotResponseDetailed, int eventIdSize);
 
-            internal static Func<IntPtr, IntPtr> GetMultiSlotDetailedEventIdOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, int> GetMultiSlotDetailedEventIdOverride { get; set; }
 
-            public static IntPtr GetMultiSlotDetailedEventId(IntPtr multiSlotResponseDetailed)
+            public static IntPtr GetMultiSlotDetailedEventId(IntPtr multiSlotResponseDetailed, out int eventIdSize)
             {
                 if (GetMultiSlotDetailedEventIdOverride != null)
                 {
-                    return GetMultiSlotDetailedEventIdOverride(multiSlotResponseDetailed);
+                    return GetMultiSlotDetailedEventIdOverride(multiSlotResponseDetailed, eventIdSize);
                 }
 
-                return GetMultiSlotEventIdNative(multiSlotResponseDetailed);
+                return GetMultiSlotEventIdNative(multiSlotResponseDetailed, eventIdSize);
             }
 
             // TODO: CLS-compliance requires that we not publically expose unsigned types.
@@ -66,7 +66,8 @@ namespace Rl.Net
         {
             get
             {
-                IntPtr modelIdUtf8Ptr = NativeMethods.GetMultiSlotDetailedModelId(this.DangerousGetHandle());
+                int modelIdSize;
+                IntPtr modelIdUtf8Ptr = NativeMethods.GetMultiSlotDetailedModelId(this.DangerousGetHandle(), modelIdSize);
 
                 GC.KeepAlive(this);
                 return NativeMethods.StringMarshallingFunc(modelIdUtf8Ptr);
@@ -78,10 +79,11 @@ namespace Rl.Net
         {
             get
             {
-                IntPtr eventIdUtf8Ptr = NativeMethods.GetMultiSlotDetailedEventId(this.DangerousGetHandle());
+                int eventIdSize;
+                IntPtr eventIdUtf8Ptr = NativeMethods.GetMultiSlotDetailedEventId(this.DangerousGetHandle(), eventIdSize);
 
                 GC.KeepAlive(this);
-                return NativeMethods.StringMarshallingFunc(eventIdUtf8Ptr);
+                return NativeMethods.StringMarshallingFunc(eventIdUtf8Ptr, eventIdSize);
             }
         }
 

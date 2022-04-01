@@ -38,8 +38,8 @@ namespace reinforcement_learning
     _event_id = event_id;
   }
 
-  const char* multi_slot_response::get_event_id() const {
-    return _event_id.c_str();
+  string_view multi_slot_response::get_event_id() const {
+    return _event_id;
   }
 
   void multi_slot_response::set_model_id(string_view model_id) {
@@ -50,8 +50,8 @@ namespace reinforcement_learning
     _model_id = model_id;
   }
 
-  const char* multi_slot_response::get_model_id() const {
-    return _model_id.c_str();
+  string_view multi_slot_response::get_model_id() const {
+    return _model_id;
   }
 
   void multi_slot_response::clear() {

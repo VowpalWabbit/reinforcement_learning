@@ -35,8 +35,8 @@ namespace reinforcement_learning {
     _event_id = event_id;
   }
 
-  const char* continuous_action_response::get_event_id() const {
-    return _event_id.c_str();
+  string_view continuous_action_response::get_event_id() const {
+    return _event_id;
   }
 
   void continuous_action_response::set_model_id(string_view model_id) {
@@ -47,8 +47,8 @@ namespace reinforcement_learning {
     _model_id = model_id;
   }
 
-  const char* continuous_action_response::get_model_id() const {
-    return _model_id.c_str();
+  string_view continuous_action_response::get_model_id() const {
+    return _model_id;
   }
 
   void continuous_action_response::clear()

@@ -19,33 +19,33 @@ namespace Rl.Net {
             public static extern void DeleteContinuousActionResponse(IntPtr response);
 
             [DllImport("rl.net.native.dll", EntryPoint = "GetContinuousActionEventId")]
-            private static extern IntPtr GetContinuousActionEventIdNative(IntPtr response);
+            private static extern IntPtr GetContinuousActionEventIdNative(IntPtr response, int eventIdSize);
 
-            internal static Func<IntPtr, IntPtr> GetContinuousActionEventIdOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, int> GetContinuousActionEventIdOverride { get; set; }
 
-            public static IntPtr GetContinuousActionEventId(IntPtr response)
+            public static IntPtr GetContinuousActionEventId(IntPtr response, out int eventIdSize)
             {
                 if (GetContinuousActionEventIdOverride != null)
                 {
-                    return GetContinuousActionEventIdOverride(response);
+                    return GetContinuousActionEventIdOverride(response, eventIdSize);
                 }
 
-                return GetContinuousActionEventIdNative(response);
+                return GetContinuousActionEventIdNative(response, eventIdSize);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "GetContinuousActionModelId")]
-            private static extern IntPtr GetContinuousActionModelIdNative(IntPtr response);
+            private static extern IntPtr GetContinuousActionModelIdNative(IntPtr response, int modelIdSize);
 
-            internal static Func<IntPtr, IntPtr> GetContinuousActionModelIdOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, int> GetContinuousActionModelIdOverride { get; set; }
 
-            public static IntPtr GetContinuousActionModelId(IntPtr response)
+            public static IntPtr GetContinuousActionModelId(IntPtr response, out int modelIdSize)
             {
                 if (GetContinuousActionModelIdOverride != null)
                 {
-                    return GetContinuousActionModelIdOverride(response);
+                    return GetContinuousActionModelIdOverride(response, modelIdSize);
                 }
 
-                return GetContinuousActionModelIdNative(response);
+                return GetContinuousActionModelIdNative(response, modelIdSize);
             }
 
             [DllImport("rl.net.native.dll")]
@@ -66,9 +66,10 @@ namespace Rl.Net {
         {
             get
             {
-                IntPtr eventIdUtf8Ptr = NativeMethods.GetContinuousActionEventId(this.DangerousGetHandle());
+                int eventIdSize;
+                IntPtr eventIdUtf8Ptr = NativeMethods.GetContinuousActionEventId(this.DangerousGetHandle(), eventIdSize);
 
-                string result = NativeMethods.StringMarshallingFunc(eventIdUtf8Ptr);
+                string result = NativeMethods.StringMarshallingFunc(eventIdUtf8Ptr, eventIdSize);
 
                 GC.KeepAlive(this);
                 return result;
@@ -79,10 +80,11 @@ namespace Rl.Net {
         {
             get
             {
-                IntPtr modelIdUtf8Ptr = NativeMethods.GetContinuousActionModelId(this.DangerousGetHandle());
+                int modelIdSize;
+                IntPtr modelIdUtf8Ptr = NativeMethods.GetContinuousActionModelId(this.DangerousGetHandle(), modelIdSize);
 
                 GC.KeepAlive(this);
-                return NativeMethods.StringMarshallingFunc(modelIdUtf8Ptr);
+                return NativeMethods.StringMarshallingFunc(modelIdUtf8Ptr, modelIdSize);
             }
         }
 

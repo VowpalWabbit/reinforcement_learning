@@ -19,33 +19,33 @@ namespace Rl.Net {
             public static extern void DeleteRankingResponse(IntPtr rankingResponse);
 
             [DllImport("rl.net.native.dll", EntryPoint = "GetRankingEventId")]
-            private static extern IntPtr GetRankingEventIdNative(IntPtr rankingResponse);
+            private static extern IntPtr GetRankingEventIdNative(IntPtr rankingResponse, int eventIdSize);
 
-            internal static Func<IntPtr, IntPtr> GetRankingEventIdOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, int> GetRankingEventIdOverride { get; set; }
 
-            public static IntPtr GetRankingEventId(IntPtr rankingResponse)
+            public static IntPtr GetRankingEventId(IntPtr rankingResponse, out int eventIdSize)
             {
                 if (GetRankingEventIdOverride != null)
                 {
-                    return GetRankingEventIdOverride(rankingResponse);
+                    return GetRankingEventIdOverride(rankingResponse, eventIdSize);
                 }
 
-                return GetRankingEventIdNative(rankingResponse);
+                return GetRankingEventIdNative(rankingResponse, eventIdSize);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "GetRankingModelId")]
-            private static extern IntPtr GetRankingModelIdNative(IntPtr rankingResponse);
+            private static extern IntPtr GetRankingModelIdNative(IntPtr rankingResponse, int modelIdSize);
 
-            internal static Func<IntPtr, IntPtr> GetRankingModelIdOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, int> GetRankingModelIdOverride { get; set; }
 
-            public static IntPtr GetRankingModelId(IntPtr rankingResponse)
+            public static IntPtr GetRankingModelId(IntPtr rankingResponse, out int modelIdSize)
             {
                 if (GetRankingModelIdOverride != null)
                 {
-                    return GetRankingModelIdOverride(rankingResponse);
+                    return GetRankingModelIdOverride(rankingResponse, modelIdSize);
                 }
 
-                return GetRankingModelIdNative(rankingResponse);
+                return GetRankingModelIdNative(rankingResponse, modelIdSize);
             }
 
             // TODO: CLS-compliance requires that we not publically expose unsigned types.
@@ -83,9 +83,10 @@ namespace Rl.Net {
         {
             get
             {
-                IntPtr eventIdUtf8Ptr = NativeMethods.GetRankingEventId(this.DangerousGetHandle());
+                int eventIdSize;
+                IntPtr eventIdUtf8Ptr = NativeMethods.GetRankingEventId(this.DangerousGetHandle(), eventIdSize);
 
-                string result = NativeMethods.StringMarshallingFunc(eventIdUtf8Ptr);
+                string result = NativeMethods.StringMarshallingFunc(eventIdUtf8Ptr, eventIdSize);
 
                 GC.KeepAlive(this);
                 return result;
@@ -96,9 +97,10 @@ namespace Rl.Net {
         {
             get
             {
-                IntPtr modelIdUtf8Ptr = NativeMethods.GetRankingModelId(this.DangerousGetHandle());
+                int modelIdSize;
+                IntPtr modelIdUtf8Ptr = NativeMethods.GetRankingModelId(this.DangerousGetHandle(), modelIdSize);
 
-                string result = NativeMethods.StringMarshallingFunc(modelIdUtf8Ptr);
+                string result = NativeMethods.StringMarshallingFunc(modelIdUtf8Ptr, modelIdSize);
 
                 GC.KeepAlive(this);
                 return result;

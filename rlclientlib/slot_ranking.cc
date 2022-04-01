@@ -7,8 +7,8 @@ namespace reinforcement_learning {
   slot_ranking::slot_ranking(string_view id)
     : _id{ id }, _chosen_action_id{ 0 } {}
 
-  const char* slot_ranking::get_id() const {
-    return _id.c_str();
+  string_view slot_ranking::get_id() const {
+    return _id;
   }
 
   void slot_ranking::set_id(string_view id) {

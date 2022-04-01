@@ -41,9 +41,9 @@ namespace reinforcement_learning {
     /**
      * @brief Unique event_id for this ranking request.
      * This event_id must be used when calling report_outcome so it can be joined with the chosen action
-     * @return const char*
+     * @return string_view
      */
-    const char* get_event_id() const;
+    string_view get_event_id() const;
 
     /**
      * @brief Set the event_id.  (This is set internally by the API)
@@ -115,9 +115,9 @@ namespace reinforcement_learning {
   * @brief Get the model_id.
   * Every rank call (single or multi slot) is associated with a unique model used to predict.  A unique model_id
   * is associated with each unique model. (This is set internally by the API)
-  * @return const char*
+  * @return string_view
   */
-  const char* get_model_id() const;
+  string_view get_model_id() const;
 
   /**
   * @brief Clear the ranking response object so that it can be reused.

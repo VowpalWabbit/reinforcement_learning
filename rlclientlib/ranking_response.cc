@@ -7,7 +7,7 @@ namespace reinforcement_learning {
   ranking_response::ranking_response(string_view event_id)
     : _slot_impl { slot_ranking(event_id) } {}
 
-  const char* ranking_response::get_event_id() const {
+  string_view ranking_response::get_event_id() const {
     return _slot_impl.get_id();
   }
 
@@ -43,8 +43,8 @@ namespace reinforcement_learning {
     _model_id.assign(std::move(model_id));
   }
 
-  const char* ranking_response::get_model_id() const {
-    return _model_id.c_str();
+  string_view ranking_response::get_model_id() const {
+    return _model_id;
   }
 
   void ranking_response::clear() {
