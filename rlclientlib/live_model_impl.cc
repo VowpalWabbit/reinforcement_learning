@@ -30,7 +30,7 @@ namespace reinforcement_learning {
   namespace m = model_management;
   namespace u = utility;
   namespace l = logger;
-  constexpr string_view NA_MODEL_ID = "N/A";
+  static constexpr string_view NA_MODEL_ID = "N/A";
 
   // Some typdefs for more concise code
   using vw_ptr = std::shared_ptr<safe_vw>;
