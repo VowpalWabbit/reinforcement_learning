@@ -120,7 +120,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/error_callback_fn.h
   ../include/errors_data.h
   ../include/factory_resolver.h
-  ../include/future_compat.h
+  ../include/rl_future_compat.h
   ../include/live_model.h
   ../include/model_mgmt.h
   ../include/multistep.h
@@ -228,18 +228,6 @@ install(TARGETS rlclientlib
   LIBRARY DESTINATION lib
 )
 
-install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rlclientlib
-    FILES_MATCHING
-    PATTERN "*.h"
-    PATTERN ".nuget" EXCLUDE
-    PATTERN "slim" EXCLUDE
-    PATTERN "win32" EXCLUDE
-    PATTERN "out" EXCLUDE
-    PATTERN "packages" EXCLUDE
-    PATTERN "x64" EXCLUDE
-    PATTERN ".vs" EXCLUDE
-)
 install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/../include
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/
     FILES_MATCHING
@@ -252,3 +240,8 @@ install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/../include
     PATTERN "x64" EXCLUDE
     PATTERN ".vs" EXCLUDE
 )
+
+install(FILES
+    ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/vowpalwabbit/vw_string_view.h
+    ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/explore/future_compat.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/vowpal_wabbit)

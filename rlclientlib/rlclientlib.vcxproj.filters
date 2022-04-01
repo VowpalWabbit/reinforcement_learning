@@ -117,7 +117,7 @@
     <ClInclude Include="..\include\decision_response.h" />
     <ClInclude Include="..\include\container_iterator.h" />
     <ClInclude Include="..\include\continuous_action_response.h" />
-    <ClInclude Include="..\include\future_compat.h" />
+    <ClInclude Include="..\include\rl_future_compat.h" />
     <ClInclude Include="..\include\multi_slot_response.h" />
     <ClInclude Include="..\include\errors_data.h" />
     <ClInclude Include="logger\logger_facade.h" />

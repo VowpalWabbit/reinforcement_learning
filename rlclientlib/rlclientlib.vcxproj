@@ -181,7 +181,7 @@ $(flatcPath) -o "$(SolutionDir)rlclientlib\generated\v2" --cpp "$(SolutionDir)rl
     <ClInclude Include="..\include\container_iterator.h" />
     <ClInclude Include="..\include\continuous_action_response.h" />
     <ClInclude Include="..\include\errors_data.h" />
-    <ClInclude Include="..\include\future_compat.h" />
+    <ClInclude Include="..\include\rl_future_compat.h" />
     <ClInclude Include="..\include\live_model.h" />
     <ClInclude Include="..\include\multistep.h" />
     <ClInclude Include="..\include\multi_slot_response_detailed.h" />
