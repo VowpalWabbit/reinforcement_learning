@@ -644,7 +644,7 @@ namespace Rl.Net.Cli.Test
             Run_LiveModelReportOutcomeSlotStringIdJson_Test(liveModel, PseudoLocEventId, "SlotId", PseudoLocOutcomeJson);
         }
 
-        private void Run_StringReturnMarshallingTest<TNativeObject>(string valueToReturn, Action<Func<IntPtr, IntPtr, int>> registerNativeOverride, Func<TNativeObject, string> targetInvocation, string targetInvocationName)
+        private void Run_StringReturnMarshallingTest<TNativeObject>(string valueToReturn, Action<Func<IntPtr, IntPtr>> registerNativeOverride, Func<TNativeObject, string> targetInvocation, string targetInvocationName)
             where TNativeObject : NativeObject<TNativeObject>, new()
         {
             TNativeObject targetObject = new TNativeObject();
@@ -656,14 +656,12 @@ namespace Rl.Net.Cli.Test
                 if (valueToReturn != null)
                 {
                     byte[] valueToReturnUtf8Bytes = NativeMethods.StringEncoding.GetBytes(valueToReturn);
-                    int valueToReturnSize = NativeMethods.StringEncoding.GetByteCount(valueToReturn);
                     valueToReturnHandle = GCHandle.Alloc(valueToReturnUtf8Bytes, GCHandleType.Pinned);
                     valueToReturnPtr = valueToReturnHandle.AddrOfPinnedObject();
                 }
 
-                IntPtr ReturnTargetValue(IntPtr targetObjectPtr, out int targetObjectStringSize)
+                IntPtr ReturnTargetValue(IntPtr targetObjectPtr)
                 {
-                    targetObjectStringSize = valueToReturnSize;
                     return valueToReturnPtr;
                 }
 
@@ -686,7 +684,7 @@ namespace Rl.Net.Cli.Test
 
         private void Run_GetRankingModelId_Test(string modelIdToReturn)
         {
-            void RegisterNativeOverride(Func<IntPtr, IntPtr, int> nativeOverrideCallback)
+            void RegisterNativeOverride(Func<IntPtr, IntPtr> nativeOverrideCallback)
             {
                 NativeMethods.GetRankingModelIdOverride = nativeOverrideCallback;
             }
@@ -696,7 +694,7 @@ namespace Rl.Net.Cli.Test
 
         private void Run_GetRankingEventId_Test(string eventIdToReturn)
         {
-            void RegisterNativeOverride(Func<IntPtr, IntPtr, int> nativeOverrideCallback)
+            void RegisterNativeOverride(Func<IntPtr, IntPtr> nativeOverrideCallback)
             {
                 NativeMethods.GetRankingEventIdOverride = nativeOverrideCallback;
             }
@@ -717,7 +715,7 @@ namespace Rl.Net.Cli.Test
         [TestMethod]
         public void Test_SlotRankingStringProperties()
         {
-            void RegisterNativeOverride(Func<IntPtr, IntPtr, int> nativeOverrideCallback)
+            void RegisterNativeOverride(Func<IntPtr, IntPtr> nativeOverrideCallback)
             {
                 NativeMethods.GetSlotIdOverride = nativeOverrideCallback;
             }
@@ -727,7 +725,7 @@ namespace Rl.Net.Cli.Test
 
         private void Run_GetMultiSlotDetailedModelId_Test(string modelIdToReturn)
         {
-            void RegisterNativeOverride(Func<IntPtr, IntPtr, int> nativeOverrideCallback)
+            void RegisterNativeOverride(Func<IntPtr, IntPtr> nativeOverrideCallback)
             {
                 NativeMethods.GetMultiSlotDetailedModelIdOverride = nativeOverrideCallback;
             }
@@ -737,7 +735,7 @@ namespace Rl.Net.Cli.Test
 
         private void Run_GetMultiSlotDetailedEventId_Test(string eventIdToReturn)
         {
-            void RegisterNativeOverride(Func<IntPtr, IntPtr, int> nativeOverrideCallback)
+            void RegisterNativeOverride(Func<IntPtr, IntPtr> nativeOverrideCallback)
             {
                 NativeMethods.GetMultiSlotDetailedEventIdOverride = nativeOverrideCallback;
             }
@@ -758,7 +756,7 @@ namespace Rl.Net.Cli.Test
 
         private void Run_GetDecisionModelId_Test(string modelIdToReturn)
         {
-            void RegisterNativeOverride(Func<IntPtr, IntPtr, int> nativeOverrideCallback)
+            void RegisterNativeOverride(Func<IntPtr, IntPtr> nativeOverrideCallback)
             {
                 NativeMethods.GetDecisionModelIdOverride = nativeOverrideCallback;
             }

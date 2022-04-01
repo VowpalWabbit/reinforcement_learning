@@ -19,33 +19,41 @@ namespace Rl.Net {
             public static extern void DeleteRankingResponse(IntPtr rankingResponse);
 
             [DllImport("rl.net.native.dll", EntryPoint = "GetRankingEventId")]
-            private static extern IntPtr GetRankingEventIdNative(IntPtr rankingResponse, int eventIdSize);
+            private static extern IntPtr GetRankingEventIdNative(IntPtr rankingResponse, out int eventIdSize);
 
-            internal static Func<IntPtr, IntPtr, int> GetRankingEventIdOverride { get; set; }
+            internal static Func<IntPtr, IntPtr> GetRankingEventIdOverride { get; set; }
 
             public static IntPtr GetRankingEventId(IntPtr rankingResponse, out int eventIdSize)
             {
+                eventIdSize = 0;
                 if (GetRankingEventIdOverride != null)
                 {
-                    return GetRankingEventIdOverride(rankingResponse, eventIdSize);
+                    IntPtr eventId = GetRankingEventIdOverride(rankingResponse);
+                    string marshalledBack = NativeMethods.StringMarshallingFunc(eventId);
+                    eventIdSize = NativeMethods.StringEncoding.GetByteCount(marshalledBack);
+                    return eventId;
                 }
 
-                return GetRankingEventIdNative(rankingResponse, eventIdSize);
+                return GetRankingEventIdNative(rankingResponse, out eventIdSize);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "GetRankingModelId")]
-            private static extern IntPtr GetRankingModelIdNative(IntPtr rankingResponse, int modelIdSize);
+            private static extern IntPtr GetRankingModelIdNative(IntPtr rankingResponse, out int modelIdSize);
 
-            internal static Func<IntPtr, IntPtr, int> GetRankingModelIdOverride { get; set; }
+            internal static Func<IntPtr, IntPtr> GetRankingModelIdOverride { get; set; }
 
             public static IntPtr GetRankingModelId(IntPtr rankingResponse, out int modelIdSize)
             {
+                modelIdSize = 0;
                 if (GetRankingModelIdOverride != null)
                 {
-                    return GetRankingModelIdOverride(rankingResponse, modelIdSize);
+                    IntPtr modelId = GetRankingModelIdOverride(rankingResponse);
+                    string marshalledBack = NativeMethods.StringMarshallingFunc(modelId);
+                    modelIdSize = NativeMethods.StringEncoding.GetByteCount(marshalledBack);
+                    return modelId;
                 }
 
-                return GetRankingModelIdNative(rankingResponse, modelIdSize);
+                return GetRankingModelIdNative(rankingResponse, out modelIdSize);
             }
 
             // TODO: CLS-compliance requires that we not publically expose unsigned types.
@@ -83,10 +91,10 @@ namespace Rl.Net {
         {
             get
             {
-                int eventIdSize;
-                IntPtr eventIdUtf8Ptr = NativeMethods.GetRankingEventId(this.DangerousGetHandle(), eventIdSize);
+                int eventIdSize = 0;
+                IntPtr eventIdUtf8Ptr = NativeMethods.GetRankingEventId(this.DangerousGetHandle(), out eventIdSize);
 
-                string result = NativeMethods.StringMarshallingFunc(eventIdUtf8Ptr, eventIdSize);
+                string result = NativeMethods.StringMarshallingFuncWithSize(eventIdUtf8Ptr, eventIdSize);
 
                 GC.KeepAlive(this);
                 return result;
@@ -97,10 +105,10 @@ namespace Rl.Net {
         {
             get
             {
-                int modelIdSize;
-                IntPtr modelIdUtf8Ptr = NativeMethods.GetRankingModelId(this.DangerousGetHandle(), modelIdSize);
+                int modelIdSize = 0;
+                IntPtr modelIdUtf8Ptr = NativeMethods.GetRankingModelId(this.DangerousGetHandle(), out modelIdSize);
 
-                string result = NativeMethods.StringMarshallingFunc(modelIdUtf8Ptr, modelIdSize);
+                string result = NativeMethods.StringMarshallingFuncWithSize(modelIdUtf8Ptr, modelIdSize);
 
                 GC.KeepAlive(this);
                 return result;
