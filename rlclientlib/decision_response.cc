@@ -10,8 +10,8 @@ namespace reinforcement_learning
     , probability(_probability) {
   }
 
-  const char* slot_response::get_slot_id() const {
-    return slot_id.c_str();
+  string_view slot_response::get_slot_id() const {
+    return slot_id;
   }
 
   uint32_t slot_response::get_action_id() const {
@@ -38,8 +38,8 @@ namespace reinforcement_learning
     _model_id.assign(std::move(model_id));
   }
 
-  const char* decision_response::get_model_id() const {
-    return _model_id.c_str();
+  string_view decision_response::get_model_id() const {
+    return _model_id;
   }
 
   void decision_response::clear() {

@@ -15,7 +15,7 @@ namespace reinforcement_learning {
 
     slot_response(string_view _slot_id, uint32_t _action_id, float _probability);
 
-    const char* get_slot_id() const;
+    string_view get_slot_id() const;
     uint32_t get_action_id() const;
     float get_probability() const;
   private:
@@ -48,7 +48,7 @@ namespace reinforcement_learning {
 
     void set_model_id(string_view model_id);
     void set_model_id(std::string&& model_id);
-    const char* get_model_id() const;
+    string_view get_model_id() const;
 
     void clear();
     const_iterator_t begin() const;

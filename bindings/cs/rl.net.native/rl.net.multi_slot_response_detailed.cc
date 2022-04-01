@@ -57,14 +57,14 @@ API size_t GetMultiSlotDetailedSize(reinforcement_learning::multi_slot_response_
 API const char* GetMultiSlotDetailedModelId(reinforcement_learning::multi_slot_response_detailed* multi_slot, int& model_id_size)
 {
   const auto model_id = multi_slot->get_model_id();
-  model_id_size = model_id.size();
+  model_id_size = static_cast<int>(model_id.size());
   return model_id.data();
 }
 
 API const char* GetMultiSlotDetailedEventId(reinforcement_learning::multi_slot_response_detailed* multi_slot, int& event_id_size)
 {
   const auto event_id = multi_slot->get_event_id();
-  event_id_size = event_id.size();
+  event_id_size = static_cast<int>(event_id.size());
   return event_id.data();
 }
 
