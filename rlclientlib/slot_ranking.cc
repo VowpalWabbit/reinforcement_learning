@@ -4,15 +4,15 @@
 
 namespace reinforcement_learning {
 
-  slot_ranking::slot_ranking(char const* id)
+  slot_ranking::slot_ranking(string_view id)
     : _id{ id }, _chosen_action_id{ 0 } {}
 
-  char const* slot_ranking::get_id() const {
-    return _id.c_str();
+  string_view slot_ranking::get_id() const {
+    return _id;
   }
 
-  void slot_ranking::set_id(char const* id) {
-    _id = id;
+  void slot_ranking::set_id(string_view id) {
+    _id = std::string(id);
   }
 
   int slot_ranking::get_chosen_action_id(size_t& action_id, api_status* status) const {

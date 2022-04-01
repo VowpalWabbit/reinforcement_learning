@@ -16,7 +16,7 @@ namespace Rl.Net {
             public static extern IntPtr CreateSlotResponse();
 
             [DllImport("rl.net.native.dll")]
-            public static extern IntPtr GetSlotSlotId(IntPtr slotResponse);
+            public static extern IntPtr GetSlotSlotId(IntPtr slotResponse, out int slotIdSize);
 
             [DllImport("rl.net.native.dll")]
             public static extern int GetSlotActionId(IntPtr slotResponse);
@@ -31,18 +31,22 @@ namespace Rl.Net {
             public static extern void DeleteDecisionResponse(IntPtr decisionResponse);
 
             [DllImport("rl.net.native.dll", EntryPoint = "GetDecisionModelId")]
-            private static extern IntPtr GetDecisionModelIdNative(IntPtr decisionResponse);
+            private static extern IntPtr GetDecisionModelIdNative(IntPtr decisionResponse, out int modelIdSize);
 
             internal static Func<IntPtr, IntPtr> GetDecisionModelIdOverride { get; set; }
 
-            public static IntPtr GetDecisionModelId(IntPtr decisionResponse)
+            public static IntPtr GetDecisionModelId(IntPtr decisionResponse, out int modelIdSize)
             {
+                modelIdSize = 0;
                 if (GetDecisionModelIdOverride != null)
                 {
-                    return GetDecisionModelIdOverride(decisionResponse);
+                    IntPtr modelId = GetDecisionModelIdOverride(decisionResponse);
+                    string marshalledBack = NativeMethods.StringMarshallingFunc(modelId);
+                    modelIdSize = NativeMethods.StringEncoding.GetByteCount(marshalledBack);
+                    return modelId;
                 }
 
-                return GetDecisionModelIdNative(decisionResponse);
+                return GetDecisionModelIdNative(decisionResponse, out modelIdSize);
             }
 
             // TODO: CLS-compliance requires that we not publically expose unsigned types.
@@ -62,10 +66,11 @@ namespace Rl.Net {
         {
             get
             {
-                IntPtr modelIdUtf8Ptr = NativeMethods.GetSlotSlotId(this.DangerousGetHandle());
+                int slotIdSize = 0;
+                IntPtr modelIdUtf8Ptr = NativeMethods.GetSlotSlotId(this.DangerousGetHandle(), out slotIdSize);
 
                 GC.KeepAlive(this);
-                return NativeMethods.StringMarshallingFunc(modelIdUtf8Ptr);
+                return NativeMethods.StringMarshallingFuncWithSize(modelIdUtf8Ptr, slotIdSize);
             }
         }
 
@@ -102,10 +107,11 @@ namespace Rl.Net {
         {
             get
             {
-                IntPtr modelIdUtf8Ptr = NativeMethods.GetDecisionModelId(this.DangerousGetHandle());
+                int modelIdSize = 0;
+                IntPtr modelIdUtf8Ptr = NativeMethods.GetDecisionModelId(this.DangerousGetHandle(), out modelIdSize);
 
                 GC.KeepAlive(this);
-                return NativeMethods.StringMarshallingFunc(modelIdUtf8Ptr);
+                return NativeMethods.StringMarshallingFuncWithSize(modelIdUtf8Ptr, modelIdSize);
             }
         }
 

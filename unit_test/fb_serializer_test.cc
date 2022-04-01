@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
   fb_collection_serializer<ranking_event> serializer(db, value::CONTENT_ENCODING_IDENTITY);
   ranking_response resp;
   std::string model_id("a_model_id");
-  resp.set_model_id(model_id.c_str());
+  resp.set_model_id(model_id);
   resp.push_back(2, .8f + .2f / 3);
   resp.push_back(0, .2f / 3);
   resp.push_back(1, .2f / 3);
@@ -116,12 +116,13 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event) {
 BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_content_encoding) {
   data_buffer db;
   fb_collection_serializer<generic_event> collection_serializer(db, value::CONTENT_ENCODING_DEDUP);
-  const char* event_id("event_id");
+  auto event_id("event_id");
   const timestamp ts;
   
   cb_serializer serializer;
   ranking_response rr(event_id);
-  rr.set_model_id("model_id");
+  std::string model_id("model_id");
+  rr.set_model_id(model_id);
   rr.push_back(1, 0.2f);
   rr.push_back(0, 0.8f);
 
@@ -142,12 +143,13 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_content_encoding) {
 BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_content_encoding_with_number_of_events) {
     data_buffer db;
     fb_collection_serializer<generic_event> collection_serializer(db, value::CONTENT_ENCODING_DEDUP);
-    const char* event_id("event_id");
+    auto event_id("event_id");
     const timestamp ts;
 
     cb_serializer serializer;
     ranking_response rr(event_id);
-    rr.set_model_id("model_id");
+    std::string model_id("model_id");
+    rr.set_model_id(model_id);
     rr.push_back(1, 0.2f);
     rr.push_back(0, 0.8f);
 
@@ -168,11 +170,12 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_content_encoding_with_number_of
 BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_metadata) {
  data_buffer db;
  fb_collection_serializer<generic_event> collection_serializer(db, value::CONTENT_ENCODING_DEDUP);
- const char* event_id("event_id");
+ auto event_id("event_id");
  const timestamp ts;
  cb_serializer serializer;
  ranking_response rr(event_id);
- rr.set_model_id("model_id");
+ std::string model_id("model_id");
+ rr.set_model_id(model_id);
  rr.push_back(1, 0.2f);
  rr.push_back(0, 0.8f);
 

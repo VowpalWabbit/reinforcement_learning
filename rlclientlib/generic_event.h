@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "time_helper.h"
+#include "rl_string_view.h"
 #include "generated/v2/Event_generated.h"
 #include <flatbuffers/flatbuffers.h>
 
@@ -20,8 +21,8 @@ namespace reinforcement_learning {
     using object_list_t = std::vector<object_id_t>;
 
     generic_event() = default;
-    generic_event(const char* id, const timestamp& ts, payload_type_t type, payload_buffer_t&& payload, event_content_type content_type, object_list_t &&objects, const char* app_id, float pass_prob = 1.f);
-    generic_event(const char* id, const timestamp& ts, payload_type_t type, payload_buffer_t&& payload, event_content_type content_type, const char* app_id, float pass_prob = 1.f);
+    generic_event(string_view id, const timestamp& ts, payload_type_t type, payload_buffer_t&& payload, event_content_type content_type, object_list_t &&objects, const char* app_id, float pass_prob = 1.f);
+    generic_event(string_view id, const timestamp& ts, payload_type_t type, payload_buffer_t&& payload, event_content_type content_type, const char* app_id, float pass_prob = 1.f);
 
     generic_event(const generic_event&) = delete;
     generic_event& operator=(const generic_event&) = delete;

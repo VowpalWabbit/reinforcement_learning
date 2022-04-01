@@ -47,5 +47,19 @@ namespace Rl.Net.Native
 
             return result;
         }
+
+        unsafe internal static string PtrToStringUtf8(this IntPtr intPtr, int stringSize)
+        {
+            if (intPtr == IntPtr.Zero || stringSize == 0)
+            {
+                return String.Empty; 
+            }
+
+            Encoding utf8 = Encoding.UTF8;
+
+            string result = utf8.GetString((byte*)intPtr.ToPointer(), stringSize);
+
+            return result;
+        }
     }
 }

@@ -8,6 +8,7 @@ namespace Rl.Net.Native {
     {
         public static readonly Encoding StringEncoding = Encoding.UTF8;
         public static readonly Func<IntPtr, string> StringMarshallingFunc = StringExtensions.PtrToStringUtf8;
+        public static readonly Func<IntPtr, int, string> StringMarshallingFuncWithSize = StringExtensions.PtrToStringUtf8;
 
         public const int SuccessStatus = 0; // See err_constants.h
         public const int OpaqueBindingError = 39; // See err_contants.h

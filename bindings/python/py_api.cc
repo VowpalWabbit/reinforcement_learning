@@ -176,7 +176,7 @@ PYBIND11_MODULE(rl_client, m) {
             unsigned int flags = deferred ? rl::action_flags::DEFERRED
                                           : rl::action_flags::DEFAULT;
             THROW_IF_FAIL(
-                lm.choose_rank(event_id, {context, std::strlen(context)}, flags, response, &status));
+                lm.choose_rank({event_id, std::strlen(event_id)}, {context, std::strlen(context)}, flags, response, &status));
             return response;
           },
           py::arg("context"),
@@ -209,7 +209,7 @@ PYBIND11_MODULE(rl_client, m) {
           [](rl::live_model &lm, const char* event_id, const char* previous_id, const char* context, rl::episode_state& episode) {
             rl::ranking_response response;
             rl::api_status status;
-            THROW_IF_FAIL(lm.request_episodic_decision(event_id, previous_id, {context, std::strlen(context)}, response, episode, &status));
+            THROW_IF_FAIL(lm.request_episodic_decision({event_id, std::strlen(event_id)}, {previous_id, std::strlen(previous_id)}, {context, std::strlen(context)}, response, episode, &status));
             return response;
           },
           py::arg("event_id"),
@@ -220,14 +220,14 @@ PYBIND11_MODULE(rl_client, m) {
           "report_action_taken",
           [](rl::live_model &lm, const char *event_id) {
             rl::api_status status;
-            THROW_IF_FAIL(lm.report_action_taken(event_id, &status));
+            THROW_IF_FAIL(lm.report_action_taken({event_id, std::strlen(event_id)}, &status));
           },
           py::arg("event_id"))
       .def(
           "report_outcome",
           [](rl::live_model &lm, const char *event_id, const char *outcome) {
             rl::api_status status;
-            THROW_IF_FAIL(lm.report_outcome(event_id, outcome, &status));
+            THROW_IF_FAIL(lm.report_outcome({event_id, std::strlen(event_id)}, {outcome, std::strlen(outcome)}, &status));
           },
           py::arg("event_id"),
           py::arg("outcome"))
@@ -235,7 +235,7 @@ PYBIND11_MODULE(rl_client, m) {
           "report_outcome",
           [](rl::live_model &lm, const char *event_id, float outcome) {
             rl::api_status status;
-            THROW_IF_FAIL(lm.report_outcome(event_id, outcome, &status));
+            THROW_IF_FAIL(lm.report_outcome({event_id, std::strlen(event_id)}, outcome, &status));
           },
           py::arg("event_id"),
           py::arg("outcome"))
@@ -243,7 +243,7 @@ PYBIND11_MODULE(rl_client, m) {
           "report_outcome",
           [](rl::live_model &lm, const char *episode_id, const char *event_id, float outcome) {
             rl::api_status status;
-            THROW_IF_FAIL(lm.report_outcome(episode_id, event_id, outcome, &status));
+            THROW_IF_FAIL(lm.report_outcome({episode_id, std::strlen(episode_id)}, {event_id, std::strlen(event_id)}, outcome, &status));
           },
           py::arg("episode_id"),
           py::arg("event_id"),

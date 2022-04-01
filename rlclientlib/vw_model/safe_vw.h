@@ -28,9 +28,9 @@ namespace reinforcement_learning {
     void rank(string_view context, std::vector<int>& actions, std::vector<float>& scores);
     void choose_continuous_action(string_view context, float& action, float& pdf_value);
     // Used for CCB
-    void rank_decisions(const std::vector<const char*>& event_ids, string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores);
+    void rank_decisions(const std::vector<string_view>& event_ids, string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores);
     // Used for slates
-    void rank_multi_slot_decisions(const char* event_id, const std::vector<std::string>& slot_ids, string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores);
+    void rank_multi_slot_decisions(string_view event_id, const std::vector<std::string>& slot_ids, string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores);
 
     const char* id() const;
 

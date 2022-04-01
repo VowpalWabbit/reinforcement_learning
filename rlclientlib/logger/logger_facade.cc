@@ -95,7 +95,7 @@ namespace reinforcement_learning {
       }
     }
 
-    int interaction_logger_facade::log(const char* episode_id, const char* previous_id, string_view context, unsigned int flags, const ranking_response& response, api_status* status) {
+    int interaction_logger_facade::log(string_view episode_id, string_view previous_id, string_view context, unsigned int flags, const ranking_response& response, api_status* status) {
       switch (_version) {
         case 2: {
           generic_event::object_list_t actions;
@@ -109,7 +109,7 @@ namespace reinforcement_learning {
       }
     }
 
-    int interaction_logger_facade::log_decisions(std::vector<const char*>& event_ids, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+    int interaction_logger_facade::log_decisions(std::vector<string_view>& event_ids, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status) {
       switch (_version) {
       case 1: return _v1_ccb->log_decisions(event_ids, context, flags, action_ids, pdfs, model_version, status);
@@ -130,7 +130,7 @@ namespace reinforcement_learning {
     }
 
 
-    int interaction_logger_facade::log_decision(const std::string& event_id, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+    int interaction_logger_facade::log_decision(string_view event_id, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids, api_status* status,
       const std::vector<int>& baseline_actions, learning_mode learning_mode) {
       switch (_version) {
@@ -152,7 +152,7 @@ namespace reinforcement_learning {
         event_content_type content_type;
 
         RETURN_IF_FAIL(wrap_log_call(_ext, _serializer_multislot, context, actions, payload, content_type, status, flags, action_ids, pdfs, model_version, slot_ids, baseline_actions, lmt));
-        return _v2->log(event_id.c_str(), std::move(payload), payload_type, content_type, std::move(actions), status);
+        return _v2->log(event_id, std::move(payload), payload_type, content_type, std::move(actions), status);
       }
       default: return protocol_not_supported(status);
       }
@@ -195,7 +195,7 @@ namespace reinforcement_learning {
       }
     }
 
-    int observation_logger_facade::log(const char* event_id, float outcome, api_status* status) {
+    int observation_logger_facade::log(string_view event_id, float outcome, api_status* status) {
       switch (_version) {
         case 1: return _v1->log(event_id, outcome, status);
         case 2: return _v2->log(event_id, _serializer.numeric_event(outcome), _serializer.type, event_content_type::IDENTITY, status);
@@ -203,7 +203,7 @@ namespace reinforcement_learning {
       }
     }
 
-    int observation_logger_facade::log(const char* event_id, const char* outcome, api_status* status) {
+    int observation_logger_facade::log(string_view event_id, string_view outcome, api_status* status) {
       switch (_version) {
         case 1: return _v1->log(event_id, outcome, status);
         case 2: return _v2->log(event_id, _serializer.string_event(outcome), _serializer.type, event_content_type::IDENTITY, status);
@@ -211,35 +211,35 @@ namespace reinforcement_learning {
       }
     }
 
-    int observation_logger_facade::log(const char* primary_id, int secondary_id, float outcome, api_status* status) {
+    int observation_logger_facade::log(string_view primary_id, int secondary_id, float outcome, api_status* status) {
       switch (_version) {
         case 2: return _v2->log(primary_id, _serializer.numeric_event(secondary_id, outcome), _serializer.type, event_content_type::IDENTITY, status);
         default: return protocol_not_supported(status);
       }
     }
 
-    int observation_logger_facade::log(const char* primary_id, int secondary_id, const char* outcome, api_status* status) {
+    int observation_logger_facade::log(string_view primary_id, int secondary_id, string_view outcome, api_status* status) {
       switch (_version) {
         case 2: return _v2->log(primary_id, _serializer.string_event(secondary_id, outcome), _serializer.type, event_content_type::IDENTITY, status);
         default: return protocol_not_supported(status);
       }
     }
 
-    int observation_logger_facade::log(const char* primary_id, const char* secondary_id, float outcome, api_status* status) {
+    int observation_logger_facade::log(string_view primary_id, string_view secondary_id, float outcome, api_status* status) {
       switch (_version) {
         case 2: return _v2->log(primary_id, _serializer.numeric_event(secondary_id, outcome), _serializer.type, event_content_type::IDENTITY, status);
         default: return protocol_not_supported(status);
       }
     }
 
-    int observation_logger_facade::log(const char* primary_id, const char* secondary_id, const char* outcome, api_status* status) {
+    int observation_logger_facade::log(string_view primary_id, string_view secondary_id, string_view outcome, api_status* status) {
       switch (_version) {
         case 2: return _v2->log(primary_id, _serializer.string_event(secondary_id, outcome), _serializer.type, event_content_type::IDENTITY, status);
         default: return protocol_not_supported(status);
       }
     }
 
-    int observation_logger_facade::report_action_taken(const char* event_id, api_status* status) {
+    int observation_logger_facade::report_action_taken(string_view event_id, api_status* status) {
       switch (_version) {
         case 1: return _v1->report_action_taken(event_id, status);
         case 2: return _v2->log(event_id, _serializer.report_action_taken(), _serializer.type, event_content_type::IDENTITY, status);
@@ -247,7 +247,7 @@ namespace reinforcement_learning {
       }
     }
 
-    int observation_logger_facade::report_action_taken(const char* primary_id, const char* secondary_id, api_status* status) {
+    int observation_logger_facade::report_action_taken(string_view primary_id, string_view secondary_id, api_status* status) {
       switch (_version) {
         case 2: return _v2->log(primary_id, _serializer.report_action_taken(secondary_id), _serializer.type, event_content_type::IDENTITY, status);
         default: return protocol_not_supported(status);

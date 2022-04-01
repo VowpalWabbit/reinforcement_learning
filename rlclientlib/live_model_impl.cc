@@ -30,13 +30,13 @@ namespace reinforcement_learning {
   namespace m = model_management;
   namespace u = utility;
   namespace l = logger;
+  static constexpr string_view NA_MODEL_ID = "N/A";
 
   // Some typdefs for more concise code
   using vw_ptr = std::shared_ptr<safe_vw>;
   using pooled_vw = utility::pooled_object_guard<safe_vw, safe_vw_factory>;
 
-  int check_null_or_empty(const char* arg1, string_view arg2, i_trace* trace, api_status* status);
-  int check_null_or_empty(const char* arg1, i_trace* trace, api_status* status);
+  int check_null_or_empty(string_view arg1, string_view arg2, i_trace* trace, api_status* status);
   int check_null_or_empty(string_view arg1, i_trace* trace, api_status* status);
   int reset_action_order(ranking_response& response);
   void autogenerate_missing_uuids(const std::map<size_t, std::string>& found_ids, std::vector<std::string>& complete_ids, uint64_t seed_shift);
@@ -68,7 +68,7 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int live_model_impl::choose_rank(const char* event_id, string_view context, unsigned int flags, ranking_response& response,
+  int live_model_impl::choose_rank(string_view event_id, string_view context, unsigned int flags, ranking_response& response,
     api_status* status) {
     response.clear();
     //clear previous errors if any
@@ -78,7 +78,7 @@ namespace reinforcement_learning {
     RETURN_IF_FAIL(check_null_or_empty(event_id, context, _trace_logger.get(), status));
     if (!_model_ready) {
       RETURN_IF_FAIL(explore_only(event_id, context, response, status));
-      response.set_model_id("N/A");
+      response.set_model_id(NA_MODEL_ID);
     }
     else {
       RETURN_IF_FAIL(explore_exploit(event_id, context, response, status));
@@ -114,7 +114,7 @@ namespace reinforcement_learning {
       status);
   }
 
-  int live_model_impl::request_continuous_action(const char* event_id, string_view context, unsigned int flags, continuous_action_response& response, api_status* status)
+  int live_model_impl::request_continuous_action(string_view event_id, string_view context, unsigned int flags, continuous_action_response& response, api_status* status)
   {
     response.clear();
     //clear previous errors if any
@@ -173,7 +173,7 @@ namespace reinforcement_learning {
     size_t num_decisions = context_info.slots.size();
 
     std::vector<std::string> event_ids_str(num_decisions);
-    std::vector<const char*> event_ids(num_decisions, nullptr);
+    std::vector<string_view> event_ids(num_decisions, string_view{});
     std::map<size_t, std::string> found_ids;
     RETURN_IF_FAIL(utility::get_event_ids(context_json, found_ids, _trace_logger.get(), status));
 
@@ -181,7 +181,7 @@ namespace reinforcement_learning {
 
     for (int i = 0; i < event_ids.size(); i++)
     {
-      event_ids[i] = event_ids_str[i].c_str();
+      event_ids[i] = event_ids_str[i];
     }
 
     // This will behave correctly both before a model is loaded and after. Prior to a model being loaded it operates in explore only mode.
@@ -197,7 +197,7 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int live_model_impl::request_multi_slot_decision_impl(const char *event_id, string_view context_json, std::vector<std::string>& slot_ids, std::vector<std::vector<uint32_t>>& action_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
+  int live_model_impl::request_multi_slot_decision_impl(string_view event_id, string_view context_json, std::vector<std::string>& slot_ids, std::vector<std::vector<uint32_t>>& action_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
     //clear previous errors if any
     api_status::try_clear(status);
@@ -229,7 +229,7 @@ namespace reinforcement_learning {
     return request_multi_slot_decision(uuid.c_str(), context_json, flags, resp, baseline_actions, status);
   }
 
-  int live_model_impl::request_multi_slot_decision(const char * event_id, string_view context_json, unsigned int flags, multi_slot_response& resp, const std::vector<int>& baseline_actions, api_status* status)
+  int live_model_impl::request_multi_slot_decision(string_view event_id, string_view context_json, unsigned int flags, multi_slot_response& resp, const std::vector<int>& baseline_actions, api_status* status)
   {
     resp.clear();
 
@@ -267,7 +267,7 @@ namespace reinforcement_learning {
     return request_multi_slot_decision(uuid.c_str(), context_json, flags, resp, baseline_actions, status);
   }
 
-  int live_model_impl::request_multi_slot_decision(const char * event_id, string_view context_json, unsigned int flags, multi_slot_response_detailed& resp, const std::vector<int>& baseline_actions, api_status* status)
+  int live_model_impl::request_multi_slot_decision(string_view event_id, string_view context_json, unsigned int flags, multi_slot_response_detailed& resp, const std::vector<int>& baseline_actions, api_status* status)
   {
     resp.clear();
 
@@ -303,52 +303,52 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int live_model_impl::report_action_taken(const char* event_id, api_status* status) {
+  int live_model_impl::report_action_taken(string_view event_id, api_status* status) {
     // Clear previous errors if any
     api_status::try_clear(status);
     // Send the outcome event to the backend
     return _outcome_logger->report_action_taken(event_id, status);
   }
 
-  int live_model_impl::report_action_taken(const char* primary_id, const char* secondary_id, api_status* status) {
+  int live_model_impl::report_action_taken(string_view primary_id, string_view secondary_id, api_status* status) {
     // Clear previous errors if any
     api_status::try_clear(status);
     // Send the outcome event to the backend
     return _outcome_logger->report_action_taken(primary_id, secondary_id, status);
   }
 
-  int live_model_impl::report_outcome(const char* event_id, const char* outcome, api_status* status) {
+  int live_model_impl::report_outcome(string_view event_id, string_view outcome, api_status* status) {
     // Check arguments
     RETURN_IF_FAIL(check_null_or_empty(event_id, outcome, _trace_logger.get(), status));
     return report_outcome_internal(event_id, outcome, status);
   }
 
-  int live_model_impl::report_outcome(const char* event_id, float outcome, api_status* status) {
+  int live_model_impl::report_outcome(string_view event_id, float outcome, api_status* status) {
     // Check arguments
     RETURN_IF_FAIL(check_null_or_empty(event_id, _trace_logger.get(), status));
     return report_outcome_internal(event_id, outcome, status);
   }
 
- int live_model_impl::report_outcome(const char* primary_id, int secondary_id, const char* outcome, api_status* status) {
+ int live_model_impl::report_outcome(string_view primary_id, int secondary_id, string_view outcome, api_status* status) {
     // Check arguments
     RETURN_IF_FAIL(check_null_or_empty(primary_id, outcome, _trace_logger.get(), status));
     return report_outcome_internal(primary_id, secondary_id, outcome, status);
   }
 
-  int live_model_impl::report_outcome(const char* primary_id, int secondary_id, float outcome, api_status* status) {
+  int live_model_impl::report_outcome(string_view primary_id, int secondary_id, float outcome, api_status* status) {
     // Check arguments
     RETURN_IF_FAIL(check_null_or_empty(primary_id, _trace_logger.get(), status));
     return report_outcome_internal(primary_id, secondary_id, outcome, status);
   }
 
- int live_model_impl::report_outcome(const char* primary_id, const char* secondary_id, const char* outcome, api_status* status) {
+ int live_model_impl::report_outcome(string_view primary_id, string_view secondary_id, string_view outcome, api_status* status) {
     // Check arguments
     RETURN_IF_FAIL(check_null_or_empty(primary_id, outcome, _trace_logger.get(), status));
     RETURN_IF_FAIL(check_null_or_empty(secondary_id, _trace_logger.get(), status));
     return report_outcome_internal(primary_id, secondary_id, outcome, status);
   }
 
-  int live_model_impl::report_outcome(const char* primary_id, const char* secondary_id, float outcome, api_status* status) {
+  int live_model_impl::report_outcome(string_view primary_id, string_view secondary_id, float outcome, api_status* status) {
     // Check arguments
     RETURN_IF_FAIL(check_null_or_empty(primary_id, _trace_logger.get(), status));
     RETURN_IF_FAIL(check_null_or_empty(secondary_id, _trace_logger.get(), status));
@@ -526,7 +526,7 @@ namespace reinforcement_learning {
     _model_ready = model_ready;
   }
 
-  int live_model_impl::explore_only(const char* event_id, string_view context, ranking_response& response,
+  int live_model_impl::explore_only(string_view event_id, string_view context, ranking_response& response,
     api_status* status) const {
 
     // Generate egreedy pdf
@@ -549,7 +549,7 @@ namespace reinforcement_learning {
     }
 
     // The seed used is composed of uniform_hash(app_id) + uniform_hash(event_id)
-    const uint64_t seed = uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
+    const uint64_t seed = uniform_hash(event_id.data(), event_id.size(), 0) + _seed_shift;
 
     // Pick a slot using the pdf. NOTE: sample_after_normalizing() can change the pdf
     uint32_t chosen_index;
@@ -587,10 +587,10 @@ namespace reinforcement_learning {
     return error_code::success;
   }
 
-  int live_model_impl::explore_exploit(const char* event_id, string_view context, ranking_response& response,
+  int live_model_impl::explore_exploit(string_view event_id, string_view context, ranking_response& response,
     api_status* status) const {
     // The seed used is composed of uniform_hash(app_id) + uniform_hash(event_id)
-    const uint64_t seed = uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
+    const uint64_t seed = uniform_hash(event_id.data(), event_id.size(), 0) + _seed_shift;
 
     std::vector<int> action_ids;
     std::vector<float> action_pdf;
@@ -618,14 +618,14 @@ namespace reinforcement_learning {
     return refresh_model(status);
   }
 
-  int live_model_impl::request_episodic_decision(const char* event_id, const char* previous_id, string_view context_json, unsigned int flags, ranking_response& resp, episode_state& episode, api_status* status) {
+  int live_model_impl::request_episodic_decision(string_view event_id, string_view previous_id, string_view context_json, unsigned int flags, ranking_response& resp, episode_state& episode, api_status* status) {
     resp.clear();
     //clear previous errors if any
     api_status::try_clear(status);
 
     //check arguments
     RETURN_IF_FAIL(check_null_or_empty(event_id, context_json, _trace_logger.get(), status));
-    const uint64_t seed = uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
+    const uint64_t seed = uniform_hash(event_id.data(), event_id.size(), 0) + _seed_shift;
 
     std::vector<int> action_ids;
     std::vector<float> action_pdf;
@@ -651,8 +651,8 @@ namespace reinforcement_learning {
   }
 
   //helper: check if at least one of the arguments is null or empty
-  int check_null_or_empty(const char* arg1, string_view arg2, i_trace* trace, api_status* status) {
-    if (!arg1 || strlen(arg1) == 0 || arg2.empty()) {
+  int check_null_or_empty(string_view arg1, string_view arg2, i_trace* trace, api_status* status) {
+    if (arg1.empty() || arg2.empty()) {
       RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty");
     }
     return error_code::success;
@@ -660,13 +660,6 @@ namespace reinforcement_learning {
 
   int check_null_or_empty(string_view arg1,  i_trace* trace, api_status* status) {
     if (arg1.empty()) {
-      RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty");
-    }
-    return error_code::success;
-  }
-
-  int check_null_or_empty(const char* arg1,  i_trace* trace, api_status* status) {
-    if (!arg1 || strlen(arg1) == 0) {
       RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty");
     }
     return error_code::success;

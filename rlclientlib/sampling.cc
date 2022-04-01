@@ -27,7 +27,7 @@ int populate_response(float action, float pdf_value, std::string&& event_id, std
   return error_code::success;
 }
 
-int populate_response(const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::vector<const char*>& event_ids, std::string&& model_id, decision_response& response, i_trace* trace_logger, api_status* status) {
+int populate_response(const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs, const std::vector<string_view>& event_ids, std::string&& model_id, decision_response& response, i_trace* trace_logger, api_status* status) {
   if(action_ids.size() != pdfs.size())
   {
     RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids and pdfs must be the same size";

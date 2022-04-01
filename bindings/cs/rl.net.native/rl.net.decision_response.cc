@@ -38,9 +38,11 @@ public:
     }
 };
 
-API const char* GetSlotSlotId(reinforcement_learning::slot_response* slot)
+API const char* GetSlotSlotId(reinforcement_learning::slot_response* slot, int& slot_id_size)
 {
-  return slot->get_slot_id();
+    const auto slot_id = slot->get_slot_id();
+    slot_id_size = static_cast<int>(slot_id.size());
+    return slot_id.data();
 }
 
 API int GetSlotActionId(reinforcement_learning::slot_response* slot)
@@ -71,9 +73,11 @@ API size_t GetDecisionSize(reinforcement_learning::decision_response* decision)
 // TODO: We should think about how to avoid extra string copies; ideally, err constants
 // should be able to be shared between native/managed, but not clear if this is possible
 // right now.
-API const char* GetDecisionModelId(reinforcement_learning::decision_response* decision)
+API const char* GetDecisionModelId(reinforcement_learning::decision_response* decision, int& model_id_size)
 {
-    return decision->get_model_id();
+    const auto model_id = decision->get_model_id();
+    model_id_size = static_cast<int>(model_id.size());
+    return model_id.data();
 }
 
 API decision_enumerator_adapter* CreateDecisionEnumeratorAdapter(reinforcement_learning::decision_response* decision)

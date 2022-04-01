@@ -787,32 +787,32 @@ BOOST_AUTO_TEST_CASE(populate_response_same_size_test) {
     r::api_status status;
     std::vector<std::vector<uint32_t>> action_ids = {{0,1,2}, {1,2}, {2}};
     std::vector<std::vector<float>> pdfs = {{0.8667f, 0.0667f, 0.0667f}, {0.9f, 0.1f}, {1.0f}};
-    std::vector<const char*> event_ids = {"a", "b", "c"};
+    std::vector<r::string_view> event_ids = {"a", "b", "c"};
     std::string model_id = "id";
 
     r::decision_response resp;
 
     BOOST_CHECK_EQUAL(populate_response(action_ids, pdfs, event_ids, std::move(model_id), resp, nullptr, &status), err::success);
 
-    BOOST_CHECK(strcmp(resp.get_model_id(), "id") == 0);
+    BOOST_CHECK_EQUAL(resp.get_model_id(), "id");
     BOOST_CHECK_EQUAL(resp.size(), 3);
 
     auto it = resp.begin();
     size_t action_id = 0;
     auto& rank_resp = *it;
-    BOOST_CHECK(strcmp(rank_resp.get_slot_id(), "a") == 0);
+    BOOST_CHECK_EQUAL(rank_resp.get_slot_id(), "a");
     BOOST_CHECK_EQUAL(rank_resp.get_action_id(), 0);
     BOOST_CHECK_CLOSE(rank_resp.get_probability(), 0.8667f, FLOAT_TOL);
     ++it;
 
     auto& rank_resp1 = *it;
-    BOOST_CHECK(strcmp(rank_resp1.get_slot_id(), "b") == 0);
+    BOOST_CHECK_EQUAL(rank_resp1.get_slot_id(), "b");
     BOOST_CHECK_EQUAL(rank_resp1.get_action_id(), 1);
     BOOST_CHECK_CLOSE(rank_resp1.get_probability(), 0.9f, FLOAT_TOL);
     ++it;
 
     auto& rank_resp2 = *it;
-    BOOST_CHECK(strcmp(rank_resp2.get_slot_id(), "c") == 0);
+    BOOST_CHECK_EQUAL(rank_resp2.get_slot_id(), "c");
     BOOST_CHECK_EQUAL(rank_resp2.get_action_id(), 2);
     BOOST_CHECK_CLOSE(rank_resp2.get_probability(), 1.0f, FLOAT_TOL);
 }
@@ -821,7 +821,7 @@ BOOST_AUTO_TEST_CASE(populate_response_different_size_test) {
     r::api_status status;
     std::vector<std::vector<uint32_t>> action_ids = {{0,1,2}, {1,2}};
     std::vector<std::vector<float>> pdfs = {{0.8667f, 0.0667f, 0.0667f}, {0.9f, 0.1f}, {1.0f}};
-    std::vector<const char*> event_ids = {"a", "b", "c"};
+    std::vector<r::string_view> event_ids = {"a", "b", "c"};
     std::string model_id = "id";
 
     r::decision_response resp;
@@ -869,7 +869,7 @@ BOOST_AUTO_TEST_CASE(populate_multi_slot_response_same_size_test) {
 
   BOOST_CHECK_EQUAL(populate_multi_slot_response_detailed(action_ids, pdfs, std::move(event_id), std::move(model_id), slot_ids, resp, nullptr, &status), err::success);
 
-  BOOST_CHECK(strcmp(resp.get_model_id(), "id") == 0);
+  BOOST_CHECK_EQUAL(resp.get_model_id(), "id");
   BOOST_CHECK_EQUAL(resp.size(), 3);
 
   auto it = resp.begin();
@@ -926,19 +926,19 @@ BOOST_AUTO_TEST_CASE(ccb_explore_only_mode) {
   r::decision_response response;
   BOOST_CHECK_EQUAL(model.request_decision(JSON_CCB_CONTEXT, response), err::success);
 
-  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.get_model_id(), "N/A");
   BOOST_CHECK_EQUAL(response.size(), 2);
 
   auto it = response.begin();
   size_t action_id = 0;
   auto& rank_resp = *it;
-  BOOST_CHECK(strcmp(rank_resp.get_slot_id(), "") != 0);
+  BOOST_CHECK_NE(rank_resp.get_slot_id(), "");
   BOOST_CHECK_EQUAL(rank_resp.get_action_id(), 0);
   BOOST_CHECK_CLOSE(rank_resp.get_probability(), 1.f, FLOAT_TOL);
   ++it;
 
   auto& rank_resp1 = *it;
-  BOOST_CHECK(strcmp(rank_resp1.get_slot_id(), "") != 0);
+  BOOST_CHECK_NE(rank_resp1.get_slot_id(), "");
   BOOST_CHECK_EQUAL(rank_resp1.get_action_id(), 1);
   BOOST_CHECK_CLOSE(rank_resp1.get_probability(), 1.f, FLOAT_TOL);
   ++it;
@@ -963,20 +963,20 @@ BOOST_AUTO_TEST_CASE(multi_slot_response) {
   r::multi_slot_response response;
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(JSON_CCB_CONTEXT, response), err::success);
 
-  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.get_model_id(), "N/A");
   BOOST_CHECK_EQUAL(response.size(), 2);
 
 
   auto it = response.begin();
   auto& slot_entry0 = *it;
   size_t action_id = slot_entry0.get_action_id();
-  BOOST_CHECK(strcmp(slot_entry0.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_entry0.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 0);
   ++it;
 
   auto& slot_entry1 = *it;
   action_id = slot_entry1.get_action_id();
-  BOOST_CHECK(strcmp(slot_entry1.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_entry1.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 1);
   ++it;
 }
@@ -1021,22 +1021,22 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_apprentice_mode_with_baseline) {
 
   r::multi_slot_response response;
   int baseline_actions[2] = { 3, 1 };
-  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response,  baseline_actions, 2), err::success);
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision({}, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response,  baseline_actions, 2), err::success);
 
-  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.get_model_id(), "N/A");
   BOOST_CHECK_EQUAL(response.size(), 2);
 
   auto it = response.begin();
   auto& slot_entry0 = *it;
   size_t action_id = slot_entry0.get_action_id();
-  BOOST_CHECK(strcmp(slot_entry0.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_entry0.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 3);
   BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
   ++it;
 
   auto& slot_entry1 = *it;
   action_id = slot_entry1.get_action_id();
-  BOOST_CHECK(strcmp(slot_entry1.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_entry1.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 1);
   BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
   ++it;
@@ -1062,22 +1062,22 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_logging_only_with_baseline) {
   r::multi_slot_response response;
   //baseline actions are not valid action indicies, this is for testing purposes to make sure the action id is overriden in apprentice / logginonly mode.
   int baseline_actions[2] = { 3, 1 };
-  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision({}, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
 
-  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.get_model_id(), "N/A");
   BOOST_CHECK_EQUAL(response.size(), 2);
 
   auto it = response.begin();
   auto& slot_entry0 = *it;
   size_t action_id = slot_entry0.get_action_id();
-  BOOST_CHECK(strcmp(slot_entry0.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_entry0.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 3);
   BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
   ++it;
 
   auto& slot_entry1 = *it;
   action_id = slot_entry1.get_action_id();
-  BOOST_CHECK(strcmp(slot_entry1.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_entry1.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 1);
   BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
   ++it;
@@ -1101,22 +1101,22 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_logging_only_no_baseline) {
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
-  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, nullptr, 0), err::success);
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision({}, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, nullptr, 0), err::success);
 
-  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.get_model_id(), "N/A");
   BOOST_CHECK_EQUAL(response.size(), 2);
 
   auto it = response.begin();
   auto& slot_entry0 = *it;
   size_t action_id = slot_entry0.get_action_id();
-  BOOST_CHECK(strcmp(slot_entry0.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_entry0.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 0);
   BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
   ++it;
 
   auto& slot_entry1 = *it;
   action_id = slot_entry1.get_action_id();
-  BOOST_CHECK(strcmp(slot_entry1.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_entry1.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 1);
   BOOST_CHECK_EQUAL(slot_entry0.get_probability(), 1.0);
   ++it;
@@ -1140,22 +1140,22 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_with_baseline_null_eventId) {
 
   r::multi_slot_response response;
   int baseline_actions[2] = { 3, 1 };
-  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision({}, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
 
-  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.get_model_id(), "N/A");
   BOOST_CHECK_EQUAL(response.size(), 2);
 
 
   auto it = response.begin();
   auto& slot_entry0 = *it;
   size_t action_id = slot_entry0.get_action_id();
-  BOOST_CHECK(strcmp(slot_entry0.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_entry0.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 0);
   ++it;
 
   auto& slot_entry1 = *it;
   action_id = slot_entry1.get_action_id();
-  BOOST_CHECK(strcmp(slot_entry1.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_entry1.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 1);
   ++it;
 }
@@ -1180,7 +1180,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_with_baseline_custom_eventId) {
   int baseline_actions[2] = { 3, 1 };
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision("testEventId", JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
 
-  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.get_model_id(), "N/A");
   BOOST_CHECK_EQUAL(response.size(), 2);
   BOOST_CHECK_EQUAL(response.get_event_id(), "testEventId");
 
@@ -1188,13 +1188,13 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_with_baseline_custom_eventId) {
   auto it = response.begin();
   auto& slot_entry0 = *it;
   size_t action_id = slot_entry0.get_action_id();
-  BOOST_CHECK(strcmp(slot_entry0.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_entry0.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 0);
   ++it;
 
   auto& slot_entry1 = *it;
   action_id = slot_entry1.get_action_id();
-  BOOST_CHECK(strcmp(slot_entry1.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_entry1.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 1);
   ++it;
 }
@@ -1218,7 +1218,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed) {
   r::multi_slot_response_detailed response;
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(JSON_CCB_CONTEXT, response), err::success);
 
-  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.get_model_id(), "N/A");
   BOOST_CHECK_EQUAL(response.size(), 2);
 
 
@@ -1226,13 +1226,13 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed) {
   size_t action_id = 0;
   auto& slot_rank0 = *it;
   slot_rank0.get_chosen_action_id(action_id);
-  BOOST_CHECK(strcmp(slot_rank0.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_rank0.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 0);
   ++it;
 
   auto& slot_rank1 = *it;
   slot_rank1.get_chosen_action_id(action_id);
-  BOOST_CHECK(strcmp(slot_rank1.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_rank1.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 1);
   ++it;
 }
@@ -1277,23 +1277,23 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_apprentice_mode_with_baseline)
 
   r::multi_slot_response_detailed response;
   int baseline_actions[2] = { 3, 1 };
-  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision({}, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
 
-  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.get_model_id(), "N/A");
   BOOST_CHECK_EQUAL(response.size(), 2);
 
   auto it = response.begin();
   size_t action_id = 0;
   auto& slot_rank0 = *it;
   slot_rank0.get_chosen_action_id(action_id);
-  BOOST_CHECK(strcmp(slot_rank0.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_rank0.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 3);
   ++it;
 
   auto& slot_rank1 = *it;
   slot_rank1.get_chosen_action_id(action_id);
   slot_rank1.get_chosen_action_id(action_id);
-  BOOST_CHECK(strcmp(slot_rank1.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_rank1.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 1);
   ++it;
 }
@@ -1317,23 +1317,23 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_logging_only_with_baseline) {
 
   r::multi_slot_response_detailed response;
   int baseline_actions[2] = { 3, 1 };
-  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision({}, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
 
-  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.get_model_id(), "N/A");
   BOOST_CHECK_EQUAL(response.size(), 2);
 
   auto it = response.begin();
   size_t action_id = 0;
   auto& slot_rank0 = *it;
   slot_rank0.get_chosen_action_id(action_id);
-  BOOST_CHECK(strcmp(slot_rank0.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_rank0.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 3);
   ++it;
 
   auto& slot_rank1 = *it;
   slot_rank1.get_chosen_action_id(action_id);
   slot_rank1.get_chosen_action_id(action_id);
-  BOOST_CHECK(strcmp(slot_rank1.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_rank1.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 1);
   ++it;
 }
@@ -1356,23 +1356,23 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_logging_only_no_baseline) {
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
-  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, nullptr, 0), err::success);
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision({}, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, nullptr, 0), err::success);
 
-  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.get_model_id(), "N/A");
   BOOST_CHECK_EQUAL(response.size(), 2);
 
   auto it = response.begin();
   size_t action_id = 0;
   auto& slot_rank0 = *it;
   slot_rank0.get_chosen_action_id(action_id);
-  BOOST_CHECK(strcmp(slot_rank0.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_rank0.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 0);
   ++it;
 
   auto& slot_rank1 = *it;
   slot_rank1.get_chosen_action_id(action_id);
   slot_rank1.get_chosen_action_id(action_id);
-  BOOST_CHECK(strcmp(slot_rank1.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_rank1.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 1);
   ++it;
 }
@@ -1395,22 +1395,22 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_with_baseline_null_eventid) {
 
   r::multi_slot_response_detailed response;
   int baseline_actions[2] = { 3, 1 };
-  BOOST_CHECK_EQUAL(model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
+  BOOST_CHECK_EQUAL(model.request_multi_slot_decision({}, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
 
-  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.get_model_id(), "N/A");
   BOOST_CHECK_EQUAL(response.size(), 2);
 
   auto it = response.begin();
   size_t action_id = 0;
   auto& slot_rank0 = *it;
   slot_rank0.get_chosen_action_id(action_id);
-  BOOST_CHECK(strcmp(slot_rank0.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_rank0.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 0);
   ++it;
 
   auto& slot_rank1 = *it;
   slot_rank1.get_chosen_action_id(action_id);
-  BOOST_CHECK(strcmp(slot_rank1.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_rank1.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 1);
   ++it;
 }
@@ -1435,7 +1435,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_with_baseline_custom_eventid) 
   int baseline_actions[2] = { 3, 1 };
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision("testEventId", JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2), err::success);
 
-  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.get_model_id(), "N/A");
   BOOST_CHECK_EQUAL(response.size(), 2);
   BOOST_CHECK_EQUAL(response.get_event_id(), "testEventId");
 
@@ -1444,13 +1444,13 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_with_baseline_custom_eventid) 
   size_t action_id = 0;
   auto& slot_rank0 = *it;
   slot_rank0.get_chosen_action_id(action_id);
-  BOOST_CHECK(strcmp(slot_rank0.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_rank0.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 0);
   ++it;
 
   auto& slot_rank1 = *it;
   slot_rank1.get_chosen_action_id(action_id);
-  BOOST_CHECK(strcmp(slot_rank1.get_id(), "") != 0);
+  BOOST_CHECK_NE(slot_rank1.get_id(), "");
   BOOST_CHECK_EQUAL(action_id, 1);
   ++it;
 }
@@ -1475,7 +1475,7 @@ BOOST_AUTO_TEST_CASE(slates_explore_only_mode) {
   r::multi_slot_response response;
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(JSON_SLATES_CONTEXT, response), err::success);
 
-  BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
+  BOOST_CHECK_EQUAL(response.get_model_id(), "N/A");
   BOOST_CHECK_EQUAL(response.size(), 2);
 
   auto it = response.begin();

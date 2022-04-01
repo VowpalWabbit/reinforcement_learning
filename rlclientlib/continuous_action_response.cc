@@ -27,28 +27,28 @@ namespace reinforcement_learning {
     _chosen_action_pdf_value = pdf_value;
   }
 
-  void continuous_action_response::set_event_id(const char* event_id) {
-    _event_id = event_id;
+  void continuous_action_response::set_event_id(string_view event_id) {
+    _event_id = std::string(event_id);
   }
 
   void continuous_action_response::set_event_id(std::string&& event_id) {
     _event_id = event_id;
   }
 
-  const char* continuous_action_response::get_event_id() const {
-    return _event_id.c_str();
+  string_view continuous_action_response::get_event_id() const {
+    return _event_id;
   }
 
-  void continuous_action_response::set_model_id(const char* model_id) {
-    _model_id = model_id;
+  void continuous_action_response::set_model_id(string_view model_id) {
+    _model_id = std::string(model_id);
   }
 
   void continuous_action_response::set_model_id(std::string&& model_id) {
     _model_id = model_id;
   }
 
-  const char* continuous_action_response::get_model_id() const {
-    return _model_id.c_str();
+  string_view continuous_action_response::get_model_id() const {
+    return _model_id;
   }
 
   void continuous_action_response::clear()

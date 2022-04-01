@@ -30,28 +30,28 @@ namespace reinforcement_learning
     return _probability;
   }
 
-  void multi_slot_response::set_event_id(const char* event_id) {
-    _event_id = event_id;
+  void multi_slot_response::set_event_id(string_view event_id) {
+    _event_id = std::string(event_id);
   }
 
   void multi_slot_response::set_event_id(std::string&& event_id) {
     _event_id = event_id;
   }
 
-  const char* multi_slot_response::get_event_id() const {
-    return _event_id.c_str();
+  string_view multi_slot_response::get_event_id() const {
+    return _event_id;
   }
 
-  void multi_slot_response::set_model_id(const char* model_id) {
-    _model_id = model_id;
+  void multi_slot_response::set_model_id(string_view model_id) {
+    _model_id = std::string(model_id);
   }
 
   void multi_slot_response::set_model_id(std::string&& model_id) {
     _model_id = model_id;
   }
 
-  const char* multi_slot_response::get_model_id() const {
-    return _model_id.c_str();
+  string_view multi_slot_response::get_model_id() const {
+    return _model_id;
   }
 
   void multi_slot_response::clear() {

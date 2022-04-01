@@ -26,7 +26,8 @@ const float tolerance = 0.00001f;
 BOOST_AUTO_TEST_CASE(cb_payload_serializer_test) {
   cb_serializer serializer;
   ranking_response rr("event_id");
-  rr.set_model_id("model_id");
+  std::string model_id("model_id");
+  rr.set_model_id(model_id);
   rr.push_back(1, 0.2f);
   rr.push_back(0, 0.8f);
 
@@ -59,7 +60,8 @@ BOOST_AUTO_TEST_CASE(ca_payload_serializer_test)
   continuous_action_response response;
   response.set_chosen_action(action);
   response.set_chosen_action_pdf_value(pdf_value);
-  response.set_model_id("model_id");
+  std::string model_id("model_id");
+  response.set_model_id(model_id);
 
   const auto buffer = serializer.event("my_context", action_flags::DEFERRED, response);
 

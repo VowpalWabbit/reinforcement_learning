@@ -110,7 +110,7 @@ namespace reinforcement_learning { namespace model_management {
     }
   }
 
-  int vw_model::request_decision(const std::vector<const char*>& event_ids, string_view features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
+  int vw_model::request_decision(const std::vector<string_view>& event_ids, string_view features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
     try {
       pooled_vw vw(_vw_pool, _vw_pool.get_or_create());
@@ -131,7 +131,7 @@ namespace reinforcement_learning { namespace model_management {
   }
 
 
-  int vw_model::request_multi_slot_decision(const char *event_id, const std::vector<std::string>& slot_ids, string_view features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
+  int vw_model::request_multi_slot_decision(string_view event_id, const std::vector<std::string>& slot_ids, string_view features, std::vector<std::vector<uint32_t>>& actions_ids, std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status)
   {
     try {
       pooled_vw vw(_vw_pool, _vw_pool.get_or_create());

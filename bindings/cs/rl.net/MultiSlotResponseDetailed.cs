@@ -20,33 +20,41 @@ namespace Rl.Net
             public static extern void DeleteMultiSlotResponseDetailed(IntPtr multiSlotResponseDetailed);
 
             [DllImport("rl.net.native.dll", EntryPoint = "GetMultiSlotDetailedModelId")]
-            private static extern IntPtr GetMultiSlotDetailedModelIdNative(IntPtr multiSlotResponseDetailed);
+            private static extern IntPtr GetMultiSlotDetailedModelIdNative(IntPtr multiSlotResponseDetailed, out int modelIdSize);
 
             internal static Func<IntPtr, IntPtr> GetMultiSlotDetailedModelIdOverride { get; set; }
 
-            public static IntPtr GetMultiSlotDetailedModelId(IntPtr multiSlotResponseDetailed)
+            public static IntPtr GetMultiSlotDetailedModelId(IntPtr multiSlotResponseDetailed, out int modelIdSize)
             {
+                modelIdSize = 0;
                 if (GetMultiSlotDetailedModelIdOverride != null)
                 {
-                    return GetMultiSlotDetailedModelIdOverride(multiSlotResponseDetailed);
+                    IntPtr modelId = GetMultiSlotDetailedModelIdOverride(multiSlotResponseDetailed);
+                    string marshalledBack = NativeMethods.StringMarshallingFunc(modelId);
+                    modelIdSize = NativeMethods.StringEncoding.GetByteCount(marshalledBack);
+                    return modelId;
                 }
 
-                return GetMultiSlotDetailedModelIdNative(multiSlotResponseDetailed);
+                return GetMultiSlotDetailedModelIdNative(multiSlotResponseDetailed, out modelIdSize);
             }
 
             [DllImport("rl.net.native.dll", EntryPoint = "GetMultiSlotDetailedEventID")]
-            private static extern IntPtr GetMultiSlotDetailedEventIDNative(IntPtr multiSlotResponseDetailed);
+            private static extern IntPtr GetMultiSlotDetailedEventIDNative(IntPtr multiSlotResponseDetailed, out int eventIdSize);
 
             internal static Func<IntPtr, IntPtr> GetMultiSlotDetailedEventIdOverride { get; set; }
 
-            public static IntPtr GetMultiSlotDetailedEventId(IntPtr multiSlotResponseDetailed)
+            public static IntPtr GetMultiSlotDetailedEventId(IntPtr multiSlotResponseDetailed, out int eventIdSize)
             {
+                eventIdSize = 0;
                 if (GetMultiSlotDetailedEventIdOverride != null)
                 {
-                    return GetMultiSlotDetailedEventIdOverride(multiSlotResponseDetailed);
+                    IntPtr eventId = GetMultiSlotDetailedEventIdOverride(multiSlotResponseDetailed);
+                    string marshalledBack = NativeMethods.StringMarshallingFunc(eventId);
+                    eventIdSize = NativeMethods.StringEncoding.GetByteCount(marshalledBack);
+                    return eventId;
                 }
 
-                return GetMultiSlotEventIdNative(multiSlotResponseDetailed);
+                return GetMultiSlotEventIdNative(multiSlotResponseDetailed, out eventIdSize);
             }
 
             // TODO: CLS-compliance requires that we not publically expose unsigned types.
@@ -66,10 +74,11 @@ namespace Rl.Net
         {
             get
             {
-                IntPtr modelIdUtf8Ptr = NativeMethods.GetMultiSlotDetailedModelId(this.DangerousGetHandle());
+                int modelIdSize = 0;
+                IntPtr modelIdUtf8Ptr = NativeMethods.GetMultiSlotDetailedModelId(this.DangerousGetHandle(), out modelIdSize);
 
                 GC.KeepAlive(this);
-                return NativeMethods.StringMarshallingFunc(modelIdUtf8Ptr);
+                return NativeMethods.StringMarshallingFuncWithSize(modelIdUtf8Ptr, modelIdSize);
             }
         }
 
@@ -78,10 +87,11 @@ namespace Rl.Net
         {
             get
             {
-                IntPtr eventIdUtf8Ptr = NativeMethods.GetMultiSlotDetailedEventId(this.DangerousGetHandle());
+                int eventIdSize = 0;
+                IntPtr eventIdUtf8Ptr = NativeMethods.GetMultiSlotDetailedEventId(this.DangerousGetHandle(), out eventIdSize);
 
                 GC.KeepAlive(this);
-                return NativeMethods.StringMarshallingFunc(eventIdUtf8Ptr);
+                return NativeMethods.StringMarshallingFuncWithSize(eventIdUtf8Ptr, eventIdSize);
             }
         }
 

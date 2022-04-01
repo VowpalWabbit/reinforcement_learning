@@ -163,7 +163,7 @@ namespace reinforcement_learning {
     }
   }
 
-  void safe_vw::rank_decisions(const std::vector<const char*>& event_ids, string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
+  void safe_vw::rank_decisions(const std::vector<string_view>& event_ids, string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
   {
     v_array<example*> examples;
     examples.push_back(get_or_create_example());
@@ -179,7 +179,7 @@ namespace reinforcement_learning {
       const size_t slot_example_indx = examples.size() - event_ids.size() + i;
       auto& tag = examples[slot_example_indx]->tag;
       std::copy(SEED_TAG.begin(), SEED_TAG.end(), std::back_inserter(tag));
-      std::copy(event_ids[i], event_ids[i]+strlen(event_ids[i]), std::back_inserter(tag));
+      std::copy(event_ids[i].data(), event_ids[i].data() + event_ids[i].size(), std::back_inserter(tag));
     }
 
     // finalize example
@@ -210,7 +210,7 @@ namespace reinforcement_learning {
     }
   }
 
-  void safe_vw::rank_multi_slot_decisions(const char* event_id, const std::vector<std::string>& slot_ids, string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
+  void safe_vw::rank_multi_slot_decisions(string_view event_id, const std::vector<std::string>& slot_ids, string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
   {
     v_array<example*> examples;
     examples.push_back(get_or_create_example());
@@ -225,7 +225,7 @@ namespace reinforcement_learning {
       const size_t slot_example_indx = examples.size() - slot_ids.size() + i;
       auto& tag = examples[slot_example_indx]->tag;
       std::copy(SEED_TAG.begin(), SEED_TAG.end(), std::back_inserter(tag));
-      std::copy(event_id, event_id+strlen(event_id), std::back_inserter(tag));
+      std::copy(event_id.data(), event_id.data() + event_id.size(), std::back_inserter(tag));
       std::copy(slot_ids[i].begin(), slot_ids[i].end(), std::back_inserter(tag));
     }
 

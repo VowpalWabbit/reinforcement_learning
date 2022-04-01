@@ -27,14 +27,16 @@ datacol get_slot_ranking_test_data1() {
 BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_event_id) {
   multi_slot_response_detailed multi1;
   BOOST_CHECK_EQUAL(multi1.get_event_id(), "");
-  multi1.set_event_id("event_id");
+  std::string e_i = "event_id";
+  multi1.set_event_id(e_i);
   BOOST_CHECK_EQUAL(multi1.get_event_id(), "event_id");
 }
 
 BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_model_id) {
   multi_slot_response_detailed multi1;
   BOOST_CHECK_EQUAL(multi1.get_model_id(), "");
-  multi1.set_model_id("model_id");
+  std::string model_id("model_id");
+  multi1.set_model_id(model_id);
   BOOST_CHECK_EQUAL(multi1.get_model_id(), "model_id");
 }
 

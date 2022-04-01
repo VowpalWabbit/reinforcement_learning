@@ -87,7 +87,7 @@ namespace reinforcement_learning { namespace logger {
       : event_logger(time_provider, batcher)
     {}
 
-    int log(const char* event_id, string_view context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
+    int log(string_view event_id, string_view context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
   };
 
 class ccb_logger : public event_logger<decision_ranking_event> {
@@ -96,7 +96,7 @@ class ccb_logger : public event_logger<decision_ranking_event> {
       : event_logger(time_provider, batcher)
     {}
 
-    int log_decisions(std::vector<const char*>& event_ids, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+    int log_decisions(std::vector<string_view>& event_ids, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
   };
 
@@ -106,7 +106,7 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
       : event_logger(time_provider, batcher)
     {}
 
-    int log_decision(const std::string &event_id, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+    int log_decision(string_view event_id, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
       const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
   };
 
@@ -117,12 +117,12 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
     {}
 
     template <typename D>
-    int log(const char* event_id, D outcome, api_status* status) {
+    int log(string_view event_id, D outcome, api_status* status) {
       const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
       return append(outcome_event::report_outcome(event_id, outcome, now), status);
     }
 
-    int report_action_taken(const char* event_id, api_status* status);
+    int report_action_taken(string_view event_id, api_status* status);
   };
 
   class generic_event_logger : public event_logger<generic_event> {
@@ -131,7 +131,7 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
       : event_logger(time_provider, batcher, app_id)
     {}
 
-    int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, api_status* status);
-    int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, generic_event::object_list_t&& objects, api_status* status);
+    int log(string_view event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, api_status* status);
+    int log(string_view event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, generic_event::object_list_t&& objects, api_status* status);
   };
 }}

@@ -168,10 +168,10 @@ void test_loop::cb_loop(size_t thread_id) const {
   logger << thread_id << ": Choose_rank: " << choose_rank_perf << " microseconds" << std::endl;
 }
 
-std::vector<const char*> to_const_char(const std::vector<std::string>& ids) {
-  std::vector<const char*> result;
+std::vector<r::string_view> to_string_view(const std::vector<std::string>& ids) {
+  std::vector<r::string_view> result;
   for (const auto& id : ids) {
-    result.push_back(id.c_str());
+    result.push_back(id);
   }
   return result;
 }
@@ -183,7 +183,7 @@ void test_loop::ccb_loop(size_t thread_id) const {
   size_t choose_rank_size = 0;
   {
     const auto event_ids = test_inputs.create_event_ids(0, 0);
-    const auto event_ids_c = to_const_char(event_ids);
+    const auto event_ids_c = to_string_view(event_ids);
     const std::string warmup_id = "_warmup_" + std::string(event_ids[0].c_str());
     const auto context = test_inputs.get_context(0, 0, event_ids);
     if (rl->request_decision(context.c_str(), response, &status) != err::success) {
@@ -213,7 +213,7 @@ void test_loop::ccb_loop(size_t thread_id) const {
 
     const auto example_id = controller->get_iteration();
     const auto event_ids = test_inputs.create_event_ids(thread_id, example_id);
-    const auto event_ids_c = to_const_char(event_ids);
+    const auto event_ids_c = to_string_view(event_ids);
     const auto context = test_inputs.get_context(thread_id, example_id, event_ids);
     if (rl->request_decision(context.c_str(), response, &status) != err::success) {
       std::cout << status.get_error_msg() << std::endl;
