@@ -23,7 +23,7 @@ namespace reinforcement_learning {
     using object_list_t = std::vector<object_id_t>;
 
     generic_event() = default;
-    generic_event(const char* id, const timestamp& ts, payload_type_t type, const char* context, const char* app_id);
+    generic_event(const char* id, const timestamp& ts, payload_type_t type, string_view context, const char* app_id);
     generic_event(const char* id, const timestamp& ts, payload_type_t type, payload_buffer_t&& payload, event_content_type content_type, object_list_t &&objects, const char* app_id, float pass_prob = 1.f);
     generic_event(const char* id, const timestamp& ts, payload_type_t type, payload_buffer_t&& payload, event_content_type content_type, const char* app_id, float pass_prob = 1.f);
 
@@ -60,7 +60,7 @@ namespace reinforcement_learning {
 
     // generate a serializable event
     template<typename TSerializer, typename... Args>
-    int transform(logger::i_logger_extensions* ext, TSerializer serializer, api_status* status, Args... args) {
+    int transform(logger::i_logger_extensions* ext, TSerializer& serializer, api_status* status, Args... args) {
       if(!ext->is_object_extraction_enabled()) {
         _payload = serializer.event(get_context_string(), args...);
       } else {

@@ -146,11 +146,15 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
     {}
 
     template<typename TSerializer, typename... Args>
-    int log(const char* event_id, const char* context, generic_event::payload_type_t type, i_logger_extensions* ext, TSerializer& serializer, api_status* status, Args... args) {
+    int log(const char* event_id, string_view context, generic_event::payload_type_t type, i_logger_extensions* ext, TSerializer& serializer, api_status* status, const Args&... args) {
       const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
       // using shared_ptr because we can't move a unique_ptr in C++11
       // We should replace them in C++14
       auto evt_sp = std::make_shared<generic_event>(event_id, now, type, context, _app_id);
+      // there's no guarantee that the parameter pack Args will stay in scope, so we need to capture them
+      // as a copy the ensure their lifetime.
+      // TODO: See if there's a way to do this without the copy, since the pack can contain some pretty
+      //       expensive objects
       auto evt_fn =
           [evt_sp, type, ext, serializer, args...](generic_event& out_evt, api_status* status)->int
           {

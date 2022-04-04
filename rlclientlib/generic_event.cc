@@ -5,18 +5,14 @@
 
 using namespace std;
 namespace reinforcement_learning {
-  generic_event::generic_event(const char* id, const timestamp& ts, payload_type_t type, const char* context, const char* app_id)
+  generic_event::generic_event(const char* id, const timestamp& ts, payload_type_t type, string_view context, const char* app_id)
   : _id(id)
   , _client_time_gmt(ts)
   , _payload_type(type)
   , _app_id(app_id)
   {
-    auto len = strlen(context);
-    _context_string.reserve(len);
-    for(int i = 0; i < len; ++i)
-    {
-      _context_string.push_back(static_cast<unsigned char>(context[i]));
-    }
+    _context_string.reserve(context.length());
+    std::copy(context.begin(), context.end(), std::back_inserter(_context_string));
   }
 
   generic_event::generic_event(const char* id, const timestamp& ts, payload_type_t type, flatbuffers::DetachedBuffer&& payload, event_content_type content_type, object_list_t &&objects, const char* app_id, float pass_prob)

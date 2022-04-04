@@ -36,53 +36,52 @@ namespace reinforcement_learning {
     };
 
     struct cb_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CB> {
-      static generic_event::payload_buffer_t event(string_view context, unsigned int flags, v2::LearningModeType learning_mode, const ranking_response& response) {
+      static generic_event::payload_buffer_t event(
+        const char* context, unsigned int flags, v2::LearningModeType learning_mode, 
+        const std::vector<uint64_t>& action_ids, const std::vector<float>& probabilities, const std::string& model_id) {
         flatbuffers::FlatBufferBuilder fbb;
-        std::vector<uint64_t> action_ids;
-        std::vector<float> probabilities;
-        for (auto const& r : response) {
-          action_ids.push_back(r.action_id + 1);
-          probabilities.push_back(r.probability);
-        }
+
         std::vector<unsigned char> _context;
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-        auto fb = v2::CreateCbEventDirect(fbb, flags & action_flags::DEFERRED, &action_ids, &_context, &probabilities, response.get_model_id(), learning_mode);
+        auto fb = v2::CreateCbEventDirect(fbb, flags & action_flags::DEFERRED, &action_ids, &_context, &probabilities, model_id.c_str(), learning_mode);
         fbb.Finish(fb);
         return fbb.Release();
       }
     };
 
     struct ca_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CA> {
-      static generic_event::payload_buffer_t event(string_view context, unsigned int flags, const continuous_action_response& response) {
+      static generic_event::payload_buffer_t event(
+        const char* context, unsigned int flags,
+        float chosen_action, float chosen_action_pdf_value, const std::string& model_id) {
         flatbuffers::FlatBufferBuilder fbb;
 
         std::vector<unsigned char> _context;
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-        auto fb = v2::CreateCaEventDirect(fbb, flags & action_flags::DEFERRED, response.get_chosen_action(), &_context, response.get_chosen_action_pdf_value(), response.get_model_id());
+        auto fb = v2::CreateCaEventDirect(fbb, flags & action_flags::DEFERRED, chosen_action, &_context, chosen_action_pdf_value, model_id.c_str());
         fbb.Finish(fb);
         return fbb.Release();
       }
     };
 
     struct multi_slot_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_Slates> {
-      static generic_event::payload_buffer_t event(string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
+      static generic_event::payload_buffer_t event(const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
         const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids,
         const std::vector<int>& baseline_actions, v2::LearningModeType learning_mode) {
         flatbuffers::FlatBufferBuilder fbb;
         std::vector<flatbuffers::Offset<v2::SlotEvent>> slots;
-        for (size_t i = 0; i < action_ids.size(); i++)
-        {
-          slots.push_back(v2::CreateSlotEventDirect(fbb, &action_ids[i], &pdfs[i], slot_ids[i].c_str()));
-        }
 
         std::vector<unsigned char> _context;
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
+        for (size_t i = 0; i < action_ids.size(); i++)
+        {
+          slots.push_back(v2::CreateSlotEventDirect(fbb, &action_ids[i], &pdfs[i], slot_ids[i].c_str()));
+        }
         auto fb = v2::CreateMultiSlotEventDirect(fbb, &_context, &slots, model_version.c_str(), flags & action_flags::DEFERRED, &baseline_actions, learning_mode);
         fbb.Finish(fb);
         return fbb.Release();
@@ -176,20 +175,18 @@ namespace reinforcement_learning {
     };
 
     struct multistep_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_MultiStep> {
-      static generic_event::payload_buffer_t event(string_view context, const char* previous_id, unsigned int flags, const ranking_response& response) {
+      static generic_event::payload_buffer_t event(
+        const char* context, const std::string& previous_id, unsigned int flags,
+        const std::vector<uint64_t>& action_ids, const std::vector<float>& probabilities,
+        const std::string& event_id, const std::string& model_id) {
         flatbuffers::FlatBufferBuilder fbb;
-        std::vector<uint64_t> action_ids;
-        std::vector<float> probabilities;
-        for (auto const& r : response) {
-          action_ids.push_back(r.action_id + 1);
-          probabilities.push_back(r.probability);
-        }
+
         std::vector<unsigned char> _context;
         std::string context_str(context);
         copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-        auto fb = v2::CreateMultiStepEventDirect(fbb, response.get_event_id(), previous_id, &action_ids,
-          &_context, &probabilities, response.get_model_id(), flags & action_flags::DEFERRED);
+        auto fb = v2::CreateMultiStepEventDirect(fbb, event_id.c_str(), previous_id.c_str(), &action_ids,
+          &_context, &probabilities, model_id.c_str(), flags & action_flags::DEFERRED);
         fbb.Finish(fb);
         return fbb.Release();
       }

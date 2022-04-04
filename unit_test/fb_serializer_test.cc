@@ -125,7 +125,18 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_content_encoding) {
   rr.push_back(1, 0.2f);
   rr.push_back(0, 0.8f);
 
-  auto buffer = serializer.event("my_context", action_flags::DEFERRED, v2::LearningModeType_Apprentice, rr);
+  std::vector<uint64_t> action_ids;
+  std::vector<float> probabilities;
+  std::string model_id(rr.get_model_id());
+  for (auto const& r : rr) {
+    action_ids.push_back(r.action_id + 1);
+    probabilities.push_back(r.probability);
+  }
+
+
+  auto buffer = serializer.event(
+    "my_context", action_flags::DEFERRED, v2::LearningModeType_Apprentice, action_ids, probabilities, model_id
+  );
 
   generic_event ge(event_id, ts, v2::PayloadType_CB, std::move(buffer), event_content_type::IDENTITY, "app_id");
   collection_serializer.add(ge);
@@ -151,7 +162,17 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_content_encoding_with_number_of
     rr.push_back(1, 0.2f);
     rr.push_back(0, 0.8f);
 
-    auto buffer = serializer.event("my_context", action_flags::DEFERRED, v2::LearningModeType_Apprentice, rr);
+    std::vector<uint64_t> action_ids;
+    std::vector<float> probabilities;
+    std::string model_id(rr.get_model_id());
+    for (auto const& r : rr) {
+      action_ids.push_back(r.action_id + 1);
+      probabilities.push_back(r.probability);
+    }
+
+    auto buffer = serializer.event(
+      "my_context", action_flags::DEFERRED, v2::LearningModeType_Apprentice, action_ids, probabilities, model_id
+    );
 
     generic_event ge(event_id, ts, v2::PayloadType_CB, std::move(buffer), event_content_type::IDENTITY, "app_id");
     collection_serializer.add(ge);
@@ -176,7 +197,17 @@ BOOST_AUTO_TEST_CASE(fb_serializer_generic_event_metadata) {
  rr.push_back(1, 0.2f);
  rr.push_back(0, 0.8f);
 
- auto buffer = serializer.event("my_context", action_flags::DEFERRED, v2::LearningModeType_Apprentice, rr);
+ std::vector<uint64_t> action_ids;
+ std::vector<float> probabilities;
+ std::string model_id(rr.get_model_id());
+ for (auto const& r : rr) {
+   action_ids.push_back(r.action_id + 1);
+   probabilities.push_back(r.probability);
+ }
+
+ auto buffer = serializer.event(
+   "my_context", action_flags::DEFERRED, v2::LearningModeType_Apprentice, action_ids, probabilities, model_id
+  );
 
  generic_event ge(event_id, ts, v2::PayloadType_CB, std::move(buffer), event_content_type::IDENTITY, "app_id");
  collection_serializer.add(ge);
