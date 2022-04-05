@@ -42,7 +42,7 @@ int passthru(test_event& out_evt, api_status*, std::shared_ptr<test_event> evt_s
 }
 
 BOOST_AUTO_TEST_CASE(push_pop_test) {
-  event_queue<test_event, Func> queue(30,events_counter_status::ENABLE);
+  event_queue<test_event> queue(30,events_counter_status::ENABLE);
   
   std::vector<std::string> vs = {"1", "2", "3"};
   for (int i = 0; i < vs.size(); ++i) {
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(push_pop_test) {
 }
 
 BOOST_AUTO_TEST_CASE(prune_test) {
-  event_queue<test_event, Func> queue(30, events_counter_status::ENABLE);
+  event_queue<test_event> queue(30, events_counter_status::ENABLE);
   {
     auto evt_sp = std::make_shared<test_event>("no_drop_1");
     queue.push(std::bind(passthru, _1, _2, evt_sp), 10 , evt_sp.get());
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(prune_test) {
 
 BOOST_AUTO_TEST_CASE(queue_push_pop)
 {
-  reinforcement_learning::event_queue<test_event, Func> queue(30);
+  reinforcement_learning::event_queue<test_event> queue(30);
 
   //push n elements in the queue
   int n = 10;
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(queue_push_pop)
 
 BOOST_AUTO_TEST_CASE(queue_push_pop_subsample)
 {
-  reinforcement_learning::event_queue<test_event, Func> queue(30,events_counter_status::ENABLE,0.5);
+  reinforcement_learning::event_queue<test_event> queue(30,events_counter_status::ENABLE,0.5);
   
   //push n elements in the queue
   int n = 10;
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(queue_push_pop_subsample)
 
 BOOST_AUTO_TEST_CASE(queue_push_pop_threads)
 {
-  reinforcement_learning::event_queue<test_event, Func> queue(30, events_counter_status::ENABLE);
+  reinforcement_learning::event_queue<test_event> queue(30, events_counter_status::ENABLE);
   std::vector<thread> _threads;
 
   int n = 10;
@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE(queue_push_pop_threads)
 
 BOOST_AUTO_TEST_CASE(queue_push_pop_threads_subsampling)
 {
-  reinforcement_learning::event_queue<test_event, Func> queue(30, events_counter_status::ENABLE,0.5);
+  reinforcement_learning::event_queue<test_event> queue(30, events_counter_status::ENABLE,0.5);
   std::vector<thread> _threads;
 
   int n = 10;
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(queue_push_pop_threads_subsampling)
 }
 BOOST_AUTO_TEST_CASE(queue_pop_empty)
 {
-  reinforcement_learning::event_queue<test_event, Func> queue(30);
+  reinforcement_learning::event_queue<test_event> queue(30);
 
   //the pop call on an empty queue should do nothing
   Func *f = NULL;
@@ -277,7 +277,7 @@ BOOST_AUTO_TEST_CASE(queue_pop_empty)
 BOOST_AUTO_TEST_CASE(queue_capacity_test)
 {
   auto test = std::make_shared<test_event>("hello");
-  reinforcement_learning::event_queue<test_event, Func> queue(30);
+  reinforcement_learning::event_queue<test_event> queue(30);
 
   BOOST_CHECK_EQUAL(queue.capacity(), 0);
   // Contents of string moved into queue

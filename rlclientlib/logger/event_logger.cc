@@ -21,7 +21,7 @@ using namespace std::placeholders;
         out_evt = std::move(*evt_sp);
         return error_code::success;
       };
-    return append(std::move(evt_fn), event_id, 1 /*TODO: fix size estimate*/, evt_sp.get(), status);
+    return append(std::move(evt_fn), event_id, evt_sp.get(), status);
     
   }
 
@@ -37,7 +37,7 @@ using namespace std::placeholders;
       out_evt = std::move(*evt_sp);
       return error_code::success;
     };
-    return append(std::move(evt_fn), evt_id, 1, evt_sp.get(), status);
+    return append(std::move(evt_fn), evt_id, evt_sp.get(), status);
   }
 
   int multi_slot_logger::log_decision(const std::string &event_id, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
@@ -54,7 +54,7 @@ using namespace std::placeholders;
         out_evt = std::move(*evt_sp);
         return error_code::success;
       };;
-    return append(std::move(evt_fn), event_id.c_str(), 1, evt_sp.get(), status);
+    return append(std::move(evt_fn), event_id.c_str(), evt_sp.get(), status);
   }
 
   int observation_logger::report_action_taken(const char* event_id, api_status* status) {
@@ -68,7 +68,7 @@ using namespace std::placeholders;
         out_evt = std::move(*evt_sp);
         return error_code::success;
       };
-    return append(std::move(evt_fn), event_id, 1, evt_sp.get(), status);
+    return append(std::move(evt_fn), event_id, evt_sp.get(), status);
   }
 
   int generic_event_logger::log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, api_status* status) {
@@ -86,6 +86,6 @@ using namespace std::placeholders;
       out_evt = std::move(*evt_sp);
       return error_code::success;
     };
-    return append(std::move(evt_fn), event_id, 1, evt_sp.get(), status);
+    return append(std::move(evt_fn), event_id, evt_sp.get(), status);
   }
 }}

@@ -12,7 +12,7 @@ namespace reinforcement_learning {
     }
 
     template<typename T>
-    i_async_batcher<T, std::function<int(T&, api_status*)>>* create_legacy_async_batcher(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog,
+    i_async_batcher<T>* create_legacy_async_batcher(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog,
       error_callback_fn* perror_cb, const char *section, typename async_batcher<T, fb_collection_serializer>::shared_state_t &shared_state) {
 
       auto config = utility::get_batcher_config(c, section);

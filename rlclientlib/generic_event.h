@@ -54,18 +54,21 @@ namespace reinforcement_learning {
 
     encoding_type_t get_encoding() const;
     
-    const char* get_context_string() const {
-      return reinterpret_cast<const char*>(_context_string.data());
+    // context_string is only valid before the event is transformed
+    const std::vector<uint8_t>& get_context_string() const {
+      return _context_string;
     }
 
     // generate a serializable event
+    // This only works with a context string, other event types cannot be transformed
     template<typename TSerializer, typename... Args>
     int transform(logger::i_logger_extensions* ext, TSerializer& serializer, api_status* status, Args... args) {
+      const char* data = reinterpret_cast<const char*>(get_context_string().data());
       if(!ext->is_object_extraction_enabled()) {
-        _payload = serializer.event(get_context_string(), args...);
+        _payload = serializer.event(data, args...);
       } else {
         std::string tmp;
-        RETURN_IF_FAIL(ext->transform_payload_and_extract_objects(get_context_string(), tmp, _objects, status));
+        RETURN_IF_FAIL(ext->transform_payload_and_extract_objects(data, tmp, _objects, status));
         _payload = serializer.event(tmp.c_str(), args...);
       }
       if(ext->is_serialization_transform_enabled()) {
@@ -73,6 +76,7 @@ namespace reinforcement_learning {
       } else {
         _content_type = event_content_type::IDENTITY;
       }
+     _context_string.clear(); 
      return 0;
     }
   protected:

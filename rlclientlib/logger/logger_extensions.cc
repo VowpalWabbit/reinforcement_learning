@@ -10,7 +10,7 @@ public:
     delete provider; //We don't use it
   }
 
-  i_async_batcher<generic_event, std::function<int(generic_event&, api_status*)>>* create_batcher(i_message_sender* sender, utility::watchdog& watchdog, error_callback_fn* perror_cb, const char* section) override {
+  i_async_batcher<generic_event>* create_batcher(i_message_sender* sender, utility::watchdog& watchdog, error_callback_fn* perror_cb, const char* section) override {
     auto config = utility::get_batcher_config(_config, section);
     return new async_batcher<generic_event, fb_collection_serializer>(
       sender,

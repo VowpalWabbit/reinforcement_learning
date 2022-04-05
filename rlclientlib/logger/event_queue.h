@@ -12,8 +12,10 @@
 namespace reinforcement_learning {
 
   //a moving concurrent queue with locks and mutex
-  template <class T, class TFunc>
+  template <class T>
   class event_queue {
+  public:
+    using TFunc = std::function<int(T&, api_status*)>;
   private:
     // T's lifetime is tied to TFunc
     using queue_t = std::list<std::tuple<TFunc,size_t,T*>>;

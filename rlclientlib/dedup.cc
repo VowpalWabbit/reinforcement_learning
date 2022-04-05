@@ -292,9 +292,9 @@ public:
     _use_dedup(use_dedup),
     _use_compression(use_compression) {}
 
-  logger::i_async_batcher<generic_event, std::function<int(generic_event&, api_status*)>>* 
+  logger::i_async_batcher<generic_event>* 
   create_batcher(logger::i_message_sender* sender, utility::watchdog& watchdog,
-                                                         error_callback_fn* perror_cb, const char* section) override {
+                 error_callback_fn* perror_cb, const char* section) override {
     auto config = utility::get_batcher_config(_config, section);
 
     if(_use_dedup) {

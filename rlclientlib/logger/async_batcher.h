@@ -27,15 +27,16 @@ namespace reinforcement_learning {
 };
 
 namespace reinforcement_learning { namespace logger {
-  template<typename TEvent, typename TFunc>
+  template<typename TEvent>
   class i_async_batcher {
   public:
+    using TFunc = std::function<int(TEvent&, api_status*)>;
     virtual ~i_async_batcher() = default;
 
     virtual int init(api_status* status) = 0;
 
-    virtual int append(TFunc&& func, string_view evt_id, size_t size_estimate, TEvent* event, api_status* status = nullptr) = 0;
-    virtual int append(TFunc& func, string_view evt_id, size_t size_estimate, TEvent* event, api_status* status = nullptr) = 0;
+    virtual int append(TFunc&& func, string_view evt_id, TEvent* event, api_status* status = nullptr) = 0;
+    virtual int append(TFunc& func, string_view evt_id, TEvent* event, api_status* status = nullptr) = 0;
 
     virtual int run_iteration(api_status* status) = 0;
   };
@@ -46,15 +47,16 @@ namespace reinforcement_learning { namespace logger {
   //       return value: Error code
   //       evt    : Event type out-param
   //       status : Optional status object
-  template<typename TEvent, template<typename> class TSerializer = json_collection_serializer, typename TFunc = std::function<int(TEvent&, api_status*)>>
-  class async_batcher: public i_async_batcher<TEvent, TFunc> {
+  template<typename TEvent, template<typename> class TSerializer = json_collection_serializer>
+  class async_batcher: public i_async_batcher<TEvent> {
   public:
     using shared_state_t = typename TSerializer<TEvent>::shared_state_t;
+    using TFunc = std::function<int(TEvent&, api_status*)>;
 
     int init(api_status* status) override;
 
-    int append(TFunc&& func, string_view evt_id, size_t size_estimate, TEvent* event, api_status* status = nullptr) override;
-    int append(TFunc& func, string_view evt_id, size_t size_estimate, TEvent* event, api_status* status = nullptr) override;
+    int append(TFunc&& func, string_view evt_id, TEvent* event, api_status* status = nullptr) override;
+    int append(TFunc& func, string_view evt_id, TEvent* event, api_status* status = nullptr) override;
 
     int run_iteration(api_status* status) override;
 
@@ -76,7 +78,7 @@ namespace reinforcement_learning { namespace logger {
   private:
     std::unique_ptr<i_message_sender> _sender;
 
-    event_queue<TEvent, TFunc> _queue;       // A queue to accumulate batch of events.
+    event_queue<TEvent> _queue;       // A queue to accumulate batch of events.
     size_t _send_high_water_mark;
     error_callback_fn* _perror_cb;
     shared_state_t& _shared_state;
@@ -93,8 +95,8 @@ namespace reinforcement_learning { namespace logger {
     uint64_t _buffer_end_event_index = 0;
   };
 
-  template<typename TEvent, template<typename> class TSerializer, typename TFunc>
-  int async_batcher<TEvent, TSerializer, TFunc>::init(api_status* status) {
+  template<typename TEvent, template<typename> class TSerializer>
+  int async_batcher<TEvent, TSerializer>::init(api_status* status) {
     RETURN_IF_FAIL(_periodic_background_proc.init(this, status));
     bool subsample_lte_zero = _subsample_rate < 0.f || VW::math::are_same(_subsample_rate, 0.f);
     bool subsample_gt_one = _subsample_rate > 1.f && !VW::math::are_same(_subsample_rate, 1.f);
@@ -105,8 +107,8 @@ namespace reinforcement_learning { namespace logger {
     return error_code::success;
   }
 
-  template<typename TEvent, template<typename> class TSerializer, typename TFunc>
-  int async_batcher<TEvent, TSerializer, TFunc>::append(TFunc&& func, string_view evt_id, size_t size_estimate, TEvent* event, api_status* status) {
+  template<typename TEvent, template<typename> class TSerializer>
+  int async_batcher<TEvent, TSerializer>::append(TFunc&& func, string_view evt_id, TEvent* event, api_status* status) {
 
     // If subsampling rate is < 1, then run subsampling logic
     if(_subsample_rate < 1.f) {
@@ -117,7 +119,7 @@ namespace reinforcement_learning { namespace logger {
       }
     }
     
-    _queue.push(std::move(func), size_estimate, event);
+    _queue.push(std::move(func), TSerializer<TEvent>::serializer_t::size_estimate(*event), event);
 
     //block or drop events if the queue if full
     if (_queue.is_full()) {
@@ -133,19 +135,19 @@ namespace reinforcement_learning { namespace logger {
     return error_code::success;
   }
 
-  template<typename TEvent, template<typename> class TSerializer, typename TFunc>
-  int async_batcher<TEvent, TSerializer, TFunc>::append(TFunc& func, string_view evt_id, size_t size_estimate, TEvent* event, api_status* status) {
-    return append(std::move(func), evt_id, size_estimate, event, status);
+  template<typename TEvent, template<typename> class TSerializer>
+  int async_batcher<TEvent, TSerializer>::append(TFunc& func, string_view evt_id, TEvent* event, api_status* status) {
+    return append(std::move(func), evt_id, event, status);
   }
 
-  template<typename TEvent, template<typename> class TSerializer, typename TFunc>
-  int async_batcher<TEvent, TSerializer, TFunc>::run_iteration(api_status* status) {
+  template<typename TEvent, template<typename> class TSerializer>
+  int async_batcher<TEvent, TSerializer>::run_iteration(api_status* status) {
     flush();
     return error_code::success;
   }
 
-  template<typename TEvent, template<typename> class TSerializer, typename TFunc>
-  int async_batcher<TEvent, TSerializer, TFunc>::fill_buffer(
+  template<typename TEvent, template<typename> class TSerializer>
+  int async_batcher<TEvent, TSerializer>::fill_buffer(
                                                       std::shared_ptr<utility::data_buffer>& buffer, 
                                                       size_t& remaining, 
                                                       api_status* status)
@@ -177,8 +179,8 @@ namespace reinforcement_learning { namespace logger {
     return error_code::success;
   }
 
-  template<typename TEvent, template<typename> class TSerializer, typename TFunc>
-  void async_batcher<TEvent, TSerializer, TFunc>::flush() {
+  template<typename TEvent, template<typename> class TSerializer>
+  void async_batcher<TEvent, TSerializer>::flush() {
     const auto queue_size = _queue.size();
 
     // Early exit if queue is empty.
@@ -201,8 +203,8 @@ namespace reinforcement_learning { namespace logger {
     }
   }
 
-  template<typename TEvent, template<typename> class TSerializer, typename TFunc>
-  async_batcher<TEvent, TSerializer, TFunc>::async_batcher(
+  template<typename TEvent, template<typename> class TSerializer>
+  async_batcher<TEvent, TSerializer>::async_batcher(
     i_message_sender* sender,
     utility::watchdog& watchdog,
     typename TSerializer<TEvent>::shared_state_t& shared_state,
@@ -221,8 +223,8 @@ namespace reinforcement_learning { namespace logger {
     , _events_counter_status(config.event_counter_status)
   {}
 
-  template<typename TEvent, template<typename> class TSerializer, typename TFunc>
-  async_batcher<TEvent, TSerializer, TFunc>::~async_batcher() {
+  template<typename TEvent, template<typename> class TSerializer>
+  async_batcher<TEvent, TSerializer>::~async_batcher() {
     // Stop the background procedure the queue before exiting
     _periodic_background_proc.stop();
     if (_queue.size() > 0) {
