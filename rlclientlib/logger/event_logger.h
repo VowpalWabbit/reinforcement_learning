@@ -124,7 +124,6 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
 
     template <typename D>
     int log(const char* event_id, D outcome, api_status* status) {
-      using namespace std::placeholders;
       const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
       // A gross little shuffle because report_outcome returns a copy, but we actually need a pointer
       auto evt_sp = std::make_shared<outcome_event>();

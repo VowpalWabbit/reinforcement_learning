@@ -6,7 +6,6 @@
 #include <functional>
 #include <memory>
 namespace reinforcement_learning { namespace logger {
-using namespace std::placeholders;
   int interaction_logger::log(const char* event_id, string_view context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode) {
     const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
     // using shared_ptr because we can't move a unique_ptr in C++11
