@@ -35,8 +35,8 @@ namespace reinforcement_learning { namespace logger {
 
     virtual int init(api_status* status) = 0;
 
-    virtual int append(TFunc&& func, string_view evt_id, TEvent* event, api_status* status = nullptr) = 0;
-    virtual int append(TFunc& func, string_view evt_id, TEvent* event, api_status* status = nullptr) = 0;
+    virtual int append(TFunc&& func, TEvent* event, api_status* status = nullptr) = 0;
+    virtual int append(TFunc& func, TEvent* event, api_status* status = nullptr) = 0;
 
     virtual int run_iteration(api_status* status) = 0;
   };
@@ -55,8 +55,8 @@ namespace reinforcement_learning { namespace logger {
 
     int init(api_status* status) override;
 
-    int append(TFunc&& func, string_view evt_id, TEvent* event, api_status* status = nullptr) override;
-    int append(TFunc& func, string_view evt_id, TEvent* event, api_status* status = nullptr) override;
+    int append(TFunc&& func, TEvent* event, api_status* status = nullptr) override;
+    int append(TFunc& func, TEvent* event, api_status* status = nullptr) override;
 
     int run_iteration(api_status* status) override;
 
@@ -108,7 +108,7 @@ namespace reinforcement_learning { namespace logger {
   }
 
   template<typename TEvent, template<typename> class TSerializer>
-  int async_batcher<TEvent, TSerializer>::append(TFunc&& func, string_view evt_id, TEvent* event, api_status* status) {
+  int async_batcher<TEvent, TSerializer>::append(TFunc&& func, TEvent* event, api_status* status) {
 
     // If subsampling rate is < 1, then run subsampling logic
     if(_subsample_rate < 1.f) {
@@ -136,8 +136,8 @@ namespace reinforcement_learning { namespace logger {
   }
 
   template<typename TEvent, template<typename> class TSerializer>
-  int async_batcher<TEvent, TSerializer>::append(TFunc& func, string_view evt_id, TEvent* event, api_status* status) {
-    return append(std::move(func), evt_id, event, status);
+  int async_batcher<TEvent, TSerializer>::append(TFunc& func, TEvent* event, api_status* status) {
+    return append(std::move(func), event, status);
   }
 
   template<typename TEvent, template<typename> class TSerializer>

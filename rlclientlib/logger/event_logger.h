@@ -39,8 +39,8 @@ namespace reinforcement_learning { namespace logger {
     int init(api_status* status);
 
   protected:
-    int append(TFunc&& func, const char* evt_id, TEvent* event, api_status* status);
-    int append(TFunc& func, const char* evt_id, TEvent* event, api_status* status);
+    int append(TFunc&& func, TEvent* event, api_status* status);
+    int append(TFunc& func, TEvent* event, api_status* status);
 
   protected:
     bool _initialized = false;
@@ -71,7 +71,7 @@ namespace reinforcement_learning { namespace logger {
   }
 
   template<typename TEvent>
-  int event_logger<TEvent>::append(TFunc&& func, const char* evt_id, TEvent* event, api_status* status) {
+  int event_logger<TEvent>::append(TFunc&& func, TEvent* event, api_status* status) {
     if (!_initialized) {
       api_status::try_update(status, error_code::not_initialized,
         "Logger not initialized. Call init() first.");
@@ -79,12 +79,12 @@ namespace reinforcement_learning { namespace logger {
     }
 
     // Add item to the batch (will be sent later)
-    return _batcher->append(func, evt_id, event, status);
+    return _batcher->append(func, event, status);
   }
 
   template<typename TEvent>
-  int event_logger<TEvent>::append(TFunc& func, const char* evt_id, TEvent* event, api_status* status) {
-    return append(std::move(func), evt_id, status);
+  int event_logger<TEvent>::append(TFunc& func, TEvent* event, api_status* status) {
+    return append(std::move(func), status);
   }
 
   class interaction_logger : public event_logger<ranking_event> {
@@ -134,7 +134,7 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
           out_evt = std::move(*evt_sp);
           return error_code::success;
         };
-      return append(std::move(evt_fn), event_id, evt_sp.get(), status);
+      return append(std::move(evt_fn), evt_sp.get(), status);
     }
 
     int report_action_taken(const char* event_id, api_status* status);
@@ -163,7 +163,7 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
             out_evt = std::move(*evt_sp);
             return error_code::success;
           };
-      return append(std::move(evt_fn), event_id, evt_sp.get(), status);
+      return append(std::move(evt_fn), evt_sp.get(), status);
     }
 
     // TODO: used for observations for now.. may want to change that later

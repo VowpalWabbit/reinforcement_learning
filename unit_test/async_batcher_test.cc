@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(flush_timeout) {
         out_evt = std::move(*foo_evt_sp);
         return error_code::success;
       };
-    batcher.append(std::move(evt_fn), foo_evt_sp->get_event_id(), foo_evt_sp.get(), nullptr);
+    batcher.append(std::move(evt_fn), foo_evt_sp.get(), nullptr);
   }
   {
     auto bar_evt_sp = std::make_shared<test_undroppable_event>(bar);
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(flush_timeout) {
         out_evt = std::move(*bar_evt_sp);
         return error_code::success;
       };
-    batcher.append(std::move(evt_fn), bar_evt_sp->get_event_id(), bar_evt_sp.get(), nullptr);
+    batcher.append(std::move(evt_fn), bar_evt_sp.get(), nullptr);
   }
   std::string expected = foo + "\n" + bar + "\n";
   std::this_thread::sleep_for(std::chrono::milliseconds(150));
@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(flush_batches) {
         out_evt = std::move(*foo_evt_sp);
         return error_code::success;
       };
-    batcher->append(std::move(evt_fn), foo_evt_sp->get_event_id(), foo_evt_sp.get(), nullptr);
+    batcher->append(std::move(evt_fn), foo_evt_sp.get(), nullptr);
   }
   {
     auto bar_evt_sp = std::make_shared<test_undroppable_event>(bar);
@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(flush_batches) {
         out_evt = std::move(*bar_evt_sp);
         return error_code::success;
       };
-    batcher->append(std::move(evt_fn), bar_evt_sp->get_event_id(), bar_evt_sp.get(), nullptr);
+    batcher->append(std::move(evt_fn), bar_evt_sp.get(), nullptr);
   }
   //'send_high_water_mark' will be triggered by previous 2 items.
   //next item will be added in a new batch
@@ -214,7 +214,7 @@ BOOST_AUTO_TEST_CASE(flush_batches) {
         out_evt = std::move(*hello_evt_sp);
         return error_code::success;
       };
-    batcher->append(std::move(evt_fn), hello_evt_sp->get_event_id(), hello_evt_sp.get(), nullptr);
+    batcher->append(std::move(evt_fn), hello_evt_sp.get(), nullptr);
   }
 
   const std::string expected_batch_0 = foo + "\n" + bar + "\n";
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(flush_after_deletion) {
         out_evt = std::move(*foo_evt_sp);
         return error_code::success;
       };
-    batcher->append(std::move(evt_fn), foo_evt_sp->get_event_id(), foo_evt_sp.get(), nullptr);
+    batcher->append(std::move(evt_fn), foo_evt_sp.get(), nullptr);
   }
   {
     auto bar_evt_sp = std::make_shared<test_undroppable_event>(bar);
@@ -254,7 +254,7 @@ BOOST_AUTO_TEST_CASE(flush_after_deletion) {
         out_evt = std::move(*bar_evt_sp);
         return error_code::success;
       };
-    batcher->append(std::move(evt_fn), bar_evt_sp->get_event_id(), bar_evt_sp.get(), nullptr);
+    batcher->append(std::move(evt_fn), bar_evt_sp.get(), nullptr);
   }
                                                 //batch was not sent yet
   BOOST_CHECK_EQUAL(items.size(), 0);           //batch flush is triggered on delete
@@ -290,7 +290,7 @@ BOOST_AUTO_TEST_CASE(queue_overflow_do_not_drop_event) {
         out_evt = std::move(*evt_sp);
         return error_code::success;
       };
-    batcher->append(std::move(evt_fn), evt_sp->get_event_id(), evt_sp.get(), nullptr);
+    batcher->append(std::move(evt_fn), evt_sp.get(), nullptr);
   } //triggers a final flush
   delete batcher;
   //all batches were sent. Check that no event was dropped
@@ -334,7 +334,7 @@ BOOST_AUTO_TEST_CASE(queue_config_drop_rate_test)
         out_evt = std::move(*evt_sp);
         return error_code::success;
       };
-    batcher->append(std::move(evt_fn), evt_sp->get_event_id(), evt_sp.get(), nullptr);
+    batcher->append(std::move(evt_fn), evt_sp.get(), nullptr);
   }
   delete batcher;
 

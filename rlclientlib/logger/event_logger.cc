@@ -20,7 +20,7 @@ namespace reinforcement_learning { namespace logger {
         out_evt = std::move(*evt_sp);
         return error_code::success;
       };
-    return append(std::move(evt_fn), event_id, evt_sp.get(), status);
+    return append(std::move(evt_fn), evt_sp.get(), status);
     
   }
 
@@ -36,7 +36,7 @@ namespace reinforcement_learning { namespace logger {
       out_evt = std::move(*evt_sp);
       return error_code::success;
     };
-    return append(std::move(evt_fn), evt_id, evt_sp.get(), status);
+    return append(std::move(evt_fn), evt_sp.get(), status);
   }
 
   int multi_slot_logger::log_decision(const std::string &event_id, string_view context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
@@ -53,7 +53,7 @@ namespace reinforcement_learning { namespace logger {
         out_evt = std::move(*evt_sp);
         return error_code::success;
       };;
-    return append(std::move(evt_fn), event_id.c_str(), evt_sp.get(), status);
+    return append(std::move(evt_fn), evt_sp.get(), status);
   }
 
   int observation_logger::report_action_taken(const char* event_id, api_status* status) {
@@ -67,7 +67,7 @@ namespace reinforcement_learning { namespace logger {
         out_evt = std::move(*evt_sp);
         return error_code::success;
       };
-    return append(std::move(evt_fn), event_id, evt_sp.get(), status);
+    return append(std::move(evt_fn), evt_sp.get(), status);
   }
 
   int generic_event_logger::log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, api_status* status) {
@@ -85,6 +85,6 @@ namespace reinforcement_learning { namespace logger {
       out_evt = std::move(*evt_sp);
       return error_code::success;
     };
-    return append(std::move(evt_fn), event_id, evt_sp.get(), status);
+    return append(std::move(evt_fn), evt_sp.get(), status);
   }
 }}
