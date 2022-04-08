@@ -1,0 +1,76 @@
+name: Build RLClientLib
+
+on:
+  push:
+    branches:
+      - master
+      - 'releases/**'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build-linux:
+    name: rlclientlib.ubuntu18.04
+    container:
+      image: vowpalwabbit/rl-ubuntu-1804:latest
+    runs-on: ubuntu-latest
+    steps:
+      # v1 must be used because newer versions require a node.js version that will not run on this old image.
+      - uses: actions/checkout@v1
+        with:
+          submodules: 'true'
+      - run: ./.scripts/linux/build.sh
+      - run: ./.scripts/linux/test.sh
+  build-linux-valgrind:
+    name: rlclientlib-valgrind.ubuntu18.04
+    container:
+      image: vowpalwabbit/rl-ubuntu-1804:latest
+    runs-on: ubuntu-latest
+    steps:
+      # v1 must be used because newer versions require a node.js version that will not run on this old image.
+      - uses: actions/checkout@v1
+        with:
+          submodules: 'true'
+      - run: ./.scripts/linux/build-valgrind.sh
+      - run: ./.scripts/linux/unit-tests-valgrind.sh
+  build-macos:
+    name: rlclientlib.macos-10.15
+    runs-on: macos-10.15
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - run: ./.scripts/macos/restore.sh
+      - run: ./.scripts/macos/build.sh
+      - run: ./.scripts/macos/test.sh
+  build-windows:
+    name: rlclientlib.windows-2019
+    runs-on: windows-2019
+    env:
+      SOURCE_DIR: ${{ github.workspace }}/reinforcement_learning
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      # 2022.03.10
+      VCPKG_REF: af2287382b1991dbdcb7e5112d236f3323b9dd7a
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: 'reinforcement_learning'
+          submodules: true
+      - uses: actions/checkout@v2
+        with:
+          path: 'vcpkg'
+          repository: 'microsoft/vcpkg'
+          ref: ${{ env.VCPKG_REF }}
+      - name: Restore vcpkg and build artifacts
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ env.VCPKG_ROOT }}/installed/
+          key: |
+            rl-${{ env.VCPKG_REF }}-windows-2019-vcpkg-cache-invalidate-0
+      - uses: ilammy/msvc-dev-cmd@v1
+      - run: ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
+      - run: ${{ env.SOURCE_DIR }}/.scripts/restore-cmake.cmd
+      - run: ${{ env.SOURCE_DIR }}/.scripts/build-cmake.cmd
+      - run: ${{ env.SOURCE_DIR }}/.scripts/test-cmake.cmd
