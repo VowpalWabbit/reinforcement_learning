@@ -181,7 +181,7 @@ source_group("Sources" FILES ${PROJECT_SOURCES})
 source_group("Public headers" FILES ${PROJECT_PUBLIC_HEADERS})
 source_group("Private headers" FILES ${PROJECT_PRIVATE_HEADERS})
 
-add_library(rlclientlib SHARED ${PROJECT_SOURCES} ${PROJECT_PUBLIC_HEADERS} ${PROJECT_PRIVATE_HEADERS})
+add_library(rlclientlib ${PROJECT_SOURCES} ${PROJECT_PUBLIC_HEADERS} ${PROJECT_PRIVATE_HEADERS})
 add_dependencies(rlclientlib fbgenerator_v1 fbgenerator_v2)
 
 if(vw_USE_AZURE_FACTORIES)

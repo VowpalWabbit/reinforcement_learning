@@ -48,6 +48,7 @@ jobs:
           -T ${{ matrix.toolset }}
           -DNATIVE_NUGET_PLATFORM_TAG=${{ matrix.arch_config.arch }}
           -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE
+          -DBUILD_SHARED_LIBS=TRUE
           -DUSE_ZSTD=ON
           -DBUILD_TESTING=Off
           -DRAPIDJSON_SYS_DEP=Off
