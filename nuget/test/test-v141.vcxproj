@@ -57,6 +57,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)rlclientlib;$(SolutionDir)include;$(SolutionDir)\ext_libs\date;$(SolutionDir)\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\rapidjson\include;$(SolutionDir)\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\ext_libs\zstd\lib;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\fmt\include;$(SolutionDir)\ext_libs\vowpal_wabbit\ext_libs\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -71,6 +72,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\ext_libs\date;$(SolutionDir)\..\..\ext_libs\vowpal_wabbit\vowpalwabbit;$(SolutionDir)\..\..\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\..\..\ext_libs\vowpal_wabbit\ext_libs\rapidjson\include;$(SolutionDir)\..\..\ext_libs\vowpal_wabbit\explore;$(SolutionDir)\..\..\ext_libs\zstd\lib;$(SolutionDir)\..\..\ext_libs\vowpal_wabbit\ext_libs\fmt\include;$(SolutionDir)\..\..\ext_libs\vowpal_wabbit\ext_libs\spdlog\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

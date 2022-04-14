@@ -28,8 +28,8 @@ jobs:
       - name: Dependencies
         run: >
           vcpkg install
-          --host-triplet=${{ matrix.arch_config.arch }}-windows-static
-          --triplet=${{ matrix.arch_config.arch }}-windows-static
+          --host-triplet=${{ matrix.arch_config.arch }}-windows
+          --triplet=${{ matrix.arch_config.arch }}-windows
           cpprestsdk
           openssl-windows
           zlib
@@ -47,6 +47,7 @@ jobs:
           -G "Visual Studio 16 2019" -A ${{ matrix.arch_config.generator_arch }}
           -T ${{ matrix.toolset }}
           -DNATIVE_NUGET_PLATFORM_TAG=${{ matrix.arch_config.arch }}
+          -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE
           -DUSE_ZSTD=ON
           -DBUILD_TESTING=Off
           -DRAPIDJSON_SYS_DEP=Off
@@ -54,10 +55,9 @@ jobs:
           -DSPDLOG_SYS_DEP=Off
           -DBUILD_FLATBUFFERS=Off
           -DVW_INSTALL=Off
-          -DRL_STATIC_DEPS=On
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
-          -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.arch }}-windows-static
-          -DFLATBUFFERS_FLATC_EXECUTABLE=C:/vcpkg/installed/${{ matrix.arch_config.arch }}-windows-static/tools/flatbuffers/flatc.exe
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.arch }}-windows
+          -DFLATBUFFERS_FLATC_EXECUTABLE=C:/vcpkg/installed/${{ matrix.arch_config.arch }}-windows/tools/flatbuffers/flatc.exe
       - name: Build and install
         run: |
           cmake --build build --config Debug -t rlclientlib -v

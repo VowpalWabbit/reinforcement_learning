@@ -181,7 +181,7 @@ source_group("Sources" FILES ${PROJECT_SOURCES})
 source_group("Public headers" FILES ${PROJECT_PUBLIC_HEADERS})
 source_group("Private headers" FILES ${PROJECT_PRIVATE_HEADERS})
 
-add_library(rlclientlib ${PROJECT_SOURCES} ${PROJECT_PUBLIC_HEADERS} ${PROJECT_PRIVATE_HEADERS})
+add_library(rlclientlib SHARED ${PROJECT_SOURCES} ${PROJECT_PUBLIC_HEADERS} ${PROJECT_PRIVATE_HEADERS})
 add_dependencies(rlclientlib fbgenerator_v1 fbgenerator_v2)
 
 if(vw_USE_AZURE_FACTORIES)
@@ -223,13 +223,14 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 install(TARGETS rlclientlib
-  INCLUDES DESTINATION rlclientlib
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
 install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/../include
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     FILES_MATCHING
     PATTERN "*.h"
     PATTERN ".nuget" EXCLUDE
@@ -245,3 +246,7 @@ install(FILES
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/vowpalwabbit/vw_string_view.h
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/explore/future_compat.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/vowpal_wabbit)
+
+install(FILES
+    ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/vowpalwabbit/nonstd/string_view.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/vowpal_wabbit/nonstd)

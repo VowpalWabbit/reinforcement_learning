@@ -1,10 +1,7 @@
-#include "learning_mode.h"
-#include "constants.h"
-#include <assert.h>
+#include "live_model.h"
 
 int main()
 {
-  const char* apprentice = "apprentice";
-  auto mode = reinforcement_learning::learning::to_learning_mode(apprentice);
-  assert(mode == reinforcement_learning::APPRENTICE);
+  const reinforcement_learning::utility::configuration config;
+  reinforcement_learning::live_model m(config, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 }
