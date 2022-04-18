@@ -14,8 +14,11 @@ namespace reinforcement_learning {
   //a moving concurrent queue with locks and mutex
   template <class T>
   class event_queue {
+  public:
+    using TFunc = std::function<int(T&, api_status*)>;
   private:
-    using queue_t = std::list<std::pair<T,size_t>>;
+    // T's lifetime is tied to TFunc
+    using queue_t = std::list<std::tuple<TFunc,size_t,T*>>;
     using iterator_t = typename queue_t::iterator;
 
     queue_t _queue;
@@ -32,39 +35,40 @@ namespace reinforcement_learning {
       : _max_capacity(max_capacity), _event_counter_status(event_counter_status), _subsample_rate(subsample_rate) {
     }
 
-    bool pop(T* item)
+    bool pop(TFunc* item)
     {
       std::unique_lock<std::mutex> mlock(_mutex);
       if (!_queue.empty())
       {
         auto entry(std::move(_queue.front()));
-        *item = std::move(entry.first);
-        _capacity = (std::max)(0, static_cast<int>(_capacity) - static_cast<int>(entry.second));
+        *item = std::move(std::get<0>(entry));
+        _capacity = (std::max)(0, static_cast<int>(_capacity) - static_cast<int>(std::get<1>(entry)));
         _queue.pop_front();
         return true;
       }
       return false;
     }
 
-    bool push(T& item, size_t item_size) {
-      return push(std::move(item), item_size);
+    bool push(TFunc& item, size_t item_size, T* event) {
+      return push(std::move(item), item_size, event);
     }
 
-    bool push(T&& item, size_t item_size) {
+    bool push(TFunc&& item, size_t item_size, T* event)
+    {
       std::unique_lock<std::mutex> mlock(_mutex);
       if (_event_counter_status == events_counter_status::ENABLE) {
         ++_event_index;
-        item.set_event_index(_event_index);
+        event->set_event_index(_event_index);
       }
       // If subsampling rate is < 1, then run subsampling logic
       if (_subsample_rate < 1) {
-        if (item.try_drop(_subsample_rate, constants::SUBSAMPLE_RATE_DROP_PASS)) {
+        if (event->try_drop(_subsample_rate, constants::SUBSAMPLE_RATE_DROP_PASS)) {
           // If the event is dropped, just get out of here
           return false;
         }
       }
       _capacity += item_size;
-      _queue.push_back({ std::forward<T>(item),item_size });
+      _queue.push_back({std::forward<TFunc>(item),item_size,event});
       return true;
     }
 
@@ -73,7 +77,7 @@ namespace reinforcement_learning {
       std::unique_lock<std::mutex> mlock(_mutex);
       if (!is_full()) return;
       for (auto it = _queue.begin(); it != _queue.end();) {
-        it = it->first.try_drop(pass_prob, _drop_pass) ? erase(it) : (++it);
+        it = std::get<2>(*it)->try_drop(pass_prob, _drop_pass) ? erase(it) : (++it);
       }
       ++_drop_pass;
     }
@@ -97,7 +101,7 @@ namespace reinforcement_learning {
   private:
     //thread-unsafe
     iterator_t erase(iterator_t it) {
-      _capacity = (std::max)(0, static_cast<int>(_capacity) - static_cast<int>(it->second));
+      _capacity = (std::max)(0, static_cast<int>(_capacity) - static_cast<int>(std::get<1>(*it)));
       return _queue.erase(it);
     }
   };

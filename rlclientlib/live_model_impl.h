@@ -104,6 +104,10 @@ namespace reinforcement_learning
     std::unique_ptr<model_management::i_data_transport> _transport{nullptr};
     std::unique_ptr<model_management::i_model> _model{nullptr};
 
+    // These objects need to be handled VERY carefully. _interaction_logger will spawn a thread
+    // which will contain a pointer to the _logger_extensions object. The thread's lifetime is
+    // tied to the _interaction_logger object. If any of these conditions change, the _logger_extentions
+    // object must be converted into a shared_ptr for this to work properly
     std::unique_ptr<logger::i_logger_extensions> _logger_extensions{nullptr};
     std::unique_ptr<logger::interaction_logger_facade> _interaction_logger{nullptr};
     std::unique_ptr<logger::observation_logger_facade> _outcome_logger{nullptr};
