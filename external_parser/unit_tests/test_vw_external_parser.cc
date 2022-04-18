@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_CASE(cb_simple) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw);
 
@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(cb_simple) {
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(read_payload, true);
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(ccb_simple) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw);
 
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(ccb_simple) {
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(read_payload, true);
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(slates_simple) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw);
 
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(slates_simple) {
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(read_payload, true);
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(cb_dedup_compressed) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
   set_buffer_as_vw_input(buffer, vw);
 
   bool read_payload = false;
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE(cb_dedup_compressed) {
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(read_payload, true);
@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE(slates_skip_learn_w_activations) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw);
 
@@ -336,7 +336,7 @@ BOOST_AUTO_TEST_CASE(slates_skip_learn_w_activations) {
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   // this file contains 10 joined events 5 deferred but 2 of those activated
@@ -378,7 +378,7 @@ BOOST_AUTO_TEST_CASE(rrcr_ignore_examples_before_checkpoint) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw);
 
@@ -386,7 +386,7 @@ BOOST_AUTO_TEST_CASE(rrcr_ignore_examples_before_checkpoint) {
   while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     ++count;
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(count, 1);
@@ -404,7 +404,7 @@ BOOST_AUTO_TEST_CASE(rcrrmr_file_magic_and_header_in_the_middle_works) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw);
 
@@ -412,7 +412,7 @@ BOOST_AUTO_TEST_CASE(rcrrmr_file_magic_and_header_in_the_middle_works) {
   while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     ++count;
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(count, 3);
@@ -437,7 +437,7 @@ BOOST_AUTO_TEST_CASE(cb_apprentice_mode) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw);
 
@@ -472,7 +472,7 @@ BOOST_AUTO_TEST_CASE(cb_apprentice_mode) {
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   // this file contains 5 joined events
@@ -497,7 +497,7 @@ BOOST_AUTO_TEST_CASE(cb_skip_learn_w_activations_and_apprentice) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw);
 
@@ -508,7 +508,7 @@ BOOST_AUTO_TEST_CASE(cb_skip_learn_w_activations_and_apprentice) {
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   // this file contains 10 joined events 5 deferred but 2 of those activated
@@ -556,7 +556,7 @@ BOOST_AUTO_TEST_CASE(ccb_apprentice_mode) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw);
 
@@ -625,7 +625,7 @@ BOOST_AUTO_TEST_CASE(ccb_apprentice_mode) {
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   // this file contains 5 joined events
@@ -650,7 +650,7 @@ BOOST_AUTO_TEST_CASE(ccb_skip_learn_w_activations_and_apprentice) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw);
 
@@ -661,7 +661,7 @@ BOOST_AUTO_TEST_CASE(ccb_skip_learn_w_activations_and_apprentice) {
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   // this file contains 20 joined events 5 deferred but 2 of those activated
@@ -704,7 +704,7 @@ BOOST_AUTO_TEST_CASE(cb_pdrop_05_parse) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
   set_buffer_as_vw_input(buffer, vw);
 
   bool read_payload = false;
@@ -716,7 +716,7 @@ BOOST_AUTO_TEST_CASE(cb_pdrop_05_parse) {
     BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 2);
     BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(read_payload, true);
@@ -735,7 +735,7 @@ BOOST_AUTO_TEST_CASE(cb_pdrop_1_parse) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
   set_buffer_as_vw_input(buffer, vw);
 
   bool read_payload = false;
@@ -746,7 +746,7 @@ BOOST_AUTO_TEST_CASE(cb_pdrop_1_parse) {
     BOOST_CHECK_EQUAL(examples[0]->indices[0], 'S');
     BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(read_payload, true);
@@ -765,7 +765,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
   set_buffer_as_vw_input(buffer, vw);
 
   size_t index = 0;
@@ -816,7 +816,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes) {
         break;
     }
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(seenA, true);
@@ -838,7 +838,7 @@ BOOST_AUTO_TEST_CASE(multistep_3_deferred_episodes) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
   set_buffer_as_vw_input(buffer, vw);
 
   bool seenA = false;
@@ -895,7 +895,7 @@ BOOST_AUTO_TEST_CASE(multistep_3_deferred_episodes) {
     }
 
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(seenA, true);
@@ -919,7 +919,7 @@ BOOST_AUTO_TEST_CASE(multistep_unordered_episodes) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
   set_buffer_as_vw_input(buffer, vw);
 
   size_t counter = 0;
@@ -976,7 +976,7 @@ BOOST_AUTO_TEST_CASE(multistep_unordered_episodes) {
     }
 
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   clear_examples(examples, vw);
@@ -994,7 +994,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_mean) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
   set_buffer_as_vw_input(buffer, vw);
 
   bool seenA = false;
@@ -1028,7 +1028,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_mean) {
     }
 
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(seenA, true);
@@ -1050,7 +1050,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_sum) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
   set_buffer_as_vw_input(buffer, vw);
 
   bool seenA = false;
@@ -1090,7 +1090,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_sum) {
     }
 
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(seenA, true);

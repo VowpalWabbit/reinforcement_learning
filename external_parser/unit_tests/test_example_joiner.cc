@@ -1,5 +1,6 @@
 #include "joiners/example_joiner.h"
 #include "test_common.h"
+#include "reductions/conditional_contextual_bandit.h"
 #include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE(example_joiner_test_ca) {
@@ -20,7 +21,7 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_ca) {
 
   for (auto &je : joined_ca_events) {
     joiner.process_event(*je);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   // need to keep the fb buffer around in order to process the event
@@ -74,7 +75,7 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cb) {
 
   for (auto &je : joined_cb_events) {
     joiner.process_event(*je);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   // need to keep the fb buffer around in order to process the event
@@ -143,7 +144,7 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cbb) {
 
   for (auto &je : joined_ccb_events) {
     joiner.process_event(*je);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   // need to keep the fb buffer around in order to process the event
@@ -169,7 +170,7 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cbb) {
   // shared, two actions, two slots and one empty (end of multiline)
   BOOST_CHECK_EQUAL(examples.size(), 6);
   // first example is shared example
-  BOOST_CHECK_EQUAL(CCB::ec_is_example_header(*examples[0]), true);
+  BOOST_CHECK_EQUAL(VW::reductions::ccb::ec_is_example_header(*examples[0]), true);
   // next two examples are actions
   BOOST_CHECK_EQUAL(examples[1]->l.conditional_contextual_bandit.type == CCB::example_type::action, true);
   BOOST_CHECK_EQUAL(examples[2]->l.conditional_contextual_bandit.type == CCB::example_type::action, true);

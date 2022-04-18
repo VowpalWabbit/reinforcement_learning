@@ -7,14 +7,14 @@ BOOST_AUTO_TEST_CASE(test_lru_add_new_examples_to_cache) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
   // create a dummy examples to be cached
   examples[0]->indices.push_back('A');
   examples[0]->feature_space['A'].indices.push_back(1);
   examples[0]->feature_space['A'].values.push_back(0.2f);
   uint64_t dedup_id_0 = 0;
 
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
   examples[1]->indices.push_back('B');
   examples[1]->feature_space['B'].indices.push_back(2);
   examples[1]->feature_space['B'].values.push_back(0.5f);
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_lru_update) {
                            false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   // create a dummy examples to be cached
   examples[0]->indices.push_back('A');
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(test_lru_update) {
   examples[0]->feature_space['A'].values.push_back(0.2f);
   uint64_t dedup_id_0 = 0;
 
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
   examples[1]->indices.push_back('B');
   examples[1]->feature_space['B'].indices.push_back(2);
   examples[1]->feature_space['B'].values.push_back(0.5f);
