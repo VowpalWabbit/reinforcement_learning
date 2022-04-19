@@ -15,7 +15,7 @@ void process(VW::workspace *vw, example_joiner &joiner, v_array<example *> &exam
 
   for (auto &je : joined_cb_events) {
     joiner.process_event(*je);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   // need to keep the fb buffer around in order to process the event

@@ -1,5 +1,6 @@
 #include "joiners/example_joiner.h"
 #include "parse_example_binary.h"
+#include "reductions/conditional_contextual_bandit.h"
 #include "test_common.h"
 #include <boost/test/unit_test.hpp>
 
@@ -26,7 +27,7 @@ void should_not_add_examples(std::string &infile,
                            nullptr, false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     continue;
@@ -64,7 +65,7 @@ void should_add_examples(std::string &infile,
                            nullptr, false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
     continue;
@@ -90,7 +91,7 @@ void should_add_examples(std::string &infile,
       // shared, two actions, two slots and one empty (end of multiline)
       BOOST_CHECK_EQUAL(examples.size(), 6);
       // first example is shared example
-      BOOST_CHECK_EQUAL(CCB::ec_is_example_header(*examples[0]), true);
+      BOOST_CHECK_EQUAL(VW::reductions::ccb::ec_is_example_header(*examples[0]), true);
       // next two examples are actions
       BOOST_CHECK_EQUAL(examples[1]->l.conditional_contextual_bandit.type == CCB::example_type::action, true);
       BOOST_CHECK_EQUAL(examples[2]->l.conditional_contextual_bandit.type == CCB::example_type::action, true);

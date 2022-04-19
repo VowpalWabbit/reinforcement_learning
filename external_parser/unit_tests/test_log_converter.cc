@@ -28,10 +28,10 @@ std::string get_json_event(std::string infile_path, std::string outfile_path,
   auto vw = VW::initialize(command, nullptr, false, nullptr, nullptr);
 
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   std::ostringstream dsjson_stream;
