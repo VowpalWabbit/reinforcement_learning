@@ -68,7 +68,7 @@ namespace reinforcement_learning {
         }
       }
       _capacity += item_size;
-      _queue.push_back({std::forward<TFunc>(item),item_size,event});
+      _queue.emplace_back(std::forward<TFunc>(item),item_size,event);
       return true;
     }
 
