@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
                         true);
     BOOST_REQUIRE_EQUAL(payload_type, MSG_TYPE_REGULAR);
     v_array<example *> examples;
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
     bool ignore_msg = false;
     BOOST_REQUIRE_EQUAL(bp.read_regular_msg(vw->example_parser->input, examples, ignore_msg),
                         true);
@@ -171,14 +171,14 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
     set_buffer_as_vw_input(buffer, vw);
     VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
     v_array<example *> examples;
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
 
     size_t total_examples_read = 0;
 
     while (bp.parse_examples(vw, vw->example_parser->input, examples)) {
       total_examples_read++;
       clear_examples(examples, vw);
-      examples.push_back(&VW::get_unused_example(vw));
+      examples.push_back(VW::new_unused_example(*vw));
     }
 
     BOOST_CHECK_EQUAL(total_examples_read, 1);
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_corrupt_joined_event_payload) {
   set_buffer_as_vw_input(buffer, vw);
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   size_t total_size_of_examples = 0;
   // file contains 2 regular messages, first one contains a corrupted
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_corrupt_joined_event_payload) {
     BOOST_CHECK_EQUAL(examples.size(), 4);
     total_size_of_examples += examples.size();
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   // skipped first payload and read the second one
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_mismatched_payload_types) {
   set_buffer_as_vw_input(buffer, vw);
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   size_t total_size_of_examples = 0;
   // file contains 2 regular messages, both have wrong types set
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_event_in_joined_event) {
   set_buffer_as_vw_input(buffer, vw);
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw),vw->logger);
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   size_t total_size_of_examples = 0;
   // file contains 2 regular messages each with one JoinedEvent that holds one
@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_event_in_joined_event) {
     BOOST_CHECK_EQUAL(examples.size(), 4);
     total_size_of_examples += examples.size();
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   // skipped first payload and read the second one
@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_dedup_payload_missing) {
   set_buffer_as_vw_input(buffer, vw);
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   size_t total_size_of_examples = 0;
   // file contains 1 regular message with one JoinedEvent that holds one
@@ -294,7 +294,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_dedup_payload_missing) {
   while (bp.parse_examples(vw, vw->example_parser->input, examples)) {
     total_size_of_examples += examples.size();
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   // skipped payload
@@ -315,7 +315,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_interaction_but_no_observation) {
   set_buffer_as_vw_input(buffer, vw);
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   size_t total_size_of_examples = 0;
   // file contains 1 regular message with 1 JoinedEvent that holds one
@@ -329,7 +329,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_interaction_but_no_observation) {
   // default reward since first observation is missing
   BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, 0.0f);
   clear_examples(examples, vw);
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   BOOST_CHECK_EQUAL(bp.parse_examples(vw, vw->example_parser->input, examples), true);
   BOOST_CHECK_EQUAL(examples.size(), 4);
@@ -338,7 +338,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_interaction_but_no_observation) {
   // second interaction should have cost set
   BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, -1.5f);
   clear_examples(examples, vw);
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   BOOST_CHECK_EQUAL(bp.parse_examples(vw, vw->example_parser->input, examples), false);
 
@@ -361,7 +361,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_no_interaction_with_observation) {
   set_buffer_as_vw_input(buffer, vw);
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   size_t total_size_of_examples = 0;
   // file contains 1 regular message with 1 JoinedEvent that holds one
@@ -371,7 +371,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_no_interaction_with_observation) {
     BOOST_CHECK_EQUAL(examples.size(), 4);
     total_size_of_examples += examples.size();
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   // one interaction processed
@@ -391,7 +391,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_invalid_cb_context) {
   set_buffer_as_vw_input(buffer, vw);
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw), vw->logger);
   v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
 
   size_t total_size_of_examples = 0;
   // file contains 1 regular message with 2 JoinedEvent that has two
@@ -401,7 +401,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_invalid_cb_context) {
   while (bp.parse_examples(vw, vw->example_parser->input, examples)) {
     total_size_of_examples += examples.size();
     clear_examples(examples, vw);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   // no interactions processed

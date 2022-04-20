@@ -176,7 +176,7 @@ void example_joiner::clear_vw_examples(v_array<example *> &examples) {
   VW::return_multiple_example(*_vw, examples);
   // add one new example since all parsers expect to be called with one unused
   // example
-  examples.push_back(&VW::get_unused_example(_vw));
+  examples.push_back(VW::new_unused_example(*_vw));
 }
 
 void example_joiner::clear_event_id_batch_info(const std::string &id) {
@@ -290,12 +290,12 @@ bool example_joiner::process_interaction(const v2::Event &event,
       if (_vw->audit || _vw->hash_inv) {
         VW::template read_line_json_s<true>(
             *_vw, examples, const_cast<char *>(context.c_str()), context.size(),
-            reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example),
+            reinterpret_cast<VW::example_factory_t>(VW::new_unused_example),
             _vw, &_dedup_cache.dedup_examples);
       } else {
         VW::template read_line_json_s<false>(
             *_vw, examples, const_cast<char *>(context.c_str()), context.size(),
-            reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example),
+            reinterpret_cast<VW::example_factory_t>(VW::new_unused_example),
             _vw, &_dedup_cache.dedup_examples);
       }
     } catch (VW::vw_exception &e) {
@@ -529,7 +529,7 @@ bool example_joiner::process_joined(v_array<example *> &examples) {
 
   if (multiline) {
     // add an empty example to signal end-of-multiline
-    examples.push_back(&VW::get_unused_example(_vw));
+    examples.push_back(VW::new_unused_example(*_vw));
     _vw->example_parser->lbl_parser.default_label(examples.back()->l);
     examples.back()->is_newline = true;
   }

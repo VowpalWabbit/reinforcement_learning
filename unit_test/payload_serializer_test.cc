@@ -30,7 +30,17 @@ BOOST_AUTO_TEST_CASE(cb_payload_serializer_test) {
   rr.push_back(1, 0.2f);
   rr.push_back(0, 0.8f);
 
-  const auto buffer = serializer.event("my_context", action_flags::DEFERRED, v2::LearningModeType_Apprentice, rr);
+  std::vector<uint64_t> action_ids;
+  std::vector<float> probs;
+  std::string model_id(rr.get_model_id());
+  for (auto const& r : rr) {
+    action_ids.push_back(r.action_id + 1);
+    probs.push_back(r.probability);
+  }
+
+  const auto buffer = serializer.event(
+    "my_context", action_flags::DEFERRED, v2::LearningModeType_Apprentice, action_ids, probs, model_id
+  );
 
   const auto event = v2::GetCbEvent(buffer.data());
 
@@ -61,7 +71,13 @@ BOOST_AUTO_TEST_CASE(ca_payload_serializer_test)
   response.set_chosen_action_pdf_value(pdf_value);
   response.set_model_id("model_id");
 
-  const auto buffer = serializer.event("my_context", action_flags::DEFERRED, response);
+  const auto buffer = serializer.event(
+    "my_context",
+    action_flags::DEFERRED,
+    response.get_chosen_action(),
+    response.get_chosen_action_pdf_value(),
+    response.get_model_id()
+  );
 
   const auto event = v2::GetCaEvent(buffer.data());
 

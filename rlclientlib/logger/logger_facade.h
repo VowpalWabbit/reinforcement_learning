@@ -6,6 +6,7 @@
 #include "learning_mode.h"
 #include "ranking_response.h"
 #include "error_callback_fn.h"
+#include "logger/logger_extensions.h"
 #include "utility/watchdog.h"
 
 #include "message_sender.h"
@@ -16,32 +17,16 @@
 
 #include "serialization/payload_serializer.h"
 
+#include <functional>
+
 namespace reinforcement_learning
 {
   namespace logger {
-    class i_logger_extensions {
-    protected:
-      const utility::configuration& _config;
-    public:
-      i_logger_extensions(const utility::configuration&);
-
-      virtual ~i_logger_extensions();
-
-      virtual bool is_object_extraction_enabled() const = 0;
-      virtual bool is_serialization_transform_enabled() const = 0;
-
-      virtual i_async_batcher<generic_event>* create_batcher(i_message_sender* sender, utility::watchdog& watchdog, error_callback_fn* perror_cb, const char* section) = 0;
-      virtual int transform_payload_and_extract_objects(string_view context, std::string& edited_payload, generic_event::object_list_t& objects, api_status* status) = 0;
-      virtual int transform_serialized_payload(generic_event::payload_buffer_t& input, event_content_type &content_type, api_status* status) const = 0;
-
-      static i_logger_extensions* get_extensions(const utility::configuration& config, i_time_provider* time_provider);
-    };
-
     class interaction_logger_facade {
     public:
       interaction_logger_facade(reinforcement_learning::model_management::model_type_t model_type,
         const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog,
-        i_time_provider* time_provider, i_logger_extensions& ext, error_callback_fn* perror_cb = nullptr);
+        i_time_provider* time_provider, i_logger_extensions* ext, error_callback_fn* perror_cb = nullptr);
 
       interaction_logger_facade(const interaction_logger_facade& other) = delete;
       interaction_logger_facade& operator=(const interaction_logger_facade& other) = delete;
@@ -72,7 +57,8 @@ namespace reinforcement_learning
       const reinforcement_learning::model_management::model_type_t _model_type;
       const int _version;
       int _serializer_shared_state;
-      i_logger_extensions& _ext;
+      // _ext_p is owned by live_model_impl
+      i_logger_extensions* _ext_p;
 
       const std::unique_ptr<interaction_logger> _v1_cb;
       const std::unique_ptr<ccb_logger> _v1_ccb;

@@ -50,7 +50,7 @@ std::vector<float> get_float_rewards(
 
   for (auto &je : joined_int_events) {
     joiner.process_event(*je);
-    examples.push_back(&VW::get_unused_example(vw));
+    examples.push_back(VW::new_unused_example(*vw));
   }
 
   // need to keep the fb buffer around in order to process the event

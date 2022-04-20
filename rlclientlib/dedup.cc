@@ -3,6 +3,8 @@
 #include "serialization/payload_serializer.h"
 #include "utility/context_helper.h"
 #include "utility/config_helper.h"
+#include "logger/async_batcher.h"
+#include "logger/logger_extensions.h"
 
 #include "zstd.h"
 #include <sstream>
@@ -280,12 +282,20 @@ struct dedup_collection_serializer
 class dedup_extensions : public logger::i_logger_extensions
 {
 public:
-	dedup_extensions(const utility::configuration& c, bool use_compression, bool use_dedup, i_time_provider* time_provider) :
-    logger::i_logger_extensions(c), _dedup_state(c, use_compression, use_dedup, time_provider), _use_dedup(use_dedup), _use_compression(use_compression) {}
+  dedup_extensions(const utility::configuration& c, bool use_compression, bool use_dedup, i_time_provider* time_provider) :
+    logger::i_logger_extensions(c),
+    _dedup_state(c,
+                 use_compression,
+                 use_dedup,
+                 time_provider
+    ),
+    _use_dedup(use_dedup),
+    _use_compression(use_compression) {}
 
-	logger::i_async_batcher<generic_event>* create_batcher(logger::i_message_sender* sender, utility::watchdog& watchdog,
-																									error_callback_fn* perror_cb, const char* section) override {
-		auto config = utility::get_batcher_config(_config, section);
+  logger::i_async_batcher<generic_event>* 
+  create_batcher(logger::i_message_sender* sender, utility::watchdog& watchdog,
+                 error_callback_fn* perror_cb, const char* section) override {
+    auto config = utility::get_batcher_config(_config, section);
 
     if(_use_dedup) {
       return new logger::async_batcher<generic_event, dedup_collection_serializer>(
@@ -302,19 +312,18 @@ public:
           perror_cb,
           config);
     }
-
-	}
+  }
 
   bool is_object_extraction_enabled() const override { return _use_dedup; }
   bool is_serialization_transform_enabled() const override { return _use_compression; }
 
-	int transform_payload_and_extract_objects(string_view context, std::string& edited_payload, generic_event::object_list_t& objects, api_status* status) override {
+  int transform_payload_and_extract_objects(string_view context, std::string& edited_payload, generic_event::object_list_t& objects, api_status* status) override {
     return _dedup_state.transform_payload_and_add_objects(context, edited_payload, objects, status);
-	}
+  }
 
   int transform_serialized_payload(generic_event::payload_buffer_t& input, event_content_type& content_type, api_status* status) const override {
-		return _dedup_state.compress(input, content_type, status);
-	}
+    return _dedup_state.compress(input, content_type, status);
+  }
 private:
 	dedup_state _dedup_state;
   int _dummy_state = 0;
@@ -324,7 +333,7 @@ private:
 
 
 logger::i_logger_extensions* create_dedup_logger_extension(const utility::configuration& config, const char* section, i_time_provider* time_provider) {
-	if(config.get_int(name::PROTOCOL_VERSION, 1) != 2)
+  if(config.get_int(name::PROTOCOL_VERSION, 1) != 2)
     return nullptr;
   const bool use_compression = config.get_bool(section, name::USE_COMPRESSION, false);
   const bool use_dedup = config.get_bool(section, name::USE_DEDUP, false);
