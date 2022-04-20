@@ -1,6 +1,8 @@
 #pragma once
 
 #include <stddef.h>
+#include <functional>
+#include <memory>
 
 #include "sender.h"
 #include "utility/versioned_object_pool.h"
@@ -22,9 +24,13 @@
 #include "rl_string_view.h"
 
 namespace reinforcement_learning { namespace logger {
+  class i_logger_extensions;
+
   // This class wraps logging event to event_hub in a generic way that live_model can consume.
   template<typename TEvent>
   class event_logger {
+  public:
+    using TFunc = std::function<int(TEvent&, api_status*)>;
   public:
     event_logger(i_time_provider* time_provider, i_async_batcher<TEvent>* batcher);
 
@@ -33,8 +39,8 @@ namespace reinforcement_learning { namespace logger {
     int init(api_status* status);
 
   protected:
-    int append(TEvent&& item, api_status* status);
-    int append(TEvent& item, api_status* status);
+    int append(TFunc&& func, TEvent* event, api_status* status);
+    int append(TFunc& func, TEvent* event, api_status* status);
 
   protected:
     bool _initialized = false;
@@ -65,7 +71,7 @@ namespace reinforcement_learning { namespace logger {
   }
 
   template<typename TEvent>
-  int event_logger<TEvent>::append(TEvent&& item, api_status* status) {
+  int event_logger<TEvent>::append(TFunc&& func, TEvent* event, api_status* status) {
     if (!_initialized) {
       api_status::try_update(status, error_code::not_initialized,
         "Logger not initialized. Call init() first.");
@@ -73,12 +79,12 @@ namespace reinforcement_learning { namespace logger {
     }
 
     // Add item to the batch (will be sent later)
-    return _batcher->append(item, status);
+    return _batcher->append(func, event, status);
   }
 
   template<typename TEvent>
-  int event_logger<TEvent>::append(TEvent& item, api_status* status) {
-    return append(std::move(item), status);
+  int event_logger<TEvent>::append(TFunc& func, TEvent* event, api_status* status) {
+    return append(std::move(func), status);
   }
 
   class interaction_logger : public event_logger<ranking_event> {
@@ -119,7 +125,16 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
     template <typename D>
     int log(const char* event_id, D outcome, api_status* status) {
       const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
-      return append(outcome_event::report_outcome(event_id, outcome, now), status);
+      // A gross little shuffle because report_outcome returns a copy, but we actually need a pointer
+      auto evt_sp = std::make_shared<outcome_event>();
+      auto evt_copy = outcome_event::report_outcome(event_id, outcome, now);
+      *evt_sp = std::move(evt_copy);
+      auto evt_fn =
+        [evt_sp](outcome_event& out_evt, api_status* status)->int {
+          out_evt = std::move(*evt_sp);
+          return error_code::success;
+        };
+      return append(std::move(evt_fn), evt_sp.get(), status);
     }
 
     int report_action_taken(const char* event_id, api_status* status);
@@ -131,6 +146,29 @@ class multi_slot_logger : public event_logger<multi_slot_decision_event> {
       : event_logger(time_provider, batcher, app_id)
     {}
 
+    template<typename TSerializer, typename... Args>
+    int log(const char* event_id, string_view context, generic_event::payload_type_t type, i_logger_extensions* ext, TSerializer& serializer, api_status* status, const Args&... args) {
+      const auto now = _time_provider != nullptr ? _time_provider->gmt_now() : timestamp();
+      // using shared_ptr because we can't move a unique_ptr in C++11
+      // We should replace them in C++14
+      auto evt_sp = std::make_shared<generic_event>(event_id, now, type, context, _app_id);
+      // there's no guarantee that the parameter pack Args will stay in scope, so we need to capture them
+      // as a copy the ensure their lifetime.
+      // TODO: See if there's a way to do this without the copy, since the pack can contain some pretty
+      //       expensive objects
+      auto evt_fn =
+          [evt_sp, type, ext, serializer, args...](generic_event& out_evt, api_status* status)->int
+          {
+            RETURN_IF_FAIL(evt_sp->transform(ext, serializer, status, args...));
+            out_evt = std::move(*evt_sp);
+            return error_code::success;
+          };
+      return append(std::move(evt_fn), evt_sp.get(), status);
+    }
+
+    // TODO: used for observations for now.. may want to change that later
+    // These functions will take in fully transformed generic_event objects, and should only be used
+    // when the creation of those types are very cheap
     int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, api_status* status);
     int log(const char* event_id, generic_event::payload_buffer_t&& payload, generic_event::payload_type_t type, event_content_type content_type, generic_event::object_list_t&& objects, api_status* status);
   };

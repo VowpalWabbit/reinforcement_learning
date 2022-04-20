@@ -254,11 +254,11 @@ joined_event::multistep_joined_event multistep_example_joiner::process_interacti
   if (_vw->audit || _vw->hash_inv) {
     VW::template read_line_json_s<true>(
         *_vw, examples, const_cast<char *>(line_vec.c_str()), line_vec.size(),
-        reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
+        reinterpret_cast<VW::example_factory_t>(VW::new_unused_example), _vw);
   } else {
     VW::template read_line_json_s<false>(
         *_vw, examples, const_cast<char *>(line_vec.c_str()), line_vec.size(),
-        reinterpret_cast<VW::example_factory_t>(&VW::get_unused_example), _vw);
+        reinterpret_cast<VW::example_factory_t>(VW::new_unused_example), _vw);
   }
 
   return joined_event::multistep_joined_event(std::move(meta), std::move(cb_data));
@@ -296,7 +296,7 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
     _rewards.pop_front();
     if (clear_examples) {
       VW::return_multiple_example(*_vw, examples);
-      examples.push_back(&VW::get_unused_example(_vw));
+      examples.push_back(VW::new_unused_example(*_vw));
     }
   });
 
@@ -310,7 +310,7 @@ bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
   joined.fill_in_label(examples, logger);
 
   // add an empty example to signal end-of-multiline
-  examples.push_back(&VW::get_unused_example(_vw));
+  examples.push_back(VW::new_unused_example(*_vw));
   _vw->example_parser->lbl_parser.default_label(examples.back()->l);
   examples.back()->is_newline = true;
 

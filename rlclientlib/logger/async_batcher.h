@@ -13,9 +13,14 @@
 #include "message_sender.h"
 #include "utility/config_helper.h"
 #include "utility/object_pool.h"
+#include "explore_internal.h"
+#include "hash.h"
+#include "rl_string_view.h"
 
 // float comparisons
 #include "vw_math.h"
+
+#include <functional>
 
 namespace reinforcement_learning {
   class error_callback_fn;
@@ -25,27 +30,33 @@ namespace reinforcement_learning { namespace logger {
   template<typename TEvent>
   class i_async_batcher {
   public:
+    using TFunc = std::function<int(TEvent&, api_status*)>;
     virtual ~i_async_batcher() = default;
 
     virtual int init(api_status* status) = 0;
 
-    virtual int append(TEvent&& evt, api_status* status = nullptr) = 0;
-    virtual int append(TEvent& evt, api_status* status = nullptr) = 0;
+    virtual int append(TFunc&& func, TEvent* event, api_status* status = nullptr) = 0;
+    virtual int append(TFunc& func, TEvent* event, api_status* status = nullptr) = 0;
 
     virtual int run_iteration(api_status* status) = 0;
   };
 
   // This class takes uses a queue and a background thread to accumulate events, and send them by batch asynchronously.
   // A batch is shipped with TSender::send(data)
+  // TFunc : a function with the prototype int f(Event& evt, api_status* status)
+  //       return value: Error code
+  //       evt    : Event type out-param
+  //       status : Optional status object
   template<typename TEvent, template<typename> class TSerializer = json_collection_serializer>
   class async_batcher: public i_async_batcher<TEvent> {
   public:
     using shared_state_t = typename TSerializer<TEvent>::shared_state_t;
+    using TFunc = std::function<int(TEvent&, api_status*)>;
 
     int init(api_status* status) override;
 
-    int append(TEvent&& evt, api_status* status = nullptr) override;
-    int append(TEvent& evt, api_status* status = nullptr) override;
+    int append(TFunc&& func, TEvent* event, api_status* status = nullptr) override;
+    int append(TFunc& func, TEvent* event, api_status* status = nullptr) override;
 
     int run_iteration(api_status* status) override;
 
@@ -97,12 +108,18 @@ namespace reinforcement_learning { namespace logger {
   }
 
   template<typename TEvent, template<typename> class TSerializer>
-  int async_batcher<TEvent, TSerializer>::append(TEvent&& evt, api_status* status) {
-    //increment event_index if counter is enabled, check subsampling and push to queue
-    if (_queue.push(std::move(evt), TSerializer<TEvent>::serializer_t::size_estimate(evt)) == false) {
-      //Event is dropped as part of subsampling return
-      return error_code::success;
+  int async_batcher<TEvent, TSerializer>::append(TFunc&& func, TEvent* event, api_status* status) {
+
+    // If subsampling rate is < 1, then run subsampling logic
+    if(_subsample_rate < 1.f) {
+      if(event->try_drop(_subsample_rate, constants::SUBSAMPLE_RATE_DROP_PASS))
+      {
+        // If the event is dropped, just get out of here
+        return error_code::success;
+      }
     }
+    
+    _queue.push(std::move(func), TSerializer<TEvent>::serializer_t::size_estimate(*event), event);
 
     //block or drop events if the queue if full
     if (_queue.is_full()) {
@@ -119,8 +136,8 @@ namespace reinforcement_learning { namespace logger {
   }
 
   template<typename TEvent, template<typename> class TSerializer>
-  int async_batcher<TEvent, TSerializer>::append(TEvent& evt, api_status* status) {
-    return append(std::move(evt), status);
+  int async_batcher<TEvent, TSerializer>::append(TFunc& func, TEvent* event, api_status* status) {
+    return append(std::move(func), event, status);
   }
 
   template<typename TEvent, template<typename> class TSerializer>
@@ -131,18 +148,20 @@ namespace reinforcement_learning { namespace logger {
 
   template<typename TEvent, template<typename> class TSerializer>
   int async_batcher<TEvent, TSerializer>::fill_buffer(
-                                                      std::shared_ptr<utility::data_buffer>& buffer,
-                                                      size_t& remaining,
+                                                      std::shared_ptr<utility::data_buffer>& buffer, 
+                                                      size_t& remaining, 
                                                       api_status* status)
   {
+    TFunc f_evt;
     TEvent evt;
     TSerializer<TEvent> collection_serializer(*buffer.get(), _batch_content_encoding, _shared_state);
     
     while (remaining > 0 && collection_serializer.size() < _send_high_water_mark) {
-      if (_queue.pop(&evt)) {
+      if (_queue.pop(&f_evt)) {
         if (queue_mode_enum::BLOCK == _queue_mode) {
           _cv.notify_one();
         }
+        RETURN_IF_FAIL(f_evt(evt, status));
         RETURN_IF_FAIL(collection_serializer.add(evt, status));
         --remaining;
       }

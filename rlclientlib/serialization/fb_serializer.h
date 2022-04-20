@@ -286,7 +286,7 @@ namespace reinforcement_learning { namespace logger {
     using batch_builder_t = v2::EventBatchBuilder;
 
     static size_t size_estimate(const generic_event& evt) {
-      return evt.get_payload().size();
+      return evt.get_payload().size() + evt.get_context_string().size();
     }
 
     static int serialize(generic_event& evt, flatbuffers::FlatBufferBuilder& outter_builder,
