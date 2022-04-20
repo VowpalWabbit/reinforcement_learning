@@ -61,10 +61,8 @@ jobs:
           -DFLATBUFFERS_FLATC_EXECUTABLE=C:/vcpkg/installed/${{ matrix.arch_config.arch }}-windows/tools/flatbuffers/flatc.exe
       - name: Build and install
         run: |
-          cmake --build build --config Debug -t rlclientlib -v
           cmake --build build --config Release -t rlclientlib -v
           # Install debug first so that release overwrites the exe and nothing else
-          cmake --install build --prefix ./nuget_staging --config Debug -v
           cmake --install build --prefix ./nuget_staging --config Release -v
       - if: ${{ matrix.arch_config.arch == 'x64' }}
         run: cp nuget\rlclientlib-x64.targets nuget_staging\rlclientlib.targets
@@ -113,6 +111,4 @@ jobs:
           .\.nuget\NuGet.exe install -Source ${{ github.workspace }}\downloaded_nugets -OutputDirectory ${{ github.workspace }}\nuget\test\packages\ RLClientLibNative-${{ matrix.toolset }}-x64
           cd nuget\test
           msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=Release;Platform=x64"
-          msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=Debug;Platform=x64"
           .\bin\x64\Release\test-${{ matrix.toolset }}.exe
-          .\bin\x64\Debug\test-${{ matrix.toolset }}.exe
