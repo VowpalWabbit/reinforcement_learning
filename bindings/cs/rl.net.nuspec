@@ -16,8 +16,8 @@
         <group targetFramework="netstandard2.0">
           <dependency id="NETStandard.Library" version="[2.0.0,)" />
         </group>
-        
-        <!-- Should we externalize our VW dependency? Right now we link vw-core directly into the RL.Net.Native.dll 
+
+        <!-- Should we externalize our VW dependency? Right now we link vw-core directly into the RL.Net.Native.dll
              assembly. -->
       </dependencies>
 
