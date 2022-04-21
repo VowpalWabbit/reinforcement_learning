@@ -34,7 +34,7 @@
       <file src="$RootRelativeOutputDirX64$\rl.net.native.dll" target="runtimes\win-x64\native"/>
       <file src="$RootRelativeOutputDirX64$\rl.net.native.pdb" target="runtimes\win-x64\native"/>
 
-	    <file src="$RootRelativeOutputDirX64$\rl.net.dll" target="lib\netstandard2.0" />
+      <file src="$RootRelativeOutputDirX64$\rl.net.dll" target="lib\netstandard2.0" />
       <file src="$RootRelativeOutputDirX64$\rl.net.pdb" target="lib\netstandard2.0" />
 
       <file src="LICENSE.txt" target="" />
