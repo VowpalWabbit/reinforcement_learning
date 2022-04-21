@@ -6,6 +6,7 @@
     <title>Reinforcement Learning Client Library Native</title>
     <authors>John Langford et al</authors>
     <description>RLClientLib is an Interaction-side integration library for Reinforcement Learning loops: Predict, Log, Learn, Update</description>
+    <license type="expression">MIT</license>
     <copyright>Copyright (c) by respective owners including Yahoo!, Microsoft, and individual contributors.</copyright>
     <tags>native</tags>
   </metadata>
