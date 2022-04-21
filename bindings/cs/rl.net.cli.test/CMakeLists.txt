@@ -12,7 +12,7 @@ if (rlclientlib_DOTNET_USE_MSPROJECT)
 else()
   # No need to add the other two targets to ALL, because the rl.net.cli.test target will chain-build them
   add_custom_target(rl.net.cli.test ALL
-    COMMAND ${DOTNET_COMMAND} build ${CMAKE_CURRENT_SOURCE_DIR} -o $<TARGET_FILE_DIR:rl.net.native> -v m --nologo --no-dependencies /clp:NoSummary
+    COMMAND ${DOTNET_COMMAND} build ${CMAKE_CURRENT_SOURCE_DIR} "${rlclientlib_SIGNING_INCLUDE}" -o $<TARGET_FILE_DIR:rl.net.native> -v m --nologo --no-dependencies /clp:NoSummary
     COMMENT Building rl.net.cli.test
     DEPENDS rl.net.cli
     SOURCES ${RL_NET_CLI_TEST_SOURCES})

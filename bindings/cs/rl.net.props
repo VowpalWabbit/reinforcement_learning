@@ -1,0 +1,12 @@
+<Project>
+
+  <ItemGroup>
+    <TextTransformParameter Include="SNRequired">
+      <Value>$(SignAssembly)</Value>
+    </TextTransformParameter>
+    <TextTransformParameter Include="PublicKey">
+      <Value>$(PublicKey)</Value>
+    </TextTransformParameter>
+  </ItemGroup>
+
+</Project>

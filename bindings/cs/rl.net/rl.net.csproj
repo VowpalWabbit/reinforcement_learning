@@ -46,6 +46,7 @@
     <Message Importance="high" Text="INFO: SignAssembly = $(SignAssembly)" />
     <Message Importance="high" Text="INFO: DelaySign = $(DelaySign)" />
     <Message Importance="high" Text="INFO: KeyFile = $(KeyFile)" />
+    <Message Importance="high" Text="INFO: PublicKey = $(PublicKey)" />
     <Message Importance="high" Text="INFO: AssemblyOriginatorKeyFile = $(AssemblyOriginatorKeyFile)" />
     <Message Importance="high" Text="INFO: TextTransformerParams = @(TextTransformParameter)" />
   </Target>
