@@ -88,7 +88,7 @@ jobs:
     strategy:
       matrix:
         os: ["windows-2019"]
-        toolset: ["v141", "v142"]
+        toolset: ["v141", "v142", "v143"]
     steps:
       - uses: actions/checkout@v2
         with:
