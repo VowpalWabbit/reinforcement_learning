@@ -15,8 +15,8 @@ jobs:
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        os: ["windows-2019"]
-        toolset: ["v141", "v142", "v143"]
+        os: ["windows-2017"]
+        toolset: ["v141", "v142"]
         arch_config:
         - { arch: x64, generator_arch: x64}
   
@@ -44,7 +44,7 @@ jobs:
       - name: Configure
         run: >
           cmake -S . -B build
-          -G "Visual Studio 16 2019" -A ${{ matrix.arch_config.generator_arch }}
+          -G "Visual Studio 15 2017" -A ${{ matrix.arch_config.generator_arch }}
           -T ${{ matrix.toolset }}
           -DNATIVE_NUGET_PLATFORM_TAG=${{ matrix.arch_config.arch }}
           -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE
@@ -87,8 +87,8 @@ jobs:
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        os: ["windows-2019"]
-        toolset: ["v141", "v142", "v143"]
+        os: ["windows-2017"]
+        toolset: ["v141", "v142"]
     steps:
       - uses: actions/checkout@v2
         with:
