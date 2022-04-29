@@ -1,9 +1,6 @@
 #pragma once
 #include "object_factory.h"
-
-#if defined _WIN32 || defined __CYGWIN__
-#define VW_DLL_PUBLIC __declspec(dllimport)
-#endif
+#include "vwvis.h"
 
 namespace reinforcement_learning  {
   namespace utility {

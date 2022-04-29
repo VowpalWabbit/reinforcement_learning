@@ -244,6 +244,7 @@ install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/../include
 
 install(FILES
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/vowpalwabbit/vw_string_view.h
+    ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/vowpalwabbit/vwvis.h
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/explore/future_compat.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/vowpal_wabbit)
 
