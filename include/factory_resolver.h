@@ -1,5 +1,10 @@
 #pragma once
 #include "object_factory.h"
+
+#if defined _WIN32 || defined __CYGWIN__
+#define VW_DLL_PUBLIC __declspec(dllimport)
+#endif
+
 namespace reinforcement_learning  {
   namespace utility {
     class configuration;
@@ -47,11 +52,11 @@ namespace reinforcement_learning  {
    */
   using time_provider_factory_t = utility::object_factory<i_time_provider, const utility::configuration&>;
 
-  __declspec( dllimport ) extern data_transport_factory_t& data_transport_factory;
-  __declspec( dllimport ) extern model_factory_t& model_factory;
-  __declspec( dllimport ) extern sender_factory_t& sender_factory;
-  __declspec( dllimport ) extern trace_logger_factory_t& trace_logger_factory;
-  __declspec( dllimport ) extern time_provider_factory_t& time_provider_factory;
+  VW_DLL_PUBLIC extern data_transport_factory_t& data_transport_factory;
+  VW_DLL_PUBLIC extern model_factory_t& model_factory;
+  VW_DLL_PUBLIC extern sender_factory_t& sender_factory;
+  VW_DLL_PUBLIC extern trace_logger_factory_t& trace_logger_factory;
+  VW_DLL_PUBLIC extern time_provider_factory_t& time_provider_factory;
 
   // For proper static intialization
   // Check https://en.wikibooks.org/wiki/More_C++_Idioms/Nifty_Counter for explanation
