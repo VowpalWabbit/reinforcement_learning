@@ -47,11 +47,11 @@ namespace reinforcement_learning  {
    */
   using time_provider_factory_t = utility::object_factory<i_time_provider, const utility::configuration&>;
 
-  extern data_transport_factory_t& data_transport_factory;
-  extern model_factory_t& model_factory;
-  extern sender_factory_t& sender_factory;
-  extern trace_logger_factory_t& trace_logger_factory;
-  extern time_provider_factory_t& time_provider_factory;
+  __declspec( dllimport ) extern data_transport_factory_t& data_transport_factory;
+  __declspec( dllimport ) extern model_factory_t& model_factory;
+  __declspec( dllimport ) extern sender_factory_t& sender_factory;
+  __declspec( dllimport ) extern trace_logger_factory_t& trace_logger_factory;
+  __declspec( dllimport ) extern time_provider_factory_t& time_provider_factory;
 
   // For proper static intialization
   // Check https://en.wikibooks.org/wiki/More_C++_Idioms/Nifty_Counter for explanation

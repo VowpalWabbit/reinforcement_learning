@@ -1,8 +1,12 @@
 #include "live_model.h"
+#include "config_utility.h"
+
+namespace r = reinforcement_learning;
+namespace u = reinforcement_learning::utility;
 
 int main()
 {
-  reinforcement_learning::utility::configuration config;
-  std::unique_ptr<reinforcement_learning::live_model> _rl = std::unique_ptr<reinforcement_learning::live_model>(new reinforcement_learning::live_model(config, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr));
+  u::configuration config;
+  auto rl = std::make_unique<r::live_model>(config);
   return 0;
 }
