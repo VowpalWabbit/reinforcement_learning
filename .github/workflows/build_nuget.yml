@@ -87,7 +87,7 @@ jobs:
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        os: ["windows-2017"]
+        os: ["windows-2019"]
         toolset: ["v141", "v142"]
     steps:
       - uses: actions/checkout@v2
