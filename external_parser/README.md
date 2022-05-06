@@ -23,7 +23,7 @@ Each message has an unique indentifier, those are the ones currently recognized:
 - `MSG_TYPE_EOF = 0xAAAAAAAA`
 
 ### Message payloads
- 
+
 For all flatbuffer payloads see `rlclientlib/schema/v2`
 
 ### File Magic message
@@ -54,7 +54,7 @@ required to process the stream that follows them.
 
 Payload is a flatbuffer message of type `JoinedPayload` (see `FileFormat.fbs`).
 
-This message include multiple events, sharing one or more event-ids that should be processed together. 
+This message include multiple events, sharing one or more event-ids that should be processed together.
 
 ### Recomended message ordering
 
@@ -109,7 +109,7 @@ from `external_parser` (replace `Release` with `Debug` if you want a debug build
 
 - mkdir build
 - cd build
-- cmake .. -DCMAKE_TOOLCHAIN_FILE=<VCPKG_INSTALLATION_ROOT>\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -G "Visual Studio 15 2017" -A x64 -DBUILD_FLATBUFFERS=OFF -DCMAKE_CONFIGURATION_TYPES="Release" -DWARNINGS=OFF -DWARNINGS=OFF -DWARNING_AS_ERROR=OFF -DDO_NOT_BUILD_VW_C_WRAPPER=OFF  -DBUILD_JAVA=OFF -DBUILD_PYTHON=OFF -DBUILD_TESTS=OFF -DBUILD_EXPERIMENTAL_BINDING=OFF
+- cmake .. -DCMAKE_TOOLCHAIN_FILE=<VCPKG_INSTALLATION_ROOT>\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -G "Visual Studio 15 2017" -A x64 -DBUILD_FLATBUFFERS=OFF -DCMAKE_CONFIGURATION_TYPES="Release" -DWARNINGS=OFF -DWARNINGS=OFF -DWARNING_AS_ERROR=OFF -DDO_NOT_BUILD_VW_C_WRAPPER=OFF  -DBUILD_JAVA=OFF -DBUILD_PYTHON=OFF -DBUILD_TESTING=OFF -DBUILD_EXPERIMENTAL_BINDING=OFF
 - <MSBUILD_PATH> /verbosity:normal /m /p:Configuration=Release;Platform=x64 vw_binary_parser.sln
 
 `vw_binary_parser.sln` will be available under `build` and can be used to open the solution in visual studio

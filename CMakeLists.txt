@@ -21,10 +21,7 @@ option(RL_BUILD_BENCHMARKS "Build benchmarks" OFF)
 
 option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" ON)
 
-# TODO Compile cpprest into its own separate lib so that it doesn't have to be consumed
-if (vw_USE_AZURE_FACTORIES)
-    find_package(cpprestsdk REQUIRED)
-endif()
+
 
 if(RL_STATIC_DEPS)
     if(WIN32)
@@ -39,7 +36,12 @@ if(RL_STATIC_DEPS)
     set(CMAKE_FIND_LIBRARY_SUFFIXES ${STATIC_LIB_SUFFIXES})
 endif()
 
-find_package(OpenSSL REQUIRED)
+# TODO Compile cpprest into its own separate lib so that it doesn't have to be consumed
+if (vw_USE_AZURE_FACTORIES)
+    find_package(cpprestsdk REQUIRED)
+    find_package(OpenSSL REQUIRED)
+endif()
+
 
 # We also require Boost::uuid, but that is a header-only dependency and is unable to be found
 # using find_package as a component, which means it is possible to have a successfully configured
@@ -53,7 +55,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG")
-set(CMAKE_CONFIGURATION_TYPES Debug Release CACHE TYPE INTERNAL FORCE)
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING INTERNAL FORCE)
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: Debug, Release" FORCE)
 
 include(ProcessorCount)
