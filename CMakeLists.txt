@@ -82,4 +82,22 @@ if(RL_BUILD_BENCHMARKS)
   add_subdirectory(benchmarks)
 endif()
 
+# Grab git commitish into variable
+IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git)
+  FIND_PACKAGE(Git)
+  IF(GIT_FOUND)
+    EXECUTE_PROCESS(
+      COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+      OUTPUT_VARIABLE "rl_GIT_COMMIT"
+      ERROR_QUIET
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    MESSAGE(STATUS "Git Version: ${rl_GIT_COMMIT}" )
+  ELSE(GIT_FOUND)
+    SET(vw_GIT_COMMIT "")
+  ENDIF(GIT_FOUND)
+ELSE(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git)
+  SET(vw_GIT_COMMIT "")
+ENDIF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git)
+
 configure_file(nuget/rlclientlib.nuspec.in nuget/rlclientlib.nuspec @ONLY)

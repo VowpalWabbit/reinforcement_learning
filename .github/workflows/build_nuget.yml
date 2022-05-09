@@ -94,14 +94,9 @@ jobs:
         with:
           submodules: 'recursive'
       - uses: ilammy/msvc-dev-cmd@v1
-      - id: fetch-rl-version
-        run: |
-          $version = Get-Content nuget_version.txt -Raw
-          $version = $version.Trim()
-          echo "::set-output name=RLVersion::$version"
       - uses: actions/download-artifact@v1
         with:
-          name: RLClientLibNative-${{matrix.toolset}}-x64.${{ steps.fetch-rl-version.outputs.RLVersion }}.nupkg
+          name: RLClientLibNative-${{matrix.toolset}}-x64.1.0.0.nupkg
           path: downloaded_nugets
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
