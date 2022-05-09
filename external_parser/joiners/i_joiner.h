@@ -49,10 +49,12 @@ public:
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their
   // id. The grouped events can be processed when process_joined() is called
+  // True means success, false means failure
   virtual bool process_event(const v2::JoinedEvent &joined_event) = 0;
   // Takes all grouped events, processes them (e.g. decompression) and populates
   // the examples array with complete example(s) ready to be used by vw for
   // training
+  // True means success, false means failure
   virtual bool process_joined(VW::multi_ex &examples) = 0;
   // true if there are still event-groups to be processed from a deserialized
   // batch

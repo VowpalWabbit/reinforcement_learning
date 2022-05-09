@@ -8,6 +8,7 @@
 #include "simulation_stats.h"
 #include "constants.h"
 #include "multistep.h"
+#include "local_loop.h"
 
 using namespace std;
 
@@ -317,6 +318,8 @@ void _on_error(const reinforcement_learning::api_status& status, rl_sim* psim) {
 int rl_sim::init_rl() {
   r::api_status status;
   u::configuration config;
+
+  bool local_loop = false;
   // Load configuration from json config file
   const auto config_file = _options["json_config"].as<std::string>();
   if ( load_config_from_json(config_file, config, &status) != err::success ) {
@@ -324,13 +327,47 @@ int rl_sim::init_rl() {
     return -1;
   }
 
+  if(_options["local_loop"].as<bool>()) {
+    local_loop = true;
+    std::cout << "Using --local_loop, replacing some config vars." << std::endl;
+    if (_loop_kind != CB)
+    {
+      std::cerr << "--local_loop can only be used with cb." << std::endl;
+      return -1;
+    }
+
+    config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, "LOCAL_MODEL");
+    std::cout << "Setting " << r::name::INTERACTION_SENDER_IMPLEMENTATION << "=LOCAL_MODEL" <<std::endl;
+    config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, "LOCAL_MODEL");
+    std::cout << "Setting " << r::name::OBSERVATION_SENDER_IMPLEMENTATION << "=LOCAL_MODEL" <<std::endl;
+    config.set(r::name::MODEL_SRC, "LOCAL_MODEL");
+    std::cout << "Setting " << r::name::MODEL_SRC << "=LOCAL_MODEL" <<std::endl;
+    config.set(r::name::MODEL_IMPLEMENTATION, "VW");
+    std::cout << "Setting " << r::name::MODEL_IMPLEMENTATION << "=VW" <<std::endl;
+    config.set(r::name::PROTOCOL_VERSION, "2");
+    std::cout << "Setting " << r::name::PROTOCOL_VERSION << "=2" <<std::endl;
+    config.set(r::name::OBSERVATION_SEND_BATCH_INTERVAL_MS, "100");
+    std::cout << "Setting " << r::name::OBSERVATION_SEND_BATCH_INTERVAL_MS << "=100" <<std::endl;
+    config.set(r::name::MODEL_REFRESH_INTERVAL_MS, "2000");
+    std::cout << "Setting " << r::name::MODEL_REFRESH_INTERVAL_MS << "=2000" <<std::endl;
+  }
+
   if(_options["log_to_file"].as<bool>()) {
+    if (local_loop)
+    {
+      std::cerr << "--local_loop and --log_to_file can't be used together." << std::endl;
+      return -1;
+    }
     config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
     config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
   }
 
   if (!_options["get_model"].as<bool>()) {
-    // Set the time provider to the clock time provider
+    if (local_loop)
+    {
+      std::cerr << "--local_loop and --get_model can't be used together." << std::endl;
+      return -1;
+    }
     config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
   }
 
@@ -341,6 +378,29 @@ int rl_sim::init_rl() {
 
   // Trace log API calls to the console
   config.set(r::name::TRACE_LOG_IMPLEMENTATION, r::value::CONSOLE_TRACE_LOGGER);
+
+  if(local_loop)
+  {
+    _local_model = std::unique_ptr<local_model>(new local_model);
+    auto* raw_local_model = _local_model.get();
+    r::data_transport_factory.register_type(
+        "LOCAL_MODEL", [raw_local_model](r::model_management::i_data_transport **retval,
+                           const r::utility::configuration &config,
+                           r::i_trace *trace_logger, r::api_status *status) {
+            raw_local_model->set_trace_logger(trace_logger);
+            *retval = new local_model_proxy(raw_local_model);
+            return 0;
+        });
+    r::sender_factory.register_type(
+        "LOCAL_MODEL",
+        [raw_local_model](r::i_sender **retval, const r::utility::configuration &config,
+            r::error_callback_fn *error_cb, r::i_trace *trace_logger,
+            r::api_status *status) {
+            raw_local_model->set_trace_logger(trace_logger);
+            *retval = new local_model_proxy(raw_local_model);
+            return 0;
+        });
+  }
 
   // Initialize the API
   _rl = std::unique_ptr<r::live_model>(new r::live_model(config, _on_error, this));
@@ -356,7 +416,7 @@ int rl_sim::init_rl() {
 
 bool rl_sim::init_sim_world() {
 
-  //  Initilize topics
+  //  Initialize topics
   _topics = {
     "SkiConditions-VT",
     "HerbGarden",

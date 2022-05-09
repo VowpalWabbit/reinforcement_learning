@@ -40,6 +40,8 @@ po::variables_map process_cmd_line(const int argc, char** argv) {
       default_value(false), "Run in continuous actions mode")
     ("multistep", po::value<bool>()->
       default_value(false), "Run in multistep mode")
+    ("local_loop", po::value<bool>()->
+        default_value(false), "Train and update model locally")
     ;
 
   po::variables_map vm;

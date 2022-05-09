@@ -43,22 +43,25 @@ else()
   set(flatc_location ${FLATBUFFERS_FLATC_EXECUTABLE})
 endif()
 
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../ext_libs/zstd/build/cmake ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser/zstd EXCLUDE_FROM_ALL)
+option(RL_EXTERNAL_PARSER_OTHER_DEPS "Add the other deps." ON)
+if (RL_EXTERNAL_PARSER_OTHER_DEPS)
+  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../ext_libs/zstd/build/cmake ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser/zstd EXCLUDE_FROM_ALL)
 
-# set vw cmake flags
-# This is not longer using the injected method, but implemented in this repo just consuming vw as a lib
-set(BUILD_EXTERNAL_PARSER OFF CACHE BOOL "")
-set(BUILD_FLATBUFFERS OFF CACHE BOOL "")
-set(DO_NOT_BUILD_VW_C_WRAPPER OFF CACHE BOOL "")
-set(BUILD_JAVA OFF CACHE BOOL "")
-set(BUILD_PYTHON OFF CACHE BOOL "")
-set(BUILD_EXPERIMENTAL_BINDING OFF CACHE BOOL "")
-set(BUILD_TESTING OFF CACHE BOOL "")
+  # set vw cmake flags
+  # This is not longer using the injected method, but implemented in this repo just consuming vw as a lib
+  set(BUILD_EXTERNAL_PARSER OFF CACHE BOOL "")
+  set(BUILD_FLATBUFFERS OFF CACHE BOOL "")
+  set(DO_NOT_BUILD_VW_C_WRAPPER OFF CACHE BOOL "")
+  set(BUILD_JAVA OFF CACHE BOOL "")
+  set(BUILD_PYTHON OFF CACHE BOOL "")
+  set(BUILD_EXPERIMENTAL_BINDING OFF CACHE BOOL "")
+  set(BUILD_TESTING OFF CACHE BOOL "")
 
-if(STATIC_LINK_BINARY_PARSER)
-  set(STATIC_LINK_VW ON CACHE BOOL "" FORCE)
-endif()
+  if(STATIC_LINK_BINARY_PARSER)
+    set(STATIC_LINK_VW ON CACHE BOOL "" FORCE)
+  endif()
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser)
+endif()
 
 # Flatbuffer generation
 # ---------------------

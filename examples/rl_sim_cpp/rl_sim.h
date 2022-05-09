@@ -10,6 +10,7 @@
 #include "person.h"
 #include "live_model.h"
 #include "robot_joint.h"
+#include "local_loop.h"
 
 /**
  * @brief Reinforcement Learning Simulator
@@ -160,6 +161,7 @@ public:
 
     boost::program_options::variables_map _options;
     std::unique_ptr<reinforcement_learning::live_model> _rl;
+    std::unique_ptr<local_model> _local_model;
     std::vector<person> _people;
     std::vector<std::string> _topics;
     std::vector<std::string> _slot_sizes;
