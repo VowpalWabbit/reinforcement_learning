@@ -6,16 +6,16 @@
 #include <fstream>
 #include <iostream>
 
-#include "action_score.h"
-#include "best_constant.h"
-#include "cb.h"
-#include "constant.h"
-#include "example.h"
+#include "vw/core/action_score.h"
+#include "vw/core/best_constant.h"
+#include "vw/core/cb.h"
+#include "vw/core/constant.h"
+#include "vw/core/example.h"
 #include "flatbuffers/flatbuffers.h"
-#include "global_data.h"
-#include "io/logger.h"
+#include "vw/core/global_data.h"
+#include "vw/io/logger.h"
 #include "joiners/example_joiner.h"
-#include "memory.h"
+#include "vw/core/memory.h"
 #include "parse_example_binary.h"
 
 // TODO need to check if errors will be detected from stderr/stdout/other and

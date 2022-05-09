@@ -12,9 +12,9 @@
 #include <time.h>
 
 // VW headers
-#include "parse_example_json.h"
-#include "parser.h"
-#include "scope_exit.h"
+#include "vw/core/parse_example_json.h"
+#include "vw/core/parser.h"
+#include "vw/core/scope_exit.h"
 
 example_joiner::example_joiner(VW::workspace *vw)
     : i_joiner(vw->logger), _vw(vw), _reward_calculation(&reward::earliest),

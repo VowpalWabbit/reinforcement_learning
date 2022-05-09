@@ -1,6 +1,6 @@
 #include "joiners/example_joiner.h"
 #include "test_common.h"
-#include "reductions/conditional_contextual_bandit.h"
+#include "vw/core/reductions/conditional_contextual_bandit.h"
 #include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE(example_joiner_test_ca) {

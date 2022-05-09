@@ -13,12 +13,12 @@
 #include "message_sender.h"
 #include "utility/config_helper.h"
 #include "utility/object_pool.h"
-#include "explore_internal.h"
-#include "hash.h"
+#include "vw/explore/explore.h"
+#include "vw/common/hash.h"
 #include "rl_string_view.h"
 
 // float comparisons
-#include "vw_math.h"
+#include "vw/core/vw_math.h"
 
 #include <functional>
 
@@ -118,7 +118,7 @@ namespace reinforcement_learning { namespace logger {
         return error_code::success;
       }
     }
-    
+
     _queue.push(std::move(func), TSerializer<TEvent>::serializer_t::size_estimate(*event), event);
 
     //block or drop events if the queue if full
@@ -148,14 +148,14 @@ namespace reinforcement_learning { namespace logger {
 
   template<typename TEvent, template<typename> class TSerializer>
   int async_batcher<TEvent, TSerializer>::fill_buffer(
-                                                      std::shared_ptr<utility::data_buffer>& buffer, 
-                                                      size_t& remaining, 
+                                                      std::shared_ptr<utility::data_buffer>& buffer,
+                                                      size_t& remaining,
                                                       api_status* status)
   {
     TFunc f_evt;
     TEvent evt;
     TSerializer<TEvent> collection_serializer(*buffer.get(), _batch_content_encoding, _shared_state);
-    
+
     while (remaining > 0 && collection_serializer.size() < _send_high_water_mark) {
       if (_queue.pop(&f_evt)) {
         if (queue_mode_enum::BLOCK == _queue_mode) {

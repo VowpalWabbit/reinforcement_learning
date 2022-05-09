@@ -3,10 +3,10 @@
 // license as described in the file LICENSE.
 
 #pragma once
-#include "memory.h"
-#include "parse_args.h"
-#include "config/option_group_definition.h"
-#include "vw.h"
+#include "vw/core/memory.h"
+#include "vw/core/parse_args.h"
+#include "vw/config/option_group_definition.h"
+#include "vw/core/vw.h"
 
 namespace VW {
 namespace external {

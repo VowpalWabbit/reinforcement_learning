@@ -1,4 +1,4 @@
-#include "ccb_label.h"
+#include "vw/core/ccb_label.h"
 #include "test_common.h"
 
 #include <boost/test/unit_test.hpp>

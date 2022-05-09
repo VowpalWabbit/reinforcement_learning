@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <memory>
-#include "vw.h"
+#include "vw/core/vw.h"
 #include "model_mgmt.h"
 
 namespace reinforcement_learning {

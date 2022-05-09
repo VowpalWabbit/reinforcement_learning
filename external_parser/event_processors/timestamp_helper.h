@@ -2,7 +2,7 @@
 
 #include "date.h"
 #include "generated/v2/Metadata_generated.h"
-#include "io/logger.h"
+#include "vw/io/logger.h"
 
 #include <chrono>
 

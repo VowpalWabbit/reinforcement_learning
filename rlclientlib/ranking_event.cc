@@ -1,8 +1,8 @@
 #include "action_flags.h"
 #include "ranking_event.h"
 #include "data_buffer.h"
-#include "explore_internal.h"
-#include "hash.h"
+#include "vw/explore/explore.h"
+#include "vw/common/hash.h"
 #include "time_helper.h"
 using namespace std;
 namespace reinforcement_learning {

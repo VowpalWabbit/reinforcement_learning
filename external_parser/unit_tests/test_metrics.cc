@@ -1,4 +1,4 @@
-#include "io/logger.h"
+#include "vw/io/logger.h"
 #include "rapidjson/document.h"
 #include "test_common.h"
 #include <boost/test/unit_test.hpp>

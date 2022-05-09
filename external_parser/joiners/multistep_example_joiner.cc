@@ -5,7 +5,7 @@
 #include "generated/v2/Event_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
-#include "io/logger.h"
+#include "vw/io/logger.h"
 #include "event_processors/typed_events.h"
 #include "utils.h"
 
@@ -17,14 +17,14 @@
 #include <tuple>
 
 // VW headers
-#include "example.h"
-#include "io/logger.h"
-#include "parse_example_json.h"
-#include "parser.h"
-#include "v_array.h"
+#include "vw/core/example.h"
+#include "vw/io/logger.h"
+#include "vw/core/parse_example_json.h"
+#include "vw/core/parser.h"
+#include "vw/core/v_array.h"
 
 
-multistep_example_joiner::multistep_example_joiner(VW::workspace *vw) : 
+multistep_example_joiner::multistep_example_joiner(VW::workspace *vw) :
     i_joiner(vw->logger)
     , _vw(vw)
     , _reward_calculation(&reward::earliest)

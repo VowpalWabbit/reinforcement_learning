@@ -1,6 +1,6 @@
 #include "joiners/example_joiner.h"
 #include "parse_example_binary.h"
-#include "reductions/conditional_contextual_bandit.h"
+#include "vw/core/reductions/conditional_contextual_bandit.h"
 #include "test_common.h"
 #include <boost/test/unit_test.hpp>
 

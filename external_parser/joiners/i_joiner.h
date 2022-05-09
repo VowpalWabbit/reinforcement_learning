@@ -1,16 +1,16 @@
 #pragma once
 
-#include "error_constants.h"
+#include "vw/core/error_constants.h"
 
 #include "event_processors/reward.h"
-#include "example.h"
+#include "vw/core/example.h"
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "lru_dedup_cache.h"
 #include "metrics/metrics.h"
-#include "parse_args.h"
-#include "v_array.h"
+#include "vw/core/parse_args.h"
+#include "vw/core/v_array.h"
 
 #include <list>
 #include <queue>
@@ -18,8 +18,8 @@
 // VW headers
 // vw.h has to come before json_utils.h
 // clang-format off
-#include "vw.h"
-#include "json_utils.h"
+#include "vw/core/vw.h"
+#include "vw/core/json_utils.h"
 // clang-format on
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
@@ -39,7 +39,7 @@ public:
   /**
    * @brief Tells whether config was provided such that it can start joining examples.
    * TODO This method is naive with respect to whether the config provided was both enough and valid.
-   * 
+   *
    * @return true if the joiner is ready, false otherwise.
    */
   virtual bool joiner_ready() = 0;

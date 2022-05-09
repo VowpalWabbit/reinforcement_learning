@@ -1,7 +1,7 @@
 #include "action_flags.h"
 #include "generic_event.h"
-#include "explore_internal.h"
-#include "hash.h"
+#include "vw/explore/explore.h"
+#include "vw/common/hash.h"
 
 using namespace std;
 namespace reinforcement_learning {
@@ -20,8 +20,8 @@ namespace reinforcement_learning {
     , _payload(std::move(payload))
     , _objects(std::move(objects))
     , _pass_prob(pass_prob)
-    , _content_type(content_type) 
-    , _app_id(app_id) 
+    , _content_type(content_type)
+    , _app_id(app_id)
     , _event_index(0) {}
   generic_event::generic_event(const char* id, const timestamp& ts, payload_type_t type, flatbuffers::DetachedBuffer&& payload, event_content_type content_type, const char* app_id, float pass_prob)
     : _id(id)
@@ -29,7 +29,7 @@ namespace reinforcement_learning {
     , _payload_type(type)
     , _payload(std::move(payload))
     , _pass_prob(pass_prob)
-    , _content_type(content_type) 
+    , _content_type(content_type)
     , _app_id(app_id)
     , _event_index(0) {}
   bool generic_event::try_drop(float pass_prob, int drop_pass) {
@@ -39,7 +39,7 @@ namespace reinforcement_learning {
 
   const char* generic_event::get_id() const { return _id.c_str(); }
 
-  const char* generic_event::get_app_id() const { return _app_id.c_str(); }  
+  const char* generic_event::get_app_id() const { return _app_id.c_str(); }
 
   uint64_t generic_event::get_event_index() const { return _event_index; }
 
