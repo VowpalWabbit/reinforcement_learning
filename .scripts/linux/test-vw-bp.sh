@@ -12,8 +12,8 @@ cd $REPO_DIR/external_parser/build
 
 ctest --verbose --output-on-failure
 
-cd ext_libs/vowpal_wabbit/vowpalwabbit/cli/
+cd vw_binary_parser/vowpalwabbit
 
-./vw --extra_metrics metrics.json -d ../../../unit_tests/test_files/valid_joined_logs/cb_simple.log --binary_parser --cb_explore_adf
+./cli/vw --extra_metrics metrics.json -d ../../../unit_tests/test_files/valid_joined_logs/cb_simple.log --binary_parser --cb_explore_adf
 
 python3 -m json.tool metrics.json
