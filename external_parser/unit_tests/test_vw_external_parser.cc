@@ -209,6 +209,16 @@ void generate_dsjson_and_fb_models(const std::string &model_name,
   }
 }
 
+void compare_files_json_to_fb(const std::string& fp)
+{
+  auto buffer_fb_model = read_file(fp + ".fb");
+  auto buffer_dsjson_model = read_file(fp + ".json");
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
+                                buffer_dsjson_model.begin(),
+                                buffer_dsjson_model.end());
+}
+
 BOOST_AUTO_TEST_CASE(cb_compare_dsjson_with_fb_models) {
   std::string input_files = get_test_files_location();
 
@@ -220,12 +230,7 @@ BOOST_AUTO_TEST_CASE(cb_compare_dsjson_with_fb_models) {
   generate_dsjson_and_fb_models(model_name, "--cb_explore_adf ", file_name);
 
   // read the models and compare
-  auto buffer_fb_model = read_file(model_name + ".fb");
-  auto buffer_dsjson_model = read_file(model_name + ".json");
-
-  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
-                                buffer_dsjson_model.begin(),
-                                buffer_dsjson_model.end());
+  compare_files_json_to_fb(model_name);
 }
 
 BOOST_AUTO_TEST_CASE(cb_compare_dsjson_with_fb_models_ignore_feature) {
@@ -240,12 +245,7 @@ BOOST_AUTO_TEST_CASE(cb_compare_dsjson_with_fb_models_ignore_feature) {
   generate_dsjson_and_fb_models(model_name, vw_command, file_name);
 
   // read the models and compare
-  auto buffer_fb_model = read_file(model_name + ".fb");
-  auto buffer_dsjson_model = read_file(model_name + ".json");
-
-  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
-                                buffer_dsjson_model.begin(),
-                                buffer_dsjson_model.end());
+  compare_files_json_to_fb(model_name);;
 }
 
 BOOST_AUTO_TEST_CASE(cb_compare_dsjson_with_fb_models_ignore_multiple_feature) {
@@ -260,12 +260,7 @@ BOOST_AUTO_TEST_CASE(cb_compare_dsjson_with_fb_models_ignore_multiple_feature) {
   generate_dsjson_and_fb_models(model_name, vw_command, file_name);
 
   // read the models and compare
-  auto buffer_fb_model = read_file(model_name + ".fb");
-  auto buffer_dsjson_model = read_file(model_name + ".json");
-
-  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
-                                buffer_dsjson_model.begin(),
-                                buffer_dsjson_model.end());
+  compare_files_json_to_fb(model_name);
 }
 
 BOOST_AUTO_TEST_CASE(ccb_compare_dsjson_with_fb_models) {
@@ -279,12 +274,7 @@ BOOST_AUTO_TEST_CASE(ccb_compare_dsjson_with_fb_models) {
   generate_dsjson_and_fb_models(model_name, "--ccb_explore_adf ", file_name);
 
   // read the models and compare
-  auto buffer_fb_model = read_file(model_name + ".fb");
-  auto buffer_dsjson_model = read_file(model_name + ".json");
-
-  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
-                                buffer_dsjson_model.begin(),
-                                buffer_dsjson_model.end());
+  compare_files_json_to_fb(model_name);
 }
 
 BOOST_AUTO_TEST_CASE(ca_compare_dsjson_with_fb_models_simple) {
@@ -300,12 +290,7 @@ BOOST_AUTO_TEST_CASE(ca_compare_dsjson_with_fb_models_simple) {
       file_name);
 
   // read the models and compare
-  auto buffer_fb_model = read_file(model_name + ".fb");
-  auto buffer_dsjson_model = read_file(model_name + ".json");
-
-  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
-                                buffer_dsjson_model.begin(),
-                                buffer_dsjson_model.end());
+  compare_files_json_to_fb(model_name);
 }
 
 BOOST_AUTO_TEST_CASE(ca_compare_dsjson_with_fb_models_mixed_skip_learn) {
@@ -322,12 +307,7 @@ BOOST_AUTO_TEST_CASE(ca_compare_dsjson_with_fb_models_mixed_skip_learn) {
       file_name);
 
   // read the models and compare
-  auto buffer_fb_model = read_file(model_name + ".fb");
-  auto buffer_dsjson_model = read_file(model_name + ".json");
-
-  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
-                                buffer_dsjson_model.begin(),
-                                buffer_dsjson_model.end());
+  compare_files_json_to_fb(model_name);
 }
 
 BOOST_AUTO_TEST_CASE(slates_compare_dsjson_with_fb_models) {
@@ -341,12 +321,7 @@ BOOST_AUTO_TEST_CASE(slates_compare_dsjson_with_fb_models) {
   generate_dsjson_and_fb_models(model_name, "--ccb_explore_adf --slates ", file_name);
 
   // read the models and compare
-  auto buffer_fb_model = read_file(model_name + ".fb");
-  auto buffer_dsjson_model = read_file(model_name + ".json");
-
-  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
-                                buffer_dsjson_model.begin(),
-                                buffer_dsjson_model.end());
+  compare_files_json_to_fb(model_name);
 }
 
 BOOST_AUTO_TEST_CASE(slates_skip_learn_w_activations) {
@@ -401,12 +376,7 @@ BOOST_AUTO_TEST_CASE(
   generate_dsjson_and_fb_models(model_name, "--ccb_explore_adf --slates ", file_name);
 
   // read the models and compare
-  auto buffer_fb_model = read_file(model_name + ".fb");
-  auto buffer_dsjson_model = read_file(model_name + ".json");
-
-  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
-                                buffer_dsjson_model.begin(),
-                                buffer_dsjson_model.end());
+  compare_files_json_to_fb(model_name);
 }
 
 BOOST_AUTO_TEST_CASE(rrcr_ignore_examples_before_checkpoint) {
@@ -573,12 +543,7 @@ BOOST_AUTO_TEST_CASE(
   generate_dsjson_and_fb_models(model_name, "--cb_explore_adf ", file_name);
 
   // read the models and compare
-  auto buffer_fb_model = read_file(model_name + ".fb");
-  auto buffer_dsjson_model = read_file(model_name + ".json");
-
-  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
-                                buffer_dsjson_model.begin(),
-                                buffer_dsjson_model.end());
+  compare_files_json_to_fb(model_name);
 }
 
 BOOST_AUTO_TEST_CASE(ccb_apprentice_mode) {
@@ -726,12 +691,7 @@ BOOST_AUTO_TEST_CASE(
   generate_dsjson_and_fb_models(model_name, "--ccb_explore_adf ", file_name);
 
   // read the models and compare
-  auto buffer_fb_model = read_file(model_name + ".fb");
-  auto buffer_dsjson_model = read_file(model_name + ".json");
-
-  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
-                                buffer_dsjson_model.begin(),
-                                buffer_dsjson_model.end());
+  compare_files_json_to_fb(model_name);
 }
 
 BOOST_AUTO_TEST_CASE(cb_pdrop_05_parse) {
