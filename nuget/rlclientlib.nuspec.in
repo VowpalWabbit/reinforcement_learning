@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>RLClientLibNative-v@MSVC_TOOLSET_VERSION@-@NATIVE_NUGET_PLATFORM_TAG@</id>
-    <version>1.0.0</version>
+    <version>0.1.0</version>
     <title>Reinforcement Learning Client Library Native</title>
     <authors>John Langford et al</authors>
     <license type="expression">MIT</license>
