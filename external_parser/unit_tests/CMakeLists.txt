@@ -21,12 +21,12 @@ add_executable(binary_parser_unit_tests ${TEST_SOURCES})
 # Add the include directories from vw target for testing
 target_include_directories(binary_parser_unit_tests
   PRIVATE
-    $<TARGET_PROPERTY:vw,INCLUDE_DIRECTORIES>
+    $<TARGET_PROPERTY:vw_core,INCLUDE_DIRECTORIES>
 )
 
 target_link_libraries(binary_parser_unit_tests
   PRIVATE
-    vw
+    vw_core
     Boost::unit_test_framework
     Boost::system
     Boost::filesystem

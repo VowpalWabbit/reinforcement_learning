@@ -1,6 +1,6 @@
 #pragma once
 
-#include "example.h"
+#include "vw/core/example.h"
 
 #include <list>
 #include <unordered_map>

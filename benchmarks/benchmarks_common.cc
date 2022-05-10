@@ -1,5 +1,5 @@
 #include "benchmarks_common.h"
-#include "rand48.h"
+#include "vw/core/rand48.h"
 
 #include <set>
 

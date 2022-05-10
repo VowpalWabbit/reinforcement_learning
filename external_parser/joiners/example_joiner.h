@@ -1,14 +1,14 @@
 #pragma once
 
-#include "error_constants.h"
+#include "vw/core/error_constants.h"
 
 #include "event_processors/joined_event.h"
 #include "event_processors/loop.h"
-#include "example.h"
+#include "vw/core/example.h"
 #include "joiners/i_joiner.h"
 #include "lru_dedup_cache.h"
 #include "metrics/metrics.h"
-#include "v_array.h"
+#include "vw/core/v_array.h"
 
 #include <fstream>
 #include <list>

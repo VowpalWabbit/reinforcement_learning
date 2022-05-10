@@ -6,7 +6,7 @@
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include "ranking_response.h"
-#include "explore.h"
+#include "vw/explore/explore.h"
 
 const int NUM_ACTIONS = 10;
 namespace e = exploration;

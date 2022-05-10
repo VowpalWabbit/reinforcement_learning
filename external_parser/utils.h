@@ -3,8 +3,8 @@
 // license as described in the file LICENSE.
 
 #pragma once
-#include "memory.h"
-#include "vw.h"
+#include "vw/core/memory.h"
+#include "vw/core/vw.h"
 
 namespace VW {
 namespace external {

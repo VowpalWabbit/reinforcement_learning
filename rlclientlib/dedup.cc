@@ -1,5 +1,5 @@
 #include "dedup_internals.h"
-#include "hash.h"
+#include "vw/common/hash.h"
 #include "serialization/payload_serializer.h"
 #include "utility/context_helper.h"
 #include "utility/config_helper.h"
@@ -154,7 +154,7 @@ float dedup_state::get_ewma_value() const {
 
 void dedup_state::update_ewma(float value)
 {
-  //This is racy, but update only reads and modifies a single value, so it won't lead to data corruption 
+  //This is racy, but update only reads and modifies a single value, so it won't lead to data corruption
   _ewma.update(value);
 }
 
@@ -223,7 +223,7 @@ int action_dict_builder::finalize(generic_event& evt, api_status* status)
   //compress the payload
   event_content_type content_type;
   size_t old_size = payload.size();
-  RETURN_IF_FAIL(_state.compress(payload, content_type, status));    
+  RETURN_IF_FAIL(_state.compress(payload, content_type, status));
   size_t new_size = payload.size();
 
   //update compression ratio estimator
@@ -234,7 +234,7 @@ int action_dict_builder::finalize(generic_event& evt, api_status* status)
     now,
     generic_event::payload_type_t::PayloadType_DedupInfo,
     std::move(payload),
-    content_type, 
+    content_type,
     evt.get_app_id());
 
   return error_code::success;
@@ -292,7 +292,7 @@ public:
     _use_dedup(use_dedup),
     _use_compression(use_compression) {}
 
-  logger::i_async_batcher<generic_event>* 
+  logger::i_async_batcher<generic_event>*
   create_batcher(logger::i_message_sender* sender, utility::watchdog& watchdog,
                  error_callback_fn* perror_cb, const char* section) override {
     auto config = utility::get_batcher_config(_config, section);
