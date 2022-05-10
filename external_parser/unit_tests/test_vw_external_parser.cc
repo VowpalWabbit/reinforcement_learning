@@ -228,6 +228,46 @@ BOOST_AUTO_TEST_CASE(cb_compare_dsjson_with_fb_models) {
                                 buffer_dsjson_model.end());
 }
 
+BOOST_AUTO_TEST_CASE(cb_compare_dsjson_with_fb_models_ignore_feature) {
+  std::string input_files = get_test_files_location();
+
+  std::string model_name = input_files + "/test_outputs/ignore_single_feature";
+
+  std::string file_name =
+      input_files + "/valid_joined_logs/average_reward_100_interactions";
+  
+  auto vw_command = "--cb_explore_adf --ignore_features_dsjson_experimental GUser|hobby";
+  generate_dsjson_and_fb_models(model_name, vw_command, file_name);
+
+  // read the models and compare
+  auto buffer_fb_model = read_file(model_name + ".fb");
+  auto buffer_dsjson_model = read_file(model_name + ".json");
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
+                                buffer_dsjson_model.begin(),
+                                buffer_dsjson_model.end());
+}
+
+BOOST_AUTO_TEST_CASE(cb_compare_dsjson_with_fb_models_ignore_multiple_feature) {
+  std::string input_files = get_test_files_location();
+
+  std::string model_name = input_files + "/test_outputs/ignore_multiple_features";
+
+  std::string file_name =
+      input_files + "/valid_joined_logs/average_reward_100_interactions";
+  
+  auto vw_command = "--cb_explore_adf --ignore_features_dsjson_experimental GUser|hobby TAction|a1";
+  generate_dsjson_and_fb_models(model_name, vw_command, file_name);
+
+  // read the models and compare
+  auto buffer_fb_model = read_file(model_name + ".fb");
+  auto buffer_dsjson_model = read_file(model_name + ".json");
+
+  BOOST_CHECK_EQUAL_COLLECTIONS(buffer_fb_model.begin(), buffer_fb_model.end(),
+                                buffer_dsjson_model.begin(),
+                                buffer_dsjson_model.end());
+}
+
 BOOST_AUTO_TEST_CASE(ccb_compare_dsjson_with_fb_models) {
   std::string input_files = get_test_files_location();
 

@@ -410,39 +410,3 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_invalid_cb_context) {
   clear_examples(examples, vw);
   VW::finish(*vw);
 }
-
-void generate_and_compare_vw_outputs(const std::string& vw_command, const std::string& output_path, const std::string& expected_model_path)
-{
-  auto vw = VW::initialize(vw_command, nullptr, false, nullptr, nullptr);
-
-  VW::start_parser(*vw);
-  VW::LEARNER::generic_driver(*vw);
-  VW::end_parser(*vw);
-  VW::finish(*vw);
-
-  auto readable_model = read_file(output_path);
-  auto expected_readable_model = read_file(expected_model_path);
-  BOOST_CHECK_EQUAL_COLLECTIONS(expected_readable_model.begin(), expected_readable_model.end(),
-                                readable_model.begin(),
-                                readable_model.end());
-}
-
-BOOST_AUTO_TEST_CASE(test_ignore_single_feature) {
-  std::string input_files = get_test_files_location();
-
-  auto input_path = fmt::format("{}/valid_joined_logs/cb_simple.log", input_files);
-  auto output_path = fmt::format("{}/test_outputs/ignore_feature.interactions", input_files);
-  auto expected_model_path = fmt::format("{}/expected_models/ignore_single_feature.interactions", input_files);
-  auto vw_command = fmt::format("--cb_explore_adf --binary_parser -d {} --invert_hash {} --ignore_features_dsjson_experimental GUser|hobby", input_path, output_path);
-  generate_and_compare_vw_outputs(vw_command, output_path, expected_model_path);
-}
-
-BOOST_AUTO_TEST_CASE(test_ignore_multiple_features) {
-  std::string input_files = get_test_files_location();
-
-  auto input_path = fmt::format("{}/valid_joined_logs/cb_simple.log", input_files);
-  auto output_path = fmt::format("{}/test_outputs/ignore_multiple_features.interactions", input_files);
-  auto expected_model_path = fmt::format("{}/expected_models/ignore_multiple_features.interactions", input_files);
-  auto vw_command = fmt::format("--cb_explore_adf --binary_parser -d {} --invert_hash {} --ignore_features_dsjson_experimental GUser|hobby TAction|a1", input_path, output_path);
-  generate_and_compare_vw_outputs(vw_command, output_path, expected_model_path);
-}
