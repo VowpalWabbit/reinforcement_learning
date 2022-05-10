@@ -1,0 +1,35 @@
+Version 9.1.0
+Id 
+Min label:-1.5
+Max label:0
+bits:18
+lda:0
+0 ngram:
+0 skip:
+options: --cb_adf --cb_explore_adf --cb_type mtr --csoaa_ldf multiline --csoaa_rank --ignore_features_dsjson_experimental GUser|hobby
+Checksum: 1924834747
+event_sum 1
+action_sum 2
+:1
+initial_t 0
+norm normalizer 2.22222
+t 1
+sum_loss -0.833333
+sum_loss_since_last_dump 0
+dump_interval 2
+min_label -1.5
+max_label 0
+weighted_labeled_examples 1
+weighted_labels 0
+weighted_unlabeled_examples 0
+example_number 1
+total_features 8
+total_weight 0.555556
+sd::oec.weighted_labeled_examples 1
+current_pass 1
+l1_state 0
+l2_state 1
+GUser^majoreng:15773:-0.146874 5 1
+Constant:116060:-0.146874 5 1
+TAction^a1f1:185416:-0.146874 5 1
+GUser^ida:259730:-0.146874 5 1
