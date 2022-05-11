@@ -100,5 +100,5 @@ jobs:
           .\.nuget\NuGet.exe install -Source ${{ github.workspace }}\downloaded_nugets -OutputDirectory ${{ github.workspace }}\nuget\test\packages\ RLClientLibNative-${{ matrix.toolset }}-x64
           cd nuget\test
           msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=Release;Platform=x64"
-      - name: Test nuget
-          run: .\bin\x64\Release\test-v141.exe
+          echo "Run Executable:"
+          .\bin\x64\Release\test-v141.exe
