@@ -96,7 +96,7 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
       - uses: actions/download-artifact@v1
         with:
-          name: RLClientLibNative-${{matrix.toolset}}-x64.1.0.0.nupkg
+          name: RLClientLibNative-${{matrix.toolset}}-x64.0.1.0.nupkg
           path: downloaded_nugets
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
@@ -106,3 +106,4 @@ jobs:
           .\.nuget\NuGet.exe install -Source ${{ github.workspace }}\downloaded_nugets -OutputDirectory ${{ github.workspace }}\nuget\test\packages\ RLClientLibNative-${{ matrix.toolset }}-x64
           cd nuget\test
           msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=Release;Platform=x64"
+          .\bin\x64\Release\test-v141.exe
