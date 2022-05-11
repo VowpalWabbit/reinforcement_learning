@@ -47,18 +47,11 @@ jobs:
           -G "Visual Studio 16 2019" -A ${{ matrix.arch_config.generator_arch }}
           -T ${{ matrix.toolset }}
           -DNATIVE_NUGET_PLATFORM_TAG=${{ matrix.arch_config.arch }}
-          -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE
-          -DBUILD_SHARED_LIBS=TRUE
-          -DUSE_ZSTD=ON
           -DBUILD_TESTING=Off
-          -DRAPIDJSON_SYS_DEP=Off
-          -DFMT_SYS_DEP=Off
-          -DSPDLOG_SYS_DEP=Off
-          -DBUILD_FLATBUFFERS=Off
-          -DVW_INSTALL=Off
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.arch }}-windows
-          -DFLATBUFFERS_FLATC_EXECUTABLE=C:/vcpkg/installed/${{ matrix.arch_config.arch }}-windows/tools/flatbuffers/flatc.exe
+          -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE
+          -DBUILD_SHARED_LIBS=TRUE
       - name: Build and install
         run: |
           cmake --build build --config Release -t rlclientlib -v
