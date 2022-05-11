@@ -1,6 +1,6 @@
 #pragma once
 #include "object_factory.h"
-#include "vwvis.h"
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning  {
   namespace utility {

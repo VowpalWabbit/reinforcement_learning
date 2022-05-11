@@ -243,11 +243,11 @@ install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/../include
 )
 
 install(FILES
-    ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/vowpalwabbit/vw_string_view.h
-    ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/vowpalwabbit/vwvis.h
-    ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/explore/future_compat.h
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/vowpal_wabbit)
+    ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/vowpalwabbit/common/include/vw/common/vwvis.h
+    ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/vowpalwabbit/common/include/vw/common/future_compat.h
+    ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/vowpalwabbit/common/include/vw/common/string_view.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/vw/common)
 
 install(FILES
-    ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/vowpalwabbit/nonstd/string_view.h
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/vowpal_wabbit/nonstd)
+    ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/ext_libs/string-view-lite/nonstd/string_view.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/nonstd)
