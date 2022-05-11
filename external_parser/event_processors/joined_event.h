@@ -4,10 +4,10 @@
 // VW headers
 // vw.h has to come before json_utils.h
 // clang-format off
-#include "vw.h"
-#include "json_utils.h"
-#include "example.h"
-#include "io/logger.h"
+#include "vw/core/vw.h"
+#include "vw/core/json_utils.h"
+#include "vw/core/example.h"
+#include "vw/io/logger.h"
 // clang-format on
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
@@ -20,7 +20,7 @@ namespace joined_event {
   float probability_of_drop {0.f};
 };
 
-inline void calculate_multislot_interaction_metrics(dsjson_metrics* metrics, 
+inline void calculate_multislot_interaction_metrics(dsjson_metrics* metrics,
                                                        MultiSlotInteraction multi_slot_interaction,
                                                        float first_slot_original_reward_neg) {
     if(metrics) {
@@ -30,7 +30,7 @@ inline void calculate_multislot_interaction_metrics(dsjson_metrics* metrics,
           !multi_slot_interaction.interaction_data[0].actions.empty() &&
           !multi_slot_interaction.baseline_actions.empty()) {
 
-        if (multi_slot_interaction.interaction_data[0].actions[0] 
+        if (multi_slot_interaction.interaction_data[0].actions[0]
             == multi_slot_interaction.baseline_actions[0])  {
           metrics->DsjsonNumberOfLabelEqualBaselineFirstSlot++;
           metrics->DsjsonSumCostOriginalLabelEqualBaselineFirstSlot += first_slot_original_reward_neg;

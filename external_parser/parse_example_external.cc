@@ -2,10 +2,10 @@
 // individual contributors. All rights reserved. Released under a BSD (revised)
 // license as described in the file LICENSE.
 
-#include "parse_args.h"
+#include "vw/core/parse_args.h"
 #include "parse_example_binary.h"
 #include "parse_example_converter.h"
-#include "io/logger.h"
+#include "vw/io/logger.h"
 #include "joiners/example_joiner.h"
 #include "joiners/multistep_example_joiner.h"
 #include "utils.h"

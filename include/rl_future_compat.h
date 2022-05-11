@@ -3,7 +3,7 @@
 #if __cplusplus >= 201103L || defined(_MSC_VER) && (_MSC_VER >= 1900)
 
 // Rely on the VW implementation of future_compat to set up HAS_STD(NN)
-#include "rl_future_compat.h"
+#include "vw/common/future_compat.h"
 
 #ifdef HAS_STD17
 #define RL_ATTR(name) [[ name ]]

@@ -2,13 +2,13 @@
 
 #include "event_processors/joined_event.h"
 #include "event_processors/loop.h"
-#include "example.h"
+#include "vw/core/example.h"
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "generated/v2/MultiStepEvent_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
 #include "joiners/i_joiner.h"
-#include "v_array.h"
+#include "vw/core/v_array.h"
 #include "metrics/metrics.h"
 
 #include <list>
@@ -18,8 +18,8 @@
 // VW headers
 // vw.h has to come before json_utils.h
 // clang-format off
-#include "vw.h"
-#include "json_utils.h"
+#include "vw/core/vw.h"
+#include "vw/core/json_utils.h"
 // clang-format on
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;

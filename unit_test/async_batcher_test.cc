@@ -11,7 +11,7 @@
 #include "serialization/json_serializer.h"
 #include "logger/async_batcher.h"
 #include "sender.h"
-#include "vw_math.h"
+#include "vw/core/vw_math.h"
 
 using namespace reinforcement_learning;
 //This class simply implement a 'send' method, in order to be used as a template in the async_batcher
@@ -99,7 +99,7 @@ namespace reinforcement_learning { namespace logger {
 
     static size_t size_estimate(const test_undroppable_event& evt) { return 1; }
   };
-    
+
   template <>
   struct json_event_serializer<config_drop_event> {
     using serializer_t = json_event_serializer<config_drop_event>;

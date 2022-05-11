@@ -1,7 +1,7 @@
 #include "test_common.h"
 
-#include "io/io_adapter.h"
-#include "parser.h"
+#include "vw/io/io_adapter.h"
+#include "vw/core/parser.h"
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 

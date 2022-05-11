@@ -1,5 +1,5 @@
 #include "timestamp_helper.h"
-#include "io/logger.h"
+#include "vw/io/logger.h"
 
 TimePoint timestamp_to_chrono(const v2::TimeStamp &ts) {
 

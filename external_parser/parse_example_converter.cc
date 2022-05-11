@@ -3,8 +3,8 @@
 // license as described in the file LICENSE.
 
 #include "parse_example_converter.h"
-#include "example.h"
-#include "global_data.h"
+#include "vw/core/example.h"
+#include "vw/core/global_data.h"
 
 namespace VW {
 namespace external {

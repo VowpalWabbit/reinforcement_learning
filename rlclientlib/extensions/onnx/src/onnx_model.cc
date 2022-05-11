@@ -7,7 +7,7 @@
 #include "err_constants.h"
 #include "factory_resolver.h"
 #include "onnx_input.h"
-#include "scope_exit.h"
+#include "vw/core/scope_exit.h"
 #include "str_util.h"
 #include "trace_logger.h"
 

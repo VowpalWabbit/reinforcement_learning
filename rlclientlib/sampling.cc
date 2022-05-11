@@ -2,7 +2,7 @@
 #include "err_constants.h"
 #include "trace_logger.h"
 #include "api_status.h"
-#include "explore.h"
+#include "vw/explore/explore.h"
 #include <iostream>
 
 namespace e = exploration;

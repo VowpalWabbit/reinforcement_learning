@@ -1,11 +1,11 @@
 #include "safe_vw.h"
 
 // VW headers
-#include "example.h"
-#include "parse_example_json.h"
-#include "parser.h"
-#include "v_array.h"
-#include "config/options.h"
+#include "vw/core/example.h"
+#include "vw/core/parse_example_json.h"
+#include "vw/core/parser.h"
+#include "vw/core/v_array.h"
+#include "vw/config/options.h"
 
 #include <algorithm>
 #include <iostream>
@@ -336,7 +336,7 @@ bool safe_vw::is_CB_to_CCB_model_upgrade(const std::string& args) const
     const auto local_model_type = get_model_type(args);
     const auto inbound_model_type = get_model_type(_vw->options.get());
 
-    return local_model_type == mm::model_type_t::CCB && inbound_model_type == mm::model_type_t::CB;    
+    return local_model_type == mm::model_type_t::CCB && inbound_model_type == mm::model_type_t::CB;
 }
 
 safe_vw_factory::safe_vw_factory(const std::string& command_line)
@@ -359,7 +359,7 @@ safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_dat
   : _master_data(master_data), _command_line(command_line)
   {}
 
-safe_vw* safe_vw_factory::operator()() 
+safe_vw* safe_vw_factory::operator()()
 {
     if (_master_data.data() && _command_line.size() > 0)
     {

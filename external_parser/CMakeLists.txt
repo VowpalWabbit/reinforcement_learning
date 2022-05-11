@@ -62,7 +62,7 @@ set(DO_NOT_BUILD_VW_C_WRAPPER OFF CACHE BOOL "")
 set(BUILD_JAVA OFF CACHE BOOL "")
 set(BUILD_PYTHON OFF CACHE BOOL "")
 set(BUILD_EXPERIMENTAL_BINDING OFF CACHE BOOL "")
-set(BUILD_TESTS OFF CACHE BOOL "")
+set(BUILD_TESTING OFF CACHE BOOL "")
 
 if(STATIC_LINK_BINARY_PARSER)
   set(STATIC_LINK_VW ON CACHE BOOL "" FORCE)
@@ -76,7 +76,7 @@ add_flatbuffer_schema(
   FLATC_EXE ${flatc_location}
 )
 
-set(external_parser_headers ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.h
+set(custom_external_parser_headers ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.h
   ${CMAKE_CURRENT_SOURCE_DIR}/joiners/i_joiner.h
   ${CMAKE_CURRENT_SOURCE_DIR}/joiners/example_joiner.h
   ${CMAKE_CURRENT_SOURCE_DIR}/joiners/multistep_example_joiner.h
@@ -87,7 +87,7 @@ set(external_parser_headers ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.h
   ${CMAKE_CURRENT_SOURCE_DIR}/log_converter.h
   ${CMAKE_CURRENT_SOURCE_DIR}/utils.h
 )
-set(external_parser_sources ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.cc
+set(custom_external_parser_sources ${CMAKE_CURRENT_SOURCE_DIR}/lru_dedup_cache.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/joiners/example_joiner.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/joiners/multistep_example_joiner.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/parse_example_external.cc
@@ -103,8 +103,9 @@ set(EXTERNAL_PARSER_DIR ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/
 set(EXTERNAL_PARSER_LIBS libzstd_static)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/../ext_libs/vowpal_wabbit ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser)
-add_dependencies(vw fbgen)
-target_include_directories(vw PRIVATE ${FLATBUFFERS_INCLUDE_DIR})
+add_dependencies(vw_core fbgen)
+target_include_directories(vw_core PRIVATE ${FLATBUFFERS_INCLUDE_DIR})
+target_sources(vw_core PRIVATE ${custom_external_parser_headers} ${custom_external_parser_sources})
 
 if (BUILD_BINARY_PARSER_TESTS)
   enable_testing()
