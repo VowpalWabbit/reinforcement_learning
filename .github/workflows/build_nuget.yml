@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: ["windows-2019"]
-        toolset: ["v141", "v142"]
+        toolset: ["v141"]
         arch_config:
         - { arch: x64, generator_arch: x64}
   
@@ -65,12 +65,13 @@ jobs:
           # Install debug first so that release overwrites the exe and nothing else
           cmake --install build --prefix ./nuget_staging --config Release -v
       - if: ${{ matrix.arch_config.arch == 'x64' }}
-        run: cp nuget\rlclientlib-x64.targets nuget_staging\rlclientlib.targets
+        run: cp nuget\rlclientlib-x64.0.1.0.targets nuget_staging\rlclientlib.targets
       - name: Package
         shell: powershell
         id: generate-nuget
         run: |
           cp build\nuget\rlclientlib.nuspec nuget_staging\rlclientlib.nuspec
+          cp build\binaries\Release\*.dll nuget_staging\bin
           cd nuget_staging
           ..\.nuget\NuGet.exe pack .\rlclientlib.nuspec
           $NugetFileName = Get-ChildItem *.nupkg -name
@@ -88,7 +89,7 @@ jobs:
     strategy:
       matrix:
         os: ["windows-2019"]
-        toolset: ["v141", "v142"]
+        toolset: ["v141"]
     steps:
       - uses: actions/checkout@v2
         with:
