@@ -8,6 +8,7 @@
 #pragma once
 #include <string>
 #include <unordered_map>
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {namespace utility {
   class configuration;
@@ -23,8 +24,8 @@ namespace reinforcement_learning { namespace utility {
   class configuration
   {
   public:
-    configuration();
-    ~configuration();
+    VW_DLL_PUBLIC configuration();
+    VW_DLL_PUBLIC ~configuration();
     //! Copy constructor
     configuration(const configuration&);
     //! Assignment operator

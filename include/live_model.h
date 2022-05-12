@@ -16,6 +16,7 @@
 #include "factory_resolver.h"
 #include "sender.h"
 #include "rl_future_compat.h"
+#include "vw/common/vwvis.h"
 
 #include "multistep.h"
 
@@ -72,7 +73,7 @@ namespace reinforcement_learning {
      * @param sender_factory Sender factory.  The default factory provides two senders, one for
      *                       interaction and the other for observation which logs to Event Hub.
      */
-    explicit live_model(
+    VW_DLL_PUBLIC explicit live_model(
       const utility::configuration& config,
       error_fn fn = nullptr,
       void* err_context = nullptr,
@@ -426,7 +427,7 @@ namespace reinforcement_learning {
     live_model(const live_model&) = delete;       //! Prevent accidental copy, since destructor will deallocate the implementation
     live_model& operator=(live_model&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
 
-    ~live_model();
+    VW_DLL_PUBLIC ~live_model();
 
   private:
     std::unique_ptr<live_model_impl> _pimpl;  //! The actual implementation details are forwarded to this object (PIMPL pattern)

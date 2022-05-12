@@ -58,8 +58,8 @@ namespace reinforcement_learning  {
   // For proper static intialization
   // Check https://en.wikibooks.org/wiki/More_C++_Idioms/Nifty_Counter for explanation
   struct factory_initializer {
-    factory_initializer();
-    ~factory_initializer();
+    VW_DLL_PUBLIC factory_initializer();
+    VW_DLL_PUBLIC ~factory_initializer();
     private:
     static void register_default_factories();
   };
