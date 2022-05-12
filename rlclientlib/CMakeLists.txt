@@ -246,8 +246,8 @@ install(FILES
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/vowpalwabbit/common/include/vw/common/vwvis.h
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/vowpalwabbit/common/include/vw/common/future_compat.h
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/vowpalwabbit/common/include/vw/common/string_view.h
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/vw/common)
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/include/vw/common)
 
 install(FILES
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/ext_libs/string-view-lite/nonstd/string_view.h
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/nonstd)
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/include/vw/common/nonstd)

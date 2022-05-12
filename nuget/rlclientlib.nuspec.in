@@ -13,7 +13,7 @@
   <files>
       <file src="rlclientlib.targets" target="build" />
       <file src="lib\*.lib" target="lib" />
-      <file src="bin\*.dll" target="lib" />
+      <file src="bin\*.dll" target="bin" />
       <file src="include\**\*.*" target="include" />
   </files>
 </package>
