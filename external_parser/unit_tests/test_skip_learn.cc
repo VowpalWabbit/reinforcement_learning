@@ -1,5 +1,7 @@
 #include "joiners/example_joiner.h"
 #include "parse_example_binary.h"
+#include "vw/config/options_cli.h"
+#include "vw/core/parse_primitives.h"
 #include "vw/core/reductions/conditional_contextual_bandit.h"
 #include "test_common.h"
 #include <boost/test/unit_test.hpp>
@@ -20,24 +22,29 @@ void should_not_add_examples(std::string &infile,
     case v2::ProblemType_SLATES:
       command = "--quiet --binary_parser --ccb_explore_adf --slates";
       break;
-  }
+    case reinforcement_learning::messages::flatbuff::v2::ProblemType_UNKNOWN:
+    case reinforcement_learning::messages::flatbuff::v2::ProblemType_MULTISTEP:
+      THROW("Unknown problem type");
+      break;
+    }
 
   std::string infile_name = get_test_files_location() + "skip_learn/" + infile;
-  auto vw = VW::initialize(command + " -d " + infile_name,
-                           nullptr, false, nullptr, nullptr);
+
+  auto options = VW::make_unique<VW::config::options_cli>(VW::split_command_line(command + " -d " + infile_name));
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
 
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     continue;
   }
 
   BOOST_CHECK_EQUAL(examples.size(), 1);
   BOOST_CHECK_EQUAL(examples[0]->indices.size(), 0); //newline example
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 void should_add_examples(std::string &infile,
@@ -61,13 +68,14 @@ void should_add_examples(std::string &infile,
   }
 
   std::string infile_name = get_test_files_location() + "skip_learn/" + infile;
-  auto vw = VW::initialize(command + " -d " + infile_name,
-                           nullptr, false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(VW::split_command_line(command + " -d " + infile_name));
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
+
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
 
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     continue;
   }
 
@@ -131,8 +139,8 @@ void should_add_examples(std::string &infile,
       break;
   }
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_SUITE(skip_learn_with_regular_cb_payload)

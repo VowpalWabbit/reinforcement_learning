@@ -32,7 +32,7 @@ cd /reinforcement_learning
 mkdir -p build
 cd build
 cmake ..
-NUM_PROCESSORS=$(cat nprocs.txt)
+NUM_PROCESSORS=$(nproc)
 make -j${NUM_PROCESSORS}
 
 export CTEST_OUTPUT_ON_FAILURE=1

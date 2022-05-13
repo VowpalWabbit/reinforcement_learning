@@ -26,7 +26,7 @@ target_include_directories(binary_parser_unit_tests
 
 target_link_libraries(binary_parser_unit_tests
   PRIVATE
-    vw_core
+    rl_binary_parser
     Boost::unit_test_framework
     Boost::system
     Boost::filesystem

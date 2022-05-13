@@ -1,5 +1,7 @@
 #include "joiners/example_joiner.h"
 #include "test_common.h"
+#include "vw/config/options_cli.h"
+#include "vw/core/memory.h"
 #include <boost/test/unit_test.hpp>
 
 void process(VW::workspace *vw, example_joiner &joiner, v_array<example *> &examples,
@@ -35,10 +37,10 @@ void process(VW::workspace *vw, example_joiner &joiner, v_array<example *> &exam
 }
 
 BOOST_AUTO_TEST_CASE(test_use_client_time_missing_and_configured_to_true) {
-  auto vw = VW::initialize("--quiet --binary_parser --cb_explore_adf", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  example_joiner joiner(vw);
+  example_joiner joiner(vw.get());
   v_array<example *> examples;
 
   joiner.set_problem_type_config(v2::ProblemType_CB);
@@ -50,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_use_client_time_missing_and_configured_to_true) {
   // enqueued time goes from latest to earliest
   // client time goes from earliest to latest
   float earliest_enqueued = -3.f;
-  process(vw, joiner, examples, "/reward_functions/cb/cb_v2.fb",
+  process(vw.get(), joiner, examples, "/reward_functions/cb/cb_v2.fb",
           "/reward_functions/cb/f-reward_3obs_v2.fb");
 
   BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].action, 1);
@@ -58,15 +60,15 @@ BOOST_AUTO_TEST_CASE(test_use_client_time_missing_and_configured_to_true) {
   BOOST_CHECK_CLOSE(examples[1]->l.cb.costs[0].probability, 0.9, FLOAT_TOL);
   BOOST_CHECK_EQUAL(examples[1]->l.cb.weight, 1.0f);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(test_use_client_time_existing_and_configured_to_false) {
-  auto vw = VW::initialize("--quiet --binary_parser --cb_explore_adf", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  example_joiner joiner(vw);
+  example_joiner joiner(vw.get());
   v_array<example *> examples;
 
   joiner.set_problem_type_config(v2::ProblemType_CB);
@@ -79,7 +81,7 @@ BOOST_AUTO_TEST_CASE(test_use_client_time_existing_and_configured_to_false) {
   // client time goes from earliest to latest
   float earliest_enqueued = -5.f;
   float earliest_client = -1.f;
-  process(vw, joiner, examples, "/client_time/cb_v2_client_time.fb",
+  process(vw.get(), joiner, examples, "/client_time/cb_v2_client_time.fb",
           "/client_time/f-reward_3obs_v2_client_time.fb");
 
   BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].action, 1);
@@ -87,15 +89,15 @@ BOOST_AUTO_TEST_CASE(test_use_client_time_existing_and_configured_to_false) {
   BOOST_CHECK_CLOSE(examples[1]->l.cb.costs[0].probability, 0.9, FLOAT_TOL);
   BOOST_CHECK_EQUAL(examples[1]->l.cb.weight, 1.0f);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(test_use_client_time_existing_and_configured_to_true) {
-  auto vw = VW::initialize("--quiet --binary_parser --cb_explore_adf", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  example_joiner joiner(vw);
+  example_joiner joiner(vw.get());
   v_array<example *> examples;
 
   joiner.set_problem_type_config(v2::ProblemType_CB);
@@ -108,7 +110,7 @@ BOOST_AUTO_TEST_CASE(test_use_client_time_existing_and_configured_to_true) {
   // client time goes from earliest to latest
   float earliest_enqueued = -5.f;
   float earliest_client = -1.f;
-  process(vw, joiner, examples, "/client_time/cb_v2_client_time.fb",
+  process(vw.get(), joiner, examples, "/client_time/cb_v2_client_time.fb",
           "/client_time/f-reward_3obs_v2_client_time.fb");
 
   BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].action, 1);
@@ -116,6 +118,6 @@ BOOST_AUTO_TEST_CASE(test_use_client_time_existing_and_configured_to_true) {
   BOOST_CHECK_CLOSE(examples[1]->l.cb.costs[0].probability, 0.9, FLOAT_TOL);
   BOOST_CHECK_EQUAL(examples[1]->l.cb.weight, 1.0f);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }

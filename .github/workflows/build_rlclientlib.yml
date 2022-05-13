@@ -62,15 +62,11 @@ jobs:
           path: 'vcpkg'
           repository: 'microsoft/vcpkg'
           ref: ${{ env.VCPKG_REF }}
-      - name: Restore vcpkg and build artifacts
-        uses: actions/cache@v2
-        with:
-          path: |
-            ${{ env.VCPKG_ROOT }}/installed/
-          key: |
-            rl-${{ env.VCPKG_REF }}-windows-2019-vcpkg-cache-invalidate-0
+      - uses: lukka/get-cmake@latest
+      - uses: lukka/run-vcpkg@v10
+        vcpkgDirectory: ${{ env.VCPKG_ROOT }}
+        vcpkgGitCommitId: ${{ env.VCPKG_REF }}
       - uses: ilammy/msvc-dev-cmd@v1
-      - run: ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
       - run: ${{ env.SOURCE_DIR }}/.scripts/restore-cmake.cmd
       - run: ${{ env.SOURCE_DIR }}/.scripts/build-cmake.cmd
       - run: ${{ env.SOURCE_DIR }}/.scripts/test-cmake.cmd

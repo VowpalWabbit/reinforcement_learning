@@ -8,4 +8,4 @@ REPO_DIR=$SCRIPT_DIR/../../
 cd $REPO_DIR/external_parser
 
 cmake -S . -B build -G Ninja
-cmake --build build --target vw_cli_bin binary_parser_unit_tests
+cmake --build build --target rl_binary_parser_bin binary_parser_unit_tests
