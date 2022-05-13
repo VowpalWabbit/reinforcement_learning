@@ -150,7 +150,6 @@ void parser::set_parse_args(VW::config::option_group_definition &in_options,
 }
 
 void parser::persist_metrics(metric_sink& metric_sink) {
-  std::cout << "persist_metrics" << std::endl;
   metric_sink.set_uint("external_parser", 1);
 }
 
