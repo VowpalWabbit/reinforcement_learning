@@ -113,7 +113,7 @@ set(binary_parser_sources
 )
 
 add_library(rl_binary_parser STATIC ${binary_parser_headers} ${binary_parser_sources})
-target_link_libraries(rl_binary_parser PUBLIC vw_core PRIVATE libzstd_static)
+target_link_libraries(rl_binary_parser PUBLIC vw_core RapidJSON PRIVATE libzstd_static)
 target_include_directories(rl_binary_parser
   PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/
