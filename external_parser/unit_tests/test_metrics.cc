@@ -1,3 +1,6 @@
+#include "parse_example_external.h"
+#include "vw/config/options_cli.h"
+#include "vw/core/parse_primitives.h"
 #include "vw/io/logger.h"
 #include "rapidjson/document.h"
 #include "test_common.h"
@@ -18,16 +21,17 @@ void should_match_expected_metrics(
 
   remove(outfile.c_str());
 
-  auto vw =
-      VW::initialize(args + " -d " + infile +
-                         " --binary_parser --quiet --extra_metrics " + outfile,
-                     nullptr, false, nullptr, nullptr);
+  auto args_vec = VW::split_command_line(args + " -d " + infile +
+                         " --binary_parser --quiet --extra_metrics " + outfile);
+
+  auto options = VW::make_unique<VW::config::options_cli>(args_vec);
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   VW::start_parser(*vw);
   VW::LEARNER::generic_driver(*vw);
   VW::end_parser(*vw);
 
-  VW::finish(*vw);
+  VW::finish(*vw, false);
 
   namespace rj = rapidjson;
 

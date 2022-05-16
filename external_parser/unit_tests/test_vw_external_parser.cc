@@ -1,5 +1,8 @@
+#include "parse_example_external.h"
+#include "vw/config/options_cli.h"
 #include "vw/core/ccb_label.h"
 #include "test_common.h"
+#include "vw/core/parse_primitives.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -8,16 +11,16 @@ BOOST_AUTO_TEST_CASE(cb_simple) {
 
   auto buffer = read_file(input_files + "/valid_joined_logs/cb_simple.log");
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
 
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   bool read_payload = false;
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     read_payload = true;
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
@@ -30,14 +33,14 @@ BOOST_AUTO_TEST_CASE(cb_simple) {
 
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(read_payload, true);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(ccb_simple) {
@@ -45,16 +48,16 @@ BOOST_AUTO_TEST_CASE(ccb_simple) {
 
   auto buffer = read_file(input_files + "/valid_joined_logs/ccb_simple.log");
 
-  auto vw = VW::initialize("--ccb_explore_adf --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--ccb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
 
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   bool read_payload = false;
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     read_payload = true;
     BOOST_CHECK_EQUAL(examples.size(), 6);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
@@ -77,14 +80,14 @@ BOOST_AUTO_TEST_CASE(ccb_simple) {
 
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(read_payload, true);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(slates_simple) {
@@ -92,17 +95,17 @@ BOOST_AUTO_TEST_CASE(slates_simple) {
 
   auto buffer = read_file(input_files + "/valid_joined_logs/slates_simple.log");
 
-  auto vw = VW::initialize("--ccb_explore_adf --slates --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--ccb_explore_adf", "--slates"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
 
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   bool read_payload = false;
 
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     read_payload = true;
 
     BOOST_CHECK_EQUAL(examples.size(), 9);
@@ -127,14 +130,14 @@ BOOST_AUTO_TEST_CASE(slates_simple) {
     set_slates_label(examples);
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(read_payload, true);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(cb_dedup_compressed) {
@@ -143,15 +146,15 @@ BOOST_AUTO_TEST_CASE(cb_dedup_compressed) {
   auto buffer =
       read_file(input_files + "/valid_joined_logs/cb_dedup_compressed.log");
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   bool read_payload = false;
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     read_payload = true;
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
@@ -164,14 +167,14 @@ BOOST_AUTO_TEST_CASE(cb_dedup_compressed) {
 
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(read_payload, true);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 void generate_dsjson_and_fb_models(const std::string &model_name,
@@ -187,25 +190,27 @@ void generate_dsjson_and_fb_models(const std::string &model_name,
   std::string dsjson_file = file_name + ".json";
 
   {
-    auto vw = VW::initialize(vw_args + " --binary_parser --quiet -f " +
-                                 fb_model + " -d " + fb_file,
-                             nullptr, false, nullptr, nullptr);
+    auto options = VW::make_unique<VW::config::options_cli>(VW::split_command_line(vw_args + " --binary_parser --quiet -f " +
+                                  fb_model + " -d " + fb_file));
+    auto vw = VW::external::initialize_with_binary_parser(std::move(options));
+
     VW::start_parser(*vw);
     VW::LEARNER::generic_driver(*vw);
     VW::end_parser(*vw);
 
-    VW::finish(*vw);
+    VW::finish(*vw, false);
   }
 
   {
-    auto vw = VW::initialize(vw_args + " --dsjson --quiet -f " + dsjson_model +
-                                 " -d " + dsjson_file,
-                             nullptr, false, nullptr, nullptr);
+    auto options = VW::make_unique<VW::config::options_cli>(VW::split_command_line(vw_args + " --dsjson --quiet -f " + dsjson_model +
+                                 " -d " + dsjson_file));
+    auto vw = VW::external::initialize_with_binary_parser(std::move(options));
+
     VW::start_parser(*vw);
     VW::LEARNER::generic_driver(*vw);
     VW::end_parser(*vw);
 
-    VW::finish(*vw);
+    VW::finish(*vw, false);
   }
 }
 
@@ -335,30 +340,30 @@ BOOST_AUTO_TEST_CASE(slates_skip_learn_w_activations) {
       input_files + "/valid_joined_logs/"
                     "slates_deferred_actions_w_activations_10.fb");
 
-  auto vw = VW::initialize("--ccb_explore_adf --slates --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--ccb_explore_adf","--slates","--binary_parser","--quiet"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
 
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   size_t joined_events_count = 0;
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     joined_events_count++;
 
     set_slates_label(examples);
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
   // this file contains 10 joined events 5 deferred but 2 of those activated
   BOOST_CHECK_EQUAL(joined_events_count, 7);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(
@@ -384,25 +389,25 @@ BOOST_AUTO_TEST_CASE(rrcr_ignore_examples_before_checkpoint) {
 
   auto buffer = read_file(input_files + "/valid_joined_logs/rrcr.fb");
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
 
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   int count = 0;
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     ++count;
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(count, 1);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(rcrrmr_file_magic_and_header_in_the_middle_works) {
@@ -410,25 +415,25 @@ BOOST_AUTO_TEST_CASE(rcrrmr_file_magic_and_header_in_the_middle_works) {
 
   auto buffer = read_file(input_files + "/valid_joined_logs/rcrrmr.fb");
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
 
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   int count = 0;
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     ++count;
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(count, 3);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(cb_apprentice_mode) {
@@ -443,16 +448,16 @@ BOOST_AUTO_TEST_CASE(cb_apprentice_mode) {
 
   size_t event_without_baseline = 3;
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
 
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   size_t joined_events_count = 0;
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     joined_events_count++;
     if (joined_events_count == event_without_baseline) {
       // non-baseline action, find the label and check that cost is -0.0 (i.e.
@@ -481,15 +486,15 @@ BOOST_AUTO_TEST_CASE(cb_apprentice_mode) {
 
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
   // this file contains 5 joined events
   BOOST_CHECK_EQUAL(joined_events_count, 5);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(cb_skip_learn_w_activations_and_apprentice) {
@@ -503,29 +508,29 @@ BOOST_AUTO_TEST_CASE(cb_skip_learn_w_activations_and_apprentice) {
       input_files + "/valid_joined_logs/"
                     "cb_deferred_actions_w_activations_and_apprentice_10.fb");
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
 
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   size_t joined_events_count = 0;
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     joined_events_count++;
 
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
   // this file contains 10 joined events 5 deferred but 2 of those activated
   BOOST_CHECK_EQUAL(joined_events_count, 7);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(
@@ -557,16 +562,16 @@ BOOST_AUTO_TEST_CASE(ccb_apprentice_mode) {
   auto buffer =
       read_file(input_files + "/valid_joined_logs/ccb_apprentice_5.log");
 
-  auto vw = VW::initialize("--ccb_explore_adf --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--ccb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
 
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   size_t joined_events_count = 0;
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     joined_events_count++;
     if (joined_events_count == 2 || joined_events_count == 5) {
       // baseline sent by example_gen is {1, 0}
@@ -629,15 +634,15 @@ BOOST_AUTO_TEST_CASE(ccb_apprentice_mode) {
     examples[0]->pred.decision_scores[0].push_back({0, 0.f});
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
   // this file contains 5 joined events
   BOOST_CHECK_EQUAL(joined_events_count, 5);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(ccb_skip_learn_w_activations_and_apprentice) {
@@ -651,29 +656,29 @@ BOOST_AUTO_TEST_CASE(ccb_skip_learn_w_activations_and_apprentice) {
       input_files + "/valid_joined_logs/"
                     "ccb_deferred_actions_w_activations_and_apprentice_20.fb");
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
 
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   size_t joined_events_count = 0;
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     joined_events_count++;
 
     // simulate next call to parser->read by clearing up examples
     // and preparing one unused example
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
   // this file contains 20 joined events 5 deferred but 2 of those activated
   BOOST_CHECK_EQUAL(joined_events_count, 17);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(
@@ -700,29 +705,29 @@ BOOST_AUTO_TEST_CASE(cb_pdrop_05_parse) {
   auto buffer =
       read_file(input_files + "/valid_joined_logs/cb_joined_with_pdrop_05.fb");
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   bool read_payload = false;
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     read_payload = true;
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[1]->l.cb.costs.size(), 0);
     BOOST_CHECK_EQUAL(examples[2]->l.cb.costs.size(), 1);
     BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 2);
     BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(read_payload, true);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(cb_pdrop_1_parse) {
@@ -731,28 +736,28 @@ BOOST_AUTO_TEST_CASE(cb_pdrop_1_parse) {
   auto buffer =
       read_file(input_files + "/valid_joined_logs/cb_joined_with_pdrop_1.fb");
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   bool read_payload = false;
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     read_payload = true;
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
     BOOST_CHECK_EQUAL(examples[0]->indices[0], 'S');
     BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
   BOOST_CHECK_EQUAL(read_payload, true);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(multistep_2_episodes) {
@@ -761,19 +766,19 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes) {
   auto buffer =
       read_file(input_files + "/valid_joined_logs/multistep_2_episodes.fb");
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet --multistep --multistep_reward identity", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--cb_explore_adf","--binary_parser","--quiet","--multistep","--multistep_reward","identity"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   size_t index = 0;
   bool seenA = false;
   bool seenB = false;
   bool seenC = false;
   bool seenD = false;
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
     BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
@@ -815,7 +820,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes) {
         BOOST_CHECK_EQUAL(examples[2]->l.cb.weight, 1);
         break;
     }
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
@@ -824,8 +829,8 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes) {
   BOOST_CHECK_EQUAL(seenC, true);
   BOOST_CHECK_EQUAL(seenD, true);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(multistep_3_deferred_episodes) {
@@ -834,12 +839,12 @@ BOOST_AUTO_TEST_CASE(multistep_3_deferred_episodes) {
   auto buffer =
       read_file(input_files + "/valid_joined_logs/multistep_3_deferred_episodes.fb");
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet --multistep --multistep_reward identity", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--cb_explore_adf","--binary_parser","--quiet","--multistep","--multistep_reward","identity"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   bool seenA = false;
   bool seenB = false;
@@ -848,7 +853,7 @@ BOOST_AUTO_TEST_CASE(multistep_3_deferred_episodes) {
   bool seenE = false;
   bool seenF = false;
 
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
     BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
@@ -894,7 +899,7 @@ BOOST_AUTO_TEST_CASE(multistep_3_deferred_episodes) {
         break;
     }
 
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
@@ -905,8 +910,8 @@ BOOST_AUTO_TEST_CASE(multistep_3_deferred_episodes) {
   BOOST_CHECK_EQUAL(seenE, false);
   BOOST_CHECK_EQUAL(seenF, false);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(multistep_unordered_episodes) {
@@ -915,15 +920,15 @@ BOOST_AUTO_TEST_CASE(multistep_unordered_episodes) {
   auto buffer =
       read_file(input_files + "/valid_joined_logs/multistep_unordered_episodes.fb");
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet --multistep --multistep_reward identity", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--cb_explore_adf","--binary_parser","--quiet","--multistep","--multistep_reward","identity"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   size_t counter = 0;
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
     BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
@@ -975,12 +980,12 @@ BOOST_AUTO_TEST_CASE(multistep_unordered_episodes) {
         break;
     }
 
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_mean) {
@@ -990,18 +995,18 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_mean) {
   auto buffer =
       read_file(input_files + "/valid_joined_logs/multistep_2_episodes.fb");
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet --multistep --multistep_reward suffix_mean", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--cb_explore_adf","--binary_parser","--quiet","--multistep","--multistep_reward","suffix_mean"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   bool seenA = false;
   bool seenB = false;
   bool seenC = false;
   bool seenD = false;
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
     BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
@@ -1027,7 +1032,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_mean) {
         break;
     }
 
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
@@ -1036,8 +1041,8 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_mean) {
   BOOST_CHECK_EQUAL(seenC, true);
   BOOST_CHECK_EQUAL(seenD, true);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_sum) {
@@ -1046,12 +1051,12 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_sum) {
   auto buffer =
       read_file(input_files + "/valid_joined_logs/multistep_2_episodes.fb");
 
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet --multistep --multistep_reward suffix_sum", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--cb_explore_adf","--binary_parser","--quiet","--multistep","--multistep_reward","suffix_sum"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
-  set_buffer_as_vw_input(buffer, vw);
+  set_buffer_as_vw_input(buffer, vw.get());
 
   bool seenA = false;
   bool seenB = false;
@@ -1059,7 +1064,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_sum) {
   bool seenD = false;
 
   size_t index = 0;
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     BOOST_CHECK_EQUAL(examples.size(), 4);
     BOOST_CHECK_EQUAL(examples[0]->indices.size(), 1);
     BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
@@ -1089,7 +1094,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_sum) {
         break;
     }
 
-    clear_examples(examples, vw);
+    clear_examples(examples, vw.get());
     examples.push_back(VW::new_unused_example(*vw));
   }
 
@@ -1098,6 +1103,6 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_sum) {
   BOOST_CHECK_EQUAL(seenC, true);
   BOOST_CHECK_EQUAL(seenD, true);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }

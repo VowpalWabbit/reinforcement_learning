@@ -355,12 +355,12 @@ bool multistep_example_joiner::current_event_is_skip_learn() {
   return _current_je_is_skip_learn;
 }
 
-void multistep_example_joiner::apply_cli_overrides(VW::workspace *all, const input_options &parsed_options) {
+void multistep_example_joiner::apply_cli_overrides(VW::workspace *all, const VW::external::parser_options &parsed_options) {
   if(all->options->was_supplied("multistep_reward")) {
     multistep_reward_funtion_type multistep_reward_func;
 
-    if(!VW::external::str_to_enum(parsed_options.ext_opts->multistep_reward, multistep_reward_functions, multistep_reward_funtion_type::Identity, multistep_reward_func)) {
-      throw std::runtime_error("Invalid argument to --multistep_reward " + parsed_options.ext_opts->reward_function);
+    if(!VW::external::str_to_enum(parsed_options.multistep_reward, multistep_reward_functions, multistep_reward_funtion_type::Identity, multistep_reward_func)) {
+      throw std::runtime_error("Invalid argument to --multistep_reward " + parsed_options.reward_function);
     }
     set_multistep_reward_function(multistep_reward_func, true);
   }
