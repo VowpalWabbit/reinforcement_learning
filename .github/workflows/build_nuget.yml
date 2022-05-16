@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: ["windows-2019"]
-        toolset: ["v141"]
+        toolset: ["v141","v142"]
         arch_config:
         - { arch: x64, generator_arch: x64}
   
@@ -82,7 +82,7 @@ jobs:
     strategy:
       matrix:
         os: ["windows-2019"]
-        toolset: ["v141"]
+        toolset: ["v141","v142"]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -101,4 +101,4 @@ jobs:
           cd nuget\test
           msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=Release;Platform=x64"
           echo "Run Executable:"
-          .\bin\x64\Release\test-v141.exe
+          .\bin\x64\Release\test-${{matrix.toolset}}.exe
