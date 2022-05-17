@@ -54,7 +54,7 @@ namespace reinforcement_learning {
     VW::finish(*_vw);
   }
 
-  example* safe_vw::get_or_create_example()
+  VW::example* safe_vw::get_or_create_example()
   {
     // alloc new element if we don't have any left
     if (_example_pool.size() == 0) {
@@ -65,7 +65,7 @@ namespace reinforcement_learning {
     }
 
     // get last element
-    example* ex = _example_pool.back();
+    VW::example* ex = _example_pool.back();
     _example_pool.pop_back();
 
     VW::empty_example(*_vw, *ex);
@@ -74,13 +74,13 @@ namespace reinforcement_learning {
     return ex;
   }
 
-  example& safe_vw::get_or_create_example_f(void* vw) { return *(((safe_vw*)vw)->get_or_create_example()); }
+  VW::example& safe_vw::get_or_create_example_f(void* vw) { return *(((safe_vw*)vw)->get_or_create_example()); }
 
   void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& actions, std::vector<float>& scores)
   {
     DecisionServiceInteraction interaction;
 
-    v_array<example*> examples;
+    v_array<VW::example*> examples;
     examples.push_back(get_or_create_example());
 
     //copy due to destructive parsing by rapidjson
@@ -107,7 +107,7 @@ namespace reinforcement_learning {
 
   void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<float>& scores)
   {
-    v_array<example*> examples;
+    v_array<VW::example*> examples;
     examples.push_back(get_or_create_example());
 
     //copy due to destructive parsing by rapidjson
@@ -119,7 +119,7 @@ namespace reinforcement_learning {
     VW::setup_examples(*_vw, examples);
 
     // TODO: refactor setup_examples/read_line_json_s to take in multi_ex
-    multi_ex examples2(examples.begin(), examples.end());
+    VW::multi_ex examples2(examples.begin(), examples.end());
 
     _vw->predict(examples2);
 
@@ -141,7 +141,7 @@ namespace reinforcement_learning {
 
   void safe_vw::choose_continuous_action(string_view context, float& action, float& pdf_value)
   {
-    v_array<example*> examples;
+    v_array<VW::example*> examples;
     examples.push_back(get_or_create_example());
 
     //copy due to destructive parsing by rapidjson
@@ -165,7 +165,7 @@ namespace reinforcement_learning {
 
   void safe_vw::rank_decisions(const std::vector<const char*>& event_ids, string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
   {
-    v_array<example*> examples;
+    v_array<VW::example*> examples;
     examples.push_back(get_or_create_example());
 
     //copy due to destructive parsing by rapidjson
@@ -186,7 +186,7 @@ namespace reinforcement_learning {
     VW::setup_examples(*_vw, examples);
 
     // TODO: refactor setup_examples/read_line_json_s to take in multi_ex
-    multi_ex examples2(examples.begin(), examples.end());
+    VW::multi_ex examples2(examples.begin(), examples.end());
 
     _vw->predict(examples2);
 
@@ -212,7 +212,7 @@ namespace reinforcement_learning {
 
   void safe_vw::rank_multi_slot_decisions(const char* event_id, const std::vector<std::string>& slot_ids, string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
   {
-    v_array<example*> examples;
+    v_array<VW::example*> examples;
     examples.push_back(get_or_create_example());
 
     //copy due to destructive parsing by rapidjson
@@ -233,7 +233,7 @@ namespace reinforcement_learning {
     VW::setup_examples(*_vw, examples);
 
     // TODO: refactor setup_examples/read_line_json_s to take in multi_ex
-    multi_ex examples2(examples.begin(), examples.end());
+    VW::multi_ex examples2(examples.begin(), examples.end());
 
     _vw->predict(examples2);
 

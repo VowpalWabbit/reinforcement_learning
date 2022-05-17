@@ -64,7 +64,7 @@ namespace reinforcement_learning {
 
     _initial_epsilon = _configuration.get_float(name::INITIAL_EPSILON, 0.2f);
     const char* app_id = _configuration.get(name::APP_ID, "");
-    _seed_shift = uniform_hash(app_id, strlen(app_id), 0);
+    _seed_shift = VW::uniform_hash(app_id, strlen(app_id), 0);
     return error_code::success;
   }
 
@@ -549,7 +549,7 @@ namespace reinforcement_learning {
     }
 
     // The seed used is composed of uniform_hash(app_id) + uniform_hash(event_id)
-    const uint64_t seed = uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
+    const uint64_t seed = VW::uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
 
     // Pick a slot using the pdf. NOTE: sample_after_normalizing() can change the pdf
     uint32_t chosen_index;
@@ -590,7 +590,7 @@ namespace reinforcement_learning {
   int live_model_impl::explore_exploit(const char* event_id, string_view context, ranking_response& response,
     api_status* status) const {
     // The seed used is composed of uniform_hash(app_id) + uniform_hash(event_id)
-    const uint64_t seed = uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
+    const uint64_t seed = VW::uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
 
     std::vector<int> action_ids;
     std::vector<float> action_pdf;
@@ -625,7 +625,7 @@ namespace reinforcement_learning {
 
     //check arguments
     RETURN_IF_FAIL(check_null_or_empty(event_id, context_json, _trace_logger.get(), status));
-    const uint64_t seed = uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
+    const uint64_t seed = VW::uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
 
     std::vector<int> action_ids;
     std::vector<float> action_pdf;

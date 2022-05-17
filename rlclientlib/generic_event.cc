@@ -52,7 +52,7 @@ namespace reinforcement_learning {
 
   float generic_event::prg(int drop_pass) const {
     const auto seed_str = _id + std::to_string(drop_pass);
-    const auto seed = uniform_hash(seed_str.c_str(), seed_str.length(), 0);
+    const auto seed = VW::uniform_hash(seed_str.c_str(), seed_str.length(), 0);
     return exploration::uniform_random_merand48(seed);
   }
 

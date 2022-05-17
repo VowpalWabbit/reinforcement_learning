@@ -11,10 +11,10 @@ namespace reinforcement_learning {
     // we need to keep a reference to the master around, so it's still valid even if the factory is deleted
     std::shared_ptr<safe_vw> _master;
     VW::workspace* _vw;
-    std::vector<example*> _example_pool;
+    std::vector<VW::example*> _example_pool;
 
-    example* get_or_create_example();
-    static example& get_or_create_example_f(void* vw);
+    VW::example* get_or_create_example();
+    static VW::example& get_or_create_example_f(void* vw);
 
   public:
     safe_vw(const std::shared_ptr<safe_vw>& master);
