@@ -23,7 +23,7 @@ dedup_dict::dict_entry::dict_entry(const char* data, size_t length) : _count(1),
 
 static generic_event::object_id_t hash_content(const char*start, size_t size)
 {
-  return uniform_hash(start, size, 0);
+  return VW::uniform_hash(start, size, 0);
 }
 
 generic_event::object_id_t dedup_dict::add_object(const char*start, size_t length)
