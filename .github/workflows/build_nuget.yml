@@ -51,14 +51,13 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.arch }}-windows
           -DBUILD_SHARED_LIBS=TRUE
-          -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE
       - name: Build and install
         run: |
           cmake --build build --config Release -t rlclientlib -v
           # Install debug first so that release overwrites the exe and nothing else
           cmake --install build --prefix ./nuget_staging --config Release -v
       - if: ${{ matrix.arch_config.arch == 'x64' }}
-        run: cp nuget\rlclientlib-x64.0.1.0.targets nuget_staging\rlclientlib.targets
+        run: cp nuget\RLClientLibNative-v141-x64.0.1.0.targets nuget_staging\RLClientLibNative-v141-x64.0.1.0.targets
       - name: Package
         shell: powershell
         id: generate-nuget

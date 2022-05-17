@@ -29,4 +29,30 @@
       <AdditionalLibraryDirectories>$(MSBuildThisFileDirectory)..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)\..\bin\rlclientlib.dll">
+      <Link>rlclientlib.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)\..\bin\cpprest_2_10.dll">
+      <Link>cpprest_2_10.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)\..\bin\fmt.dll">
+      <Link>fmt.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)\..\bin\libcrypto-1_1-x64.dll">
+      <Link>libcrypto-1_1-x64.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)\..\bin\spdlog.dll">
+      <Link>spdlog.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)\..\bin\zlib1.dll">
+      <Link>zlib1.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
