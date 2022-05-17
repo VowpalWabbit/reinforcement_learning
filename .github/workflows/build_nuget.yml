@@ -57,7 +57,7 @@ jobs:
           # Install debug first so that release overwrites the exe and nothing else
           cmake --install build --prefix ./nuget_staging --config Release -v
       - if: ${{ matrix.arch_config.arch == 'x64' }}
-        run: cp nuget\RLClientLibNative-v141-x64.0.1.0.targets nuget_staging\RLClientLibNative-v141-x64.0.1.0.targets
+        run: cp nuget\RLClientLibNative-v141-x64.targets nuget_staging\RLClientLibNative-v141-x64.targets
       - name: Package
         shell: powershell
         id: generate-nuget
