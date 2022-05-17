@@ -42,8 +42,8 @@
       <Link>fmt.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)\..\lib\Release\libcrypto-1_1-x64.dll">
-      <Link>libcrypto-1_1-x64.dll</Link>
+    <None Include="$(MSBuildThisFileDirectory)\..\lib\Release\libcrypto-3-x64.dll">
+      <Link>libcrypto-3-x64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="$(MSBuildThisFileDirectory)\..\lib\Release\spdlog.dll">
