@@ -33,7 +33,7 @@ void should_not_add_examples(std::string &infile,
   auto options = VW::make_unique<VW::config::options_cli>(VW::split_command_line(command + " -d " + infile_name));
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
@@ -72,7 +72,7 @@ void should_add_examples(std::string &infile,
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {

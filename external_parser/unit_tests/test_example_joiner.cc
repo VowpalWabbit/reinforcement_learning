@@ -10,7 +10,7 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_ca) {
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   example_joiner joiner(vw.get());
-  v_array<example *> examples;
+  VW::multi_ex examples;
   joiner.set_problem_type_config(v2::ProblemType_CA);
   std::string input_files = get_test_files_location();
   auto interaction_buffer = read_file(input_files + "/fb_events/ca_v2.fb");
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cb) {
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   example_joiner joiner(vw.get());
-  v_array<example *> examples;
+  VW::multi_ex examples;
 
   joiner.set_problem_type_config(v2::ProblemType_CB);
 
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cbb) {
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   example_joiner joiner(vw.get());
-  v_array<example *> examples;
+  VW::multi_ex examples;
 
   joiner.set_problem_type_config(v2::ProblemType_CCB);
 

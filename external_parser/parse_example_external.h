@@ -25,7 +25,7 @@ struct parser_options {
   bool use_client_time;
 };
 
-int parse_examples(VW::workspace *all, io_buf &io_buf, v_array<example *> &examples);
+int parse_examples(VW::workspace *all, io_buf &io_buf, VW::multi_ex &examples);
 
 class parser : public VW::details::input_parser {
 public:
@@ -36,7 +36,7 @@ public:
                              parser_options &parsed_options);
   virtual ~parser() = default;
   virtual bool parse_examples(VW::workspace *all, io_buf &io_buf,
-                              v_array<example *> &examples) = 0;
+                              VW::multi_ex &examples) = 0;
   virtual void persist_metrics(metric_sink &metrics);
 
   bool next(VW::workspace& workspace_instance, io_buf& buffer, VW::v_array<VW::example*>& output_examples) override

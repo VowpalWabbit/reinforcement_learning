@@ -153,7 +153,7 @@ void parser::persist_metrics(metric_sink& metric_sink) {
   metric_sink.set_uint("external_parser", 1);
 }
 
-int parse_examples(VW::workspace *all, io_buf& io_buf, v_array<example *> &examples) {
+int parse_examples(VW::workspace *all, io_buf& io_buf, VW::multi_ex &examples) {
   bool keep_reading = all->custom_parser->next(*all, io_buf, examples);
   return keep_reading ? 1 : 0;
 }

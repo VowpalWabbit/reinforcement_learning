@@ -30,13 +30,13 @@ uint32_t from_network_order(std::uint32_t net_l) {
 }
 } // end of namespace endian
 
-void set_slates_label(v_array<example *> &examples) {
+void set_slates_label(VW::multi_ex &examples) {
   examples[0]->pred.decision_scores.resize(2);
   examples[0]->pred.decision_scores[0].push_back({0, 0.f});
   examples[0]->pred.decision_scores[1].push_back({1, 0.f});
 }
 
-void clear_examples(v_array<example *> &examples, VW::workspace *vw) {
+void clear_examples(VW::multi_ex &examples, VW::workspace *vw) {
   if (vw->l->is_multiline()) {
     multi_ex multi_exs;
     for (auto *ex : examples) {
