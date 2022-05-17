@@ -55,7 +55,7 @@ namespace reinforcement_learning {
     VW::finish(*_vw);
   }
 
-  example* safe_vw::get_or_create_example()
+  VW::example* safe_vw::get_or_create_example()
   {
     // alloc new element if we don't have any left
     if (_example_pool.size() == 0) {
@@ -66,7 +66,7 @@ namespace reinforcement_learning {
     }
 
     // get last element
-    example* ex = _example_pool.back();
+    VW::example* ex = _example_pool.back();
     _example_pool.pop_back();
 
     VW::empty_example(*_vw, *ex);
@@ -75,7 +75,7 @@ namespace reinforcement_learning {
     return ex;
   }
 
-  example& safe_vw::get_or_create_example_f(void* vw) { return *(((safe_vw*)vw)->get_or_create_example()); }
+  VW::example& safe_vw::get_or_create_example_f(void* vw) { return *(((safe_vw*)vw)->get_or_create_example()); }
 
   void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& actions, std::vector<float>& scores)
   {
@@ -120,7 +120,7 @@ namespace reinforcement_learning {
     VW::setup_examples(*_vw, examples);
 
     // TODO: refactor setup_examples/read_line_json_s to take in multi_ex
-    multi_ex examples2(examples.begin(), examples.end());
+    VW::multi_ex examples2(examples.begin(), examples.end());
 
     _vw->predict(examples2);
 
@@ -187,7 +187,7 @@ namespace reinforcement_learning {
     VW::setup_examples(*_vw, examples);
 
     // TODO: refactor setup_examples/read_line_json_s to take in multi_ex
-    multi_ex examples2(examples.begin(), examples.end());
+    VW::multi_ex examples2(examples.begin(), examples.end());
 
     _vw->predict(examples2);
 
@@ -234,7 +234,7 @@ namespace reinforcement_learning {
     VW::setup_examples(*_vw, examples);
 
     // TODO: refactor setup_examples/read_line_json_s to take in multi_ex
-    multi_ex examples2(examples.begin(), examples.end());
+    VW::multi_ex examples2(examples.begin(), examples.end());
 
     _vw->predict(examples2);
 
