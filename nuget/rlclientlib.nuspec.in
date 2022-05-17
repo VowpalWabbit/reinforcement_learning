@@ -12,8 +12,8 @@
   </metadata>
   <files>
       <file src="RLClientLibNative-v141-x64.targets" target="build" />
-      <file src="lib\*.lib" target="lib" />
-      <file src="bin\*.dll" target="bin" />
-      <file src="include\**\*.*" target="include" />
+      <file src="lib\*.lib" target="lib\Release" />
+      <file src="bin\*.dll" target="lib\Release" />
+      <file src="include\**\*.*" target="." />
   </files>
 </package>
