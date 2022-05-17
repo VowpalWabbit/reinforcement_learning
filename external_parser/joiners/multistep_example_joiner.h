@@ -10,6 +10,7 @@
 #include "joiners/i_joiner.h"
 #include "vw/core/v_array.h"
 #include "metrics/metrics.h"
+#include "parse_example_external.h"
 
 #include <list>
 #include <queue>
@@ -65,7 +66,7 @@ public:
   void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky) override;
   void set_problem_type_config(v2::ProblemType problem_type, bool sticky) override;
   void set_use_client_time(bool use_client_time, bool sticky = false) override;
-  void apply_cli_overrides(VW::workspace *all, const input_options &parsed_options) override;
+  void apply_cli_overrides(VW::workspace *all, const VW::external::parser_options &parsed_options) override;
   bool joiner_ready() override;
 
   bool current_event_is_skip_learn() override;

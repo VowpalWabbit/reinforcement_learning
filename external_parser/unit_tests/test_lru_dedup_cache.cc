@@ -1,10 +1,12 @@
 #include "lru_dedup_cache.h"
+#include "parse_example_external.h"
 #include "test_common.h"
+#include "vw/config/options_cli.h"
 #include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE(test_lru_add_new_examples_to_cache) {
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
@@ -61,13 +63,13 @@ BOOST_AUTO_TEST_CASE(test_lru_add_new_examples_to_cache) {
   BOOST_CHECK_EQUAL(dedup_cache.exists(dedup_id_0), false);
   BOOST_CHECK_EQUAL(dedup_cache.exists(dedup_id_1), true);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(test_lru_update) {
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
@@ -123,6 +125,6 @@ BOOST_AUTO_TEST_CASE(test_lru_update) {
   BOOST_CHECK_EQUAL(dedup_cache.exists(dedup_id_0), true);
   BOOST_CHECK_EQUAL(dedup_cache.exists(dedup_id_1), false);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }

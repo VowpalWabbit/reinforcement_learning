@@ -11,6 +11,7 @@
 #include "metrics/metrics.h"
 #include "vw/core/parse_args.h"
 #include "vw/core/v_array.h"
+#include "parse_example_external.h"
 
 #include <list>
 #include <queue>
@@ -34,7 +35,7 @@ public:
   virtual void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky = false) = 0;
   virtual void set_problem_type_config(v2::ProblemType problem_type, bool sticky = false) = 0;
   virtual void set_use_client_time(bool use_client_time, bool sticky = false) = 0;
-  virtual void apply_cli_overrides(VW::workspace *all, const input_options &parsed_options) = 0;
+  virtual void apply_cli_overrides(VW::workspace *all, const VW::external::parser_options &parsed_options) = 0;
 
   /**
    * @brief Tells whether config was provided such that it can start joining examples.

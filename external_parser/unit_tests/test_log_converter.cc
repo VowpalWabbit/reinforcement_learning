@@ -1,4 +1,7 @@
+#include "parse_example_external.h"
 #include "test_common.h"
+#include "vw/config/options_cli.h"
+#include "vw/core/parse_primitives.h"
 #include <boost/test/unit_test.hpp>
 #include <stdio.h>
 
@@ -23,14 +26,19 @@ std::string get_json_event(std::string infile_path, std::string outfile_path,
           "--max_value 100 --bandwidth 1 -d" +
           infile_name;
       break;
-  }
+    case reinforcement_learning::messages::flatbuff::v2::ProblemType_UNKNOWN:
+    case reinforcement_learning::messages::flatbuff::v2::ProblemType_MULTISTEP:
+      THROW("unknown problem type");
+      break;
+    }
 
-  auto vw = VW::initialize(command, nullptr, false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(VW::split_command_line(command));
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   v_array<example *> examples;
   examples.push_back(VW::new_unused_example(*vw));
 
-  while (vw->example_parser->reader(vw, vw->example_parser->input, examples) > 0) {
+  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) {
     examples.push_back(VW::new_unused_example(*vw));
   }
 
@@ -40,8 +48,8 @@ std::string get_json_event(std::string infile_path, std::string outfile_path,
   std::ifstream dsjson_output(outfile_name);
   dsjson_stream << dsjson_output.rdbuf();
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
   remove(outfile_name.c_str());
 
   return dsjson_stream.str();

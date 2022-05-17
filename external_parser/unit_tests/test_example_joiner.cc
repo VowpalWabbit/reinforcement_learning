@@ -1,14 +1,15 @@
 #include "joiners/example_joiner.h"
 #include "test_common.h"
+#include "vw/config/options_cli.h"
 #include "vw/core/reductions/conditional_contextual_bandit.h"
 #include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE(example_joiner_test_ca) {
-  auto vw = VW::initialize("--quiet --binary_parser --cats 4 --min_value 1 "
-                           "--max_value 100 --bandwidth 1",
-                           nullptr, false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cats","4","--min_value","1",
+                           "--max_value","100","--bandwidth","1"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  example_joiner joiner(vw);
+  example_joiner joiner(vw.get());
   v_array<example *> examples;
   joiner.set_problem_type_config(v2::ProblemType_CA);
   std::string input_files = get_test_files_location();
@@ -21,7 +22,7 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_ca) {
 
   for (auto &je : joined_ca_events) {
     joiner.process_event(*je);
-    examples.push_back(VW::new_unused_example(*vw));
+    examples.push_back(VW::new_unused_example(*vw.get()));
   }
 
   // need to keep the fb buffer around in order to process the event
@@ -52,15 +53,15 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_ca) {
   BOOST_CHECK_EQUAL(examples[0]->feature_space[(int)'R'].sum_feat_sq, 6084);
 
   BOOST_CHECK_EQUAL(joiner.processing_batch(), false);
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(example_joiner_test_cb) {
-  auto vw = VW::initialize("--quiet --binary_parser --cb_explore_adf", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  example_joiner joiner(vw);
+  example_joiner joiner(vw.get());
   v_array<example *> examples;
 
   joiner.set_problem_type_config(v2::ProblemType_CB);
@@ -121,15 +122,15 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cb) {
   BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
 
   BOOST_CHECK_EQUAL(joiner.processing_batch(), false);
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(example_joiner_test_cbb) {
-  auto vw = VW::initialize("--quiet --binary_parser --ccb_explore_adf", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--ccb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  example_joiner joiner(vw);
+  example_joiner joiner(vw.get());
   v_array<example *> examples;
 
   joiner.set_problem_type_config(v2::ProblemType_CCB);
@@ -207,15 +208,15 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cbb) {
   BOOST_CHECK_EQUAL(examples[5]->indices.size(), 0); // newline example
 
   BOOST_CHECK_EQUAL(joiner.processing_batch(), false);
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(example_joiner_test_joiner_ready) {
-  auto vw = VW::initialize("--quiet --binary_parser --cb_explore_adf", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  example_joiner joiner(vw);
+  example_joiner joiner(vw.get());
 
   //the initial state of the joiner is not ready
   BOOST_CHECK_EQUAL(joiner.joiner_ready(), false);
@@ -225,14 +226,14 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_joiner_ready) {
 
   BOOST_CHECK_EQUAL(joiner.joiner_ready(), true);
 
-  VW::finish(*vw);
+  VW::finish(*vw, false);
 }
 
 BOOST_AUTO_TEST_CASE(example_joiner_test_stickyness) {
-  auto vw = VW::initialize("--quiet --binary_parser --cb_explore_adf", nullptr,
-                           false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  example_joiner joiner(vw);
+  example_joiner joiner(vw.get());
 
   BOOST_CHECK_EQUAL(joiner.joiner_ready(), false);
 
@@ -250,5 +251,5 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_stickyness) {
   joiner.set_problem_type_config(v2::ProblemType_CB, true);
   BOOST_CHECK_EQUAL(joiner.problem_type_config(), v2::ProblemType_SLATES);
 
-  VW::finish(*vw);
+  VW::finish(*vw, false);
 }

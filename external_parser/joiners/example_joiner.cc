@@ -575,4 +575,4 @@ metrics::joiner_metrics example_joiner::get_metrics() {
   return _joiner_metrics;
 }
 
-void example_joiner::apply_cli_overrides(VW::workspace *, const input_options &) {}
+void example_joiner::apply_cli_overrides(VW::workspace *, const VW::external::parser_options &) {}

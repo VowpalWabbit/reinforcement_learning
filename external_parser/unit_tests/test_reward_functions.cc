@@ -1,5 +1,7 @@
 #include "joiners/example_joiner.h"
 #include "test_common.h"
+#include "vw/config/options_cli.h"
+#include "vw/core/parse_primitives.h"
 #include <boost/test/unit_test.hpp>
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
@@ -31,9 +33,11 @@ std::vector<float> get_float_rewards(
       break;
   }
 
-  auto vw = VW::initialize(command, nullptr, false, nullptr, nullptr);
+  auto options = VW::make_unique<VW::config::options_cli>(VW::split_command_line(command));
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
+
   v_array<example *> examples;
-  example_joiner joiner(vw);
+  example_joiner joiner(vw.get());
 
   joiner.set_problem_type_config(problem_type);
   joiner.set_learning_mode_config(learning_mode);
@@ -105,8 +109,8 @@ std::vector<float> get_float_rewards(
     } break;
   }
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
   return rewards;
 }
 

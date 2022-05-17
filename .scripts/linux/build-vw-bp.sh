@@ -14,4 +14,4 @@ cmake -S . -B build -G Ninja \
     -DFMT_SYS_DEP=ON \
     -DSPDLOG_SYS_DEP=ON
 
-cmake --build build --target vw_cli_bin binary_parser_unit_tests
+cmake --build build --target rl_binary_parser_bin binary_parser_unit_tests
