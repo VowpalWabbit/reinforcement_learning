@@ -7,15 +7,16 @@
 #include <string>
 
 #include "multistep.h"
+#include "vw/common/vwvis.h"
 
 // Declare const pointer for internal linkage
 namespace reinforcement_learning {
-  class ranking_response;
-  class api_status;
+  class VW_DLL_PUBLIC ranking_response;
+  class VW_DLL_PUBLIC api_status;
 }
 
 namespace reinforcement_learning { namespace model_management {
-    class model_data {
+    class VW_DLL_PUBLIC model_data {
       public:
         // Get data
         char* data() const;
@@ -57,7 +58,7 @@ namespace reinforcement_learning { namespace model_management {
     };
 
     //! The i_data_transport interface provides the way to retrieve the data for a model from some source.
-    class i_data_transport {
+    class VW_DLL_PUBLIC i_data_transport {
     public:
       virtual int get_data(model_data& data, api_status* status = nullptr) = 0;
       virtual ~i_data_transport() = default;
@@ -76,7 +77,7 @@ namespace reinforcement_learning { namespace model_management {
         HTTP_API
     };
     //! The i_model interfaces provides the resolution from the raw model_data to a consumable object.
-    class i_model {
+    class VW_DLL_PUBLIC i_model {
     public:
       virtual int update(const model_data& data, bool& model_ready, api_status* status = nullptr) = 0;
       virtual int choose_rank(uint64_t rnd_seed, string_view features, std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) = 0;

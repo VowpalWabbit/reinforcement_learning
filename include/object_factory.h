@@ -4,11 +4,12 @@
 #include "err_constants.h"
 #include "trace_logger.h"
 #include <functional>
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning { namespace utility
 {
     template<class I, typename ...Args>
-    struct object_factory
+    struct VW_DLL_PUBLIC object_factory
     {
       using create_fn = std::function<int (I** retval, Args&& ...args, i_trace* trace_logger, api_status* status)>;
 

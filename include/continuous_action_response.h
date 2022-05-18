@@ -4,9 +4,10 @@
 #include <iterator>
 #include <vector>
 #include <string>
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {
-  class api_status;
+  class VW_DLL_PUBLIC api_status;
 
   /**
    * @brief request_continuous_action() returns the continuous action choice using a continuous_action_response object.
@@ -14,7 +15,7 @@ namespace reinforcement_learning {
    * continuous_action_response also contains the unique event_id representing the choice.
    * This unique event_id must be used to report back outcomes against this choice for the online trainer.
    */
-  class continuous_action_response {
+  class VW_DLL_PUBLIC continuous_action_response {
   public:
     continuous_action_response() = default;
     ~continuous_action_response() = default;

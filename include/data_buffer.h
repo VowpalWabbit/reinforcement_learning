@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning { namespace utility {
 
@@ -13,7 +14,7 @@ namespace reinforcement_learning { namespace utility {
  * preamble: is n bytes immediately before the body.
  * preamble is usually 8 bytes and sometimes zero if there is no preamble
  */
-class data_buffer {
+class VW_DLL_PUBLIC data_buffer {
 public:
   using value_type = unsigned char;
 

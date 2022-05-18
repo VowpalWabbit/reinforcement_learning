@@ -11,9 +11,10 @@
 
 #include "ranking_response.h"
 #include "rl_string_view.h"
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {
-  class episode_history {
+  class VW_DLL_PUBLIC episode_history {
   public:
     episode_history() = default;
     episode_history(const episode_history* previous);
@@ -36,7 +37,7 @@ namespace reinforcement_learning {
     std::map<std::string, int> _depths;
   };
 
-  class episode_state {
+  class VW_DLL_PUBLIC episode_state {
   public:
     explicit episode_state(const char* episode_id);
 

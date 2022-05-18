@@ -251,4 +251,4 @@ install(FILES
 
 install(FILES
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit/ext_libs/string-view-lite/nonstd/string_view.h
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/include/vw/common/nonstd)
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/include/nonstd)

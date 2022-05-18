@@ -1,5 +1,6 @@
 #pragma once
 #include <mutex>
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {
 #define ERROR_CALLBACK(fn,status) do {  \
@@ -8,9 +9,9 @@ namespace reinforcement_learning {
     }                               \
   } while (0)
 
-  class api_status;
+  class VW_DLL_PUBLIC api_status;
 
-  class error_callback_fn
+  class VW_DLL_PUBLIC error_callback_fn
   {
     public:
       using error_fn = void(*)(const api_status&, void*);

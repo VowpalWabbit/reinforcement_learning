@@ -11,7 +11,7 @@
 #include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {namespace utility {
-  class configuration;
+  class VW_DLL_PUBLIC configuration;
 }}
 
 std::ostream& operator<<(std::ostream& os, const reinforcement_learning::utility::configuration&);
@@ -21,11 +21,11 @@ namespace reinforcement_learning { namespace utility {
    * @brief Configuration class to initialize the API
    * Represents a collection of (name,value) pairs used to configure the API
    */
-  class configuration
+  class VW_DLL_PUBLIC configuration
   {
   public:
-    VW_DLL_PUBLIC configuration();
-    VW_DLL_PUBLIC ~configuration();
+    configuration();
+    ~configuration();
     //! Copy constructor
     configuration(const configuration&);
     //! Assignment operator

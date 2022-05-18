@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {
   const int LEVEL_DEBUG = -10;
@@ -27,7 +28,7 @@ const char* get_log_level_string(int log_level);
 #define TRACE_ERROR( logger, msg ) TRACE_LOG(logger, reinforcement_learning::LEVEL_ERROR, msg)
 
 namespace reinforcement_learning {
-  class i_trace {
+  class VW_DLL_PUBLIC i_trace {
   public:
     virtual void log(int log_level, const std::string& msg) = 0;
     virtual ~i_trace() {} ;

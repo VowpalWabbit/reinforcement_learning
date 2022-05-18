@@ -5,14 +5,15 @@
 #include <vector>
 
 #include "ranking_response.h"
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {
-  class api_status;
+  class VW_DLL_PUBLIC api_status;
 
   /**
    * @brief Holds (id, action_id, probability) that tells which action was choosen for the given slot.
    */
-  struct slot_entry {
+  struct VW_DLL_PUBLIC slot_entry {
   public:
     ~slot_entry() = default;
 
@@ -35,7 +36,7 @@ namespace reinforcement_learning {
   /**
    * @brief request_multi_slot_decision returns the per-slot action choice using multi_slot_response.
    */
-  class multi_slot_response {
+  class VW_DLL_PUBLIC multi_slot_response {
   private:
     using coll_t = std::vector<slot_entry>;
 

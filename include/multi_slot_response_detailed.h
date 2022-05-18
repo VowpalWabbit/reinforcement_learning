@@ -6,11 +6,12 @@
 #include <iterator>
 #include <vector>
 #include <string>
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {
-  class api_status;
+  class VW_DLL_PUBLIC api_status;
 
-  class multi_slot_response_detailed {
+  class VW_DLL_PUBLIC multi_slot_response_detailed {
   private:
     using coll_t = std::vector<slot_ranking>;
 

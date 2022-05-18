@@ -6,6 +6,7 @@
 * @date 2020-02-13
 */
 #pragma once
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {
 
@@ -16,6 +17,6 @@ namespace reinforcement_learning {
   };
 
   namespace learning {
-    learning_mode to_learning_mode(const char* learning_mode);
+    VW_DLL_PUBLIC learning_mode to_learning_mode(const char* learning_mode);
   }
 }

@@ -12,16 +12,17 @@
 #include <iterator>
 #include <vector>
 #include <string>
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {
-  class api_status;
+  class VW_DLL_PUBLIC api_status;
 
   /**
    * @brief choose_rank() returns the action choice using ranking_response.
    * ranking_response contains all the actions and distribution from with the action was sampled.  It also contains the chosen action id and
    * the unique event_id representing the choice.  This unique event_id must be used to report back outcomes against this choice for the online trainer.
    */
-  class ranking_response {
+  class VW_DLL_PUBLIC ranking_response {
   private:
   std::string _model_id;
   slot_ranking _slot_impl;

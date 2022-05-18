@@ -7,14 +7,15 @@
 #include <iterator>
 #include <vector>
 #include <string>
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {
-  class api_status;
+  class VW_DLL_PUBLIC api_status;
 
   /**
    * @brief Holds (action, probability) pairs, POD used for extern "C"
    */
-  struct action_prob_d {
+  struct VW_DLL_PUBLIC action_prob_d {
     //! action id
     size_t action_id;
     //! probability associated with the action id
@@ -24,7 +25,7 @@ namespace reinforcement_learning {
   /**
    * @brief Holds (action, probability) pairs.
    */
-  struct action_prob : public action_prob_d {
+  struct VW_DLL_PUBLIC action_prob : public action_prob_d {
     inline action_prob(size_t action_id, float probability) {
       this->action_id = action_id;
       this->probability = probability;
@@ -36,7 +37,7 @@ namespace reinforcement_learning {
    * slot_ranking contains all the actions and distribution from with the action was sampled.  It also contains the chosen action id and
    * the unique id representing the choice.
    */
-  class slot_ranking {
+  class VW_DLL_PUBLIC slot_ranking {
   public:
     slot_ranking() = default;
     ~slot_ranking() = default;

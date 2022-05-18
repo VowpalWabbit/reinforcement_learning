@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <sstream>
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning { namespace utility {
 
@@ -22,7 +23,7 @@ namespace reinforcement_learning { namespace utility {
     return concat(os, first, rest...);
   }
 
-  class str_util {
+  class VW_DLL_PUBLIC str_util {
   public:
     static std::string& to_lower(std::string& sval);
     static std::string& ltrim(std::string& sval);

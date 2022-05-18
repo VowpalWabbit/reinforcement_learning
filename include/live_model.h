@@ -47,7 +47,7 @@ namespace reinforcement_learning {
    * - (2) choose_rank() to choose an action from a list of actions
    * - (3) report_outcome() to provide feedback on chosen action
    */
-  class live_model {
+  class VW_DLL_PUBLIC live_model {
 
   public:
     /**
@@ -73,7 +73,7 @@ namespace reinforcement_learning {
      * @param sender_factory Sender factory.  The default factory provides two senders, one for
      *                       interaction and the other for observation which logs to Event Hub.
      */
-    VW_DLL_PUBLIC explicit live_model(
+    explicit live_model(
       const utility::configuration& config,
       error_fn fn = nullptr,
       void* err_context = nullptr,
@@ -427,7 +427,7 @@ namespace reinforcement_learning {
     live_model(const live_model&) = delete;       //! Prevent accidental copy, since destructor will deallocate the implementation
     live_model& operator=(live_model&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
 
-    VW_DLL_PUBLIC ~live_model();
+    ~live_model();
 
   private:
     std::unique_ptr<live_model_impl> _pimpl;  //! The actual implementation details are forwarded to this object (PIMPL pattern)

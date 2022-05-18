@@ -2,9 +2,11 @@
 #include "configuration.h"
 #include "data_buffer.h"
 #include <memory>
+#include "vw/common/vwvis.h"
+
 namespace reinforcement_learning {
-  class api_status;
-  class i_sender {
+  class VW_DLL_PUBLIC api_status;
+  class VW_DLL_PUBLIC i_sender {
   public:
     using buffer = std::shared_ptr<utility::data_buffer>;
     virtual int init(const utility::configuration& config, api_status* status) = 0;

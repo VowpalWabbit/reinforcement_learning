@@ -5,11 +5,12 @@
 #include <vector>
 
 #include "ranking_response.h"
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {
   class api_status;
 
-  struct slot_response {
+  struct VW_DLL_PUBLIC slot_response {
   public:
     ~slot_response() = default;
 
@@ -27,7 +28,7 @@ namespace reinforcement_learning {
     float probability;
   };
 
-  class decision_response {
+  class VW_DLL_PUBLIC decision_response {
   private:
     using coll_t = std::vector<slot_response>;
 

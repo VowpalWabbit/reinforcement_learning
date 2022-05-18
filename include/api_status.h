@@ -10,13 +10,14 @@
 #include <string>
 #include <sstream>
 #include "err_constants.h"
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {
-  class i_trace;
+  class VW_DLL_PUBLIC i_trace;
   /**
    * @brief Report status of all API calls
    */
-  class api_status {
+  class VW_DLL_PUBLIC api_status {
     public:
       api_status();
 
@@ -60,7 +61,7 @@ namespace reinforcement_learning {
   /**
    * @brief Helper class used in report_error template funcstions to return status from API calls.
    */
-  struct status_builder {
+  struct VW_DLL_PUBLIC status_builder {
     /**
      * @brief Construct a new status builder object
      *

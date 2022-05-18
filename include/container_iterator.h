@@ -3,13 +3,14 @@
 #include <iterator>
 #include <vector>
 #include <type_traits>
+#include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {
   /**
    * @brief Forward iterator class used to access the TElem collection
    */
   template<typename TElem, typename TColl = std::vector<TElem>>
-  class container_iterator : public std::iterator<
+  class VW_DLL_PUBLIC container_iterator : public std::iterator<
     std::random_access_iterator_tag,
     TElem> {
   public:
@@ -113,7 +114,7 @@ namespace reinforcement_learning {
   * @brief Forward const iterator class used to access the TElem collection
   */
   template<typename TElem, typename TColl = std::vector<TElem>>
-  class const_container_iterator : public std::iterator<
+  class VW_DLL_PUBLIC const_container_iterator : public std::iterator<
     std::random_access_iterator_tag,
     TElem> {
   public:
