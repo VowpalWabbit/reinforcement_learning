@@ -183,7 +183,7 @@ source_group("Private headers" FILES ${PROJECT_PRIVATE_HEADERS})
 
 add_library(rlclientlib ${PROJECT_SOURCES} ${PROJECT_PUBLIC_HEADERS} ${PROJECT_PRIVATE_HEADERS})
 add_dependencies(rlclientlib fbgenerator_v1 fbgenerator_v2)
-target_compile_definitions(rlclientlib PRIVATE VWDLL_EXPORTS)
+target_compile_definitions(rlclientlib PUBLIC VWDLL_EXPORTS)
 
 if(vw_USE_AZURE_FACTORIES)
   target_compile_definitions(rlclientlib PRIVATE USE_AZURE_FACTORIES)
