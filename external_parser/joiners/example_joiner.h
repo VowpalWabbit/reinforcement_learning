@@ -70,7 +70,7 @@ public:
    * We can't attempt to invalidate the specific id since we don't know it (it's
    * in the metadata)
    */
-  bool process_joined(v_array<example *> &examples) override;
+  bool process_joined(VW::multi_ex &examples) override;
 
   // true if there are still event-groups to be processed from a deserialized
   // batch
@@ -94,7 +94,7 @@ private:
 
   bool process_interaction(const v2::Event &event, const v2::Metadata &metadata,
                            const TimePoint &enqueued_time_utc,
-                           v_array<example *> &examples);
+                           VW::multi_ex &examples);
 
   bool process_outcome(const v2::Event &event, const v2::Metadata &metadata,
                        const TimePoint &enqueued_time_utc);
@@ -102,7 +102,7 @@ private:
   void clear_batch_info();
   void clear_event_id_batch_info(const std::string &id);
   void invalidate_joined_event(const std::string &id);
-  void clear_vw_examples(v_array<example *> &examples);
+  void clear_vw_examples(VW::multi_ex &examples);
 
   example *get_or_create_example();
 

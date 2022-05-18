@@ -72,7 +72,7 @@ public:
   bool current_event_is_skip_learn() override;
 
   bool process_event(const v2::JoinedEvent &joined_event) override;
-  bool process_joined(v_array<example *> &examples) override;
+  bool process_joined(VW::multi_ex &examples) override;
   bool processing_batch() override;
 
   void on_new_batch() override;
@@ -93,7 +93,7 @@ private:
   process_outcome(const TimePoint& timestamp, const v2::Metadata &metadata, const v2::OutcomeEvent& event);
   joined_event::multistep_joined_event
   process_interaction(const Parsed<v2::MultiStepEvent> &event_meta,
-                      v_array<example *> &examples);
+                      VW::multi_ex &examples);
   void populate_episodic_rewards();
 
 private:

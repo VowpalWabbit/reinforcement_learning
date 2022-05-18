@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
                             vw->example_parser->input, payload_type),
                         true);
     BOOST_REQUIRE_EQUAL(payload_type, MSG_TYPE_REGULAR);
-    v_array<example *> examples;
+    VW::multi_ex examples;
     examples.push_back(VW::new_unused_example(*vw));
     bool ignore_msg = false;
     BOOST_REQUIRE_EQUAL(bp.read_regular_msg(vw->example_parser->input, examples, ignore_msg),
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_unknown_msg_type) {
     auto vw = VW::external::initialize_with_binary_parser(std::move(options));
     set_buffer_as_vw_input(buffer, vw.get());
     VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw.get()), vw->logger);
-    v_array<example *> examples;
+    VW::multi_ex examples;
     examples.push_back(VW::new_unused_example(*vw));
 
     size_t total_examples_read = 0;
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_corrupt_joined_event_payload) {
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
   set_buffer_as_vw_input(buffer, vw.get());
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw.get()), vw->logger);
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   size_t total_size_of_examples = 0;
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_mismatched_payload_types) {
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
   set_buffer_as_vw_input(buffer, vw.get());
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw.get()), vw->logger);
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   size_t total_size_of_examples = 0;
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_bad_event_in_joined_event) {
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
   set_buffer_as_vw_input(buffer, vw.get());
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw.get()),vw->logger);
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   size_t total_size_of_examples = 0;
@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_dedup_payload_missing) {
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
   set_buffer_as_vw_input(buffer, vw.get());
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw.get()), vw->logger);
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   size_t total_size_of_examples = 0;
@@ -315,7 +315,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_interaction_but_no_observation) {
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
   set_buffer_as_vw_input(buffer, vw.get());
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw.get()), vw->logger);
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   size_t total_size_of_examples = 0;
@@ -361,7 +361,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_no_interaction_with_observation) {
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
   set_buffer_as_vw_input(buffer, vw.get());
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw.get()), vw->logger);
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   size_t total_size_of_examples = 0;
@@ -391,7 +391,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_invalid_cb_context) {
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
   set_buffer_as_vw_input(buffer, vw.get());
   VW::external::binary_parser bp(VW::make_unique<example_joiner>(vw.get()), vw->logger);
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   size_t total_size_of_examples = 0;

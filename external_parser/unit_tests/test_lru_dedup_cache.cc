@@ -8,7 +8,7 @@ BOOST_AUTO_TEST_CASE(test_lru_add_new_examples_to_cache) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
   // create a dummy examples to be cached
   examples[0]->indices.push_back('A');
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(test_lru_update) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   // create a dummy examples to be cached

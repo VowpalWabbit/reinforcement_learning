@@ -4,7 +4,7 @@
 #include "vw/core/memory.h"
 #include <boost/test/unit_test.hpp>
 
-void process(VW::workspace *vw, example_joiner &joiner, v_array<example *> &examples,
+void process(VW::workspace *vw, example_joiner &joiner, VW::multi_ex &examples,
              std::string int_file, std::string obs_file) {
   std::string input_files = get_test_files_location();
 
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(test_use_client_time_missing_and_configured_to_true) {
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   example_joiner joiner(vw.get());
-  v_array<example *> examples;
+  VW::multi_ex examples;
 
   joiner.set_problem_type_config(v2::ProblemType_CB);
   // the test files used do not have a client time utc set, so they will use the
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(test_use_client_time_existing_and_configured_to_false) {
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   example_joiner joiner(vw.get());
-  v_array<example *> examples;
+  VW::multi_ex examples;
 
   joiner.set_problem_type_config(v2::ProblemType_CB);
   // the test files used have a client time utc set, but enqueued time will be
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_use_client_time_existing_and_configured_to_true) {
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   example_joiner joiner(vw.get());
-  v_array<example *> examples;
+  VW::multi_ex examples;
 
   joiner.set_problem_type_config(v2::ProblemType_CB);
   // the test files used have a client time set and it should be used instead of

@@ -49,7 +49,7 @@ struct typed_joined_event {
   virtual bool is_skip_learn() const = 0;
   virtual void set_skip_learn(bool sl) = 0;
   virtual void set_apprentice_reward() = 0;
-  virtual bool fill_in_label(v_array<example *> &examples, VW::io::logger& logger) const = 0;
+  virtual bool fill_in_label(VW::multi_ex &examples, VW::io::logger& logger) const = 0;
   virtual void
   calc_cost(float default_reward, reward::RewardFunctionType reward_function,
             const metadata::event_metadata_info &interaction_metadata,
@@ -88,7 +88,7 @@ struct cb_joined_event : public typed_joined_event {
     }
   }
 
-  bool fill_in_label(v_array<example *> &examples,
+  bool fill_in_label(VW::multi_ex &examples,
                      VW::io::logger &logger) const override {
     if (interaction_data.actions.empty()) {
       logger.out_warn("missing actions for event [{}]",
@@ -187,7 +187,7 @@ struct ccb_joined_event : public typed_joined_event {
     }
   }
 
-  bool fill_in_label(v_array<example *> &examples,
+  bool fill_in_label(VW::multi_ex &examples,
                      VW::io::logger &logger) const override {
     // index to interaction_data vector which holds per-slot info
     size_t slot_index = 0;
@@ -318,7 +318,7 @@ struct slates_joined_event : public typed_joined_event {
 
   void set_apprentice_reward() override {}
 
-  bool fill_in_label(v_array<example *> &examples,
+  bool fill_in_label(VW::multi_ex &examples,
                      VW::io::logger &logger) const override {
     size_t slot_index = 0;
     auto weight = 1.f / (1.f - multi_slot_interaction.probability_of_drop);
@@ -415,7 +415,7 @@ struct ca_joined_event : public typed_joined_event {
     }
   }
 
-  bool fill_in_label(v_array<example *> &examples,
+  bool fill_in_label(VW::multi_ex &examples,
                      VW::io::logger &logger) const override {
 
     if (std::isnan(interaction_data.action)) {
@@ -495,7 +495,7 @@ struct joined_event {
     return typed_data->set_apprentice_reward();
   }
 
-  bool fill_in_label(v_array<example *> &examples,
+  bool fill_in_label(VW::multi_ex &examples,
                      VW::io::logger &logger) const {
     return typed_data->fill_in_label(examples, logger);
   }
@@ -545,7 +545,7 @@ struct multistep_joined_event {
   std::unique_ptr<cb_joined_event> cb_data;
   std::vector<reward::outcome_event> outcome_events;
 
-  bool fill_in_label(v_array<example *> &examples, VW::io::logger& logger) const {
+  bool fill_in_label(VW::multi_ex &examples, VW::io::logger& logger) const {
     return cb_data->fill_in_label(examples, logger);
   }
 

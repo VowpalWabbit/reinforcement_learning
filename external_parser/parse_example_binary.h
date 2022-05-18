@@ -24,18 +24,18 @@ public:
       std::unique_ptr<i_joiner> &&joiner, VW::io::logger logger); // taking ownership of joiner
   ~binary_parser();
   bool parse_examples(VW::workspace *all, io_buf &io_buf,
-                      v_array<example *> &examples) override;
+                      VW::multi_ex &examples) override;
   bool read_version(io_buf &input);
   bool read_header(io_buf &input);
   bool read_checkpoint_msg(io_buf &input);
-  bool read_regular_msg(io_buf &input, v_array<example *> &examples,
+  bool read_regular_msg(io_buf &input, VW::multi_ex &examples,
                         bool &ignore_msg);
   bool skip_over_unknown_payload(io_buf &input);
   bool advance_to_next_payload_type(io_buf &input, unsigned int &payload_type);
   void persist_metrics(metric_sink &metrics) override;
 
 private:
-  bool process_next_in_batch(v_array<example *> &examples);
+  bool process_next_in_batch(VW::multi_ex &examples);
   std::unique_ptr<i_joiner> _example_joiner;
   char *_payload;
   uint32_t _payload_size;

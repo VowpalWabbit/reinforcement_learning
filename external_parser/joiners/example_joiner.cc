@@ -170,7 +170,7 @@ void example_joiner::clear_batch_info() {
   }
 }
 
-void example_joiner::clear_vw_examples(v_array<example *> &examples) {
+void example_joiner::clear_vw_examples(VW::multi_ex &examples) {
   // cleanup examples since something might have gone wrong and left the
   // existing example's in a bad state
   VW::return_multiple_example(*_vw, examples);
@@ -196,7 +196,7 @@ void example_joiner::invalidate_joined_event(const std::string &id) {
 bool example_joiner::process_interaction(const v2::Event &event,
                                          const v2::Metadata &metadata,
                                          const TimePoint &enqueued_time_utc,
-                                         v_array<example *> &examples) {
+                                         VW::multi_ex &examples) {
 
   std::string payload_type(EnumNamePayloadType(metadata.payload_type()));
   std::string loop_type(EnumNameProblemType(_loop_info.problem_type_config));
@@ -377,7 +377,7 @@ bool example_joiner::process_dedup(const v2::Event &event,
     return false;
   }
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
 
   for (flatbuffers::uoffset_t i = 0; i < dedup->ids()->size(); i++) {
     auto dedup_id = dedup->ids()->Get(i);
@@ -420,7 +420,7 @@ bool example_joiner::process_dedup(const v2::Event &event,
   return true;
 }
 
-bool example_joiner::process_joined(v_array<example *> &examples) {
+bool example_joiner::process_joined(VW::multi_ex &examples) {
   _current_je_is_skip_learn = false;
 
   if (_batch_event_order.empty()) {
