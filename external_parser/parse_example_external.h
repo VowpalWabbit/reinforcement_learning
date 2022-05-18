@@ -39,7 +39,7 @@ public:
                               VW::multi_ex &examples) = 0;
   virtual void persist_metrics(metric_sink &metrics);
 
-  bool next(VW::workspace& workspace_instance, io_buf& buffer, VW::v_array<VW::example*>& output_examples) override
+  bool next(VW::workspace& workspace_instance, io_buf& buffer, VW::multi_ex& output_examples) override
   {
     return parse_examples(&workspace_instance, buffer, output_examples);
   }
