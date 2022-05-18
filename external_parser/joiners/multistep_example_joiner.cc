@@ -226,7 +226,7 @@ reward::outcome_event multistep_example_joiner::process_outcome(
 
 joined_event::multistep_joined_event multistep_example_joiner::process_interaction(
     const multistep_example_joiner::Parsed<v2::MultiStepEvent> &event_meta,
-    v_array<example *> &examples) {
+    VW::multi_ex &examples) {
   const auto& metadata = event_meta.meta;
   const auto& event = event_meta.event;
   metadata::event_metadata_info meta = {
@@ -264,7 +264,7 @@ joined_event::multistep_joined_event multistep_example_joiner::process_interacti
   return joined_event::multistep_joined_event(std::move(meta), std::move(cb_data));
 }
 
-bool multistep_example_joiner::process_joined(v_array<example *> &examples) {
+bool multistep_example_joiner::process_joined(VW::multi_ex &examples) {
   _current_je_is_skip_learn = false;
 
   if (!_sorted) {

@@ -1,6 +1,7 @@
 #include "safe_vw.h"
 
 // VW headers
+#include "vw/core/debug_print.h"
 #include "vw/core/example.h"
 #include "vw/core/parse_example_json.h"
 #include "vw/core/parser.h"
@@ -80,7 +81,7 @@ namespace reinforcement_learning {
   {
     DecisionServiceInteraction interaction;
 
-    v_array<VW::example*> examples;
+    VW::multi_ex examples;
     examples.push_back(get_or_create_example());
 
     //copy due to destructive parsing by rapidjson
@@ -107,7 +108,7 @@ namespace reinforcement_learning {
 
   void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<float>& scores)
   {
-    v_array<VW::example*> examples;
+    VW::multi_ex examples;
     examples.push_back(get_or_create_example());
 
     //copy due to destructive parsing by rapidjson
@@ -141,7 +142,7 @@ namespace reinforcement_learning {
 
   void safe_vw::choose_continuous_action(string_view context, float& action, float& pdf_value)
   {
-    v_array<VW::example*> examples;
+    VW::multi_ex examples;
     examples.push_back(get_or_create_example());
 
     //copy due to destructive parsing by rapidjson
@@ -165,7 +166,7 @@ namespace reinforcement_learning {
 
   void safe_vw::rank_decisions(const std::vector<const char*>& event_ids, string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
   {
-    v_array<VW::example*> examples;
+    VW::multi_ex examples;
     examples.push_back(get_or_create_example());
 
     //copy due to destructive parsing by rapidjson
@@ -212,7 +213,7 @@ namespace reinforcement_learning {
 
   void safe_vw::rank_multi_slot_decisions(const char* event_id, const std::vector<std::string>& slot_ids, string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
   {
-    v_array<VW::example*> examples;
+    VW::multi_ex examples;
     examples.push_back(get_or_create_example());
 
     //copy due to destructive parsing by rapidjson

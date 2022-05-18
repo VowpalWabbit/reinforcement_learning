@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE(cb_simple) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw.get());
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(ccb_simple) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--ccb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw.get());
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(slates_simple) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--ccb_explore_adf", "--slates"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw.get());
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(cb_dedup_compressed) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
   set_buffer_as_vw_input(buffer, vw.get());
 
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(cb_compare_dsjson_with_fb_models_ignore_feature) {
 
   std::string file_name =
       input_files + "/valid_joined_logs/average_reward_100_interactions";
-  
+
   auto vw_command = "--cb_explore_adf --ignore_features_dsjson_experimental GUser|hobby";
   generate_dsjson_and_fb_models(model_name, vw_command, file_name);
 
@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE(cb_compare_dsjson_with_fb_models_ignore_multiple_feature) {
 
   std::string file_name =
       input_files + "/valid_joined_logs/average_reward_100_interactions";
-  
+
   auto vw_command = "--cb_explore_adf --ignore_features_dsjson_experimental GUser|hobby TAction|a1";
   generate_dsjson_and_fb_models(model_name, vw_command, file_name);
 
@@ -343,7 +343,7 @@ BOOST_AUTO_TEST_CASE(slates_skip_learn_w_activations) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--ccb_explore_adf","--slates","--binary_parser","--quiet"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw.get());
@@ -392,7 +392,7 @@ BOOST_AUTO_TEST_CASE(rrcr_ignore_examples_before_checkpoint) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw.get());
@@ -418,7 +418,7 @@ BOOST_AUTO_TEST_CASE(rcrrmr_file_magic_and_header_in_the_middle_works) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw.get());
@@ -451,7 +451,7 @@ BOOST_AUTO_TEST_CASE(cb_apprentice_mode) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw.get());
@@ -511,7 +511,7 @@ BOOST_AUTO_TEST_CASE(cb_skip_learn_w_activations_and_apprentice) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw.get());
@@ -565,7 +565,7 @@ BOOST_AUTO_TEST_CASE(ccb_apprentice_mode) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--ccb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw.get());
@@ -659,7 +659,7 @@ BOOST_AUTO_TEST_CASE(ccb_skip_learn_w_activations_and_apprentice) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
   set_buffer_as_vw_input(buffer, vw.get());
@@ -708,7 +708,7 @@ BOOST_AUTO_TEST_CASE(cb_pdrop_05_parse) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
   set_buffer_as_vw_input(buffer, vw.get());
 
@@ -739,7 +739,7 @@ BOOST_AUTO_TEST_CASE(cb_pdrop_1_parse) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
   set_buffer_as_vw_input(buffer, vw.get());
 
@@ -769,7 +769,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--cb_explore_adf","--binary_parser","--quiet","--multistep","--multistep_reward","identity"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
   set_buffer_as_vw_input(buffer, vw.get());
 
@@ -842,7 +842,7 @@ BOOST_AUTO_TEST_CASE(multistep_3_deferred_episodes) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--cb_explore_adf","--binary_parser","--quiet","--multistep","--multistep_reward","identity"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
   set_buffer_as_vw_input(buffer, vw.get());
 
@@ -923,7 +923,7 @@ BOOST_AUTO_TEST_CASE(multistep_unordered_episodes) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--cb_explore_adf","--binary_parser","--quiet","--multistep","--multistep_reward","identity"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
   set_buffer_as_vw_input(buffer, vw.get());
 
@@ -998,7 +998,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_mean) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--cb_explore_adf","--binary_parser","--quiet","--multistep","--multistep_reward","suffix_mean"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
   set_buffer_as_vw_input(buffer, vw.get());
 
@@ -1054,7 +1054,7 @@ BOOST_AUTO_TEST_CASE(multistep_2_episodes_suffix_sum) {
   auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--cb_explore_adf","--binary_parser","--quiet","--multistep","--multistep_reward","suffix_sum"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
   set_buffer_as_vw_input(buffer, vw.get());
 

@@ -17,9 +17,9 @@ constexpr float FLOAT_TOL = 0.0001f;
 
 // learn/predict isn't called in the unit test but cleanup examples
 // expects shared pred to be set for slates
-void set_slates_label(v_array<example *> &examples);
+void set_slates_label(VW::multi_ex &examples);
 
-void clear_examples(v_array<example *> &examples, VW::workspace *vw);
+void clear_examples(VW::multi_ex &examples, VW::workspace *vw);
 
 void set_buffer_as_vw_input(const std::vector<char> &buffer, VW::workspace *vw);
 

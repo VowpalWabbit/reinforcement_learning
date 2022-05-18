@@ -201,7 +201,7 @@ bool binary_parser::read_checkpoint_msg(io_buf &input) {
 }
 
 bool binary_parser::read_regular_msg(io_buf &input,
-                                     v_array<example *> &examples,
+                                     VW::multi_ex &examples,
                                      bool &ignore_msg) {
   _payload = nullptr;
   ignore_msg = false;
@@ -264,7 +264,7 @@ bool binary_parser::read_regular_msg(io_buf &input,
   return process_next_in_batch(examples);
 }
 
-bool binary_parser::process_next_in_batch(v_array<example *> &examples) {
+bool binary_parser::process_next_in_batch(VW::multi_ex &examples) {
   while (_example_joiner->processing_batch()) {
     if (_example_joiner->process_joined(examples)) {
       return true;
@@ -312,7 +312,7 @@ void binary_parser::persist_metrics(metric_sink &) {
 }
 
 bool binary_parser::parse_examples(VW::workspace*, io_buf &io_buf,
-                                   v_array<example *> &examples) {
+                                   VW::multi_ex &examples) {
   if (process_next_in_batch(examples)) {
     return true;
   }

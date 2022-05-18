@@ -36,7 +36,7 @@ std::vector<float> get_float_rewards(
   auto options = VW::make_unique<VW::config::options_cli>(VW::split_command_line(command));
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
+  VW::multi_ex examples;
   example_joiner joiner(vw.get());
 
   joiner.set_problem_type_config(problem_type);

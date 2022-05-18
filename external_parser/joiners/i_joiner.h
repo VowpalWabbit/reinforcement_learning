@@ -53,7 +53,7 @@ public:
   // Takes all grouped events, processes them (e.g. decompression) and populates
   // the examples array with complete example(s) ready to be used by vw for
   // training
-  virtual bool process_joined(v_array<example *> &examples) = 0;
+  virtual bool process_joined(VW::multi_ex &examples) = 0;
   // true if there are still event-groups to be processed from a deserialized
   // batch
   virtual bool processing_batch() = 0;
