@@ -10,6 +10,14 @@ if(WIN32)
   message(STATUS "WinSDK Version: ${CMAKE_SYSTEM_VERSION}")
 endif()
 
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG")
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING INTERNAL FORCE)
+if (NOT CMAKE_BUILD_TYPE AND NOT GENERATOR_IS_MULTI_CONFIG)
+  message(STATUS "No build type selected, defaulting to Release")
+  set(CMAKE_BUILD_TYPE "Release")
+endif()
+
 project(reinforcement_learning)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -20,8 +28,6 @@ option(RL_STATIC_DEPS "Only use static dependencies" OFF)
 option(RL_BUILD_BENCHMARKS "Build benchmarks" OFF)
 
 option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" ON)
-
-
 
 if(RL_STATIC_DEPS)
     if(WIN32)
@@ -52,11 +58,6 @@ find_package(Boost COMPONENTS unit_test_framework system program_options thread 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     find_package(Boost COMPONENTS thread REQUIRED)
 endif()
-
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG")
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING INTERNAL FORCE)
-set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build, options are: Debug, Release" FORCE)
 
 include(ProcessorCount)
 ProcessorCount(NumProcessors)
