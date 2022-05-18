@@ -11,7 +11,7 @@
     <tags>native</tags>
   </metadata>
   <files>
-      <file src="RLClientLibNative-v141-x64.targets" target="build" />
+      <file src="RLClientLibNative-v@MSVC_TOOLSET_VERSION@-@NATIVE_NUGET_PLATFORM_TAG@.targets" target="build" />
       <file src="lib\*.lib" target="lib\Release" />
       <file src="bin\*.dll" target="lib\Release" />
       <file src="include\**\*.*" target="." />
