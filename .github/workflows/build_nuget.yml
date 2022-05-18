@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: ["windows-2019"]
-        toolset: ["v141"]
+        toolset: ["v141", "v142"]
         arch_config:
         - { arch: x64, generator_arch: x64}
   
@@ -56,7 +56,7 @@ jobs:
           cmake --build build --config Release -t rlclientlib -v
           cmake --install build --prefix ./nuget_staging --config Release -v
       - if: ${{ matrix.arch_config.arch == 'x64' }}
-        run: cp nuget\RLClientLibNative-v141-x64.targets nuget_staging\RLClientLibNative-v141-x64.targets
+        run: cp nuget\RLClientLibNative-${{matrix.toolset}}-x64.targets nuget_staging\RLClientLibNative-${{matrix.toolset}}-x64.targets
       - name: Package
         shell: powershell
         id: generate-nuget
@@ -80,7 +80,7 @@ jobs:
     strategy:
       matrix:
         os: ["windows-2019"]
-        toolset: ["v141"]
+        toolset: ["v141", "v142"]
     steps:
       - uses: actions/checkout@v2
         with:
