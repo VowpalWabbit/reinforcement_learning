@@ -9,9 +9,9 @@
 #include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {
-  class VW_DLL_PUBLIC api_status;
+  class api_status;
 
-  class VW_DLL_PUBLIC multi_slot_response_detailed {
+  class multi_slot_response_detailed {
   private:
     using coll_t = std::vector<slot_ranking>;
 
@@ -27,28 +27,28 @@ namespace reinforcement_learning {
     ~multi_slot_response_detailed() = default;
 
 
-    void resize(size_t new_size);
+    VW_DLL_PUBLIC void resize(size_t new_size);
 
-    size_t size() const;
+    VW_DLL_PUBLIC size_t size() const;
 
-    void set_event_id(const char* event_id);
-    void set_event_id(std::string&& event_id);
-    const char* get_event_id() const;
+    VW_DLL_PUBLIC void set_event_id(const char* event_id);
+    VW_DLL_PUBLIC void set_event_id(std::string&& event_id);
+    VW_DLL_PUBLIC const char* get_event_id() const;
 
-    void set_model_id(const char* model_id);
-    void set_model_id(std::string&& model_id);
-    const char* get_model_id() const;
+    VW_DLL_PUBLIC void set_model_id(const char* model_id);
+    VW_DLL_PUBLIC void set_model_id(std::string&& model_id);
+    VW_DLL_PUBLIC const char* get_model_id() const;
 
-    int set_slot_at_index(const unsigned int index, slot_ranking&& slot, api_status* status = nullptr);
+    VW_DLL_PUBLIC int set_slot_at_index(const unsigned int index, slot_ranking&& slot, api_status* status = nullptr);
 
-    void clear();
-    const_iterator_t begin() const;
-    iterator_t begin();
-    const_iterator_t end() const;
-    iterator_t end();
+    VW_DLL_PUBLIC void clear();
+    VW_DLL_PUBLIC const_iterator_t begin() const;
+    VW_DLL_PUBLIC iterator_t begin();
+    VW_DLL_PUBLIC const_iterator_t end() const;
+    VW_DLL_PUBLIC iterator_t end();
 
-    multi_slot_response_detailed(multi_slot_response_detailed&&) noexcept;
-    multi_slot_response_detailed& operator=(multi_slot_response_detailed&&) noexcept;
+    VW_DLL_PUBLIC multi_slot_response_detailed(multi_slot_response_detailed&&) noexcept;
+    VW_DLL_PUBLIC multi_slot_response_detailed& operator=(multi_slot_response_detailed&&) noexcept;
 
     /**
     * @brief Copy constructor is removed since implementation will be deleted twice

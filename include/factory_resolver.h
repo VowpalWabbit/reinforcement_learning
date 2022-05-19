@@ -4,18 +4,18 @@
 
 namespace reinforcement_learning  {
   namespace utility {
-    class VW_DLL_PUBLIC configuration;
-    class VW_DLL_PUBLIC watchdog;
+    class configuration;
+    class watchdog;
   }
 
   // Forward declarations
   namespace model_management {
-    class VW_DLL_PUBLIC i_data_transport;
-    class VW_DLL_PUBLIC i_model;
+    class i_data_transport;
+    class i_model;
   }
-  class VW_DLL_PUBLIC i_sender;
-  class VW_DLL_PUBLIC i_time_provider;
-  class VW_DLL_PUBLIC error_callback_fn;
+  class i_sender;
+  class i_time_provider;
+  class error_callback_fn;
 
   /**
   * @brief Factory to create trace loggers used to trace events in the library.

@@ -11,8 +11,8 @@
 
 // Declare const pointer for internal linkage
 namespace reinforcement_learning {
-  class VW_DLL_PUBLIC ranking_response;
-  class VW_DLL_PUBLIC api_status;
+  class ranking_response;
+  class api_status;
 }
 
 namespace reinforcement_learning { namespace model_management {

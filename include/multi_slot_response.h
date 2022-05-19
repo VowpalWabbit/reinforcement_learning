@@ -8,22 +8,22 @@
 #include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {
-  class VW_DLL_PUBLIC api_status;
+  class api_status;
 
   /**
    * @brief Holds (id, action_id, probability) that tells which action was choosen for the given slot.
    */
-  struct VW_DLL_PUBLIC slot_entry {
+  struct slot_entry {
   public:
     ~slot_entry() = default;
 
-    slot_entry(const std::string& id, uint32_t _action_id, float _probability);
+    VW_DLL_PUBLIC slot_entry(const std::string& id, uint32_t _action_id, float _probability);
 
-    const char* get_id() const;
-    uint32_t get_action_id() const;
-    float get_probability() const;
-    void set_action_id(uint32_t id);
-    void set_probability(float prob);
+    VW_DLL_PUBLIC const char* get_id() const;
+    VW_DLL_PUBLIC uint32_t get_action_id() const;
+    VW_DLL_PUBLIC float get_probability() const;
+    VW_DLL_PUBLIC void set_action_id(uint32_t id);
+    VW_DLL_PUBLIC void set_probability(float prob);
   private:
     //! slot entry id
     std::string _id;
@@ -36,7 +36,7 @@ namespace reinforcement_learning {
   /**
    * @brief request_multi_slot_decision returns the per-slot action choice using multi_slot_response.
    */
-  class VW_DLL_PUBLIC multi_slot_response {
+  class multi_slot_response {
   private:
     using coll_t = std::vector<slot_entry>;
 
@@ -52,26 +52,26 @@ namespace reinforcement_learning {
     ~multi_slot_response() = default;
 
     // push_back calls must be done in slot order
-    void push_back(const std::string& id, uint32_t action_id, float prob);
+    VW_DLL_PUBLIC void push_back(const std::string& id, uint32_t action_id, float prob);
 
-    size_t size() const;
+    VW_DLL_PUBLIC size_t size() const;
 
-    void set_event_id(const char* event_id);
-    void set_event_id(std::string&& event_id);
-    const char* get_event_id() const;
+    VW_DLL_PUBLIC void set_event_id(const char* event_id);
+    VW_DLL_PUBLIC void set_event_id(std::string&& event_id);
+    VW_DLL_PUBLIC const char* get_event_id() const;
 
-    void set_model_id(const char* model_id);
-    void set_model_id(std::string&& model_id);
-    const char* get_model_id() const;
+    VW_DLL_PUBLIC void set_model_id(const char* model_id);
+    VW_DLL_PUBLIC void set_model_id(std::string&& model_id);
+    VW_DLL_PUBLIC const char* get_model_id() const;
 
-    void clear();
-    const_iterator_t begin() const;
-    iterator_t begin();
-    const_iterator_t end() const;
-    iterator_t end();
+    VW_DLL_PUBLIC void clear();
+    VW_DLL_PUBLIC const_iterator_t begin() const;
+    VW_DLL_PUBLIC iterator_t begin();
+    VW_DLL_PUBLIC const_iterator_t end() const;
+    VW_DLL_PUBLIC iterator_t end();
 
-    multi_slot_response(multi_slot_response&&) noexcept;
-    multi_slot_response& operator=(multi_slot_response&&) noexcept;
+    VW_DLL_PUBLIC multi_slot_response(multi_slot_response&&) noexcept;
+    VW_DLL_PUBLIC multi_slot_response& operator=(multi_slot_response&&) noexcept;
 
   /**
   * @brief Copy constructor is removed since implementation will be deleted twice

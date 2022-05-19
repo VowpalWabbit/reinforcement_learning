@@ -9,7 +9,7 @@
 namespace reinforcement_learning { namespace utility
 {
     template<class I, typename ...Args>
-    struct VW_DLL_PUBLIC object_factory
+    struct object_factory
     {
       using create_fn = std::function<int (I** retval, Args&& ...args, i_trace* trace_logger, api_status* status)>;
 

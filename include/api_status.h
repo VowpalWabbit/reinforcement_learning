@@ -13,13 +13,13 @@
 #include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {
-  class VW_DLL_PUBLIC i_trace;
+  class i_trace;
   /**
    * @brief Report status of all API calls
    */
-  class VW_DLL_PUBLIC api_status {
+  class api_status {
     public:
-      api_status();
+      VW_DLL_PUBLIC api_status();
 
       /**
        * @brief (\ref api_error_codes) Get the error code
@@ -27,7 +27,7 @@ namespace reinforcement_learning {
        * passed in, the code is set in the object also.
        * @return int Error code
        */
-      int get_error_code() const;
+      VW_DLL_PUBLIC int get_error_code() const;
 
       /**
        * @brief (\ref api_error_codes) Get the error msg string
@@ -35,7 +35,7 @@ namespace reinforcement_learning {
        * passed in, the detailed error description is passed back using get_error_msg()
        * @return const char* Error description
        */
-      const char* get_error_msg() const;
+      VW_DLL_PUBLIC const char* get_error_msg() const;
 
       /**
        * @brief Helper method for returning error object
@@ -44,14 +44,14 @@ namespace reinforcement_learning {
        * @param new_code Error code to set if status object is not null
        * @param new_msg Error description to set if status object is not null
        */
-      static void try_update(api_status* status, int new_code, const char* new_msg);
+      VW_DLL_PUBLIC static void try_update(api_status* status, int new_code, const char* new_msg);
 
       /**
        * @brief Helper method to clear the error object
        * Checks to see if api_status is not null before clearing current values.
        * @param status Error object.  Could be null.
        */
-      static void try_clear(api_status* status);
+      VW_DLL_PUBLIC static void try_clear(api_status* status);
 
     private:
       int _error_code;          //! Error code
@@ -61,7 +61,7 @@ namespace reinforcement_learning {
   /**
    * @brief Helper class used in report_error template funcstions to return status from API calls.
    */
-  struct VW_DLL_PUBLIC status_builder {
+  struct status_builder {
     /**
      * @brief Construct a new status builder object
      *
@@ -69,11 +69,11 @@ namespace reinforcement_learning {
      * @param status api_status object which can be null
      * @param code Error code
      */
-    status_builder(i_trace* trace, api_status* status, int code);
-    ~status_builder();
+    VW_DLL_PUBLIC status_builder(i_trace* trace, api_status* status, int code);
+    VW_DLL_PUBLIC ~status_builder();
 
     //! return the status when cast to an int
-    operator int() const;
+    VW_DLL_PUBLIC operator int() const;
 
     //! Error code
     int _code;

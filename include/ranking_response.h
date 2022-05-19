@@ -15,14 +15,14 @@
 #include "vw/common/vwvis.h"
 
 namespace reinforcement_learning {
-  class VW_DLL_PUBLIC api_status;
+  class api_status;
 
   /**
    * @brief choose_rank() returns the action choice using ranking_response.
    * ranking_response contains all the actions and distribution from with the action was sampled.  It also contains the chosen action id and
    * the unique event_id representing the choice.  This unique event_id must be used to report back outcomes against this choice for the online trainer.
    */
-  class VW_DLL_PUBLIC ranking_response {
+  class ranking_response {
   private:
   std::string _model_id;
   slot_ranking _slot_impl;
@@ -37,20 +37,20 @@ namespace reinforcement_learning {
   *
   * @param event_id The unique identifier for this interaction.  This event_id must be used when reporting the outcome for this action
   */
-  ranking_response(char const* event_id);
+  VW_DLL_PUBLIC ranking_response(char const* event_id);
 
-    /**
-     * @brief Unique event_id for this ranking request.
-     * This event_id must be used when calling report_outcome so it can be joined with the chosen action
-     * @return const char*
-     */
-    const char* get_event_id() const;
+  /**
+   * @brief Unique event_id for this ranking request.
+   * This event_id must be used when calling report_outcome so it can be joined with the chosen action
+   * @return const char*
+   */
+  VW_DLL_PUBLIC const char* get_event_id() const;
 
-    /**
-     * @brief Set the event_id.  (This is set internally by the API)
-     * @param event_id
-     */
-    void set_event_id(const char* event_id);
+  /**
+   * @brief Set the event_id.  (This is set internally by the API)
+   * @param event_id
+   */
+  VW_DLL_PUBLIC void set_event_id(const char* event_id);
 
   /**
   * @brief Get the chosen action id.
@@ -59,7 +59,7 @@ namespace reinforcement_learning {
   * @param status Optional field with detailed string description if there is an error
   * @return int Error code
   */
-  int get_chosen_action_id(size_t& action_id, api_status* status = nullptr) const; // id of the top action chosen by the model
+  VW_DLL_PUBLIC int get_chosen_action_id(size_t& action_id, api_status* status = nullptr) const; // id of the top action chosen by the model
 
   /**
   * @brief Set the chosen action id.  (This is set internally by the API)
@@ -68,7 +68,7 @@ namespace reinforcement_learning {
   * @param status Optional field with detailed string description if there is an error
   * @return int Error code
   */
-  int set_chosen_action_id(size_t action_id, api_status* status = nullptr); // id of the top action chosen by the model
+  VW_DLL_PUBLIC int set_chosen_action_id(size_t action_id, api_status* status = nullptr); // id of the top action chosen by the model
 
   /**
   * @brief Set the chosen action id, but do not verify the index fits within the ranking.  (This is set internally by the API)
@@ -78,7 +78,7 @@ namespace reinforcement_learning {
   * @param status Optional field with detailed string description if there is an error
   * @return int Error code
   */
-  int set_chosen_action_id_unchecked(size_t action_id, api_status* status = nullptr);
+  VW_DLL_PUBLIC int set_chosen_action_id_unchecked(size_t action_id, api_status* status = nullptr);
 
   /**
   * @brief Add (action id, probability) pair to the slot (This is set internally by the API)
@@ -86,14 +86,14 @@ namespace reinforcement_learning {
   * @param action_id
   * @param prob
   */
-  void push_back(const size_t action_id, const float prob);
+  VW_DLL_PUBLIC void push_back(const size_t action_id, const float prob);
 
   /**
   * @brief Size of the action collection.
   *
   * @return size_t
   */
-  size_t size() const;
+  VW_DLL_PUBLIC size_t size() const;
 
   /**
   * @brief Set the model_id.
@@ -101,7 +101,7 @@ namespace reinforcement_learning {
   * is associated with each unique model. (This is set internally by the API)
   * @param model_id
   */
-  void set_model_id(const char* model_id);
+  VW_DLL_PUBLIC void set_model_id(const char* model_id);
 
   /**
   * @brief Set the model_id.
@@ -110,7 +110,7 @@ namespace reinforcement_learning {
   * Input model_id is left in an unspecified but valid state.
   * @param model_id
   */
-  void set_model_id(std::string&& model_id);
+  VW_DLL_PUBLIC void set_model_id(std::string&& model_id);
 
   /**
   * @brief Get the model_id.
@@ -118,26 +118,26 @@ namespace reinforcement_learning {
   * is associated with each unique model. (This is set internally by the API)
   * @return const char*
   */
-  const char * get_model_id() const;
+  VW_DLL_PUBLIC const char * get_model_id() const;
 
   /**
   * @brief Clear the ranking response object so that it can be reused.
   * The goal is to reuse response without reallocating as much as possible.
   */
-  void clear();
+  VW_DLL_PUBLIC void clear();
 
   /**
   * @brief Move construct a new ranking response object.
   * The underlying data is taken from the rvalue reference.
   */
-  ranking_response(ranking_response&&) noexcept;
+  VW_DLL_PUBLIC ranking_response(ranking_response&&) noexcept;
 
   /**
   * @brief Move assignment operator for ranking response.
   * The underlying data is taken from rvalue reference, and then it is cleared.
   * @return ranking_response&
   */
-  ranking_response& operator=(ranking_response&&) noexcept;
+  VW_DLL_PUBLIC ranking_response& operator=(ranking_response&&) noexcept;
 
   /**
   * @brief Copy constructor is removed since implementation will be deleted twice
@@ -155,11 +155,11 @@ namespace reinforcement_learning {
     using const_iterator = slot_ranking::const_iterator;
 
     //! Returns an iterator pointing to the first element of the (action, probability) collection
-    const_iterator begin() const;
-    iterator begin();
+    VW_DLL_PUBLIC const_iterator begin() const;
+    VW_DLL_PUBLIC iterator begin();
 
     //! Returns an iterator referring to the past-the-end element of the (action, probability) collection.
-    const_iterator end() const;
-    iterator end();
+    VW_DLL_PUBLIC const_iterator end() const;
+    VW_DLL_PUBLIC iterator end();
   };
 }

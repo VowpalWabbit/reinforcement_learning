@@ -5,8 +5,8 @@
 namespace reinforcement_learning {namespace utility {
   class configuration;
 }
-class VW_DLL_PUBLIC api_status;
-class VW_DLL_PUBLIC i_trace;
+class api_status;
+class i_trace;
 }
 
 namespace reinforcement_learning { namespace utility { namespace config {
