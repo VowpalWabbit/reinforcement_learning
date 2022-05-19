@@ -6,10 +6,11 @@
 #include "generated/v2/Event_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
 #include "zstd.h"
-#include <boost/algorithm/string.hpp>
 
 #include <limits.h>
 #include <time.h>
+#include <algorithm>
+#include <cctype>
 
 // VW headers
 #include "vw/core/parse_example_json.h"
@@ -193,6 +194,17 @@ void example_joiner::invalidate_joined_event(const std::string &id) {
   }
 }
 
+// Case insensitive equality
+bool iequals(const std::string &a, const std::string &b) {
+  if (a.size() != b.size()) {
+    return false;
+  }
+
+  return std::equal(a.begin(), a.end(), b.begin(), [](char a, char b) {
+    return std::tolower(a) == std::tolower(b);
+  });
+}
+
 bool example_joiner::process_interaction(const v2::Event &event,
                                          const v2::Metadata &metadata,
                                          const TimePoint &enqueued_time_utc,
@@ -201,7 +213,7 @@ bool example_joiner::process_interaction(const v2::Event &event,
   std::string payload_type(EnumNamePayloadType(metadata.payload_type()));
   std::string loop_type(EnumNameProblemType(_loop_info.problem_type_config));
 
-  if (!boost::iequals(payload_type, loop_type)) {
+  if (!iequals(payload_type, loop_type)) {
     logger.out_warn("Online Trainer mode [{}] "
                     "and Interaction event type [{}] "
                     "don't match. Skipping interaction from processing. "
