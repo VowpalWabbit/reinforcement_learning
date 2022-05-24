@@ -4,9 +4,8 @@ if (rlclientlib_BUILD_DOTNET)
 
   if (rlclientlib_DOTNET_STRONG_NAME_SIGN)
     include(FindStrongName)
-
-    get_target_property(rlclientlib_VW_CORE_SOURCE_ROOT vw SOURCE_DIR)
-    set(rlclientlib_DOTNET_SIGNING_KEY_PATH "${rlclientlib_VW_CORE_SOURCE_ROOT}/../cs/vw_key.snk")
+    get_target_property(rlclientlib_VW_CORE_SOURCE_ROOT vw_core SOURCE_DIR)
+    set(rlclientlib_DOTNET_SIGNING_KEY_PATH "${rlclientlib_VW_CORE_SOURCE_ROOT}/../../cs/vw_key.snk")
 
     configure_file(${rlclientlib_DOTNET_SIGNING_KEY_PATH} vw_key.snk COPYONLY)
     set(rlclientlib_DOTNET_SIGNING_KEY ${CMAKE_CURRENT_BINARY_DIR}/vw_key.snk)

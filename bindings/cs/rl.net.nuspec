@@ -2,21 +2,20 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
     <metadata>
       <id>RL.Net</id>
-      <tags>RL.NET ML RL Machine Learning Reinforcement</tags>
+      <tags>RL.NET ML RL Machine Learning Reinforcement native</tags>
       <authors>John Langford et al</authors>
       <version>$version$$Tag$</version>
       <projectUrl>https://github.com/VowpalWabbit/reinforcement_learning</projectUrl>
-      <license type="file">LICENSE.txt</license>
+      <license type="expression">MIT</license>
       <requireLicenseAcceptance>false</requireLicenseAcceptance>
       <description>Interaction-side integration library for Reinforcement Learning loops: Predict, Log, [Learn,] Update</description>
       <copyright>Copyright (C) Microsoft Corp 2012-2022, Yahoo! Inc. 2007-2012, and many individual contributors. All rights reserved.</copyright>
-
-      <!-- Dependencies are automatically installed when the package is installed -->
+            <!-- Dependencies are automatically installed when the package is installed -->
       <dependencies>
         <group targetFramework="netstandard2.0">
           <dependency id="NETStandard.Library" version="[2.0.0,)" />
         </group>
-
+        
         <!-- Should we externalize our VW dependency? Right now we link vw-core directly into the RL.Net.Native.dll
              assembly. -->
       </dependencies>
@@ -26,17 +25,19 @@
 
     <!-- A readme.txt to display when the package is installed -->
     <files>
-      <file src="$RootRelativeOutputDirX64$\libcrypto-1_1-x64.dll" target="runtimes\win-x64\native"/>
-      <file src="$RootRelativeOutputDirX64$\zlibd1.dll" target="runtimes\win-x64\native"/>
-      <file src="$RootRelativeOutputDirX64$\cpprest_2_10d.dll" target="runtimes\win-x64\native"/>
-      <file src="$RootRelativeOutputDirX64$\boost_program_options-vc143-mt-gd-x64-1_78.dll" target="runtimes\win-x64\native"/>
+      <file src="$BinariesX64Dir$\libcrypto-1_1-x64.dll" target="runtimes\win-x64\native"/>
+      <file src="$BinariesX64Dir$\zlib1.dll" target="runtimes\win-x64\native"/>
+      <file src="$BinariesX64Dir$\cpprest_2_10.dll" target="runtimes\win-x64\native"/>
+      <file src="$BinariesX64Dir$\boost_program_options-vc143-mt-x64-1_78.dll" target="runtimes\win-x64\native"/>
 
-      <file src="$RootRelativeOutputDirX64$\rl.net.native.dll" target="runtimes\win-x64\native"/>
-      <file src="$RootRelativeOutputDirX64$\rl.net.native.pdb" target="runtimes\win-x64\native"/>
+      <file src="$BinariesX64Dir$\rl.net.native.dll" target="runtimes\win-x64\native"/>
+      <file src="$BinariesX64Dir$\rl.net.native.pdb" target="runtimes\win-x64\native"/>
 
-      <file src="$RootRelativeOutputDirX64$\rl.net.dll" target="lib\netstandard2.0" />
-      <file src="$RootRelativeOutputDirX64$\rl.net.pdb" target="lib\netstandard2.0" />
+      <file src="$BinariesX64Dir$\rl.net.dll" target="lib\netstandard2.0" />
+      <file src="$BinariesX64Dir$\rl.net.pdb" target="lib\netstandard2.0" />
 
       <file src="LICENSE.txt" target="" />
+
+      <file src="$PackageExtrasDir$\**\*" target="" />
     </files>
 </package>
