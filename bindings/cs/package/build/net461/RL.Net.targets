@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_ProjectStyle Condition="'$(_PlatformWithoutConfigurationInference)'!=''">sdk</_ProjectStyle>
+    <_ProjectStyle Condition="'$(_PlatformWithoutConfigurationInference)'==''">legacy</_ProjectStyle>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <_RL_NET_NATIVE_DLL Include="$(MSBuildThisFileDirectory)\..\..\runtimes\win-x64\native\*.dll" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(_ProjectStyle)' == 'legacy'">
+    <!-- TODO: Support x86 -->
+    <Content Include="@(_RL_NET_NATIVE_DLL)">
+      <Link>%(filename).dll</Link>
+      <PublishState>Included</PublishState>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVsix>true</IncludeInVsix>
+      <Pack>false</Pack>
+    </Content>
+  </ItemGroup>
+
+</Project>
