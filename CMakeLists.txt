@@ -20,7 +20,20 @@ endif()
 
 project(reinforcement_learning)
 
-set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_CXX_STANDARD 11)
+# Add support for building library with latest version of C++ supported by your compiler
+# Copied from VW
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake/")
+option(USE_LATEST_STD "Override using C++11 with the latest standard the compiler offers. Default is C++11. " OFF)
+include(DetectCXXStandard)
+set(RL_CXX_STANDARD 11)
+if(USE_LATEST_STD)
+  DetectCXXStandard(RL_CXX_STANDARD)
+endif()
+message(STATUS "Using C++ standard: " ${RL_CXX_STANDARD})
+set(CMAKE_CXX_STANDARD ${RL_CXX_STANDARD})
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(RL_BUILD_PYTHON "Build the Python bindings" OFF)
 option(USE_ZSTD "Whether to enable usage of zstandard compression" ON)
