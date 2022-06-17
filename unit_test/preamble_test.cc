@@ -1,25 +1,27 @@
 #define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
-#   define BOOST_TEST_MODULE Main
+#  define BOOST_TEST_MODULE Main
 #endif
 
-#include <boost/test/unit_test.hpp>
-#include "data_buffer.h"
-#include "logger/preamble_sender.h"
-#include "logger/message_type.h"
-#include "err_constants.h"
 #include "logger/preamble.h"
+
+#include "data_buffer.h"
+#include "err_constants.h"
+#include "logger/message_type.h"
+#include "logger/preamble_sender.h"
+
+#include <boost/test/unit_test.hpp>
 
 using namespace reinforcement_learning::utility;
 using namespace reinforcement_learning::logger;
 using namespace reinforcement_learning;
 
-struct dummy_sender : i_sender {
-  int init(const utility::configuration& config, api_status* status) override {
-    return error_code::success;
-  };
+struct dummy_sender : i_sender
+{
+  int init(const utility::configuration& config, api_status* status) override { return error_code::success; };
 
-  int v_send(const buffer& data, api_status* status = nullptr) override {
+  int v_send(const buffer& data, api_status* status = nullptr) override
+  {
     v_data = data;
     return error_code::success;
   }
@@ -27,12 +29,13 @@ struct dummy_sender : i_sender {
   buffer v_data;
 };
 
-BOOST_AUTO_TEST_CASE(simple_preamble_usage) {
+BOOST_AUTO_TEST_CASE(simple_preamble_usage)
+{
   std::shared_ptr<data_buffer> db(new data_buffer());
   dummy_sender* raw_data = new dummy_sender();
   preamble_message_sender f_sender(raw_data);
   i_message_sender& sender = f_sender;
-  db->set_body_endoffset(db->preamble_size()+db->body_capacity());
+  db->set_body_endoffset(db->preamble_size() + db->body_capacity());
   const auto send_msg_sz = db->body_filled_size();
   const auto send_msg_type = message_type::fb_ranking_learning_mode_event_collection;
 

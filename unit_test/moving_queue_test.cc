@@ -1,16 +1,18 @@
 #define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
-#   define BOOST_TEST_MODULE Main
+#  define BOOST_TEST_MODULE Main
 #endif
 
 #include "moving_queue.h"
-#include <string>
+
 #include <boost/test/unit_test.hpp>
+#include <string>
 
 using namespace reinforcement_learning;
 using namespace std;
 
-class move_only {
+class move_only
+{
 public:
   move_only() {}
   move_only(const std::string& value) : _value(value) {}
@@ -25,12 +27,14 @@ public:
     return *this;
   }
 
-  std::string  value() const { return _value; }
+  std::string value() const { return _value; }
+
 private:
   std::string _value;
 };
 
-BOOST_AUTO_TEST_CASE(moving_push_pop_test) {
+BOOST_AUTO_TEST_CASE(moving_push_pop_test)
+{
   moving_queue<move_only> queue;
   queue.push(move_only("1"));
   queue.push(move_only("2"));
@@ -56,11 +60,10 @@ BOOST_AUTO_TEST_CASE(moving_queue_pop_empty)
 {
   moving_queue<move_only> queue;
 
-  //the pop call on an empty queue should do nothing
+  // the pop call on an empty queue should do nothing
   move_only* item = NULL;
   queue.pop(item);
-  if (item)
-    BOOST_ERROR("item should be null");
+  if (item) BOOST_ERROR("item should be null");
 }
 
 BOOST_AUTO_TEST_CASE(moving_queue_move_push)

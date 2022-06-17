@@ -2,11 +2,13 @@
 
 #include <memory>
 
-namespace Ort {
-  struct MemoryInfo;
+namespace Ort
+{
+struct MemoryInfo;
 }
 
-struct GlobalConfig {
+struct GlobalConfig
+{
   GlobalConfig();
   ~GlobalConfig() = default;
 

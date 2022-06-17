@@ -1,10 +1,11 @@
 #pragma once
-#include "sender.h"
 #include "configuration.h"
+#include "sender.h"
 
 #include <boost/program_options.hpp>
 
-class test_loop {
+class test_loop
+{
 public:
   test_loop(const boost::program_options::variables_map& vm);
   bool init();
@@ -12,9 +13,8 @@ public:
 
 private:
   int load_file(const std::string& file_name, std::string& config_str) const;
-  int load_config_from_json(const std::string& file_name,
-    reinforcement_learning::utility::configuration& config,
-    reinforcement_learning::api_status* status) const;
+  int load_config_from_json(const std::string& file_name, reinforcement_learning::utility::configuration& config,
+      reinforcement_learning::api_status* status) const;
   std::string get_message(size_t i) const;
   void init_messages();
 

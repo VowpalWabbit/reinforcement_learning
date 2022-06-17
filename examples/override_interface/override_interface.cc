@@ -5,15 +5,15 @@
  * @author Jack Gerrits et al
  * @date 2018-08-20
  */
-#include <iostream>
-#include <fstream>
-#include <mutex>
-
 #include "config_utility.h"
-#include "live_model.h"
-#include "factory_resolver.h"
 #include "constants.h"
+#include "factory_resolver.h"
+#include "live_model.h"
 #include "sender.h"
+
+#include <fstream>
+#include <iostream>
+#include <mutex>
 
 // Namespace manipulation for brevity
 namespace r = reinforcement_learning;
@@ -24,36 +24,30 @@ namespace err = r::error_code;
 class ostream_sender : public r::i_sender
 {
 public:
-  ostream_sender(std::ostream &stream, std::mutex &mutex)
-      : _stream(stream),
-        _mutex(mutex) {}
+  ostream_sender(std::ostream& stream, std::mutex& mutex) : _stream(stream), _mutex(mutex) {}
 
-  virtual int init(const u::configuration& config, r::api_status *status) override
-  {
-    return err::success;
-  }
+  virtual int init(const u::configuration& config, r::api_status* status) override { return err::success; }
 
 protected:
-  int v_send(const buffer &data, r::api_status *status) override
+  int v_send(const buffer& data, r::api_status* status) override
   {
     std::lock_guard<std::mutex> lock(_mutex);
-    _stream.write(reinterpret_cast<const char *>(data->body_begin()), data->body_filled_size());
+    _stream.write(reinterpret_cast<const char*>(data->body_begin()), data->body_filled_size());
     _stream << std::endl;
     return err::success;
   }
 
 private:
-  std::ostream &_stream;
-  std::mutex &_mutex;
+  std::ostream& _stream;
+  std::mutex& _mutex;
 };
 
 // Load contents of file into a string
-int load_file(const std::string &file_name, std::string &config_str)
+int load_file(const std::string& file_name, std::string& config_str)
 {
   std::ifstream fs;
   fs.open(file_name);
-  if (!fs.good())
-    return err::invalid_argument;
+  if (!fs.good()) return err::invalid_argument;
   std::stringstream buffer;
   buffer << fs.rdbuf();
   config_str = buffer.str();
@@ -61,7 +55,7 @@ int load_file(const std::string &file_name, std::string &config_str)
 }
 
 // Load config from json file
-int load_config_from_json(const std::string &file_name, u::configuration &cfg)
+int load_config_from_json(const std::string& file_name, u::configuration& cfg)
 {
   std::string config_str;
   RETURN_IF_FAIL(load_file(file_name, config_str));
@@ -83,19 +77,22 @@ int main()
   std::mutex cout_mutex;
 
   // Define a create function to be used in the factory.
-  auto const create_ostream_sender_fn =
-      [&](r::i_sender **retval, const u::configuration &, r::error_callback_fn *error_callback, r::i_trace *trace, r::api_status *) {
-        *retval = new ostream_sender(std::cout, cout_mutex);
-        return err::success;
-      };
+  auto const create_ostream_sender_fn = [&](r::i_sender** retval, const u::configuration&,
+                                            r::error_callback_fn* error_callback, r::i_trace* trace, r::api_status*)
+  {
+    *retval = new ostream_sender(std::cout, cout_mutex);
+    return err::success;
+  };
 
-  // Create a local factory and register the create function with it using the corresponding implementation keys defined in constants.h
+  // Create a local factory and register the create function with it using the corresponding implementation keys defined
+  // in constants.h
   r::sender_factory_t stdout_logger_factory;
   stdout_logger_factory.register_type(r::value::OBSERVATION_EH_SENDER, create_ostream_sender_fn);
   stdout_logger_factory.register_type(r::value::INTERACTION_EH_SENDER, create_ostream_sender_fn);
 
   // Default factories defined in factory_resolver.h are passed as well as the custom stdout logger.
-  r::live_model model(config, nullptr, nullptr, &r::trace_logger_factory, &r::data_transport_factory, &r::model_factory, &stdout_logger_factory);
+  r::live_model model(config, nullptr, nullptr, &r::trace_logger_factory, &r::data_transport_factory, &r::model_factory,
+      &stdout_logger_factory);
 
   if (model.init(&status) != err::success)
   {
@@ -105,7 +102,7 @@ int main()
 
   r::ranking_response response;
 
-  char const *const event_id = "event_id";
+  char const* const event_id = "event_id";
   const auto context =
       R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[ { "TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}}]})";
   float outcome = 1.0f;
