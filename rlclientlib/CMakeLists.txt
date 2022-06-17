@@ -202,7 +202,7 @@ target_include_directories( rlclientlib
                             ${CMAKE_CURRENT_SOURCE_DIR}/../include
                             PRIVATE
                             ${CMAKE_CURRENT_SOURCE_DIR}
-                            ${FLATBUFFERS_INCLUDE_DIRS}
+                            ${FLATBUFFERS_INCLUDE_DIR}
                             ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date
                             )
 target_link_libraries(rlclientlib PUBLIC Boost::system vw_common vw_core PRIVATE RapidJSON)

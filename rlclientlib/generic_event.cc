@@ -10,7 +10,7 @@ namespace reinforcement_learning {
   , _client_time_gmt(ts)
   , _payload_type(type)
   , _app_id(app_id)
-  , _context_string(context.to_string())
+  , _context_string(context)
   {}
 
   generic_event::generic_event(const char* id, const timestamp& ts, payload_type_t type, flatbuffers::DetachedBuffer&& payload, event_content_type content_type, object_list_t &&objects, const char* app_id, float pass_prob)
