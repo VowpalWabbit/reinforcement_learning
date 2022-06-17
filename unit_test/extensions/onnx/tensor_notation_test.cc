@@ -1,14 +1,15 @@
 #define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
-#define BOOST_TEST_MODULE Main
+#  define BOOST_TEST_MODULE Main
 #endif
 
-#include <boost/test/unit_test.hpp>
+#include "onnx_input.h"
 #include "test_helpers.h"
 
-#include "onnx_input.h"
+#include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_CASE(null_pointer) {
+BOOST_AUTO_TEST_CASE(null_pointer)
+{
   // Arrange
   Ort::MemoryInfo memory_info{nullptr};
   o::onnx_input_builder ic{nullptr};
@@ -22,7 +23,8 @@ BOOST_AUTO_TEST_CASE(null_pointer) {
   validate_empty(ic);
 }
 
-BOOST_AUTO_TEST_CASE(empty_string) {
+BOOST_AUTO_TEST_CASE(empty_string)
+{
   // Arrange
   Ort::MemoryInfo memory_info{nullptr};
   o::onnx_input_builder ic{nullptr};
@@ -36,7 +38,8 @@ BOOST_AUTO_TEST_CASE(empty_string) {
   validate_empty(ic);
 }
 
-BOOST_AUTO_TEST_CASE(empty_object) {
+BOOST_AUTO_TEST_CASE(empty_object)
+{
   // Arrange
   Ort::MemoryInfo memory_info{nullptr};
   o::onnx_input_builder ic{nullptr};
@@ -94,10 +97,7 @@ inline void run_tensor_notation_test(const Ort::MemoryInfo& memory_info, expecta
   std::vector<string_t> input_names;
 
   std::for_each(expectations.cbegin(), expectations.cend(),
-    [&input_names](expectation_t<string_t> expectation)
-    {
-      input_names.push_back(std::get<0>(expectation));
-    });
+      [&input_names](expectation_t<string_t> expectation) { input_names.push_back(std::get<0>(expectation)); });
 
   o::onnx_input_builder ic{nullptr};
 
@@ -114,19 +114,16 @@ inline void run_tensor_notation_test(const Ort::MemoryInfo& memory_info, expecta
 BOOST_AUTO_TEST_CASE(higher_rank_tensor)
 {
   // Arrange
-  const int size = 28*28;
+  const int size = 28 * 28;
   const std::string input_name = "Input3";
 
   dimensions dims{1, 1, 28, 28};
   tensor_raw rawdata{};
 
   rawdata.reserve(size);
-  for (int i = 0; i < size; i++)
-  {
-    rawdata.push_back((float)i / (float)size);
-  };
+  for (int i = 0; i < size; i++) { rawdata.push_back((float)i / (float)size); };
 
-  expectations<std::string> expectations{ std::make_tuple(input_name, dims, rawdata) };
+  expectations<std::string> expectations{std::make_tuple(input_name, dims, rawdata)};
 
   run_tensor_notation_test(GlobalConfig::instance()->get_memory_info(), expectations);
 }

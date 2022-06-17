@@ -2,11 +2,13 @@
 #include "test_common.h"
 #include "vw/config/options_cli.h"
 #include "vw/core/reductions/conditional_contextual_bandit.h"
+
 #include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_CASE(example_joiner_test_ca) {
-  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cats","4","--min_value","1",
-                           "--max_value","100","--bandwidth","1"});
+BOOST_AUTO_TEST_CASE(example_joiner_test_ca)
+{
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{
+      "--quiet", "--binary_parser", "--cats", "4", "--min_value", "1", "--max_value", "100", "--bandwidth", "1"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   example_joiner joiner(vw.get());
@@ -17,10 +19,10 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_ca) {
   // need to keep the fb buffer around in order to process the event
   std::vector<flatbuffers::DetachedBuffer> int_detached_buffers;
 
-  auto joined_ca_events =
-      wrap_into_joined_events(interaction_buffer, int_detached_buffers);
+  auto joined_ca_events = wrap_into_joined_events(interaction_buffer, int_detached_buffers);
 
-  for (auto &je : joined_ca_events) {
+  for (auto& je : joined_ca_events)
+  {
     joiner.process_event(*je);
     examples.push_back(VW::new_unused_example(*vw.get()));
   }
@@ -28,14 +30,10 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_ca) {
   // need to keep the fb buffer around in order to process the event
   std::vector<flatbuffers::DetachedBuffer> obs_detached_buffers;
 
-  auto observation_buffer =
-      read_file(input_files + "/fb_events/f-reward_v2.fb");
-  joined_ca_events =
-      wrap_into_joined_events(observation_buffer, obs_detached_buffers);
+  auto observation_buffer = read_file(input_files + "/fb_events/f-reward_v2.fb");
+  joined_ca_events = wrap_into_joined_events(observation_buffer, obs_detached_buffers);
 
-  for (auto &je : joined_ca_events) {
-    joiner.process_event(*je);
-  }
+  for (auto& je : joined_ca_events) { joiner.process_event(*je); }
   BOOST_CHECK_EQUAL(joiner.processing_batch(), true);
   joiner.process_joined(examples);
   BOOST_CHECK_EQUAL(examples.size(), 1);
@@ -57,8 +55,10 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_ca) {
   VW::finish(*vw, false);
 }
 
-BOOST_AUTO_TEST_CASE(example_joiner_test_cb) {
-  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
+BOOST_AUTO_TEST_CASE(example_joiner_test_cb)
+{
+  auto options = VW::make_unique<VW::config::options_cli>(
+      std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   example_joiner joiner(vw.get());
@@ -71,10 +71,10 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cb) {
   // need to keep the fb buffer around in order to process the event
   std::vector<flatbuffers::DetachedBuffer> int_detached_buffers;
 
-  auto joined_cb_events =
-      wrap_into_joined_events(interaction_buffer, int_detached_buffers);
+  auto joined_cb_events = wrap_into_joined_events(interaction_buffer, int_detached_buffers);
 
-  for (auto &je : joined_cb_events) {
+  for (auto& je : joined_cb_events)
+  {
     joiner.process_event(*je);
     examples.push_back(VW::new_unused_example(*vw));
   }
@@ -82,14 +82,10 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cb) {
   // need to keep the fb buffer around in order to process the event
   std::vector<flatbuffers::DetachedBuffer> obs_detached_buffers;
 
-  auto observation_buffer =
-      read_file(input_files + "/fb_events/f-reward_v2.fb");
-  joined_cb_events =
-      wrap_into_joined_events(observation_buffer, obs_detached_buffers);
+  auto observation_buffer = read_file(input_files + "/fb_events/f-reward_v2.fb");
+  joined_cb_events = wrap_into_joined_events(observation_buffer, obs_detached_buffers);
 
-  for (auto &je : joined_cb_events) {
-    joiner.process_event(*je);
-  }
+  for (auto& je : joined_cb_events) { joiner.process_event(*je); }
 
   BOOST_CHECK_EQUAL(joiner.processing_batch(), true);
 
@@ -119,15 +115,17 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cb) {
   BOOST_CHECK_EQUAL(examples[1]->indices[0], 'T');
   BOOST_CHECK_EQUAL(examples[2]->indices.size(), 1);
   BOOST_CHECK_EQUAL(examples[2]->indices[0], 'T');
-  BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0); // newline example
+  BOOST_CHECK_EQUAL(examples[3]->indices.size(), 0);  // newline example
 
   BOOST_CHECK_EQUAL(joiner.processing_batch(), false);
   clear_examples(examples, vw.get());
   VW::finish(*vw, false);
 }
 
-BOOST_AUTO_TEST_CASE(example_joiner_test_cbb) {
-  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--ccb_explore_adf"});
+BOOST_AUTO_TEST_CASE(example_joiner_test_cbb)
+{
+  auto options = VW::make_unique<VW::config::options_cli>(
+      std::vector<std::string>{"--quiet", "--binary_parser", "--ccb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   example_joiner joiner(vw.get());
@@ -140,10 +138,10 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cbb) {
   // need to keep the fb buffer around in order to process the event
   std::vector<flatbuffers::DetachedBuffer> int_detached_buffers;
 
-  auto joined_ccb_events =
-      wrap_into_joined_events(interaction_buffer, int_detached_buffers);
+  auto joined_ccb_events = wrap_into_joined_events(interaction_buffer, int_detached_buffers);
 
-  for (auto &je : joined_ccb_events) {
+  for (auto& je : joined_ccb_events)
+  {
     joiner.process_event(*je);
     examples.push_back(VW::new_unused_example(*vw));
   }
@@ -151,14 +149,10 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cbb) {
   // need to keep the fb buffer around in order to process the event
   std::vector<flatbuffers::DetachedBuffer> obs_detached_buffers;
 
-  auto observation_buffer =
-      read_file(input_files + "/fb_events/fi-reward_v2.fb");
-  joined_ccb_events =
-      wrap_into_joined_events(observation_buffer, obs_detached_buffers);
+  auto observation_buffer = read_file(input_files + "/fb_events/fi-reward_v2.fb");
+  joined_ccb_events = wrap_into_joined_events(observation_buffer, obs_detached_buffers);
 
-  for (auto &je : joined_ccb_events) {
-    joiner.process_event(*je);
-  }
+  for (auto& je : joined_ccb_events) { joiner.process_event(*je); }
 
   BOOST_CHECK_EQUAL(joiner.processing_batch(), true);
 
@@ -182,14 +176,8 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cbb) {
   BOOST_CHECK_EQUAL(VW::example_is_newline(*examples[5]), true);
 
   // check slot labels
-  BOOST_CHECK_EQUAL(
-      examples[3]
-          ->l.conditional_contextual_bandit.outcome->probabilities.size(),
-      2);
-  BOOST_CHECK_EQUAL(
-      examples[4]
-          ->l.conditional_contextual_bandit.outcome->probabilities.size(),
-      1);
+  BOOST_CHECK_EQUAL(examples[3]->l.conditional_contextual_bandit.outcome->probabilities.size(), 2);
+  BOOST_CHECK_EQUAL(examples[4]->l.conditional_contextual_bandit.outcome->probabilities.size(), 1);
 
   // check example features
   // from example_gen payload is JSON_CCB_CONTEXT =
@@ -205,23 +193,25 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cbb) {
   BOOST_CHECK_EQUAL(examples[3]->indices[0], 'S');
   BOOST_CHECK_EQUAL(examples[4]->indices.size(), 1);
   BOOST_CHECK_EQUAL(examples[4]->indices[0], 'S');
-  BOOST_CHECK_EQUAL(examples[5]->indices.size(), 0); // newline example
+  BOOST_CHECK_EQUAL(examples[5]->indices.size(), 0);  // newline example
 
   BOOST_CHECK_EQUAL(joiner.processing_batch(), false);
   clear_examples(examples, vw.get());
   VW::finish(*vw, false);
 }
 
-BOOST_AUTO_TEST_CASE(example_joiner_test_joiner_ready) {
-  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
+BOOST_AUTO_TEST_CASE(example_joiner_test_joiner_ready)
+{
+  auto options = VW::make_unique<VW::config::options_cli>(
+      std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   example_joiner joiner(vw.get());
 
-  //the initial state of the joiner is not ready
+  // the initial state of the joiner is not ready
   BOOST_CHECK_EQUAL(joiner.joiner_ready(), false);
 
-  //all values but problem type have a default value
+  // all values but problem type have a default value
   joiner.set_problem_type_config(v2::ProblemType_CB);
 
   BOOST_CHECK_EQUAL(joiner.joiner_ready(), true);
@@ -229,15 +219,17 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_joiner_ready) {
   VW::finish(*vw, false);
 }
 
-BOOST_AUTO_TEST_CASE(example_joiner_test_stickyness) {
-  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet","--binary_parser","--cb_explore_adf"});
+BOOST_AUTO_TEST_CASE(example_joiner_test_stickyness)
+{
+  auto options = VW::make_unique<VW::config::options_cli>(
+      std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   example_joiner joiner(vw.get());
 
   BOOST_CHECK_EQUAL(joiner.joiner_ready(), false);
 
-  //all values but problem type have a default value
+  // all values but problem type have a default value
   joiner.set_problem_type_config(v2::ProblemType_CB, false);
   BOOST_CHECK_EQUAL(joiner.problem_type_config(), v2::ProblemType_CB);
 

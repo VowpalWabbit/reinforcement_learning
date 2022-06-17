@@ -14,7 +14,8 @@ ERROR_CODE_DEFINITION(12, last_modified_not_found, "Last-Modified http header no
 ERROR_CODE_DEFINITION(13, last_modified_invalid, "Unable to parse Last-Modified http header as date-time")
 ERROR_CODE_DEFINITION(14, bad_content_length, "Content-Length header not set or set to zero")
 ERROR_CODE_DEFINITION(15, exception_during_http_req, "http request exception. ")
-ERROR_CODE_DEFINITION(16, model_export_frequency_not_provided, "Export frequency of model not specified in configuration.")
+ERROR_CODE_DEFINITION(
+    16, model_export_frequency_not_provided, "Export frequency of model not specified in configuration.")
 ERROR_CODE_DEFINITION(17, bad_time_interval, "Bad time interval string.  Format should be hh:mm:ss")
 ERROR_CODE_DEFINITION(18, data_callback_exception, "Background data callback threw an exception. ")
 ERROR_CODE_DEFINITION(19, data_callback_not_set, "Data callback handler not set")
@@ -26,9 +27,12 @@ ERROR_CODE_DEFINITION(24, model_update_error, "Error updating model: ")
 ERROR_CODE_DEFINITION(25, model_rank_error, "Error while ranking actions using model: ")
 ERROR_CODE_DEFINITION(26, pdf_sampling_error, "")
 ERROR_CODE_DEFINITION(27, eh_connstr_parse_error, "Unable to parse event hub connection string.")
-ERROR_CODE_DEFINITION(28, unhandled_background_error_occurred, "A background thread encountered an error but there was no error handler registered. Register an error handler to see the error code and message.")
+ERROR_CODE_DEFINITION(28, unhandled_background_error_occurred,
+    "A background thread encountered an error but there was no error handler registered. Register an error handler to "
+    "see the error code and message.")
 ERROR_CODE_DEFINITION(29, thread_unresponsive_timeout, "A background thread exceeded the watchdog timer.")
-ERROR_CODE_DEFINITION(30, incorrect_buffer_preamble_size, "Buffer preamble is pre-allocated and does not match the size requested.")
+ERROR_CODE_DEFINITION(
+    30, incorrect_buffer_preamble_size, "Buffer preamble is pre-allocated and does not match the size requested.")
 ERROR_CODE_DEFINITION(31, serialize_unknown_outcome_type, "Unable to serialize unknown outcome type.")
 ERROR_CODE_DEFINITION(32, preamble_error, "Unable to read or write the preamble.")
 ERROR_CODE_DEFINITION(33, file_open_error, "Unable to open file.")

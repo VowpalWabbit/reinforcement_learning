@@ -1,15 +1,17 @@
 #pragma once
 
+#include "live_model.h"
+#include "ranking_response.h"
+
 #include <fstream>
 #include <string>
 #include <vector>
 
-#include "live_model.h"
-#include "ranking_response.h"
-
-class test_data_provider {
+class test_data_provider
+{
 public:
-  test_data_provider(const std::string& experiment_name, size_t threads, size_t features, size_t actions, size_t slots, bool _is_float_outcome, size_t reward_ratio);
+  test_data_provider(const std::string& experiment_name, size_t threads, size_t features, size_t actions, size_t slots,
+      bool _is_float_outcome, size_t reward_ratio);
 
   std::string create_event_id(size_t thread_id, size_t example_id) const;
   std::vector<std::string> create_event_ids(size_t thread_id, size_t example_id) const;
@@ -22,7 +24,8 @@ public:
 
   bool is_rewarded(size_t thread_id, size_t example_id) const;
 
-  int report_outcome(reinforcement_learning::live_model* rl, size_t thread_id, size_t example_id, reinforcement_learning::api_status* status) const;
+  int report_outcome(reinforcement_learning::live_model* rl, size_t thread_id, size_t example_id,
+      reinforcement_learning::api_status* status) const;
 
 private:
   std::string create_action_features(size_t actions, size_t features, size_t example_id) const;

@@ -1,16 +1,18 @@
 #define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
-#   define BOOST_TEST_MODULE Main
+#  define BOOST_TEST_MODULE Main
 #endif
+
+#include "utility/http_client.h"
+
+#include "api_status.h"
+#include "config_utility.h"
+#include "configuration.h"
+#include "constants.h"
+#include "err_constants.h"
 
 #include <boost/test/unit_test.hpp>
 #include <unordered_map>
-#include "utility/http_client.h"
-#include "constants.h"
-#include "api_status.h"
-#include "err_constants.h"
-#include "config_utility.h"
-#include "configuration.h"
 
 namespace r = reinforcement_learning;
 namespace u = reinforcement_learning::utility;

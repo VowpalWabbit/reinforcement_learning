@@ -1,25 +1,25 @@
 #define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
-#   define BOOST_TEST_MODULE Main
+#  define BOOST_TEST_MODULE Main
 #endif
 
-#include <boost/test/unit_test.hpp>
-#include "mock_util.h"
-#include "live_model.h"
-#include "config_utility.h"
-#include "constants.h"
-#include "model_mgmt.h"
 #include "api_status.h"
-#include "err_constants.h"
+#include "config_utility.h"
 #include "console_tracer.h"
+#include "constants.h"
+#include "err_constants.h"
+#include "live_model.h"
+#include "mock_util.h"
+#include "model_mgmt.h"
 
+#include <boost/test/unit_test.hpp>
 #include <mutex>
 
 #ifdef __GNUG__
 
 // Fakeit does not work with GCC's devirtualization
 // which is enabled with -O2 (the default) or higher.
-#pragma GCC optimize("no-devirtualize")
+#  pragma GCC optimize("no-devirtualize")
 
 #endif
 
@@ -43,8 +43,10 @@ const auto JSON_CFG = R"(
   )";
 const auto JSON_CONTEXT = R"({"_multi":[{},{}]})";
 
-struct vector_tracer : r::i_trace {
-  void log(int log_level, const std::string& msg) override {
+struct vector_tracer : r::i_trace
+{
+  void log(int log_level, const std::string& msg) override
+  {
     std::unique_lock<std::mutex> mlock(mutex);
     data.emplace_back(msg);
   }
@@ -53,12 +55,14 @@ struct vector_tracer : r::i_trace {
 };
 
 vector_tracer* the_tracer = new vector_tracer();
-int vector_trace_create(r::i_trace** retval, const u::configuration&, r::i_trace* trace_logger, r::api_status* status) {
+int vector_trace_create(r::i_trace** retval, const u::configuration&, r::i_trace* trace_logger, r::api_status* status)
+{
   *retval = the_tracer;
   return err::success;
 }
 
-BOOST_AUTO_TEST_CASE(test_trace_logging) {
+BOOST_AUTO_TEST_CASE(test_trace_logging)
+{
   auto mock_logger = get_mock_sender(r::error_code::success);
   auto mock_data_transport = get_mock_data_transport();
   auto mock_model = get_mock_model(r::model_management::model_type_t::CB);
@@ -67,24 +71,25 @@ BOOST_AUTO_TEST_CASE(test_trace_logging) {
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
   auto model_factory = get_mock_model_factory(mock_model.get());
 
-  //create a simple ds configuration
+  // create a simple ds configuration
   u::configuration config;
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::EH_TEST, "true");
-
 
   config.set(r::name::TRACE_LOG_IMPLEMENTATION, "VectorTracer");
   r::trace_logger_factory.register_type("VectorTracer", vector_trace_create);
 
   r::api_status status;
 
-  //create the ds live_model, and initialize it with the config
-  r::live_model ds(config, nullptr, nullptr, &r::trace_logger_factory, data_transport_factory.get(), model_factory.get(), logger_factory.get());
+  // create the ds live_model, and initialize it with the config
+  r::live_model ds(config, nullptr, nullptr, &r::trace_logger_factory, data_transport_factory.get(),
+      model_factory.get(), logger_factory.get());
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
   BOOST_CHECK_EQUAL(the_tracer->data[0], "API Tracing initialized");
 }
 
-BOOST_AUTO_TEST_CASE(test_console_logging) {
+BOOST_AUTO_TEST_CASE(test_console_logging)
+{
   reinforcement_learning::console_tracer trace;
   trace.log(0, "Test message");
 }
