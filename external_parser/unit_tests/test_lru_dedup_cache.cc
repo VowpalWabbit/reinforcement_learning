@@ -1,9 +1,9 @@
+#include <boost/test/unit_test.hpp>
+
 #include "lru_dedup_cache.h"
 #include "parse_example_external.h"
 #include "test_common.h"
 #include "vw/config/options_cli.h"
-
-#include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE(test_lru_add_new_examples_to_cache)
 {

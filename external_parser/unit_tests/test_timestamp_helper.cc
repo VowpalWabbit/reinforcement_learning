@@ -1,6 +1,7 @@
+#include <boost/test/unit_test.hpp>
+
 #include "event_processors/timestamp_helper.h"
 
-#include <boost/test/unit_test.hpp>
 #include <thread>
 
 // gmt timestamp generation as used in rlclientlib/time_helper.cc

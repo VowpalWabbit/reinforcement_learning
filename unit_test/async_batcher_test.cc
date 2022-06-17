@@ -3,6 +3,7 @@
 #  define BOOST_TEST_MODULE Main
 #endif
 #include "logger/async_batcher.h"
+#include <boost/test/unit_test.hpp>
 
 #include "data_buffer.h"
 #include "err_constants.h"
@@ -10,7 +11,6 @@
 #include "serialization/json_serializer.h"
 #include "vw/core/vw_math.h"
 
-#include <boost/test/unit_test.hpp>
 #include <memory>
 #include <string>
 #include <vector>

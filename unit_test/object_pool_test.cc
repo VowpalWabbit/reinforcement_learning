@@ -3,9 +3,9 @@
 #  define BOOST_TEST_MODULE Main
 #endif
 
-#include "utility/versioned_object_pool.h"
-
 #include <boost/test/unit_test.hpp>
+
+#include "utility/versioned_object_pool.h"
 
 using namespace reinforcement_learning;
 using namespace reinforcement_learning::utility;

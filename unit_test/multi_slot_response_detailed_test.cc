@@ -4,11 +4,11 @@
 #endif
 
 #include "multi_slot_response_detailed.h"
+#include <boost/test/unit_test.hpp>
 
 #include "api_status.h"
 #include "slot_ranking.h"
 
-#include <boost/test/unit_test.hpp>
 #include <string>
 
 using namespace reinforcement_learning;

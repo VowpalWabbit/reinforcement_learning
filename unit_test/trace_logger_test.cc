@@ -3,6 +3,8 @@
 #  define BOOST_TEST_MODULE Main
 #endif
 
+#include <boost/test/unit_test.hpp>
+
 #include "api_status.h"
 #include "config_utility.h"
 #include "console_tracer.h"
@@ -12,7 +14,6 @@
 #include "mock_util.h"
 #include "model_mgmt.h"
 
-#include <boost/test/unit_test.hpp>
 #include <mutex>
 
 #ifdef __GNUG__

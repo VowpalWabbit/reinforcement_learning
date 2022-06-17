@@ -1,9 +1,9 @@
+#include <boost/test/unit_test.hpp>
+
 #include "joiners/example_joiner.h"
 #include "test_common.h"
 #include "vw/config/options_cli.h"
 #include "vw/core/parse_primitives.h"
-
-#include <boost/test/unit_test.hpp>
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 const int DEFAULT_REWARD = -1000;

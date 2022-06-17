@@ -3,15 +3,15 @@
 #  define BOOST_TEST_MODULE Main
 #endif
 
-#include "utility/http_client.h"
+#include <boost/test/unit_test.hpp>
 
 #include "api_status.h"
 #include "config_utility.h"
 #include "configuration.h"
 #include "constants.h"
 #include "err_constants.h"
+#include "utility/http_client.h"
 
-#include <boost/test/unit_test.hpp>
 #include <unordered_map>
 
 namespace r = reinforcement_learning;

@@ -4,7 +4,6 @@
 #endif
 
 #include "str_util.h"
-
 #include <boost/test/unit_test.hpp>
 
 using namespace reinforcement_learning::utility;

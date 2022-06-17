@@ -4,10 +4,9 @@
 #endif
 
 #include "multistep.h"
+#include <boost/test/unit_test.hpp>
 
 #include "ranking_response.h"
-
-#include <boost/test/unit_test.hpp>
 
 using namespace reinforcement_learning;
 

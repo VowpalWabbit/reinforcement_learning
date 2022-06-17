@@ -3,10 +3,10 @@
 #  define BOOST_TEST_MODULE Main
 #endif
 #include "vw/explore/explore.h"
+#include <boost/test/unit_test.hpp>
 
 #include "ranking_response.h"
 
-#include <boost/test/unit_test.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 

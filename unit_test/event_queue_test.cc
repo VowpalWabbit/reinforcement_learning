@@ -4,11 +4,11 @@
 #endif
 
 #include "logger/event_queue.h"
+#include <boost/test/unit_test.hpp>
 
 #include "data_buffer.h"
 #include "err_constants.h"
 
-#include <boost/test/unit_test.hpp>
 #include <functional>
 #include <thread>
 

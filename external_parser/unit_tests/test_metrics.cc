@@ -1,11 +1,11 @@
+#include <boost/test/unit_test.hpp>
+
 #include "parse_example_external.h"
 #include "rapidjson/document.h"
 #include "test_common.h"
 #include "vw/config/options_cli.h"
 #include "vw/core/parse_primitives.h"
 #include "vw/io/logger.h"
-
-#include <boost/test/unit_test.hpp>
 
 using namespace rapidjson;
 

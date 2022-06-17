@@ -4,6 +4,8 @@
 #  define BOOST_TEST_MODULE Main
 #endif
 
+#include <boost/test/unit_test.hpp>
+
 #include "api_status.h"
 #include "config_utility.h"
 #include "constants.h"
@@ -17,7 +19,6 @@
 #include "sender.h"
 #include "str_util.h"
 
-#include <boost/test/unit_test.hpp>
 #include <thread>
 #include <vector>
 

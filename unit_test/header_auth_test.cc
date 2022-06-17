@@ -3,13 +3,13 @@
 #  define BOOST_TEST_MODULE Main
 #endif
 
+#include <boost/test/unit_test.hpp>
+
 #include "config_utility.h"
 #include "constants.h"
 #include "utility/header_authorization.h"
 
 #include <cpprest/http_headers.h>
-
-#include <boost/test/unit_test.hpp>
 
 namespace r = reinforcement_learning;
 namespace u = reinforcement_learning::utility;

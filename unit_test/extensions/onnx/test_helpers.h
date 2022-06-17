@@ -1,4 +1,6 @@
 #pragma once
+#include <boost/test/unit_test.hpp>
+
 #include "api_status.h"
 #include "err_constants.h"
 #include "global_fixture.h"
@@ -8,7 +10,6 @@
 #include <core/session/onnxruntime_cxx_api.h>
 #include <cpprest/asyncrt_utils.h>
 
-#include <boost/test/unit_test.hpp>
 #include <map>
 #include <sstream>
 #include <tuple>

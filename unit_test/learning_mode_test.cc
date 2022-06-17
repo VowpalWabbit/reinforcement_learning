@@ -4,10 +4,9 @@
 #endif
 
 #include "learning_mode.h"
+#include <boost/test/unit_test.hpp>
 
 #include "constants.h"
-
-#include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE(learning_mode_apprentice_lower_case)
 {

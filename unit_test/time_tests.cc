@@ -3,9 +3,10 @@
 #  define BOOST_TEST_MODULE Main
 #endif
 
+#include <boost/test/unit_test.hpp>
+
 #include "time_helper.h"
 
-#include <boost/test/unit_test.hpp>
 #include <iostream>
 namespace r = reinforcement_learning;
 

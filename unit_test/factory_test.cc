@@ -3,11 +3,11 @@
 #  define BOOST_TEST_MODULE Main
 #endif
 
+#include <boost/test/unit_test.hpp>
+
 #include "constants.h"
 #include "err_constants.h"
 #include "object_factory.h"
-
-#include <boost/test/unit_test.hpp>
 
 namespace r = reinforcement_learning;
 namespace u = reinforcement_learning::utility;

@@ -3,9 +3,9 @@
 #  define BOOST_TEST_MODULE Main
 #endif
 
-#include "api_status.h"
-
 #include <boost/test/unit_test.hpp>
+
+#include "api_status.h"
 
 namespace err = reinforcement_learning::error_code;
 

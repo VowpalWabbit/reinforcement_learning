@@ -4,11 +4,10 @@
 #endif
 
 #include "data_buffer.h"
+#include <boost/test/unit_test.hpp>
 
 #include "err_constants.h"
 #include "utility/data_buffer_streambuf.h"
-
-#include <boost/test/unit_test.hpp>
 
 using namespace reinforcement_learning;
 using namespace utility;

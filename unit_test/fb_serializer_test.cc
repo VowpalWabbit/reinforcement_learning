@@ -4,14 +4,13 @@
 #endif
 
 #include "serialization/fb_serializer.h"
+#include <boost/test/unit_test.hpp>
 
 #include "api_status.h"
 #include "constants.h"
 #include "learning_mode.h"
 #include "ranking_event.h"
 #include "serialization/payload_serializer.h"
-
-#include <boost/test/unit_test.hpp>
 
 using namespace reinforcement_learning;
 using namespace logger;

@@ -3,11 +3,11 @@
 #  define BOOST_TEST_MODULE Main
 #endif
 
+#include <boost/test/unit_test.hpp>
+
 #include "logger/flatbuffer_allocator.h"
 #include "ranking_event.h"
 #include "utility/data_buffer.h"
-
-#include <boost/test/unit_test.hpp>
 
 using namespace reinforcement_learning;
 

@@ -3,17 +3,16 @@
 #  define BOOST_TEST_MODULE Main
 #endif
 
-#include "logger/http_transport_client.h"
+#include <boost/test/unit_test.hpp>
 
 #include "config_utility.h"
 #include "err_constants.h"
+#include "logger/http_transport_client.h"
 #include "logger/preamble.h"
 #include "mock_http_client.h"
 #include "utility/data_buffer_streambuf.h"
 #include "utility/eventhub_http_authorization.h"
 #include "utility/header_authorization.h"
-
-#include <boost/test/unit_test.hpp>
 
 namespace reinforcement_learning
 {

@@ -3,10 +3,11 @@
 #  define BOOST_TEST_MODULE Main
 #endif
 
+#include <boost/test/unit_test.hpp>
+
 #include "err_constants.h"
 #include "utility/context_helper.h"
 
-#include <boost/test/unit_test.hpp>
 #include <map>
 
 using namespace reinforcement_learning;

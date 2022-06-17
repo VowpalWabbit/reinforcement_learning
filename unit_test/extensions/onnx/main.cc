@@ -1,11 +1,12 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE Main
+#include <boost/test/unit_test.hpp>
+
 #include "global_fixture.h"
 #include "onnx_extension.h"
 
 #include <core/session/onnxruntime_cxx_api.h>
 
-#include <boost/test/unit_test.hpp>
 #include <memory>
 
 GlobalConfig::GlobalConfig()

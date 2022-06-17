@@ -1,9 +1,9 @@
+#include <boost/test/unit_test.hpp>
+
 #include "joiners/example_joiner.h"
 #include "parse_example_binary.h"
 #include "test_common.h"
 #include "vw/config/options_cli.h"
-
-#include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE(test_log_file_with_bad_magic)
 {

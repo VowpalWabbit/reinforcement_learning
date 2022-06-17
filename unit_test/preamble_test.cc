@@ -4,13 +4,12 @@
 #endif
 
 #include "logger/preamble.h"
+#include <boost/test/unit_test.hpp>
 
 #include "data_buffer.h"
 #include "err_constants.h"
 #include "logger/message_type.h"
 #include "logger/preamble_sender.h"
-
-#include <boost/test/unit_test.hpp>
 
 using namespace reinforcement_learning::utility;
 using namespace reinforcement_learning::logger;

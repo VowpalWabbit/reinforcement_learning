@@ -3,6 +3,8 @@
 #  define BOOST_TEST_MODULE Main
 #endif
 
+#include <boost/test/unit_test.hpp>
+
 #include "config_utility.h"
 #include "configuration.h"
 #include "factory_resolver.h"
@@ -11,7 +13,6 @@
 #include "onnx_extension.h"
 #include "test_helpers.h"
 
-#include <boost/test/unit_test.hpp>
 #include <iostream>
 
 namespace r = reinforcement_learning;

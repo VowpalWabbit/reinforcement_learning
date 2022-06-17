@@ -1,10 +1,10 @@
+#include <boost/test/unit_test.hpp>
+
 #include "parse_example_external.h"
 #include "test_common.h"
 #include "vw/config/options_cli.h"
 #include "vw/core/ccb_label.h"
 #include "vw/core/parse_primitives.h"
-
-#include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_CASE(cb_simple)
 {

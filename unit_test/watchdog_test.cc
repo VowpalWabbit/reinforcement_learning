@@ -3,12 +3,12 @@
 #  define BOOST_TEST_MODULE Main
 #endif
 #include "utility/watchdog.h"
+#include <boost/test/unit_test.hpp>
 
 #include "common_test_utils.h"
 #include "str_util.h"
 
 #include <atomic>
-#include <boost/test/unit_test.hpp>
 #include <iostream>
 
 using namespace reinforcement_learning;

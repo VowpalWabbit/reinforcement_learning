@@ -1,6 +1,7 @@
+#include <boost/test/unit_test.hpp>
+
 #include "rl_string_view.h"
 
-#include <boost/test/unit_test.hpp>
 #include <string>
 
 bool is_invoked_with(const std::string& arg)

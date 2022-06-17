@@ -1,11 +1,11 @@
+#include <boost/test/unit_test.hpp>
+
 #include "parse_example_external.h"
 #include "test_common.h"
 #include "vw/config/options_cli.h"
 #include "vw/core/parse_primitives.h"
 
 #include <stdio.h>
-
-#include <boost/test/unit_test.hpp>
 
 std::string get_json_event(
     std::string infile_path, std::string outfile_path, v2::ProblemType problem_type = v2::ProblemType_CB)

@@ -4,13 +4,12 @@
 #endif
 
 #include "configuration.h"
+#include <boost/test/tools/floating_point_comparison.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include "api_status.h"
 #include "config_utility.h"
 #include "constants.h"
-
-#include <boost/test/tools/floating_point_comparison.hpp>
-#include <boost/test/unit_test.hpp>
 
 namespace util = reinforcement_learning::utility;
 namespace err = reinforcement_learning::error_code;

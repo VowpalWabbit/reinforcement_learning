@@ -4,6 +4,7 @@
 #endif
 
 #include "serialization/payload_serializer.h"
+#include <boost/test/unit_test.hpp>
 
 #include "action_flags.h"
 #include "generated/v2/CaEvent_generated.h"
@@ -11,8 +12,6 @@
 #include "generated/v2/MultiSlotEvent_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
 #include "ranking_response.h"
-
-#include <boost/test/unit_test.hpp>
 
 using namespace reinforcement_learning;
 using namespace reinforcement_learning::logger;

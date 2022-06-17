@@ -4,6 +4,7 @@
 #endif
 
 #include "model_mgmt.h"
+#include <boost/test/unit_test.hpp>
 
 #include "api_status.h"
 #include "config_utility.h"
@@ -17,7 +18,6 @@
 #include "utility/periodic_background_proc.h"
 #include "utility/watchdog.h"
 
-#include <boost/test/unit_test.hpp>
 #include <regex>
 #include <unordered_map>
 

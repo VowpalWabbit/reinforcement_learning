@@ -4,12 +4,11 @@
 #endif
 
 #include "vw_model/safe_vw.h"
+#include <boost/test/unit_test.hpp>
 
 #include "data.h"
 #include "model_mgmt.h"
 #include "utility/versioned_object_pool.h"
-
-#include <boost/test/unit_test.hpp>
 
 using namespace reinforcement_learning;
 using namespace reinforcement_learning::utility;

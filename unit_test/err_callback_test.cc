@@ -3,10 +3,10 @@
 #  define BOOST_TEST_MODULE Main
 #endif
 
+#include <boost/test/unit_test.hpp>
+
 #include "api_status.h"
 #include "error_callback_fn.h"
-
-#include <boost/test/unit_test.hpp>
 
 using namespace reinforcement_learning;
 using namespace std;

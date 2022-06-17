@@ -1,9 +1,9 @@
+#include <boost/test/unit_test.hpp>
+
 #include "joiners/example_joiner.h"
 #include "test_common.h"
 #include "vw/config/options_cli.h"
 #include "vw/core/memory.h"
-
-#include <boost/test/unit_test.hpp>
 
 void process(
     VW::workspace* vw, example_joiner& joiner, VW::multi_ex& examples, std::string int_file, std::string obs_file)

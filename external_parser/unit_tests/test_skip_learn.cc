@@ -1,11 +1,11 @@
+#include <boost/test/unit_test.hpp>
+
 #include "joiners/example_joiner.h"
 #include "parse_example_binary.h"
 #include "test_common.h"
 #include "vw/config/options_cli.h"
 #include "vw/core/parse_primitives.h"
 #include "vw/core/reductions/conditional_contextual_bandit.h"
-
-#include <boost/test/unit_test.hpp>
 
 void should_not_add_examples(std::string& infile, v2::ProblemType problem_type = v2::ProblemType_CB)
 {

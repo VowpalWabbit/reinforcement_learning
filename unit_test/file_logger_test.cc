@@ -4,10 +4,10 @@
 #endif
 
 #include "logger/file/file_logger.h"
+#include <boost/test/unit_test.hpp>
 
 #include "err_constants.h"
 
-#include <boost/test/unit_test.hpp>
 #include <cstdio>
 
 namespace rl = reinforcement_learning;
