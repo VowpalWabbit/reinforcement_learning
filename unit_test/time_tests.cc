@@ -40,6 +40,6 @@ BOOST_AUTO_TEST_CASE(time_usage)
 //		auto sec = total_sec % 60;
 //		auto min = (total_sec - sec)/60;
 //		std::cout << ts.month << "/" << ts.day << "/" << ts.year+1900 << " " << ts.hour << ":" << min << ":" <<
-//sec << "." << msec << "." << usec << std::endl;
+// sec << "." << msec << "." << usec << std::endl;
 //	}
 // }
