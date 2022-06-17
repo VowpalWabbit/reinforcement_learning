@@ -57,7 +57,7 @@ jobs:
         shell: bash
         run: |
           pip install pytype
-          pip install numpy sympy flatbuffers zstandard zstd shutil
+          pip install numpy sympy flatbuffers zstandard zstd
           pip install torch torchvision torchaudio
           pip install hyperopt matplotlib seaborn
       - name: Install wheel
