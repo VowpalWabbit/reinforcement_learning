@@ -190,7 +190,7 @@ void test_loop::cb_loop(size_t thread_id) const
 
 std::vector<const char*> to_const_char(const std::vector<std::string>& ids)
 {
-  std::vector<const char*> result;
+  std::vector<const char*> result(ids.size());
   for (const auto& id : ids) { result.push_back(id.c_str()); }
   return result;
 }

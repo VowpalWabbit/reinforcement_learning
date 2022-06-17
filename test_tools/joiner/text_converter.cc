@@ -1,3 +1,5 @@
+#include "text_converter.h"
+
 #include "../../rlclientlib/generated/v1/OutcomeEvent_generated.h"
 #include "../../rlclientlib/generated/v1/RankingEvent_generated.h"
 #include "../../rlclientlib/logger/message_type.h"
@@ -9,8 +11,6 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <string>
-#include <vector>
 // namespace aliases
 namespace rlog = reinforcement_learning::logger;
 namespace flat = reinforcement_learning::messages::flatbuff;

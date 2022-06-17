@@ -36,7 +36,7 @@ mock_http_client::response_t mock_http_client::request(mock_http_client::method_
   return request(req);
 }
 
-void mock_http_client::set_responder(http::method method, std::function<response_fn> responder)
+void mock_http_client::set_responder(const http::method& method, const std::function<response_fn>& responder)
 {
   _responders[method] = responder;
 }

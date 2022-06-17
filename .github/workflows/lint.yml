@@ -84,7 +84,8 @@ jobs:
         with:
           python-version: 3.9
       - run: pip install black black[jupyter]
-      - shell: bash
+      - name: Run python formatting
+        shell: bash
         run: |
           python -m black --check . --exclude ext_libs/ || (echo -e "---\nTo fix, run:\n\tpython -m black . --exclude ext_libs"; exit 1)
   cpp-formatting:
@@ -135,11 +136,12 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: Install Ninja
+      - name: Install dependencies
         shell: bash
         run: |
           apt update
           apt install -y libspdlog-dev libfmt-dev libboost-math-dev
+          apt install -y jq
       - name: Run clang tidy
         shell: bash
         run: ./.scripts/linux/run-clang-tidy.sh

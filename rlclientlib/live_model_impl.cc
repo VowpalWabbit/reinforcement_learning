@@ -799,7 +799,7 @@ int reset_chosen_action_multi_slot(multi_slot_response_detailed& response, const
 void autogenerate_missing_uuids(
     const std::map<size_t, std::string>& found_ids, std::vector<std::string>& complete_ids, uint64_t seed_shift)
 {
-  for (auto ids : found_ids) { complete_ids[ids.first] = ids.second; }
+  for (const auto& ids : found_ids) { complete_ids[ids.first] = ids.second; }
 
   for (int i = 0; i < complete_ids.size(); i++)
   {

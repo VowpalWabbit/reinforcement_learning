@@ -447,12 +447,12 @@ public:
   /**
    * @brief Move constructor for live model object.
    */
-  live_model(live_model&& other);
+  live_model(live_model&& other) noexcept;
 
   /**
    * @brief Move assignment operator swaps implementation.
    */
-  live_model& operator=(live_model&& other);
+  live_model& operator=(live_model&& other) noexcept;
 
   live_model(
       const live_model&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation

@@ -22,7 +22,7 @@ live_model::live_model(const utility::configuration& config, error_fn fn, void* 
       new live_model_impl(config, fn, err_context, trace_factory, t_factory, m_factory, s_factory, time_prov_factory));
 }
 
-live_model::live_model(live_model&& other)
+live_model::live_model(live_model&& other) noexcept
 {
   std::swap(_pimpl, other._pimpl);
   _initialized = other._initialized;
@@ -30,7 +30,7 @@ live_model::live_model(live_model&& other)
 
 live_model::~live_model() = default;
 
-live_model& live_model::operator=(live_model&& other)
+live_model& live_model::operator=(live_model&& other) noexcept
 {
   std::swap(_pimpl, other._pimpl);
   _initialized = other._initialized;

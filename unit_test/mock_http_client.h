@@ -18,7 +18,7 @@ public:
   virtual response_t request(method_t method) override;
   virtual response_t request(request_t request) override;
 
-  void set_responder(http::method, std::function<response_fn> custom_responder);
+  void set_responder(const http::method&, const std::function<response_fn>& custom_responder);
 
 private:
   static void handle_get(const http_request& message, http_response& resp);

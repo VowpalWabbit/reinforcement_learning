@@ -617,7 +617,7 @@ int pseudo_random(int seed)
 }
 
 int run_config(int action, int count, int initial_seed, bool gen_random_reward, bool enable_apprentice_mode,
-    int deferred_action_count, std::string config_file, std::mt19937& rng, float epsilon = 0.0f)
+    int deferred_action_count, const std::string& config_file, std::mt19937& rng, float epsilon = 0.0f)
 {
   u::configuration config;
 
@@ -704,7 +704,7 @@ int main(int argc, char* argv[])
 
     if (vm.count("deferred_action_count") > 0 &&
         !std::any_of(deferrable_interactions.begin(), deferrable_interactions.end(),
-            [action_name](std::string evt_type) { return action_name == evt_type; }))
+            [action_name](const std::string& evt_type) { return action_name == evt_type; }))
     {
       throw std::runtime_error("'--deferred_action' should be used with interaction event");
     }

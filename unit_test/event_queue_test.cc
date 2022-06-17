@@ -21,8 +21,8 @@ public:
   test_event() {}
   test_event(const string& id) : event(id.c_str(), timestamp{}) {}
 
-  test_event(test_event&& other) : event(std::move(other)) {}
-  test_event& operator=(test_event&& other)
+  test_event(test_event&& other) noexcept : event(std::move(other)) {}
+  test_event& operator=(test_event&& other) noexcept
   {
     if (&other != this) event::operator=(std::move(other));
     return *this;
@@ -35,7 +35,7 @@ public:
 
 using Func = std::function<int(test_event&, api_status*)>;
 using namespace std::placeholders;
-int passthru(test_event& out_evt, api_status*, std::shared_ptr<test_event> evt_sp)
+int passthru(test_event& out_evt, api_status*, const std::shared_ptr<test_event>& evt_sp)
 {
   out_evt = std::move(*evt_sp);
   return reinforcement_learning::error_code::success;

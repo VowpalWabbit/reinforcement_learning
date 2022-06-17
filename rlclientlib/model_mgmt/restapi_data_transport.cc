@@ -127,7 +127,7 @@ int restapi_data_transport::get_data(model_data& ret, api_status* status)
           ->request(request)
           // Handle response headers arriving.
           .then(
-              [&](pplx::task<http_response> resp_task)
+              [&](const pplx::task<http_response>& resp_task)
               {
                 auto response = resp_task.get();
                 if (response.status_code() != 200)

@@ -1,4 +1,7 @@
 #pragma once
+#include <string>
+#include <vector>
+
 namespace reinforcement_learning
 {
 namespace joiner
