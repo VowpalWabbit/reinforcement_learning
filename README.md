@@ -88,7 +88,7 @@ cmake --build build --target all -j 4
 
 #### Dependencies
 ```cmd
-vcpkg install --triplet x64-windows zlib boost-system boost-program-options boost-test boost-align boost-foreach boost-math boost-uuid cpprestsdk flatbuffers
+vcpkg install --triplet x64-windows zlib boost-system boost-program-options boost-test boost-align boost-foreach boost-math boost-uuid cpprestsdk flatbuffers openssl
 ```
 
 Add the flatbuffers tool directory to your PATH: `<vcpkg_root>\installed\x64-windows\tools\flatbuffers`
