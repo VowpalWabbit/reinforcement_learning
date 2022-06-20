@@ -20,14 +20,15 @@ string& str_util::to_lower(string& sval)
 
 string& str_util::ltrim(std::string& sval)
 {
-  sval.erase(sval.begin(), std::find_if(sval.begin(), sval.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+  sval.erase(
+      sval.begin(), std::find_if(sval.begin(), sval.end(), [](unsigned char ch) { return std::isspace(ch) == 0; }));
   return sval;
 }
 
 string& str_util::rtrim(std::string& sval)
 {
-  sval.erase(
-      std::find_if(sval.rbegin(), sval.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), sval.end());
+  sval.erase(std::find_if(sval.rbegin(), sval.rend(), [](unsigned char ch) { return std::isspace(ch) == 0; }).base(),
+      sval.end());
   return sval;
 }
 

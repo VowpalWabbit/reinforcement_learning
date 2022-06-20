@@ -58,14 +58,14 @@ int file_model_loader::get_data(model_data& data, api_status* status)
     // File exists read from it
     const auto curr_file_size = in_strm.tellg();
 
-    time_t curr_last_modified;
+    time_t curr_last_modified = 0;
     RETURN_IF_FAIL(get_file_modified_time(curr_last_modified, status));
 
     // If file has the same size and same timestamp, no need to reload
-    if (curr_last_modified == _last_modified && (size_t)curr_file_size == _datasz) return error_code::success;
+    if (curr_last_modified == _last_modified && (size_t)curr_file_size == _datasz) { return error_code::success; }
 
     in_strm.seekg(0, std::ios::beg);
-    const auto buff = data.alloc(curr_file_size);
+    auto* const buff = data.alloc(curr_file_size);
     if (!in_strm.read(buff, curr_file_size))
     {
       RETURN_ERROR_LS(_trace, status, file_read_error) << " file_name = " << _file_name;

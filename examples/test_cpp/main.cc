@@ -24,11 +24,11 @@ int main(int argc, char** argv)
   try
   {
     const auto vm = process_cmd_line(argc, argv);
-    if (is_help(vm)) return 0;
+    if (is_help(vm)) { return 0; }
 
     const size_t num_instances = vm["instances"].as<size_t>();
     std::vector<std::thread> instances;
-    for (size_t i = 0; i < num_instances; ++i) { instances.push_back(std::thread(&run_test_instance, i, vm)); }
+    for (size_t i = 0; i < num_instances; ++i) { instances.emplace_back(&run_test_instance, i, vm); }
     for (size_t i = 0; i < num_instances; ++i) { instances[i].join(); }
   }
   catch (const std::exception& e)

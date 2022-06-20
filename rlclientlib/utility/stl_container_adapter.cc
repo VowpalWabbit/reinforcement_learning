@@ -15,7 +15,7 @@ const stl_container_adapter::value_type& stl_container_adapter::operator[](size_
   return *(_db->preamble_begin() + idx);
 }
 
-void stl_container_adapter::resize(size_t)
+void stl_container_adapter::resize(size_t /*unused*/)
 {
   assert(false);  // Resize is not supported.
 }

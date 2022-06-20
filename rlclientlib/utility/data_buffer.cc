@@ -66,8 +66,8 @@ void data_buffer::resize_body_region(size_t size)
 
   // If body became smaller, change body
   // region settings to sane values
-  if (_body_endoffset >= (_buffer.size())) _body_endoffset = _buffer.size() - 1;
-  if (_body_beginoffset >= (_buffer.size())) _body_beginoffset = _buffer.size() - 1;
+  if (_body_endoffset >= (_buffer.size())) { _body_endoffset = _buffer.size() - 1; }
+  if (_body_beginoffset >= (_buffer.size())) { _body_beginoffset = _buffer.size() - 1; }
 }
 
 data_buffer::value_type* data_buffer::preamble_begin() { return _buffer.data() + _body_beginoffset - _preamble_size; }

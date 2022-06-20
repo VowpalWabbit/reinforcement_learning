@@ -18,7 +18,7 @@ int header_authorization::init(const utility::configuration& config, api_status*
 
 int header_authorization::insert_authorization_header(http_headers& headers, api_status* status, i_trace* trace)
 {
-  if (_api_key.empty()) RETURN_ERROR(trace, status, http_api_key_not_provided);
+  if (_api_key.empty()) { RETURN_ERROR(trace, status, http_api_key_not_provided); }
   headers.add(_http_api_header_key_name, _api_key.c_str());
   return error_code::success;
 }

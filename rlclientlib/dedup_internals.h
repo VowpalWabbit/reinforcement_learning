@@ -23,11 +23,11 @@ public:
   ~dedup_dict() = default;
 
   //! Returns true if the object was found. This doesn't tell the ref count status of that object
-  bool remove_object(generic_event::object_id_t oid, size_t count = 1);
+  bool remove_object(generic_event::object_id_t aid, size_t count = 1);
   //! Returns the object id of the object described by [start, start+length[
   generic_event::object_id_t add_object(const char* start, size_t length);
   //! Return a string_view of the object content, or an empty view if not found
-  string_view get_object(generic_event::object_id_t oid) const;
+  string_view get_object(generic_event::object_id_t aid) const;
 
   size_t size() const;
   int transform_payload_and_add_objects(
@@ -66,7 +66,7 @@ public:
 
   explicit zstd_compressor(int level);
   int compress(generic_event::payload_buffer_t& input, api_status* status) const;
-  int decompress(generic_event::payload_buffer_t& buf, api_status* status) const;
+  static int decompress(generic_event::payload_buffer_t& buf, api_status* status);
 
 private:
   const int _level;

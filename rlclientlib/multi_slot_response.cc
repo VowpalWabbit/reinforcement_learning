@@ -3,10 +3,12 @@
 #include "api_status.h"
 #include "err_constants.h"
 
+#include <utility>
+
 namespace reinforcement_learning
 {
-slot_entry::slot_entry(const std::string& id, uint32_t action_id, float probability)
-    : _id(id), _action_id(action_id), _probability(probability)
+slot_entry::slot_entry(std::string id, uint32_t action_id, float probability)
+    : _id(std::move(id)), _action_id(action_id), _probability(probability)
 {
 }
 

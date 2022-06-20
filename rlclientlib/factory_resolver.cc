@@ -79,8 +79,8 @@ int model_create(m::i_model** retval, const u::configuration& c, i_trace* trace_
   return error_code::success;
 }
 
-int null_tracer_create(i_trace** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
-int console_tracer_create(i_trace** retval, const u::configuration&, i_trace* trace_logger, api_status* status);
+int null_tracer_create(i_trace** retval, const u::configuration& /*cfg*/, i_trace* trace_logger, api_status* status);
+int console_tracer_create(i_trace** retval, const u::configuration& /*cfg*/, i_trace* trace_logger, api_status* status);
 
 int file_sender_create(i_sender** retval, const u::configuration& cfg, const char* file_name,
     error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
@@ -103,7 +103,7 @@ int file_model_loader_create(
   TRACE_INFO(trace_logger, "File model loader created.");
   const char* file_name = config.get(name::MODEL_FILE_NAME, "current");
   const bool file_must_exist = config.get_bool(name::MODEL_FILE_MUST_EXIST, false);
-  auto file_loader = new model_management::file_model_loader(file_name, file_must_exist, trace_logger);
+  auto* file_loader = new model_management::file_model_loader(file_name, file_must_exist, trace_logger);
 
   const auto success = file_loader->init(status);
 

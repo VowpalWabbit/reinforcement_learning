@@ -14,7 +14,7 @@ namespace reinforcement_learning
 queue_mode_enum to_queue_mode_enum(const char* queue_mode)
 {
   if (_stricmp(queue_mode, "BLOCK") == 0) { return queue_mode_enum::BLOCK; }
-  else { return queue_mode_enum::DROP; }
+  return queue_mode_enum::DROP;
 }
 
 namespace utility
@@ -26,7 +26,7 @@ static int get_int(const configuration& config, const char* section, const char*
   ss << section << "." << property;
   auto tmp = ss.str();
   const char* key = tmp.c_str();
-  if (config.get(key, NULL) != nullptr) { return config.get_int(key, defval); }
+  if (config.get(key, nullptr) != nullptr) { return config.get_int(key, defval); }
   return config.get_int(property, defval);
 }
 
@@ -36,7 +36,7 @@ static const char* get_str(const configuration& config, const char* section, con
   ss << section << "." << property;
   auto tmp = ss.str();
   const char* key = tmp.c_str();
-  if (config.get(key, NULL) != nullptr) { return config.get(key, defval); }
+  if (config.get(key, nullptr) != nullptr) { return config.get(key, defval); }
   return config.get(property, defval);
 }
 
@@ -46,13 +46,13 @@ static float get_float(const configuration& config, const char* section, const c
   ss << section << "." << property;
   auto tmp = ss.str();
   const char* key = tmp.c_str();
-  if (config.get(key, NULL) != nullptr) { return config.get_float(key, defval); }
+  if (config.get(key, nullptr) != nullptr) { return config.get_float(key, defval); }
   return config.get_float(property, defval);
 }
 
 static const char* get_default_sender_implmentation(const char* section)
 {
-  if (std::strcmp(section, OBSERVATION_SECTION)) { return value::get_default_observation_sender(); }
+  if (std::strcmp(section, OBSERVATION_SECTION) != 0) { return value::get_default_observation_sender(); }
   return value::get_default_interaction_sender();
 }
 
@@ -67,7 +67,7 @@ events_counter_status get_counter_status(const utility::configuration& config, c
     // only when protocol version is 2 and sender implmentation is INTERACTION_HTTP_API_HOST
     return events_counter_status::ENABLE;
   }
-  else { return events_counter_status::DISABLE; }
+  return events_counter_status::DISABLE;
 }
 
 async_batcher_config get_batcher_config(const configuration& config, const char* section)

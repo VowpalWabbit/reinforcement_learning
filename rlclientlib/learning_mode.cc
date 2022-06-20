@@ -16,8 +16,8 @@ namespace learning
 learning_mode to_learning_mode(const char* learning_mode)
 {
   if (_stricmp(learning_mode, value::LEARNING_MODE_APPRENTICE) == 0) { return APPRENTICE; }
-  else if (_stricmp(learning_mode, value::LEARNING_MODE_ONLINE) == 0) { return ONLINE; }
-  else if (_stricmp(learning_mode, value::LEARNING_MODE_LOGGINGONLY) == 0) { return LOGGINGONLY; }
+  if (_stricmp(learning_mode, value::LEARNING_MODE_ONLINE) == 0) { return ONLINE; }
+  if (_stricmp(learning_mode, value::LEARNING_MODE_LOGGINGONLY) == 0) { return LOGGINGONLY; }
   else { return ONLINE; }
 }
 }  // namespace learning

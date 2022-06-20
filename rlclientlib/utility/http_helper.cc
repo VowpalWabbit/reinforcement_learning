@@ -16,7 +16,7 @@ web::http::client::http_client_config get_http_config(const utility::configurati
   config.set_validate_certificates(!cfg.get_bool(name::HTTP_CLIENT_DISABLE_CERT_VALIDATION, false));
   auto timeout = cfg.get_int(name::HTTP_CLIENT_TIMEOUT, 30);
   // Valid values are 1-30.
-  if (timeout < 1 || timeout > 30) timeout = 30;
+  if (timeout < 1 || timeout > 30) { timeout = 30; }
   config.set_timeout(std::chrono::seconds(timeout));
   return config;
 }

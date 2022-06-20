@@ -50,16 +50,16 @@ private:
    * @param action Action json
    * @return std::string Constructed context json
    */
-  std::string create_context_json(const std::string& cntxt);
-  std::string create_context_json(const std::string& cntxt, const std::string& action);
-  std::string create_context_json(const std::string& cntxt, const std::string& action, const std::string& slots);
+  static std::string create_context_json(const std::string& cntxt);
+  static std::string create_context_json(const std::string& cntxt, const std::string& action);
+  static std::string create_context_json(const std::string& cntxt, const std::string& action, const std::string& slots);
 
   /**
    * @brief Create a event_id used to match choose_rank and report_outcome()
    *
    * @return std::string
    */
-  std::string create_event_id();
+  static std::string create_event_id();
 
   /**
    * @brief Pick a person from the list of people.  Use uniform random.
@@ -83,7 +83,7 @@ private:
    * @param status api_status object for error feedback
    * @return int Error status
    */
-  int load_config_from_json(const std::string& str, reinforcement_learning::utility::configuration& config,
+  static int load_config_from_json(const std::string& file_name, reinforcement_learning::utility::configuration& config,
       reinforcement_learning::api_status* status);
 
   /**
@@ -94,7 +94,8 @@ private:
    * @param status api_status object for error feedback
    * @return int Error status
    */
-  int load_file(const std::string& file_name, std::string& config_str, reinforcement_learning::api_status* status);
+  static int load_file(
+      const std::string& file_name, std::string& config_str, reinforcement_learning::api_status* status);
 
   /**
    * @brief Initialize Inference API

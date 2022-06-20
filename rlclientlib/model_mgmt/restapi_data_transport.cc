@@ -9,6 +9,8 @@
 #include <cpprest/http_client.h>
 #include <cpprest/rawptrstream.h>
 
+#include <utility>
+
 using namespace web;        // Common features like URIs.
 using namespace web::http;  // Common HTTP functionality
 using namespace std::chrono;
@@ -25,9 +27,9 @@ restapi_data_transport::restapi_data_transport(i_http_client* httpcli, i_trace* 
     : _httpcli(httpcli), _datasz{0}, _trace{trace}
 {
 }
-restapi_data_transport::restapi_data_transport(std::unique_ptr<i_http_client>&& httpcli,
-    const utility::configuration& cfg, model_source model_source, i_trace* trace)
-    : _httpcli(std::move(httpcli)), _cfg(cfg), _model_source(model_source), _datasz{0}, _trace{trace}
+restapi_data_transport::restapi_data_transport(
+    std::unique_ptr<i_http_client>&& httpcli, utility::configuration cfg, model_source model_source, i_trace* trace)
+    : _httpcli(std::move(httpcli)), _cfg(std::move(cfg)), _model_source(model_source), _datasz{0}, _trace{trace}
 {
 }
 
@@ -71,17 +73,21 @@ int restapi_data_transport::get_data_info(
             RETURN_IF_FAIL(get_data_info(last_modified, sz, status));
             return error_code::success;
           }
-          else
-            RETURN_ERROR_ARG(
-                _trace, status, http_bad_status_code, "Found: ", response.status_code(), _httpcli->get_url());
+
+          RETURN_ERROR_ARG(
+              _trace, status, http_bad_status_code, "Found: ", response.status_code(), _httpcli->get_url());
         }
         const auto iter = response.headers().find(U("Last-Modified"));
         if (iter == response.headers().end())
+        {
           RETURN_ERROR_ARG(_trace, status, last_modified_not_found, _httpcli->get_url());
+        }
 
         last_modified = ::utility::datetime::from_string(iter->second);
         if (last_modified.to_interval() == 0)
+        {
           RETURN_ERROR_ARG(_trace, status, last_modified_invalid, _httpcli->get_url());
+        }
 
         sz = response.headers().content_length();
 
@@ -112,12 +118,12 @@ int restapi_data_transport::add_authentiction_header(http_headers& header, api_s
 int restapi_data_transport::get_data(model_data& ret, api_status* status)
 {
   ::utility::datetime curr_last_modified;
-  ::utility::size64_t curr_datasz;
+  ::utility::size64_t curr_datasz = 0;
   _method_type = methods::HEAD;
   _retry_get_data = true;
   RETURN_IF_FAIL(get_data_info(curr_last_modified, curr_datasz, status));
 
-  if (curr_last_modified == _last_modified && curr_datasz == _datasz) return error_code::success;
+  if (curr_last_modified == _last_modified && curr_datasz == _datasz) { return error_code::success; }
   _method_type = methods::GET;
   http_request request(_method_type);
   RETURN_IF_FAIL(add_authentiction_header(request.headers(), status));
@@ -131,23 +137,29 @@ int restapi_data_transport::get_data(model_data& ret, api_status* status)
               {
                 auto response = resp_task.get();
                 if (response.status_code() != 200)
+                {
                   RETURN_ERROR_ARG(
                       _trace, status, http_bad_status_code, "Found: ", response.status_code(), _httpcli->get_url());
+                }
 
                 const auto iter = response.headers().find(U("Last-Modified"));
                 if (iter == response.headers().end())
+                {
                   RETURN_ERROR_ARG(_trace, status, last_modified_not_found, _httpcli->get_url());
+                }
 
                 curr_last_modified = ::utility::datetime::from_string(iter->second);
                 if (curr_last_modified.to_interval() == 0)
+                {
                   RETURN_ERROR_ARG(_trace, status, last_modified_invalid,
                       "Found: ", ::utility::conversions::to_utf8string(curr_last_modified.to_string()),
                       _httpcli->get_url());
+                }
 
                 curr_datasz = response.headers().content_length();
                 if (curr_datasz > 0)
                 {
-                  const auto buff = ret.alloc(curr_datasz);
+                  auto* const buff = ret.alloc(curr_datasz);
                   const Concurrency::streams::rawptr_buffer<char> rb(buff, curr_datasz, std::ios::out);
 
                   // Write response body into the file.

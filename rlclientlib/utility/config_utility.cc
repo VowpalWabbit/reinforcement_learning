@@ -100,7 +100,7 @@ int set_eventhub_config(
   std::string access_key_name;
   std::string access_key;
   RETURN_IF_FAIL(parse_eventhub_conn_str(conn_str, host, name, access_key_name, access_key, trace, status));
-  const auto topic = ".eventhub.";
+  const auto* const topic = ".eventhub.";
   cc.set(concat(cfg_root, topic, "host").c_str(), host.c_str());
   cc.set(concat(cfg_root, topic, "name").c_str(), name.c_str());
   cc.set(concat(cfg_root, topic, "keyname").c_str(), access_key_name.c_str());
@@ -184,11 +184,11 @@ int create_from_json(const std::string& config_json, configuration& cc, i_trace*
 
   for (auto const& prop_pair : jsonObj)
   {
-    auto prop_name_raw = prop_pair.name.GetString();
+    const auto* prop_name_raw = prop_pair.name.GetString();
     auto prop_name = std::string(prop_name_raw);
     auto const& prop_value = prop_pair.value;
 
-    const char* string_value;
+    const char* string_value = nullptr;
     if (prop_value.IsString()) { string_value = prop_value.GetString(); }
     else if (prop_value.IsBool()) { string_value = prop_value.GetBool() ? "true" : "false"; }
     else

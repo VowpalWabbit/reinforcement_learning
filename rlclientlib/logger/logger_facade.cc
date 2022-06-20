@@ -252,8 +252,8 @@ int observation_logger_facade::log(const char* event_id, float outcome, api_stat
     case 1:
       return _v1->log(event_id, outcome, status);
     case 2:
-      return _v2->log(
-          event_id, _serializer.numeric_event(outcome), _serializer.type, event_content_type::IDENTITY, status);
+      return _v2->log(event_id, reinforcement_learning::logger::outcome_serializer::numeric_event(outcome),
+          _serializer.type, event_content_type::IDENTITY, status);
     default:
       return protocol_not_supported(status);
   }
@@ -266,8 +266,8 @@ int observation_logger_facade::log(const char* event_id, const char* outcome, ap
     case 1:
       return _v1->log(event_id, outcome, status);
     case 2:
-      return _v2->log(
-          event_id, _serializer.string_event(outcome), _serializer.type, event_content_type::IDENTITY, status);
+      return _v2->log(event_id, reinforcement_learning::logger::outcome_serializer::string_event(outcome),
+          _serializer.type, event_content_type::IDENTITY, status);
     default:
       return protocol_not_supported(status);
   }
@@ -278,7 +278,8 @@ int observation_logger_facade::log(const char* primary_id, int secondary_id, flo
   switch (_version)
   {
     case 2:
-      return _v2->log(primary_id, _serializer.numeric_event(secondary_id, outcome), _serializer.type,
+      return _v2->log(primary_id,
+          reinforcement_learning::logger::outcome_serializer::numeric_event(secondary_id, outcome), _serializer.type,
           event_content_type::IDENTITY, status);
     default:
       return protocol_not_supported(status);
@@ -290,7 +291,8 @@ int observation_logger_facade::log(const char* primary_id, int secondary_id, con
   switch (_version)
   {
     case 2:
-      return _v2->log(primary_id, _serializer.string_event(secondary_id, outcome), _serializer.type,
+      return _v2->log(primary_id,
+          reinforcement_learning::logger::outcome_serializer::string_event(secondary_id, outcome), _serializer.type,
           event_content_type::IDENTITY, status);
     default:
       return protocol_not_supported(status);
@@ -302,7 +304,8 @@ int observation_logger_facade::log(const char* primary_id, const char* secondary
   switch (_version)
   {
     case 2:
-      return _v2->log(primary_id, _serializer.numeric_event(secondary_id, outcome), _serializer.type,
+      return _v2->log(primary_id,
+          reinforcement_learning::logger::outcome_serializer::numeric_event(secondary_id, outcome), _serializer.type,
           event_content_type::IDENTITY, status);
     default:
       return protocol_not_supported(status);
@@ -315,7 +318,8 @@ int observation_logger_facade::log(
   switch (_version)
   {
     case 2:
-      return _v2->log(primary_id, _serializer.string_event(secondary_id, outcome), _serializer.type,
+      return _v2->log(primary_id,
+          reinforcement_learning::logger::outcome_serializer::string_event(secondary_id, outcome), _serializer.type,
           event_content_type::IDENTITY, status);
     default:
       return protocol_not_supported(status);
@@ -329,8 +333,8 @@ int observation_logger_facade::report_action_taken(const char* event_id, api_sta
     case 1:
       return _v1->report_action_taken(event_id, status);
     case 2:
-      return _v2->log(
-          event_id, _serializer.report_action_taken(), _serializer.type, event_content_type::IDENTITY, status);
+      return _v2->log(event_id, reinforcement_learning::logger::outcome_serializer::report_action_taken(),
+          _serializer.type, event_content_type::IDENTITY, status);
     default:
       return protocol_not_supported(status);
   }
@@ -341,8 +345,8 @@ int observation_logger_facade::report_action_taken(const char* primary_id, const
   switch (_version)
   {
     case 2:
-      return _v2->log(primary_id, _serializer.report_action_taken(secondary_id), _serializer.type,
-          event_content_type::IDENTITY, status);
+      return _v2->log(primary_id, reinforcement_learning::logger::outcome_serializer::report_action_taken(secondary_id),
+          _serializer.type, event_content_type::IDENTITY, status);
     default:
       return protocol_not_supported(status);
   }

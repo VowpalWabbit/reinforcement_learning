@@ -36,14 +36,14 @@ generic_event::object_id_t dedup_dict::add_object(const char* start, size_t leng
 
 bool dedup_dict::remove_object(generic_event::object_id_t aid, size_t count)
 {
-  if (count < 1) return true;
+  if (count < 1) { return true; }
 
   auto it = _entries.find(aid);
-  if (it == _entries.end()) return false;
+  if (it == _entries.end()) { return false; }
 
   count = std::min(count, it->second._count);
   it->second._count -= count;
-  if (!it->second._count) _entries.erase(it);
+  if (it->second._count == 0u) { _entries.erase(it); }
 
   return true;
 }
@@ -51,8 +51,8 @@ bool dedup_dict::remove_object(generic_event::object_id_t aid, size_t count)
 string_view dedup_dict::get_object(generic_event::object_id_t aid) const
 {
   auto it = _entries.find(aid);
-  if (it == _entries.end()) return string_view();
-  return string_view(it->second._content.data(), it->second._length);
+  if (it == _entries.end()) { return {}; }
+  return {it->second._content.data(), it->second._length};
 }
 
 int dedup_dict::transform_payload_and_add_objects(
@@ -93,27 +93,31 @@ int zstd_compressor::compress(generic_event::payload_buffer_t& input, api_status
   std::unique_ptr<uint8_t[]> data(fb::DefaultAllocator().allocate(buff_size));
   size_t res = ZSTD_compress(data.get(), buff_size, input.data(), input.size(), _level);
 
-  if (ZSTD_isError(res)) RETURN_ERROR_ARG(nullptr, status, compression_error, ZSTD_getErrorName(res));
+  if (ZSTD_isError(res) != 0u) { RETURN_ERROR_ARG(nullptr, status, compression_error, ZSTD_getErrorName(res)); }
 
-  auto data_ptr = data.release();
+  auto* data_ptr = data.release();
   input = fb::DetachedBuffer(nullptr, false, data_ptr, 0, data_ptr, res);
   return error_code::success;
 }
 
-int zstd_compressor::decompress(generic_event::payload_buffer_t& buf, api_status* status) const
+int zstd_compressor::decompress(generic_event::payload_buffer_t& buf, api_status* status)
 {
   size_t buff_size = ZSTD_getFrameContentSize(buf.data(), buf.size());
   if (buff_size == ZSTD_CONTENTSIZE_ERROR)
+  {
     RETURN_ERROR_ARG(nullptr, status, compression_error, "Invalid compressed content.");
+  }
   if (buff_size == ZSTD_CONTENTSIZE_UNKNOWN)
+  {
     RETURN_ERROR_ARG(nullptr, status, compression_error, "Unknown compressed size.");
+  }
 
   std::unique_ptr<uint8_t[]> data(fb::DefaultAllocator().allocate(buff_size));
   size_t res = ZSTD_decompress(data.get(), buff_size, buf.data(), buf.size());
 
-  if (ZSTD_isError(res)) RETURN_ERROR_ARG(nullptr, status, compression_error, ZSTD_getErrorName(res));
+  if (ZSTD_isError(res) != 0u) { RETURN_ERROR_ARG(nullptr, status, compression_error, ZSTD_getErrorName(res)); }
 
-  auto data_ptr = data.release();
+  auto* data_ptr = data.release();
   buf = fb::DetachedBuffer(nullptr, false, data_ptr, 0, data_ptr, res);
   return error_code::success;
 }
@@ -161,11 +165,9 @@ int dedup_state::transform_payload_and_add_objects(
     edited_payload = std::string(payload);
     return error_code::success;
   }
-  else
-  {
-    std::unique_lock<std::mutex> mlock(_mutex);
-    return _dict.transform_payload_and_add_objects(payload, edited_payload, object_ids, status);
-  }
+
+  std::unique_lock<std::mutex> mlock(_mutex);
+  return _dict.transform_payload_and_add_objects(payload, edited_payload, object_ids, status);
 }
 
 action_dict_builder::action_dict_builder(dedup_state& state) : _size_estimate(0), _state(state) {}
@@ -178,7 +180,7 @@ int action_dict_builder::add(const generic_event::object_list_t& object_ids, api
     if (it == _used_objects.end())
     {
       auto content = _state.get_object(aid);
-      if (content.size() == 0)
+      if (content.empty())
       {
         RETURN_ERROR_LS(nullptr, status, compression_error)
             << "Key not found while processing event into batch dictionary";
@@ -201,7 +203,7 @@ int action_dict_builder::finalize(generic_event& evt, api_status* status)
   std::vector<string_view> action_values;
 
   RETURN_IF_FAIL(_state.get_all_values(_used_objects.begin(), _used_objects.end(), action_ids, action_values, status));
-  auto payload = ser.event(action_ids, action_values);
+  auto payload = l::dedup_info_serializer::event(action_ids, action_values);
 
   // remove used actions from the dictionary
   RETURN_IF_FAIL(_state.remove_all_values(_used_objects.begin(), _used_objects.end(), status));
@@ -231,7 +233,7 @@ struct dedup_collection_serializer
   static int message_id() { return logger::message_type::fb_generic_event_collection; }
 
   dedup_collection_serializer(buffer_t& buffer, const char* content_encoding, shared_state_t& state)
-      : _dummy(0), _ser(buffer, content_encoding, _dummy), _state(state), _builder(state)
+      : _ser(buffer, content_encoding, _dummy), _state(state), _builder(state)
   {
   }
 
@@ -254,7 +256,7 @@ struct dedup_collection_serializer
 
   int finalize(api_status* status, uint64_t original_event_count) { return finalize(status); }
 
-  int _dummy;
+  int _dummy{0};
   shared_state_t& _state;
   action_dict_builder _builder;
   logger::fb_collection_serializer<event_t> _ser;
@@ -282,11 +284,9 @@ public:
       return new logger::async_batcher<generic_event, dedup_collection_serializer>(
           sender, watchdog, _dedup_state, perror_cb, config);
     }
-    else
-    {
-      return new logger::async_batcher<generic_event, logger::fb_collection_serializer>(
-          sender, watchdog, _dummy_state, perror_cb, config);
-    }
+
+    return new logger::async_batcher<generic_event, logger::fb_collection_serializer>(
+        sender, watchdog, _dummy_state, perror_cb, config);
   }
 
   bool is_object_extraction_enabled() const override { return _use_dedup; }
@@ -314,11 +314,11 @@ private:
 logger::i_logger_extensions* create_dedup_logger_extension(
     const utility::configuration& config, const char* section, i_time_provider* time_provider)
 {
-  if (config.get_int(name::PROTOCOL_VERSION, 1) != 2) return nullptr;
+  if (config.get_int(name::PROTOCOL_VERSION, 1) != 2) { return nullptr; }
   const bool use_compression = config.get_bool(section, name::USE_COMPRESSION, false);
   const bool use_dedup = config.get_bool(section, name::USE_DEDUP, false);
 
-  if (!use_compression && !use_dedup) return nullptr;
+  if (!use_compression && !use_dedup) { return nullptr; }
 
   return new dedup_extensions(config, use_compression, use_dedup, time_provider);
 }

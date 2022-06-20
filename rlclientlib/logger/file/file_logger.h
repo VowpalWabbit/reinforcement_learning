@@ -17,7 +17,7 @@ namespace file
 class file_logger : public i_sender
 {
 public:
-  explicit file_logger(const std::string& file_name, i_trace*);
+  explicit file_logger(std::string file_name, i_trace*);
   int init(const utility::configuration& config, api_status* status) override;
 
   file_logger(const file_logger&) = delete;

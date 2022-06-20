@@ -5,10 +5,11 @@
 #include "serialization/json_serializer.h"
 
 #include <sstream>
+#include <utility>
 
-test_data_provider::test_data_provider(const std::string& experiment_name, size_t threads, size_t features,
-    size_t actions, size_t _slots, bool _is_float_outcome, size_t _reward_period)
-    : _experiment_name(experiment_name)
+test_data_provider::test_data_provider(std::string experiment_name, size_t threads, size_t features, size_t actions,
+    size_t _slots, bool _is_float_outcome, size_t _reward_period)
+    : _experiment_name(std::move(experiment_name))
     , contexts(threads, std::vector<std::string>(preallocated_count))
     , outcomes(threads, std::vector<std::string>(preallocated_count))
     , is_float_outcome(_is_float_outcome)
@@ -49,7 +50,7 @@ std::vector<std::string> test_data_provider::create_event_ids(size_t thread_id, 
   return result;
 }
 
-std::string test_data_provider::create_action_features(size_t actions, size_t features, size_t example_id) const
+std::string test_data_provider::create_action_features(size_t actions, size_t features, size_t example_id)
 {
   std::ostringstream oss;
   oss << R"("_multi": [ )";
@@ -59,16 +60,16 @@ std::string test_data_provider::create_action_features(size_t actions, size_t fe
     for (size_t f = 0; f < features; ++f)
     {
       oss << R"("a_f_)" << f << R"(":"value_)" << (a + f + example_id) << R"(")";
-      if (f + 1 < features) oss << ",";
+      if (f + 1 < features) { oss << ","; }
     }
     oss << "}}";
-    if (a + 1 < actions) oss << ",";
+    if (a + 1 < actions) { oss << ","; }
   }
   oss << R"(])";
   return oss.str();
 }
 
-std::string test_data_provider::create_slot_features(size_t slots, size_t features, size_t slot_decision_id) const
+std::string test_data_provider::create_slot_features(size_t slots, size_t features, size_t slot_decision_id)
 {
   std::ostringstream oss;
   oss << R"("_slots": [ )";
@@ -76,20 +77,20 @@ std::string test_data_provider::create_slot_features(size_t slots, size_t featur
   {
     oss << R"({ "TSlot":{)";
     oss << R"("_id":")" << slot_decision_id << R"(")";
-    if (features > 0) oss << ",";
+    if (features > 0) { oss << ","; }
     for (size_t f = 0; f < features; ++f)
     {
       oss << R"("a_f_)" << f << R"(":"value_)" << (a + f + slot_decision_id) << R"(")";
-      if (f + 1 < features) oss << ",";
+      if (f + 1 < features) { oss << ","; }
     }
     oss << "}}";
-    if (a + 1 < slots) oss << ",";
+    if (a + 1 < slots) { oss << ","; }
   }
   oss << R"(])";
   return oss.str();
 }
 
-std::string test_data_provider::create_features(size_t features, size_t thread_id, size_t example_id) const
+std::string test_data_provider::create_features(size_t features, size_t thread_id, size_t example_id)
 {
   std::ostringstream oss;
   oss << R"("GUser":{)";
@@ -98,7 +99,7 @@ std::string test_data_provider::create_features(size_t features, size_t thread_i
   for (size_t f = 0; f < features; ++f)
   {
     oss << R"("f_str_)" << f << R"(":"value_)" << (f + thread_id + example_id) << R"(")";
-    if (f + 1 < features) oss << ",";
+    if (f + 1 < features) { oss << ","; }
   }
   oss << R"(})";
   return oss.str();
@@ -112,26 +113,23 @@ std::string test_data_provider::create_json_outcome(size_t thread_id, size_t exa
   return oss.str();
 }
 
-std::string test_data_provider::create_context_json(const std::string& cntxt, const std::string& action, bool ccb) const
+std::string test_data_provider::create_context_json(const std::string& cntxt, const std::string& action, bool ccb)
 {
   std::ostringstream oss;
-  if (ccb)
-    oss << cntxt << ", " << action;
-  else
-    oss << "{ " << cntxt << ", " << action << " }";
+  if (ccb) { oss << cntxt << ", " << action; }
+  else { oss << "{ " << cntxt << ", " << action << " }"; }
 
   return oss.str();
 }
 
-std::string test_data_provider::create_ccb_context_json(
-    const std::string& cntxt, const std::vector<std::string>& ids) const
+std::string test_data_provider::create_ccb_context_json(const std::string& cntxt, const std::vector<std::string>& ids)
 {
   std::ostringstream oss;
   oss << "{ " << cntxt << ", " << create_slots_json(ids) << " }";
   return oss.str();
 }
 
-std::string test_data_provider::create_slots_json(const std::vector<std::string>& ids) const
+std::string test_data_provider::create_slots_json(const std::vector<std::string>& ids)
 {
   std::ostringstream oss;
   oss << R"("_slots": [ )";
@@ -140,7 +138,7 @@ std::string test_data_provider::create_slots_json(const std::vector<std::string>
     oss << R"({ )";  // "TSlot":{)";
     oss << R"("_id":")" << ids[a] << R"(")";
     oss << "}";  //}";
-    if (a + 1 < ids.size()) oss << ",";
+    if (a + 1 < ids.size()) { oss << ","; }
   }
   oss << R"(])";
   return oss.str();
@@ -176,6 +174,6 @@ int test_data_provider::report_outcome(reinforcement_learning::live_model* rl, s
     reinforcement_learning::api_status* status) const
 {
   const auto event_id = create_event_id(thread_id, example_id);
-  if (is_float_outcome) return rl->report_outcome(event_id.c_str(), get_outcome(thread_id, example_id), status);
+  if (is_float_outcome) { return rl->report_outcome(event_id.c_str(), get_outcome(thread_id, example_id), status); }
   return rl->report_outcome(event_id.c_str(), get_outcome_json(thread_id, example_id), status);
 }

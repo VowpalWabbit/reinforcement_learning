@@ -32,7 +32,7 @@ struct async_batcher_config
   queue_mode_enum queue_mode;
   // bool use_compression;
   // bool use_dedup;
-  const char* batch_content_encoding;
+  const char* batch_content_encoding{};
   float subsample_rate = 1.f;  // percentage of kept events. 0 = drop all events, 1 = keep all events
   events_counter_status event_counter_status;
 };

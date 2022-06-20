@@ -46,7 +46,7 @@ const char* configuration::get(const char* name, const char* defval) const
 {
   auto& map = *_pmap;
   const auto it = map.find(name);
-  if (it != map.end()) return it->second.c_str();
+  if (it != map.end()) { return it->second.c_str(); }
   return defval;
 }
 
@@ -54,7 +54,7 @@ int configuration::get_int(const char* name, const int defval) const
 {
   auto& map = *_pmap;
   const auto it = map.find(name);
-  if (it != map.end()) return atoi(it->second.c_str());
+  if (it != map.end()) { return atoi(it->second.c_str()); }
   return defval;
 }
 
@@ -66,12 +66,9 @@ bool configuration::get_bool(const char* name, const bool defval) const
   {
     auto sval = it->second;
     str_util::trim(str_util::to_lower(sval));
-    if (sval == "true")
-      return true;
-    else if (sval == "false")
-      return false;
-    else
-      return defval;  // value string is neither true nor false.  return default
+    if (sval == "true") { return true; }
+    if (sval == "false") { return false; }
+    return defval;  // value string is neither true nor false.  return default
   }
   return defval;
 }
@@ -82,7 +79,7 @@ bool configuration::get_bool(const char* section, const char* name, bool defval)
   ss << section << "." << name;
   auto tmp = ss.str();
   const char* key = tmp.c_str();
-  if (get(key, NULL) != nullptr) { return get_bool(key, defval); }
+  if (get(key, nullptr) != nullptr) { return get_bool(key, defval); }
   return get_bool(name, defval);
 }
 
@@ -90,7 +87,7 @@ float configuration::get_float(const char* name, float defval) const
 {
   auto& map = *_pmap;
   const auto it = map.find(name);
-  if (it != map.end()) return strtof(it->second.c_str(), nullptr);
+  if (it != map.end()) { return strtof(it->second.c_str(), nullptr); }
   return defval;
 }
 }  // namespace utility

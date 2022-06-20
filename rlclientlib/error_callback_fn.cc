@@ -13,7 +13,7 @@ void error_callback_fn::set(error_fn fn, void* context)
 
 void error_callback_fn::report_error(api_status& s)
 {
-  if (_fn == nullptr) return;
+  if (_fn == nullptr) { return; }
 
   lock_guard<mutex> lock(_mutex);
   if (_fn != nullptr)

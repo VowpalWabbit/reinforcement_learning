@@ -12,9 +12,9 @@ public:
   void run();
 
 private:
-  int load_file(const std::string& file_name, std::string& config_str) const;
-  int load_config_from_json(const std::string& file_name, reinforcement_learning::utility::configuration& config,
-      reinforcement_learning::api_status* status) const;
+  static int load_file(const std::string& file_name, std::string& config_str);
+  static int load_config_from_json(const std::string& file_name, reinforcement_learning::utility::configuration& config,
+      reinforcement_learning::api_status* status);
   std::string get_message(size_t i) const;
   void init_messages();
 

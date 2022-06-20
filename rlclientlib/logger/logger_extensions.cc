@@ -43,14 +43,14 @@ private:
 };
 
 i_logger_extensions::i_logger_extensions(const utility::configuration& config) : _config(config) {}
-i_logger_extensions::~i_logger_extensions() {}
+i_logger_extensions::~i_logger_extensions() = default;
 
 i_logger_extensions* i_logger_extensions::get_extensions(
     const utility::configuration& config, i_time_provider* time_provider)
 {
   const char* section = "interaction";  // fixme lift this to live_model_impl;
-  auto res = create_dedup_logger_extension(config, section, time_provider);
-  return res ? res : new default_extensions(config, time_provider);
+  auto* res = create_dedup_logger_extension(config, section, time_provider);
+  return res != nullptr ? res : new default_extensions(config, time_provider);
 }
 
 }  // namespace logger

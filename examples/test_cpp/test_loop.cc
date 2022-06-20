@@ -60,19 +60,18 @@ bool test_loop::init()
   return true;
 }
 
-int test_loop::load_config_from_json(
-    const std::string& file_name, u::configuration& config, r::api_status* status) const
+int test_loop::load_config_from_json(const std::string& file_name, u::configuration& config, r::api_status* status)
 {
   std::string config_str;
   RETURN_IF_FAIL(load_file(file_name, config_str));
   return cfg::create_from_json(config_str, config, nullptr, status);
 }
 
-int test_loop::load_file(const std::string& file_name, std::string& config_str) const
+int test_loop::load_file(const std::string& file_name, std::string& config_str)
 {
   std::ifstream fs;
   fs.open(file_name);
-  if (!fs.good()) return err::invalid_argument;
+  if (!fs.good()) { return err::invalid_argument; }
   std::stringstream buffer;
   buffer << fs.rdbuf();
   config_str = buffer.str();
@@ -80,18 +79,18 @@ int test_loop::load_file(const std::string& file_name, std::string& config_str) 
 }
 
 std::string test_loop::generate_experiment_name(const std::string& experiment_name_base, size_t threads,
-    size_t features, size_t actions, size_t slots, size_t episode_length, size_t index) const
+    size_t features, size_t actions, size_t slots, size_t episode_length, size_t index)
 {
   return experiment_name_base + "-t" + std::to_string(threads) + "-x" + std::to_string(features) + "-a" +
       std::to_string(actions) + "-s" + std::to_string(slots) + "-m" + std::to_string(episode_length) + "-i" +
       std::to_string(index);
 }
 
-LoopKind test_loop::get_loop_kind(const boost::program_options::variables_map& vm) const
+LoopKind test_loop::get_loop_kind(const boost::program_options::variables_map& vm)
 {
   throw_if_conflicting(vm, "episode_length", "slots");
-  if (vm["episode_length"].as<size_t>() > 0) return LoopKind::MULTISTEP;
-  if (vm["slots"].as<size_t>() > 0) return LoopKind::CCB;
+  if (vm["episode_length"].as<size_t>() > 0) { return LoopKind::MULTISTEP; }
+  if (vm["slots"].as<size_t>() > 0) { return LoopKind::CCB; }
   return LoopKind::CB;
 }
 
@@ -118,7 +117,7 @@ void test_loop::run() const
   }
 
   std::vector<std::thread> _threads;
-  for (size_t i = 0; i < threads; ++i) { _threads.push_back(std::thread(loop, this, i)); }
+  for (size_t i = 0; i < threads; ++i) { _threads.emplace_back(loop, this, i); }
   for (size_t i = 0; i < threads; ++i) { _threads[i].join(); }
 }
 
@@ -131,7 +130,7 @@ void test_loop::cb_loop(size_t thread_id) const
   size_t choose_rank_size = 0;
   {
     const auto event_id = test_inputs.create_event_id(0, 0);
-    const std::string warmup_id = "_warmup_" + std::string(event_id.c_str());
+    const std::string warmup_id = "_warmup_" + std::string(event_id);
     if (rl->choose_rank(warmup_id.c_str(), test_inputs.get_context(0, 0), response, &status) != err::success)
     {
       std::cout << "Warmup has failed. " << status.get_error_msg() << std::endl;
@@ -148,7 +147,7 @@ void test_loop::cb_loop(size_t thread_id) const
     std::cout << "Choose rank size: " << choose_rank_size << std::endl;
   }
 
-  auto controller = controllers[thread_id].get();
+  auto* controller = controllers[thread_id].get();
   auto& logger = *loggers[thread_id];
 
   std::cout << "Perf test is started..." << std::endl;
@@ -156,7 +155,7 @@ void test_loop::cb_loop(size_t thread_id) const
   const auto choose_rank_start = chrono::high_resolution_clock::now();
   for (controller->restart(); controller->is_running(); controller->iterate())
   {
-    if (thread_id == 0) controller->show_progress_bar();
+    if (thread_id == 0) { controller->show_progress_bar(); }
 
     const auto example_id = controller->get_iteration();
     const auto event_id = test_inputs.create_event_id(thread_id, example_id);
@@ -177,7 +176,7 @@ void test_loop::cb_loop(size_t thread_id) const
       }
     }
   }
-  if (thread_id == 0) controller->show_progress_bar();
+  if (thread_id == 0) { controller->show_progress_bar(); }
   std::cout << std::endl;
 
   const auto choose_rank_end = chrono::high_resolution_clock::now();
@@ -204,7 +203,7 @@ void test_loop::ccb_loop(size_t thread_id) const
   {
     const auto event_ids = test_inputs.create_event_ids(0, 0);
     const auto event_ids_c = to_const_char(event_ids);
-    const std::string warmup_id = "_warmup_" + std::string(event_ids[0].c_str());
+    const std::string warmup_id = "_warmup_" + std::string(event_ids[0]);
     const auto context = test_inputs.get_context(0, 0, event_ids);
     if (rl->request_decision(context.c_str(), response, &status) != err::success)
     {
@@ -225,7 +224,7 @@ void test_loop::ccb_loop(size_t thread_id) const
     std::cout << "Decision event size: " << choose_rank_size << std::endl;
   }
 
-  auto controller = controllers[thread_id].get();
+  auto* controller = controllers[thread_id].get();
   auto& logger = *loggers[thread_id];
 
   std::cout << "Perf test is started..." << std::endl;
@@ -233,7 +232,7 @@ void test_loop::ccb_loop(size_t thread_id) const
   const auto choose_rank_start = chrono::high_resolution_clock::now();
   for (controller->restart(); controller->is_running(); controller->iterate())
   {
-    if (thread_id == 0) controller->show_progress_bar();
+    if (thread_id == 0) { controller->show_progress_bar(); }
 
     const auto example_id = controller->get_iteration();
     const auto event_ids = test_inputs.create_event_ids(thread_id, example_id);
@@ -255,7 +254,7 @@ void test_loop::ccb_loop(size_t thread_id) const
       }
     }
   }
-  if (thread_id == 0) controller->show_progress_bar();
+  if (thread_id == 0) { controller->show_progress_bar(); }
   std::cout << std::endl;
 
   const auto choose_rank_end = chrono::high_resolution_clock::now();
@@ -275,7 +274,7 @@ void test_loop::multistep_loop(size_t thread_id) const
   {
     r::episode_state episode("warmup_episode");
     const auto event_id = test_inputs.create_event_id(0, 0);
-    const std::string warmup_id = "_warmup_" + std::string(event_id.c_str());
+    const std::string warmup_id = "_warmup_" + std::string(event_id);
     if (rl->request_episodic_decision(
             warmup_id.c_str(), nullptr, test_inputs.get_context(0, 0), response, episode, &status) != err::success)
     {
@@ -286,19 +285,19 @@ void test_loop::multistep_loop(size_t thread_id) const
     // TODO: Add serializable request_episodic_decision event.
   }
 
-  auto controller = controllers[thread_id].get();
+  auto* controller = controllers[thread_id].get();
   auto& logger = *loggers[thread_id];
 
   size_t episode_id = 0;
   std::unique_ptr<r::episode_state> current_episode = nullptr;
-  std::string previous_event_id("");
+  std::string previous_event_id;
 
   std::cout << "Perf test is started..." << std::endl;
   std::cout << "Choose_rank..." << std::endl;
   const auto choose_rank_start = chrono::high_resolution_clock::now();
   for (controller->restart(); controller->is_running(); controller->iterate())
   {
-    if (thread_id == 0) controller->show_progress_bar();
+    if (thread_id == 0) { controller->show_progress_bar(); }
 
     const auto example_id = controller->get_iteration();
     const auto event_id = test_inputs.create_event_id(thread_id, example_id);
@@ -331,7 +330,7 @@ void test_loop::multistep_loop(size_t thread_id) const
     // TODO: This makes a chain of events. Add other types of event relationships.
     previous_event_id = event_id;
   }
-  if (thread_id == 0) controller->show_progress_bar();
+  if (thread_id == 0) { controller->show_progress_bar(); }
   std::cout << std::endl;
 
   const auto choose_rank_end = chrono::high_resolution_clock::now();

@@ -18,12 +18,12 @@ int restapi_data_transport_create(
     m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status);
 int authenticated_restapi_data_transport_create(
     m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status);
-int episode_sender_create(
-    i_sender** retval, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status);
-int observation_sender_create(
-    i_sender** retval, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status);
-int interaction_sender_create(
-    i_sender** retval, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status);
+int episode_sender_create(i_sender** retval, const u::configuration& /*cfg*/, error_callback_fn* /*error_cb*/,
+    i_trace* trace_logger, api_status* status);
+int observation_sender_create(i_sender** retval, const u::configuration& /*cfg*/, error_callback_fn* /*error_cb*/,
+    i_trace* trace_logger, api_status* status);
+int interaction_sender_create(i_sender** retval, const u::configuration& /*cfg*/, error_callback_fn* /*error_cb*/,
+    i_trace* trace_logger, api_status* status);
 int decision_sender_create(
     i_sender** retval, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status);
 int observation_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb,
@@ -45,9 +45,9 @@ void register_azure_factories()
 int restapi_data_transport_create(
     m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
 {
-  const auto uri = config.get(name::MODEL_BLOB_URI, nullptr);
+  const auto* const uri = config.get(name::MODEL_BLOB_URI, nullptr);
   if (uri == nullptr) { RETURN_ERROR(trace_logger, status, http_model_uri_not_provided); }
-  i_http_client* client;
+  i_http_client* client = nullptr;
   RETURN_IF_FAIL(create_http_client(uri, config, &client, status));
   *retval = new m::restapi_data_transport(client, trace_logger);
   return error_code::success;
@@ -58,7 +58,7 @@ int authenticated_restapi_data_transport_create(
 {
   const auto* model_uri = config.get(name::MODEL_BLOB_URI, nullptr);
   if (model_uri == nullptr) { RETURN_ERROR(trace_logger, status, http_model_uri_not_provided); }
-  i_http_client* client;
+  i_http_client* client = nullptr;
   RETURN_IF_FAIL(create_http_client(model_uri, config, &client, status));
   *retval = new m::restapi_data_transport(
       std::unique_ptr<i_http_client>(client), config, m::model_source::HTTP_API, trace_logger);
@@ -75,10 +75,10 @@ std::string build_eh_url(const char* eh_host, const char* eh_name)
 int episode_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb,
     i_trace* trace_logger, api_status* status)
 {
-  const auto eh_host = cfg.get(name::EPISODE_EH_HOST, "localhost:8080");
-  const auto eh_name = cfg.get(name::EPISODE_EH_NAME, "episode");
+  const auto* const eh_host = cfg.get(name::EPISODE_EH_HOST, "localhost:8080");
+  const auto* const eh_name = cfg.get(name::EPISODE_EH_NAME, "episode");
   const auto eh_url = build_eh_url(eh_host, eh_name);
-  i_http_client* client;
+  i_http_client* client = nullptr;
   RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
   *retval =
       new http_transport_client<eventhub_http_authorization>(client, cfg.get_int(name::EPISODE_EH_TASKS_LIMIT, 16),
@@ -89,7 +89,7 @@ int episode_sender_create(i_sender** retval, const u::configuration& cfg, error_
 int create_apim_http_api_sender(i_sender** retval, const u::configuration& cfg, const char* api_host, int tasks_limit,
     int max_http_retries, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
 {
-  i_http_client* client;
+  i_http_client* client = nullptr;
   RETURN_IF_FAIL(create_http_client(api_host, cfg, &client, status));
   *retval =
       new http_transport_client<header_authorization>(client, tasks_limit, max_http_retries, trace_logger, error_cb);
@@ -100,7 +100,7 @@ int create_apim_http_api_sender(i_sender** retval, const u::configuration& cfg, 
 int observation_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb,
     i_trace* trace_logger, api_status* status)
 {
-  const auto api_host = cfg.get(name::OBSERVATION_HTTP_API_HOST, "localhost:8080");
+  const auto* const api_host = cfg.get(name::OBSERVATION_HTTP_API_HOST, "localhost:8080");
   return create_apim_http_api_sender(retval, cfg, api_host, cfg.get_int(name::OBSERVATION_APIM_TASKS_LIMIT, 16),
       cfg.get_int(name::OBSERVATION_APIM_MAX_HTTP_RETRIES, 4), error_cb, trace_logger, status);
 }
@@ -109,7 +109,7 @@ int observation_api_sender_create(i_sender** retval, const u::configuration& cfg
 int interaction_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb,
     i_trace* trace_logger, api_status* status)
 {
-  const auto api_host = cfg.get(name::INTERACTION_HTTP_API_HOST, "localhost:8080");
+  const auto* const api_host = cfg.get(name::INTERACTION_HTTP_API_HOST, "localhost:8080");
   return create_apim_http_api_sender(retval, cfg, api_host, cfg.get_int(name::INTERACTION_APIM_TASKS_LIMIT, 16),
       cfg.get_int(name::INTERACTION_APIM_MAX_HTTP_RETRIES, 4), error_cb, trace_logger, status);
 }
@@ -118,10 +118,10 @@ int interaction_api_sender_create(i_sender** retval, const u::configuration& cfg
 int observation_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb,
     i_trace* trace_logger, api_status* status)
 {
-  const auto eh_host = cfg.get(name::OBSERVATION_EH_HOST, "localhost:8080");
-  const auto eh_name = cfg.get(name::OBSERVATION_EH_NAME, "observation");
+  const auto* const eh_host = cfg.get(name::OBSERVATION_EH_HOST, "localhost:8080");
+  const auto* const eh_name = cfg.get(name::OBSERVATION_EH_NAME, "observation");
   const auto eh_url = build_eh_url(eh_host, eh_name);
-  i_http_client* client;
+  i_http_client* client = nullptr;
   RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
   *retval =
       new http_transport_client<eventhub_http_authorization>(client, cfg.get_int(name::OBSERVATION_EH_TASKS_LIMIT, 16),
@@ -133,10 +133,10 @@ int observation_sender_create(i_sender** retval, const u::configuration& cfg, er
 int interaction_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb,
     i_trace* trace_logger, api_status* status)
 {
-  const auto eh_host = cfg.get(name::INTERACTION_EH_HOST, "localhost:8080");
-  const auto eh_name = cfg.get(name::INTERACTION_EH_NAME, "interaction");
+  const auto* const eh_host = cfg.get(name::INTERACTION_EH_HOST, "localhost:8080");
+  const auto* const eh_name = cfg.get(name::INTERACTION_EH_NAME, "interaction");
   const auto eh_url = build_eh_url(eh_host, eh_name);
-  i_http_client* client;
+  i_http_client* client = nullptr;
   RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
   *retval =
       new http_transport_client<eventhub_http_authorization>(client, cfg.get_int(name::INTERACTION_EH_TASKS_LIMIT, 16),

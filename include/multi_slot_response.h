@@ -18,7 +18,7 @@ struct slot_entry
 public:
   ~slot_entry() = default;
 
-  slot_entry(const std::string& id, uint32_t _action_id, float _probability);
+  slot_entry(std::string id, uint32_t _action_id, float _probability);
 
   const char* get_id() const;
   uint32_t get_action_id() const;

@@ -11,13 +11,15 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <utility>
+
 namespace mm = reinforcement_learning::model_management;
 
 namespace reinforcement_learning
 {
 static const std::string SEED_TAG = "seed=";
 
-safe_vw::safe_vw(const std::shared_ptr<safe_vw>& master) : _master(master)
+safe_vw::safe_vw(std::shared_ptr<safe_vw> master) : _master(std::move(master))
 {
   _vw = VW::seed_vw_model(_master->_vw, "", nullptr, nullptr);
 }
@@ -54,9 +56,9 @@ safe_vw::~safe_vw()
 VW::example* safe_vw::get_or_create_example()
 {
   // alloc new element if we don't have any left
-  if (_example_pool.size() == 0)
+  if (_example_pool.empty())
   {
-    auto ex = VW::alloc_examples(1);
+    auto* ex = VW::alloc_examples(1);
     _vw->example_parser->lbl_parser.default_label(ex->l);
 
     return ex;
@@ -318,34 +320,34 @@ bool safe_vw::is_CB_to_CCB_model_upgrade(const std::string& args) const
   return local_model_type == mm::model_type_t::CCB && inbound_model_type == mm::model_type_t::CB;
 }
 
-safe_vw_factory::safe_vw_factory(const std::string& command_line) : _command_line(command_line) {}
+safe_vw_factory::safe_vw_factory(std::string command_line) : _command_line(std::move(command_line)) {}
 
 safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data) : _master_data(master_data) {}
 
 safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_data) : _master_data(master_data) {}
 
-safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data, const std::string& command_line)
-    : _master_data(master_data), _command_line(command_line)
+safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data, std::string command_line)
+    : _master_data(master_data), _command_line(std::move(command_line))
 {
 }
 
-safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_data, const std::string& command_line)
-    : _master_data(master_data), _command_line(command_line)
+safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_data, std::string command_line)
+    : _master_data(master_data), _command_line(std::move(command_line))
 {
 }
 
 safe_vw* safe_vw_factory::operator()()
 {
-  if (_master_data.data() && _command_line.size() > 0)
+  if ((_master_data.data() != nullptr) && !_command_line.empty())
   {
     // Construct new vw object from raw model data and command line argument
     return new safe_vw(_master_data.data(), _master_data.data_sz(), _command_line);
   }
-  else if (_master_data.data())
+  if (_master_data.data() != nullptr)
   {
     // Construct new vw object from raw model data.
     return new safe_vw(_master_data.data(), _master_data.data_sz());
   }
-  else { return new safe_vw(_command_line); }
+  return new safe_vw(_command_line);
 }
 }  // namespace reinforcement_learning

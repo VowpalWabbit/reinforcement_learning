@@ -108,10 +108,10 @@ inline std::string to_str(const messages::flatbuff::Metadata* pmeta)
 
 void print_ranking_event(void* buff, std::ostream& out_strm)
 {
-  const auto rank = flat::GetRankingEventBatch(buff);
-  const auto events = rank->events();
+  const auto* const rank = flat::GetRankingEventBatch(buff);
+  const auto* const events = rank->events();
   out_strm << "RankingBatch: ";
-  for (auto evt : *events)
+  for (const auto* evt : *events)
   {
     out_strm << "Int: ";
 
@@ -142,10 +142,10 @@ void print_ranking_event(void* buff, std::ostream& out_strm)
 
 void print_outcome_event(void* buff, std::ostream& out_strm)
 {
-  const auto outcome = flat::GetOutcomeEventBatch(buff);
-  const auto events = outcome->events();
+  const auto* const outcome = flat::GetOutcomeEventBatch(buff);
+  const auto* const events = outcome->events();
   out_strm << "OutcomeBatch: ";
-  for (auto evt : *events)
+  for (const auto* evt : *events)
   {
     out_strm << "[" << to_str(evt->meta()) << "] ";
     out_strm << "id [" << to_str(evt->event_id()) << "]";
@@ -169,19 +169,19 @@ void print_outcome_event(void* buff, std::ostream& out_strm)
 
 void print_numeric_outcome(const flat::OutcomeEventHolder* evt, std::ostream& out_strm)
 {
-  const auto number = evt->the_event_as_NumericEvent();
+  const auto* const number = evt->the_event_as_NumericEvent();
   out_strm << ", outcome [" << number->value() << "]";
 }
 
 void print_string_outcome(const flat::OutcomeEventHolder* evt, std::ostream& out_strm)
 {
-  const auto str = evt->the_event_as_StringEvent();
+  const auto* const str = evt->the_event_as_StringEvent();
   out_strm << ", outcome ['" << str->value() << "']";
 }
 
 void print_action_outcome(const flat::OutcomeEventHolder* evt, std::ostream& out_strm)
 {
-  const auto act = evt->the_event_as_ActionTakenEvent();
+  const auto* const act = evt->the_event_as_ActionTakenEvent();
   out_strm << ", outcome [action_taken=" << act->value() << "]";
 }
 

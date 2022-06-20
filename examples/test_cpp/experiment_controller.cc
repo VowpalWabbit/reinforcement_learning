@@ -25,7 +25,7 @@ void experiment_controller::stop() { _is_running = false; }
 
 void experiment_controller::show_progress_bar() const
 {
-  if (_iteration % 100 == 0) std::cout << "\r" << _iteration << " sent";
+  if (_iteration % 100 == 0) { std::cout << "\r" << _iteration << " sent"; }
 }
 
 iterations_experiment_controller::iterations_experiment_controller(size_t num_iterations)
@@ -39,7 +39,7 @@ duration_experiment_controller::duration_experiment_controller(size_t duration) 
 
 duration_experiment_controller::~duration_experiment_controller()
 {
-  if (_timer_thread) _timer_thread->join();
+  if (_timer_thread) { _timer_thread->join(); }
 }
 
 void duration_experiment_controller::timer()
@@ -50,13 +50,13 @@ void duration_experiment_controller::timer()
 
 void duration_experiment_controller::on_restart()
 {
-  if (_timer_thread) _timer_thread->join();
+  if (_timer_thread) { _timer_thread->join(); }
   _timer_thread.reset(new std::thread(&duration_experiment_controller::timer, this));
 }
 
 experiment_controller* experiment_controller_factory::create(const boost::program_options::variables_map& vm)
 {
   throw_if_conflicting(vm, "examples", "duration");
-  if (vm.count("duration")) { return new duration_experiment_controller(vm["duration"].as<size_t>()); }
+  if (vm.count("duration") != 0u) { return new duration_experiment_controller(vm["duration"].as<size_t>()); }
   return new iterations_experiment_controller(vm["examples"].as<size_t>());
 }

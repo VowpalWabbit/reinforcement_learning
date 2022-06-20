@@ -19,11 +19,11 @@ public:
   http_client(const http_client&) = delete;
   http_client& operator=(const http_client&) = delete;
 
-  virtual response_t request(method_t method) override { return _impl.request(method); }
+  response_t request(method_t method) override { return _impl.request(method); }
 
-  virtual response_t request(request_t request) override { return _impl.request(request); }
+  response_t request(request_t request) override { return _impl.request(request); }
 
-  virtual const std::string& get_url() const override { return _url; }
+  const std::string& get_url() const override { return _url; }
 
 private:
   const std::string _url;

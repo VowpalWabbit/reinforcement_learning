@@ -26,7 +26,7 @@ class ostream_sender : public r::i_sender
 public:
   ostream_sender(std::ostream& stream, std::mutex& mutex) : _stream(stream), _mutex(mutex) {}
 
-  virtual int init(const u::configuration& config, r::api_status* status) override { return err::success; }
+  int init(const u::configuration& config, r::api_status* status) override { return err::success; }
 
 protected:
   int v_send(const buffer& data, r::api_status* status) override
@@ -47,7 +47,7 @@ int load_file(const std::string& file_name, std::string& config_str)
 {
   std::ifstream fs;
   fs.open(file_name);
-  if (!fs.good()) return err::invalid_argument;
+  if (!fs.good()) { return err::invalid_argument; }
   std::stringstream buffer;
   buffer << fs.rdbuf();
   config_str = buffer.str();
@@ -103,7 +103,7 @@ int main()
   r::ranking_response response;
 
   char const* const event_id = "event_id";
-  const auto context =
+  const auto* const context =
       R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[ { "TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}}]})";
   float outcome = 1.0f;
 

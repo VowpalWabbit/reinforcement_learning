@@ -95,13 +95,13 @@ public:
   int log(const char* event_id, float outcome, api_status* status);
   int log(const char* event_id, const char* outcome, api_status* status);
 
-  int log(const char* event_id, int index, float outcome, api_status* status);
-  int log(const char* event_id, int index, const char* outcome, api_status* status);
-  int log(const char* event_id, const char* index, float outcome, api_status* status);
-  int log(const char* event_id, const char* index, const char* outcome, api_status* status);
+  int log(const char* primary_id, int secondary_id, float outcome, api_status* status);
+  int log(const char* primary_id, int secondary_id, const char* outcome, api_status* status);
+  int log(const char* primary_id, const char* secondary_id, float outcome, api_status* status);
+  int log(const char* primary_id, const char* secondary_id, const char* outcome, api_status* status);
 
   int report_action_taken(const char* event_id, api_status* status);
-  int report_action_taken(const char* event_id, const char* index, api_status* status);
+  int report_action_taken(const char* primary_id, const char* secondary_id, api_status* status);
 
 private:
   const int _version;

@@ -27,14 +27,14 @@ po::variables_map process_cmd_line(const int argc, char** argv)
   po::variables_map vm;
   store(parse_command_line(argc, argv, desc), vm);
 
-  if (is_help(vm)) std::cout << desc << std::endl;
+  if (is_help(vm)) { std::cout << desc << std::endl; }
 
   return vm;
 }
 
 void throw_if_conflicting(const po::variables_map& vm, const std::string& first, const std::string& second)
 {
-  if (vm.count(first) && !vm[first].defaulted() && vm.count(second) && !vm[second].defaulted())
+  if ((vm.count(first) != 0u) && !vm[first].defaulted() && (vm.count(second) != 0u) && !vm[second].defaulted())
   {
     throw std::logic_error(std::string("Conflicting options '") + first + "' and '" + second + "'.");
   }

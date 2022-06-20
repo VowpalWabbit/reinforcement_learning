@@ -20,10 +20,10 @@ class safe_vw
   static VW::example& get_or_create_example_f(void* vw);
 
 public:
-  safe_vw(const std::shared_ptr<safe_vw>& master);
-  safe_vw(const char* model_data, size_t len, const std::string& vw_parameters);
+  safe_vw(std::shared_ptr<safe_vw> master);
+  safe_vw(const char* model_data, size_t len, const std::string& vw_commandline);
   safe_vw(const char* model_data, size_t len);
-  safe_vw(const std::string& vw_parameters);
+  safe_vw(const std::string& vw_commandline);
 
   ~safe_vw();
 
@@ -55,11 +55,11 @@ class safe_vw_factory
 
 public:
   // model_data is copied and stored in the factory object.
-  safe_vw_factory(const std::string& command_line);
+  safe_vw_factory(std::string command_line);
   safe_vw_factory(const model_management::model_data& master_data);
   safe_vw_factory(const model_management::model_data&& master_data);
-  safe_vw_factory(const model_management::model_data& master_data, const std::string& command_line);
-  safe_vw_factory(const model_management::model_data&& master_data, const std::string& command_line);
+  safe_vw_factory(const model_management::model_data& master_data, std::string command_line);
+  safe_vw_factory(const model_management::model_data&& master_data, std::string command_line);
 
   safe_vw* operator()();
 };

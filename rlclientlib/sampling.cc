@@ -127,7 +127,7 @@ int sample_and_populate_response(uint64_t rnd_seed, std::vector<int>& action_ids
   try
   {
     // Pick a slot using the pdf. NOTE: sample_after_normalizing() can change the pdf
-    uint32_t chosen_index;
+    uint32_t chosen_index = 0;
     auto scode = e::sample_after_normalizing(rnd_seed, std::begin(pdf), std::end(pdf), chosen_index);
 
     if (S_EXPLORATION_OK != scode) { RETURN_ERROR_LS(trace_logger, status, exploration_error) << scode; }

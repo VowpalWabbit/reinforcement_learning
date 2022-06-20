@@ -52,7 +52,7 @@ public:
   int report_action_taken(const char* primary_id, const char* secondary_id, api_status* status);
 
   int report_outcome(const char* event_id, const char* outcome_data, api_status* status);
-  int report_outcome(const char* event_id, float reward, api_status* status);
+  int report_outcome(const char* event_id, float outcome, api_status* status);
 
   int report_outcome(const char* primary_id, int secondary_id, float outcome, api_status* status = nullptr);
   int report_outcome(const char* primary_id, const char* secondary_id, float outcome, api_status* status = nullptr);
@@ -122,7 +122,7 @@ private:
   std::unique_ptr<i_trace> _trace_logger{nullptr};
 
   std::unique_ptr<utility::periodic_background_proc<model_management::model_downloader>> _bg_model_proc;
-  uint64_t _seed_shift;
+  uint64_t _seed_shift{};
 };
 
 template <typename D>

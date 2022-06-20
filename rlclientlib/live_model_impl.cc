@@ -19,6 +19,7 @@
 
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <cmath>
 #include <cstring>
 
 // Some namespace changes for more concise code
@@ -49,7 +50,7 @@ int reset_chosen_action_multi_slot(
 
 void default_error_callback(const api_status& status, void* watchdog_context)
 {
-  auto watchdog = static_cast<utility::watchdog*>(watchdog_context);
+  auto* watchdog = static_cast<utility::watchdog*>(watchdog_context);
   watchdog->set_unhandled_background_error(true);
 }
 
@@ -133,8 +134,8 @@ int live_model_impl::request_continuous_action(const char* event_id, string_view
 
   RETURN_IF_FAIL(check_null_or_empty(event_id, context.data(), _trace_logger.get(), status));
 
-  float action;
-  float pdf_value;
+  float action = NAN;
+  float pdf_value = NAN;
   std::string model_version;
 
   RETURN_IF_FAIL(_model->choose_continuous_action(context, action, pdf_value, model_version, status));
@@ -177,7 +178,7 @@ int live_model_impl::request_decision(
   RETURN_IF_FAIL(utility::get_context_info(context_json, context_info, _trace_logger.get(), status));
 
   // Ensure multi comes before slots, this is a current limitation of the parser.
-  if (context_info.slots.size() < 1 || context_info.actions.size() < 1 ||
+  if (context_info.slots.empty() || context_info.actions.empty() ||
       context_info.slots[0].first < context_info.actions[0].first)
   {
     RETURN_ERROR_LS(_trace_logger.get(), status, json_parse_error)
@@ -231,7 +232,7 @@ int live_model_impl::request_multi_slot_decision_impl(const char* event_id, stri
   RETURN_IF_FAIL(utility::get_context_info(context_json, context_info, _trace_logger.get(), status));
 
   // Ensure multi comes before slots, this is a current limitation of the parser.
-  if (context_info.slots.size() < 1 || context_info.actions.size() < 1 ||
+  if (context_info.slots.empty() || context_info.actions.empty() ||
       context_info.slots[0].first < context_info.actions[0].first)
   {
     RETURN_ERROR_LS(_trace_logger.get(), status, json_parse_error)
@@ -445,8 +446,8 @@ live_model_impl::live_model_impl(const utility::configuration& config, const err
 
 int live_model_impl::init_trace(api_status* status)
 {
-  const auto trace_impl = _configuration.get(name::TRACE_LOG_IMPLEMENTATION, value::NULL_TRACE_LOGGER);
-  i_trace* plogger;
+  const auto* const trace_impl = _configuration.get(name::TRACE_LOG_IMPLEMENTATION, value::NULL_TRACE_LOGGER);
+  i_trace* plogger = nullptr;
   RETURN_IF_FAIL(_trace_factory->create(&plogger, trace_impl, _configuration, nullptr, status));
   _trace_logger.reset(plogger);
   TRACE_INFO(_trace_logger, "API Tracing initialized");
@@ -456,8 +457,8 @@ int live_model_impl::init_trace(api_status* status)
 
 int live_model_impl::init_model(api_status* status)
 {
-  const auto model_impl = _configuration.get(name::MODEL_IMPLEMENTATION, value::VW);
-  m::i_model* pmodel;
+  const auto* const model_impl = _configuration.get(name::MODEL_IMPLEMENTATION, value::VW);
+  m::i_model* pmodel = nullptr;
   RETURN_IF_FAIL(_m_factory->create(&pmodel, model_impl, _configuration, _trace_logger.get(), status));
   _model.reset(pmodel);
   return error_code::success;
@@ -468,7 +469,7 @@ int live_model_impl::init_loggers(api_status* status)
   // Get the name of raw data (as opposed to message) sender for interactions.
   const auto* const ranking_sender_impl =
       _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::get_default_interaction_sender());
-  i_sender* ranking_data_sender;
+  i_sender* ranking_data_sender = nullptr;
 
   // Use the name to create an instance of raw data sender for interactions
   _configuration.set(config_constants::CONFIG_SECTION, config_constants::INTERACTION);
@@ -485,7 +486,7 @@ int live_model_impl::init_loggers(api_status* status)
   const auto* const time_provider_impl =
       _configuration.get(name::TIME_PROVIDER_IMPLEMENTATION, value::get_default_time_provider());
 
-  i_time_provider* logger_extensions_time_provider;
+  i_time_provider* logger_extensions_time_provider = nullptr;
   RETURN_IF_FAIL(_time_provider_factory->create(
       &logger_extensions_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
@@ -493,7 +494,7 @@ int live_model_impl::init_loggers(api_status* status)
   _logger_extensions.reset(
       logger::i_logger_extensions::get_extensions(_configuration, logger_extensions_time_provider));
 
-  i_time_provider* ranking_time_provider;
+  i_time_provider* ranking_time_provider = nullptr;
   RETURN_IF_FAIL(_time_provider_factory->create(
       &ranking_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
@@ -505,7 +506,7 @@ int live_model_impl::init_loggers(api_status* status)
   // Get the name of raw data (as opposed to message) sender for observations.
   const auto* const outcome_sender_impl =
       _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::get_default_observation_sender());
-  i_sender* outcome_sender;
+  i_sender* outcome_sender = nullptr;
 
   // Use the name to create an instance of raw data sender for observations
   _configuration.set(config_constants::CONFIG_SECTION, config_constants::OBSERVATION);
@@ -519,7 +520,7 @@ int live_model_impl::init_loggers(api_status* status)
   RETURN_IF_FAIL(outcome_msg_sender->init(status));
 
   // Get time provider implementation
-  i_time_provider* observation_time_provider;
+  i_time_provider* observation_time_provider = nullptr;
   RETURN_IF_FAIL(_time_provider_factory->create(
       &observation_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
@@ -535,7 +536,7 @@ int live_model_impl::init_loggers(api_status* status)
     // Get the name of raw data (as opposed to message) sender for episodes.
     const auto* const episode_sender_impl =
         _configuration.get(name::EPISODE_SENDER_IMPLEMENTATION, value::get_default_episode_sender());
-    i_sender* episode_sender;
+    i_sender* episode_sender = nullptr;
 
     // Use the name to create an instance of raw data sender for episodes
     _configuration.set(config_constants::CONFIG_SECTION, config_constants::EPISODE);
@@ -549,7 +550,7 @@ int live_model_impl::init_loggers(api_status* status)
     RETURN_IF_FAIL(episode_msg_sender->init(status));
 
     // Get time provider implementation
-    i_time_provider* episode_time_provider;
+    i_time_provider* episode_time_provider = nullptr;
     RETURN_IF_FAIL(_time_provider_factory->create(
         &episode_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
@@ -615,7 +616,7 @@ int live_model_impl::explore_only(
   const uint64_t seed = VW::uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
 
   // Pick a slot using the pdf. NOTE: sample_after_normalizing() can change the pdf
-  uint32_t chosen_index;
+  uint32_t chosen_index = 0;
   scode = e::sample_after_normalizing(seed, begin(pdf), end(pdf), chosen_index);
 
   if (S_EXPLORATION_OK != scode)
@@ -669,8 +670,8 @@ int live_model_impl::explore_exploit(
 int live_model_impl::init_model_mgmt(api_status* status)
 {
   // Initialize transport for the model using transport factory
-  const auto tranport_impl = _configuration.get(name::MODEL_SRC, value::get_default_data_transport());
-  m::i_data_transport* ptransport;
+  const auto* const tranport_impl = _configuration.get(name::MODEL_SRC, value::get_default_data_transport());
+  m::i_data_transport* ptransport = nullptr;
   RETURN_IF_FAIL(_t_factory->create(&ptransport, tranport_impl, _configuration, status));
   // This class manages lifetime of transport
   this->_transport.reset(ptransport);
@@ -726,7 +727,7 @@ int live_model_impl::request_episodic_decision(const char* event_id, const char*
 // helper: check if at least one of the arguments is null or empty
 int check_null_or_empty(const char* arg1, string_view arg2, i_trace* trace, api_status* status)
 {
-  if (!arg1 || strlen(arg1) == 0 || arg2.empty())
+  if ((arg1 == nullptr) || strlen(arg1) == 0 || arg2.empty())
   {
     RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty");
   }
@@ -744,7 +745,7 @@ int check_null_or_empty(string_view arg1, i_trace* trace, api_status* status)
 
 int check_null_or_empty(const char* arg1, i_trace* trace, api_status* status)
 {
-  if (!arg1 || strlen(arg1) == 0)
+  if ((arg1 == nullptr) || strlen(arg1) == 0)
   {
     RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty");
   }
@@ -801,11 +802,11 @@ void autogenerate_missing_uuids(
 {
   for (const auto& ids : found_ids) { complete_ids[ids.first] = ids.second; }
 
-  for (int i = 0; i < complete_ids.size(); i++)
+  for (auto& complete_id : complete_ids)
   {
-    if (complete_ids[i].empty())
+    if (complete_id.empty())
     {
-      complete_ids[i] = boost::uuids::to_string(boost::uuids::random_generator()()) + std::to_string(seed_shift);
+      complete_id = boost::uuids::to_string(boost::uuids::random_generator()()) + std::to_string(seed_shift);
     }
   }
 }

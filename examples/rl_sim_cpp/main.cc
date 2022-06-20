@@ -6,7 +6,7 @@ int main(int argc, char** argv)
   try
   {
     const auto vm = process_cmd_line(argc, argv);
-    if (is_help(vm)) return 0;
+    if (is_help(vm)) { return 0; }
 
     // Instantiate reinforcement learning simulator
     rl_sim sim(vm);
@@ -38,7 +38,7 @@ po::variables_map process_cmd_line(const int argc, char** argv)
   po::variables_map vm;
   store(parse_command_line(argc, argv, desc), vm);
 
-  if (is_help(vm)) std::cout << desc << std::endl;
+  if (is_help(vm)) { std::cout << desc << std::endl; }
 
   return vm;
 }

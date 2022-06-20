@@ -69,11 +69,11 @@ public:
 
 public:
   static ranking_event choose_rank(const char* event_id, string_view context, unsigned int flags,
-      const ranking_response& resp, const timestamp& ts, float pass_prob = 1, learning_mode decision_mode = ONLINE);
+      const ranking_response& resp, const timestamp& ts, float pass_prob = 1, learning_mode learning_mode = ONLINE);
 
 private:
   ranking_event(const char* event_id, bool deferred_action, float pass_prob, string_view context,
-      const ranking_response& response, const timestamp& ts, learning_mode decision_mode);
+      const ranking_response& response, const timestamp& ts, learning_mode learning_mode);
 
   std::vector<unsigned char> _context;
   std::vector<uint64_t> _action_ids_vector;
@@ -108,8 +108,8 @@ public:
 
 private:
   decision_ranking_event(const std::vector<const char*>& event_ids, bool deferred_action, float pass_prob,
-      string_view context, const std::vector<std::vector<uint32_t>>& action_ids,
-      const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts);
+      string_view context, std::vector<std::vector<uint32_t>> action_ids, std::vector<std::vector<float>> pdfs,
+      std::string model_version, const timestamp& ts);
 
   std::vector<unsigned char> _context;
   std::vector<std::vector<uint32_t>> _action_ids_vector;
@@ -117,7 +117,7 @@ private:
   std::vector<std::string> _event_ids;
 
   std::string _model_id;
-  bool _deferred_action;
+  bool _deferred_action{};
 };
 
 // serializable decision ranking event
@@ -145,8 +145,8 @@ public:
 
 private:
   multi_slot_decision_event(const std::string& event_id, bool deferred_action, float pass_prob, string_view context,
-      const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs,
-      const std::string& model_version, const timestamp& ts);
+      std::vector<std::vector<uint32_t>> action_ids, std::vector<std::vector<float>> pdfs, std::string model_version,
+      const timestamp& ts);
 
   std::vector<unsigned char> _context;
   std::vector<std::vector<uint32_t>> _action_ids_vector;

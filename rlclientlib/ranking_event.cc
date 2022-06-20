@@ -5,6 +5,8 @@
 #include "time_helper.h"
 #include "vw/common/hash.h"
 #include "vw/explore/explore.h"
+
+#include <utility>
 using namespace std;
 namespace reinforcement_learning
 {
@@ -57,22 +59,22 @@ learning_mode ranking_event::get_learning_mode() const { return _learning_mode; 
 ranking_event ranking_event::choose_rank(const char* event_id, string_view context, unsigned int flags,
     const ranking_response& resp, const timestamp& ts, float pass_prob, learning_mode learning_mode)
 {
-  return ranking_event(event_id, flags & action_flags::DEFERRED, pass_prob, context, resp, ts, learning_mode);
+  return ranking_event(event_id, (flags & action_flags::DEFERRED) != 0u, pass_prob, context, resp, ts, learning_mode);
 }
 
-decision_ranking_event::decision_ranking_event() {}
+decision_ranking_event::decision_ranking_event() = default;
 
 decision_ranking_event::decision_ranking_event(const std::vector<const char*>& event_ids, bool deferred_action,
-    float pass_prob, string_view context, const std::vector<std::vector<uint32_t>>& action_ids,
-    const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts)
+    float pass_prob, string_view context, std::vector<std::vector<uint32_t>> action_ids,
+    std::vector<std::vector<float>> pdfs, std::string model_version, const timestamp& ts)
     : event(event_ids[0], ts, pass_prob)
     , _deferred_action(deferred_action)
-    , _action_ids_vector(action_ids)
-    , _probilities_vector(pdfs)
-    , _model_id(model_version)
+    , _action_ids_vector(std::move(action_ids))
+    , _probilities_vector(std::move(pdfs))
+    , _model_id(std::move(model_version))
 {
   string context_str(context);
-  for (auto evt : event_ids) { _event_ids.emplace_back(evt); }
+  for (const auto* evt : event_ids) { _event_ids.emplace_back(evt); }
   copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 }
 
@@ -88,18 +90,18 @@ decision_ranking_event decision_ranking_event::request_decision(const std::vecto
     const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts, float pass_prob)
 {
   return decision_ranking_event(
-      event_ids, flags & action_flags::DEFERRED, pass_prob, context, action_ids, pdfs, model_version, ts);
+      event_ids, (flags & action_flags::DEFERRED) != 0u, pass_prob, context, action_ids, pdfs, model_version, ts);
 }
 
 multi_slot_decision_event::multi_slot_decision_event(const std::string& event_id, bool deferred_action, float pass_prob,
-    string_view context, const std::vector<std::vector<uint32_t>>& action_ids,
-    const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const timestamp& ts)
+    string_view context, std::vector<std::vector<uint32_t>> action_ids, std::vector<std::vector<float>> pdfs,
+    std::string model_version, const timestamp& ts)
     : event(event_id.c_str(), ts, pass_prob)
     , _event_id(event_id)
     , _deferred_action(deferred_action)
-    , _action_ids_vector(action_ids)
-    , _probilities_vector(pdfs)
-    , _model_id(model_version)
+    , _action_ids_vector(std::move(action_ids))
+    , _probilities_vector(std::move(pdfs))
+    , _model_id(std::move(model_version))
 {
   string context_str(context);
   copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
@@ -128,13 +130,13 @@ multi_slot_decision_event multi_slot_decision_event::request_decision(const std:
 
 outcome_event::outcome_event(
     const char* event_id, float pass_prob, const char* outcome, bool action_taken, const timestamp& ts)
-    : event(event_id, ts, pass_prob), _outcome(outcome), _float_outcome(0.0f), _action_taken(action_taken)
+    : event(event_id, ts, pass_prob), _outcome(outcome), _action_taken(action_taken)
 {
 }
 
 outcome_event::outcome_event(
     const char* event_id, float pass_prob, float outcome, bool action_taken, const timestamp& ts)
-    : event(event_id, ts, pass_prob), _outcome(""), _float_outcome(outcome), _action_taken(action_taken)
+    : event(event_id, ts, pass_prob), _float_outcome(outcome), _action_taken(action_taken)
 {
 }
 

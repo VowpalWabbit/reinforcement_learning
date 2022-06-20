@@ -30,10 +30,8 @@ float joint::get_outcome(float observed_friction)
   {
     if (observed_friction >= fp.first) { click_prob = fp.second; }
   }
-  if (norm_draw_val <= click_prob)
-    return 1.0f;
-  else
-    return 0.0f;
+  if (norm_draw_val <= click_prob) { return 1.0f; }
+  return 0.0f;
 }
 
 std::string joint::id() const { return _id; }

@@ -90,24 +90,24 @@ struct MessageHandler : public rj::BaseReaderHandler<rj::UTF8<>, MessageHandler>
   bool _is_slots = false;
   size_t _item_start = 0;
 
-  MessageHandler(rj::InsituStringStream& is, ContextInfo& info)
-      : _is(is), _info(info), _level(0), _array_level(0), _is_multi(false), _item_start(0)
-  {
-  }
+  MessageHandler(rj::InsituStringStream& is, ContextInfo& info) : _is(is), _info(info) {}
 
   bool Key(const char* str, size_t length, bool copy)
   {
     if (_level == 1 && _array_level == 0)
     {
-      _is_multi = !strcmp(str, multi);
-      _is_slots = !strcmp(str, slots);
+      _is_multi = (strcmp(str, multi) == 0);
+      _is_slots = (strcmp(str, slots) == 0);
     }
     return true;
   }
 
   bool StartObject()
   {
-    if ((_is_multi | _is_slots) && _level == 1 && _array_level == 1) _item_start = _is.Tell() - 1;
+    if (((static_cast<int>(_is_multi) | static_cast<int>(_is_slots)) != 0) && _level == 1 && _array_level == 1)
+    {
+      _item_start = _is.Tell() - 1;
+    }
 
     ++_level;
     return true;
@@ -117,11 +117,11 @@ struct MessageHandler : public rj::BaseReaderHandler<rj::UTF8<>, MessageHandler>
   {
     --_level;
 
-    if ((_is_multi | _is_slots) && _level == 1 && _array_level == 1)
+    if (((static_cast<int>(_is_multi) | static_cast<int>(_is_slots)) != 0) && _level == 1 && _array_level == 1)
     {
       size_t item_end = _is.Tell() - _item_start;
-      if (_is_multi) _info.actions.push_back(std::make_pair(_item_start, item_end));
-      if (_is_slots) _info.slots.push_back(std::make_pair(_item_start, item_end));
+      if (_is_multi) { _info.actions.push_back(std::make_pair(_item_start, item_end)); }
+      if (_is_slots) { _info.slots.push_back(std::make_pair(_item_start, item_end)); }
     }
     return true;
   }

@@ -17,7 +17,7 @@ public:
   stl_container_adapter(stl_container_adapter&& rhs) noexcept = default;
   size_t size() const;
   const value_type& operator[](size_t idx) const;
-  void resize(size_t);
+  static void resize(size_t);
 
 #ifdef _WIN32
   stdext::checked_array_iterator<value_type*> begin() const;

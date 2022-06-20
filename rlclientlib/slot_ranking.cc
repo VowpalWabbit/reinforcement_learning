@@ -25,7 +25,7 @@ int slot_ranking::set_chosen_action_id(size_t action_id, api_status* status)
   return error_code::success;
 }
 
-int slot_ranking::set_chosen_action_id_unchecked(size_t action_id, api_status*)
+int slot_ranking::set_chosen_action_id_unchecked(size_t action_id, api_status* /*unused*/)
 {
   _chosen_action_id = action_id;
   return error_code::success;

@@ -386,7 +386,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_outcome(const char* event_id, int secondary_id, const char* outcome, api_status* status = nullptr);
+  int report_outcome(const char* primary_id, int secondary_id, const char* outcome, api_status* status = nullptr);
 
   /**
    * @brief Report outcome of a decision based on a pair of primary and secondary indentifiers.
@@ -467,7 +467,7 @@ private:
   bool _initialized = false;  //! Guard to ensure that live_model is properly initialized. i.e. init() was called and
                               //! successfully initialized.
   const std::vector<int> default_baseline_vector = std::vector<int>();
-  std::vector<int> c_array_to_vector(
+  static std::vector<int> c_array_to_vector(
       const int* c_array, size_t array_size);  //! Convert baseline_actions from c array to std vector.
 };
 

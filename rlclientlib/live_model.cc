@@ -39,7 +39,7 @@ live_model& live_model::operator=(live_model&& other) noexcept
 
 int live_model::init(api_status* status)
 {
-  if (_initialized) return error_code::success;
+  if (_initialized) { return error_code::success; }
 
   const auto err_code = _pimpl->init(status);
   if (err_code == error_code::success) { _initialized = true; }
@@ -49,7 +49,7 @@ int live_model::init(api_status* status)
 
 std::vector<int> live_model::c_array_to_vector(const int* c_array, size_t array_size)
 {
-  if (c_array == nullptr) { return std::vector<int>(); }
+  if (c_array == nullptr) { return {}; }
   return std::vector<int>(c_array, c_array + array_size);
 }
 

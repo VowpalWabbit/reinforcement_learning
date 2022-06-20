@@ -17,7 +17,7 @@ std::string get_dist_str(const reinforcement_learning::slot_entry& response);
 
 int rl_sim::loop()
 {
-  if (!init()) return -1;
+  if (!init()) { return -1; }
 
   switch (_loop_kind)
   {
@@ -59,7 +59,7 @@ int rl_sim::cb_loop()
     }
 
     // Use the chosen action
-    size_t chosen_action;
+    size_t chosen_action = 0;
     if (response.get_chosen_action_id(chosen_action) != err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
@@ -128,7 +128,7 @@ int rl_sim::multistep_loop()
         return -1;
       }
 
-      size_t chosen_action;
+      size_t chosen_action = 0;
       if (response.get_chosen_action_id(chosen_action) != err::success)
       {
         std::cout << status.get_error_msg() << std::endl;
@@ -429,9 +429,9 @@ bool rl_sim::init_continuous_sim_world()
 
 bool rl_sim::init()
 {
-  if (init_rl() != err::success) return false;
-  if (!init_sim_world()) return false;
-  if (!init_continuous_sim_world()) return false;
+  if (init_rl() != err::success) { return false; }
+  if (!init_sim_world()) { return false; }
+  if (!init_continuous_sim_world()) { return false; }
   return true;
 }
 
@@ -509,14 +509,10 @@ std::string rl_sim::create_event_id() { return boost::uuids::to_string(boost::uu
 
 rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm)), _loop_kind(CB)
 {
-  if (_options["ccb"].as<bool>())
-    _loop_kind = CCB;
-  else if (_options["slates"].as<bool>())
-    _loop_kind = Slates;
-  else if (_options["ca"].as<bool>())
-    _loop_kind = CA;
-  else if (_options["multistep"].as<bool>())
-    _loop_kind = Multistep;
+  if (_options["ccb"].as<bool>()) { _loop_kind = CCB; }
+  else if (_options["slates"].as<bool>()) { _loop_kind = Slates; }
+  else if (_options["ca"].as<bool>()) { _loop_kind = CA; }
+  else if (_options["multistep"].as<bool>()) { _loop_kind = Multistep; }
 }
 
 std::string get_dist_str(const reinforcement_learning::ranking_response& response)

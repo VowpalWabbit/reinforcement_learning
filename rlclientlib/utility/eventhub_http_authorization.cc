@@ -82,10 +82,10 @@ int eventhub_http_authorization::generate_authorization_string(std::chrono::seco
 
   // compute HMAC of data
   std::vector<unsigned char> digest(EVP_MAX_MD_SIZE);
-  unsigned int digest_len;
+  unsigned int digest_len = 0;
   // https://www.openssl.org/docs/man1.0.2/crypto/hmac.html
-  if (!HMAC(EVP_sha256(), shared_access_key.c_str(), (int)shared_access_key.length(),
-          (const unsigned char*)data.c_str(), (int)data.length(), &digest[0], &digest_len))
+  if (HMAC(EVP_sha256(), shared_access_key.c_str(), (int)shared_access_key.length(), (const unsigned char*)data.c_str(),
+          (int)data.length(), digest.data(), &digest_len) == nullptr)
   {
     TRACE_ERROR(trace, "Failed to generate SAS hash");
     RETURN_ERROR_ARG(trace, status, eventhub_generate_SAS_hash, "Failed to generate SAS hash");

@@ -48,7 +48,7 @@ public:
   //! Gets the value as an integer.  If the value does not exist or if there is an error, it returns defval
   int get_int(const char* name, int defval) const;
   //! Gets the value as a boolean.  If the value does not exist or if there is an error, it returns defval
-  bool get_bool(const char* str, bool defval) const;
+  bool get_bool(const char* name, bool defval) const;
   //! Gets the value as a float.  If the value does not exist or if there is an error, it returns defval
   float get_float(const char* name, float defval) const;
   //! friend Left shift operator

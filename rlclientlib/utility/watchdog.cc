@@ -102,7 +102,7 @@ void watchdog::loop()
 
         if (thread_info.last_verify_time - thread_info.last_check_in_time > thread_info.timeout)
         {
-          if (_error_callback) { failed_thread_names.push_back(thread_info.thread_name); }
+          if (_error_callback != nullptr) { failed_thread_names.push_back(thread_info.thread_name); }
           else { set_unhandled_background_error(true); }
         }
       }

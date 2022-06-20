@@ -18,13 +18,13 @@ public:
    * @param fav_char Person feature (fav_char)
    * @param topicprob Probability of outcome for a given topic
    **/
-  person(std::string id, std::string major, std::string hobby, std::string fav_char, topic_prob& topicprob);
+  person(std::string id, std::string major, std::string hobby, std::string fav_char, topic_prob& p);
   ~person();
 
   //! Get person features as a json string
   std::string get_features() const;
   //! Get the outcome for a topic.  Use probability to randomly assign a outcome
-  float get_outcome(const std::string& topic);
+  float get_outcome(const std::string& chosen_action);
   //! Get the person's id
   std::string id() const;
 

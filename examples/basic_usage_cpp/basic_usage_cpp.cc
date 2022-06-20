@@ -67,7 +67,7 @@ int basic_usage_cb()
   //! [(3) Choose an action]
 
   //! [(4) Use the response]
-  size_t chosen_action;
+  size_t chosen_action = 0;
   if (response.get_chosen_action_id(chosen_action, &status) != err::success)
   {
     std::cout << status.get_error_msg() << std::endl;
@@ -357,7 +357,7 @@ int load_config_from_json(const std::string& file_name, u::configuration& config
   std::string config_str;
   // Load contents of config file into a string
   const auto scode = load_file(file_name, config_str);
-  if (scode != 0) return scode;
+  if (scode != 0) { return scode; }
 
   //! [Create a configuration from json string]
   // Use library supplied convenience method to parse json and build config object
@@ -372,7 +372,7 @@ int load_file(const std::string& file_name, std::string& config_str)
 {
   std::ifstream fs;
   fs.open(file_name);
-  if (!fs.good()) return reinforcement_learning::error_code::invalid_argument;
+  if (!fs.good()) { return reinforcement_learning::error_code::invalid_argument; }
   std::stringstream buffer;
   buffer << fs.rdbuf();
   config_str = buffer.str();

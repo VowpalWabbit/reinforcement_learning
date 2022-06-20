@@ -13,7 +13,7 @@ namespace model_management
 
 // We construct a VW object here to use the example parser to parse joined dsjson-style examples
 // to extract the PDF.
-pdf_model::pdf_model(i_trace* trace_logger, const utility::configuration&)
+pdf_model::pdf_model(i_trace* trace_logger, const utility::configuration& /*unused*/)
     : _trace_logger(trace_logger), _vw(new safe_vw("--json --quiet --cb_adf"))
 {
 }
@@ -32,7 +32,7 @@ int pdf_model::choose_rank(uint64_t rnd_seed, string_view features, std::vector<
     // Get a ranked list of action_ids and corresponding pdf
     _vw->parse_context_with_pdf(features, action_ids, action_pdf);
 
-    model_version = _model_version.c_str();
+    model_version = _model_version;
 
     return error_code::success;
   }
