@@ -43,7 +43,6 @@ using namespace fakeit;
 
 namespace
 {
-
 const auto JSON_CFG = R"(
   {
     "ApplicationID": "rnc-123456-a",

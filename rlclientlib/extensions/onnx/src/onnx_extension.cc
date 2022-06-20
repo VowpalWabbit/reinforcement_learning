@@ -15,7 +15,6 @@ namespace reinforcement_learning
 {
 namespace onnx
 {
-
 int create_onnx_model(m::i_model** retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
 {
   const char* app_id = config.get(name::APP_ID, "");

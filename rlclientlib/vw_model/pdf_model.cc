@@ -10,7 +10,6 @@ namespace reinforcement_learning
 {
 namespace model_management
 {
-
 // We construct a VW object here to use the example parser to parse joined dsjson-style examples
 // to extract the PDF.
 pdf_model::pdf_model(i_trace* trace_logger, const utility::configuration& /*unused*/)

@@ -13,7 +13,6 @@ namespace reinforcement_learning
 {
 namespace logger
 {
-
 template <typename T>
 struct json_event_serializer;
 

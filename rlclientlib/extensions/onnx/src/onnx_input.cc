@@ -10,7 +10,6 @@ namespace reinforcement_learning
 {
 namespace onnx
 {
-
 std::vector<const char*> onnx_input_builder::input_names() const
 {
   int count = 0;

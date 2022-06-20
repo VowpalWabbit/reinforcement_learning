@@ -9,7 +9,6 @@ namespace reinforcement_learning
 {
 namespace model_management
 {
-
 class file_model_loader : public i_data_transport
 {
 public:

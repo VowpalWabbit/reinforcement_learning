@@ -6,7 +6,6 @@ namespace reinforcement_learning
 {
 namespace utility
 {
-
 template <typename Last>
 std::string concat(std::ostringstream& os, const Last& last)
 {

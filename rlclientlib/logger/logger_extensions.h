@@ -29,7 +29,6 @@ class i_message_sender;
 
 namespace logger
 {
-
 // WARNING: This interface is a bit complex in its usage. It currently lives in the live_model_impl, but is passed
 // into the interaction logger and is eventually called in the logger thread. However, it (currently) does not
 // need any form of locking because the object is ONLY called in the SINGLE logger thead.

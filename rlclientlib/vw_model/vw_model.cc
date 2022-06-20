@@ -11,7 +11,6 @@ namespace reinforcement_learning
 {
 namespace model_management
 {
-
 vw_model::vw_model(i_trace* trace_logger, const utility::configuration& config)
     : _initial_command_line(config.get(
           name::MODEL_VW_INITIAL_COMMAND_LINE, "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A"))
@@ -36,7 +35,10 @@ int vw_model::update(const model_data& data, bool& model_ready, api_status* stat
       {
         factory.reset(new safe_vw_factory(data, _upgrade_to_CCB_vw_commandline_options));
       }
-      else { factory.reset(new safe_vw_factory(data)); }
+      else
+      {
+        factory.reset(new safe_vw_factory(data));
+      }
 
       std::unique_ptr<safe_vw> test_vw((*factory)());
       if (test_vw->is_compatible(_initial_command_line))

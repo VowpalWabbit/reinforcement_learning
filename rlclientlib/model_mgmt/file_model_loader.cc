@@ -20,7 +20,6 @@ namespace reinforcement_learning
 {
 namespace model_management
 {
-
 int file_model_loader::get_file_modified_time(time_t& file_time, api_status* status) const
 {
   struct stat result

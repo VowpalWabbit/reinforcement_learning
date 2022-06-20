@@ -13,7 +13,6 @@ namespace VW
 {
 namespace external
 {
-
 struct parser_options
 {
   bool is_enabled();

@@ -26,11 +26,10 @@ API livemodel_context_t* CreateLiveModel(
   // Create a trace log factory by passing in below creator. It allows LiveModel to use trace_logger provided by user.
   const auto binding_tracer_create =
       [context](reinforcement_learning::i_trace** retval, const reinforcement_learning::utility::configuration& cfg,
-          reinforcement_learning::i_trace* trace_logger, reinforcement_learning::api_status* status)
-  {
-    *retval = new rl_net_native::binding_tracer(*context);
-    return reinforcement_learning::error_code::success;
-  };
+          reinforcement_learning::i_trace* trace_logger, reinforcement_learning::api_status* status) {
+        *retval = new rl_net_native::binding_tracer(*context);
+        return reinforcement_learning::error_code::success;
+      };
 
   // TODO: Unify this factory projection and the sender_factory projection in FactoryContext.
   reinforcement_learning::trace_logger_factory_t* trace_logger_factory =

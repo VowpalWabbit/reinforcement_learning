@@ -7,7 +7,6 @@ namespace reinforcement_learning
 {
 namespace utility
 {
-
 template <typename Object>
 class object_pool
 {

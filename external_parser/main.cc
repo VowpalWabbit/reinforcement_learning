@@ -102,7 +102,10 @@ int main(int argc, char* argv[])
       {
         std::cerr << "[critical] vw: " << e.what() << std::endl;
       }
-      else { std::cout << "[critical] vw: " << e.what() << std::endl; }
+      else
+      {
+        std::cout << "[critical] vw: " << e.what() << std::endl;
+      }
     }
     return 1;
   }
@@ -114,7 +117,10 @@ int main(int argc, char* argv[])
       {
         std::cerr << "[critical] Unknown exception occurred" << std::endl;
       }
-      else { std::cout << "[critical] vw: unknown exception" << std::endl; }
+      else
+      {
+        std::cout << "[critical] vw: unknown exception" << std::endl;
+      }
     }
     return 1;
   }

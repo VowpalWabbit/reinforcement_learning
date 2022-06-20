@@ -19,7 +19,6 @@ queue_mode_enum to_queue_mode_enum(const char* queue_mode)
 
 namespace utility
 {
-
 static int get_int(const configuration& config, const char* section, const char* property, int defval)
 {
   std::stringstream ss;

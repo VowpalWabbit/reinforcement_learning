@@ -510,9 +510,18 @@ std::string rl_sim::create_event_id() { return boost::uuids::to_string(boost::uu
 rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm)), _loop_kind(CB)
 {
   if (_options["ccb"].as<bool>()) { _loop_kind = CCB; }
-  else if (_options["slates"].as<bool>()) { _loop_kind = Slates; }
-  else if (_options["ca"].as<bool>()) { _loop_kind = CA; }
-  else if (_options["multistep"].as<bool>()) { _loop_kind = Multistep; }
+  else if (_options["slates"].as<bool>())
+  {
+    _loop_kind = Slates;
+  }
+  else if (_options["ca"].as<bool>())
+  {
+    _loop_kind = CA;
+  }
+  else if (_options["multistep"].as<bool>())
+  {
+    _loop_kind = Multistep;
+  }
 }
 
 std::string get_dist_str(const reinforcement_learning::ranking_response& response)

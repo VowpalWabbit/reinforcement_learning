@@ -6,7 +6,6 @@ namespace reinforcement_learning
 {
 namespace utility
 {
-
 /*
  * Data buffer used for serialized messages.  Data buffer
  * consists of 2 parts.  1) preamble 2) body

@@ -8,7 +8,6 @@ namespace reinforcement_learning
 {
 namespace utility
 {
-
 data_buffer::data_buffer(size_t body_size)
     : _buffer(body_size + logger::preamble::size())
     , _body_beginoffset{logger::preamble::size()}

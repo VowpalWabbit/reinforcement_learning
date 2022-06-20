@@ -57,7 +57,10 @@ bool multistep_example_joiner::process_event(const v2::JoinedEvent& joined_event
       auto outcome = flatbuffers::GetRoot<v2::OutcomeEvent>(event->payload()->data());
       const char* id = outcome->index_type() == v2::IndexValue_literal ? outcome->index_as_literal()->c_str() : nullptr;
       if (id == nullptr) { _episodic_outcomes.push_back(process_outcome(enqueued_time_utc, meta, *outcome)); }
-      else { _outcomes[std::string(id)].push_back(process_outcome(enqueued_time_utc, meta, *outcome)); }
+      else
+      {
+        _outcomes[std::string(id)].push_back(process_outcome(enqueued_time_utc, meta, *outcome));
+      }
       break;
     }
     default:
@@ -184,7 +187,10 @@ public:
         states.push(&next[cur_id]);
         top.pop();
       }
-      else { states.pop(); }
+      else
+      {
+        states.pop();
+      }
     }
   }
 };
@@ -196,7 +202,10 @@ bool multistep_example_joiner::populate_order()
   {
     const auto& parsed = it.second[0];
     if (parsed.event.previous_id() == nullptr) { sorter.push(it.first, parsed.timestamp); }
-    else { sorter.push(it.first, parsed.timestamp, parsed.event.previous_id()->str()); }
+    else
+    {
+      sorter.push(it.first, parsed.timestamp, parsed.event.previous_id()->str());
+    }
   }
   sorter.get(_order);
   _sorted = true;
@@ -212,7 +221,10 @@ reward::outcome_event multistep_example_joiner::process_outcome(
       v2::LearningModeType::LearningModeType_Online};
 
   if (event.value_type() == v2::OutcomeValue_literal) { o_event.s_value = event.value_as_literal()->c_str(); }
-  else if (event.value_type() == v2::OutcomeValue_numeric) { o_event.value = event.value_as_numeric()->value(); }
+  else if (event.value_type() == v2::OutcomeValue_numeric)
+  {
+    o_event.value = event.value_as_numeric()->value();
+  }
   o_event.action_taken = event.action_taken();
   return o_event;
 }
@@ -273,17 +285,15 @@ bool multistep_example_joiner::process_joined(VW::multi_ex& examples)
   for (const auto& o : _episodic_outcomes) { joined.outcome_events.push_back(o); }
 
   bool clear_examples = false;
-  auto guard = VW::scope_exit(
-      [&]
-      {
-        _order.pop_front();
-        _rewards.pop_front();
-        if (clear_examples)
-        {
-          VW::return_multiple_example(*_vw, examples);
-          examples.push_back(VW::new_unused_example(*_vw));
-        }
-      });
+  auto guard = VW::scope_exit([&] {
+    _order.pop_front();
+    _rewards.pop_front();
+    if (clear_examples)
+    {
+      VW::return_multiple_example(*_vw, examples);
+      examples.push_back(VW::new_unused_example(*_vw));
+    }
+  });
 
   if (!joined.is_joined_event_learnable())
   {

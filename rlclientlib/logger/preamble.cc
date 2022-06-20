@@ -6,7 +6,6 @@ namespace reinforcement_learning
 {
 namespace logger
 {
-
 bool preamble::write_to_bytes(uint8_t* buffer, size_t buffersz) const
 {
   if (buffersz < size()) { return false; }

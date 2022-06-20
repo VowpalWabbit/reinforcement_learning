@@ -5,7 +5,6 @@
 
 namespace reinforcement_learning
 {
-
 // a moving non-concurrent queue
 template <class T>
 class moving_queue

@@ -21,8 +21,7 @@ int interaction_logger::log(const char* event_id, string_view context, unsigned 
   auto evt_copy = ranking_event::choose_rank(event_id, context, flags, response, now, 1.0f, learning_mode);
   *evt_sp = std::move(evt_copy);
 
-  auto evt_fn = [evt_sp](ranking_event& out_evt, api_status* status) -> int
-  {
+  auto evt_fn = [evt_sp](ranking_event& out_evt, api_status* status) -> int {
     out_evt = std::move(*evt_sp);
     return error_code::success;
   };
@@ -40,8 +39,7 @@ int ccb_logger::log_decisions(std::vector<const char*>& event_ids, string_view c
   *evt_sp = std::move(evt_copy);
 
   const char* evt_id = evt_sp->get_seed_id().c_str();
-  auto evt_fn = [evt_sp](decision_ranking_event& out_evt, api_status* status) -> int
-  {
+  auto evt_fn = [evt_sp](decision_ranking_event& out_evt, api_status* status) -> int {
     out_evt = std::move(*evt_sp);
     return error_code::success;
   };
@@ -59,8 +57,7 @@ int multi_slot_logger::log_decision(const std::string& event_id, string_view con
       multi_slot_decision_event::request_decision(event_id, context, flags, action_ids, pdfs, model_version, now);
   *evt_sp = std::move(evt_copy);
 
-  auto evt_fn = [evt_sp](multi_slot_decision_event& out_evt, api_status* status) -> int
-  {
+  auto evt_fn = [evt_sp](multi_slot_decision_event& out_evt, api_status* status) -> int {
     out_evt = std::move(*evt_sp);
     return error_code::success;
   };
@@ -75,8 +72,7 @@ int observation_logger::report_action_taken(const char* event_id, api_status* st
   auto evt_copy = outcome_event::report_action_taken(event_id, now);
   *evt_sp = std::move(evt_copy);
 
-  auto evt_fn = [evt_sp](outcome_event& out_evt, api_status* status) -> int
-  {
+  auto evt_fn = [evt_sp](outcome_event& out_evt, api_status* status) -> int {
     out_evt = std::move(*evt_sp);
     return error_code::success;
   };
@@ -98,8 +94,7 @@ int generic_event_logger::log(const char* event_id, generic_event::payload_buffe
   auto evt_sp = std::make_shared<generic_event>(
       event_id, now, type, std::move(payload), content_type, std::move(objects), _app_id);
 
-  auto evt_fn = [evt_sp](generic_event& out_evt, api_status* status) -> int
-  {
+  auto evt_fn = [evt_sp](generic_event& out_evt, api_status* status) -> int {
     out_evt = std::move(*evt_sp);
     return error_code::success;
   };

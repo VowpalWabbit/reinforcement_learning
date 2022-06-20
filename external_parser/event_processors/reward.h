@@ -5,7 +5,6 @@
 
 namespace reward
 {
-
 struct outcome_event
 {
   outcome_event()
@@ -97,7 +96,10 @@ inline float median(const std::vector<outcome_event>& outcome_events, float defa
     {
       return (values[outcome_events_size / 2 - 1] + values[outcome_events_size / 2]) / 2;
     }
-    else { return values[outcome_events_size / 2]; }
+    else
+    {
+      return values[outcome_events_size / 2];
+    }
   }
 
   return default_reward;

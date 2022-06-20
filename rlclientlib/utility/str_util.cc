@@ -11,7 +11,6 @@ namespace reinforcement_learning
 {
 namespace utility
 {
-
 string& str_util::to_lower(string& sval)
 {
   transform(sval.begin(), sval.end(), sval.begin(), ::tolower);

@@ -13,16 +13,14 @@ namespace u = reinforcement_learning::utility;
 BOOST_AUTO_TEST_CASE(sleeper_interrupt)
 {
   u::interruptable_sleeper sleeper;
-  std::thread t(
-      [&]()
-      {
-        // test interruption
-        const auto start = std::chrono::system_clock::now();
-        sleeper.sleep(std::chrono::milliseconds(5000));
-        const auto stop = std::chrono::system_clock::now();
-        const auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-        BOOST_CHECK(diff <= std::chrono::milliseconds(100));
-      });
+  std::thread t([&]() {
+    // test interruption
+    const auto start = std::chrono::system_clock::now();
+    sleeper.sleep(std::chrono::milliseconds(5000));
+    const auto stop = std::chrono::system_clock::now();
+    const auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    BOOST_CHECK(diff <= std::chrono::milliseconds(100));
+  });
 
   std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
@@ -33,15 +31,13 @@ BOOST_AUTO_TEST_CASE(sleeper_interrupt)
 BOOST_AUTO_TEST_CASE(sleeper_sleep)
 {
   u::interruptable_sleeper sleeper;
-  std::thread t(
-      [&]()
-      {
-        // test interruption
-        const auto start = std::chrono::system_clock::now();
-        sleeper.sleep(std::chrono::milliseconds(100));
-        const auto stop = std::chrono::system_clock::now();
-        const auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-        BOOST_CHECK(diff >= std::chrono::milliseconds(80));
-      });
+  std::thread t([&]() {
+    // test interruption
+    const auto start = std::chrono::system_clock::now();
+    sleeper.sleep(std::chrono::milliseconds(100));
+    const auto stop = std::chrono::system_clock::now();
+    const auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    BOOST_CHECK(diff >= std::chrono::milliseconds(80));
+  });
   t.join();
 }

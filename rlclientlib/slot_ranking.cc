@@ -5,7 +5,6 @@
 
 namespace reinforcement_learning
 {
-
 slot_ranking::slot_ranking(char const* id) : _id{id}, _chosen_action_id{0} {}
 
 char const* slot_ranking::get_id() const { return _id.c_str(); }

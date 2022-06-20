@@ -190,7 +190,10 @@ int create_from_json(const std::string& config_json, configuration& cc, i_trace*
 
     const char* string_value = nullptr;
     if (prop_value.IsString()) { string_value = prop_value.GetString(); }
-    else if (prop_value.IsBool()) { string_value = prop_value.GetBool() ? "true" : "false"; }
+    else if (prop_value.IsBool())
+    {
+      string_value = prop_value.GetBool() ? "true" : "false";
+    }
     else
     {
       RETURN_ERROR_LS(trace, status, json_parse_error)

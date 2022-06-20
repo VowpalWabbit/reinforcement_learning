@@ -4,7 +4,6 @@ namespace reinforcement_learning
 {
 namespace value
 {
-
 #ifdef USE_AZURE_FACTORIES
 const char* const DEFAULT_EPISODE_SENDER = EPISODE_EH_SENDER;
 const char* const DEFAULT_OBSERVATION_SENDER = OBSERVATION_EH_SENDER;

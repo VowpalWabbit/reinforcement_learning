@@ -7,7 +7,6 @@ namespace reinforcement_learning
 {
 namespace onnx
 {
-
 namespace tensor_parser
 {
 enum CONSUME_TYPE : bool
@@ -177,8 +176,14 @@ public:
       {
         _running = _running | (c - '0' + 52);  // 52 - 61
       }
-      else if (c == '+') { _running = _running | 62; }
-      else if (c == '/') { _running = _running | 63; }
+      else if (c == '+')
+      {
+        _running = _running | 62;
+      }
+      else if (c == '/')
+      {
+        _running = _running | 63;
+      }
       else
       {
         // TODO: Bad character
@@ -267,7 +272,10 @@ public:
         _value.push_back(c);
         _in_escape = false;
       }
-      else if (c == escape) { _in_escape = true; }
+      else if (c == escape)
+      {
+        _in_escape = true;
+      }
 
       return true;
     }

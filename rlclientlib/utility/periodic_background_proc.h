@@ -17,7 +17,6 @@ namespace reinforcement_learning
 {
 namespace utility
 {
-
 constexpr float timeout_grace_multiplier_c = 3.f;
 
 template <typename BgProc>

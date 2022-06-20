@@ -228,7 +228,10 @@ bool process_compression(const uint8_t* data, size_t size, const v2::Metadata& m
     detached_buffer = flatbuffers::DetachedBuffer(nullptr, false, data_ptr, 0, data_ptr, res);
     payload = flatbuffers::GetRoot<T>(detached_buffer.data());
   }
-  else { payload = flatbuffers::GetRoot<T>(data); }
+  else
+  {
+    payload = flatbuffers::GetRoot<T>(data);
+  }
   return true;
 }
 }  // namespace typed_event

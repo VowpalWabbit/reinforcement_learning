@@ -13,7 +13,6 @@ namespace reinforcement_learning
 class i_trace;
 namespace utility
 {
-
 class watchdog
 {
 public:

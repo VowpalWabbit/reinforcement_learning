@@ -8,7 +8,6 @@
 
 namespace reinforcement_learning
 {
-
 class safe_vw
 {
   // we need to keep a reference to the master around, so it's still valid even if the factory is deleted

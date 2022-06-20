@@ -37,7 +37,10 @@ inline void calculate_multislot_interaction_metrics(
         metrics->DsjsonNumberOfLabelEqualBaselineFirstSlot++;
         metrics->DsjsonSumCostOriginalLabelEqualBaselineFirstSlot += first_slot_original_reward_neg;
       }
-      else { metrics->DsjsonNumberOfLabelNotEqualBaselineFirstSlot++; }
+      else
+      {
+        metrics->DsjsonNumberOfLabelNotEqualBaselineFirstSlot++;
+      }
     }
   }
 }
@@ -84,7 +87,10 @@ struct cb_joined_event : public typed_joined_event
       // Reward of 1 when we are match baseline and 0 otherwise
       reward = apprentice_matching_reward;
     }
-    else { reward = apprentice_not_matching_reward; }
+    else
+    {
+      reward = apprentice_not_matching_reward;
+    }
   }
 
   bool fill_in_label(VW::multi_ex& examples, VW::io::logger& logger) const override
@@ -133,7 +139,10 @@ struct cb_joined_event : public typed_joined_event
     original_reward = reward_function(outcome_events, default_reward);
 
     if (interaction_metadata.learning_mode == v2::LearningModeType_Apprentice) { set_apprentice_reward(); }
-    else { reward = original_reward; }
+    else
+    {
+      reward = original_reward;
+    }
   }
 
   void calculate_metrics(dsjson_metrics* metrics) override
@@ -174,7 +183,10 @@ struct ccb_joined_event : public typed_joined_event
       {
         rewards[i] = apprentice_matching_reward;
       }
-      else { rewards[i] = apprentice_not_matching_reward; }
+      else
+      {
+        rewards[i] = apprentice_not_matching_reward;
+      }
     }
   }
 
@@ -279,7 +291,10 @@ struct ccb_joined_event : public typed_joined_event
     }
 
     if (metadata_info.learning_mode == v2::LearningModeType_Apprentice) { set_apprentice_reward(); }
-    else { rewards.assign(original_rewards.begin(), original_rewards.end()); }
+    else
+    {
+      rewards.assign(original_rewards.begin(), original_rewards.end());
+    }
   }
 
   void calculate_metrics(dsjson_metrics* metrics) override
@@ -366,7 +381,10 @@ struct slates_joined_event : public typed_joined_event
     {
       logger.out_warn("Apprentice mode is not implmeneted for slates.");
     }
-    else { reward = original_reward; }
+    else
+    {
+      reward = original_reward;
+    }
   }
 
   void calculate_metrics(dsjson_metrics* metrics) override
@@ -451,7 +469,10 @@ struct ca_joined_event : public typed_joined_event
     {
       logger.out_warn("Apprentice mode is not implmeneted for cats.");
     }
-    else { reward = original_reward; }
+    else
+    {
+      reward = original_reward;
+    }
   }
 
   void calculate_metrics(dsjson_metrics* metrics) override
@@ -508,7 +529,10 @@ struct joined_event
       typed_data->set_skip_learn(false);
       return true;
     }
-    else { return false; }
+    else
+    {
+      return false;
+    }
   }
 
   void calc_reward(float default_reward, reward::RewardFunctionType reward_function, VW::io::logger& logger)
@@ -552,7 +576,10 @@ struct multistep_joined_event
       cb_data->set_skip_learn(false);
       return true;
     }
-    else { return false; }
+    else
+    {
+      return false;
+    }
   }
 
   void calc_reward(float default_reward, reward::RewardFunctionType reward_function, VW::io::logger& logger)

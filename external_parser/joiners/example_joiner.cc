@@ -347,12 +347,18 @@ bool example_joiner::process_outcome(
   }
 
   if (outcome->value_type() == v2::OutcomeValue_literal) { o_event.s_value = outcome->value_as_literal()->c_str(); }
-  else if (outcome->value_type() == v2::OutcomeValue_numeric) { o_event.value = outcome->value_as_numeric()->value(); }
+  else if (outcome->value_type() == v2::OutcomeValue_numeric)
+  {
+    o_event.value = outcome->value_as_numeric()->value();
+  }
 
   o_event.index_type = outcome->index_type();
 
   if (outcome->index_type() == v2::IndexValue_literal) { o_event.s_index = outcome->index_as_literal()->c_str(); }
-  else if (outcome->index_type() == v2::IndexValue_numeric) { o_event.index = outcome->index_as_numeric()->index(); }
+  else if (outcome->index_type() == v2::IndexValue_numeric)
+  {
+    o_event.index = outcome->index_as_numeric()->index();
+  }
 
   o_event.action_taken = outcome->action_taken();
 
@@ -415,7 +421,10 @@ bool example_joiner::process_dedup(const v2::Event& event, const v2::Metadata& m
       _dedup_cache.add(dedup_id, examples[0]);
       examples.clear();
     }
-    else { _dedup_cache.update(dedup_id); }
+    else
+    {
+      _dedup_cache.update(dedup_id);
+    }
   }
 
   if (dedup->ids()->size() > 0)
@@ -459,37 +468,35 @@ bool example_joiner::process_joined(VW::multi_ex& examples)
   // that way we can guarantee clean-up no matter where the return happens
   // without having to duplicate the cleanup code
   bool clear_examples = false;
-  auto clear_event_id_on_exit = VW::scope_exit(
-      [&]
+  auto clear_event_id_on_exit = VW::scope_exit([&] {
+    if (je)
+    {
+      if (_vw->example_parser->metrics)
       {
-        if (je)
+        if (!je->is_joined_event_learnable()) { _joiner_metrics.number_of_skipped_events++; }
+        else
         {
-          if (_vw->example_parser->metrics)
+          je->calculate_metrics(_vw->example_parser->metrics.get());
+          _joiner_metrics.sum_cost_original += -1.f * je->get_sum_original_reward();
+          if (_joiner_metrics.first_event_id.empty())
           {
-            if (!je->is_joined_event_learnable()) { _joiner_metrics.number_of_skipped_events++; }
-            else
-            {
-              je->calculate_metrics(_vw->example_parser->metrics.get());
-              _joiner_metrics.sum_cost_original += -1.f * je->get_sum_original_reward();
-              if (_joiner_metrics.first_event_id.empty())
-              {
-                _joiner_metrics.first_event_id = std::move(je->interaction_metadata.event_id);
-                _joiner_metrics.first_event_timestamp = std::move(je->joined_event_timestamp);
-              }
-              else
-              {
-                _joiner_metrics.last_event_id = std::move(je->interaction_metadata.event_id);
-                _joiner_metrics.last_event_timestamp = std::move(je->joined_event_timestamp);
-              }
-            }
+            _joiner_metrics.first_event_id = std::move(je->interaction_metadata.event_id);
+            _joiner_metrics.first_event_timestamp = std::move(je->joined_event_timestamp);
           }
-
-          if (_binary_to_json) { log_converter::build_json(_outfile, *je, logger); }
+          else
+          {
+            _joiner_metrics.last_event_id = std::move(je->interaction_metadata.event_id);
+            _joiner_metrics.last_event_timestamp = std::move(je->joined_event_timestamp);
+          }
         }
+      }
 
-        clear_event_id_batch_info(id);
-        if (clear_examples) { clear_vw_examples(examples); }
-      });
+      if (_binary_to_json) { log_converter::build_json(_outfile, *je, logger); }
+    }
+
+    clear_event_id_batch_info(id);
+    if (clear_examples) { clear_vw_examples(examples); }
+  });
 
   if (_batch_grouped_examples.find(id) == _batch_grouped_examples.end())
   {

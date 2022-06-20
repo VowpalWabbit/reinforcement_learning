@@ -126,47 +126,45 @@ pplx::task<web::http::status_code> http_transport_client<TAuthorization>::http_r
   const auto stream = concurrency::streams::bytestream::open_istream(container);
   request.set_body(stream, container_size);
 
-  return _client->request(request).then(
-      [this, try_count](pplx::task<http_response> response)
+  return _client->request(request).then([this, try_count](pplx::task<http_response> response) {
+    web::http::status_code code = status_codes::InternalError;
+    api_status status;
+
+    try
+    {
+      code = response.get().status_code();
+    }
+    catch (const std::exception& e)
+    {
+      TRACE_ERROR(_trace, e.what());
+    }
+
+    // If the response is not the expected code then it has failed. Retry if possible otherwise report background
+    // error.
+    if (code != status_codes::Created && code != status_codes::NoContent)
+    {
+      // Stop condition of recurison.
+      if (try_count < _max_retries)
       {
-        web::http::status_code code = status_codes::InternalError;
-        api_status status;
+        TRACE_ERROR(_trace, "HTTP request failed, retrying...");
 
-        try
-        {
-          code = response.get().status_code();
-        }
-        catch (const std::exception& e)
-        {
-          TRACE_ERROR(_trace, e.what());
-        }
+        // Yes, recursively send another request inside this one. If a subsequent request returns success we are
+        // good, otherwise the failure will propagate.
+        return send_request(try_count + 1).get();
+      }
+      else
+      {
+        auto msg = u::concat("(expected 201): Found ", code, ", failed after ", try_count, " retries.");
+        api_status::try_update(&status, error_code::http_bad_status_code, msg.c_str());
+        ERROR_CALLBACK(_error_callback, status);
 
-        // If the response is not the expected code then it has failed. Retry if possible otherwise report background
-        // error.
-        if (code != status_codes::Created && code != status_codes::NoContent)
-        {
-          // Stop condition of recurison.
-          if (try_count < _max_retries)
-          {
-            TRACE_ERROR(_trace, "HTTP request failed, retrying...");
-
-            // Yes, recursively send another request inside this one. If a subsequent request returns success we are
-            // good, otherwise the failure will propagate.
-            return send_request(try_count + 1).get();
-          }
-          else
-          {
-            auto msg = u::concat("(expected 201): Found ", code, ", failed after ", try_count, " retries.");
-            api_status::try_update(&status, error_code::http_bad_status_code, msg.c_str());
-            ERROR_CALLBACK(_error_callback, status);
-
-            return code;
-          }
-        }
-
-        // We have succeeded, return success.
         return code;
-      });
+      }
+    }
+
+    // We have succeeded, return success.
+    return code;
+  });
 }
 
 template <typename TAuthorization>

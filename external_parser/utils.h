@@ -10,7 +10,6 @@ namespace VW
 {
 namespace external
 {
-
 bool stricmp(const char* first, const char* second);
 
 template <typename enum_t>

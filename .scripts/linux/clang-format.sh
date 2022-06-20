@@ -8,13 +8,22 @@ if [[ "$1" != "check" ]] && [[ "$1" != "fix" ]]; then
     exit 1
 fi
 
+# Allow calling the script with a different version of clang-format through an environment variable
+# $ CLANG_FORMAT=clang-format-11 ./clang-format.sh fix
+if [[ -z "$CLANG_FORMAT" ]]; then
+    CLANG_FORMAT="clang-format"
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_DIR="$SCRIPT_DIR/../../"
 cd "$REPO_DIR"
 
+echo "Using clang-format version:"
+$CLANG_FORMAT --version
+
 for FILE in $(find . -type f -not -path './ext_libs/*' \( -name '*.cc' -o -name "*.h" \) ); do
     if [[ "$1" == "check" ]]; then
-        diff $FILE <(clang-format -style=file $FILE);
+        diff $FILE <($CLANG_FORMAT $FILE);
         if [ $? -ne 0 ]; then
             ISSUE_FOUND="true"
             if [[ -v GH_WORKFLOW_LOGGING ]]; then
@@ -24,7 +33,7 @@ for FILE in $(find . -type f -not -path './ext_libs/*' \( -name '*.cc' -o -name 
     fi
 
     if [[ "$1" == "fix" ]]; then
-        clang-format -style=file -i $FILE;
+        $CLANG_FORMAT -i $FILE;
     fi
 done
 

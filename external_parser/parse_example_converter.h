@@ -12,7 +12,6 @@ namespace VW
 {
 namespace external
 {
-
 class binary_json_converter : public parser
 {
 public:

@@ -7,7 +7,6 @@ namespace reinforcement_learning
 {
 namespace onnx
 {
-
 // This implements a very restricted parser/serializer for a JSON-like dialect to
 // describe input to the ONNX Runtime
 //

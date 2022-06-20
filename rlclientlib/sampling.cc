@@ -10,7 +10,6 @@
 namespace e = exploration;
 namespace reinforcement_learning
 {
-
 int populate_response(size_t chosen_action_index, std::vector<int>& action_ids, std::vector<float>& pdf,
     std::string&& model_id, ranking_response& response, i_trace* trace_logger, api_status* status)
 {

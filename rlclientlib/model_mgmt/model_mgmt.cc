@@ -7,7 +7,6 @@ namespace reinforcement_learning
 {
 namespace model_management
 {
-
 model_data::model_data() = default;
 
 model_data::~model_data() { free(); }

@@ -11,7 +11,6 @@
 
 namespace reinforcement_learning
 {
-
 // a moving concurrent queue with locks and mutex
 template <class T>
 class event_queue

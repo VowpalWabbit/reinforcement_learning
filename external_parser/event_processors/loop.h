@@ -7,7 +7,6 @@ namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 namespace loop
 {
-
 template <typename T>
 class sticky_value
 {

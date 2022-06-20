@@ -13,7 +13,6 @@ namespace reinforcement_learning
 class i_trace;
 namespace model_management
 {
-
 class restapi_data_transport : public i_data_transport
 {
 public:

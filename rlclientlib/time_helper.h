@@ -2,7 +2,6 @@
 #include <cstdint>
 namespace reinforcement_learning
 {
-
 struct timestamp
 {
   uint16_t year = 0;        // year

@@ -20,7 +20,6 @@ namespace reinforcement_learning
 {
 namespace joiner
 {
-
 // forward declarations
 void convert_to_text(const std::string& file);
 void convert_to_text(std::istream& in_strm, std::ostream& out_strm);

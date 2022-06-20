@@ -30,7 +30,10 @@ generic_event::object_id_t dedup_dict::add_object(const char* start, size_t leng
   auto hash = hash_content(start, length);
   auto it = _entries.find(hash);
   if (it == _entries.end()) { _entries.insert({hash, dict_entry(start, length)}); }
-  else { ++it->second._count; }
+  else
+  {
+    ++it->second._count;
+  }
   return hash;
 }
 
@@ -188,7 +191,10 @@ int action_dict_builder::add(const generic_event::object_list_t& object_ids, api
       _used_objects.insert({aid, 1});
       _size_estimate += sizeof(size_t) + content.size();
     }
-    else { ++it->second; }
+    else
+    {
+      ++it->second;
+    }
   }
   return error_code::success;
 }

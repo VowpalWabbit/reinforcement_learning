@@ -11,7 +11,6 @@ namespace reinforcement_learning
 class i_trace;
 namespace utility
 {
-
 //! This struct collects all sort of relevant data we need about a context json.
 struct ContextInfo
 {

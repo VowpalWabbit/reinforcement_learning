@@ -5,7 +5,6 @@ namespace reinforcement_learning
 {
 namespace logger
 {
-
 class default_extensions : public i_logger_extensions
 {
 public:

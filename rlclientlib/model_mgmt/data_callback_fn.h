@@ -5,7 +5,6 @@ namespace reinforcement_learning
 class i_trace;
 namespace model_management
 {
-
 class data_callback_fn
 {
 public:

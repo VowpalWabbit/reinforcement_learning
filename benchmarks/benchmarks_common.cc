@@ -79,7 +79,10 @@ std::string cb_decision_gen::gen_example()
     for (size_t i = 1; i < actions_per_decision; i++) { str << "," << (1 / actions_per_decision); }
     str << R"(]})";
   }
-  else { str << R"(]})"; }
+  else
+  {
+    str << R"(]})";
+  }
   temp_str = str.str();
 
   return temp_str;

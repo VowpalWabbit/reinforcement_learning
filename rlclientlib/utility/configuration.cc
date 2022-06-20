@@ -8,7 +8,6 @@ namespace reinforcement_learning
 {
 namespace utility
 {
-
 configuration::configuration() : _pmap(new map_type()) {}
 configuration::~configuration() { delete _pmap; }
 

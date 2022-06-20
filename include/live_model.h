@@ -22,7 +22,6 @@
 
 namespace reinforcement_learning
 {
-
 //// Forward declarations ////////
 class live_model_impl;   //
 class ranking_response;  //

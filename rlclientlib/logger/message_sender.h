@@ -4,7 +4,6 @@
 #include <memory>
 namespace reinforcement_learning
 {
-
 class api_status;
 
 namespace utility

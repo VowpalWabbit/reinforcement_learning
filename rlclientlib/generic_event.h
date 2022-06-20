@@ -85,7 +85,10 @@ public:
     {
       RETURN_IF_FAIL(ext->transform_serialized_payload(_payload, _content_type, status));
     }
-    else { _content_type = event_content_type::IDENTITY; }
+    else
+    {
+      _content_type = event_content_type::IDENTITY;
+    }
     _context_string.clear();
     return 0;
   }

@@ -91,7 +91,10 @@ int live_model_impl::choose_rank(
     RETURN_IF_FAIL(explore_only(event_id, context, response, status));
     response.set_model_id("N/A");
   }
-  else { RETURN_IF_FAIL(explore_exploit(event_id, context, response, status)); }
+  else
+  {
+    RETURN_IF_FAIL(explore_exploit(event_id, context, response, status));
+  }
   response.set_event_id(event_id);
 
   if (_learning_mode == LOGGINGONLY)

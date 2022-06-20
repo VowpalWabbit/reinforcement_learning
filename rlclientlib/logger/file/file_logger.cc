@@ -13,7 +13,6 @@ namespace logger
 {
 namespace file
 {
-
 file_logger::file_logger(std::string file_name, i_trace* trace) : _file_name(std::move(file_name)), _trace(trace) {}
 
 int file_logger::init(const utility::configuration& config, api_status* status)

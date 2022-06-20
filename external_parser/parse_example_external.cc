@@ -17,7 +17,6 @@ namespace VW
 {
 namespace external
 {
-
 std::map<const char*, v2::ProblemType> const problem_types = {{
     {"cb", v2::ProblemType_CB},
     {"ccb", v2::ProblemType_CCB},
@@ -106,7 +105,10 @@ std::unique_ptr<parser> parser::get_external_parser(VW::workspace* all, const pa
 
       return VW::make_unique<binary_json_converter>(std::move(joiner), all->logger);
     }
-    else { joiner = VW::make_unique<example_joiner>(all); }
+    else
+    {
+      joiner = VW::make_unique<example_joiner>(all);
+    }
     if (parsed_options.multistep) { joiner = VW::make_unique<multistep_example_joiner>(all); }
 
     apply_cli_overrides(joiner, all, parsed_options);

@@ -4,7 +4,6 @@
 
 namespace reinforcement_learning
 {
-
 int api_status::get_error_code() const { return _error_code; }
 
 const char* api_status::get_error_msg() const { return _error_msg.c_str(); }

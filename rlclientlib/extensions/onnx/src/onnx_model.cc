@@ -15,7 +15,6 @@ namespace reinforcement_learning
 {
 namespace onnx
 {
-
 // This is used for statically introspecting the model. It will be used regardless of whether the actual
 // inference is done on CPU/GPU/Accelerator.
 static Ort::AllocatorWithDefaultOptions DefaultOnnxAllocator;

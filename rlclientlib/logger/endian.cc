@@ -4,7 +4,6 @@ namespace reinforcement_learning
 {
 namespace logger
 {
-
 bool endian::is_big_endian()
 {
   const union

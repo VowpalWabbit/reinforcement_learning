@@ -9,7 +9,6 @@
 
 namespace reinforcement_learning
 {
-
 enum learning_mode
 {
   ONLINE = 0,

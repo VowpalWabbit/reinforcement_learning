@@ -19,7 +19,6 @@ namespace VW
 {
 namespace external
 {
-
 class binary_parser : public parser
 {
 public:

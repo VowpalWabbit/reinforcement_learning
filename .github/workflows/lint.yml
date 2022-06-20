@@ -94,9 +94,6 @@ jobs:
         with:
           submodules: recursive
       - name: Install clang-format
-        # This is only needed if the diff check runs as it installs 'clang-format-diff'
-        # 'clang-format' is available by default
-        if: github.event_name == 'pull_request'
         shell: bash
         run: |
           sudo apt update
@@ -114,9 +111,9 @@ jobs:
         run: |
           if [[ ! -f .clang-format ]]; then
             echo "Cannot find .clang-format file!"
-            exit 0
+            exit 1
           fi
-          git diff origin/master...HEAD -U0 --no-color | clang-format-diff -style=file -r '^.*\.(cc|h)$' -p1 > clang_format_diff.txt
+          git diff origin/master...HEAD -U0 --no-color | clang-format-diff -r '^.*\.(cc|h)$' -p1 > clang_format_diff.txt
           if [ -s clang_format_diff.txt ]; then
             cat clang_format_diff.txt
             echo "::error:: Formatting issues found"
@@ -126,6 +123,8 @@ jobs:
             echo -e "\tRun: \"git fetch upstream\""
             echo -e "\tUse Docker: https://gist.github.com/jackgerrits/2736da5ffff871f7830aed6b55c0c73e"
             echo -e "\tOr, Run: \"git diff origin/master...HEAD -U0 --no-color | clang-format-diff -r '^.*\.(cc|h)$' -p1 -i\""
+            echo -e "Also, check your version of clang-format. This check was run with..."
+            clang-format --version
             exit 1
           else
             echo "No formatting issues found in the PR diff."
