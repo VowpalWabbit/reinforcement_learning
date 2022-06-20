@@ -89,6 +89,7 @@ jobs:
     name: lint.c++.formatting
     runs-on: ubuntu-latest
     steps:
+      # Must use v1 or else git diff breaks
       - uses: actions/checkout@v1
         with:
           submodules: recursive
@@ -111,7 +112,11 @@ jobs:
         if: github.event_name == 'pull_request'
         shell: bash
         run: |
-          git diff origin/master...HEAD -U0 --no-color | clang-format-diff -r '^.*\.(cc|h)$' -p1 > clang_format_diff.txt
+          if [[ ! -f .clang-format ]]; then
+            echo "Cannot find .clang-format file!"
+            exit 0
+          fi
+          git diff origin/master...HEAD -U0 --no-color | clang-format-diff -style=file -r '^.*\.(cc|h)$' -p1 > clang_format_diff.txt
           if [ -s clang_format_diff.txt ]; then
             cat clang_format_diff.txt
             echo "::error:: Formatting issues found"

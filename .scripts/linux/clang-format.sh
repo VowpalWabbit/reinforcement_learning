@@ -14,7 +14,7 @@ cd "$REPO_DIR"
 
 for FILE in $(find . -type f -not -path './ext_libs/*' \( -name '*.cc' -o -name "*.h" \) ); do
     if [[ "$1" == "check" ]]; then
-        diff $FILE <(clang-format $FILE);
+        diff $FILE <(clang-format -style=file $FILE);
         if [ $? -ne 0 ]; then
             ISSUE_FOUND="true"
             if [[ -v GH_WORKFLOW_LOGGING ]]; then
@@ -24,7 +24,7 @@ for FILE in $(find . -type f -not -path './ext_libs/*' \( -name '*.cc' -o -name 
     fi
 
     if [[ "$1" == "fix" ]]; then
-        clang-format -i $FILE;
+        clang-format -style=file -i $FILE;
     fi
 done
 
