@@ -349,15 +349,14 @@ bool parse(parser_context& context)
 
   errors::error_context error_context(context._errors, "while parsing tensor notation", context);
 
-  do {
+  do
+  {
     std::string name;
     bytes_t tensor_shape_bytes;
     bytes_t tensor_data_bytes;
 
     if (!parse_tensor_name_value(reading_head, name, tensor_shape_bytes, tensor_data_bytes, error_context))
-    {
-      return false;
-    }
+    { return false; }
 
     context._input_builder.push_input(
         std::move(name), std::move(std::make_pair(tensor_shape_bytes, tensor_data_bytes)));

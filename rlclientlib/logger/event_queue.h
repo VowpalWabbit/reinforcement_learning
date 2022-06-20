@@ -82,9 +82,7 @@ public:
     std::unique_lock<std::mutex> mlock(_mutex);
     if (!is_full()) return;
     for (auto it = _queue.begin(); it != _queue.end();)
-    {
-      it = std::get<2>(*it)->try_drop(pass_prob, _drop_pass) ? erase(it) : (++it);
-    }
+    { it = std::get<2>(*it)->try_drop(pass_prob, _drop_pass) ? erase(it) : (++it); }
     ++_drop_pass;
   }
 

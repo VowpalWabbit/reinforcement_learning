@@ -210,7 +210,8 @@ int report_error(status_builder& sb, const First& first, const Rest&... rest)
  * @brief Error reporting macro for just returning an error code.
  */
 #define RETURN_ERROR(trace, status, code, ...)                                                            \
-  do {                                                                                                    \
+  do                                                                                                      \
+  {                                                                                                       \
     if (status != nullptr)                                                                                \
     {                                                                                                     \
       reinforcement_learning::status_builder sb(trace, status, reinforcement_learning::error_code::code); \
@@ -224,7 +225,8 @@ int report_error(status_builder& sb, const First& first, const Rest&... rest)
  * @brief Error reporting macro that takes a list of parameters
  */
 #define RETURN_ERROR_ARG(trace, status, code, ...)                                                        \
-  do {                                                                                                    \
+  do                                                                                                      \
+  {                                                                                                       \
     if (status != nullptr)                                                                                \
     {                                                                                                     \
       reinforcement_learning::status_builder sb(trace, status, reinforcement_learning::error_code::code); \
@@ -245,7 +247,8 @@ int report_error(status_builder& sb, const First& first, const Rest&... rest)
  * @brief Error reporting macro to test and return on error
  */
 #define RETURN_IF_FAIL(x)                               \
-  do {                                                  \
+  do                                                    \
+  {                                                     \
     int retval__LINE__ = (x);                           \
     if (retval__LINE__ != 0) { return retval__LINE__; } \
   } while (0)

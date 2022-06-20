@@ -357,9 +357,7 @@ void multistep_example_joiner::apply_cli_overrides(
 
     if (!VW::external::str_to_enum(parsed_options.multistep_reward, multistep_reward_functions,
             multistep_reward_funtion_type::Identity, multistep_reward_func))
-    {
-      throw std::runtime_error("Invalid argument to --multistep_reward " + parsed_options.reward_function);
-    }
+    { throw std::runtime_error("Invalid argument to --multistep_reward " + parsed_options.reward_function); }
     set_multistep_reward_function(multistep_reward_func, true);
   }
 }

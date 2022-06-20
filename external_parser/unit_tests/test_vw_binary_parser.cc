@@ -223,9 +223,7 @@ BOOST_AUTO_TEST_CASE(test_log_file_with_mismatched_payload_types)
   size_t total_size_of_examples = 0;
   // file contains 2 regular messages, both have wrong types set
   while (bp.parse_examples(vw.get(), vw->example_parser->input, examples))
-  {
-    total_size_of_examples += examples.size();
-  }
+  { total_size_of_examples += examples.size(); }
 
   // skipped first payload and read the second one
   BOOST_CHECK_EQUAL(total_size_of_examples, 0);

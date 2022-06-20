@@ -107,13 +107,9 @@ int zstd_compressor::decompress(generic_event::payload_buffer_t& buf, api_status
 {
   size_t buff_size = ZSTD_getFrameContentSize(buf.data(), buf.size());
   if (buff_size == ZSTD_CONTENTSIZE_ERROR)
-  {
-    RETURN_ERROR_ARG(nullptr, status, compression_error, "Invalid compressed content.");
-  }
+  { RETURN_ERROR_ARG(nullptr, status, compression_error, "Invalid compressed content."); }
   if (buff_size == ZSTD_CONTENTSIZE_UNKNOWN)
-  {
-    RETURN_ERROR_ARG(nullptr, status, compression_error, "Unknown compressed size.");
-  }
+  { RETURN_ERROR_ARG(nullptr, status, compression_error, "Unknown compressed size."); }
 
   std::unique_ptr<uint8_t[]> data(fb::DefaultAllocator().allocate(buff_size));
   size_t res = ZSTD_decompress(data.get(), buff_size, buf.data(), buf.size());

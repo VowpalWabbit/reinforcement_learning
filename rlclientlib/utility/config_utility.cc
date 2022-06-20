@@ -76,9 +76,7 @@ int parse_eventhub_conn_str(const std::string& conn_str, std::string& host, std:
         "Endpoint=sb://([^/]+)[^;]+;SharedAccessKeyName=([^;]+);SharedAccessKey=([^;]+);EntityPath=([^;^\\s]+)");
     std::smatch match;
     if (!std::regex_match(conn_str, match, regex_eh_connstr) && !(match.size() == 5))
-    {
-      RETURN_ERROR_LS(trace, status, eh_connstr_parse_error) << conn_str;
-    }
+    { RETURN_ERROR_LS(trace, status, eh_connstr_parse_error) << conn_str; }
     host = match[1].str();
     access_key_name = match[2].str();
     access_key = match[3].str();
@@ -148,9 +146,7 @@ int translate_property(
   // Check if the current field is an EventHub connect string that needs to be parsed.
   const auto parsed_it = parsed_translation_mapping.find(prop_name);
   if (parsed_it != parsed_translation_mapping.end())
-  {
-    RETURN_IF_FAIL(set_eventhub_config(string_value, parsed_it->second, cc, trace, status));
-  }
+  { RETURN_IF_FAIL(set_eventhub_config(string_value, parsed_it->second, cc, trace, status)); }
   else
   {
     // Otherwise, just set the value in the config collection.

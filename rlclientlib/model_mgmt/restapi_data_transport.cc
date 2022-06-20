@@ -75,15 +75,11 @@ int restapi_data_transport::get_data_info(
     }
     const auto iter = response.headers().find(U("Last-Modified"));
     if (iter == response.headers().end())
-    {
-      RETURN_ERROR_ARG(_trace, status, last_modified_not_found, _httpcli->get_url());
-    }
+    { RETURN_ERROR_ARG(_trace, status, last_modified_not_found, _httpcli->get_url()); }
 
     last_modified = ::utility::datetime::from_string(iter->second);
     if (last_modified.to_interval() == 0)
-    {
-      RETURN_ERROR_ARG(_trace, status, last_modified_invalid, _httpcli->get_url());
-    }
+    { RETURN_ERROR_ARG(_trace, status, last_modified_invalid, _httpcli->get_url()); }
 
     sz = response.headers().content_length();
 
@@ -138,9 +134,7 @@ int restapi_data_transport::get_data(model_data& ret, api_status* status)
 
             const auto iter = response.headers().find(U("Last-Modified"));
             if (iter == response.headers().end())
-            {
-              RETURN_ERROR_ARG(_trace, status, last_modified_not_found, _httpcli->get_url());
-            }
+            { RETURN_ERROR_ARG(_trace, status, last_modified_not_found, _httpcli->get_url()); }
 
             curr_last_modified = ::utility::datetime::from_string(iter->second);
             if (curr_last_modified.to_interval() == 0)

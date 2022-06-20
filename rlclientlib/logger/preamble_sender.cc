@@ -18,9 +18,7 @@ int preamble_message_sender::send(const uint16_t msg_type, const buffer& db, api
   pre.msg_type = msg_type;
   pre.msg_size = static_cast<std::uint32_t>(db->body_filled_size());
   if (!pre.write_to_bytes(db->preamble_begin(), db->preamble_size()))
-  {
-    RETURN_ERROR_LS(nullptr, status, preamble_error) << " Write error.";
-  }
+  { RETURN_ERROR_LS(nullptr, status, preamble_error) << " Write error."; }
   // Send message with preamble
   return _sender->send(db, status);
 }

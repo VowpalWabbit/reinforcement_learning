@@ -41,9 +41,7 @@ API livemodel_context_t* CreateLiveModel(
   // This is a clone of cleanup_trace_logger_factory
   std::swap(trace_logger_factory, factory_context->trace_logger_factory);
   if (trace_logger_factory != nullptr && trace_logger_factory != &reinforcement_learning::trace_logger_factory)
-  {
-    delete trace_logger_factory;
-  }
+  { delete trace_logger_factory; }
 
   // Set TRACE_LOG_IMPLEMENTATION configuration to use trace logger.
   config->set(reinforcement_learning::name::TRACE_LOG_IMPLEMENTATION, rl_net_native::constants::BINDING_TRACE_LOGGER);
@@ -77,9 +75,7 @@ API int LiveModelChooseRank(livemodel_context_t* context, const char* event_id, 
     int context_json_size, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status)
 {
   if (event_id == nullptr)
-  {
-    return context->livemodel->choose_rank({context_json, static_cast<size_t>(context_json_size)}, *resp, status);
-  }
+  { return context->livemodel->choose_rank({context_json, static_cast<size_t>(context_json_size)}, *resp, status); }
 
   return context->livemodel->choose_rank(
       event_id, {context_json, static_cast<size_t>(context_json_size)}, *resp, status);

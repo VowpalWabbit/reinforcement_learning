@@ -204,9 +204,7 @@ void async_batcher<TEvent, TSerializer>::flush()
     auto buffer = _buffer_pool.acquire();
     if (fill_buffer(buffer, remaining, &status) != error_code::success) { ERROR_CALLBACK(_perror_cb, status); }
     if (_sender->send(TSerializer<TEvent>::message_id(), buffer, &status) != error_code::success)
-    {
-      ERROR_CALLBACK(_perror_cb, status);
-    }
+    { ERROR_CALLBACK(_perror_cb, status); }
   }
 }
 

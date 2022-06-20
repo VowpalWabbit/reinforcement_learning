@@ -32,9 +32,7 @@ int vw_model::update(const model_data& data, bool& model_ready, api_status* stat
 
       std::unique_ptr<safe_vw_factory> factory;
       if (init_vw->is_CB_to_CCB_model_upgrade(_initial_command_line))
-      {
-        factory.reset(new safe_vw_factory(data, _upgrade_to_CCB_vw_commandline_options));
-      }
+      { factory.reset(new safe_vw_factory(data, _upgrade_to_CCB_vw_commandline_options)); }
       else
       {
         factory.reset(new safe_vw_factory(data));

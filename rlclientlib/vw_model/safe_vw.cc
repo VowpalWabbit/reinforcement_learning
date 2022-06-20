@@ -305,9 +305,7 @@ bool safe_vw::is_compatible(const std::string& args) const
 
   // This really is an error but errors cant be reported here...
   if (local_model_type == mm::model_type_t::UNKNOWN || inbound_model_type == mm::model_type_t::UNKNOWN)
-  {
-    return false;
-  }
+  { return false; }
 
   return local_model_type == inbound_model_type;
 }

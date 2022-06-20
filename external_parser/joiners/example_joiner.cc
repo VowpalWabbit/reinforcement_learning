@@ -94,9 +94,7 @@ bool example_joiner::process_event(const v2::JoinedEvent& joined_event)
     return true;
   }
   if (_batch_grouped_events.find(id) != _batch_grouped_events.end())
-  {
-    _batch_grouped_events[id].push_back(&joined_event);
-  }
+  { _batch_grouped_events[id].push_back(&joined_event); }
   else
   {
     _batch_grouped_events.insert({id, {&joined_event}});
@@ -225,9 +223,7 @@ bool example_joiner::process_interaction(
     if (!typed_event::process_compression<v2::CbEvent>(
             event.payload()->data(), event.payload()->size(), metadata, cb, _detached_buffer, logger) ||
         cb == nullptr)
-    {
-      return false;
-    }
+    { return false; }
 
     if (!typed_event::event_processor<v2::CbEvent>::is_valid(*cb, _loop_info, logger))
     {
@@ -247,9 +243,7 @@ bool example_joiner::process_interaction(
     if (!typed_event::process_compression<v2::MultiSlotEvent>(
             event.payload()->data(), event.payload()->size(), metadata, multislot, _detached_buffer, logger) ||
         multislot == nullptr)
-    {
-      return false;
-    }
+    { return false; }
 
     if (!typed_event::event_processor<v2::MultiSlotEvent>::is_valid(*multislot, _loop_info, logger))
     {
@@ -269,9 +263,7 @@ bool example_joiner::process_interaction(
     if (!typed_event::process_compression<v2::CaEvent>(
             event.payload()->data(), event.payload()->size(), metadata, ca, _detached_buffer, logger) ||
         ca == nullptr)
-    {
-      return false;
-    }
+    { return false; }
 
     if (!typed_event::event_processor<v2::CaEvent>::is_valid(*ca, _loop_info, logger))
     {
@@ -377,9 +369,7 @@ bool example_joiner::process_dedup(const v2::Event& event, const v2::Metadata& m
   if (!typed_event::process_compression<v2::DedupInfo>(
           event.payload()->data(), event.payload()->size(), metadata, dedup, _detached_buffer, logger) ||
       dedup == nullptr)
-  {
-    return false;
-  }
+  { return false; }
 
   if (dedup->ids()->size() != dedup->values()->size())
   {

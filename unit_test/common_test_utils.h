@@ -10,9 +10,7 @@ bool is_invoked_with(const std::string& arg)
   {
     if (reinforcement_learning::string_view(boost::unit_test::framework::master_test_suite().argv[i]).find(arg) !=
         std::string::npos)
-    {
-      return true;
-    }
+    { return true; }
   }
   return false;
 }

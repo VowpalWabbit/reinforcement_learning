@@ -73,9 +73,7 @@ public:
     if (factory != nullptr)
     {
       for (int i = 0; i < _objects_count; ++i)
-      {
-        _pool.emplace_back(new pooled_object<TObject>((*_factory)(), _version));
-      }
+      { _pool.emplace_back(new pooled_object<TObject>((*_factory)(), _version)); }
     }
   }
 

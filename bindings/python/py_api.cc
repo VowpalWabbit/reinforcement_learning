@@ -77,13 +77,12 @@ static PyGetSetDef RLException_getsetters[] = {
 
 static PyObject* PyRLException;
 
-#define THROW_IF_FAIL(x)                                                   \
-  do {                                                                     \
-    int retval__LINE__ = (x);                                              \
-    if (retval__LINE__ != rl::error_code::success)                         \
-    {                                                                      \
-      throw rl_exception(status.get_error_msg(), status.get_error_code()); \
-    }                                                                      \
+#define THROW_IF_FAIL(x)                                                     \
+  do                                                                         \
+  {                                                                          \
+    int retval__LINE__ = (x);                                                \
+    if (retval__LINE__ != rl::error_code::success)                           \
+    { throw rl_exception(status.get_error_msg(), status.get_error_code()); } \
   } while (0)
 
 struct error_callback_context
@@ -282,9 +281,7 @@ PYBIND11_MODULE(rl_client, m)
           [](const rl::ranking_response& a) {
             py::list return_values;
             for (const auto& action_prob : a)
-            {
-              return_values.append(py::make_tuple(action_prob.action_id, action_prob.probability));
-            }
+            { return_values.append(py::make_tuple(action_prob.action_id, action_prob.probability)); }
             return return_values;
           },
           R"pbdoc(

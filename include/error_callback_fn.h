@@ -4,7 +4,8 @@
 namespace reinforcement_learning
 {
 #define ERROR_CALLBACK(fn, status)                   \
-  do {                                               \
+  do                                                 \
+  {                                                  \
     if (fn != nullptr) { fn->report_error(status); } \
   } while (0)
 

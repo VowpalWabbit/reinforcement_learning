@@ -109,9 +109,7 @@ struct cb_joined_event : public typed_joined_event
 
     if (std::any_of(interaction_data.probabilities.begin(), interaction_data.probabilities.end(),
             [](float p) { return std::isnan(p); }))
-    {
-      logger.out_warn("distribution for event [{}] contains invalid probabilities", interaction_data.eventId);
-    }
+    { logger.out_warn("distribution for event [{}] contains invalid probabilities", interaction_data.eventId); }
 
     int index = interaction_data.actions[0];
     auto action = interaction_data.actions[0];
@@ -180,9 +178,7 @@ struct ccb_joined_event : public typed_joined_event
       // Reward of 1 when we are match baseline and 0 otherwise
       if (!multi_slot_interaction.interaction_data[i].actions.empty() &&
           multi_slot_interaction.interaction_data[i].actions[0] == multi_slot_interaction.baseline_actions[i])
-      {
-        rewards[i] = apprentice_matching_reward;
-      }
+      { rewards[i] = apprentice_matching_reward; }
       else
       {
         rewards[i] = apprentice_not_matching_reward;
@@ -220,9 +216,7 @@ struct ccb_joined_event : public typed_joined_event
             }
 
             for (size_t i = 0; i < slot_data.actions.size(); i++)
-            {
-              outcome->probabilities.push_back({slot_data.actions[i], slot_data.probabilities[i]});
-            }
+            { outcome->probabilities.push_back({slot_data.actions[i], slot_data.probabilities[i]}); }
             outcome->cost = -1.f * rewards[slot_index];
             slot_label.outcome = outcome;
           }
@@ -285,9 +279,7 @@ struct ccb_joined_event : public typed_joined_event
     for (int i = 0; i < static_cast<int>(num_of_slots); i++)
     {
       if (outcomes_map.find(i) != outcomes_map.end())
-      {
-        original_rewards[i] = reward_function(outcomes_map[i], default_reward);
-      }
+      { original_rewards[i] = reward_function(outcomes_map[i], default_reward); }
     }
 
     if (metadata_info.learning_mode == v2::LearningModeType_Apprentice) { set_apprentice_reward(); }
@@ -358,9 +350,7 @@ struct slates_joined_event : public typed_joined_event
             }
 
             for (size_t i = 0; i < slot_data.actions.size(); i++)
-            {
-              slot_label.probabilities.push_back({slot_data.actions[i], slot_data.probabilities[i]});
-            }
+            { slot_label.probabilities.push_back({slot_data.actions[i], slot_data.probabilities[i]}); }
           }
         }
         // process next slot from interaction_data vector
@@ -378,9 +368,7 @@ struct slates_joined_event : public typed_joined_event
     original_reward = reward_function(outcome_events, default_reward);
 
     if (metadata_info.learning_mode == v2::LearningModeType_Apprentice)
-    {
-      logger.out_warn("Apprentice mode is not implmeneted for slates.");
-    }
+    { logger.out_warn("Apprentice mode is not implmeneted for slates."); }
     else
     {
       reward = original_reward;
@@ -466,9 +454,7 @@ struct ca_joined_event : public typed_joined_event
     original_reward = reward_function(outcome_events, default_reward);
 
     if (interaction_metadata.learning_mode == v2::LearningModeType_Apprentice)
-    {
-      logger.out_warn("Apprentice mode is not implmeneted for cats.");
-    }
+    { logger.out_warn("Apprentice mode is not implmeneted for cats."); }
     else
     {
       reward = original_reward;

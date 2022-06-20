@@ -99,9 +99,7 @@ inline void validate_tensors(o::onnx_input_builder& input_context, expectations<
   std::vector<const char*> input_names = input_context.input_names();
 
   for (size_t i = 0; i < expected_input_count; i++)
-  {
-    input_name_map.insert(std::make_pair(string_t{input_names[i]}, i));
-  }
+  { input_name_map.insert(std::make_pair(string_t{input_names[i]}, i)); }
 
   std::vector<Ort::Value> inputs;
 
