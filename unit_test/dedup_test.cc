@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(dedup_add_get_object)
   auto str = dict.get_object(id);
 
   BOOST_CHECK_EQUAL(5, str.size());
-  BOOST_CHECK_EQUAL("{abc}", str.to_string());
+  BOOST_CHECK_EQUAL("{abc}", str);
 }
 
 BOOST_AUTO_TEST_CASE(dedup_bad_json)
