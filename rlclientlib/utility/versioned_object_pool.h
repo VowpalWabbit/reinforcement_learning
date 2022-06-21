@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -7,61 +8,11 @@ namespace reinforcement_learning
 {
 namespace utility
 {
-template <typename TObject>
-class pooled_object
-{
-private:
-  TObject* _val;
-
-public:
-  pooled_object(TObject* obj, int pversion) : _val(obj), version(pversion) {}
-
-  pooled_object(const pooled_object&) = delete;
-  pooled_object& operator=(const pooled_object& other) = delete;
-  pooled_object(pooled_object&& other) = delete;
-
-  ~pooled_object()
-  {
-    delete _val;
-    _val = nullptr;
-  }
-
-  inline TObject* val() { return _val; }
-
-  const int version;
-};
-
-template <typename TObject, typename TFactory>
-class versioned_object_pool;
-
-// RAII guard to handle exception case properly
-template <typename TObject, typename TFactory>
-class pooled_object_guard
-{
-  versioned_object_pool<TObject, TFactory>* _pool;
-  pooled_object<TObject>* _obj;
-
-public:
-  pooled_object_guard(versioned_object_pool<TObject, TFactory>& pool, pooled_object<TObject>* obj)
-      : _pool(&pool), _obj(obj)
-  {
-  }
-
-  pooled_object_guard(const pooled_object_guard&) = delete;
-  pooled_object_guard& operator=(const pooled_object_guard& other) = delete;
-  pooled_object_guard(pooled_object_guard&& other) = delete;
-
-  ~pooled_object_guard() { _pool->return_to_pool(_obj); }
-
-  TObject* operator->() { return _obj->val(); }
-  TObject* get() { return _obj->val(); }
-};
-
 template <typename TObject, typename TFactory>
 class versioned_object_pool_unsafe
 {
   int _version;
-  std::vector<pooled_object<TObject>*> _pool;
+  std::vector<TObject*> _pool;
   TFactory* _factory;
   int _used_objects;
   int _objects_count;
@@ -72,8 +23,9 @@ public:
   {
     if (factory != nullptr)
     {
-      for (int i = 0; i < _objects_count; ++i)
-      { _pool.emplace_back(new pooled_object<TObject>((*_factory)(), _version)); }
+      for (int i = 0; i < _objects_count; ++i) { 
+        _pool.emplace_back((*_factory)());
+      }
     }
   }
 
@@ -90,17 +42,24 @@ public:
     _factory = nullptr;
 
     // delete each pool object
-    for (auto&& obj : _pool) delete obj;
+    for (auto&& obj : _pool) {
+      delete obj;
+      obj = nullptr;
+    }
+
+    // clear the pool vector itself
     _pool.clear();
   }
 
-  pooled_object<TObject>* get_or_create()
+  // Retreive an object in the pool, creating a new one if the pool is empty
+  // The object must be returned to the pool, or else allocated memory will not be freed
+  TObject* get_or_create()
   {
     if (_pool.size() == 0)
     {
       _used_objects++;
       _objects_count++;
-      return new pooled_object<TObject>((*_factory)(), _version);
+      return (*_factory)();
     }
 
     auto back = _pool.back();
@@ -109,15 +68,17 @@ public:
     return back;
   }
 
-  void return_to_pool(pooled_object<TObject>* obj)
+  void return_to_pool(TObject* obj, int obj_version)
   {
-    if (_version == obj->version)
+    if (_version == obj_version)
     {
       _pool.emplace_back(obj);
-      return;
     }
-
-    delete obj;
+    else
+    {
+      delete obj;
+      obj = nullptr;
+    }
   }
 
   int size() const { return _objects_count; }
@@ -128,8 +89,8 @@ public:
 template <typename TObject, typename TFactory>
 class versioned_object_pool
 {
-  std::mutex _mutex;
   using impl_type = versioned_object_pool_unsafe<TObject, TFactory>;
+  std::mutex _mutex;
   std::unique_ptr<impl_type> _impl;
 
 public:
@@ -145,16 +106,14 @@ public:
     _impl.reset();
   }
 
-  pooled_object<TObject>* get_or_create()
+  std::unique_ptr<TObject, std::function<void(TObject*)>> get_or_create()
   {
     std::lock_guard<std::mutex> lock(_mutex);
-    return _impl->get_or_create();
-  }
-
-  void return_to_pool(pooled_object<TObject>* obj)
-  {
-    std::lock_guard<std::mutex> lock(_mutex);
-    _impl->return_to_pool(obj);
+    // in the deleter function, capture a copy of the version at time of object creation
+    int current_version = _impl->version();
+    return std::unique_ptr<TObject, std::function<void(TObject*)>>(_impl->get_or_create(), [=](TObject* obj) {
+      this->return_to_pool(obj, current_version);
+    });
   }
 
   // takes owner-ship of factory (and will free using delete) - !!!!THREAD-UNSAFE!!!!
@@ -170,6 +129,13 @@ public:
     std::unique_ptr<impl_type> new_impl(new impl_type(new_factory, objects_count, version));
     std::lock_guard<std::mutex> lock(_mutex);
     _impl.swap(new_impl);
+  }
+
+private:
+  void return_to_pool(TObject* obj, int obj_version)
+  {
+    std::lock_guard<std::mutex> lock(_mutex);
+    _impl->return_to_pool(obj, obj_version);
   }
 };
 }  // namespace utility

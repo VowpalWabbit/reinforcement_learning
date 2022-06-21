@@ -45,14 +45,14 @@ BOOST_AUTO_TEST_CASE(object_pool_get_same_object)
   versioned_object_pool<my_object, my_object_factory> pool(factory);
 
   {
-    pooled_object_guard<my_object, my_object_factory> guard(pool, pool.get_or_create());
-    BOOST_CHECK_EQUAL(guard->_id, 0);
+    auto obj = pool.get_or_create();
+    BOOST_CHECK_EQUAL(obj->_id, 0);
   }
 
   // let's make sure we get the same object back
   {
-    pooled_object_guard<my_object, my_object_factory> guard(pool, pool.get_or_create());
-    BOOST_CHECK_EQUAL(guard->_id, 0);
+    auto obj = pool.get_or_create();
+    BOOST_CHECK_EQUAL(obj->_id, 0);
   }
 
   BOOST_CHECK_EQUAL(factory->_count, 1);
@@ -65,11 +65,11 @@ BOOST_AUTO_TEST_CASE(object_pool_get_2_objects)
   versioned_object_pool<my_object, my_object_factory> pool(factory);
 
   {
-    pooled_object_guard<my_object, my_object_factory> guard1(pool, pool.get_or_create());
-    BOOST_CHECK_EQUAL(guard1->_id, 0);
+    auto obj1 = pool.get_or_create();
+    BOOST_CHECK_EQUAL(obj1->_id, 0);
 
-    pooled_object_guard<my_object, my_object_factory> guard2(pool, pool.get_or_create());
-    BOOST_CHECK_EQUAL(guard2->_id, 1);
+    auto obj2 = pool.get_or_create();
+    BOOST_CHECK_EQUAL(obj2->_id, 1);
   }
 
   BOOST_CHECK_EQUAL(factory->_count, 2);
@@ -80,14 +80,14 @@ BOOST_AUTO_TEST_CASE(object_pool_update_factory)
   // pool owns factory
   versioned_object_pool<my_object, my_object_factory> pool(new my_object_factory);
 
-  pooled_object_guard<my_object, my_object_factory> guard1(pool, pool.get_or_create());
-  BOOST_CHECK_EQUAL(guard1->_id, 0);
+  auto obj1 = pool.get_or_create();
+  BOOST_CHECK_EQUAL(obj1->_id, 0);
 
   // update factory -> this resets the counter
   pool.update_factory(new my_object_factory);
 
-  pooled_object_guard<my_object, my_object_factory> guard2(pool, pool.get_or_create());
-  BOOST_CHECK_EQUAL(guard2->_id, 0);  // _id is 0 as this is created from the new factory
+  auto obj2 = pool.get_or_create();
+  BOOST_CHECK_EQUAL(obj2->_id, 0);  // _id is 0 as this is created from the new factory
 }
 
 BOOST_AUTO_TEST_CASE(object_pool_init_size_test)
@@ -101,24 +101,24 @@ BOOST_AUTO_TEST_CASE(object_pool_init_size_test)
   BOOST_CHECK_EQUAL(new_factory->_count, 2);
 
   {
-    pooled_object_guard<my_object, my_object_factory> guard1(pool, pool.get_or_create());
-    BOOST_CHECK_EQUAL(guard1->_id, 1);
+    auto obj1 = pool.get_or_create();
+    BOOST_CHECK_EQUAL(obj1->_id, 1);
     BOOST_CHECK_EQUAL(new_factory->_count, 2);
 
-    pooled_object_guard<my_object, my_object_factory> guard2(pool, pool.get_or_create());
-    BOOST_CHECK_EQUAL(guard2->_id, 0);
+    auto obj2 = pool.get_or_create();
+    BOOST_CHECK_EQUAL(obj2->_id, 0);
     BOOST_CHECK_EQUAL(new_factory->_count, 2);
   }
 
-  pooled_object_guard<my_object, my_object_factory> guard1(pool, pool.get_or_create());
-  BOOST_CHECK_EQUAL(guard1->_id, 1);
+  auto obj1 = pool.get_or_create();
+  BOOST_CHECK_EQUAL(obj1->_id, 1);
   BOOST_CHECK_EQUAL(new_factory->_count, 2);
 
-  pooled_object_guard<my_object, my_object_factory> guard2(pool, pool.get_or_create());
-  BOOST_CHECK_EQUAL(guard2->_id, 0);
+  auto obj2 = pool.get_or_create();
+  BOOST_CHECK_EQUAL(obj2->_id, 0);
   BOOST_CHECK_EQUAL(new_factory->_count, 2);
 
-  pooled_object_guard<my_object, my_object_factory> guard3(pool, pool.get_or_create());
-  BOOST_CHECK_EQUAL(guard3->_id, 2);
+  auto obj3 = pool.get_or_create();
+  BOOST_CHECK_EQUAL(obj3->_id, 2);
   BOOST_CHECK_EQUAL(new_factory->_count, 3);
 }

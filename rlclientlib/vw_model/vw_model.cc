@@ -69,7 +69,7 @@ int vw_model::choose_rank(uint64_t rnd_seed, string_view features, std::vector<i
 {
   try
   {
-    pooled_vw vw(_vw_pool, _vw_pool.get_or_create());
+    auto vw = _vw_pool.get_or_create();
 
     // Get a ranked list of action_ids and corresponding pdf
     vw->rank(features, action_ids, action_pdf);
@@ -99,7 +99,7 @@ int vw_model::choose_continuous_action(
 {
   try
   {
-    pooled_vw vw(_vw_pool, _vw_pool.get_or_create());
+    auto vw = _vw_pool.get_or_create();
 
     vw->choose_continuous_action(features, action, pdf_value);
 
@@ -123,7 +123,7 @@ int vw_model::request_decision(const std::vector<const char*>& event_ids, string
 {
   try
   {
-    pooled_vw vw(_vw_pool, _vw_pool.get_or_create());
+    auto vw = _vw_pool.get_or_create();
 
     // Get a ranked list of action_ids and corresponding pdf
     vw->rank_decisions(event_ids, features, actions_ids, action_pdfs);
@@ -148,7 +148,7 @@ int vw_model::request_multi_slot_decision(const char* event_id, const std::vecto
 {
   try
   {
-    pooled_vw vw(_vw_pool, _vw_pool.get_or_create());
+    auto vw = _vw_pool.get_or_create();
 
     // Get a ranked list of action_ids and corresponding pdf
     vw->rank_multi_slot_decisions(event_id, slot_ids, features, actions_ids, action_pdfs);

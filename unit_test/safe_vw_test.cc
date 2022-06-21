@@ -13,8 +13,6 @@
 using namespace reinforcement_learning;
 using namespace reinforcement_learning::utility;
 
-using pooled_vw = pooled_object_guard<safe_vw, safe_vw_factory>;
-
 void get_model_data_from_raw(const char* data, unsigned int len, model_management::model_data* model_data)
 {
   const auto buff = model_data->alloc(len);
@@ -49,7 +47,7 @@ BOOST_AUTO_TEST_CASE(factory_with_cb_model_and_ccb_arguments)
   versioned_object_pool<safe_vw, safe_vw_factory> pool(factory);
 
   {
-    pooled_vw guard(pool, pool.get_or_create());
+    auto vw = pool.get_or_create();
 
     const char* event_id = "abcdef";
     uint32_t slot_count = 3;
@@ -60,7 +58,7 @@ BOOST_AUTO_TEST_CASE(factory_with_cb_model_and_ccb_arguments)
 
     std::vector<std::string> slot_ids = {"0", "1"};
 
-    guard->rank_multi_slot_decisions(event_id, slot_ids, features, actions_ids, action_pdfs);
+    vw->rank_multi_slot_decisions(event_id, slot_ids, features, actions_ids, action_pdfs);
     BOOST_CHECK_EQUAL(actions_ids.size(), slot_count);
     BOOST_CHECK_EQUAL(action_pdfs.size(), slot_count);
     // todo: add more accurate assertions once vw is updated with cb and ccb single slot equivalence changes
@@ -80,7 +78,7 @@ BOOST_AUTO_TEST_CASE(factory_with_initial_model)
   versioned_object_pool<safe_vw, safe_vw_factory> pool(factory);
 
   {
-    pooled_vw guard(pool, pool.get_or_create());
+    auto vw = pool.get_or_create();
 
     // Update factory while an object is floating around
     model_management::model_data updated_model;
@@ -89,18 +87,18 @@ BOOST_AUTO_TEST_CASE(factory_with_initial_model)
 
     std::vector<int> actions;
     std::vector<float> ranking;
-    guard->rank(json, actions, ranking);
+    vw->rank(json, actions, ranking);
 
     BOOST_CHECK_EQUAL_COLLECTIONS(ranking.begin(), ranking.end(), ranking_expected.begin(), ranking_expected.end());
   }
 
   {
     // Make sure we get a new object
-    pooled_object_guard<safe_vw, safe_vw_factory> guard(pool, pool.get_or_create());
+    auto vw = pool.get_or_create();
 
     std::vector<int> actions;
     std::vector<float> ranking;
-    guard->rank(json, actions, ranking);
+    vw->rank(json, actions, ranking);
 
     BOOST_CHECK_EQUAL_COLLECTIONS(ranking.begin(), ranking.end(), ranking_expected.begin(), ranking_expected.end());
   }
@@ -121,7 +119,7 @@ BOOST_AUTO_TEST_CASE(factory_with_empty_model)
     model_management::model_data new_model;
     get_model_data_from_raw((const char*)cb_data_5_model, cb_data_5_model_len, &new_model);
     pool.update_factory(new safe_vw_factory(new_model));
-    pooled_vw vw(pool, pool.get_or_create());
+    auto vw = pool.get_or_create();
 
     std::vector<int> actions;
     std::vector<float> ranking;
@@ -135,7 +133,7 @@ BOOST_AUTO_TEST_CASE(factory_with_empty_model)
     model_management::model_data new_model;
     get_model_data_from_raw((const char*)cb_data_5_model, cb_data_5_model_len, &new_model);
     pool.update_factory(new safe_vw_factory(new_model));
-    pooled_vw vw(pool, pool.get_or_create());
+    auto vw = pool.get_or_create();
 
     std::vector<int> actions;
     std::vector<float> ranking;
