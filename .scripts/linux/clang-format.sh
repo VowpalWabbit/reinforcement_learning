@@ -3,27 +3,30 @@
 # Set environment variable GH_WORKFLOW_LOGGING to output logging that Azure pipelines will interpret as a warning.
 # Set environment variable WARNING_AS_ERROR to make the script exit with a non-zero code if issues are found.
 
-if [[ "$1" != "check" ]] && [[ "$1" != "fix" ]]; then
-    echo "Usage: \"$0 check\" or \"$0 fix\""
+if [[ "$1" != "check" && "$1" != "fix" && "$1" != "docker" ]]; then
+    echo "Usage: \"$0 check\" or \"$0 fix\" or \"$0 docker check\" or \"$0 docker fix\""
     exit 1
-fi
-
-# Allow calling the script with a different version of clang-format through an environment variable
-# $ CLANG_FORMAT=clang-format-11 ./clang-format.sh fix
-if [[ -z "$CLANG_FORMAT" ]]; then
-    CLANG_FORMAT="clang-format"
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_DIR="$SCRIPT_DIR/../../"
 cd "$REPO_DIR"
 
+# For the docker commands, re-run this script inside docker container
+# The ubuntu:focal image should have clang-format version 10, which matches what runs in Github Actions
+if [[ "$1" == "docker" ]]; then
+    docker run -it --env-host -v "$REPO_DIR:/reinforcement_learning" ubuntu:focal /bin/bash -c \
+        "echo 'Installing clang-format in docker container...'; apt update -qq; apt install -qq -y clang-format; cd /reinforcement_learning; ./.scripts/linux/clang-format.sh ${@:2}"
+    exit
+fi
+
+# Otherwise, actually do the formatting check/fix
 echo "Using clang-format version:"
-$CLANG_FORMAT --version
+clang-format --version
 
 for FILE in $(find . -type f -not -path './ext_libs/*' \( -name '*.cc' -o -name "*.h" \) ); do
     if [[ "$1" == "check" ]]; then
-        diff $FILE <($CLANG_FORMAT $FILE);
+        diff $FILE <(clang-format $FILE);
         if [ $? -ne 0 ]; then
             ISSUE_FOUND="true"
             if [[ -v GH_WORKFLOW_LOGGING ]]; then
@@ -33,7 +36,7 @@ for FILE in $(find . -type f -not -path './ext_libs/*' \( -name '*.cc' -o -name 
     fi
 
     if [[ "$1" == "fix" ]]; then
-        $CLANG_FORMAT -i $FILE;
+        clang-format -i $FILE;
     fi
 done
 
