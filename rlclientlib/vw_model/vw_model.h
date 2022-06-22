@@ -41,7 +41,7 @@ public:
 private:
   const std::string _initial_command_line;
   const std::string _upgrade_to_CCB_vw_commandline_options{"--ccb_explore_adf --json --quiet"};
-  utility::versioned_object_pool<safe_vw, safe_vw_factory> _vw_pool;
+  utility::versioned_object_pool<safe_vw> _vw_pool;
   i_trace* _trace_logger;
 };
 }  // namespace model_management
