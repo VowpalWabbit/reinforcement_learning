@@ -1,12 +1,13 @@
 #pragma once
 
-#include <iostream>
-#include <fstream>
-#include <exception>
-#include <boost/program_options.hpp>
 #include "config_utility.h"
 #include "live_model.h"
 #include "rl_sim.h"
+
+#include <boost/program_options.hpp>
+#include <exception>
+#include <fstream>
+#include <iostream>
 
 // Namespace manipulation for brevity
 namespace r = reinforcement_learning;

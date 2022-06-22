@@ -1,20 +1,33 @@
 #define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
-#   define BOOST_TEST_MODULE Main
+#  define BOOST_TEST_MODULE Main
 #endif
 
 #include <boost/test/unit_test.hpp>
-#include "object_factory.h"
-#include "err_constants.h"
+
 #include "constants.h"
+#include "err_constants.h"
+#include "object_factory.h"
 
 namespace r = reinforcement_learning;
 namespace u = reinforcement_learning::utility;
 
-BOOST_AUTO_TEST_CASE(factory_tempate_usage) {
-  struct an_interface { virtual void do_something() = 0; virtual ~an_interface() {} };
-  struct impl_A : public an_interface { void do_something() override {} };
-  struct impl_B : public an_interface { explicit impl_B(int b) {} void do_something() override {} };
+BOOST_AUTO_TEST_CASE(factory_tempate_usage)
+{
+  struct an_interface
+  {
+    virtual void do_something() = 0;
+    virtual ~an_interface() {}
+  };
+  struct impl_A : public an_interface
+  {
+    void do_something() override {}
+  };
+  struct impl_B : public an_interface
+  {
+    explicit impl_B(int b) {}
+    void do_something() override {}
+  };
 
   auto b = 5;  // arbitrary variable to illustrate a point
   u::object_factory<an_interface, const u::configuration&> factory;

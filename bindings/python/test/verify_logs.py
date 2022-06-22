@@ -3,11 +3,13 @@ import json
 import sys
 from collections import defaultdict
 
+
 def process_cmd_line(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument('--remote_log_file', help='client json config', required=True)
-    parser.add_argument('--log_file', help='log file that was replayed', required=True)
+    parser.add_argument("--remote_log_file", help="client json config", required=True)
+    parser.add_argument("--log_file", help="log file that was replayed", required=True)
     return parser.parse_args(args)
+
 
 def compare(replay_log, remote_log):
     # Due to replaying logs on the same loop after the EventHub buffer has cleared, EventIds can be duplicated.
@@ -30,23 +32,26 @@ def compare(replay_log, remote_log):
             passed = True
 
             # Verify the example that was sent exists in the remote log.
-            if(current_event_id not in remote_logged_events):
+            if current_event_id not in remote_logged_events:
                 print("Err: " + current_event_id + " not found in remote log")
                 passed = False
 
             # Since the remote log may contain duplcates, check over each.
             for remote_example in remote_logged_events[current_event_id]:
                 # Verify that the context that was sent matches.
-                if(remote_example["c"] != current_example["c"]):
+                if remote_example["c"] != current_example["c"]:
                     print("Err: context does not match for " + current_event_id)
                     passed = False
 
                 # Verify that the observations that were sent match.
-                if(("o" in current_example) and (("o" not in  remote_example) or (remote_example["o"] != current_example["o"]))):
+                if ("o" in current_example) and (
+                    ("o" not in remote_example)
+                    or (remote_example["o"] != current_example["o"])
+                ):
                     print("Err: observations do not match for " + current_event_id)
                     passed = False
 
-            if(passed):
+            if passed:
                 success = success + 1
             else:
                 fail = fail = 1
@@ -54,7 +59,8 @@ def compare(replay_log, remote_log):
     print("Pass: " + str(success))
     print("Fail: " + str(fail))
 
-    return (fail == 0)
+    return fail == 0
+
 
 def main(args):
     options = process_cmd_line(args)
@@ -62,4 +68,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-   main(sys.argv[1:])
+    main(sys.argv[1:])
