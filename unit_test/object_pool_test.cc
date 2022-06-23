@@ -6,6 +6,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include "utility/versioned_object_pool.h"
+#include "trace_logger.h"
+
+#include <string>
 
 using namespace reinforcement_learning;
 using namespace reinforcement_learning::utility;
@@ -15,7 +18,6 @@ class my_object
 {
 public:
   int _id;
-
   my_object(int id) : _id(id) {}
 };
 
@@ -23,10 +25,17 @@ class my_object_factory
 {
 public:
   int _count;
-
   my_object_factory() : _count(0) {}
-
   my_object* operator()() { return new my_object(_count++); }
+};
+
+class my_trace_logger : public i_trace
+{
+public:
+  std::string _latest_message;
+  void log(int log_level, const std::string& msg) { _latest_message = msg; }
+  std::string get_message() { return _latest_message; }
+  void reset() { _latest_message.clear(); }
 };
 
 BOOST_AUTO_TEST_CASE(object_pool_nothing)
@@ -143,4 +152,42 @@ BOOST_AUTO_TEST_CASE(object_pool_init_size_test)
   auto obj3 = pool.get_or_create();
   BOOST_CHECK_EQUAL(obj3->_id, 2);
   BOOST_CHECK_EQUAL(pool_factory_new->_count, 3);
+}
+
+BOOST_AUTO_TEST_CASE(object_pool_logging)
+{
+  my_object_factory factory;
+  my_trace_logger logger;
+  versioned_object_pool<my_object> pool(factory, 1, &logger);
+
+  {
+    // get the pre-initialized object
+    auto obj1 = pool.get_or_create();
+    BOOST_TEST(logger.get_message().find("1") != std::string::npos);
+    logger.reset();
+
+    // next call creates new object
+    auto obj2 = pool.get_or_create();
+    BOOST_TEST(logger.get_message().find("2") != std::string::npos);
+    logger.reset();
+
+    // obj1 and obj2 returned to pool
+    // pool size = 2
+  }
+
+  {
+    // get one of the 2 objects
+    auto obj1 = pool.get_or_create();
+    BOOST_TEST(logger.get_message().find("2") != std::string::npos);
+    logger.reset();
+
+    // obj1 returned to pool
+    // pool size = 2
+  }
+
+  // updating pool factory logs object count
+  my_object_factory new_factory;
+  pool.update_factory(new_factory);
+  BOOST_TEST(logger.get_message().find("2") != std::string::npos);
+  logger.reset();
 }
