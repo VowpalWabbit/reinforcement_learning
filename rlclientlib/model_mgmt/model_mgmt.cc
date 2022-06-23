@@ -10,13 +10,15 @@ namespace model_management
 model_data::model_data() = default;
 
 // copy constructor: allocate new memory and copy over other's data
-model_data::model_data(model_data const& other) : _data(new char[other._data_sz]), _data_sz(other._data_sz), _refresh_count(other._refresh_count)
+model_data::model_data(model_data const& other)
+    : _data(new char[other._data_sz]), _data_sz(other._data_sz), _refresh_count(other._refresh_count)
 {
   std::memcpy(_data, other._data, _data_sz);
 }
 
 // move constructor: take other's data pointer and set original pointer to null
-model_data::model_data(model_data&& other) noexcept : _data(other._data), _data_sz(other._data_sz), _refresh_count(other._refresh_count)
+model_data::model_data(model_data&& other) noexcept
+    : _data(other._data), _data_sz(other._data_sz), _refresh_count(other._refresh_count)
 {
   other._data = nullptr;
 }

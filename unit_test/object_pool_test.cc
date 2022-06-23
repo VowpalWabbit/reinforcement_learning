@@ -5,8 +5,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "utility/versioned_object_pool.h"
 #include "trace_logger.h"
+#include "utility/versioned_object_pool.h"
 
 #include <string>
 

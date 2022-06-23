@@ -29,9 +29,7 @@ public:
   versioned_object_pool_unsafe(TFactory factory, int objects_count = 0, int version = 0)
       : _version(version), _factory(std::move(factory)), _used_objects(0), _objects_count(objects_count)
   {
-    for (int i = 0; i < _objects_count; ++i) { 
-      _pool.emplace_back(_factory());
-    }
+    for (int i = 0; i < _objects_count; ++i) { _pool.emplace_back(_factory()); }
   }
 
   versioned_object_pool_unsafe(const versioned_object_pool_unsafe&) = delete;
@@ -41,7 +39,8 @@ public:
   ~versioned_object_pool_unsafe()
   {
     // delete each pool object
-    for (auto&& obj : _pool) {
+    for (auto&& obj : _pool)
+    {
       delete obj;
       obj = nullptr;
     }
@@ -71,10 +70,7 @@ public:
   // Otherwise, we deallocate it
   void return_to_pool(TObject* obj, int obj_version)
   {
-    if (_version == obj_version)
-    {
-      _pool.emplace_back(obj);
-    }
+    if (_version == obj_version) { _pool.emplace_back(obj); }
     else
     {
       delete obj;
@@ -103,7 +99,9 @@ public:
   // Construct object pool given a factory function that allocates new objects when called
   // Optionally, pre-populate the pool with a given count of objects
   versioned_object_pool(TFactory factory, int init_size = 0, i_trace* trace_logger = nullptr)
-    : _impl(new impl_type(std::move(factory), init_size, 0)), _trace_logger(trace_logger) { }
+      : _impl(new impl_type(std::move(factory), init_size, 0)), _trace_logger(trace_logger)
+  {
+  }
 
   versioned_object_pool(const versioned_object_pool&) = delete;
   versioned_object_pool& operator=(const versioned_object_pool& other) = delete;
@@ -125,11 +123,11 @@ public:
     auto pool_obj = _impl->get_or_create();
     int objects_count = _impl->size();
 
-    TRACE_DEBUG(_trace_logger, utility::concat("versioned_object_pool::get_or_create() called: pool size is ", objects_count));
+    TRACE_DEBUG(
+        _trace_logger, utility::concat("versioned_object_pool::get_or_create() called: pool size is ", objects_count));
 
-    return std::unique_ptr<TObject, TObjectDeleter>(pool_obj, [=](TObject* obj) {
-      this->return_to_pool(obj, current_version);
-    });
+    return std::unique_ptr<TObject, TObjectDeleter>(
+        pool_obj, [=](TObject* obj) { this->return_to_pool(obj, current_version); });
   }
 
   // Update the pool's factory function and increment version number
@@ -142,7 +140,8 @@ public:
     objects_count = _impl->size();
     new_version = _impl->version() + 1;
 
-    TRACE_DEBUG(_trace_logger, utility::concat("versioned_object_pool::update_factory() called: pool size is ", objects_count));
+    TRACE_DEBUG(
+        _trace_logger, utility::concat("versioned_object_pool::update_factory() called: pool size is ", objects_count));
 
     std::unique_ptr<impl_type> new_impl(new impl_type(std::move(new_factory), objects_count, new_version));
     _impl.swap(new_impl);

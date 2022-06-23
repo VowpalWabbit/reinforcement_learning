@@ -14,8 +14,7 @@ vw_model::vw_model(i_trace* trace_logger, const utility::configuration& config)
     : _initial_command_line(config.get(
           name::MODEL_VW_INITIAL_COMMAND_LINE, "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A"))
     , _vw_pool(safe_vw_factory(_initial_command_line),
-          config.get_int(name::VW_POOL_INIT_SIZE, value::DEFAULT_VW_POOL_INIT_SIZE),
-          trace_logger)
+          config.get_int(name::VW_POOL_INIT_SIZE, value::DEFAULT_VW_POOL_INIT_SIZE), trace_logger)
     , _trace_logger(trace_logger)
 {
 }
@@ -32,9 +31,7 @@ int vw_model::update(const model_data& data, bool& model_ready, api_status* stat
 
       safe_vw_factory factory(data);
       if (init_vw->is_CB_to_CCB_model_upgrade(_initial_command_line))
-      {
-        factory = safe_vw_factory(data, _upgrade_to_CCB_vw_commandline_options);
-      }
+      { factory = safe_vw_factory(data, _upgrade_to_CCB_vw_commandline_options); }
 
       std::unique_ptr<safe_vw> test_vw(factory());
       if (test_vw->is_compatible(_initial_command_line))
