@@ -1,4 +1,7 @@
 #pragma once
+#include "str_util.h"
+#include "trace_logger.h"
+
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -94,11 +97,13 @@ class versioned_object_pool
   using impl_type = versioned_object_pool_unsafe<TObject>;
   std::mutex _mutex;
   std::unique_ptr<impl_type> _impl;
+  i_trace* _trace_logger = nullptr;
 
 public:
   // Construct object pool given a factory function that allocates new objects when called
   // Optionally, pre-populate the pool with a given count of objects
-  versioned_object_pool(TFactory factory, int init_size = 0) : _impl(new impl_type(std::move(factory), init_size, 0)) { }
+  versioned_object_pool(TFactory factory, int init_size = 0, i_trace* trace_logger = nullptr)
+    : _impl(new impl_type(std::move(factory), init_size, 0)), _trace_logger(trace_logger) { }
 
   versioned_object_pool(const versioned_object_pool&) = delete;
   versioned_object_pool& operator=(const versioned_object_pool& other) = delete;
@@ -117,7 +122,12 @@ public:
     std::lock_guard<std::mutex> lock(_mutex);
     // in the deleter function, capture a copy of the version at time of object creation
     int current_version = _impl->version();
-    return std::unique_ptr<TObject, TObjectDeleter>(_impl->get_or_create(), [=](TObject* obj) {
+    auto pool_obj = _impl->get_or_create();
+    int objects_count = _impl->size();
+
+    TRACE_DEBUG(_trace_logger, utility::concat("versioned_object_pool::get_or_create() called: pool size is ", objects_count));
+
+    return std::unique_ptr<TObject, TObjectDeleter>(pool_obj, [=](TObject* obj) {
       this->return_to_pool(obj, current_version);
     });
   }
@@ -126,14 +136,15 @@ public:
   void update_factory(TFactory new_factory)
   {
     int objects_count = 0;
-    int version = 0;
-    {
-      std::lock_guard<std::mutex> lock(_mutex);
-      objects_count = _impl->size();
-      version = _impl->version() + 1;
-    }
-    std::unique_ptr<impl_type> new_impl(new impl_type(std::move(new_factory), objects_count, version));
+    int new_version = 0;
+
     std::lock_guard<std::mutex> lock(_mutex);
+    objects_count = _impl->size();
+    new_version = _impl->version() + 1;
+
+    TRACE_DEBUG(_trace_logger, utility::concat("versioned_object_pool::update_factory() called: pool size is ", objects_count));
+
+    std::unique_ptr<impl_type> new_impl(new impl_type(std::move(new_factory), objects_count, new_version));
     _impl.swap(new_impl);
   }
 

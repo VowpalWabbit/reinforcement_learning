@@ -3,10 +3,10 @@
 #include "model_mgmt.h"
 #include "multistep.h"
 #include "safe_vw.h"
+#include "trace_logger.h"
 
 namespace reinforcement_learning
 {
-class i_trace;
 namespace utility
 {
 class configuration;
