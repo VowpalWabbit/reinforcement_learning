@@ -5,7 +5,7 @@
       <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug' And ('$(Platform)'=='x64')">
     <Link>
       <AdditionalDependencies>rlclientlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -29,30 +29,4 @@
       <AdditionalLibraryDirectories>$(MSBuildThisFileDirectory)..\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)\..\lib\Release\rlclientlib.dll">
-      <Link>rlclientlib.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)\..\lib\Release\cpprest_2_10.dll">
-      <Link>cpprest_2_10.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)\..\lib\Release\fmt.dll">
-      <Link>fmt.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)\..\lib\Release\libcrypto-3-x64.dll">
-      <Link>libcrypto-3-x64.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)\..\lib\Release\spdlog.dll">
-      <Link>spdlog.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)\..\lib\Release\zlib1.dll">
-      <Link>zlib1.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 </Project>

@@ -131,9 +131,9 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/ranking_response.h
   ../include/rl_string_view.h
   ../include/sender.h
+  ../include/slot_ranking.h
   ../include/str_util.h
   ../include/trace_logger.h
-  ../include/slot_ranking.h
 )
 
 set(PROJECT_PRIVATE_HEADERS
@@ -221,8 +221,5 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   target_link_libraries(rlclientlib PUBLIC Boost::thread)
 endif()
 
-install(TARGETS rlclientlib
-  INCLUDES DESTINATION rlclientlib
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-)
+install(TARGETS rlclientlib ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
+install(FILES ${PROJECT_PUBLIC_HEADERS} DESTINATION include)

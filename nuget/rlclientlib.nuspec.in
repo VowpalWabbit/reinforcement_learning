@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <package>
   <metadata>
-    <id>RLClientLibNative-v@MSVC_TOOLSET_VERSION@-@NATIVE_NUGET_PLATFORM_TAG@</id>
-    <version>0.1.0</version>
-    <title>Reinforcement Learning Client Library Native</title>
+    <id>@RL_NUGET_PACKAGE_NAME@-v@MSVC_TOOLSET_VERSION@-@NATIVE_NUGET_PLATFORM_TAG@</id>
+    <version>@RL_NUGET_PACKAGE_VERSION@</version>
+    <title>Reinforcement Learning Client Library - Static Build</title>
     <authors>John Langford et al</authors>
     <license type="expression">MIT</license>
     <description>RLClientLib is an Interaction-side integration library for Reinforcement Learning loops: Predict, Log, Learn, Update</description>
@@ -11,8 +11,8 @@
     <tags>native</tags>
   </metadata>
   <files>
-      <file src="RLClientLibNative-v@MSVC_TOOLSET_VERSION@-@NATIVE_NUGET_PLATFORM_TAG@.targets" target="build" />
-      <file src="lib\*.lib" target="lib\Release" />
-      <file src="include\**\*.*" target="." />
+      <file src="@RL_NUGET_PACKAGE_NAME@-v@MSVC_TOOLSET_VERSION@-@NATIVE_NUGET_PLATFORM_TAG@.targets" target="build" />
+      <file src="lib\*.lib" target="lib" />
+      <file src="include\**\*.*" target="include" />
   </files>
 </package>

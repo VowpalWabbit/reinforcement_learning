@@ -46,32 +46,31 @@ jobs:
           cmake -S . -B build
           -G "Visual Studio 16 2019" -A ${{ matrix.arch_config.generator_arch }}
           -T ${{ matrix.toolset }}
+          -DRL_BUILD_NUGET=On
+          -DRL_NUGET_PACKAGE_NAME=RLClientLibNativeStatic
+          -DRL_NUGET_PACKAGE_VERSION=0.1.0
           -DNATIVE_NUGET_PLATFORM_TAG=${{ matrix.arch_config.arch }}
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.arch }}-windows
           -DRL_STATIC_DEPS=On
           -DBUILD_SHARED_LIBS=Off
           -DBUILD_TESTING=Off
-      - name: Build and install
-        run: |
-          cmake --build build --config Release -t rlclientlib -v
-          cmake --install build --prefix ./nuget_staging --config Release -v
-      - name: Copy targets file
-        if: ${{ matrix.arch_config.arch == 'x64' }}
-        run: cp nuget\RLClientLibNative-${{matrix.toolset}}-x64.targets nuget_staging\RLClientLibNative-${{matrix.toolset}}-x64.targets
-      - name: Package
+      - name: Compile
+        run: cmake --build build --config Release -t rlclientlib -v
+      - name: Create Nuget package
+        run: cmake --install build --prefix ./nuget_staging --config Release -v
+      - name: Get package name
         shell: powershell
-        id: generate-nuget
+        id: nuget_name
         run: |
           cd nuget_staging
-          ..\.nuget\nuget.exe pack .\rlclientlib.nuspec
           $NugetFileName = Get-ChildItem *.nupkg -name
           echo "::set-output name=NugetFileName::$NugetFileName"
-      - name: Upload
+      - name: Upload package
         uses: actions/upload-artifact@v1
         with:
-          name: ${{ steps.generate-nuget.outputs.NugetFileName }}
-          path: nuget_staging/${{ steps.generate-nuget.outputs.NugetFileName }}
+          name: ${{ steps.nuget_name.outputs.NugetFileName }}
+          path: nuget_staging/${{ steps.nuget_name.outputs.NugetFileName }}
 
   test_nuget_windows:
     needs: [build_nuget_windows]
@@ -81,6 +80,7 @@ jobs:
       matrix:
         os: ["windows-2019"]
         toolset: ["v141", "v142"]
+        nuget_package_version: ["0.1.0"]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -88,14 +88,14 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
       - uses: actions/download-artifact@v1
         with:
-          name: RLClientLibNative-${{matrix.toolset}}-x64.0.1.0.nupkg
+          name: RLClientLibNativeStatic-${{matrix.toolset}}-x64.${{matrix.nuget_package_version}}.nupkg
           path: downloaded_nugets
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
       - name: Build test
         run: |
           ls downloaded_nugets
-          .\.nuget\NuGet.exe install -Source ${{ github.workspace }}\downloaded_nugets -OutputDirectory ${{ github.workspace }}\nuget\test\packages\ RLClientLibNative-${{ matrix.toolset }}-x64
+          .\.nuget\NuGet.exe install -Source ${{ github.workspace }}\downloaded_nugets -OutputDirectory ${{ github.workspace }}\nuget\test\packages\ RLClientLibNativeStatic-${{ matrix.toolset }}-x64
           cd nuget\test
           msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=Release;Platform=x64"
           .\bin\x64\Release\test-${{matrix.toolset}}.exe
