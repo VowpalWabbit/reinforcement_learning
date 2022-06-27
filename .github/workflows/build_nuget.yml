@@ -57,9 +57,9 @@ jobs:
           -DBUILD_SHARED_LIBS=Off
           -DBUILD_TESTING=Off
       - name: Compile
-        run: cmake --build build --config Release -t rlclientlib -v
+        run: cmake --build build --config Release --install-prefix ./nuget_staging -t rlclientlib -v
       - name: Create Nuget package
-        run: cmake --install build --prefix ./nuget_staging --config Release -v
+        run: cmake --install build --config Release --install-prefix ./nuget_staging -v
       - name: Get package name
         id: nuget_name
         run: |

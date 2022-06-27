@@ -11,4 +11,5 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/rlclientlib.nuspec DESTINATION ./)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/rlclientlib.targets DESTINATION ./ RENAME ${RL_NUGET_PACKAGE_NAME}-v${MSVC_TOOLSET_VERSION}-${NATIVE_NUGET_PLATFORM_TAG}.targets)
 
 # Build package
+install(CODE "message(\"Building nuget package with command: execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/nuget.exe pack rlclientlib.nuspec WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX})\")")
 install(CODE "execute_process(COMMAND \"${CMAKE_CURRENT_SOURCE_DIR}/nuget.exe\" pack rlclientlib.nuspec WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}\")")
