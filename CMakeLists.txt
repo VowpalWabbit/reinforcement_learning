@@ -97,3 +97,7 @@ add_subdirectory(unit_test/extensions)
 if(RL_BUILD_BENCHMARKS)
   add_subdirectory(benchmarks)
 endif()
+
+# Generate NuGet package specification file from template
+configure_file(nuget/rlclientlib.nuspec.in nuget/rlclientlib.nuspec @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/nuget/rlclientlib.nuspec DESTINATION ./)
