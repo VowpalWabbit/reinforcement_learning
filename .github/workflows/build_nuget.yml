@@ -47,6 +47,7 @@ jobs:
           cmake -S . -B build
           -G "Visual Studio 16 2019" -A ${{ matrix.arch_config.generator_arch }}
           -T ${{ matrix.toolset }}
+          --install-prefix ./nuget_staging
           -DRL_BUILD_NUGET=On
           -DRL_NUGET_PACKAGE_NAME=RLClientLibNativeStatic
           -DRL_NUGET_PACKAGE_VERSION=0.1.0
@@ -57,9 +58,9 @@ jobs:
           -DBUILD_SHARED_LIBS=Off
           -DBUILD_TESTING=Off
       - name: Compile
-        run: cmake --build build --config Release --install-prefix ./nuget_staging -t rlclientlib -v
+        run: cmake --build build --config Release -t rlclientlib -v
       - name: Create Nuget package
-        run: cmake --install build --config Release --install-prefix ./nuget_staging -v
+        run: cmake --install build --config Release -v
       - name: Get package name
         id: nuget_name
         run: |
