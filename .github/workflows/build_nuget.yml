@@ -96,7 +96,7 @@ jobs:
       - name: Build test
         run: |
           ls downloaded_nugets
-          .\.nuget\NuGet.exe install -Source ${{ github.workspace }}\downloaded_nugets -OutputDirectory ${{ github.workspace }}\nuget\test\packages\ RLClientLibNativeStatic-${{ matrix.toolset }}-x64
+          .\nuget\nuget.exe install -Source ${{ github.workspace }}\downloaded_nugets -OutputDirectory ${{ github.workspace }}\nuget\test\packages\ RLClientLibNativeStatic-${{ matrix.toolset }}-x64
           cd nuget\test
           msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=Release;Platform=x64"
           .\bin\x64\Release\test-${{matrix.toolset}}.exe
