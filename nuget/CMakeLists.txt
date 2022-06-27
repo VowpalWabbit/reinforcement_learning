@@ -1,6 +1,6 @@
 # Check that variables are set
-if(NOT DEFINED RL_NUGET_PACKAGE_NAME OR NOT DEFINED RL_NUGET_PACKAGE_VERSION)
-  message(FATAL_ERROR "Must define variables RL_NUGET_PACKAGE_NAME and RL_NUGET_PACKAGE_VERSION when building the Nuget package")
+if(NOT DEFINED RL_NUGET_PACKAGE_NAME OR NOT DEFINED RL_NUGET_PACKAGE_VERSION OR NOT DEFINED NATIVE_NUGET_PLATFORM_TAG)
+  message(FATAL_ERROR "When building Nuget package, must define variables: RL_NUGET_PACKAGE_NAME, RL_NUGET_PACKAGE_VERSION, NATIVE_NUGET_PLATFORM_TAG")
 endif()
 
 # Generate NuGet package specification file from template
