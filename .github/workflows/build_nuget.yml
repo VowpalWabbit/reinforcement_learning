@@ -61,10 +61,10 @@ jobs:
       - name: Create Nuget package
         run: cmake --install build --prefix ./nuget_staging --config Release -v
       - name: Get package name
-        shell: powershell
         id: nuget_name
         run: |
           cd nuget_staging
+          ls
           $NugetFileName = Get-ChildItem *.nupkg -name
           echo "::set-output name=NugetFileName::$NugetFileName"
       - name: Upload package
