@@ -182,6 +182,7 @@ source_group("Private headers" FILES ${PROJECT_PRIVATE_HEADERS})
 
 add_library(rlclientlib ${PROJECT_SOURCES} ${PROJECT_PUBLIC_HEADERS} ${PROJECT_PRIVATE_HEADERS})
 add_dependencies(rlclientlib fbgenerator_v1 fbgenerator_v2)
+set_target_properties(rlclientlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 if(vw_USE_AZURE_FACTORIES)
   target_compile_definitions(rlclientlib PRIVATE USE_AZURE_FACTORIES)
@@ -221,5 +222,13 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   target_link_libraries(rlclientlib PUBLIC Boost::thread)
 endif()
 
-install(TARGETS rlclientlib ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
-install(FILES ${PROJECT_PUBLIC_HEADERS} DESTINATION include)
+# Set paths for installing library and header files
+install(
+  TARGETS rlclientlib
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+install(
+  FILES ${PROJECT_PUBLIC_HEADERS}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)

@@ -39,8 +39,17 @@ option(RL_BUILD_PYTHON "Build the Python bindings" OFF)
 option(USE_ZSTD "Whether to enable usage of zstandard compression" ON)
 option(RL_STATIC_DEPS "Only use static dependencies" OFF)
 option(RL_BUILD_BENCHMARKS "Build benchmarks" OFF)
-
 option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" ON)
+option(RL_BUILD_NUGET "Build the Nuget package" OFF)
+
+if(RL_BUILD_NUGET)
+  set(RAPIDJSON_SYS_DEP Off CACHE BOOL "" FORCE)
+  set(FMT_SYS_DEP Off CACHE BOOL "" FORCE)
+  set(SPDLOG_SYS_DEP Off CACHE BOOL "" FORCE)
+  set(VW_ZLIB_SYS_DEP Off CACHE BOOL "" FORCE)
+  set(VW_BOOST_MATH_SYS_DEP Off CACHE BOOL "" FORCE)
+  set(RL_STATIC_DEPS On)
+endif()
 
 if(RL_STATIC_DEPS)
     if(WIN32)
@@ -61,7 +70,6 @@ if (vw_USE_AZURE_FACTORIES)
     find_package(OpenSSL REQUIRED)
 endif()
 
-
 # We also require Boost::uuid, but that is a header-only dependency and is unable to be found
 # using find_package as a component, which means it is possible to have a successfully configured
 # build that will nonetheless not work due to missing dependencies.
@@ -76,6 +84,9 @@ include(ProcessorCount)
 ProcessorCount(NumProcessors)
 message("Number of processors: ${NumProcessors}")
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/nprocs.txt ${NumProcessors})
+
+# This provides the variables such as CMAKE_INSTALL_LIBDIR for installation paths.
+include(GNUInstallDirs)
 
 include(ext_libs/ext_libs.cmake)
 
@@ -98,11 +109,11 @@ if(RL_BUILD_BENCHMARKS)
   add_subdirectory(benchmarks)
 endif()
 
-option(RL_BUILD_NUGET "Build the Nuget package" OFF)
+# Add the nuget subdirectory last
 if(RL_BUILD_NUGET)
   if(WIN32)
     add_subdirectory(nuget)
   else()
-    message(WARNING "Nuget package must be built on Windows. Ignoring option RL_BUILD_NUGET.")
+    message(FATAL_ERROR "Nuget package must be built on Windows")
   endif()
 endif()

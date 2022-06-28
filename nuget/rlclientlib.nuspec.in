@@ -13,6 +13,8 @@
   <files>
       <file src="@RL_NUGET_PACKAGE_NAME@-v@MSVC_TOOLSET_VERSION@-@NATIVE_NUGET_PLATFORM_TAG@.targets" target="build" />
       <file src="lib\*.lib" target="lib" />
-      <file src="include\**\*.*" target="include" />
+      <file src="include\*.h" target="include" />
+      <file src="include\vw\**\*.h" target="include\vw" />
+      <file src="include\nonstd\*.h" target="include\nonstd" />
   </files>
 </package>
