@@ -49,7 +49,7 @@ jobs:
           -T ${{ matrix.toolset }}
           -DRL_BUILD_NUGET=On
           -DRL_NUGET_PACKAGE_NAME=RLClientLibNativeStatic
-          -DRL_NUGET_PACKAGE_VERSION=0.1.0
+          -DRL_NUGET_PACKAGE_VERSION="0.1.0"
           -DNATIVE_NUGET_PLATFORM_TAG=${{ matrix.arch_config.arch }}
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.arch }}-windows
