@@ -10,3 +10,6 @@
 	path = ext_libs/pybind11
 	url = ../../pybind/pybind11
 	branch = stable
+[submodule "ext_libs/cpprestsdk"]
+	path = ext_libs/cpprestsdk
+	url = https://github.com/microsoft/cpprestsdk.git
