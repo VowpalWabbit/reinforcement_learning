@@ -58,7 +58,7 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.arch }}-windows
       - name: Compile
-        run: cmake --build ./build --config Release -t rlclientlib -v
+        run: cmake --build ./build --config Release -v
       - name: Create Nuget package
         run: cmake --install ./build --config Release --prefix ./nuget_staging -v
       - name: Get package name
