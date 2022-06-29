@@ -31,9 +31,7 @@ jobs:
           vcpkg install
           --host-triplet=${{ matrix.arch_config.arch }}-windows
           --triplet=${{ matrix.arch_config.arch }}-windows
-          cpprestsdk
           openssl-windows
-          zlib
           flatbuffers
           boost-filesystem
           boost-thread
@@ -42,6 +40,12 @@ jobs:
           boost-align
           boost-math
           boost-uuid
+          boost-system
+          boost-date-time
+          boost-regex
+          boost-asio
+          boost-interprocess
+          zlib
       - name: Configure
         run: >
           cmake -S . -B build

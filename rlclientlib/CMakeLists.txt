@@ -184,11 +184,14 @@ add_library(rlclientlib ${PROJECT_SOURCES} ${PROJECT_PUBLIC_HEADERS} ${PROJECT_P
 add_dependencies(rlclientlib fbgenerator_v1 fbgenerator_v2)
 set_target_properties(rlclientlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
+if(WIN32)
+  set_target_properties(rlclientlib PROPERTIES DEBUG_POSTFIX d)
+endif()
+
 if(vw_USE_AZURE_FACTORIES)
   target_compile_definitions(rlclientlib PRIVATE USE_AZURE_FACTORIES)
 endif()
 
-set_target_properties(rlclientlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 if(USE_ZSTD)
   target_compile_definitions(rlclientlib PRIVATE USE_ZSTD)
