@@ -49,7 +49,7 @@ jobs:
       - name: Configure
         run: >
           cmake -S . -B build
-          -G Ninja -A ${{ matrix.arch_config.generator_arch }}
+          -G "Visual Studio 16 2019" -A ${{ matrix.arch_config.generator_arch }}
           -T ${{ matrix.toolset }}
           -DRL_BUILD_NUGET=On
           -DRL_NUGET_PACKAGE_NAME=RLClientLibNativeStatic
