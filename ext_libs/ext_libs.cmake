@@ -35,6 +35,7 @@ if(USE_ZSTD)
   set(ZSTD_BUILD_SHARED OFF CACHE BOOL "")
   set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "")
   set(ZSTD_BUILD_TESTS OFF CACHE BOOL "")
-  set(ZSTD_USE_STATIC_RUNTIME ON CACHE BOOL "")
+  # Dynamic link to MSVC runtime libraries
+  set(ZSTD_USE_STATIC_RUNTIME OFF CACHE BOOL "")
   add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/zstd/build/cmake ${RL_ext_libs_exclude_from_all})
 endif()

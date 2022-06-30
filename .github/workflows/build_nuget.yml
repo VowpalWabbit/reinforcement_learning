@@ -57,6 +57,7 @@ jobs:
           -DNATIVE_NUGET_PLATFORM_TAG=${{ matrix.arch_config.arch }}
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.arch }}-windows
+          -Drlclientlib_BUILD_DOTNET=Off
       - name: Compile
         run: cmake --build ./build --config Release -v
       - name: Create Nuget package
