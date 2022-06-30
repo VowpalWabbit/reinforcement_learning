@@ -7,8 +7,9 @@ endif()
 configure_file(rlclientlib.nuspec.in rlclientlib.nuspec @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/rlclientlib.nuspec DESTINATION ./)
 
-# Copy the .targets file
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/rlclientlib.targets DESTINATION ./ RENAME ${RL_NUGET_PACKAGE_NAME}-v${MSVC_TOOLSET_VERSION}-${NATIVE_NUGET_PLATFORM_TAG}.targets)
+# Generate the .targets file from template
+configure_file(rlclientlib.targets.in rlclientlib.targets @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/rlclientlib.targets DESTINATION ./ RENAME ${RL_NUGET_PACKAGE_NAME}-v${MSVC_TOOLSET_VERSION}-${NATIVE_NUGET_PLATFORM_TAG}.targets)
 
 # Build package
 install(SCRIPT CreateNugetPackage.cmake)

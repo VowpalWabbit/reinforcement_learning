@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug' And ('$(Platform)'=='x64')">
+    <Link>
+      <AdditionalDependencies>rlclientlibd.lib;cpprest@CMAKE_VS_PLATFORM_TOOLSET@_2_10d.lib;zstd_staticd.lib;vw_configd.lib;vw_allreduced.lib;fmtd.lib;spdlogd.lib;vw_iod.lib;vw_cored.lib;zlibstaticd.lib;wsock32.lib;ws2_32.lib;winhttp.lib;bcrypt.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>rlclientlibd.lib;cpprest@CMAKE_VS_PLATFORM_TOOLSET@_2_10d.lib;zstd_staticd.lib;vw_configd.lib;vw_allreduced.lib;fmtd.lib;spdlogd.lib;vw_iod.lib;vw_cored.lib;zlibstaticd.lib;wsock32.lib;ws2_32.lib;winhttp.lib;bcrypt.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release' And ('$(Platform)'=='x64')">
+    <Link>
+      <AdditionalDependencies>rlclientlib.lib;cpprest@CMAKE_VS_PLATFORM_TOOLSET@_2_10.lib;zstd_static.lib;vw_config.lib;vw_allreduce.lib;fmt.lib;spdlog.lib;vw_io.lib;vw_core.lib;zlibstatic.lib;wsock32.lib;ws2_32.lib;winhttp.lib;bcrypt.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>rlclientlib.lib;cpprest@CMAKE_VS_PLATFORM_TOOLSET@_2_10.lib;zstd_static.lib;vw_config.lib;vw_allreduce.lib;fmt.lib;spdlog.lib;vw_io.lib;vw_core.lib;zlibstatic.lib;wsock32.lib;ws2_32.lib;winhttp.lib;bcrypt.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
+    <Link>
+      <AdditionalLibraryDirectories>$(MSBuildThisFileDirectory)..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(MSBuildThisFileDirectory)..\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+</Project>
