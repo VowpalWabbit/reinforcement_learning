@@ -20,14 +20,13 @@ class versioned_object_pool_unsafe
   int _version;
   std::vector<TObject*> _pool;
   TFactory _factory;
-  int _used_objects;
   int _objects_count;
 
 public:
   // Construct object pool given a factory function that allocates new objects when called
   // Optionally, pre-populate the pool with a given count of objects
   versioned_object_pool_unsafe(TFactory factory, int objects_count = 0, int version = 0)
-      : _version(version), _factory(std::move(factory)), _used_objects(0), _objects_count(objects_count)
+      : _version(version), _factory(std::move(factory)), _objects_count(objects_count)
   {
     for (int i = 0; i < _objects_count; ++i) { _pool.emplace_back(_factory()); }
   }
@@ -49,21 +48,23 @@ public:
     _pool.clear();
   }
 
-  // Retreive an object in the pool, creating a new one if the pool is empty
+  // Retreive an object in the pool, or nullptr if pool is empty
   // The object must be returned to the pool along with its version, or else allocated memory will not be freed
-  TObject* get_or_create()
+  TObject* get()
   {
-    if (_pool.size() == 0)
-    {
-      _used_objects++;
-      _objects_count++;
-      return _factory();
-    }
+    if (_pool.empty()) { return nullptr; }
 
-    auto back = _pool.back();
+    auto obj = _pool.back();
     _pool.pop_back();
+    return obj;
+  }
 
-    return back;
+  // Create a new object with the pool's factory function
+  // The object must be returned to the pool along with its version, or else allocated memory will not be freed
+  TObject* create()
+  {
+    _objects_count++;
+    return _factory();
   }
 
   // Put the object into the pool if version matches
@@ -120,14 +121,33 @@ public:
     std::lock_guard<std::mutex> lock(_mutex);
     // in the deleter function, capture a copy of the version at time of object creation
     int current_version = _impl->version();
-    auto pool_obj = _impl->get_or_create();
-    int objects_count = _impl->size();
 
-    TRACE_DEBUG(
-        _trace_logger, utility::concat("versioned_object_pool::get_or_create() called: pool size is ", objects_count));
+    // try to get an existing object
+    TObject* pool_obj = _impl->get();
+    if (pool_obj != nullptr)
+    {
+      TRACE_INFO(_trace_logger,
+          utility::concat(
+              "versioned_object_pool::get_or_create() called: existing object returned, total pool size is ",
+              _impl->size()));
+    }
+    else
+    {
+      // pool was empty, create a new object
+      pool_obj = _impl->create();
+      TRACE_INFO(_trace_logger,
+          utility::concat(
+              "versioned_object_pool::get_or_create() called: new object created, total pool size is ", _impl->size()));
+    }
 
+#if __cplusplus >= 202002L
+    // C++20 deprecates implicit "this" capture by reference in [=] lambda
+    return std::unique_ptr<TObject, TObjectDeleter>(
+        pool_obj, [=, this](TObject* obj) { this->return_to_pool(obj, current_version); });
+#else
     return std::unique_ptr<TObject, TObjectDeleter>(
         pool_obj, [=](TObject* obj) { this->return_to_pool(obj, current_version); });
+#endif
   }
 
   // Update the pool's factory function and increment version number
@@ -140,7 +160,7 @@ public:
     objects_count = _impl->size();
     new_version = _impl->version() + 1;
 
-    TRACE_DEBUG(
+    TRACE_INFO(
         _trace_logger, utility::concat("versioned_object_pool::update_factory() called: pool size is ", objects_count));
 
     std::unique_ptr<impl_type> new_impl(new impl_type(std::move(new_factory), objects_count, new_version));
