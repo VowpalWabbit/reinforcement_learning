@@ -26,6 +26,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/vowpal_wabbit ${RL_ext_libs_exclude_f
 
 if(vw_USE_AZURE_FACTORIES AND (NOT RL_CPPRESTSDK_SYS_DEP))
   set(WERROR OFF CACHE BOOL "")
+  set(CPPREST_ABI_TAG "" CACHE BOOL "" FORCE)
   add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/cpprestsdk ${RL_ext_libs_exclude_from_all})
   add_library(cpprestsdk::cpprest ALIAS cpprest)
 endif()
