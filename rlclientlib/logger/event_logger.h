@@ -14,7 +14,6 @@
 #include "serialization/fb_serializer.h"
 #include "time_helper.h"
 #include "utility/config_helper.h"
-#include "utility/versioned_object_pool.h"
 #include "utility/watchdog.h"
 
 #include <stddef.h>
