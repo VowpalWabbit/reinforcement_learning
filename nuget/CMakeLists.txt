@@ -12,6 +12,8 @@ configure_file(rlclientlib.targets.in rlclientlib.targets @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/rlclientlib.targets DESTINATION ./ RENAME ${RL_NUGET_PACKAGE_NAME}-v${MSVC_TOOLSET_VERSION}-${NATIVE_NUGET_PLATFORM_TAG}.targets)
 
 # Copy OpenSSL libraries
+# Extract library paths from lists with format
+#   debug;/path/to/debug/libcrypto.lib;optimized;/path/to/optimized/libcrypto.lib
 if(CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]")
   list(FIND OPENSSL_CRYPTO_LIBRARIES "debug" index_crypto)
   list(FIND OPENSSL_SSL_LIBRARIES "debug" index_ssl)
@@ -31,11 +33,6 @@ else()
   install(FILES ${libcrypto_path} DESTINATION ${CMAKE_INSTALL_LIBDIR} RENAME libcrypto.lib)
   install(FILES ${libssl_path} DESTINATION ${CMAKE_INSTALL_LIBDIR} RENAME libssl.lib)
 endif()
-
-#math(EXPR list_index "${list_index} + 1")
-#list(GET OPENSSL_CRYPTO_LIBRARIES ${list_index} openssl_crypto_lib_path)
-#message("crypto lib found: ${openssl_crypto_lib_path}")
-#install(FILES "${openssl_crypto_lib_path}" DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 # Build package
 install(SCRIPT CreateNugetPackage.cmake)

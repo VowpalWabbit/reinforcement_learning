@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         os: ["windows-2019"]
-        toolset: ["v142"]
+        toolset: ["v141", "v142"]
         arch_config:
         - { arch: x64, generator_arch: x64}
   
@@ -31,7 +31,7 @@ jobs:
           vcpkg install
           --host-triplet=${{ matrix.arch_config.arch }}-windows
           --triplet=${{ matrix.arch_config.arch }}-windows
-          openssl-windows
+          openssl
           flatbuffers
           boost-filesystem
           boost-thread
@@ -45,7 +45,6 @@ jobs:
           boost-regex
           boost-asio
           boost-interprocess
-          zlib
       - name: Configure
         run: >
           cmake -S . -B build
@@ -88,7 +87,7 @@ jobs:
     strategy:
       matrix:
         os: ["windows-2019"]
-        toolset: ["v142"]
+        toolset: ["v141", "v142"]
         nuget_package_version: ["0.1.0"]
     steps:
       - uses: actions/checkout@v2
