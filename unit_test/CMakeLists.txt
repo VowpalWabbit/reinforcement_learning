@@ -1,29 +1,41 @@
 set(TEST_SOURCES
-  header_auth_test.cc
   async_batcher_test.cc
   configuration_test.cc
   data_buffer_test.cc
   data_callback_test.cc
-  err_callback_test.cc
   dedup_test.cc
+  err_callback_test.cc
   event_queue_test.cc
   explore_test.cc
   factory_test.cc
   fb_serializer_test.cc
+  file_logger_test.cc
+  header_auth_test.cc
+  http_client_test.cc
+  http_transport_client_test.cc
   json_context_parse_test.cc
+  json_serializer_test.cc
   learning_mode_test.cc
   live_model_test.cc
   main.cc
+  mock_http_client.cc
   mock_util.cc
   model_mgmt_test.cc
+  moving_queue_test.cc
+  multi_slot_response_detailed_test.cc
   multistep_test.cc
   object_pool_test.cc
   payload_serializer_test.cc
+  preamble_test.cc
   ranking_response_test.cc
   safe_vw_test.cc
+  #serializer.cc # won't compile
   sleeper_test.cc
+  slot_ranking_test.cc
   status_builder_test.cc
   str_util_test.cc
+  time_tests.cc
+  trace_logger_test.cc
   watchdog_test.cc
 )
 

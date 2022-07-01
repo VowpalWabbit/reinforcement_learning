@@ -38,24 +38,8 @@ public:
   ~model_data();
 
   model_data(model_data const& other);
-  model_data& operator=(model_data const& other);
-
-  model_data(model_data&& other) noexcept
-      : _data(other._data), _data_sz(other._data_sz), _refresh_count(other._refresh_count)
-  {
-  }
-
-  model_data& operator=(model_data&& other) noexcept
-  {
-    if (this != &other)
-    {
-      std::swap(_data, other._data);
-      std::swap(_data_sz, other._data_sz);
-      std::swap(_refresh_count, other._refresh_count);
-    }
-
-    return *this;
-  }
+  model_data(model_data&& other) noexcept;
+  model_data& operator=(model_data other) noexcept;
 
 private:
   char* _data = nullptr;
