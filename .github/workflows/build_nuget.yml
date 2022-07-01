@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - static_nuget
       - 'releases/**'
   pull_request:
     branches:
