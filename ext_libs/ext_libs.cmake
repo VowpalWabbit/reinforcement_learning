@@ -27,6 +27,11 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/vowpal_wabbit ${RL_ext_libs_exclude_f
 if(vw_USE_AZURE_FACTORIES AND (NOT RL_CPPRESTSDK_SYS_DEP))
   set(WERROR OFF CACHE BOOL "")
   set(CPPREST_ABI_TAG "" CACHE BOOL "" FORCE)
+  # use the zlib static build inside of VW
+  if(NOT VW_ZLIB_SYS_DEP)
+    add_library(cpprestsdk_zlib_internal INTERFACE)
+    target_link_libraries(cpprestsdk_zlib_internal INTERFACE zlibstatic)
+  endif()
   add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/cpprestsdk ${RL_ext_libs_exclude_from_all})
   add_library(cpprestsdk::cpprest ALIAS cpprest)
 endif()
