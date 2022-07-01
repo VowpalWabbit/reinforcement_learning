@@ -31,7 +31,7 @@ jobs:
           vcpkg install
           --host-triplet=${{ matrix.arch_config.arch }}-windows
           --triplet=${{ matrix.arch_config.arch }}-windows
-          openssl
+          openssl-windows
           flatbuffers
           boost-filesystem
           boost-thread
