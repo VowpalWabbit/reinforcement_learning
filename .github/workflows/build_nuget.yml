@@ -61,6 +61,8 @@ jobs:
       - name: Create Nuget package - debug build
         # this copies over files to nuget_staging and creates a package with only debug libraries
         run: cmake --install ./build --config Debug --prefix ./nuget_staging -v
+      - name: Clean
+        run: cmake --build ./build --target clean
       - name: Compile - release build
         run: cmake --build ./build --config Release -v
       - name: Create Nuget package - release build
