@@ -53,7 +53,7 @@ jobs:
           -DRL_NUGET_PACKAGE_NAME=RLClientLibNativeStatic
           -DRL_NUGET_PACKAGE_VERSION="0.1.0"
           -DNATIVE_NUGET_PLATFORM_TAG=${{ matrix.arch_config.arch }}
-          -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_INSTALLATION_ROOT }}\scripts\buildsystems\vcpkg.cmake
+          -DCMAKE_TOOLCHAIN_FILE="${env:VCPKG_INSTALLATION_ROOT}\scripts\buildsystems\vcpkg.cmake"
           -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.arch }}-windows
           -Drlclientlib_BUILD_DOTNET=Off
       - name: Compile - debug build
