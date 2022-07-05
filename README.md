@@ -3,126 +3,87 @@
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/57p7o5v34onsqma2/branch/master?svg=true)](https://ci.appveyor.com/project/JohnLangford/reinforcement-learning/branch/master)
 [![Integration with latest VW](https://github.com/VowpalWabbit/reinforcement_learning/actions/workflows/daily_integration.yml/badge.svg?event=schedule)](https://github.com/VowpalWabbit/reinforcement_learning/actions/workflows/daily_integration.yml)
 
-# reinforcement_learning
+# RL Client Library
+Interaction-side integration library for Reinforcement Learning loops: Predict, Log, [Learn,] Update
 
-```
+## Compiling the library
+### Getting the source code
+```sh
+git clone https://github.com/VowpalWabbit/reinforcement_learning.git
 git submodule update --init --recursive
 ```
 
 ## Ubuntu
-
 ### Dependencies
-
+Install the dependencies for this project with the following commands. We recommend the use of [vcpkg](https://github.com/microsoft/vcpkg) for installing `cpprestsdk` and `flatbuffers`.
 ```sh
 sudo apt-get install libboost-all-dev libssl-dev
+vcpkg install cpprestsdk flatbuffers
 ```
 
-#### Install Cpprest
-```bash
-cd ~
-git clone https://github.com/Microsoft/cpprestsdk.git cpprestsdk
-cd cpprestsdk
-# Checkout 2.10.1 version of cpprestsdk
-git checkout e8dda215426172cd348e4d6d455141f40768bf47
-git submodule update --init
-cd Release
-mkdir build
-cd build
-cmake ..
-make -j `nproc`
-make install
-cd ../../../
-rm -rf cpprestsdk
-```
-
-#### Install Flatbuffers
-```bash
-cd ~
-git clone https://github.com/google/flatbuffers.git flatbuffers
-cd ./flatbuffers
-# 2.0.0 release commit
-git checkout a9a295fecf3fbd5a4f571f53b01f63202a3e2113
-mkdir build
-cd build
-cmake .. -DFLATBUFFERS_BUILD_TESTS=Off -DFLATBUFFERS_INSTALL=On -DCMAKE_BUILD_TYPE=Release -DFLATBUFFERS_BUILD_FLATHASH=Off
-make -j `nproc`
-sudo make install
-cd ../../
-rm -rf flatbuffers
-```
-
-### Configure +  Build
-
+### Configure + Build
+When configuring a CMake project using vcpkg dependencies, we must provide the full path to the `vcpkg.cmake` toolchain file.
 ```sh
-cmake -S . -B build
-cmake --build build --target all -j 4 # $(nproc)
+# Configure
+cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=</path/to/vcpkg>/scripts/buildsystems/vcpkg.cmake
+
+# Build
+cmake --build build -j `nproc`
 
 # Test
-cmake --build build --target rltest -j 4 # $(nproc)
+cmake --build build --target rltest -j `nproc`
 cmake --build build --target test
 ```
 
 ## MacOS
-
 ### Dependencies
-
 MacOS dependencies can be managed through homebrew.
-
 ```sh
 brew install cpprestsdk flatbuffers openssl
 ```
 
 ### Configure +  Build
-
 In order to build using homebrew dependencies, you must invoke cmake this way:
-
 ```sh
 cmake -S . -B build -DOPENSSL_ROOT_DIR=`brew --prefix openssl` -DOPENSSL_LIBRARIES=`brew --prefix openssl`/lib
 cmake --build build --target all -j 4
 ```
 
 ## Windows
-### CMake (recommended)
-
-**Note:** The C# targets are not yet available in the CMake project. If those are required instructions for (Checked in solution)[#Checked-in-solution] should be used.
-
-#### Dependencies
+### Dependencies
+Dependencies on Windows should be managed using [vcpkg](https://github.com/microsoft/vcpkg).
 ```cmd
 vcpkg install --triplet x64-windows zlib boost-system boost-program-options boost-test boost-align boost-foreach boost-math boost-uuid cpprestsdk flatbuffers openssl
 ```
 
-Add the flatbuffers tool directory to your PATH: `<vcpkg_root>\installed\x64-windows\tools\flatbuffers`
+If needed, add the flatbuffers executables to your PATH: `<vcpkg_root>\installed\x64-windows\tools\flatbuffers`
 
-#### Configure
+### Configure + Build in Visual Studio
+Open the project directory in Visual Studio. Building the library can be easily done in the GUI.
+- Edit CMake command line settings with `Project > CMake Settings for <project name>`
+- Run CMake configuration with `Project > Configure Cache`. Use `Project > Delete Cache and Reconfigure` to force a full reconfiguration starting from a clean working directory.
+- Compile with `Build > Build All`
+- Run tests with `Test > Run CTests for <project name>`
+
+This procedure has been verified to work well in Visual Studio 2022.
+
+### Configure with command line + Build in Visual Studio
+Alternatively, CMake configuration can be done in the command line.
 ```cmd
 cmake -S . -B build  -DCMAKE_TOOLCHAIN_FILE=<vcpkg_root>\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -A x64 -G "Visual Studio 16 2019"
 rem Generates a solution you can open and use in Visual Studio
 .\build\reinforcement_learning.sln
 ```
 
-### Checked in solution
-Windows dependencies are managed through Vcpkg and Nuget.
-
+Set VcpkgIntegration environment variable to `vcpkg.targets` file on your machine. Example:
 ```
-vcpkg install cpprestsdk:x64-windows
-vcpkg install flatbuffers:x64-windows
+VcpkgIntegration=c:\s\vcpkg\scripts\buildsystems\msbuild\vcpkg.targets
 ```
 
-You'll need to add the flatbuffers tool directory to your PATH aswell: `<vcpkg_root>\installed\x64-windows\tools\flatbuffers`
-
-#### Build + Test
-
-Set VcpkgIntegration environment variable to `vcpkg.targets` file on your machine
-
-Example:
-`VcpkgIntegration=c:\s\vcpkg\scripts\buildsystems\msbuild\vcpkg.targets`
-
-Ensure that the v140 toolset is installed in Visual Studio 2017.
-
-Open `rl.sln` in Visual Studio 2017.
-Build Release or Debug x64 configuration.
+Open `reinforcement_learning.sln` in Visual Studio. Build Release or Debug x64 configuration.
 
 ## Troubleshooting
+### OpenSSL on MacOS
 If you get an error similar to the following on MacOS when running `cmake ..`, then you may be able to fix it by supplying the OpenSSL path to CMake.
 ```
 Make Error at /usr/local/Cellar/cmake/3.14.4/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:137 (message):
@@ -141,7 +102,7 @@ This can be fixed by invoking CMake similar to the following:
 cmake -DOPENSSL_ROOT_DIR=`brew --prefix openssl` -DOPENSSL_LIBRARIES=`brew --prefix openssl`/lib ..
 ```
 
-
+### System cpprestsdk on Linux
 Installing cpprestsdk on Ubuntu18.04 using apt-get may result in cmake failing with:
 ```
 CMake Error at CMakeLists.txt:9 (find_package):
