@@ -25,12 +25,13 @@ jobs:
         with:
           submodules: 'recursive'
       - uses: ilammy/msvc-dev-cmd@v1
+      # NASM required to compile OpenSSL assembly language code
+      - uses: ilammy/setup-nasm@v1
       - name: Dependencies
         run: >
           vcpkg install
           --host-triplet=${{ matrix.arch_config.arch }}-windows
           --triplet=${{ matrix.arch_config.arch }}-windows
-          openssl-windows
           flatbuffers
           boost-filesystem
           boost-thread

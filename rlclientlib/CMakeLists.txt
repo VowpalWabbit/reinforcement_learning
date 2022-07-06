@@ -193,7 +193,7 @@ if(vw_USE_AZURE_FACTORIES)
 endif()
 
 
-if(USE_ZSTD)
+if(RL_USE_ZSTD)
   target_compile_definitions(rlclientlib PRIVATE USE_ZSTD)
   target_link_libraries(rlclientlib PRIVATE libzstd_static)
   target_include_directories(rlclientlib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/zstd/lib/)
