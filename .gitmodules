@@ -14,3 +14,6 @@
 	path = ext_libs/cpprestsdk
 	url = https://github.com/microsoft/cpprestsdk.git
 	branch = master
+[submodule "ext_libs/openssl"]
+	path = ext_libs/openssl
+	url = https://github.com/openssl/openssl.git
