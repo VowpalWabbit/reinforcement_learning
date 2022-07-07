@@ -75,7 +75,7 @@ if(vw_USE_AZURE_FACTORIES)
       DOWNLOAD_COMMAND "" # files should alread exist in git submodule
       CONFIGURE_COMMAND "" # use custom perl_configure step instead
       BUILD_COMMAND "${MAKE_EXECUTABLE}"
-      INSTALL_COMMAND "${MAKE_EXECUTABLE}" install_sw
+      INSTALL_COMMAND "${MAKE_EXECUTABLE}" install_dev
       BUILD_BYPRODUCTS "${RL_OPENSSL_INSTALL_DIR}/lib/libcrypto${STATIC_LIB_SUFFIX}" "${RL_OPENSSL_INSTALL_DIR}/lib/libssl${STATIC_LIB_SUFFIX}"
       USES_TERMINAL_BUILD TRUE
       USES_TERMINAL_INSTALL TRUE
@@ -85,6 +85,20 @@ if(vw_USE_AZURE_FACTORIES)
       COMMENT "Running perl_configure step in OpenSSL external project..."
       COMMAND "${PERL_EXECUTABLE}" "${RL_OPENSSL_SOURCE_DIR}/Configure" --prefix=${RL_OPENSSL_INSTALL_DIR} --openssldir=${RL_OPENSSL_INSTALL_DIR}/ssl ${RL_OPENSSL_DEBUG_OR_RELEASE} no-shared no-tests
       WORKING_DIRECTORY ${RL_OPENSSL_BINARY_DIR}
+      DEPENDEES configure
+    )
+    ExternalProject_Add_Step(
+      openssl_external perl_patch
+      COMMENT "Running perl_patch step in OpenSSL external project..."
+      # patch makefile to fix linker error about missing pdb file: https://github.com/openssl/openssl/issues/947
+      # replace compiler flags "/Zi /Fd[name].pdb" with "/Z7"
+      COMMAND "${PERL_EXECUTABLE}" -i -pe [[s|/Zi\s+/Fd\w+\.pdb|/Z7|g]] makefile
+      # when not generating pdb, also don't attempt copying it in install step
+      # remove line of makefile containing command: "copy.pl ossl_static.pdb"
+      # replace with "$(ECHO) message" in order to not break any surrounding if-statement
+      COMMAND "${PERL_EXECUTABLE}" -i -pe [[s|^(\s*).*copy\.pl.*ossl_static\.pdb.*$|\1\x24(ECHO) "Skip copying ossl_static.pdb"|]] makefile
+      WORKING_DIRECTORY ${RL_OPENSSL_BINARY_DIR}
+      DEPENDEES perl_configure
       DEPENDERS build
     )
     add_library(OpenSSL::Crypto STATIC IMPORTED)
