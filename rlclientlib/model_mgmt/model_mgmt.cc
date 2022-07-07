@@ -9,6 +9,29 @@ namespace model_management
 {
 model_data::model_data() = default;
 
+// copy constructor: allocate new memory and copy over other's data
+model_data::model_data(model_data const& other)
+    : _data(new char[other._data_sz]), _data_sz(other._data_sz), _refresh_count(other._refresh_count)
+{
+  std::memcpy(_data, other._data, _data_sz);
+}
+
+// move constructor: take other's data pointer and set original pointer to null
+model_data::model_data(model_data&& other) noexcept
+    : _data(other._data), _data_sz(other._data_sz), _refresh_count(other._refresh_count)
+{
+  other._data = nullptr;
+}
+
+// pass-by-value assignment operator
+model_data& model_data::operator=(model_data other) noexcept
+{
+  std::swap(_data, other._data);
+  std::swap(_data_sz, other._data_sz);
+  std::swap(_refresh_count, other._refresh_count);
+  return *this;
+}
+
 model_data::~model_data() { free(); }
 
 char* model_data::data() const { return _data; }
@@ -23,9 +46,20 @@ void model_data::data_sz(const size_t fillsz) { _data_sz = fillsz; }
 
 char* model_data::alloc(const size_t desired)
 {
-  free();
-  _data = new (std::nothrow) char[desired];
-  _data_sz = (_data == nullptr) ? 0 : desired;
+  // wrap the allocation in a unique_ptr for exception safety
+  std::unique_ptr<char> data_new(new char[desired]);
+  char* data_new_ptr = data_new.get();
+  std::swap(_data, data_new_ptr);
+  data_new.release();
+  _data_sz = desired;
+
+  // after swap, data_new_ptr now holds the original _data ptr
+  if (data_new_ptr != nullptr)
+  {
+    delete[] data_new_ptr;
+    data_new_ptr = nullptr;
+  }
+
   return _data;
 }
 
@@ -39,21 +73,5 @@ void model_data::free()
   _data_sz = 0;
 }
 
-model_data::model_data(model_data const& other) { *this = other; }
-
-model_data& model_data::operator=(model_data const& other)
-{
-  if (this != &other)
-  {
-    // alloc will free an existing buffer, alloc the required size and set the _data_sz property.
-    _data = alloc(other._data_sz);
-    _refresh_count = other._refresh_count;
-
-    // Copy the contents of the other buffer to this object.
-    std::memcpy(_data, other._data, _data_sz);
-  }
-
-  return *this;
-}
 }  // namespace model_management
 }  // namespace reinforcement_learning

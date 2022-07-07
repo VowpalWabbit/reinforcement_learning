@@ -23,7 +23,9 @@ BOOST_AUTO_TEST_CASE(time_usage)
     BOOST_CHECK(ts.hour <= 23);
     BOOST_CHECK(ts.minute <= 59);
     BOOST_CHECK(ts.second <= 60);
-    BOOST_CHECK(ts.sub_second <= 9999999);
+
+    // subsecond is dependent on resolution of system clock
+    // BOOST_CHECK(ts.sub_second <= 9999999);
   }
 }
 

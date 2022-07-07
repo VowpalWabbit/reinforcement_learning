@@ -33,10 +33,6 @@ namespace m = model_management;
 namespace u = utility;
 namespace l = logger;
 
-// Some typdefs for more concise code
-using vw_ptr = std::shared_ptr<safe_vw>;
-using pooled_vw = utility::pooled_object_guard<safe_vw, safe_vw_factory>;
-
 int check_null_or_empty(const char* arg1, string_view arg2, i_trace* trace, api_status* status);
 int check_null_or_empty(const char* arg1, i_trace* trace, api_status* status);
 int check_null_or_empty(string_view arg1, i_trace* trace, api_status* status);
