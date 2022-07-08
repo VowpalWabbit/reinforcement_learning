@@ -1,15 +1,15 @@
 #pragma once
 
 #ifdef HAS_STD17
+#  include <string_view>
 namespace reinforcement_learning
 {
-#include <string_view>
 using std::string_view;
 }
 #else
-#include "nonstd/string_view.h"
+#  include "nonstd/string_view.h"
 namespace reinforcement_learning
 {
-using string_view = nonstd::string_view;
+using nonstd::string_view;
 }
 #endif
