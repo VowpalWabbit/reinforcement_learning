@@ -1,5 +1,7 @@
 #pragma once
 
+#include "future_compat.h"
+
 #ifdef HAS_STD17
 #  include <string_view>
 namespace reinforcement_learning
