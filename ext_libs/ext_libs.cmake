@@ -153,3 +153,8 @@ if(vw_USE_AZURE_FACTORIES)
     add_library(cpprestsdk::cpprest ALIAS cpprest)
   endif() # RL_CPPREST_SYS_DEP
 endif() # vw_USE_AZURE_FACTORIES
+
+# Include string-view-lite if not already added by VW subdirectory
+if(NOT TARGET string_view_lite)
+  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/string-view-lite)
+endif()
