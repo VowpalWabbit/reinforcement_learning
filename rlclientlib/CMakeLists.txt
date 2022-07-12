@@ -131,9 +131,9 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/ranking_response.h
   ../include/rl_string_view.h
   ../include/sender.h
+  ../include/slot_ranking.h
   ../include/str_util.h
   ../include/trace_logger.h
-  ../include/slot_ranking.h
 )
 
 set(PROJECT_PRIVATE_HEADERS
@@ -182,14 +182,18 @@ source_group("Private headers" FILES ${PROJECT_PRIVATE_HEADERS})
 
 add_library(rlclientlib ${PROJECT_SOURCES} ${PROJECT_PUBLIC_HEADERS} ${PROJECT_PRIVATE_HEADERS})
 add_dependencies(rlclientlib fbgenerator_v1 fbgenerator_v2)
+set_target_properties(rlclientlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+if(WIN32)
+  set_target_properties(rlclientlib PROPERTIES DEBUG_POSTFIX d)
+endif()
 
 if(vw_USE_AZURE_FACTORIES)
   target_compile_definitions(rlclientlib PRIVATE USE_AZURE_FACTORIES)
 endif()
 
-set_target_properties(rlclientlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-if(USE_ZSTD)
+if(RL_USE_ZSTD)
   target_compile_definitions(rlclientlib PRIVATE USE_ZSTD)
   target_link_libraries(rlclientlib PRIVATE libzstd_static)
   target_include_directories(rlclientlib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/zstd/lib/)
@@ -221,8 +225,13 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   target_link_libraries(rlclientlib PUBLIC Boost::thread)
 endif()
 
-install(TARGETS rlclientlib
-  INCLUDES DESTINATION rlclientlib
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
+# Set paths for installing library and header files
+install(
+  TARGETS rlclientlib
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+install(
+  FILES ${PROJECT_PUBLIC_HEADERS}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rlclientlib
 )

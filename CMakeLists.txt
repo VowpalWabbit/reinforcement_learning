@@ -36,31 +36,38 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(RL_BUILD_PYTHON "Build the Python bindings" OFF)
-option(USE_ZSTD "Whether to enable usage of zstandard compression" ON)
+option(RL_USE_ZSTD "Whether to enable usage of zstandard compression" ON)
 option(RL_STATIC_DEPS "Only use static dependencies" OFF)
 option(RL_BUILD_BENCHMARKS "Build benchmarks" OFF)
-
 option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" ON)
+option(RL_OPENSSL_SYS_DEP "Use system-wide openssl library" ON)
+option(RL_CPPRESTSDK_SYS_DEP "Use system-wide cpprestsdk library" ON)
+option(RL_BUILD_NUGET "Build the Nuget package" OFF)
+
+# For Nuget package don't use system libraries, use vendored ones in ext_libs instead
+if(RL_BUILD_NUGET)
+  set(RAPIDJSON_SYS_DEP OFF CACHE BOOL "" FORCE)
+  set(FMT_SYS_DEP OFF CACHE BOOL "" FORCE)
+  set(SPDLOG_SYS_DEP OFF CACHE BOOL "" FORCE)
+  set(VW_ZLIB_SYS_DEP OFF CACHE BOOL "" FORCE)
+  set(VW_BOOST_MATH_SYS_DEP OFF CACHE BOOL "" FORCE)
+  set(RL_OPENSSL_SYS_DEP OFF CACHE BOOL "" FORCE)
+  set(RL_CPPRESTSDK_SYS_DEP OFF CACHE BOOL "" FORCE)
+  set(RL_STATIC_DEPS ON)
+endif()
 
 if(RL_STATIC_DEPS)
-    if(WIN32)
-        set(STATIC_LIB_SUFFIXES ".lib" ".a")
-    else()
-        set(STATIC_LIB_SUFFIXES ".a")
-    endif()
+  if(WIN32)
+    set(STATIC_LIB_SUFFIXES ".lib" ".a")
+  else()
+    set(STATIC_LIB_SUFFIXES ".a")
+  endif()
 
-    set(BUILD_SHARED_LIBS OFF)
-    set(STATIC_LINK_VW_JAVA ON CACHE BOOL "")
-    set(Boost_USE_STATIC_LIBS ON)
-    set(CMAKE_FIND_LIBRARY_SUFFIXES ${STATIC_LIB_SUFFIXES})
+  set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
+  set(STATIC_LINK_VW_JAVA ON CACHE BOOL "")
+  set(Boost_USE_STATIC_LIBS ON CACHE BOOL "")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ${STATIC_LIB_SUFFIXES})
 endif()
-
-# TODO Compile cpprest into its own separate lib so that it doesn't have to be consumed
-if (vw_USE_AZURE_FACTORIES)
-    find_package(cpprestsdk REQUIRED)
-    find_package(OpenSSL REQUIRED)
-endif()
-
 
 # We also require Boost::uuid, but that is a header-only dependency and is unable to be found
 # using find_package as a component, which means it is possible to have a successfully configured
@@ -69,13 +76,16 @@ find_package(Boost COMPONENTS unit_test_framework system program_options thread 
 
 # On MacOS, Boost::thread needs to be linked separately.
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    find_package(Boost COMPONENTS thread REQUIRED)
+  find_package(Boost COMPONENTS thread REQUIRED)
 endif()
 
 include(ProcessorCount)
 ProcessorCount(NumProcessors)
 message("Number of processors: ${NumProcessors}")
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/nprocs.txt ${NumProcessors})
+
+# This provides the variables such as CMAKE_INSTALL_LIBDIR for installation paths.
+include(GNUInstallDirs)
 
 include(ext_libs/ext_libs.cmake)
 
@@ -96,4 +106,13 @@ add_subdirectory(unit_test)
 add_subdirectory(unit_test/extensions)
 if(RL_BUILD_BENCHMARKS)
   add_subdirectory(benchmarks)
+endif()
+
+# Add the nuget subdirectory last
+if(RL_BUILD_NUGET)
+  if(WIN32)
+    add_subdirectory(nuget)
+  else()
+    message(FATAL_ERROR "Nuget package must be built on Windows")
+  endif()
 endif()
