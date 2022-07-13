@@ -120,13 +120,28 @@ if(vw_USE_AZURE_FACTORIES)
     )
 
     if(OPENSSL_INSTALL)
-      if(CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]")
-        install(FILES "${RL_OPENSSL_INSTALL_DIR}/lib/libcrypto${STATIC_LIB_SUFFIX}" DESTINATION ${CMAKE_INSTALL_LIBDIR} RENAME "libcryptod${STATIC_LIB_SUFFIX}")
-        install(FILES "${RL_OPENSSL_INSTALL_DIR}/lib/libssl${STATIC_LIB_SUFFIX}" DESTINATION ${CMAKE_INSTALL_LIBDIR} RENAME "libssld${STATIC_LIB_SUFFIX}")
-      else()
-        install(FILES "${RL_OPENSSL_INSTALL_DIR}/lib/libcrypto${STATIC_LIB_SUFFIX}" DESTINATION ${CMAKE_INSTALL_LIBDIR})
-        install(FILES "${RL_OPENSSL_INSTALL_DIR}/lib/libssl${STATIC_LIB_SUFFIX}" DESTINATION ${CMAKE_INSTALL_LIBDIR})
-      endif()
+        install(
+          FILES "${RL_OPENSSL_INSTALL_DIR}/lib/libcrypto${STATIC_LIB_SUFFIX}"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          RENAME "libcryptod${STATIC_LIB_SUFFIX}"
+          CONFIGURATIONS Debug
+        )
+        install(
+          FILES "${RL_OPENSSL_INSTALL_DIR}/lib/libssl${STATIC_LIB_SUFFIX}"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          RENAME "libssld${STATIC_LIB_SUFFIX}"
+          CONFIGURATIONS Debug
+        )
+        install(
+          FILES "${RL_OPENSSL_INSTALL_DIR}/lib/libcrypto${STATIC_LIB_SUFFIX}"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          CONFIGURATIONS Release
+        )
+        install(
+          FILES "${RL_OPENSSL_INSTALL_DIR}/lib/libssl${STATIC_LIB_SUFFIX}"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          CONFIGURATIONS Release
+        )
     endif()
   endif() # RL_OPENSSL_SYS_DEP
 
