@@ -35,6 +35,7 @@ if(RL_USE_ZSTD)
   # Dynamic link to MSVC runtime libraries
   set(ZSTD_USE_STATIC_RUNTIME OFF CACHE BOOL "")
   add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/zstd/build/cmake ${RL_ext_libs_exclude_from_all})
+  set_target_properties(libzstd_static PROPERTIES DEBUG_POSTFIX d)
 endif()
 
 # Build OpenSSL and Cpprestsdk
