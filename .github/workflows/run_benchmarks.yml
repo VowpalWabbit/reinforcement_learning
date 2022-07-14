@@ -16,6 +16,7 @@ jobs:
         with:
           ref: ${{ github.base_ref }}
           submodules: recursive
+      - run: ./.scripts/linux/git-add-safe-directory.sh
       - name: Install google benchmarks
         shell: bash
         run: ./.scripts/linux/install-benchmarks.sh

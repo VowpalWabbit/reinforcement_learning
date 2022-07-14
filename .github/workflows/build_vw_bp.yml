@@ -20,6 +20,7 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: 'true'
+      - run: ./.scripts/linux/git-add-safe-directory.sh
       - run: ./.scripts/linux/build-vw-bp.sh
       - run: ./.scripts/linux/test-vw-bp.sh
   build-linux-valgrind:
@@ -32,6 +33,7 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: 'true'
+      - run: ./.scripts/linux/git-add-safe-directory.sh
       - run: ./.scripts/linux/build-vw-bp.sh
       - run: ./.scripts/linux/unit-tests-vw-bp-valgrind.sh
   build-macos:
