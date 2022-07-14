@@ -25,6 +25,7 @@ jobs:
         shell: bash
         run: |
           pushd ext_libs/vowpal_wabbit
+          git config --global --add safe.directory "$(pwd)"
           git pull origin master
           popd
       - name: Build
