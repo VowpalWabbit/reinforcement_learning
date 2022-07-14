@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - name: Apt update
         shell: bash
         run: sudo apt update
@@ -37,6 +39,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+        with:
+          submodules: recursive
       - name: Clone submodules
         shell: bash
         run: git submodule update --init --recursive
@@ -81,6 +85,7 @@ jobs:
           # For some reason, path is relative to the directory above GITHUB_WORKSPACE
           # To ensure the rest of the script makes sense, we need to place this under reinforcement_learning
           path: reinforcement_learning/docs
+          submodules: recursive
       - name: Copy c++ Docs
         shell: bash
         run: |
