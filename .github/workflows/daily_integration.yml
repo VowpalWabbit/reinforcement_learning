@@ -21,7 +21,6 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: 'true'
-      - run: ./.scripts/linux/git-add-safe-directory.sh
       - name: Update VW to latest
         shell: bash
         run: |
