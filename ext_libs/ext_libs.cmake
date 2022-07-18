@@ -35,6 +35,7 @@ if(RL_USE_ZSTD)
   # Dynamic link to MSVC runtime libraries
   set(ZSTD_USE_STATIC_RUNTIME OFF CACHE BOOL "")
   add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/zstd/build/cmake ${RL_ext_libs_exclude_from_all})
+  set_target_properties(libzstd_static PROPERTIES DEBUG_POSTFIX d)
 endif()
 
 # Build OpenSSL and Cpprestsdk
@@ -120,13 +121,28 @@ if(vw_USE_AZURE_FACTORIES)
     )
 
     if(OPENSSL_INSTALL)
-      if(CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]")
-        install(FILES "${RL_OPENSSL_INSTALL_DIR}/lib/libcrypto${STATIC_LIB_SUFFIX}" DESTINATION ${CMAKE_INSTALL_LIBDIR} RENAME "libcryptod${STATIC_LIB_SUFFIX}")
-        install(FILES "${RL_OPENSSL_INSTALL_DIR}/lib/libssl${STATIC_LIB_SUFFIX}" DESTINATION ${CMAKE_INSTALL_LIBDIR} RENAME "libssld${STATIC_LIB_SUFFIX}")
-      else()
-        install(FILES "${RL_OPENSSL_INSTALL_DIR}/lib/libcrypto${STATIC_LIB_SUFFIX}" DESTINATION ${CMAKE_INSTALL_LIBDIR})
-        install(FILES "${RL_OPENSSL_INSTALL_DIR}/lib/libssl${STATIC_LIB_SUFFIX}" DESTINATION ${CMAKE_INSTALL_LIBDIR})
-      endif()
+        install(
+          FILES "${RL_OPENSSL_INSTALL_DIR}/lib/libcrypto${STATIC_LIB_SUFFIX}"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          RENAME "libcryptod${STATIC_LIB_SUFFIX}"
+          CONFIGURATIONS Debug
+        )
+        install(
+          FILES "${RL_OPENSSL_INSTALL_DIR}/lib/libssl${STATIC_LIB_SUFFIX}"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          RENAME "libssld${STATIC_LIB_SUFFIX}"
+          CONFIGURATIONS Debug
+        )
+        install(
+          FILES "${RL_OPENSSL_INSTALL_DIR}/lib/libcrypto${STATIC_LIB_SUFFIX}"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          CONFIGURATIONS Release
+        )
+        install(
+          FILES "${RL_OPENSSL_INSTALL_DIR}/lib/libssl${STATIC_LIB_SUFFIX}"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          CONFIGURATIONS Release
+        )
     endif()
   endif() # RL_OPENSSL_SYS_DEP
 
