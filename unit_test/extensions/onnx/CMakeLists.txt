@@ -9,6 +9,13 @@ add_executable(rltest-onnx
   mock_helpers.cc
 )
 
+# By default assume boost is shared (old behavior)
+# Allow a caller to override this and say it is static
+option(RL_INTERNAL_BOOST_TEST_IS_SHARED_DEP "" ON)
+if(RL_INTERNAL_BOOST_TEST_IS_SHARED_DEP)
+  target_compile_definitions(rltest-onnx PRIVATE BOOST_TEST_DYN_LINK)
+endif()
+
 # Test Resources
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mnist_data/)
@@ -46,6 +53,6 @@ add_custom_command(TARGET rltest-onnx POST_BUILD
   $<TARGET_FILE_DIR:rltest-onnx>
 )
 
-add_test(NAME rltest-onnx 
-  COMMAND $<TARGET_FILE:rltest-onnx> 
+add_test(NAME rltest-onnx
+  COMMAND $<TARGET_FILE:rltest-onnx>
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
