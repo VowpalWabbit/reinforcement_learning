@@ -60,6 +60,14 @@ if(vw_USE_AZURE_FACTORIES)
   target_compile_definitions(rltest PRIVATE USE_AZURE_FACTORIES)
 endif()
 
+
+# By default assume boost is shared (old behavior)
+# Allow a caller to override this and say it is static
+option(RL_INTERNAL_BOOST_TEST_IS_SHARED_DEP "" ON)
+if(RL_INTERNAL_BOOST_TEST_IS_SHARED_DEP)
+  target_compile_definitions(rltest PRIVATE BOOST_TEST_DYN_LINK)
+endif()
+
 target_link_libraries(rltest
   PRIVATE
     rlclientlib
