@@ -201,7 +201,8 @@ bool multistep_example_joiner::populate_order()
   for (const auto& it : _interactions)
   {
     const auto& parsed = it.second[0];
-    if (parsed.event.previous_id() == nullptr || parsed.event.previous_id()->size() == 0) { sorter.push(it.first, parsed.timestamp); }
+    if (parsed.event.previous_id() == nullptr || parsed.event.previous_id()->size() == 0)
+    { sorter.push(it.first, parsed.timestamp); }
     else
     {
       sorter.push(it.first, parsed.timestamp, parsed.event.previous_id()->str());

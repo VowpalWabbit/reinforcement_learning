@@ -126,8 +126,8 @@ int interaction_logger_facade::log(const char* episode_id, const char* previous_
       std::string model_id(response.get_model_id());
       std::string previous_id_str(previous_id ? previous_id : "");
 
-      return _v2->log(episode_id, context, _multistep_serializer.type, _ext_p, _multistep_serializer,
-          status, previous_id_str, flags, action_ids, probabilities, event_id, model_id);
+      return _v2->log(episode_id, context, _multistep_serializer.type, _ext_p, _multistep_serializer, status,
+          previous_id_str, flags, action_ids, probabilities, event_id, model_id);
     }
     default:
       return protocol_not_supported(status);

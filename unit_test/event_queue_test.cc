@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(queue_push_pop_threads)
   int n = 10;
   for (int i = 0; i < n; ++i)
   {
-    _threads.push_back(thread([&] {
+    _threads.push_back(thread([&queue, i] {
       auto evt_sp = std::make_shared<test_event>(std::to_string(i + 1));
       queue.push(std::bind(passthru, _1, _2, evt_sp), 10, evt_sp.get());
     }));

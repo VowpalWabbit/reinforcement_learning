@@ -368,7 +368,10 @@ def get_records(file_name):
             for i in range(msg.EventsLength()):
                 joined_event = msg.Events(i)
                 yield dump_event_csv(
-                    joined_event.EventAsNumpy(), i, joined_event.Timestamp(), batch_idx=batch_idx
+                    joined_event.EventAsNumpy(),
+                    i,
+                    joined_event.Timestamp(),
+                    batch_idx=batch_idx,
                 )
         elif msg[0] == MSG_TYPE_CHECKPOINT:
             checkpoint_info = msg[1]
