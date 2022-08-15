@@ -110,5 +110,29 @@ private:
   const std::unique_ptr<generic_event_logger> _v2;
   const outcome_serializer _serializer;
 };
+
+class episode_logger_facade
+{
+public:
+  episode_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog,
+      i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
+
+  episode_logger_facade(const episode_logger_facade& other) = delete;
+  episode_logger_facade& operator=(const episode_logger_facade& other) = delete;
+  episode_logger_facade(episode_logger_facade&& other) = delete;
+  episode_logger_facade& operator=(episode_logger_facade&& other) = delete;
+
+  ~episode_logger_facade() = default;
+
+  int init(api_status* status);
+
+  int log(const char* episode_id, api_status* status);
+
+private:
+  const int _version;
+  int _serializer_shared_state;
+  const std::unique_ptr<generic_event_logger> _v2;
+  const episode_serializer _episode_serializer;
+};
 }  // namespace logger
 }  // namespace reinforcement_learning

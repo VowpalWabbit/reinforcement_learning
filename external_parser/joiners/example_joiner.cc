@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <iostream>
 
 // VW headers
 #include "vw/core/parse_example_json.h"
@@ -81,7 +82,7 @@ bool example_joiner::process_event(const v2::JoinedEvent& joined_event)
   }
 
   std::string id = event->meta()->id()->str();
-
+  
   if (event->meta()->payload_type() == v2::PayloadType_DedupInfo)
   {
     if (!process_dedup(*event, *event->meta()))
@@ -92,6 +93,11 @@ bool example_joiner::process_event(const v2::JoinedEvent& joined_event)
       return false;
     }
     return true;
+  }
+  else if (event->meta()->payload_type() == v2::PayloadType_Episode)
+  {
+    logger.out_error("Episode type events require multistep");
+    return false;
   }
   if (_batch_grouped_events.find(id) != _batch_grouped_events.end())
   { _batch_grouped_events[id].push_back(&joined_event); }

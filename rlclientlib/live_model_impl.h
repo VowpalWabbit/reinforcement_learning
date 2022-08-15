@@ -116,7 +116,7 @@ private:
   std::unique_ptr<logger::i_logger_extensions> _logger_extensions{nullptr};
   std::unique_ptr<logger::interaction_logger_facade> _interaction_logger{nullptr};
   std::unique_ptr<logger::observation_logger_facade> _outcome_logger{nullptr};
-  std::unique_ptr<logger::observation_logger_facade> _episode_logger{nullptr};
+  std::unique_ptr<logger::episode_logger_facade> _episode_logger{nullptr};
 
   std::unique_ptr<model_management::model_downloader> _model_download{nullptr};
   std::unique_ptr<i_trace> _trace_logger{nullptr};
