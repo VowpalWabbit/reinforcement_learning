@@ -24,6 +24,12 @@ set(BUILD_JAVA OFF CACHE BOOL "")
 set(BUILD_PYTHON OFF CACHE BOOL "")
 set(BUILD_DOCS OFF CACHE BOOL "")
 set(WARNINGS OFF CACHE BOOL "")
+if(RL_USE_ASAN)
+  set(VW_USE_ASAN ON CACHE BOOL "")
+endif()
+if(RL_USE_UBSAN)
+  set(VW_USE_UBSAN ON CACHE BOOL "")
+endif()
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/vowpal_wabbit ${RL_ext_libs_exclude_from_all})
 
 # Build ZStandard
