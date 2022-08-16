@@ -53,7 +53,7 @@ jobs:
         apt update
         apt install -y ninja-build
         apt install -y libspdlog-dev libfmt-dev libboost-math-dev
-        cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=Off
+        cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=Off -DVCPKG_MANIFEST_MODE=Off
         cmake --build build
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2

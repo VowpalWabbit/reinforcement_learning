@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+  "name": "reinforcement-learning",
+  "version": "9.3.0",
+  "dependencies": [
+    "boost-align",
+    "boost-asio",
+    "boost-date-time",
+    "boost-filesystem",
+    "boost-interprocess",
+    "boost-math",
+    "boost-program-options",
+    "boost-regex",
+    "boost-system",
+    "boost-test",
+    "boost-thread",
+    "boost-uuid",
+    "cpprestsdk",
+    "flatbuffers",
+    "fmt",
+    "openssl",
+    "rapidjson",
+    "spdlog",
+    "zlib"
+  ]
+}

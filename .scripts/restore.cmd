@@ -6,7 +6,8 @@ IF DEFINED DebugBuildScripts (
 SETLOCAL
 
 CALL %~dp0init.cmd
-PUSHD %~dp0\..\
+REM CD out of the repo dir as we need to avoid vcpkg recognizing the manifest
+PUSHD %~dp0\..\..\
 
 %vcpkgPath% install "--overlay-triplets=custom-triplets" --triplet=x64-windows-v141 --host-triplet=x64-windows-v141 cpprestsdk flatbuffers openssl-windows
 

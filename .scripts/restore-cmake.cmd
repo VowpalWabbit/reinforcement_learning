@@ -6,7 +6,8 @@ IF DEFINED DebugBuildScripts (
 SETLOCAL
 
 CALL %~dp0init-cmake.cmd
-PUSHD %~dp0\..\
+REM CD out of the repo dir as we need to avoid vcpkg recognizing the manifest
+PUSHD %~dp0\..\..\
 
 REM must be in repo root dir for overlay-triplets to work
 %vcpkgPath% install "--overlay-triplets=custom-triplets" --triplet=x64-windows-v141 --host-triplet=x64-windows-v141 zlib boost-system boost-program-options boost-test boost-align boost-foreach boost-math boost-uuid cpprestsdk flatbuffers openssl-windows

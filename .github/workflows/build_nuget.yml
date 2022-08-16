@@ -50,6 +50,7 @@ jobs:
           cmake -S . -B build
           -G "Visual Studio 16 2019" -A ${{ matrix.arch_config.generator_arch }}
           -T ${{ matrix.toolset }}
+          -DVCPKG_MANIFEST_MODE=Off
           -DRL_BUILD_NUGET=On
           -DRL_NUGET_PACKAGE_NAME=RLClientLibNativeStatic
           -DRL_NUGET_PACKAGE_VERSION="0.1.0"
