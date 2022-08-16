@@ -516,9 +516,8 @@ int live_model_impl::init_loggers(api_status* status)
       _configuration, outcome_msg_sender, _watchdog, observation_time_provider, &_error_cb));
   RETURN_IF_FAIL(_outcome_logger->init(status));
 
-  // TODO: Use a specific episode message type (for now it is the same with the observation logger, using
-  // observation_logger_facade).
-  if (_configuration.get(name::EPISODE_SENDER_IMPLEMENTATION, nullptr) != nullptr)
+  if (_configuration.get(name::EPISODE_EH_HOST, nullptr) != nullptr ||
+      _configuration.get(name::EPISODE_FILE_NAME, nullptr) != nullptr)
   {
     // Get the name of raw data (as opposed to message) sender for episodes.
     const auto* const episode_sender_impl =
