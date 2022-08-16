@@ -352,8 +352,7 @@ int observation_logger_facade::report_action_taken(const char* primary_id, const
   }
 }
 
-
-//TODO: Do we need an EPISODE_SECTION for the config? Just use OBSERVATION_SECTION for now
+// TODO: Do we need an EPISODE_SECTION for the config? Just use OBSERVATION_SECTION for now
 episode_logger_facade::episode_logger_facade(const utility::configuration& c, i_message_sender* sender,
     utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
     : _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
