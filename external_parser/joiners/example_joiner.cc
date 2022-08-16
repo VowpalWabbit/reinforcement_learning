@@ -12,7 +12,6 @@
 
 #include <algorithm>
 #include <cctype>
-#include <iostream>
 
 // VW headers
 #include "vw/core/parse_example_json.h"
@@ -82,7 +81,7 @@ bool example_joiner::process_event(const v2::JoinedEvent& joined_event)
   }
 
   std::string id = event->meta()->id()->str();
-  
+
   if (event->meta()->payload_type() == v2::PayloadType_DedupInfo)
   {
     if (!process_dedup(*event, *event->meta()))
