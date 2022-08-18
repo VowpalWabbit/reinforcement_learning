@@ -516,8 +516,6 @@ int live_model_impl::init_loggers(api_status* status)
       _configuration, outcome_msg_sender, _watchdog, observation_time_provider, &_error_cb));
   RETURN_IF_FAIL(_outcome_logger->init(status));
 
-  // TODO: Use a specific episode message type (for now it is the same with the observation logger, using
-  // observation_logger_facade).
   if (_configuration.get(name::EPISODE_EH_HOST, nullptr) != nullptr ||
       _configuration.get(name::EPISODE_FILE_NAME, nullptr) != nullptr)
   {
@@ -543,7 +541,7 @@ int live_model_impl::init_loggers(api_status* status)
         &episode_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // Create a logger for episodes that will use msg sender to send episode messages
-    _episode_logger.reset(new logger::observation_logger_facade(
+    _episode_logger.reset(new logger::episode_logger_facade(
         _configuration, episode_msg_sender, _watchdog, episode_time_provider, &_error_cb));
     RETURN_IF_FAIL(_episode_logger->init(status));
   }
@@ -696,7 +694,7 @@ int live_model_impl::request_episodic_decision(const char* event_id, const char*
   if (episode.size() == 1)
   {
     // Log the episode id when starting a new episode
-    RETURN_IF_FAIL(_episode_logger->log(episode.get_episode_id(), "", status));
+    RETURN_IF_FAIL(_episode_logger->log(episode.get_episode_id(), status));
   }
   RETURN_IF_FAIL(
       _interaction_logger->log(episode.get_episode_id(), previous_id, context_patched.c_str(), flags, resp, status));

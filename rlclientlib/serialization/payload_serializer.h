@@ -210,5 +210,16 @@ struct multistep_serializer : payload_serializer<generic_event::payload_type_t::
     return fbb.Release();
   }
 };
+
+struct episode_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_Episode>
+{
+  static generic_event::payload_buffer_t episode_event(const char* event_id)
+  {
+    flatbuffers::FlatBufferBuilder fbb;
+    auto fb = v2::CreateEpisodeEventDirect(fbb, event_id);
+    fbb.Finish(fb);
+    return fbb.Release();
+  }
+};
 }  // namespace logger
 }  // namespace reinforcement_learning
