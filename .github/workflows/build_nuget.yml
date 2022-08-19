@@ -90,7 +90,7 @@ jobs:
       matrix:
         os: ["windows-2019"]
         toolset: ["v141", "v142"]
-        nuget_package_version: ["0.1.0"]
+        nuget_package_version: ["0.1.1"]
     steps:
       - uses: actions/checkout@v2
         with:
