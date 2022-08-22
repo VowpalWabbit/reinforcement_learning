@@ -3,11 +3,12 @@
 import re
 import subprocess
 
-git = subprocess.check_output(["git", "describe", "--tags", "--first-parent", "--long"], text=True).strip()
+subprocess.run(["git", "fetch", "--tags"])
+git_describe = subprocess.check_output(["git", "describe", "--tags", "--first-parent", "--long"], text=True).strip()
 # print("Output of 'git describe' is: " + git)
 
-regex = re.compile(r'^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<tag>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?-(?P<commit>\d+)-g(?P<hash>[0-9a-fA-F]+)$')
-m = regex.match(git)
+r = re.compile(r'^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<tag>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?-(?P<commit>\d+)-g(?P<hash>[0-9a-fA-F]+)$')
+m = r.match(git_describe)
 major = m.group("major")
 minor = m.group("minor")
 patch = m.group("patch")
