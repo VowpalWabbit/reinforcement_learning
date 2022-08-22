@@ -11,14 +11,12 @@ on:
 
 jobs:
   build_nuget_windows:
-    name: nuget.${{ matrix.toolset }}.${{ matrix.arch_config.arch }}
+    name: nuget.${{ matrix.toolset }}
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
         os: ["windows-2019"]
         toolset: ["v141", "v142"]
-        arch_config:
-        - { arch: x64, generator_arch: x64}
   
     steps:
       - uses: actions/checkout@v2
@@ -32,14 +30,14 @@ jobs:
         id: get_version
         shell: bash
         run: |
-          version=$(./scripts/version_number.py)
+          version=$(./.scripts/version_number.py)
           echo "Generated version number: $version"
           echo "::set-output name=version::$version"
       - name: Dependencies
         run: >
           vcpkg install
-          --host-triplet=${{ matrix.arch_config.arch }}-windows
-          --triplet=${{ matrix.arch_config.arch }}-windows
+          --host-triplet=x64-windows
+          --triplet=x64-windows
           flatbuffers
           boost-filesystem
           boost-thread
@@ -56,14 +54,14 @@ jobs:
       - name: Configure
         run: >
           cmake -S . -B build
-          -G "Visual Studio 16 2019" -A ${{ matrix.arch_config.generator_arch }}
+          -G "Visual Studio 16 2019" -A x64
           -T ${{ matrix.toolset }}
           -DRL_BUILD_NUGET=On
           -DRL_NUGET_PACKAGE_NAME=RLClientLibNativeStatic
           -DRL_NUGET_PACKAGE_VERSION="${{ steps.get_version.outputs.version }}"
-          -DNATIVE_NUGET_PLATFORM_TAG=${{ matrix.arch_config.arch }}
+          -DNATIVE_NUGET_PLATFORM_TAG=x64
           -DCMAKE_TOOLCHAIN_FILE="${env:VCPKG_INSTALLATION_ROOT}\scripts\buildsystems\vcpkg.cmake"
-          -DVCPKG_TARGET_TRIPLET=${{ matrix.arch_config.arch }}-windows
+          -DVCPKG_TARGET_TRIPLET=x64-windows
           -Drlclientlib_BUILD_DOTNET=Off
       - name: Compile - debug build
         run: cmake --build ./build --config Debug -v
@@ -77,17 +75,10 @@ jobs:
       - name: Create Nuget package - release build
         # this overwrites the previous package with one containing both debug and release libraries
         run: cmake --install ./build --config Release --prefix ./nuget_staging -v
-      - name: Get package name
-        id: nuget_name
-        run: |
-          cd nuget_staging
-          ls
-          $NugetFileName = Get-ChildItem *.nupkg -name
-          echo "::set-output name=NugetFileName::$NugetFileName"
       - name: Upload package
         uses: actions/upload-artifact@v1
         with:
-          name: ${{ steps.nuget_name.outputs.NugetFileName }}
+          name: RLClientLibNativeStatic-${{ matrix.toolset }}-x64.${{ steps.get_version.outputs.version }}.nupkg
           path: nuget_staging/${{ steps.nuget_name.outputs.NugetFileName }}
 
   test_nuget_windows:
@@ -107,7 +98,7 @@ jobs:
         id: get_version
         shell: bash
         run: |
-          version=$(./scripts/version_number.py)
+          version=$(./.scripts/version_number.py)
           echo "Generated version number: $version"
           echo "::set-output name=version::$version"
       - uses: ilammy/msvc-dev-cmd@v1
