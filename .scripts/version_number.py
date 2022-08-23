@@ -6,8 +6,16 @@ import subprocess
 
 
 def debug_print(msg):
-    print(f"[{sys.argv[0]}]: {msg}", file=sys.stderr)
+    print(f"[{sys.argv[0]}] {msg}", file=sys.stderr)
 
+
+git_shallow = subprocess.check_output(
+    ["git", "rev-parse", "--is-shallow-repository"], text=True
+).strip()
+if git_shallow != "false":
+    debug_print("Error: Git repository is shallow!")
+    debug_print("To fix, run: 'git fetch --unshallow --tags --recurse-submodules=no'")
+    sys.exit(1)
 
 git_describe = subprocess.check_output(
     ["git", "describe", "--tags", "--first-parent", "--long"], text=True
