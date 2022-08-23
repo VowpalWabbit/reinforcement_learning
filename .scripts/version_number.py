@@ -35,14 +35,17 @@ debug_print(f"Hash: {hash}")
 if commit == "0":
     # Zero commits after tag means that this is the tagged commit
     # This is an official release, don't append the CI tag
-    print(f"{major}.{minor}.{patch}{'-'+tag if tag else ''}+{hash}")
+    if m.group("tag") is None:
+        print(f"{major}.{minor}.{patch}+{hash}")
+    else:
+        print(f"{major}.{minor}.{patch}-{tag}+{hash}")
 else:
     # Non-official build
     # Append a "ci.[number]" tag
-    if tag:
+    if m.group("tag") is None:
+        # Increment the patch number so that this build is versioned after previous official release
+        print(f"{major}.{minor}.{int(patch)+1}-ci.{commit}+{hash}")
+    else:
         # The most recent official release has a pre-release tag
         # Longer tags are always versioned after shorter tags, so no need to increment version number
         print(f"{major}.{minor}.{patch}-{tag}.ci.{commit}+{hash}")
-    else:
-        # Increment the patch number so that this build is versioned after previous official release
-        print(f"{major}.{minor}.{int(patch)+1}-ci.{commit}+{hash}")
