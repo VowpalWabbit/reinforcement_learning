@@ -26,9 +26,9 @@ jobs:
       # NASM required to compile OpenSSL assembly language code
       - uses: ilammy/setup-nasm@v1
       - name: Update git tags
-        run: git fetch --tags
+        run: git fetch --unshallow --tags
       - name: Debug
-        run: git describe --tags --first-parent --long --debug
+        run: git describe --tags --first-parent --long --debug --always
       - name: Get version number
         id: get_version
         shell: bash
