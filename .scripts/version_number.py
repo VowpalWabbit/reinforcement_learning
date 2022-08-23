@@ -3,8 +3,7 @@
 import re
 import subprocess
 
-subprocess.run(["git", "fetch", "--tags"])
-git_describe = subprocess.check_output(["git", "describe", "--tags", "--first-parent", "--long"], text=True).strip()
+git_describe = subprocess.check_output(["git", "describe", "--tags", "--first-parent", "--long", "--debug"], text=True).strip()
 # print("Output of 'git describe' is: " + git)
 
 r = re.compile(r'^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<tag>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?-(?P<commit>\d+)-g(?P<hash>[0-9a-fA-F]+)$')

@@ -25,6 +25,10 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
       # NASM required to compile OpenSSL assembly language code
       - uses: ilammy/setup-nasm@v1
+      - name: Update git tags
+        run: git fetch --tags
+      - name: Debug
+        run: git describe --tags --first-parent --long --debug
       - name: Get version number
         id: get_version
         shell: bash
