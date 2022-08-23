@@ -19,33 +19,33 @@ r = re.compile(
 )
 m = r.match(git_describe)
 
-major = m.group("major") or "No major version found"
-minor = m.group("minor") or "No minor version found"
-patch = m.group("patch") or "No patch version found"
-tag = m.group("tag") or "No tag found"
-commit = m.group("commit") or "No commit number found"
-hash = m.group("hash") or "No git hash found"
+major = m.group("major")
+minor = m.group("minor")
+patch = m.group("patch")
+prerelease_tag = m.group("tag")
+commit_count = m.group("commit")  # number of commits after latest git tag
+hash = m.group("hash")
 debug_print(f"Major: {major}")
 debug_print(f"Minor: {minor}")
 debug_print(f"Patch: {patch}")
-debug_print(f"Tag: {tag}")
-debug_print(f"Commit: {commit}")
-debug_print(f"Hash: {hash}")
+debug_print(f"Prerelease tag: {prerelease_tag}")
+debug_print(f"Commits after latest Git tag: {commit_count}")
+debug_print(f"Git hash: {hash}")
 
-if commit == "0":
+if commit_count == "0":
     # Zero commits after tag means that this is the tagged commit
     # This is an official release, don't append the CI tag
-    if m.group("tag") is None:
+    if prerelease_tag is None:
         print(f"{major}.{minor}.{patch}+{hash}")
     else:
-        print(f"{major}.{minor}.{patch}-{tag}+{hash}")
+        print(f"{major}.{minor}.{patch}-{prerelease_tag}+{hash}")
 else:
     # Non-official build
     # Append a "ci.[number]" tag
-    if m.group("tag") is None:
+    if prerelease_tag is None:
         # Increment the patch number so that this build is versioned after previous official release
-        print(f"{major}.{minor}.{int(patch)+1}-ci.{commit}+{hash}")
+        print(f"{major}.{minor}.{int(patch)+1}-ci.{commit_count}+{hash}")
     else:
         # The most recent official release has a pre-release tag
         # Longer tags are always versioned after shorter tags, so no need to increment version number
-        print(f"{major}.{minor}.{patch}-{tag}.ci.{commit}+{hash}")
+        print(f"{major}.{minor}.{patch}-{prerelease_tag}.ci.{commit_count}+{hash}")
