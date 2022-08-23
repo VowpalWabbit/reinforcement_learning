@@ -82,6 +82,14 @@ jobs:
       - name: Create Nuget package - release build
         # this overwrites the previous package with one containing both debug and release libraries
         run: cmake --install ./build --config Release --prefix ./nuget_staging -v
+
+      # Upload the package
+      - name: Get file name
+        id: nuget_name
+        shell: bash
+        run: |
+          NugetFileName=(*.nupkg)
+          echo "::set-output name=NugetFileName::${NugetFileName[0]}"
       - name: Upload package
         uses: actions/upload-artifact@v1
         with:
@@ -121,14 +129,20 @@ jobs:
         with:
           name: RLClientLibNativeStatic-${{ matrix.toolset }}-x64.${{ steps.get_version.outputs.version }}.nupkg
           path: downloaded_nugets
+      - name: List downloaded files
+        run: ls downloaded_nugets
       - name: Install nuget
-        run: |
-          ls downloaded_nugets
-          nuget install -Source ${{ github.workspace }}\downloaded_nugets -OutputDirectory ${{ github.workspace }}\nuget\test\packages\ RLClientLibNativeStatic-${{ matrix.toolset }}-x64
+        run: >
+          nuget install
+          -Source "${{ github.workspace }}\downloaded_nugets"
+          -OutputDirectory "${{ github.workspace }}\nuget\test\packages"
+          -Version "${{ steps.get_version.outputs.version }}"
+          -Verbosity detailed
+          -NonInteractive
+          RLClientLibNativeStatic-${{ matrix.toolset }}-x64
       - name: Rename package install directory to omit version number
-        shell: bash
         run: |
-          cd nuget/test/packages
+          cd nuget\test\packages
           mv * RLClientLibNativeStatic-${{ matrix.toolset }}-x64
       
       # Compile and run
