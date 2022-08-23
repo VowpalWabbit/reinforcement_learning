@@ -19,23 +19,13 @@ jobs:
         toolset: ["v141", "v142"]
   
     steps:
+      # Get repository and setup dependencies
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
       - uses: ilammy/msvc-dev-cmd@v1
       # NASM required to compile OpenSSL assembly language code
       - uses: ilammy/setup-nasm@v1
-      - name: Update git tags
-        run: git fetch --unshallow --tags
-      - name: Debug
-        run: git describe --tags --first-parent --long --debug --always
-      - name: Get version number
-        id: get_version
-        shell: bash
-        run: |
-          version=$(./.scripts/version_number.py)
-          echo "Generated version number: $version"
-          echo "::set-output name=version::$version"
       - name: Dependencies
         run: >
           vcpkg install
@@ -54,6 +44,20 @@ jobs:
           boost-regex
           boost-asio
           boost-interprocess
+
+      # Get version number
+      - name: Update git tags
+        # Needed because actions/checkout performs a shallow checkout without tags
+        run: git fetch --unshallow --tags --recurse-submodules=no
+      - name: Get version number
+        id: get_version
+        shell: bash
+        run: |
+          version=$(./.scripts/version_number.py)
+          echo "Generated version number: $version"
+          echo "::set-output name=version::$version"
+      
+      # Compile code and create package
       - name: Configure
         run: >
           cmake -S . -B build
@@ -96,6 +100,14 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: 'recursive'
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+
+      # Get version number
+      - name: Update git tags
+        # Needed because actions/checkout performs a shallow checkout without tags
+        run: git fetch --unshallow --tags --recurse-submodules=no
       - name: Get version number
         id: get_version
         shell: bash
@@ -103,13 +115,12 @@ jobs:
           version=$(./.scripts/version_number.py)
           echo "Generated version number: $version"
           echo "::set-output name=version::$version"
-      - uses: ilammy/msvc-dev-cmd@v1
+      
+      # Download and install nuget
       - uses: actions/download-artifact@v1
         with:
           name: RLClientLibNativeStatic-${{ matrix.toolset }}-x64.${{ steps.get_version.outputs.version }}.nupkg
           path: downloaded_nugets
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.1
       - name: Install nuget
         run: |
           ls downloaded_nugets
@@ -119,6 +130,8 @@ jobs:
         run: |
           cd nuget/test/packages
           mv * RLClientLibNativeStatic-${{ matrix.toolset }}-x64
+      
+      # Compile and run
       - name: Build test
         run: |
           cd nuget\test

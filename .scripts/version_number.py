@@ -1,19 +1,36 @@
 #!/usr/bin/env python3
 
 import re
+import sys
 import subprocess
 
-git_describe = subprocess.check_output(["git", "describe", "--tags", "--first-parent", "--long", "--debug"], text=True).strip()
-# print("Output of 'git describe' is: " + git)
 
-r = re.compile(r'^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<tag>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?-(?P<commit>\d+)-g(?P<hash>[0-9a-fA-F]+)$')
+def debug_print(msg):
+    print(f"[{sys.argv[0]}]: {msg}", file=sys.stderr)
+
+
+git_describe = subprocess.check_output(
+    ["git", "describe", "--tags", "--first-parent", "--long"], text=True
+).strip()
+debug_print("Output of 'git describe' is: " + git_describe)
+
+r = re.compile(
+    r"^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<tag>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?-(?P<commit>\d+)-g(?P<hash>[0-9a-fA-F]+)$"
+)
 m = r.match(git_describe)
-major = m.group("major")
-minor = m.group("minor")
-patch = m.group("patch")
-tag = m.group("tag")
-commit = m.group("commit")
-hash = m.group("hash")
+
+major = m.group("major") or "No major version found"
+minor = m.group("minor") or "No minor version found"
+patch = m.group("patch") or "No patch version found"
+tag = m.group("tag") or "No tag found"
+commit = m.group("commit") or "No commit number found"
+hash = m.group("hash") or "No git hash found"
+debug_print(f"Major: {major}")
+debug_print(f"Minor: {minor}")
+debug_print(f"Patch: {patch}")
+debug_print(f"Tag: {tag}")
+debug_print(f"Commit: {commit}")
+debug_print(f"Hash: {hash}")
 
 if commit == "0":
     # Zero commits after tag means that this is the tagged commit
