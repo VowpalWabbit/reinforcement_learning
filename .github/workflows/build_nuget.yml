@@ -92,7 +92,10 @@ jobs:
         id: nuget_name
         shell: bash
         run: |
+          cd nuget_staging
+          ls
           NugetFileName=(*.nupkg)
+          echo "Found nuget package: ${NugetFileName[0]}"
           echo "::set-output name=NugetFileName::${NugetFileName[0]}"
       - name: Upload package
         uses: actions/upload-artifact@v1
