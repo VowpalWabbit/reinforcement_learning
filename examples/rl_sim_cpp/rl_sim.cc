@@ -4,6 +4,7 @@
 #include "person.h"
 #include "rl_sim_cpp.h"
 #include "simulation_stats.h"
+#include "rand48.h"
 
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -67,7 +68,7 @@ int rl_sim::cb_loop()
     }
 
     // What outcome did this action get?
-    const auto outcome = p.get_outcome(_topics[chosen_action]);
+    const auto outcome = p.get_outcome(_topics[chosen_action], _random_seed);
 
     // Report outcome received
     if (_rl->report_outcome(req_id.c_str(), outcome, &status) != err::success && outcome > 0.00001f)
@@ -103,6 +104,10 @@ int rl_sim::multistep_loop()
 
   const size_t episode_length = 2;
   size_t episode_indx = 0;
+
+  // adjust the event count for the episode length
+  _num_events *= episode_length;
+
   while (_run_loop)
   {
     const std::string episode_id = create_episode_id(episode_indx++);
@@ -135,7 +140,7 @@ int rl_sim::multistep_loop()
         continue;
       }
 
-      const auto outcome_per_step = p.get_outcome(_topics[chosen_action]);
+      const auto outcome_per_step = p.get_outcome(_topics[chosen_action], _random_seed);
       stats.record(p.id(), chosen_action, outcome_per_step);
 
       std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", outcome, "
@@ -176,7 +181,7 @@ int rl_sim::ca_loop()
       continue;
     }
     const auto chosen_action = response.get_chosen_action();
-    const auto outcome = joint.get_outcome(chosen_action);
+    const auto outcome = joint.get_outcome(chosen_action, _random_seed);
     if (_rl->report_outcome(req_id.c_str(), outcome, &status) != err::success && outcome > 0.00001f)
     { std::cout << status.get_error_msg() << std::endl; }
 
@@ -218,7 +223,7 @@ int rl_sim::ccb_loop()
     for (auto& response : decision)
     {
       const auto chosen_action = response.get_action_id();
-      const auto outcome = p.get_outcome(_topics[chosen_action]);
+      const auto outcome = p.get_outcome(_topics[chosen_action], _random_seed);
 
       // Report outcome received
       if (_rl->report_outcome(event_id.c_str(), index, outcome, &status) != err::success && outcome > 0.00001f)
@@ -283,7 +288,7 @@ int rl_sim::slates_loop()
     for (auto& response : decision)
     {
       const auto chosen_action = response.get_action_id() + index * actions_per_slot;
-      const auto slot_outcome = p.get_outcome(_topics[chosen_action]);  // TODO per-slot weights?
+      const auto slot_outcome = p.get_outcome(_topics[chosen_action], _random_seed);  // TODO per-slot weights?
       stats.record(event_id, chosen_action, slot_outcome);
       outcome += slot_outcome;
 
@@ -307,9 +312,9 @@ int rl_sim::slates_loop()
   return 0;
 }
 
-person& rl_sim::pick_a_random_person() { return _people[rand() % _people.size()]; }
+person& rl_sim::pick_a_random_person() { return _people[rand48(_random_seed) % _people.size()]; }
 
-joint& rl_sim::pick_a_random_joint() { return _robot_joints[rand() % _robot_joints.size()]; }
+joint& rl_sim::pick_a_random_joint() { return _robot_joints[rand48(_random_seed) % _robot_joints.size()]; }
 
 int rl_sim::load_config_from_json(const std::string& file_name, u::configuration& config, r::api_status* status)
 {
@@ -501,7 +506,10 @@ std::string rl_sim::create_context_json(const std::string& cntxt, const std::str
   return oss.str();
 }
 
-std::string rl_sim::create_event_id() { return boost::uuids::to_string(boost::uuids::random_generator()()); }
+std::string rl_sim::create_event_id() {
+  if(_num_events > 0 && ++_current_events >= _num_events) { _run_loop = false; }
+  return boost::uuids::to_string(boost::uuids::random_generator()());
+}
 
 rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm)), _loop_kind(CB)
 {
@@ -518,6 +526,9 @@ rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm
   {
     _loop_kind = Multistep;
   }
+
+  _num_events = _options["num_events"].as<int>();
+  _random_seed = _options["random_seed"].as<uint64_t>();
 }
 
 std::string get_dist_str(const reinforcement_learning::ranking_response& response)

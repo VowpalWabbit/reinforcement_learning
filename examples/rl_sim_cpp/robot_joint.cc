@@ -1,5 +1,7 @@
 #include "robot_joint.h"
+#include "rand48.h"
 
+#include <cstdint>
 #include <sstream>
 #include <utility>
 
@@ -18,9 +20,9 @@ std::string joint::get_features()
   return oss.str();
 }
 
-float joint::get_outcome(float observed_friction)
+float joint::get_outcome(float observed_friction, uint64_t& random_seed)
 {
-  int const draw_uniform = rand() % 10000;
+  int const draw_uniform = rand48(random_seed) % 10000;
   float const norm_draw_val = static_cast<float>(draw_uniform) / 100000.0f;
   float click_prob = 0.;
 

@@ -24,7 +24,7 @@ public:
   //! Get person features as a json string
   std::string get_features() const;
   //! Get the outcome for a topic.  Use probability to randomly assign a outcome
-  float get_outcome(const std::string& chosen_action);
+  float get_outcome(const std::string& chosen_action, uint64_t& random_seed);
   //! Get the person's id
   std::string id() const;
 

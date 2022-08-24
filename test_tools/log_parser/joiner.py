@@ -82,7 +82,7 @@ arg_parser.add_argument(
     help="use client time utc when joining/calculating reward, defaults to off",
 )
 arg_parser.add_argument(
-    "--observations", type=str, help="observations file (defaults to observatins.fb "
+    "--observations", type=str, help="observations file (defaults to observations.fb "
 )
 arg_parser.add_argument(
     "--interactions", type=str, help="interaction file (defaults to interactions.fb)"

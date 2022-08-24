@@ -1,4 +1,5 @@
 #include "person.h"
+#include "rand48.h"
 
 #include <sstream>
 #include <utility>
@@ -26,9 +27,9 @@ std::string person::get_features() const
   return oss.str();
 }
 
-float person::get_outcome(const std::string& chosen_action)
+float person::get_outcome(const std::string& chosen_action, uint64_t& random_seed)
 {
-  int const draw_uniform = rand() % 10000;
+  int const draw_uniform = rand48(random_seed) % 10000;
   float const norm_draw_val = static_cast<float>(draw_uniform) / 10000.0f;
   float const click_prob = _topic_click_probability[chosen_action];
   if (norm_draw_val <= click_prob) { return 1.0f; }
