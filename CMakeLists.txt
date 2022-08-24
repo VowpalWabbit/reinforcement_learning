@@ -43,6 +43,7 @@ option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories compo
 option(RL_OPENSSL_SYS_DEP "Use system-wide openssl library" ON)
 option(RL_CPPRESTSDK_SYS_DEP "Use system-wide cpprestsdk library" ON)
 option(RL_BUILD_NUGET "Build the Nuget package" OFF)
+option(RL_BUILD_EXTERNAL_PARSER "Build external parser version of VW" OFF)
 
 # For Nuget package don't use system libraries, use vendored ones in ext_libs instead
 if(RL_BUILD_NUGET)
@@ -95,6 +96,10 @@ add_subdirectory(examples)
 add_subdirectory(test_tools/joiner)
 add_subdirectory(test_tools/sender_test)
 add_subdirectory(test_tools/example_gen)
+
+if(RL_BUILD_EXTERNAL_PARSER)
+  add_subdirectory(external_parser)
+endif()
 
 # enable_testing should be run after ext_libs so that the vw unit tests arent turned on.
 enable_testing()

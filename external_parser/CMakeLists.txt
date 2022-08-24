@@ -43,8 +43,6 @@ else()
   set(flatc_location ${FLATBUFFERS_FLATC_EXECUTABLE})
 endif()
 
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../ext_libs/zstd/build/cmake ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser/zstd EXCLUDE_FROM_ALL)
-
 # set vw cmake flags
 # This is not longer using the injected method, but implemented in this repo just consuming vw as a lib
 set(BUILD_EXTERNAL_PARSER OFF CACHE BOOL "")
@@ -58,7 +56,13 @@ set(BUILD_TESTING OFF CACHE BOOL "")
 if(STATIC_LINK_BINARY_PARSER)
   set(STATIC_LINK_VW ON CACHE BOOL "" FORCE)
 endif()
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser)
+
+if(NOT TARGET libzstd_static)
+  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../ext_libs/zstd/build/cmake ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser/zstd EXCLUDE_FROM_ALL)
+endif()
+if(NOT TARGET vw_core)
+  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser)
+endif()
 
 # Flatbuffer generation
 # ---------------------
