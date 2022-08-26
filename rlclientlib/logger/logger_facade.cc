@@ -351,5 +351,41 @@ int observation_logger_facade::report_action_taken(const char* primary_id, const
       return protocol_not_supported(status);
   }
 }
+
+// TODO: Do we need an EPISODE_SECTION for the config? Just use OBSERVATION_SECTION for now
+episode_logger_facade::episode_logger_facade(const utility::configuration& c, i_message_sender* sender,
+    utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
+    : _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
+    , _serializer_shared_state(0)
+    , _v2(_version == 2 ? new generic_event_logger(time_provider,
+                              create_legacy_async_batcher<generic_event>(
+                                  c, sender, watchdog, perror_cb, OBSERVATION_SECTION, _serializer_shared_state),
+                              c.get(name::APP_ID, ""))
+                        : nullptr)
+{
+}
+
+int episode_logger_facade::init(api_status* status)
+{
+  switch (_version)
+  {
+    case 2:
+      return _v2->init(status);
+    default:
+      return protocol_not_supported(status);
+  }
+}
+
+int episode_logger_facade::log(const char* episode_id, api_status* status)
+{
+  switch (_version)
+  {
+    case 2:
+      return _v2->log(episode_id, reinforcement_learning::logger::episode_serializer::episode_event(episode_id),
+          _episode_serializer.type, event_content_type::IDENTITY, status);
+    default:
+      return protocol_not_supported(status);
+  }
+}
 }  // namespace logger
 }  // namespace reinforcement_learning

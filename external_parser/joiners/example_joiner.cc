@@ -93,6 +93,11 @@ bool example_joiner::process_event(const v2::JoinedEvent& joined_event)
     }
     return true;
   }
+  else if (event->meta()->payload_type() == v2::PayloadType_Episode)
+  {
+    logger.out_error("Episode type events require multistep");
+    return false;
+  }
   if (_batch_grouped_events.find(id) != _batch_grouped_events.end())
   { _batch_grouped_events[id].push_back(&joined_event); }
   else

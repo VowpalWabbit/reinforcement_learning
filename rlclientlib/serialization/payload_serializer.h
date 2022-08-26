@@ -204,8 +204,21 @@ struct multistep_serializer : payload_serializer<generic_event::payload_type_t::
     std::string context_str(context);
     copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
-    auto fb = v2::CreateMultiStepEventDirect(fbb, event_id.c_str(), previous_id.c_str(), &action_ids, &_context,
-        &probabilities, model_id.c_str(), flags & action_flags::DEFERRED);
+    // TODO: we really shouldn't be checking previous_id.empty(). But to preserve behavior
+    //       for compatibility with older builds of VW, keep it in for now.
+    auto fb = v2::CreateMultiStepEventDirect(fbb, event_id.c_str(), previous_id.empty() ? nullptr : previous_id.c_str(),
+        &action_ids, &_context, &probabilities, model_id.c_str(), flags & action_flags::DEFERRED);
+    fbb.Finish(fb);
+    return fbb.Release();
+  }
+};
+
+struct episode_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_Episode>
+{
+  static generic_event::payload_buffer_t episode_event(const char* event_id)
+  {
+    flatbuffers::FlatBufferBuilder fbb;
+    auto fb = v2::CreateEpisodeEventDirect(fbb, event_id);
     fbb.Finish(fb);
     return fbb.Release();
   }
