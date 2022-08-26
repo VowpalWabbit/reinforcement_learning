@@ -31,7 +31,9 @@ jobs:
       # NASM required to compile OpenSSL assembly language code
       - uses: ilammy/setup-nasm@v1
       - name: Dependencies
+        # cd .. to change out of directory with vcpkg.json manifest file
         run: >
+          cd ..;
           vcpkg install
           --host-triplet=x64-windows
           --triplet=x64-windows
