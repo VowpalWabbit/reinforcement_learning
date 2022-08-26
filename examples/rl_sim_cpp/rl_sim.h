@@ -174,4 +174,5 @@ private:
   int _num_events = 0;
   int _current_events = 0;
   uint64_t _random_seed = 0;
+  int64_t _delay = 2000;
 };

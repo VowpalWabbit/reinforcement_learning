@@ -83,7 +83,7 @@ int rl_sim::cb_loop()
               << outcome << ", dist, " << get_dist_str(response) << ", " << stats.get_stats(p.id(), chosen_action)
               << std::endl;
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
 
   return 0;
@@ -157,7 +157,7 @@ int rl_sim::multistep_loop()
       continue;
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
 
   return 0;
@@ -191,7 +191,7 @@ int rl_sim::ca_loop()
               << ", outcome: " << outcome << ", dist: " << response.get_chosen_action_pdf_value() << ", "
               << stats.get_stats(joint.id(), chosen_action) << std::endl;
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
   return 0;
 }
@@ -240,7 +240,7 @@ int rl_sim::ccb_loop()
       index++;
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
 
   return 0;
@@ -306,7 +306,7 @@ int rl_sim::slates_loop()
       continue;
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
 
   return 0;
@@ -529,6 +529,7 @@ rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm
 
   _num_events = _options["num_events"].as<int>();
   _random_seed = _options["random_seed"].as<uint64_t>();
+  _delay = _options["delay"].as<int64_t>();
 }
 
 std::string get_dist_str(const reinforcement_learning::ranking_response& response)

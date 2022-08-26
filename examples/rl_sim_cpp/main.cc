@@ -35,7 +35,8 @@ po::variables_map process_cmd_line(const int argc, char** argv)
       "Run in slates mode")("ca", po::value<bool>()->default_value(false), "Run in continuous actions mode")(
       "multistep", po::value<bool>()->default_value(false), "Run in multistep mode")
       ("num_events", po::value<int>()->default_value(0), "Number of event series' to be sent. 0 is infinite.")
-      ("random_seed", po::value<uint64_t>()->default_value(0), "Random seed");
+      ("random_seed", po::value<uint64_t>()->default_value(0), "Random seed")
+      ("delay", po::value<int64_t>()->default_value(2000), "Delay between events in ms");
 
   po::variables_map vm;
   store(parse_command_line(argc, argv, desc), vm);
