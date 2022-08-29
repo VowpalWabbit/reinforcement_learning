@@ -106,7 +106,7 @@ struct dedup_info_serializer : payload_serializer<generic_event::payload_type_t:
     std::vector<flatbuffers::Offset<flatbuffers::String>> vals;
     vals.reserve(object_values.size());
 
-    for (auto sv : object_values) { vals.push_back(fbb.CreateString(sv.begin(), sv.size())); }
+    for (auto sv : object_values) { vals.push_back(fbb.CreateString(sv.data(), sv.size())); }
 
     auto fb = v2::CreateDedupInfoDirect(fbb, &object_ids, &vals);
     fbb.Finish(fb);
