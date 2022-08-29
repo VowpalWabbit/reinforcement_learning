@@ -50,6 +50,10 @@
         "RL_CPPRESTSDK_SYS_DEP": {
           "type": "BOOL",
           "value": "ON"
+        },
+        "rlclientlib_BUILD_DOTNET": {
+          "type": "BOOL",
+          "value": "OFF"
         }
       }
     },
