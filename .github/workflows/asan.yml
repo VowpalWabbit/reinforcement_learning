@@ -45,7 +45,7 @@ jobs:
           cmakeListsTxtPath: "${{ github.workspace }}/CMakeLists.txt"
           configurePreset: "${{ matrix.preset }}"
       - name: Build
-        run: cmake --build build
+        run: cmake --build build --target rltest
       - name: Run unit tests
         run: |
           cd build
