@@ -73,12 +73,12 @@ public:
   template <typename TSerializer, typename... Args>
   int transform(logger::i_logger_extensions* ext, TSerializer& serializer, api_status* status, Args... args)
   {
-    assert(get_context_string().size() > 0);
-    if (!ext->is_object_extraction_enabled()) { _payload = serializer.event(get_context_string().c_str(), args...); }
+    assert(_context_string.size() > 0);
+    if (!ext->is_object_extraction_enabled()) { _payload = serializer.event(_context_string, args...); }
     else
     {
       std::string tmp;
-      RETURN_IF_FAIL(ext->transform_payload_and_extract_objects(get_context_string().c_str(), tmp, _objects, status));
+      RETURN_IF_FAIL(ext->transform_payload_and_extract_objects(_context_string.c_str(), tmp, _objects, status));
       _payload = serializer.event(tmp.c_str(), args...);
     }
     if (ext->is_serialization_transform_enabled())
