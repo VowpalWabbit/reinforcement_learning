@@ -64,10 +64,8 @@ if(RL_USE_UBSAN)
   if(MSVC)
     message(FATAL_ERROR "UBSan not supported on MSVC")
   else()
-    # -fno-sanitize=function ignores function pointer calls of wrong type
-    # e.g. C style code where arguments cast to void*
-    add_compile_options(-fsanitize=undefined -fno-sanitize=function -fno-sanitize-recover -fno-omit-frame-pointer -g3)
-    add_link_options(-fsanitize=undefined -fno-sanitize=function -fno-sanitize-recover -fno-omit-frame-pointer -g3)
+    add_compile_options(-fsanitize=undefined -fno-sanitize-recover -fno-omit-frame-pointer -g3)
+    add_link_options(-fsanitize=undefined -fno-sanitize-recover -fno-omit-frame-pointer -g3)
   endif()
 endif()
 
