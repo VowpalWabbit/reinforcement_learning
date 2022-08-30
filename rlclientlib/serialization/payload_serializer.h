@@ -191,9 +191,9 @@ struct outcome_serializer : payload_serializer<generic_event::payload_type_t::Pa
 
 struct multistep_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_MultiStep>
 {
-  static generic_event::payload_buffer_t event(const std::string& context_str, const std::string& previous_id, unsigned int flags,
-      const std::vector<uint64_t>& action_ids, const std::vector<float>& probabilities, const std::string& event_id,
-      const std::string& model_id)
+  static generic_event::payload_buffer_t event(const std::string& context_str, const std::string& previous_id,
+      unsigned int flags, const std::vector<uint64_t>& action_ids, const std::vector<float>& probabilities,
+      const std::string& event_id, const std::string& model_id)
   {
     flatbuffers::FlatBufferBuilder fbb;
 

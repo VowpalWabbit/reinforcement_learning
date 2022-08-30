@@ -9,7 +9,7 @@ class data_callback_fn
 {
 public:
   using data_fn = void (*)(const model_data& data, void*);
-  
+
   // This function calls a C-style function pointer with argument cast to void*
   // Disable UBSan here to prevent generating an error
 #ifdef RL_USE_UBSAN
