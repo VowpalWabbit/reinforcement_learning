@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(flush_timeout)
     batcher.append(std::move(evt_fn), bar_evt_sp.get(), nullptr);
   }
   std::string expected = foo + "\n" + bar + "\n";
-  std::this_thread::sleep_for(std::chrono::milliseconds(150));
+  std::this_thread::sleep_for(std::chrono::milliseconds(250));
   BOOST_REQUIRE_EQUAL(items.size(), 1);
   std::string result;
   for (auto item : items) { result.append(item.begin(), item.end()); }
