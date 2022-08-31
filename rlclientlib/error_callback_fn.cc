@@ -11,6 +11,11 @@ void error_callback_fn::set(error_fn fn, void* context)
   _context = context;
 }
 
+// Function pointer may have been typecasted
+// Disable UBSan here to prevent generating an error
+#ifdef RL_USE_UBSAN
+__attribute__((no_sanitize("undefined")))
+#endif
 void error_callback_fn::report_error(api_status& s)
 {
   if (_fn == nullptr) { return; }
