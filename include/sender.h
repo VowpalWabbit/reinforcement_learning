@@ -17,7 +17,10 @@ public:
 #ifdef RL_USE_UBSAN
   __attribute__((no_sanitize("undefined")))
 #endif
-  int send(const buffer& data, api_status* status = nullptr) { return v_send(data, status); }
+  int send(const buffer& data, api_status* status = nullptr)
+  {
+    return v_send(data, status);
+  }
 
   virtual ~i_sender() = default;
 
