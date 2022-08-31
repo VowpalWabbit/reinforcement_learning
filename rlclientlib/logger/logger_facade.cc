@@ -208,8 +208,11 @@ int interaction_logger_facade::log_continuous_action(
   {
     case 2:
     {
+      // Create a string out of char* returned by get_model_id()
+      // so that it can be copied by value and persist after char* goes out of scope
+      auto model_id = std::string(response.get_model_id());
       return _v2->log(response.get_event_id(), context, _serializer_ca.type, _ext_p, _serializer_ca, status, flags,
-          response.get_chosen_action(), response.get_chosen_action_pdf_value(), response.get_model_id());
+          response.get_chosen_action(), response.get_chosen_action_pdf_value(), model_id);
     }
     default:
       return protocol_not_supported(status);
