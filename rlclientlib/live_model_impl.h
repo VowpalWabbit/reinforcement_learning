@@ -11,6 +11,7 @@
 #include "utility/watchdog.h"
 
 #include <atomic>
+#include <functional>
 #include <memory>
 
 namespace reinforcement_learning
@@ -63,6 +64,10 @@ public:
   int refresh_model(api_status* status);
 
   explicit live_model_impl(const utility::configuration& config, error_fn fn, void* err_context,
+      trace_logger_factory_t* trace_factory, data_transport_factory_t* t_factory, model_factory_t* m_factory,
+      sender_factory_t* sender_factory, time_provider_factory_t* time_provider_factory);
+
+  explicit live_model_impl(const utility::configuration& config, std::function<void(const api_status&)> error_cb,
       trace_logger_factory_t* trace_factory, data_transport_factory_t* t_factory, model_factory_t* m_factory,
       sender_factory_t* sender_factory, time_provider_factory_t* time_provider_factory);
 

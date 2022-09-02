@@ -18,6 +18,7 @@
 #include "ranking_response.h"
 #include "sender.h"
 
+#include <functional>
 #include <memory>
 
 namespace reinforcement_learning
@@ -74,6 +75,24 @@ public:
    *                       interaction and the other for observation which logs to Event Hub.
    */
   explicit live_model(const utility::configuration& config, error_fn fn = nullptr, void* err_context = nullptr,
+      trace_logger_factory_t* trace_factory = &trace_logger_factory,
+      data_transport_factory_t* t_factory = &data_transport_factory, model_factory_t* m_factory = &model_factory,
+      sender_factory_t* s_factory = &sender_factory,
+      time_provider_factory_t* time_prov_factory = &time_provider_factory);
+
+  /**
+   * @brief Construct a new live model object.
+   *
+   * @param config Name-Value based configuration
+   * @param error_cb Error callback that takes no context
+   * @param t_factory Transport factory.  The default transport factory is initialized with a
+   *                  REST based transport that gets data from an Azure storage account
+   * @param m_factory Model factory.  The default model factory hydrates vw models
+   *                    used for local inference.
+   * @param sender_factory Sender factory.  The default factory provides two senders, one for
+   *                       interaction and the other for observation which logs to Event Hub.
+   */
+  explicit live_model(const utility::configuration& config, std::function<void(const api_status&)> error_cb,
       trace_logger_factory_t* trace_factory = &trace_logger_factory,
       data_transport_factory_t* t_factory = &data_transport_factory, model_factory_t* m_factory = &model_factory,
       sender_factory_t* s_factory = &sender_factory,
@@ -488,8 +507,8 @@ template <typename ErrCntxt>
 live_model::live_model(const utility::configuration& config, error_fn_t<ErrCntxt> fn, ErrCntxt* err_context,
     trace_logger_factory_t* trace_factory, data_transport_factory_t* t_factory, model_factory_t* m_factory,
     sender_factory_t* s_factory, time_provider_factory_t* time_prov_factory)
-    : live_model(config, (error_fn)(fn), (void*)(err_context), trace_factory, t_factory, m_factory, s_factory,
-          time_prov_factory)
+    : live_model(config, std::bind(fn, std::placeholders::_1, err_context), trace_factory, t_factory, m_factory,
+          s_factory, time_prov_factory)
 {
 }
 }  // namespace reinforcement_learning

@@ -17,6 +17,13 @@ class error_callback_fn
 public:
   using callback_t = std::function<void(const api_status&)>;
   using error_fn = void (*)(const api_status&, void*);
+
+  void set(callback_t fn)
+  {
+    std::lock_guard<std::mutex> lock(_mutex);
+    _fn = fn;
+  }
+
   void set(error_fn fn, void* context)
   {
     std::lock_guard<std::mutex> lock(_mutex);
@@ -39,6 +46,8 @@ public:
   }
 
   void report_error(api_status& s);
+
+  error_callback_fn(callback_t fn) : _fn(fn) {}
 
   error_callback_fn(error_fn fn, void* context) { set(fn, context); }
 
