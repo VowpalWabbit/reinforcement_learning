@@ -35,8 +35,8 @@ jobs:
       - run: ./.scripts/linux/build-valgrind.sh
       - run: ./.scripts/linux/unit-tests-valgrind.sh
   build-macos:
-    name: rlclientlib.macos-10.15
-    runs-on: macos-10.15
+    name: rlclientlib.macos-11
+    runs-on: macos-11
     steps:
       - uses: actions/checkout@v2
         with:
