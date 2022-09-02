@@ -25,8 +25,8 @@ live_model::live_model(const utility::configuration& config, std::function<void(
     trace_logger_factory_t* trace_factory, data_transport_factory_t* t_factory, model_factory_t* m_factory,
     sender_factory_t* s_factory, time_provider_factory_t* time_prov_factory)
 {
-  _pimpl = std::unique_ptr<live_model_impl>(
-      new live_model_impl(config, error_cb, trace_factory, t_factory, m_factory, s_factory, time_prov_factory));
+  _pimpl = std::unique_ptr<live_model_impl>(new live_model_impl(
+      config, std::move(error_cb), trace_factory, t_factory, m_factory, s_factory, time_prov_factory));
 }
 
 live_model::live_model(live_model&& other) noexcept

@@ -21,7 +21,7 @@ public:
   void set(callback_t fn)
   {
     std::lock_guard<std::mutex> lock(_mutex);
-    _fn = fn;
+    _fn = std::move(fn);
   }
 
   void set(error_fn fn, void* context)
@@ -47,7 +47,7 @@ public:
 
   void report_error(api_status& s);
 
-  error_callback_fn(callback_t fn) : _fn(fn) {}
+  error_callback_fn(callback_t fn) : _fn(std::move(fn)) {}
 
   error_callback_fn(error_fn fn, void* context) { set(fn, context); }
 

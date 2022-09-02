@@ -435,7 +435,7 @@ live_model_impl::live_model_impl(const utility::configuration& config, std::func
     trace_logger_factory_t* trace_factory, data_transport_factory_t* t_factory, model_factory_t* m_factory,
     sender_factory_t* sender_factory, time_provider_factory_t* time_provider_factory)
     : _configuration(config)
-    , _error_cb(error_cb)
+    , _error_cb(std::move(error_cb))
     , _data_cb(_handle_model_update, this)
     , _watchdog(&_error_cb)
     , _trace_factory(trace_factory)
@@ -445,10 +445,6 @@ live_model_impl::live_model_impl(const utility::configuration& config, std::func
     , _time_provider_factory{time_provider_factory}
     , _protocol_version(_configuration.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
 {
-  // If there is no user supplied error callback, supply a default one that does nothing but report unhandled background
-  // errors.
-  if (!error_cb) { _error_cb.set(&default_error_callback, &_watchdog); }
-
   if (_configuration.get_bool(name::MODEL_BACKGROUND_REFRESH, value::DEFAULT_MODEL_BACKGROUND_REFRESH))
   {
     _bg_model_proc.reset(new utility::periodic_background_proc<model_management::model_downloader>(
