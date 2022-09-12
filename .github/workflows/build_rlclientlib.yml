@@ -22,6 +22,7 @@ jobs:
           submodules: recursive
       - run: ./.scripts/linux/build.sh
       - run: ./.scripts/linux/test.sh
+
   build-linux-valgrind:
     name: rlclientlib-valgrind.ubuntu18.04
     container:
@@ -34,9 +35,10 @@ jobs:
           submodules: recursive
       - run: ./.scripts/linux/build-valgrind.sh
       - run: ./.scripts/linux/unit-tests-valgrind.sh
+
   build-macos:
-    name: rlclientlib.macos-10.15
-    runs-on: macos-10.15
+    name: rlclientlib.macos-11
+    runs-on: macos-11
     steps:
       - uses: actions/checkout@v2
         with:
@@ -44,6 +46,7 @@ jobs:
       - run: ./.scripts/macos/restore.sh
       - run: ./.scripts/macos/build.sh
       - run: ./.scripts/macos/test.sh
+
   build-windows:
     name: rlclientlib.windows-2019
     runs-on: windows-2019
