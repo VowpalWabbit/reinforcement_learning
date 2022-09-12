@@ -22,6 +22,7 @@ jobs:
           submodules: recursive
       - run: ./.scripts/linux/build-vw-bp.sh
       - run: ./.scripts/linux/test-vw-bp.sh
+
   build-linux-valgrind:
     name: binary_parser-valgrind.ubuntu18.04
     container:
@@ -34,6 +35,7 @@ jobs:
           submodules: recursive
       - run: ./.scripts/linux/build-vw-bp.sh
       - run: ./.scripts/linux/unit-tests-vw-bp-valgrind.sh
+
   build-macos:
     name: binary_parser.macos-11
     runs-on: macos-11
@@ -44,6 +46,7 @@ jobs:
       - run: ./.scripts/macos/restore-vw-bp.sh
       - run: ./.scripts/macos/build-vw-bp.sh
       - run: ./.scripts/macos/test-vw-bp.sh
+
   build-windows:
     name: binary_parser.windows-2019
     runs-on: windows-2019
