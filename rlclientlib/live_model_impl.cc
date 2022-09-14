@@ -68,6 +68,7 @@ int live_model_impl::init(api_status* status)
   _initial_epsilon = _configuration.get_float(name::INITIAL_EPSILON, 0.2f);
   const char* app_id = _configuration.get(name::APP_ID, "");
   _seed_shift = VW::uniform_hash(app_id, strlen(app_id), 0);
+
   return error_code::success;
 }
 
@@ -638,8 +639,8 @@ int live_model_impl::explore_exploit(
   std::vector<int> action_ids;
   std::vector<float> action_pdf;
   std::string model_version;
-
-  RETURN_IF_FAIL(_model->choose_rank(seed, context, action_ids, action_pdf, model_version, status));
+  
+  RETURN_IF_FAIL(_model->choose_rank(event_id, seed, context, action_ids, action_pdf, model_version, status));
 
   return sample_and_populate_response(
       seed, action_ids, action_pdf, std::move(model_version), response, _trace_logger.get(), status);
@@ -683,7 +684,7 @@ int live_model_impl::request_episodic_decision(const char* event_id, const char*
   const std::string context_patched = history.get_context(previous_id, context_json);
 
   RETURN_IF_FAIL(_model->choose_rank_multistep(
-      seed, context_patched.c_str(), history, action_ids, action_pdf, model_version, status));
+      event_id, seed, context_patched.c_str(), history, action_ids, action_pdf, model_version, status));
   RETURN_IF_FAIL(sample_and_populate_response(
       seed, action_ids, action_pdf, std::move(model_version), resp, _trace_logger.get(), status));
 

@@ -74,7 +74,7 @@ class i_model
 {
 public:
   virtual int update(const model_data& data, bool& model_ready, api_status* status = nullptr) = 0;
-  virtual int choose_rank(uint64_t rnd_seed, string_view features, std::vector<int>& action_ids,
+  virtual int choose_rank(const char* event_id, uint64_t rnd_seed, string_view features, std::vector<int>& action_ids,
       std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) = 0;
   virtual int choose_continuous_action(string_view features, float& action, float& pdf_value,
       std::string& model_version, api_status* status = nullptr) = 0;
@@ -84,7 +84,7 @@ public:
   virtual int request_multi_slot_decision(const char* event_id, const std::vector<std::string>& slot_ids,
       string_view features, std::vector<std::vector<uint32_t>>& actions_ids,
       std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status = nullptr) = 0;
-  virtual int choose_rank_multistep(uint64_t rnd_seed, string_view features, const episode_history& history,
+  virtual int choose_rank_multistep(const char* event_id, uint64_t rnd_seed, string_view features, const episode_history& history,
       std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version,
       api_status* status = nullptr) = 0;
   virtual model_type_t model_type() const = 0;

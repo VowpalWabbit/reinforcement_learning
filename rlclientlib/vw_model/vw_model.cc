@@ -6,13 +6,18 @@
 #include "ranking_response.h"
 #include "str_util.h"
 
+#include <fstream>
+
 namespace reinforcement_learning
 {
 namespace model_management
 {
 vw_model::vw_model(i_trace* trace_logger, const utility::configuration& config)
-    : _initial_command_line(config.get(
-          name::MODEL_VW_INITIAL_COMMAND_LINE, "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A"))
+    : _audit(config.get_bool(name::AUDIT_ENABLED, false))
+    , _audit_output_path(config.get(name::AUDIT_OUTPUT_PATH, value::DEFAULT_AUDIT_OUTPUT_PATH))
+    , _initial_command_line(std::string(config.get(name::MODEL_VW_INITIAL_COMMAND_LINE,
+                                "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A")) +
+          (_audit ? " --audit" : ""))
     , _vw_pool(safe_vw_factory(_initial_command_line),
           config.get_int(name::VW_POOL_INIT_SIZE, value::DEFAULT_VW_POOL_INIT_SIZE), trace_logger)
     , _trace_logger(trace_logger)
@@ -27,12 +32,16 @@ int vw_model::update(const model_data& data, bool& model_ready, api_status* stat
 
     if (data.data_sz() > 0)
     {
-      std::unique_ptr<safe_vw> init_vw(new safe_vw(data.data(), data.data_sz()));
+      std::string cmd_line = add_optional_audit_flag(_quiet_commandline_options); 
 
-      safe_vw_factory factory(data);
+      std::unique_ptr<safe_vw> init_vw(
+          new safe_vw(data.data(), data.data_sz(), cmd_line));
       if (init_vw->is_CB_to_CCB_model_upgrade(_initial_command_line))
-      { factory = safe_vw_factory(data, _upgrade_to_CCB_vw_commandline_options); }
+      {
+        cmd_line = add_optional_audit_flag(_upgrade_to_CCB_vw_commandline_options);
+      }
 
+      safe_vw_factory factory(data, cmd_line);
       std::unique_ptr<safe_vw> test_vw(factory());
       if (test_vw->is_compatible(_initial_command_line))
       {
@@ -59,7 +68,7 @@ int vw_model::update(const model_data& data, bool& model_ready, api_status* stat
   return error_code::success;
 }
 
-int vw_model::choose_rank(uint64_t rnd_seed, string_view features, std::vector<int>& action_ids,
+int vw_model::choose_rank(const char* event_id, uint64_t rnd_seed, string_view features, std::vector<int>& action_ids,
     std::vector<float>& action_pdf, std::string& model_version, api_status* status)
 {
   try
@@ -68,6 +77,11 @@ int vw_model::choose_rank(uint64_t rnd_seed, string_view features, std::vector<i
 
     // Get a ranked list of action_ids and corresponding pdf
     vw->rank(features, action_ids, action_pdf);
+
+    if (_audit)
+    {
+      write_audit_log(event_id, vw->get_audit_data());
+    }
 
     model_version = vw->id();
 
@@ -83,10 +97,10 @@ int vw_model::choose_rank(uint64_t rnd_seed, string_view features, std::vector<i
   }
 }
 
-int vw_model::choose_rank_multistep(uint64_t rnd_seed, string_view features, const episode_history& history,
+int vw_model::choose_rank_multistep(const char* event_id, uint64_t rnd_seed, string_view features, const episode_history& history,
     std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status)
 {
-  return choose_rank(rnd_seed, features, action_ids, action_pdf, model_version, status);
+  return choose_rank(event_id, rnd_seed, features, action_ids, action_pdf, model_version, status);
 }
 
 int vw_model::choose_continuous_action(
@@ -148,6 +162,11 @@ int vw_model::request_multi_slot_decision(const char* event_id, const std::vecto
     // Get a ranked list of action_ids and corresponding pdf
     vw->rank_multi_slot_decisions(event_id, slot_ids, features, actions_ids, action_pdfs);
 
+    if (_audit)
+    {
+      write_audit_log(event_id, vw->get_audit_data());
+    }
+
     model_version = vw->id();
 
     return error_code::success;
@@ -159,6 +178,29 @@ int vw_model::request_multi_slot_decision(const char* event_id, const std::vecto
   catch (...)
   {
     RETURN_ERROR_LS(_trace_logger, status, model_rank_error) << "Unknown error";
+  }
+}
+
+const std::string vw_model::add_optional_audit_flag(const std::string& command_line) const
+{
+  if (_audit)
+  {
+    return command_line + " --audit";
+  }
+
+  return command_line;
+}
+
+void vw_model::write_audit_log(const char* event_id, const char* audit_buffer) const
+{
+  if (event_id != nullptr && audit_buffer != nullptr)
+  {
+    std::string filename = _audit_output_path + reinforcement_learning::delimiter + std::string(event_id);
+
+	std::ofstream auditFile;
+	auditFile.open(filename, std::ofstream::out | std::ofstream::trunc);
+	auditFile.write(audit_buffer, strlen(audit_buffer));
+	auditFile.close();
   }
 }
 
