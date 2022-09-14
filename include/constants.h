@@ -133,7 +133,7 @@ const char* const QUEUE_MODE_BLOCK = "BLOCK";
 const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
 const int DEFAULT_VW_POOL_INIT_SIZE = 4;
 const int DEFAULT_PROTOCOL_VERSION = 1;
-const char* DEFAULT_AUDIT_OUTPUT_PATH = "audit";
+const char* const DEFAULT_AUDIT_OUTPUT_PATH = "audit";
 
 const char* get_default_episode_sender();
 const char* get_default_observation_sender();
