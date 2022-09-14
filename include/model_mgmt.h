@@ -84,9 +84,9 @@ public:
   virtual int request_multi_slot_decision(const char* event_id, const std::vector<std::string>& slot_ids,
       string_view features, std::vector<std::vector<uint32_t>>& actions_ids,
       std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status = nullptr) = 0;
-  virtual int choose_rank_multistep(const char* event_id, uint64_t rnd_seed, string_view features, const episode_history& history,
-      std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version,
-      api_status* status = nullptr) = 0;
+  virtual int choose_rank_multistep(const char* event_id, uint64_t rnd_seed, string_view features,
+      const episode_history& history, std::vector<int>& action_ids, std::vector<float>& action_pdf,
+      std::string& model_version, api_status* status = nullptr) = 0;
   virtual model_type_t model_type() const = 0;
   virtual ~i_model() = default;
 };

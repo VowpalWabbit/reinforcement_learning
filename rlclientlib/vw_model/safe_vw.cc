@@ -44,7 +44,7 @@ safe_vw::safe_vw(const char* model_data, size_t len, const std::string& vw_comma
 }
 
 safe_vw::safe_vw(const std::string& vw_commandline)
-{ 
+{
   _vw = VW::initialize(vw_commandline);
   init();
 }
@@ -81,10 +81,7 @@ VW::example* safe_vw::get_or_create_example()
   return ex;
 }
 
-VW::example& safe_vw::get_or_create_example_f(void* vw)
-{
-    return *(((safe_vw*)vw)->get_or_create_example());
-}
+VW::example& safe_vw::get_or_create_example_f(void* vw) { return *(((safe_vw*)vw)->get_or_create_example()); }
 
 void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& actions, std::vector<float>& scores)
 {
@@ -99,13 +96,13 @@ void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& acti
   if (_vw->audit)
   {
     _vw->audit_buffer->clear();
-	VW::read_line_decision_service_json<true>(
-		  *_vw, examples, &line_vec[0], line_vec.size(), false, get_or_create_example_f, this, &interaction);
+    VW::read_line_decision_service_json<true>(
+        *_vw, examples, &line_vec[0], line_vec.size(), false, get_or_create_example_f, this, &interaction);
   }
   else
   {
-	VW::read_line_decision_service_json<false>(
-		  *_vw, examples, &line_vec[0], line_vec.size(), false, get_or_create_example_f, this, &interaction);
+    VW::read_line_decision_service_json<false>(
+        *_vw, examples, &line_vec[0], line_vec.size(), false, get_or_create_example_f, this, &interaction);
   }
 
   // finalize example
@@ -370,21 +367,19 @@ bool safe_vw::is_CB_to_CCB_model_upgrade(const std::string& args) const
   return local_model_type == mm::model_type_t::CCB && inbound_model_type == mm::model_type_t::CB;
 }
 
-const char* safe_vw::get_audit_data() const 
-{ 
-  if (_vw->audit)
-  { 
-    return &(*(_vw->audit_buffer))[0];
-  }
+const char* safe_vw::get_audit_data() const
+{
+  if (_vw->audit) { return &(*(_vw->audit_buffer))[0]; }
   else
-  { 
+  {
     return nullptr;
   }
 }
 
 void safe_vw::init()
 {
-  if (_vw->audit) {
+  if (_vw->audit)
+  {
     _vw->audit_buffer = std::make_shared<std::vector<char>>();
     _vw->audit_writer = VW::io::create_vector_writer(_vw->audit_buffer);
   }

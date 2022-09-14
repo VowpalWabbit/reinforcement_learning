@@ -125,8 +125,7 @@ int translate_property(
       {"LearningMode", name::LEARNING_MODE}, {"learningMode", name::LEARNING_MODE},
       {"InitialCommandLine", name::MODEL_VW_INITIAL_COMMAND_LINE},
       {"initialCommandLine", name::MODEL_VW_INITIAL_COMMAND_LINE}, {"ProtocolVersion", name::PROTOCOL_VERSION},
-      {"protocolVersion", name::PROTOCOL_VERSION},
-      {"AuditEnabled", name::AUDIT_ENABLED},
+      {"protocolVersion", name::PROTOCOL_VERSION}, {"AuditEnabled", name::AUDIT_ENABLED},
       {"AuditOutputPath", name::AUDIT_OUTPUT_PATH}};
 
   static const std::unordered_map<std::string, std::string> parsed_translation_mapping = {

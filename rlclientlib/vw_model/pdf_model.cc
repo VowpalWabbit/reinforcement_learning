@@ -68,8 +68,9 @@ int pdf_model::request_multi_slot_decision(const char* event_id, const std::vect
 
 model_type_t pdf_model::model_type() const { return model_type_t::CB; }
 
-int pdf_model::choose_rank_multistep(const char* event_id, uint64_t rnd_seed, string_view features, const episode_history& history,
-    std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status)
+int pdf_model::choose_rank_multistep(const char* event_id, uint64_t rnd_seed, string_view features,
+    const episode_history& history, std::vector<int>& action_ids, std::vector<float>& action_pdf,
+    std::string& model_version, api_status* status)
 {
   return error_code::not_supported;
 }

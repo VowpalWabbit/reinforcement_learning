@@ -3,9 +3,9 @@
 namespace reinforcement_learning
 {
 #ifdef _WIN32
-  const char* const delimiter = "\\";
+const char* const delimiter = "\\";
 #else
-  const char* const delimiter = "/";
+const char* const delimiter = "/";
 #endif
 
 namespace name

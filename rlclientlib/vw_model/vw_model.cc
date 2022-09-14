@@ -32,14 +32,11 @@ int vw_model::update(const model_data& data, bool& model_ready, api_status* stat
 
     if (data.data_sz() > 0)
     {
-      std::string cmd_line = add_optional_audit_flag(_quiet_commandline_options); 
+      std::string cmd_line = add_optional_audit_flag(_quiet_commandline_options);
 
-      std::unique_ptr<safe_vw> init_vw(
-          new safe_vw(data.data(), data.data_sz(), cmd_line));
+      std::unique_ptr<safe_vw> init_vw(new safe_vw(data.data(), data.data_sz(), cmd_line));
       if (init_vw->is_CB_to_CCB_model_upgrade(_initial_command_line))
-      {
-        cmd_line = add_optional_audit_flag(_upgrade_to_CCB_vw_commandline_options);
-      }
+      { cmd_line = add_optional_audit_flag(_upgrade_to_CCB_vw_commandline_options); }
 
       safe_vw_factory factory(data, cmd_line);
       std::unique_ptr<safe_vw> test_vw(factory());
@@ -78,10 +75,7 @@ int vw_model::choose_rank(const char* event_id, uint64_t rnd_seed, string_view f
     // Get a ranked list of action_ids and corresponding pdf
     vw->rank(features, action_ids, action_pdf);
 
-    if (_audit)
-    {
-      write_audit_log(event_id, vw->get_audit_data());
-    }
+    if (_audit) { write_audit_log(event_id, vw->get_audit_data()); }
 
     model_version = vw->id();
 
@@ -97,8 +91,9 @@ int vw_model::choose_rank(const char* event_id, uint64_t rnd_seed, string_view f
   }
 }
 
-int vw_model::choose_rank_multistep(const char* event_id, uint64_t rnd_seed, string_view features, const episode_history& history,
-    std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version, api_status* status)
+int vw_model::choose_rank_multistep(const char* event_id, uint64_t rnd_seed, string_view features,
+    const episode_history& history, std::vector<int>& action_ids, std::vector<float>& action_pdf,
+    std::string& model_version, api_status* status)
 {
   return choose_rank(event_id, rnd_seed, features, action_ids, action_pdf, model_version, status);
 }
@@ -162,10 +157,7 @@ int vw_model::request_multi_slot_decision(const char* event_id, const std::vecto
     // Get a ranked list of action_ids and corresponding pdf
     vw->rank_multi_slot_decisions(event_id, slot_ids, features, actions_ids, action_pdfs);
 
-    if (_audit)
-    {
-      write_audit_log(event_id, vw->get_audit_data());
-    }
+    if (_audit) { write_audit_log(event_id, vw->get_audit_data()); }
 
     model_version = vw->id();
 
@@ -183,10 +175,7 @@ int vw_model::request_multi_slot_decision(const char* event_id, const std::vecto
 
 const std::string vw_model::add_optional_audit_flag(const std::string& command_line) const
 {
-  if (_audit)
-  {
-    return command_line + " --audit";
-  }
+  if (_audit) { return command_line + " --audit"; }
 
   return command_line;
 }
@@ -197,10 +186,10 @@ void vw_model::write_audit_log(const char* event_id, const char* audit_buffer) c
   {
     std::string filename = _audit_output_path + reinforcement_learning::delimiter + std::string(event_id);
 
-	std::ofstream auditFile;
-	auditFile.open(filename, std::ofstream::out | std::ofstream::trunc);
-	auditFile.write(audit_buffer, strlen(audit_buffer));
-	auditFile.close();
+    std::ofstream auditFile;
+    auditFile.open(filename, std::ofstream::out | std::ofstream::trunc);
+    auditFile.write(audit_buffer, strlen(audit_buffer));
+    auditFile.close();
   }
 }
 

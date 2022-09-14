@@ -639,7 +639,7 @@ int live_model_impl::explore_exploit(
   std::vector<int> action_ids;
   std::vector<float> action_pdf;
   std::string model_version;
-  
+
   RETURN_IF_FAIL(_model->choose_rank(event_id, seed, context, action_ids, action_pdf, model_version, status));
 
   return sample_and_populate_response(
