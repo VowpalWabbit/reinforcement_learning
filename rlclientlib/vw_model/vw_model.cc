@@ -173,22 +173,28 @@ int vw_model::request_multi_slot_decision(const char* event_id, const std::vecto
   }
 }
 
-const std::string vw_model::add_optional_audit_flag(const std::string& command_line) const
+std::string vw_model::add_optional_audit_flag(const std::string& command_line) const
 {
   if (_audit) { return command_line + " --audit"; }
 
   return command_line;
 }
 
-void vw_model::write_audit_log(const char* event_id, const char* audit_buffer) const
+void vw_model::write_audit_log(const char* event_id, string_view audit_buffer) const
 {
   if (event_id != nullptr && audit_buffer != nullptr)
   {
-    std::string filename = _audit_output_path + reinforcement_learning::delimiter + std::string(event_id);
+    // remove any non-alphanumeric characters from the output name
+    std::string filename(event_id);
+    auto it = std::remove_if(filename.begin(), filename.end(), [](char const& c) { return !std::isalnum(c); });
+    filename.erase(it, filename.end());
+	
+    std::ostringstream filepath;
+    filepath << _audit_output_path << reinforcement_learning::PATH_DELIMITER << filename;
 
     std::ofstream auditFile;
-    auditFile.open(filename, std::ofstream::out | std::ofstream::trunc);
-    auditFile.write(audit_buffer, strlen(audit_buffer));
+    auditFile.open(filepath.str(), std::ofstream::out | std::ofstream::trunc);
+    auditFile.write(audit_buffer.begin(), audit_buffer.size());
     auditFile.close();
   }
 }

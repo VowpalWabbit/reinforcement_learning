@@ -367,12 +367,11 @@ bool safe_vw::is_CB_to_CCB_model_upgrade(const std::string& args) const
   return local_model_type == mm::model_type_t::CCB && inbound_model_type == mm::model_type_t::CB;
 }
 
-const char* safe_vw::get_audit_data() const
+string_view safe_vw::get_audit_data() const
 {
-  if (_vw->audit) { return &(*(_vw->audit_buffer))[0]; }
+  if (_vw->audit) { return string_view(_vw->audit_buffer->data(), _vw->audit_buffer->size()); }
   else
-  {
-    return nullptr;
+  { return string_view();
   }
 }
 
