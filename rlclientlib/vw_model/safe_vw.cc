@@ -371,7 +371,8 @@ string_view safe_vw::get_audit_data() const
 {
   if (_vw->audit) { return string_view(_vw->audit_buffer->data(), _vw->audit_buffer->size()); }
   else
-  { return string_view();
+  {
+    return string_view();
   }
 }
 

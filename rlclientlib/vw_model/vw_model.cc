@@ -188,7 +188,7 @@ void vw_model::write_audit_log(const char* event_id, string_view audit_buffer) c
     std::string filename(event_id);
     auto it = std::remove_if(filename.begin(), filename.end(), [](char const& c) { return !std::isalnum(c); });
     filename.erase(it, filename.end());
-	
+
     std::ostringstream filepath;
     filepath << _audit_output_path << reinforcement_learning::PATH_DELIMITER << filename;
 

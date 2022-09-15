@@ -40,7 +40,7 @@ public:
 
   bool is_compatible(const std::string& args) const;
   bool is_CB_to_CCB_model_upgrade(const std::string& args) const;
-  
+
   // audit data is not guaranteed after any subsequent safe_vw calls
   string_view get_audit_data() const;
 
