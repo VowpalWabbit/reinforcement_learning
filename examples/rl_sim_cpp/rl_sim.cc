@@ -79,10 +79,11 @@ int rl_sim::cb_loop()
 
     stats.record(p.id(), chosen_action, outcome);
 
-    std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", outcome, "
-              << outcome << ", dist, " << get_dist_str(response) << ", " << stats.get_stats(p.id(), chosen_action)
-              << std::endl;
-
+    if(!_quiet) {
+      std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", outcome, "
+                << outcome << ", dist, " << get_dist_str(response) << ", " << stats.get_stats(p.id(), chosen_action)
+                << std::endl;
+    }
     std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
 
@@ -143,9 +144,11 @@ int rl_sim::multistep_loop()
       const auto outcome_per_step = p.get_outcome(_topics[chosen_action], _random_seed);
       stats.record(p.id(), chosen_action, outcome_per_step);
 
-      std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", outcome, "
-                << outcome_per_step << ", dist, " << get_dist_str(response) << ", "
-                << stats.get_stats(p.id(), chosen_action) << std::endl;
+      if(!_quiet) {
+        std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", outcome, "
+                  << outcome_per_step << ", dist, " << get_dist_str(response) << ", "
+                  << stats.get_stats(p.id(), chosen_action) << std::endl;
+      }
 
       episodic_outcome += outcome_per_step;
       previous_id = req_id;
@@ -187,9 +190,11 @@ int rl_sim::ca_loop()
 
     stats.record(joint.id(), chosen_action, outcome);
 
-    std::cout << " " << stats.count() << " - ctxt: " << joint.id() << ", action: " << chosen_action
-              << ", outcome: " << outcome << ", dist: " << response.get_chosen_action_pdf_value() << ", "
-              << stats.get_stats(joint.id(), chosen_action) << std::endl;
+    if(!_quiet) {
+      std::cout << " " << stats.count() << " - ctxt: " << joint.id() << ", action: " << chosen_action
+                << ", outcome: " << outcome << ", dist: " << response.get_chosen_action_pdf_value() << ", "
+                << stats.get_stats(joint.id(), chosen_action) << std::endl;
+    }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
@@ -234,9 +239,11 @@ int rl_sim::ccb_loop()
 
       stats.record(p.id(), chosen_action, outcome);
 
-      std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", slot, " << index
-                << ", outcome, " << outcome << ", dist, " << get_dist_str(response) << ", "
-                << stats.get_stats(p.id(), chosen_action) << std::endl;
+      if(!_quiet) {
+        std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", slot, " << index
+                  << ", outcome, " << outcome << ", dist, " << get_dist_str(response) << ", "
+                  << stats.get_stats(p.id(), chosen_action) << std::endl;
+      }
       index++;
     }
 
@@ -292,10 +299,11 @@ int rl_sim::slates_loop()
       stats.record(event_id, chosen_action, slot_outcome);
       outcome += slot_outcome;
 
-      std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", slot, " << index
-                << ", outcome, " << outcome << ", dist, " << get_dist_str(response) << ", "
-                << stats.get_stats(p.id(), chosen_action) << std::endl;
-
+      if(!_quiet) {
+        std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", slot, " << index
+                  << ", outcome, " << outcome << ", dist, " << get_dist_str(response) << ", "
+                  << stats.get_stats(p.id(), chosen_action) << std::endl;
+      }
       index++;
     }
 
@@ -371,8 +379,10 @@ int rl_sim::init_rl()
   }
 
   // Trace log API calls to the console
-  config.set(r::name::TRACE_LOG_IMPLEMENTATION, r::value::CONSOLE_TRACE_LOGGER);
-
+  if(!_quiet) {
+    config.set(r::name::TRACE_LOG_IMPLEMENTATION, r::value::CONSOLE_TRACE_LOGGER);
+  }
+  
   // Initialize the API
   _rl = std::unique_ptr<r::live_model>(new r::live_model(config, _on_error, this));
   if (_rl->init(&status) != err::success)
@@ -381,7 +391,9 @@ int rl_sim::init_rl()
     return -1;
   }
 
-  std::cout << " API Config " << config;
+  if(!_quiet) {
+    std::cout << " API Config " << config;
+  }
 
   return err::success;
 }
@@ -530,6 +542,7 @@ rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm
   _num_events = _options["num_events"].as<int>();
   _random_seed = _options["random_seed"].as<uint64_t>();
   _delay = _options["delay"].as<int64_t>();
+  _quiet = _options["quiet"].as<bool>();
 }
 
 std::string get_dist_str(const reinforcement_learning::ranking_response& response)
