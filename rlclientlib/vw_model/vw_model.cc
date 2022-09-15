@@ -186,7 +186,7 @@ void vw_model::write_audit_log(const char* event_id, string_view audit_buffer) c
   {
     // remove any non-alphanumeric characters from the output name
     std::string filename(event_id);
-    auto it = std::remove_if(filename.begin(), filename.end(), [](char const& c) { return !std::isalnum(c); });
+    auto it = std::remove_if(filename.begin(), filename.end(), [](char const& c) { return !isalnum(c); });
     filename.erase(it, filename.end());
 
     std::ostringstream filepath;
