@@ -17,17 +17,15 @@ int main()
 {
   // return basic_usage_cb();
   // return basic_usage_ca();
-  return basic_usage_ccb();
+  // return basic_usage_ccb();
   // return basic_usage_slates();
-  // return basic_usage_multistep();
+  return basic_usage_multistep();
 }
 
 int basic_usage_cb()
 {
   char const* const event_id = "event_id";
-  // char const* const context = R"({"shared":{"sf":1},"_multi":[ { "TAction":{"af":1} },{"TAction":{"af":2}}]})";
-  char const* const context =
-      R"({"FromUrl" : [ {"weather" : "sunny"} ], "_multi" : [ {"_tag" : "Mocha", "i" : {"constant" : 1, "id" : "Mocha"}, "j" : [ {"roast" : "light"} ]}, {"_tag" : "Latte", "i" : {"constant" : 1, "id" : "Latte"}, "j" : [ {"roast" : "dark"} ]}, {"_tag" : "Cappuccino", "i" : {"constant" : 1, "id" : "Cappuccino"}, "j" : [ {"roast" : "dark"} ]}]})";
+  char const* const context = R"({"shared":{"sf":1},"_multi":[ { "TAction":{"af":1} },{"TAction":{"af":2}}]})";
   float outcome = 1.0f;
 
   //! name, value based config object used to initialise the API
@@ -60,10 +58,6 @@ int basic_usage_cb()
   //! [(3) Choose an action]
   // Response class
   r::ranking_response response;
-
-  // for (int i = 0; i < 1000; i++) {
-  //  rl.choose_rank(event_id, context, response, &status);
-  //}
 
   if (rl.choose_rank(event_id, context, response, &status) != err::success)
   {
@@ -160,9 +154,8 @@ int basic_usage_ca()
 
 int basic_usage_ccb()
 {
-  char const* const event_id = "event_id";
   char const* const context =
-      R"({"shared":{"sf":1},"_multi":[ { "_tag": "Action1", "TAction":{"af":1} },{ "_tag": "Action2", "TAction":{"af":2}},{ "_tag": "Action3", "TAction":{"af":3}}],"_slots":[{"f":1}, {"f":2}]})";
+      R"({"shared":{"sf":1},"_multi":[ { "TAction":{"af":1} },{"TAction":{"af":2}},{"TAction":{"af":3}}],"_slots":[{"f":1}, {"f":2}]})";
 
   //! name, value based config object used to initialise the API
   u::configuration config;
@@ -193,11 +186,9 @@ int basic_usage_ccb()
 
   //! [(3) Choose an action]
   // Response class
-  // r::decision_response response;
+  r::decision_response response;
 
-  r::multi_slot_response response;
-
-  if (rl.request_multi_slot_decision(event_id, context, response, &status) != err::success)
+  if (rl.request_decision(context, response, &status) != err::success)
   {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
@@ -208,7 +199,7 @@ int basic_usage_ccb()
   for (const auto& r : response)
   {
     const auto chosen_action = r.get_action_id();
-    if (rl.report_outcome(r.get_id(), 1.0f, &status) != err::success)
+    if (rl.report_outcome(r.get_slot_id(), 1.0f, &status) != err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
       return -1;

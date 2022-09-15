@@ -182,7 +182,7 @@ std::string vw_model::add_optional_audit_flag(const std::string& command_line) c
 
 void vw_model::write_audit_log(const char* event_id, string_view audit_buffer) const
 {
-  if (event_id != nullptr && audit_buffer != nullptr)
+  if (event_id != nullptr && audit_buffer.size() > 0)
   {
     // remove any non-alphanumeric characters from the output name
     std::string filename(event_id);
