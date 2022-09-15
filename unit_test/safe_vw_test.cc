@@ -33,6 +33,23 @@ BOOST_AUTO_TEST_CASE(safe_vw_1)
   BOOST_CHECK_EQUAL_COLLECTIONS(ranking.begin(), ranking.end(), ranking_expected.begin(), ranking_expected.end());
 }
 
+BOOST_AUTO_TEST_CASE(safe_vw_audit_logs)
+{
+  safe_vw vw((const char*)cb_data_5_model, cb_data_5_model_len, "--json --audit");
+  const auto json = R"({"a":{"0":1,"5":2},"_multi":[{"b":{"0":1}},{"b":{"0":2}},{"b":{"0":3}}]})";
+
+  std::vector<int> actions;
+  std::vector<float> ranking;
+  vw.rank(json, actions, ranking);
+
+  BOOST_CHECK_EQUAL(0, vw.get_audit_data().size());
+
+  safe_vw vw_w_audit((const char*)cb_data_5_model, cb_data_5_model_len, "--json --audit");
+  vw_w_audit.rank(json, actions, ranking);
+
+  BOOST_CHECK_GT(0, vw_w_audit.get_audit_data().size());
+}
+
 BOOST_AUTO_TEST_CASE(factory_with_cb_model_and_ccb_arguments)
 {
   const auto json =
