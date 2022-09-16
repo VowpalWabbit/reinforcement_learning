@@ -1,4 +1,23 @@
 #! /usr/bin/env python3 -W ignore::DeprecationWarning
+import argparse
+import flatbuffers
+import numpy as np
+import os
+import zstd
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--base_dir", type=str, help="Base files location"
+)
+parser.add_argument(
+    "--compare_dir", help="Comparison files location"
+)
+parser.add_argument(
+    "--flatc_dir", default=None, help="flatc executable directory"
+)
+args = parser.parse_args()
+flatc_file = 'flatc'
+if args.flatc_dir is not None:
+    flatc_file = os.path.join(args.flatc_dir, 'flatc')
 try:
     import reinforcement_learning.messages.flatbuff.v2.EventBatch
 except Exception as e:
@@ -12,7 +31,7 @@ except Exception as e:
 
     input_files = " ".join([str(x) for x in input_dir.glob("*.fbs")])
     subprocess.run(
-        f"flatc --python {input_files}", cwd=script_dir, shell=True, check=True
+        f"{flatc_file} --python {input_files}", cwd=script_dir, shell=True, check=True
     )
 
 
@@ -42,11 +61,6 @@ from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *
 from reinforcement_learning.messages.flatbuff.v2.CheckpointInfo import *
 from reinforcement_learning.messages.flatbuff.v2.ProblemType import *
 
-import argparse
-import flatbuffers
-import numpy as np
-import os
-import zstd
 
 PREAMBLE_LENGTH = 8
 
@@ -182,14 +196,7 @@ def compare_episode(base, compare):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--base_dir", type=str, help="Base files location"
-    )
-    parser.add_argument(
-        "--compare_dir", help="Comparison files location"
-    )
-    args = parser.parse_args()
+
 
     base_files = {f for f in os.listdir(args.base_dir) if os.path.isfile(os.path.join(args.base_dir, f))}
     compare_files = {f for f in os.listdir(args.compare_dir) if os.path.isfile(os.path.join(args.compare_dir, f))}
