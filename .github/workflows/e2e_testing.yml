@@ -21,6 +21,7 @@ jobs:
         with:
           submodules: recursive
       - run: |
+          echo "Building RLClientlib"
           cmake -S . -B build -G Ninja \
           -Drlclientlib_BUILD_ONNXRUNTIME_EXTENSION=On \
           -DFMT_SYS_DEP=ON \
@@ -28,15 +29,18 @@ jobs:
           -DRL_BUILD_EXTERNAL_PARSER=ON \
           -DBUILD_BINARY_PARSER_TESTS=OFF
           cmake --build build --target all
-      - run: ctest --verbose --output-on-failure
-      - run: pip install -r test_tools/e2e_testing/requirements.txt
       - run: |
+          echo "Generating test inputs"
           mkdir test_out
           cd test_out
           ../build/examples/rl_sim_cpp/rl_sim_cpp.out --multistep 1 --quiet 1 --num_events 200 --delay 20 --json_config test_tools/e2e_testing/multistep_client.json
-      - run:
+      - run: |
+          echo "Run event file comparison"
+          apt-get install -y --no-install-recommends pip
+          pip install -r test_tools/e2e_testing/requirements.txt
           python3 test_tools/e2e_testing/compare_serialized_examples.py --base_dir test_tools/e2e_testing/base_files/multistep --compare_dir test_out
       - run: |
+          echo "Joining and running test"
           cd test_out/
           cat interaction.fbs observation.fbs > combined.fbs
           python3 ../test_tools/log_parser/joiner.py --interactions episode.fbs --observations combined.fbs --output merged.fbs
