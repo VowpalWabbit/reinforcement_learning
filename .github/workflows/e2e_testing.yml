@@ -1,0 +1,30 @@
+name: RLClientLib End-to-end testing
+
+on:
+  push:
+    branches:
+      - master
+      - 'releases/**'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build-linux:
+    name: rlclientlib.ubuntu18.04
+    container:
+      image: vowpalwabbit/rl-ubuntu-1804:latest
+    runs-on: ubuntu-latest
+    steps:
+      # v1 must be used because newer versions require a node.js version that will not run on this old image.
+      - uses: actions/checkout@v1
+        with:
+          submodules: recursive
+      - run: |
+          cmake -S . -B build -G Ninja \
+          -Drlclientlib_BUILD_ONNXRUNTIME_EXTENSION=On \
+          -DFMT_SYS_DEP=ON \
+          -DSPDLOG_SYS_DEP=ON \
+          -DRL_BUILD_EXTERNAL_PARSER=ON
+          cmake --build build --target all
+      - run: ctest --verbose --output-on-failure
