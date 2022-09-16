@@ -223,6 +223,9 @@ def main():
             else:
                 raise Exception('Unknown type')
 
+
+    print("Comparison completed. All events match")
+
         
 
 if __name__ == "__main__":

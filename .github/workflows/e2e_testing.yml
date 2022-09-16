@@ -36,3 +36,8 @@ jobs:
           ../build/examples/rl_sim_cpp/rl_sim_cpp.out --multistep 1 --quiet 1 --num_events 200 --delay 20 --json_config test_tools/e2e_testing/multistep_client.json
       - run:
           python3 test_tools/e2e_testing/compare_serialized_examples.py --base_dir test_tools/e2e_testing/base_files/multistep --compare_dir test_out
+      - run: |
+          cd test_out/
+          cat interaction.fbs observation.fbs > combined.fbs
+          python3 ../test_tools/log_parser/joiner.py --interactions episode.fbs --observations combined.fbs --output merged.fbs
+          ../build/vw --multistep --binary_parser --cb_explore_adf --epsilon 0.2 --power_t 0 -l 0.001 --cb_type mtr -q :: -d merged.fbs
