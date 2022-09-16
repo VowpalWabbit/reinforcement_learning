@@ -175,10 +175,12 @@ def compare_dedup(base, compare):
     raise Exception('dedup comparison is unsupported')
 
 def compare_multistep(base, compare):
-    if base.EventId() != compare.EventId():
-        raise Exception('Multistep event IDs do not match')
-    if base.PreviousId() != compare.PreviousId():
-        raise Exception('Multistep event IDs do not match')
+    # TODO: rl_sim uses boost::uuids::random_generator()() to generate eventIDs
+    #       this means that eventIDs are not reproducible. Don't compare them for now
+    #if base.EventId() != compare.EventId():
+    #    raise Exception('Multistep event IDs do not match')
+    #if base.PreviousId() != compare.PreviousId():
+    #    raise Exception('Multistep event IDs do not match')
     if not np.array_equal(base.ActionIdsAsNumpy(), compare.ActionIdsAsNumpy()):
         raise Exception('Multistep ActionIDs do not match')
     if not np.array_equal(base.ContextAsNumpy(), compare.ContextAsNumpy()):
