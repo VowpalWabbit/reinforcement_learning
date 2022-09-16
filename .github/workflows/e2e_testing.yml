@@ -25,6 +25,8 @@ jobs:
           -Drlclientlib_BUILD_ONNXRUNTIME_EXTENSION=On \
           -DFMT_SYS_DEP=ON \
           -DSPDLOG_SYS_DEP=ON \
-          -DRL_BUILD_EXTERNAL_PARSER=ON
+          -DRL_BUILD_EXTERNAL_PARSER=ON \
+          -DBUILD_BINARY_PARSER_TESTS=OFF
           cmake --build build --target all
+      - run: build/examples/rl_sim_cpp/rl_sim_cpp.out --multistep 1 --quiet 1 --num_events 200 --delay 20 --json_config test_tools/e2e_testing/multistep_client.json
       - run: ctest --verbose --output-on-failure
