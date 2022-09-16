@@ -37,7 +37,7 @@ jobs:
       - run: |
           echo "Run event file comparison"
           apt update
-          apt install -y python3-pip
+          apt install -y python3-pip libflatbuffers-dev
           pip3 install -r test_tools/e2e_testing/requirements.txt
           python3 test_tools/e2e_testing/compare_serialized_examples.py --base_dir test_tools/e2e_testing/base_files/multistep --compare_dir test_out
       - run: |
