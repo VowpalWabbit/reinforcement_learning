@@ -24,10 +24,11 @@ except Exception as e:
     import pathlib
     import subprocess   
 
-    script_dir = pathlib.Path(__file__).parent.parent.absolute()
+    script_dir = pathlib.Path(__file__).parent.absolute()
     input_dir = (
         pathlib.Path(script_dir).parents[1].joinpath("rlclientlib", "schema", "v2")
     )
+    print(input_dir)
 
     input_files = " ".join([str(x) for x in input_dir.glob("*.fbs")])
     subprocess.run(
