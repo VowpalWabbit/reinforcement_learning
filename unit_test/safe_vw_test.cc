@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(safe_vw_1)
 
 BOOST_AUTO_TEST_CASE(safe_vw_audit_logs)
 {
-  safe_vw vw((const char*)cb_data_5_model, cb_data_5_model_len, "--json --audit");
+  safe_vw vw((const char*)cb_data_5_model, cb_data_5_model_len, "--json --quiet");
   const auto json = R"({"a":{"0":1,"5":2},"_multi":[{"b":{"0":1}},{"b":{"0":2}},{"b":{"0":3}}]})";
 
   std::vector<int> actions;
