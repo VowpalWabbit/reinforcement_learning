@@ -19,6 +19,7 @@
 #include "sender.h"
 #include "str_util.h"
 
+#include <fstream>
 #include <thread>
 #include <vector>
 
@@ -1712,6 +1713,81 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids_and_slot_ns)
 
   ++it;
   BOOST_CHECK(it == response.end());
+}
+
+struct AuditCleanup
+{
+  AuditCleanup() : event_id("eventId1") { remove(event_id.c_str()); }
+  ~AuditCleanup() { remove(event_id.c_str()); }
+
+  std::string event_id;
+};
+
+BOOST_FIXTURE_TEST_CASE(live_model_ccb_and_v2_w_audit, AuditCleanup)
+{
+  // create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE,
+      "--ccb_explore_adf --chain_hash --json --quiet --epsilon 0.0 --first_only --id N/A");
+  config.set(r::name::PROTOCOL_VERSION, "2");
+  config.set(r::name::AUDIT_ENABLED, "true");
+  config.set(r::name::AUDIT_OUTPUT_PATH, ".");
+
+  r::api_status status;
+
+  // Create the ds live_model, and initialize it with the config
+  r::live_model ds = create_mock_live_model(
+      config, nullptr, &reinforcement_learning::model_factory, nullptr, r::model_management::model_type_t::CCB);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  r::multi_slot_response response;
+
+  // Add invalid path separators to the event_id
+  std::string dirty_event_id = "../.." + event_id + "//\\..**";
+  BOOST_CHECK_EQUAL(ds.request_multi_slot_decision(
+                        dirty_event_id.c_str(), JSON_CONTEXT_WITH_SLOTS_W_SLOT_IDS_AND_SLOT_NS, response, &status),
+      err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  std::ifstream audit_file;
+
+  audit_file.open(event_id.c_str());
+  BOOST_CHECK(audit_file.is_open());
+}
+
+BOOST_FIXTURE_TEST_CASE(live_model_ccb_and_v2_w_audit_bad_path, AuditCleanup)
+{
+  // create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE,
+      "--ccb_explore_adf --chain_hash --json --quiet --epsilon 0.0 --first_only --id N/A");
+  config.set(r::name::PROTOCOL_VERSION, "2");
+  config.set(r::name::AUDIT_ENABLED, "true");
+  config.set(r::name::AUDIT_OUTPUT_PATH, "invalid_directory");
+
+  r::api_status status;
+
+  // Create the ds live_model, and initialize it with the config
+  r::live_model ds = create_mock_live_model(
+      config, nullptr, &reinforcement_learning::model_factory, nullptr, r::model_management::model_type_t::CCB);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  r::multi_slot_response response;
+
+  // Add invalid path separators to the event_id
+  std::string dirty_event_id = "../.." + event_id + "//\\..**";
+  BOOST_CHECK_EQUAL(ds.request_multi_slot_decision(
+                        dirty_event_id.c_str(), JSON_CONTEXT_WITH_SLOTS_W_SLOT_IDS_AND_SLOT_NS, response, &status),
+      err::success);
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  std::ifstream audit_file;
+  audit_file.open(event_id.c_str());
+  BOOST_CHECK(!audit_file.is_open());
 }
 
 BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_uri)

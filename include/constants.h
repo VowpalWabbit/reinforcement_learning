@@ -2,6 +2,12 @@
 
 namespace reinforcement_learning
 {
+#ifdef _WIN32
+const char* const PATH_DELIMITER = "\\";
+#else
+const char* const PATH_DELIMITER = "/";
+#endif
+
 namespace name
 {
 const char* const APP_ID = "appid";
@@ -18,6 +24,8 @@ const char* const LEARNING_MODE = "rank.learning.mode";
 const char* const PROTOCOL_VERSION = "protocol.version";
 const char* const HTTP_API_KEY = "http.api.key";
 const char* const HTTP_API_HEADER_KEY_NAME = "http.api.header.key.name";
+const char* const AUDIT_ENABLED = "audit.enabled";
+const char* const AUDIT_OUTPUT_PATH = "audit.output.path";
 
 // Episode
 const char* const EPISODE_EH_HOST = "episode.eventhub.host";
@@ -125,6 +133,7 @@ const char* const QUEUE_MODE_BLOCK = "BLOCK";
 const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
 const int DEFAULT_VW_POOL_INIT_SIZE = 4;
 const int DEFAULT_PROTOCOL_VERSION = 1;
+const char* const DEFAULT_AUDIT_OUTPUT_PATH = "audit";
 
 const char* get_default_episode_sender();
 const char* get_default_observation_sender();

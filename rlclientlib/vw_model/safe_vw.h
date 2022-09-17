@@ -41,10 +41,16 @@ public:
   bool is_compatible(const std::string& args) const;
   bool is_CB_to_CCB_model_upgrade(const std::string& args) const;
 
+  // audit data is not guaranteed after any subsequent safe_vw calls
+  string_view get_audit_data() const;
+
   static model_management::model_type_t get_model_type(const std::string& args);
   static model_management::model_type_t get_model_type(const VW::config::options_i* args);
 
   friend class safe_vw_factory;
+
+private:
+  void init();
 };
 
 class safe_vw_factory
