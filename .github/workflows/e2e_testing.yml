@@ -46,4 +46,4 @@ jobs:
           cd test_out/
           cat interaction.fbs observation.fbs > combined.fbs
           python3 ../test_tools/log_parser/joiner.py --interactions episode.fbs --observations combined.fbs --output merged.fbs
-          ../build/vw --multistep --binary_parser --cb_explore_adf --epsilon 0.2 --power_t 0 -l 0.001 --cb_type mtr -q :: -d merged.fbs
+          ../build/external_parser/vw --multistep --binary_parser --cb_explore_adf --epsilon 0.2 --power_t 0 -l 0.001 --cb_type mtr -q :: -d merged.fbs
