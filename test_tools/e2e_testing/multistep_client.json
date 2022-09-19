@@ -11,6 +11,5 @@
   "LearningMode": "Online",
   "model.source": "FILE_MODEL_DATA",
   "protocol.version":"2",
-  "vw.pool.init.size": 1,
   "model.vw.initial_command_line": "--cb_explore_adf --epsilon 0.2 --power_t 0 -l 0.001 --cb_type mtr -q ::"
   }

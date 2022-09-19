@@ -1,5 +1,22 @@
 #! /usr/bin/env python3 -W ignore::DeprecationWarning
 
+# Generate FB serializers if they are not available
+try:
+    import reinforcement_learning.messages.flatbuff.v2.EventBatch
+except Exception as e:
+    import pathlib
+    import subprocess
+
+    script_dir = pathlib.Path(__file__).parent.absolute()
+    input_dir = (
+        pathlib.Path(script_dir).parents[1].joinpath("rlclientlib", "schema", "v2")
+    )
+
+    input_files = " ".join([str(x) for x in input_dir.glob("*.fbs")])
+    subprocess.run(
+        f"flatc --python {input_files}", cwd=script_dir, shell=True, check=True
+    )
+
 from reinforcement_learning.messages.flatbuff.v2.EventBatch import *
 from reinforcement_learning.messages.flatbuff.v2.BatchMetadata import *
 from reinforcement_learning.messages.flatbuff.v2.EventBatch import *
