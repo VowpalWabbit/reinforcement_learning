@@ -22,8 +22,7 @@ std::string joint::get_features()
 
 float joint::get_outcome(float observed_friction, uint64_t& random_seed)
 {
-  int const draw_uniform = rand48(random_seed) % 10000;
-  float const norm_draw_val = static_cast<float>(draw_uniform) / 100000.0f;
+  float const norm_draw_val = rand48(random_seed);
   float click_prob = 0.;
 
   // figure out which bucket from our pre-set frictions the observed_friction

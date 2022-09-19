@@ -9,6 +9,7 @@
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <thread>
+#include <cmath>
 
 using namespace std;
 
@@ -162,7 +163,6 @@ int rl_sim::multistep_loop()
 
     std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
-
   return 0;
 }
 
@@ -320,9 +320,15 @@ int rl_sim::slates_loop()
   return 0;
 }
 
-person& rl_sim::pick_a_random_person() { return _people[rand48(_random_seed) % _people.size()]; }
+person& rl_sim::pick_a_random_person() {
+  size_t idx = static_cast<size_t>(rand48(_random_seed) * (_people.size() + 1));
+  return _people[std::min(idx, _people.size() - 1)];
+}
 
-joint& rl_sim::pick_a_random_joint() { return _robot_joints[rand48(_random_seed) % _robot_joints.size()]; }
+joint& rl_sim::pick_a_random_joint() {
+  size_t idx = static_cast<size_t>(rand48(_random_seed) * (_robot_joints.size() + 1));
+  return _robot_joints[std::min(idx, _robot_joints.size() - 1)];
+}
 
 int rl_sim::load_config_from_json(const std::string& file_name, u::configuration& config, r::api_status* status)
 {
@@ -520,7 +526,10 @@ std::string rl_sim::create_context_json(const std::string& cntxt, const std::str
 
 std::string rl_sim::create_event_id() {
   if(_num_events > 0 && ++_current_events >= _num_events) { _run_loop = false; }
-  return boost::uuids::to_string(boost::uuids::random_generator()());
+  std::ostringstream oss;
+  oss << "event_" << _current_events;
+  return oss.str();
+  //return boost::uuids::to_string(boost::uuids::random_generator()());
 }
 
 rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm)), _loop_kind(CB)

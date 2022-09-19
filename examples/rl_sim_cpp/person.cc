@@ -29,8 +29,7 @@ std::string person::get_features() const
 
 float person::get_outcome(const std::string& chosen_action, uint64_t& random_seed)
 {
-  int const draw_uniform = rand48(random_seed) % 10000;
-  float const norm_draw_val = static_cast<float>(draw_uniform) / 10000.0f;
+  float const norm_draw_val = rand48(random_seed);
   float const click_prob = _topic_click_probability[chosen_action];
   if (norm_draw_val <= click_prob) { return 1.0f; }
   return 0.0f;
