@@ -46,7 +46,7 @@ from reinforcement_learning.messages.flatbuff.v2.RewardFunctionType import *
 from reinforcement_learning.messages.flatbuff.v2.ProblemType import *
 
 import flatbuffers
-import zstandard as zstd
+import zstd
 import sys
 import json
 import struct
