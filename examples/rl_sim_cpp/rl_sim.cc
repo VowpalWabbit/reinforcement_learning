@@ -529,11 +529,8 @@ std::string rl_sim::create_context_json(const std::string& cntxt, const std::str
 
 std::string rl_sim::create_event_id()
 {
-  if(_random_ids)
-  {
-    return boost::uuids::to_string(boost::uuids::random_generator()());
-  }
-  
+  if (_random_ids) { return boost::uuids::to_string(boost::uuids::random_generator()()); }
+
   if (_num_events > 0 && ++_current_events >= _num_events) { _run_loop = false; }
   std::ostringstream oss;
   oss << "event_" << _current_events;
