@@ -33,7 +33,7 @@ jobs:
           echo "Generating test inputs"
           mkdir test_out
           cd test_out
-          ../build/examples/rl_sim_cpp/rl_sim_cpp.out --multistep 1 --quiet 1 --num_events 200 --delay 20 --json_config ../test_tools/e2e_testing/multistep_client.json
+          ../build/examples/rl_sim_cpp/rl_sim_cpp.out --multistep 1 --quiet 1 --num_events 1000 --delay 20 --json_config ../test_tools/e2e_testing/multistep_client.json
       - run: |
           echo "Run event file comparison"
           apt update
