@@ -23,7 +23,6 @@ jobs:
       - run: |
           echo "Building RLClientlib"
           cmake -S . -B build -G Ninja \
-          -Drlclientlib_BUILD_ONNXRUNTIME_EXTENSION=On \
           -DFMT_SYS_DEP=ON \
           -DSPDLOG_SYS_DEP=ON \
           -DRL_BUILD_EXTERNAL_PARSER=ON \
@@ -39,7 +38,8 @@ jobs:
           apt update
           apt install -y python3-pip
           pip3 install -r test_tools/e2e_testing/requirements.txt
-          python3 test_tools/e2e_testing/compare_serialized_examples.py --base_dir test_tools/e2e_testing/base_files/multistep --compare_dir test_out --flatc_dir /usr/local/bin/
+          export PATH="$PATH:/usr/local/bin"
+          python3 test_tools/e2e_testing/compare_serialized_examples.py --base_dir test_tools/e2e_testing/base_files/multistep --compare_dir test_out
       - run: |
           echo "Joining and running test"
           export PATH="$PATH:/usr/local/bin"
