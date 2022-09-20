@@ -176,4 +176,5 @@ private:
   uint64_t _random_seed = 0;
   int64_t _delay = 2000;
   bool _quiet = false;
+  bool _random_ids = true;
 };

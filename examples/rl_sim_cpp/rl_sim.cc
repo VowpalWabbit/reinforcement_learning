@@ -529,11 +529,15 @@ std::string rl_sim::create_context_json(const std::string& cntxt, const std::str
 
 std::string rl_sim::create_event_id()
 {
+  if(_random_ids)
+  {
+    return boost::uuids::to_string(boost::uuids::random_generator()());
+  }
+  
   if (_num_events > 0 && ++_current_events >= _num_events) { _run_loop = false; }
   std::ostringstream oss;
   oss << "event_" << _current_events;
   return oss.str();
-  // return boost::uuids::to_string(boost::uuids::random_generator()());
 }
 
 rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm)), _loop_kind(CB)
@@ -556,6 +560,7 @@ rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm
   _random_seed = _options["random_seed"].as<uint64_t>();
   _delay = _options["delay"].as<int64_t>();
   _quiet = _options["quiet"].as<bool>();
+  _random_ids = _options["random_ids"].as<bool>();
 }
 
 std::string get_dist_str(const reinforcement_learning::ranking_response& response)
