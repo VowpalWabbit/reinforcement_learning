@@ -1,6 +1,7 @@
 #pragma once
-#include <cstdint>
 #include <limits.h>
+
+#include <cstdint>
 
 // merand48 copied from VW. Stable random number generator for reproducibility
 constexpr uint64_t CONSTANT_A = 0xeece66d5deece66dULL;

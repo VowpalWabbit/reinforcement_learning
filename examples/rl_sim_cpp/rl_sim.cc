@@ -2,14 +2,14 @@
 #include "live_model.h"
 #include "multistep.h"
 #include "person.h"
+#include "rand48.h"
 #include "rl_sim_cpp.h"
 #include "simulation_stats.h"
-#include "rand48.h"
 
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <thread>
 #include <cmath>
+#include <thread>
 
 using namespace std;
 
@@ -80,7 +80,8 @@ int rl_sim::cb_loop()
 
     stats.record(p.id(), chosen_action, outcome);
 
-    if(!_quiet) {
+    if (!_quiet)
+    {
       std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", outcome, "
                 << outcome << ", dist, " << get_dist_str(response) << ", " << stats.get_stats(p.id(), chosen_action)
                 << std::endl;
@@ -145,7 +146,8 @@ int rl_sim::multistep_loop()
       const auto outcome_per_step = p.get_outcome(_topics[chosen_action], _random_seed);
       stats.record(p.id(), chosen_action, outcome_per_step);
 
-      if(!_quiet) {
+      if (!_quiet)
+      {
         std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", outcome, "
                   << outcome_per_step << ", dist, " << get_dist_str(response) << ", "
                   << stats.get_stats(p.id(), chosen_action) << std::endl;
@@ -190,7 +192,8 @@ int rl_sim::ca_loop()
 
     stats.record(joint.id(), chosen_action, outcome);
 
-    if(!_quiet) {
+    if (!_quiet)
+    {
       std::cout << " " << stats.count() << " - ctxt: " << joint.id() << ", action: " << chosen_action
                 << ", outcome: " << outcome << ", dist: " << response.get_chosen_action_pdf_value() << ", "
                 << stats.get_stats(joint.id(), chosen_action) << std::endl;
@@ -239,9 +242,10 @@ int rl_sim::ccb_loop()
 
       stats.record(p.id(), chosen_action, outcome);
 
-      if(!_quiet) {
-        std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", slot, " << index
-                  << ", outcome, " << outcome << ", dist, " << get_dist_str(response) << ", "
+      if (!_quiet)
+      {
+        std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", slot, "
+                  << index << ", outcome, " << outcome << ", dist, " << get_dist_str(response) << ", "
                   << stats.get_stats(p.id(), chosen_action) << std::endl;
       }
       index++;
@@ -299,9 +303,10 @@ int rl_sim::slates_loop()
       stats.record(event_id, chosen_action, slot_outcome);
       outcome += slot_outcome;
 
-      if(!_quiet) {
-        std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", slot, " << index
-                  << ", outcome, " << outcome << ", dist, " << get_dist_str(response) << ", "
+      if (!_quiet)
+      {
+        std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", slot, "
+                  << index << ", outcome, " << outcome << ", dist, " << get_dist_str(response) << ", "
                   << stats.get_stats(p.id(), chosen_action) << std::endl;
       }
       index++;
@@ -320,12 +325,14 @@ int rl_sim::slates_loop()
   return 0;
 }
 
-person& rl_sim::pick_a_random_person() {
+person& rl_sim::pick_a_random_person()
+{
   size_t idx = static_cast<size_t>(rand48(_random_seed) * (_people.size() + 1));
   return _people[std::min(idx, _people.size() - 1)];
 }
 
-joint& rl_sim::pick_a_random_joint() {
+joint& rl_sim::pick_a_random_joint()
+{
   size_t idx = static_cast<size_t>(rand48(_random_seed) * (_robot_joints.size() + 1));
   return _robot_joints[std::min(idx, _robot_joints.size() - 1)];
 }
@@ -385,10 +392,8 @@ int rl_sim::init_rl()
   }
 
   // Trace log API calls to the console
-  if(!_quiet) {
-    config.set(r::name::TRACE_LOG_IMPLEMENTATION, r::value::CONSOLE_TRACE_LOGGER);
-  }
-  
+  if (!_quiet) { config.set(r::name::TRACE_LOG_IMPLEMENTATION, r::value::CONSOLE_TRACE_LOGGER); }
+
   // Initialize the API
   _rl = std::unique_ptr<r::live_model>(new r::live_model(config, _on_error, this));
   if (_rl->init(&status) != err::success)
@@ -397,9 +402,7 @@ int rl_sim::init_rl()
     return -1;
   }
 
-  if(!_quiet) {
-    std::cout << " API Config " << config;
-  }
+  if (!_quiet) { std::cout << " API Config " << config; }
 
   return err::success;
 }
@@ -524,12 +527,13 @@ std::string rl_sim::create_context_json(const std::string& cntxt, const std::str
   return oss.str();
 }
 
-std::string rl_sim::create_event_id() {
-  if(_num_events > 0 && ++_current_events >= _num_events) { _run_loop = false; }
+std::string rl_sim::create_event_id()
+{
+  if (_num_events > 0 && ++_current_events >= _num_events) { _run_loop = false; }
   std::ostringstream oss;
   oss << "event_" << _current_events;
   return oss.str();
-  //return boost::uuids::to_string(boost::uuids::random_generator()());
+  // return boost::uuids::to_string(boost::uuids::random_generator()());
 }
 
 rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm)), _loop_kind(CB)

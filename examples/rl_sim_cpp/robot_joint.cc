@@ -1,4 +1,5 @@
 #include "robot_joint.h"
+
 #include "rand48.h"
 
 #include <cstdint>
