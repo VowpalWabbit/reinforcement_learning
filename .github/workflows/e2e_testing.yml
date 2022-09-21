@@ -28,10 +28,6 @@ jobs:
           -DRL_BUILD_EXTERNAL_PARSER=ON \
           -DBUILD_BINARY_PARSER_TESTS=OFF
           cmake --build build --target all
-      - uses: actions/upload-artifact@v3
-        with:
-          name: vw-bin
-          path: build/external_parser/vw
       - run: |
           echo "Generating test inputs"
           mkdir test_out
@@ -45,11 +41,18 @@ jobs:
           export PATH="$PATH:/usr/local/bin"
           python3 test_tools/e2e_testing/compare_serialized_examples.py --base_dir test_tools/e2e_testing/base_files/input/multistep --compare_dir test_out
       - run: |
-          echo "Joining and running test"
+          echo "Joining inputs"
           export PATH="$PATH:/usr/local/bin"
           cd test_out/
           cat interaction.fbs observation.fbs > combined.fbs
-          pip3 install vw-executor
           python3 ../test_tools/log_parser/joiner.py --interactions episode.fbs --observations combined.fbs --output merged.fbs
+      - uses: actions/upload-artifact@v3
+        with:
+          name: test_out
+          path: test_out/
+      - run: |
+          echo "Running tests"
+          cd test_out/
           ../build/external_parser/vw --multistep --binary_parser --cb_explore_adf --epsilon 0.2 --power_t 0 -l 0.001 --cb_type mtr -q :: -d merged.fbs > vw_out.log 2>&1
+          pip3 install vw-executor
           python3 ../test_tools/e2e_testing/evaluate_result.py --base_file ../test_tools/e2e_testing/base_files/output/multistep/vw_out.log --compare_file vw_out.log
