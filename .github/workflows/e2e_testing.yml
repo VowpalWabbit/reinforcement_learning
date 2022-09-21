@@ -28,6 +28,10 @@ jobs:
           -DRL_BUILD_EXTERNAL_PARSER=ON \
           -DBUILD_BINARY_PARSER_TESTS=OFF
           cmake --build build --target all
+      - uses: actions/upload-artifact@v3
+        with:
+          name: vw-bin
+          path: build/external_parser/vw
       - run: |
           echo "Generating test inputs"
           mkdir test_out
