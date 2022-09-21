@@ -36,7 +36,7 @@ jobs:
       - run: |
           echo "Run event file comparison"
           apt update
-          apt install -y python3-pip
+          apt install -y python3-pip python3-setuptools
           pip3 install -r test_tools/e2e_testing/requirements.txt
           export PATH="$PATH:/usr/local/bin"
           python3 test_tools/e2e_testing/compare_serialized_examples.py --base_dir test_tools/e2e_testing/base_files/input/multistep --compare_dir test_out
@@ -45,7 +45,6 @@ jobs:
           export PATH="$PATH:/usr/local/bin"
           cd test_out/
           cat interaction.fbs observation.fbs > combined.fbs
-          pip3 install python3-setuptools 
           pip3 install vw-executor
           python3 ../test_tools/log_parser/joiner.py --interactions episode.fbs --observations combined.fbs --output merged.fbs
           ../build/external_parser/vw --multistep --binary_parser --cb_explore_adf --epsilon 0.2 --power_t 0 -l 0.001 --cb_type mtr -q :: -d merged.fbs > vw_out.log 2>&1
