@@ -36,7 +36,7 @@ jobs:
       - run: |
           echo "Run event file comparison"
           apt update
-          apt install -y python3-pip python3-setuptools
+          apt install -y python3-pip python3-setuptools libboost-python-dev
           pip3 install -r test_tools/e2e_testing/requirements.txt
           export PATH="$PATH:/usr/local/bin"
           python3 test_tools/e2e_testing/compare_serialized_examples.py --base_dir test_tools/e2e_testing/base_files/input/multistep --compare_dir test_out
