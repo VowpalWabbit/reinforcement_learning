@@ -30,5 +30,5 @@ finished run
 number of examples = 2000
 weighted example sum = 2000.000000
 weighted label sum = 0.000000
-average loss = -0.149200
+average loss = -0.097400
 total feature number = 280000
