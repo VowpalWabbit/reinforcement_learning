@@ -15,6 +15,14 @@ def main():
     vw_compare = Output(args.compare_file)
 
     if not np.isclose([vw_base.loss], [vw_compare.loss]):
+        print("base.loss_table:")
+        print(vw_base.loss_table)
+        print("base.metrics:")
+        print(vw_base.metrics)
+        print("compare.loss_table:")
+        print(vw_compare.loss_table)
+        print("compare.metrics:")
+        print(vw_compare.metrics)
         raise Exception(f"Loss is different between base and compare: {vw_base.loss} vs. {vw_compare.loss}")
 
     if vw_base.loss_table.shape != vw_compare.loss_table.shape:
