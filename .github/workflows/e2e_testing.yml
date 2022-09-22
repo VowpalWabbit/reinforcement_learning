@@ -46,10 +46,6 @@ jobs:
           cd test_out/
           cat interaction.fbs observation.fbs > combined.fbs
           python3 ../test_tools/log_parser/joiner.py --interactions episode.fbs --observations combined.fbs --output merged.fbs
-      - uses: actions/upload-artifact@v3
-        with:
-          name: test_out
-          path: test_out/
       - run: |
           echo "Running tests"
           cd test_out/
