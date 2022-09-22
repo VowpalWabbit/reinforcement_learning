@@ -371,13 +371,14 @@ for msg in interactions_file.messages():
         events_to_serialize.append(ser_evt.PayloadAsNumpy())
         evt_id = get_event_id(ser_evt)
         if evt_id in observations:
-            for obs in observations[evt_id]:
-                events_to_serialize.append(obs)
+            events_to_serialize.extend(observations[evt_id])
 
-    if verbose:
-        print(f"batch with {len(events_to_serialize)} events")
-        print(f"joining iters with {batch.Metadata().ContentEncoding()}")
-    bin_f.write_join_msg(events_to_serialize)
+            if verbose:
+                print(f"batch with {len(events_to_serialize)} events")
+                print(f"joining iters with {batch.Metadata().ContentEncoding()}")
+            bin_f.write_join_msg(events_to_serialize)
+
+            events_to_serialize = []
 
 bin_f.write_eof()
 

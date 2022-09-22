@@ -200,7 +200,7 @@ def compare_multistep(base, compare):
     if base.ModelId() != compare.ModelId():
         raise Exception("Multistep model IDs do not match")
     if base.DeferredAction() != compare.DeferredAction():
-        raise Exception("Multistep model IDs do not match")
+        raise Exception("Multistep deferred action does not match")
 
 
 def compare_episode(base, compare):
