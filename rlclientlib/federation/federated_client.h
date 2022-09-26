@@ -3,13 +3,12 @@
 #include "future_compat.h"
 #include "model_mgmt.h"
 
-#include <vector>
-#include <string>
 #include <cstdint>
+#include <string>
+#include <vector>
 
 namespace reinforcement_learning
 {
-
 /**
  * @brief Allows an implementation to be configurable based on what kinds of
  * aggregation payloads it supports.
