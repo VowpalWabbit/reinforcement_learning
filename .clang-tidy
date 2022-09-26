@@ -6,6 +6,10 @@
     {
       "key": "performance-move-const-arg.CheckTriviallyCopyableMove",
       "value": "0"
+    },
+    {
+      "key":"readability-identifier-length.IgnoredVariableNames",
+      "value": "t"
     }
   ]
 }
