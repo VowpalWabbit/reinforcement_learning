@@ -139,6 +139,7 @@ set(PROJECT_PUBLIC_HEADERS
 set(PROJECT_PRIVATE_HEADERS
   console_tracer.h
   dedup.h
+  federation/federated_client.h
   generic_event.h
   live_model_impl.h
   logger/async_batcher.h
