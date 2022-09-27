@@ -24,7 +24,7 @@ std::string cb_decision_gen::mk_feature_vector(int count, uint32_t max_idx)
     if (added_idx.find(idx) == added_idx.end())
     {
       if (added > 0) str << ",";
-      str << "\"_" << idx << "_f\":1";
+      str << "\"" << idx << "_f\":1";
 
       ++added;
       added_idx.insert(idx);

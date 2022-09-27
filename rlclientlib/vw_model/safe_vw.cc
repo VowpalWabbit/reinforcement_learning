@@ -22,6 +22,7 @@ static const std::string SEED_TAG = "seed=";
 safe_vw::safe_vw(std::shared_ptr<safe_vw> master) : _master(std::move(master))
 {
   _vw = VW::seed_vw_model(_master->_vw, "", nullptr, nullptr);
+  init();
 }
 
 safe_vw::safe_vw(const char* model_data, size_t len)
@@ -30,6 +31,7 @@ safe_vw::safe_vw(const char* model_data, size_t len)
   buf.add_file(VW::io::create_buffer_view(model_data, len));
 
   _vw = VW::initialize("--quiet --json", &buf, false, nullptr, nullptr);
+  init();
 }
 
 safe_vw::safe_vw(const char* model_data, size_t len, const std::string& vw_commandline)
@@ -38,9 +40,14 @@ safe_vw::safe_vw(const char* model_data, size_t len, const std::string& vw_comma
   buf.add_file(VW::io::create_buffer_view(model_data, len));
 
   _vw = VW::initialize(vw_commandline, &buf, false, nullptr, nullptr);
+  init();
 }
 
-safe_vw::safe_vw(const std::string& vw_commandline) { _vw = VW::initialize(vw_commandline); }
+safe_vw::safe_vw(const std::string& vw_commandline)
+{
+  _vw = VW::initialize(vw_commandline);
+  init();
+}
 
 safe_vw::~safe_vw()
 {
@@ -86,8 +93,17 @@ void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& acti
   // copy due to destructive parsing by rapidjson
   std::string line_vec(context);
 
-  VW::read_line_decision_service_json<false>(
-      *_vw, examples, &line_vec[0], line_vec.size(), false, get_or_create_example_f, this, &interaction);
+  if (_vw->audit)
+  {
+    _vw->audit_buffer->clear();
+    VW::read_line_decision_service_json<true>(
+        *_vw, examples, &line_vec[0], line_vec.size(), false, get_or_create_example_f, this, &interaction);
+  }
+  else
+  {
+    VW::read_line_decision_service_json<false>(
+        *_vw, examples, &line_vec[0], line_vec.size(), false, get_or_create_example_f, this, &interaction);
+  }
 
   // finalize example
   VW::setup_examples(*_vw, examples);
@@ -112,7 +128,15 @@ void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<f
   // copy due to destructive parsing by rapidjson
   std::string line_vec(context);
 
-  VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+  if (_vw->audit)
+  {
+    _vw->audit_buffer->clear();
+    VW::read_line_json_s<true>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+  }
+  else
+  {
+    VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+  }
 
   // finalize example
   VW::setup_examples(*_vw, examples);
@@ -148,7 +172,15 @@ void safe_vw::choose_continuous_action(string_view context, float& action, float
   // copy due to destructive parsing by rapidjson
   std::string line_vec(context);
 
-  VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+  if (_vw->audit)
+  {
+    _vw->audit_buffer->clear();
+    VW::read_line_json_s<true>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+  }
+  else
+  {
+    VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+  }
 
   // finalize example
   VW::setup_examples(*_vw, examples);
@@ -174,7 +206,15 @@ void safe_vw::rank_decisions(const std::vector<const char*>& event_ids, string_v
   // copy due to destructive parsing by rapidjson
   std::string line_vec(context);
 
-  VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+  if (_vw->audit)
+  {
+    _vw->audit_buffer->clear();
+    VW::read_line_json_s<true>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+  }
+  else
+  {
+    VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+  }
 
   // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the
   // example tag.
@@ -223,7 +263,16 @@ void safe_vw::rank_multi_slot_decisions(const char* event_id, const std::vector<
   // copy due to destructive parsing by rapidjson
   std::string line_vec(context);
 
-  VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+  if (_vw->audit)
+  {
+    _vw->audit_buffer->clear();
+    VW::read_line_json_s<true>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+  }
+  else
+  {
+    VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+  }
+
   // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the
   // example tag.
   for (uint32_t i = 0; i < slot_ids.size(); i++)
@@ -316,6 +365,24 @@ bool safe_vw::is_CB_to_CCB_model_upgrade(const std::string& args) const
   const auto inbound_model_type = get_model_type(_vw->options.get());
 
   return local_model_type == mm::model_type_t::CCB && inbound_model_type == mm::model_type_t::CB;
+}
+
+string_view safe_vw::get_audit_data() const
+{
+  if (_vw->audit) { return string_view(_vw->audit_buffer->data(), _vw->audit_buffer->size()); }
+  else
+  {
+    return string_view();
+  }
+}
+
+void safe_vw::init()
+{
+  if (_vw->audit)
+  {
+    _vw->audit_buffer = std::make_shared<std::vector<char>>();
+    _vw->audit_writer = VW::io::create_vector_writer(_vw->audit_buffer);
+  }
 }
 
 safe_vw_factory::safe_vw_factory(std::string command_line) : _command_line(std::move(command_line)) {}

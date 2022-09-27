@@ -140,7 +140,7 @@ int onnx_model::update(const model_management::model_data& data, bool& model_rea
   return error_code::success;
 }
 
-int onnx_model::choose_rank(uint64_t rnd_seed, string_view features, std::vector<int>& action_ids,
+int onnx_model::choose_rank(const char* event_id, uint64_t rnd_seed, string_view features, std::vector<int>& action_ids,
     std::vector<float>& action_pdf, std::string& model_version, api_status* status)
 {
   std::shared_ptr<Ort::Session> local_session = _master_session;
