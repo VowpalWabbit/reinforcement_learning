@@ -49,7 +49,7 @@ struct i_federated_client
    * @param status Contains error information in the event of a failure.
    * @returns Status code
    */
-  virtual RL_ATTR(nodiscard) int try_get_model(const std::string& app_id,
+  RL_ATTR(nodiscard) virtual int try_get_model(const std::string& app_id,
       /* inout */ model_management::model_data& data, /* out */ bool& model_received, api_status* status = nullptr) = 0;
 
   /**
@@ -64,7 +64,7 @@ struct i_federated_client
    * @param status Contains error information in the event of a failure
    * @returns Status code
    */
-  virtual RL_ATTR(nodiscard) int report_result(const std::vector<uint8_t>& payload, api_status* status = nullptr) = 0;
+  RL_ATTR(nodiscard) virtual int report_result(const std::vector<uint8_t>& payload, api_status* status = nullptr) = 0;
 
   /// The supplied payload to report_result must match the expected type.
   RL_ATTR(nodiscard) federated_aggregation_payload_t get_expected_aggregation_payload_type() const noexcept
