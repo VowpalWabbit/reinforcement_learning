@@ -49,7 +49,8 @@ struct i_federated_client
    * @param status Contains error information in the event of a failure.
    * @returns Status code
    */
-  RL_ATTR(nodiscard) virtual int try_get_model(const std::string& app_id,
+  RL_ATTR(nodiscard)
+  virtual int try_get_model(const std::string& app_id,
       /* inout */ model_management::model_data& data, /* out */ bool& model_received, api_status* status = nullptr) = 0;
 
   /**
