@@ -625,7 +625,7 @@ int live_model_impl::explore_only(
   if (S_EXPLORATION_OK != scode)
   { RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration (Swap) error code: " << scode; }
 
-  response.set_chosen_action_id(chosen_index);
+  RETURN_IF_FAIL(response.set_chosen_action_id(chosen_index));
 
   return error_code::success;
 }
@@ -729,7 +729,7 @@ int reset_action_order(ranking_response& response)
 {
   std::sort(response.begin(), response.end(),
       [](const action_prob& a, const action_prob& b) { return a.action_id < b.action_id; });
-  response.set_chosen_action_id((*(response.begin())).action_id);
+  RETURN_IF_FAIL(response.set_chosen_action_id((*(response.begin())).action_id));
 
   return error_code::success;
 }
@@ -757,11 +757,11 @@ int reset_chosen_action_multi_slot(multi_slot_response_detailed& response, const
   for (auto& slot : response)
   {
     if (!baseline_actions.empty() && baseline_actions.size() >= index)
-    { slot.set_chosen_action_id(baseline_actions[index]); }
+    { RETURN_IF_FAIL(slot.set_chosen_action_id(baseline_actions[index])); }
     else
     {
       // implicit baseline is the action corresponding to the slot index
-      slot.set_chosen_action_id(index);
+      RETURN_IF_FAIL(slot.set_chosen_action_id(index));
     }
     ++index;
   }

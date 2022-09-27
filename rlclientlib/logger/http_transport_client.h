@@ -244,6 +244,14 @@ http_transport_client<TAuthorization>::http_transport_client(i_http_client* clie
 template <typename TAuthorization>
 http_transport_client<TAuthorization>::~http_transport_client()
 {
-  while (_tasks.size() != 0) { pop_task(nullptr); }
+  while (_tasks.size() != 0)
+  {
+    auto result = pop_task(nullptr);
+    if(!result)
+    {
+      auto message = utility::concat("Failure in pop_task while running ~http_transport_client. Status: '", result, "'");
+      TRACE_ERROR(_trace, message);
+    }
+  }
 }
 }  // namespace reinforcement_learning
