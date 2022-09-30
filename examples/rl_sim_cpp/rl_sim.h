@@ -59,7 +59,7 @@ private:
    *
    * @return std::string
    */
-  static std::string create_event_id();
+  std::string create_event_id();
 
   /**
    * @brief Pick a person from the list of people.  Use uniform random.
@@ -171,4 +171,10 @@ private:
   const uint8_t NUM_SLATES_SLOTS = 2;
   bool _run_loop = true;
   LoopKind _loop_kind;
+  int _num_events = 0;
+  int _current_events = 0;
+  uint64_t _random_seed = 0;
+  int64_t _delay = 2000;
+  bool _quiet = false;
+  bool _random_ids = true;
 };

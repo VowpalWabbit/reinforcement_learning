@@ -1,0 +1,3 @@
+flatbuffers
+numpy
+zstd
