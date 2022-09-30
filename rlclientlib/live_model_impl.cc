@@ -79,17 +79,17 @@ int live_model_impl::choose_rank(
   // clear previous errors if any
   api_status::try_clear(status);
 
-  // check arguments
-  RETURN_IF_FAIL(check_null_or_empty(event_id, context, _trace_logger.get(), status));
-  if (!_model_ready)
-  {
-    RETURN_IF_FAIL(explore_only(event_id, context, response, status));
-    response.set_model_id("N/A");
-  }
-  else
-  {
+  // // check arguments
+  // RETURN_IF_FAIL(check_null_or_empty(event_id, context, _trace_logger.get(), status));
+  // if (!_model_ready)
+  // {
+  //   RETURN_IF_FAIL(explore_only(event_id, context, response, status));
+  //   response.set_model_id("N/A");
+  // }
+  // else
+  // {
     RETURN_IF_FAIL(explore_exploit(event_id, context, response, status));
-  }
+  // }
   response.set_event_id(event_id);
 
   if (_learning_mode == LOGGINGONLY)
