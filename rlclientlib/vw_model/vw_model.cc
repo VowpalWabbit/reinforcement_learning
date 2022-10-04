@@ -194,7 +194,7 @@ void vw_model::write_audit_log(const char* event_id, string_view audit_buffer) c
 
     std::ofstream auditFile;
     auditFile.open(filepath.str(), std::ofstream::out | std::ofstream::trunc);
-    auditFile.write(audit_buffer.begin(), audit_buffer.size());
+    auditFile.write(audit_buffer.data(), audit_buffer.size());
     auditFile.close();
   }
 }
