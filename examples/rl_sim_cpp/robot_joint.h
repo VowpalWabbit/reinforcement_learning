@@ -10,7 +10,7 @@ public:
   joint(std::string id, float temp, float ang_velocity, float load, friction_prob& outcome_probs);
 
   std::string get_features();
-  float get_outcome(float observed_friction);
+  float get_outcome(float observed_friction, uint64_t& random_seed);
   std::string id() const;
 
 private:

@@ -2,11 +2,13 @@
 #include "live_model.h"
 #include "multistep.h"
 #include "person.h"
+#include "rand48.h"
 #include "rl_sim_cpp.h"
 #include "simulation_stats.h"
 
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <cmath>
 #include <thread>
 
 using namespace std;
@@ -67,7 +69,7 @@ int rl_sim::cb_loop()
     }
 
     // What outcome did this action get?
-    const auto outcome = p.get_outcome(_topics[chosen_action]);
+    const auto outcome = p.get_outcome(_topics[chosen_action], _random_seed);
 
     // Report outcome received
     if (_rl->report_outcome(req_id.c_str(), outcome, &status) != err::success && outcome > 0.00001f)
@@ -78,11 +80,13 @@ int rl_sim::cb_loop()
 
     stats.record(p.id(), chosen_action, outcome);
 
-    std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", outcome, "
-              << outcome << ", dist, " << get_dist_str(response) << ", " << stats.get_stats(p.id(), chosen_action)
-              << std::endl;
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    if (!_quiet)
+    {
+      std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", outcome, "
+                << outcome << ", dist, " << get_dist_str(response) << ", " << stats.get_stats(p.id(), chosen_action)
+                << std::endl;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
 
   return 0;
@@ -103,6 +107,10 @@ int rl_sim::multistep_loop()
 
   const size_t episode_length = 2;
   size_t episode_indx = 0;
+
+  // adjust the event count for the episode length
+  _num_events *= episode_length;
+
   while (_run_loop)
   {
     const std::string episode_id = create_episode_id(episode_indx++);
@@ -135,12 +143,15 @@ int rl_sim::multistep_loop()
         continue;
       }
 
-      const auto outcome_per_step = p.get_outcome(_topics[chosen_action]);
+      const auto outcome_per_step = p.get_outcome(_topics[chosen_action], _random_seed);
       stats.record(p.id(), chosen_action, outcome_per_step);
 
-      std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", outcome, "
-                << outcome_per_step << ", dist, " << get_dist_str(response) << ", "
-                << stats.get_stats(p.id(), chosen_action) << std::endl;
+      if (!_quiet)
+      {
+        std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", outcome, "
+                  << outcome_per_step << ", dist, " << get_dist_str(response) << ", "
+                  << stats.get_stats(p.id(), chosen_action) << std::endl;
+      }
 
       episodic_outcome += outcome_per_step;
       previous_id = req_id;
@@ -152,9 +163,8 @@ int rl_sim::multistep_loop()
       continue;
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
-
   return 0;
 }
 
@@ -176,17 +186,20 @@ int rl_sim::ca_loop()
       continue;
     }
     const auto chosen_action = response.get_chosen_action();
-    const auto outcome = joint.get_outcome(chosen_action);
+    const auto outcome = joint.get_outcome(chosen_action, _random_seed);
     if (_rl->report_outcome(req_id.c_str(), outcome, &status) != err::success && outcome > 0.00001f)
     { std::cout << status.get_error_msg() << std::endl; }
 
     stats.record(joint.id(), chosen_action, outcome);
 
-    std::cout << " " << stats.count() << " - ctxt: " << joint.id() << ", action: " << chosen_action
-              << ", outcome: " << outcome << ", dist: " << response.get_chosen_action_pdf_value() << ", "
-              << stats.get_stats(joint.id(), chosen_action) << std::endl;
+    if (!_quiet)
+    {
+      std::cout << " " << stats.count() << " - ctxt: " << joint.id() << ", action: " << chosen_action
+                << ", outcome: " << outcome << ", dist: " << response.get_chosen_action_pdf_value() << ", "
+                << stats.get_stats(joint.id(), chosen_action) << std::endl;
+    }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
   return 0;
 }
@@ -218,7 +231,7 @@ int rl_sim::ccb_loop()
     for (auto& response : decision)
     {
       const auto chosen_action = response.get_action_id();
-      const auto outcome = p.get_outcome(_topics[chosen_action]);
+      const auto outcome = p.get_outcome(_topics[chosen_action], _random_seed);
 
       // Report outcome received
       if (_rl->report_outcome(event_id.c_str(), index, outcome, &status) != err::success && outcome > 0.00001f)
@@ -229,13 +242,16 @@ int rl_sim::ccb_loop()
 
       stats.record(p.id(), chosen_action, outcome);
 
-      std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", slot, " << index
-                << ", outcome, " << outcome << ", dist, " << get_dist_str(response) << ", "
-                << stats.get_stats(p.id(), chosen_action) << std::endl;
+      if (!_quiet)
+      {
+        std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", slot, "
+                  << index << ", outcome, " << outcome << ", dist, " << get_dist_str(response) << ", "
+                  << stats.get_stats(p.id(), chosen_action) << std::endl;
+      }
       index++;
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
 
   return 0;
@@ -283,14 +299,16 @@ int rl_sim::slates_loop()
     for (auto& response : decision)
     {
       const auto chosen_action = response.get_action_id() + index * actions_per_slot;
-      const auto slot_outcome = p.get_outcome(_topics[chosen_action]);  // TODO per-slot weights?
+      const auto slot_outcome = p.get_outcome(_topics[chosen_action], _random_seed);  // TODO per-slot weights?
       stats.record(event_id, chosen_action, slot_outcome);
       outcome += slot_outcome;
 
-      std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", slot, " << index
-                << ", outcome, " << outcome << ", dist, " << get_dist_str(response) << ", "
-                << stats.get_stats(p.id(), chosen_action) << std::endl;
-
+      if (!_quiet)
+      {
+        std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", slot, "
+                  << index << ", outcome, " << outcome << ", dist, " << get_dist_str(response) << ", "
+                  << stats.get_stats(p.id(), chosen_action) << std::endl;
+      }
       index++;
     }
 
@@ -301,15 +319,23 @@ int rl_sim::slates_loop()
       continue;
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
 
   return 0;
 }
 
-person& rl_sim::pick_a_random_person() { return _people[rand() % _people.size()]; }
+person& rl_sim::pick_a_random_person()
+{
+  size_t idx = static_cast<size_t>(rand48(_random_seed) * (_people.size() + 1));
+  return _people[std::min(idx, _people.size() - 1)];
+}
 
-joint& rl_sim::pick_a_random_joint() { return _robot_joints[rand() % _robot_joints.size()]; }
+joint& rl_sim::pick_a_random_joint()
+{
+  size_t idx = static_cast<size_t>(rand48(_random_seed) * (_robot_joints.size() + 1));
+  return _robot_joints[std::min(idx, _robot_joints.size() - 1)];
+}
 
 int rl_sim::load_config_from_json(const std::string& file_name, u::configuration& config, r::api_status* status)
 {
@@ -366,7 +392,7 @@ int rl_sim::init_rl()
   }
 
   // Trace log API calls to the console
-  config.set(r::name::TRACE_LOG_IMPLEMENTATION, r::value::CONSOLE_TRACE_LOGGER);
+  if (!_quiet) { config.set(r::name::TRACE_LOG_IMPLEMENTATION, r::value::CONSOLE_TRACE_LOGGER); }
 
   // Initialize the API
   _rl = std::unique_ptr<r::live_model>(new r::live_model(config, _on_error, this));
@@ -376,7 +402,7 @@ int rl_sim::init_rl()
     return -1;
   }
 
-  std::cout << " API Config " << config;
+  if (!_quiet) { std::cout << " API Config " << config; }
 
   return err::success;
 }
@@ -501,7 +527,16 @@ std::string rl_sim::create_context_json(const std::string& cntxt, const std::str
   return oss.str();
 }
 
-std::string rl_sim::create_event_id() { return boost::uuids::to_string(boost::uuids::random_generator()()); }
+std::string rl_sim::create_event_id()
+{
+  if (_num_events > 0 && ++_current_events >= _num_events) { _run_loop = false; }
+
+  if (_random_ids) { return boost::uuids::to_string(boost::uuids::random_generator()()); }
+
+  std::ostringstream oss;
+  oss << "event_" << _current_events;
+  return oss.str();
+}
 
 rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm)), _loop_kind(CB)
 {
@@ -518,6 +553,12 @@ rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm
   {
     _loop_kind = Multistep;
   }
+
+  _num_events = _options["num_events"].as<int>();
+  _random_seed = _options["random_seed"].as<uint64_t>();
+  _delay = _options["delay"].as<int64_t>();
+  _quiet = _options["quiet"].as<bool>();
+  _random_ids = _options["random_ids"].as<bool>();
 }
 
 std::string get_dist_str(const reinforcement_learning::ranking_response& response)

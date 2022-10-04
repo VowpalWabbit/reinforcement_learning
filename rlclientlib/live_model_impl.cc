@@ -68,6 +68,7 @@ int live_model_impl::init(api_status* status)
   _initial_epsilon = _configuration.get_float(name::INITIAL_EPSILON, 0.2f);
   const char* app_id = _configuration.get(name::APP_ID, "");
   _seed_shift = VW::uniform_hash(app_id, strlen(app_id), 0);
+
   return error_code::success;
 }
 
@@ -647,7 +648,7 @@ int live_model_impl::explore_only(
   if (S_EXPLORATION_OK != scode)
   { RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration (Swap) error code: " << scode; }
 
-  response.set_chosen_action_id(chosen_index);
+  RETURN_IF_FAIL(response.set_chosen_action_id(chosen_index));
 
   return error_code::success;
 }
@@ -662,7 +663,7 @@ int live_model_impl::explore_exploit(
   std::vector<float> action_pdf;
   std::string model_version;
 
-  RETURN_IF_FAIL(_model->choose_rank(seed, context, action_ids, action_pdf, model_version, status));
+  RETURN_IF_FAIL(_model->choose_rank(event_id, seed, context, action_ids, action_pdf, model_version, status));
 
   return sample_and_populate_response(
       seed, action_ids, action_pdf, std::move(model_version), response, _trace_logger.get(), status);
@@ -706,7 +707,7 @@ int live_model_impl::request_episodic_decision(const char* event_id, const char*
   const std::string context_patched = history.get_context(previous_id, context_json);
 
   RETURN_IF_FAIL(_model->choose_rank_multistep(
-      seed, context_patched.c_str(), history, action_ids, action_pdf, model_version, status));
+      event_id, seed, context_patched.c_str(), history, action_ids, action_pdf, model_version, status));
   RETURN_IF_FAIL(sample_and_populate_response(
       seed, action_ids, action_pdf, std::move(model_version), resp, _trace_logger.get(), status));
 
@@ -751,7 +752,7 @@ int reset_action_order(ranking_response& response)
 {
   std::sort(response.begin(), response.end(),
       [](const action_prob& a, const action_prob& b) { return a.action_id < b.action_id; });
-  response.set_chosen_action_id((*(response.begin())).action_id);
+  RETURN_IF_FAIL(response.set_chosen_action_id((*(response.begin())).action_id));
 
   return error_code::success;
 }
@@ -779,11 +780,11 @@ int reset_chosen_action_multi_slot(multi_slot_response_detailed& response, const
   for (auto& slot : response)
   {
     if (!baseline_actions.empty() && baseline_actions.size() >= index)
-    { slot.set_chosen_action_id(baseline_actions[index]); }
+    { RETURN_IF_FAIL(slot.set_chosen_action_id(baseline_actions[index])); }
     else
     {
       // implicit baseline is the action corresponding to the slot index
-      slot.set_chosen_action_id(index);
+      RETURN_IF_FAIL(slot.set_chosen_action_id(index));
     }
     ++index;
   }

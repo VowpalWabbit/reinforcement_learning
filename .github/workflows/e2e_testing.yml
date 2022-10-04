@@ -1,0 +1,54 @@
+name: RLClientLib End-to-end testing
+
+on:
+  push:
+    branches:
+      - master
+      - 'releases/**'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build-linux:
+    name: rlclientlib.ubuntu18.04
+    container:
+      image: vowpalwabbit/rl-ubuntu-1804:latest
+    runs-on: ubuntu-latest
+    steps:
+      # v1 must be used because newer versions require a node.js version that will not run on this old image.
+      - uses: actions/checkout@v1
+        with:
+          submodules: recursive
+      - run: |
+          echo "Building RLClientlib"
+          cmake -S . -B build -G Ninja \
+          -DFMT_SYS_DEP=ON \
+          -DSPDLOG_SYS_DEP=ON \
+          -DRL_BUILD_EXTERNAL_PARSER=ON \
+          -DBUILD_BINARY_PARSER_TESTS=OFF
+          cmake --build build --target all
+      - run: |
+          echo "Generating test inputs"
+          mkdir test_out
+          cd test_out
+          ../build/examples/rl_sim_cpp/rl_sim_cpp.out --multistep 1 --quiet 1 --num_events 1000 --delay 20 --random_seed 0 --random_ids 0 --json_config ../test_tools/e2e_testing/multistep_client.json
+      - run: |
+          echo "Run event file comparison"
+          apt update
+          apt install -y python3-pip python3-setuptools libboost-python-dev
+          pip3 install -r test_tools/e2e_testing/requirements.txt
+          export PATH="$PATH:/usr/local/bin"
+          python3 test_tools/e2e_testing/compare_serialized_examples.py --base_dir test_tools/e2e_testing/base_files/input/multistep --compare_dir test_out
+      - run: |
+          echo "Joining inputs"
+          export PATH="$PATH:/usr/local/bin"
+          cd test_out/
+          cat interaction.fbs observation.fbs > combined.fbs
+          python3 ../test_tools/log_parser/joiner.py --interactions episode.fbs --observations combined.fbs --output merged.fbs
+      - run: |
+          echo "Running tests"
+          cd test_out/
+          ../build/external_parser/vw --multistep --binary_parser --cb_explore_adf --epsilon 0.2 --power_t 0 -l 0.001 --cb_type mtr -q :: -d merged.fbs > vw_out.log 2>&1
+          pip3 install vw-executor
+          python3 ../test_tools/e2e_testing/evaluate_result.py --base_file ../test_tools/e2e_testing/base_files/output/multistep/vw_out.log --compare_file vw_out.log

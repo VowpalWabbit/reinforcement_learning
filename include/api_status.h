@@ -101,13 +101,13 @@ private:
  * @brief Ends recursion of report_error variadic template with the Last argument
  *
  * @tparam Last type of Last argument to report_error
- * @param os ostringstream that contains serialized error data
+ * @param oss ostringstream that contains serialized error data
  * @param last value of last argument to report_error
  */
 template <typename Last>
-void report_error(std::ostringstream& os, const Last& last)
+void report_error(std::ostringstream& oss, const Last& last)
 {
-  os << last;
+  oss << last;
 }
 
 /**
@@ -115,15 +115,15 @@ void report_error(std::ostringstream& os, const Last& last)
  *
  * @tparam First Type of first parameter to report_error
  * @tparam Rest Rest of the parameter type list
- * @param os ostringstream that contains serialized error data
+ * @param oss ostringstream that contains serialized error data
  * @param first value of the first parameter to report_error
  * @param rest rest of the values to report error
  */
 template <typename First, typename... Rest>
-void report_error(std::ostringstream& os, const First& first, const Rest&... rest)
+void report_error(std::ostringstream& oss, const First& first, const Rest&... rest)
 {
-  os << first;
-  report_error(os, rest...);
+  oss << first;
+  report_error(oss, rest...);
 }
 
 /**
@@ -140,9 +140,9 @@ int report_error(api_status* status, int scode, const All&... all)
 {
   if (status != nullptr)
   {
-    std::ostringstream os;
-    report_error(os, all...);
-    api_status::try_update(status, scode, os.str().c_str());
+    std::ostringstream oss;
+    report_error(oss, all...);
+    api_status::try_update(status, scode, oss.str().c_str());
   }
   return scode;
 }
@@ -152,16 +152,16 @@ int report_error(api_status* status, int scode, const All&... all)
  * @brief left shift operator to serialize types into stringstream held in status_builder
  *
  * @tparam T Type to serialize
- * @param sb Status builder that holds serialized error message
+ * @param sbuilder Status builder that holds serialized error message
  * @param val Error code
  * @return reinforcement_learning::status_builder& Passed in status builder so left shift operators can be chained
  * together.
  */
 template <typename T>
-reinforcement_learning::status_builder& operator<<(reinforcement_learning::status_builder& sb, const T& val)
+reinforcement_learning::status_builder& operator<<(reinforcement_learning::status_builder& sbuilder, const T& val)
 {
-  if (sb._status != nullptr) { sb._os << ", " << val; }
-  return sb;
+  if (sbuilder._status != nullptr) { sbuilder._os << ", " << val; }
+  return sbuilder;
 }
 
 namespace reinforcement_learning
@@ -169,23 +169,23 @@ namespace reinforcement_learning
 /**
  * @brief Terminates recursion of report_error
  *
- * @param sb status_builder that contains the serialized error string
+ * @param sbuilder status_builder that contains the serialized error string
  * @return int Error status
  */
-inline int report_error(status_builder& sb) { return sb; }
+inline int report_error(status_builder& sbuilder) { return sbuilder; }
 
 /**
  * @brief report_error that takes the final paramter
  *
  * @tparam Last Final paramter type
- * @param sb status_builder that contains the serialized error string
+ * @param sbuilder status_builder that contains the serialized error string
  * @param last Final parameter value
  * @return int Error status
  */
 template <typename Last>
-int report_error(status_builder& sb, const Last& last)
+int report_error(status_builder& sbuilder, const Last& last)
 {
-  return sb << last;
+  return sbuilder << last;
 }
 
 /**
@@ -193,55 +193,55 @@ int report_error(status_builder& sb, const Last& last)
  *
  * @tparam First Type of first parameter in parameter list
  * @tparam Rest Tail parameter types in paramter list
- * @param sb status_builder that contains the serialized error string
+ * @param sbuilder status_builder that contains the serialized error string
  * @param first First parameter value
  * @param rest Tail paramter value list
  * @return int Error status
  */
 template <typename First, typename... Rest>
-int report_error(status_builder& sb, const First& first, const Rest&... rest)
+int report_error(status_builder& sbuilder, const First& first, const Rest&... rest)
 {
-  sb << first;
-  return report_error(sb, rest...);
+  sbuilder << first;
+  return report_error(sbuilder, rest...);
 }
 }  // namespace reinforcement_learning
 
 /**
  * @brief Error reporting macro for just returning an error code.
  */
-#define RETURN_ERROR(trace, status, code, ...)                                                            \
-  do                                                                                                      \
-  {                                                                                                       \
-    if (status != nullptr)                                                                                \
-    {                                                                                                     \
-      reinforcement_learning::status_builder sb(trace, status, reinforcement_learning::error_code::code); \
-      sb << reinforcement_learning::error_code::code##_s;                                                 \
-      return report_error(sb);                                                                            \
-    }                                                                                                     \
-    return reinforcement_learning::error_code::code;                                                      \
+#define RETURN_ERROR(trace, status, code, ...)                                                                  \
+  do                                                                                                            \
+  {                                                                                                             \
+    if (status != nullptr)                                                                                      \
+    {                                                                                                           \
+      reinforcement_learning::status_builder sbuilder(trace, status, reinforcement_learning::error_code::code); \
+      sbuilder << reinforcement_learning::error_code::code##_s;                                                 \
+      return report_error(sbuilder);                                                                            \
+    }                                                                                                           \
+    return reinforcement_learning::error_code::code;                                                            \
   } while (0);
 
 /**
  * @brief Error reporting macro that takes a list of parameters
  */
-#define RETURN_ERROR_ARG(trace, status, code, ...)                                                        \
-  do                                                                                                      \
-  {                                                                                                       \
-    if (status != nullptr)                                                                                \
-    {                                                                                                     \
-      reinforcement_learning::status_builder sb(trace, status, reinforcement_learning::error_code::code); \
-      sb << reinforcement_learning::error_code::code##_s;                                                 \
-      return report_error(sb, __VA_ARGS__);                                                               \
-    }                                                                                                     \
-    return reinforcement_learning::error_code::code;                                                      \
+#define RETURN_ERROR_ARG(trace, status, code, ...)                                                              \
+  do                                                                                                            \
+  {                                                                                                             \
+    if (status != nullptr)                                                                                      \
+    {                                                                                                           \
+      reinforcement_learning::status_builder sbuilder(trace, status, reinforcement_learning::error_code::code); \
+      sbuilder << reinforcement_learning::error_code::code##_s;                                                 \
+      return report_error(sbuilder, __VA_ARGS__);                                                               \
+    }                                                                                                           \
+    return reinforcement_learning::error_code::code;                                                            \
   } while (0);
 
 /**
  * @brief Error reporting macro used with left shift operator
  */
-#define RETURN_ERROR_LS(trace, status, code)                                                          \
-  reinforcement_learning::status_builder sb(trace, status, reinforcement_learning::error_code::code); \
-  return sb << reinforcement_learning::error_code::code##_s
+#define RETURN_ERROR_LS(trace, status, code)                                                                \
+  reinforcement_learning::status_builder sbuilder(trace, status, reinforcement_learning::error_code::code); \
+  return sbuilder << reinforcement_learning::error_code::code##_s
 
 /**
  * @brief Error reporting macro to test and return on error
