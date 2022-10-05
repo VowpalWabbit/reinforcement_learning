@@ -1,3 +1,11 @@
+// Windows may define a preprocessor macro named GetObject, which conflicts with RapidJSON
+// Undefine it if it's defined, then include the RapidJSON header
+// This step should come first before all other includes
+#ifdef GetObject
+#  define RL_WINDOWS_GETOBJECT_MACRO_UNDEF
+#  pragma push_macro("GetObject")
+#  undef GetObject
+#endif
 #include "joiners/example_joiner.h"
 
 #include "event_processors/typed_events.h"
@@ -8,6 +16,7 @@
 #include "zstd.h"
 
 #include <limits.h>
+#include <rapidjson/document.h>
 #include <time.h>
 
 #include <algorithm>
@@ -300,12 +309,12 @@ bool example_joiner::process_interaction(
     {
       if (_vw->audit || _vw->hash_inv)
       {
-        VW::template read_line_json_s<true>(*_vw, examples, const_cast<char*>(context.c_str()), context.size(),
+        VW::read_line_json_s<true>(*_vw, examples, const_cast<char*>(context.c_str()), context.size(),
             reinterpret_cast<VW::example_factory_t>(VW::new_unused_example), _vw, &_dedup_cache.dedup_examples);
       }
       else
       {
-        VW::template read_line_json_s<false>(*_vw, examples, const_cast<char*>(context.c_str()), context.size(),
+        VW::read_line_json_s<false>(*_vw, examples, const_cast<char*>(context.c_str()), context.size(),
             reinterpret_cast<VW::example_factory_t>(VW::new_unused_example), _vw, &_dedup_cache.dedup_examples);
       }
     }
@@ -581,3 +590,8 @@ void example_joiner::on_batch_read() {}
 metrics::joiner_metrics example_joiner::get_metrics() { return _joiner_metrics; }
 
 void example_joiner::apply_cli_overrides(VW::workspace*, const VW::external::parser_options&) {}
+
+#ifdef RL_WINDOWS_GETOBJECT_MACRO_UNDEF
+#  undef RL_WINDOWS_GETOBJECT_MACRO_UNDEF
+#  pragma pop_macro("GetObject")
+#endif
