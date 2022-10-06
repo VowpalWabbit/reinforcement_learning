@@ -61,6 +61,12 @@ if(STATIC_LINK_BINARY_PARSER)
   set(STATIC_LINK_VW ON CACHE BOOL "" FORCE)
 endif()
 
+if(RL_USE_UBSAN)
+  # Flatbuffers generated code gives pointer alignment errors with UBSan
+  add_compile_options(-fno-sanitize=alignment)
+  add_link_options(-fno-sanitize=alignment)
+endif()
+
 if(NOT TARGET libzstd_static)
   add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../ext_libs/zstd/build/cmake ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser/zstd EXCLUDE_FROM_ALL)
 endif()
