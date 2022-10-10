@@ -18,6 +18,9 @@ if (NOT CMAKE_BUILD_TYPE AND NOT GENERATOR_IS_MULTI_CONFIG)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+# Set this to on so that tooling can make use of the outputted compile commands (such as clang-tidy)
+set(CMAKE_EXPORT_COMPILE_COMMANDS On)
+
 project(reinforcement_learning)
 
 #set(CMAKE_CXX_STANDARD 11)
@@ -48,7 +51,7 @@ option(RL_USE_ASAN "Compile with AddressSanitizer" OFF)
 option(RL_USE_UBSAN "Compile with UndefinedBehaviorSanitizer" OFF)
 
 if(RL_USE_ASAN)
-  add_compile_definitions(RL_USE_ASAN)
+  add_compile_definitions(RL_USE_ASAN VW_USE_ASAN)
   if(MSVC)
     add_compile_options(/fsanitize=address /GS- /wd5072)
     add_link_options(/InferASanLibs /incremental:no /debug)
@@ -61,7 +64,7 @@ if(RL_USE_ASAN)
 endif()
 
 if(RL_USE_UBSAN)
-  add_compile_definitions(RL_USE_UBSAN)
+  add_compile_definitions(RL_USE_UBSAN VW_USE_UBSAN)
   if(MSVC)
     message(FATAL_ERROR "UBSan not supported on MSVC")
   else()

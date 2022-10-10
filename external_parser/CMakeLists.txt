@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.5)
 if(POLICY CMP0074)
     cmake_policy(SET CMP0074 NEW)
 endif()
+
+# Set this to on so that tooling can make use of the outputted compile commands (such as clang-tidy)
+set(CMAKE_EXPORT_COMPILE_COMMANDS On)
+
 project(vw_binary_parser)
 
 if(DEFINED RL_CXX_STANDARD)
