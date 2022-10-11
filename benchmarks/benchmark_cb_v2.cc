@@ -95,13 +95,3 @@ BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload, 20, 10, 50, 2000, 500, false,
 BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload_compression, 20, 10, 50, 2000, 500, true, false);
 BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload_dedup, 20, 10, 50, 2000, 500, false, true);
 BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload_compression_dedup, 20, 10, 50, 2000, 500, true, true);
-
-BENCHMARK_CAPTURE(bench_cb, extremeley_dedupable_payload, 20, 400, 10, 50, 500, false, false);
-BENCHMARK_CAPTURE(bench_cb, extremeley_dedupable_payload_compression, 20, 400, 10, 50, 500, true, false);
-BENCHMARK_CAPTURE(bench_cb, extremeley_dedupable_payload_dedup, 20, 400, 10, 50, 500, false, true);
-BENCHMARK_CAPTURE(bench_cb, extremeley_dedupable_payload_compression_dedup, 20, 400, 10, 50, 500, true, true);
-
-BENCHMARK_CAPTURE(bench_cb, normal_dedupable_payload, 20, 100, 10, 30, 500, false, false);
-BENCHMARK_CAPTURE(bench_cb, normal_dedupable_payload_compression, 20, 100, 10, 30, 500, true, false);
-BENCHMARK_CAPTURE(bench_cb, normal_dedupable_payload_dedup, 20, 100, 10, 30, 500, false, true);
-BENCHMARK_CAPTURE(bench_cb, normal_dedupable_payload_compression_dedup, 20, 100, 10, 30, 500, true, true);
