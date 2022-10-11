@@ -18,6 +18,9 @@ if (NOT CMAKE_BUILD_TYPE AND NOT GENERATOR_IS_MULTI_CONFIG)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+# Set this to on so that tooling can make use of the outputted compile commands (such as clang-tidy)
+set(CMAKE_EXPORT_COMPILE_COMMANDS On)
+
 project(reinforcement_learning)
 
 #set(CMAKE_CXX_STANDARD 11)
@@ -44,6 +47,31 @@ option(RL_OPENSSL_SYS_DEP "Use system-wide openssl library" ON)
 option(RL_CPPRESTSDK_SYS_DEP "Use system-wide cpprestsdk library" ON)
 option(RL_BUILD_NUGET "Build the Nuget package" OFF)
 option(RL_BUILD_EXTERNAL_PARSER "Build external parser version of VW" OFF)
+option(RL_USE_ASAN "Compile with AddressSanitizer" OFF)
+option(RL_USE_UBSAN "Compile with UndefinedBehaviorSanitizer" OFF)
+
+if(RL_USE_ASAN)
+  add_compile_definitions(RL_USE_ASAN VW_USE_ASAN)
+  if(MSVC)
+    add_compile_options(/fsanitize=address /GS- /wd5072)
+    add_link_options(/InferASanLibs /incremental:no /debug)
+    # Workaround for MSVC ASan issue here: https://developercommunity.visualstudio.com/t/VS2022---Address-sanitizer-on-x86-Debug-/10116361
+    add_compile_definitions(_DISABLE_STRING_ANNOTATION)
+  else()
+    add_compile_options(-fsanitize=address -fno-omit-frame-pointer -g3)
+    add_link_options(-fsanitize=address -fno-omit-frame-pointer -g3)
+  endif()
+endif()
+
+if(RL_USE_UBSAN)
+  add_compile_definitions(RL_USE_UBSAN VW_USE_UBSAN)
+  if(MSVC)
+    message(FATAL_ERROR "UBSan not supported on MSVC")
+  else()
+    add_compile_options(-fsanitize=undefined -fno-sanitize-recover -fno-omit-frame-pointer -g3)
+    add_link_options(-fsanitize=undefined -fno-sanitize-recover -fno-omit-frame-pointer -g3)
+  endif()
+endif()
 
 # For Nuget package don't use system libraries, use vendored ones in ext_libs instead
 if(RL_BUILD_NUGET)

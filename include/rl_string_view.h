@@ -4,6 +4,5 @@
 
 namespace reinforcement_learning
 {
-using nonstd::string_view;
-
+using string_view = nonstd::string_view;
 }

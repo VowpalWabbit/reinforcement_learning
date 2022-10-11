@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(data_callback)
 BOOST_AUTO_TEST_CASE(null_data_callback)
 {
   auto i = -1;
-  using int_cb = data_callback_fn::data_fn_t<int>;
+  using int_cb = void (*)(const model_data&, int*);
   data_callback_fn fn((int_cb) nullptr, &i);
   const auto str = "model data";
 

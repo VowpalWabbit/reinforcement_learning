@@ -31,7 +31,9 @@ jobs:
       # NASM required to compile OpenSSL assembly language code
       - uses: ilammy/setup-nasm@v1
       - name: Dependencies
+        # cd .. to change out of directory with vcpkg.json manifest file
         run: >
+          cd ..;
           vcpkg install
           --host-triplet=x64-windows
           --triplet=x64-windows
@@ -67,6 +69,7 @@ jobs:
           cmake -S . -B build
           -G "Visual Studio 16 2019" -A x64
           -T ${{ matrix.toolset }}
+          -DVCPKG_MANIFEST_MODE=Off
           -DRL_BUILD_NUGET=On
           -DRL_NUGET_PACKAGE_NAME=RLClientLibNativeStatic
           -DRL_NUGET_PACKAGE_VERSION="${{ steps.get_version.outputs.version }}"

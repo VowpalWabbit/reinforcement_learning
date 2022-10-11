@@ -432,6 +432,29 @@ live_model_impl::live_model_impl(const utility::configuration& config, const err
   _learning_mode = learning::to_learning_mode(_configuration.get(name::LEARNING_MODE, value::LEARNING_MODE_ONLINE));
 }
 
+live_model_impl::live_model_impl(const utility::configuration& config, std::function<void(const api_status&)> error_cb,
+    trace_logger_factory_t* trace_factory, data_transport_factory_t* t_factory, model_factory_t* m_factory,
+    sender_factory_t* sender_factory, time_provider_factory_t* time_provider_factory)
+    : _configuration(config)
+    , _error_cb(std::move(error_cb))
+    , _data_cb(_handle_model_update, this)
+    , _watchdog(&_error_cb)
+    , _trace_factory(trace_factory)
+    , _t_factory{t_factory}
+    , _m_factory{m_factory}
+    , _sender_factory{sender_factory}
+    , _time_provider_factory{time_provider_factory}
+    , _protocol_version(_configuration.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
+{
+  if (_configuration.get_bool(name::MODEL_BACKGROUND_REFRESH, value::DEFAULT_MODEL_BACKGROUND_REFRESH))
+  {
+    _bg_model_proc.reset(new utility::periodic_background_proc<model_management::model_downloader>(
+        config.get_int(name::MODEL_REFRESH_INTERVAL_MS, 60 * 1000), _watchdog, "Model downloader", &_error_cb));
+  }
+
+  _learning_mode = learning::to_learning_mode(_configuration.get(name::LEARNING_MODE, value::LEARNING_MODE_ONLINE));
+}
+
 int live_model_impl::init_trace(api_status* status)
 {
   const auto* const trace_impl = _configuration.get(name::TRACE_LOG_IMPLEMENTATION, value::NULL_TRACE_LOGGER);

@@ -39,14 +39,13 @@ struct payload_serializer
 
 struct cb_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CB>
 {
-  static generic_event::payload_buffer_t event(const char* context, unsigned int flags,
+  static generic_event::payload_buffer_t event(const std::string& context_str, unsigned int flags,
       v2::LearningModeType learning_mode, const std::vector<uint64_t>& action_ids,
       const std::vector<float>& probabilities, const std::string& model_id)
   {
     flatbuffers::FlatBufferBuilder fbb;
 
     std::vector<unsigned char> _context;
-    std::string context_str(context);
     copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
     auto fb = v2::CreateCbEventDirect(
@@ -58,13 +57,12 @@ struct cb_serializer : payload_serializer<generic_event::payload_type_t::Payload
 
 struct ca_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CA>
 {
-  static generic_event::payload_buffer_t event(const char* context, unsigned int flags, float chosen_action,
+  static generic_event::payload_buffer_t event(const std::string& context_str, unsigned int flags, float chosen_action,
       float chosen_action_pdf_value, const std::string& model_id)
   {
     flatbuffers::FlatBufferBuilder fbb;
 
     std::vector<unsigned char> _context;
-    std::string context_str(context);
     copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
     auto fb = v2::CreateCaEventDirect(
@@ -76,7 +74,7 @@ struct ca_serializer : payload_serializer<generic_event::payload_type_t::Payload
 
 struct multi_slot_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_Slates>
 {
-  static generic_event::payload_buffer_t event(const char* context, unsigned int flags,
+  static generic_event::payload_buffer_t event(const std::string& context_str, unsigned int flags,
       const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs,
       const std::string& model_version, const std::vector<std::string>& slot_ids,
       const std::vector<int>& baseline_actions, v2::LearningModeType learning_mode)
@@ -85,7 +83,6 @@ struct multi_slot_serializer : payload_serializer<generic_event::payload_type_t:
     std::vector<flatbuffers::Offset<v2::SlotEvent>> slots;
 
     std::vector<unsigned char> _context;
-    std::string context_str(context);
     copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
     for (size_t i = 0; i < action_ids.size(); i++)
@@ -106,7 +103,7 @@ struct dedup_info_serializer : payload_serializer<generic_event::payload_type_t:
     std::vector<flatbuffers::Offset<flatbuffers::String>> vals;
     vals.reserve(object_values.size());
 
-    for (auto sv : object_values) { vals.push_back(fbb.CreateString(sv.begin(), sv.size())); }
+    for (auto sv : object_values) { vals.push_back(fbb.CreateString(sv.data(), sv.size())); }
 
     auto fb = v2::CreateDedupInfoDirect(fbb, &object_ids, &vals);
     fbb.Finish(fb);
@@ -194,14 +191,13 @@ struct outcome_serializer : payload_serializer<generic_event::payload_type_t::Pa
 
 struct multistep_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_MultiStep>
 {
-  static generic_event::payload_buffer_t event(const char* context, const std::string& previous_id, unsigned int flags,
-      const std::vector<uint64_t>& action_ids, const std::vector<float>& probabilities, const std::string& event_id,
-      const std::string& model_id)
+  static generic_event::payload_buffer_t event(const std::string& context_str, const std::string& previous_id,
+      unsigned int flags, const std::vector<uint64_t>& action_ids, const std::vector<float>& probabilities,
+      const std::string& event_id, const std::string& model_id)
   {
     flatbuffers::FlatBufferBuilder fbb;
 
     std::vector<unsigned char> _context;
-    std::string context_str(context);
     copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
     // TODO: we really shouldn't be checking previous_id.empty(). But to preserve behavior

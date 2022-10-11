@@ -1,0 +1,50 @@
+name: AddressSanitizer
+
+on:
+  push:
+    branches:
+      - master
+      - 'releases/**'
+  pull_request:
+    branches:
+      - '*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  test_with_sanitizers:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        preset: [vcpkg-asan-debug, vcpkg-ubsan-debug]
+        exclude:
+          # UBSan not supported by MSVC on Windows
+          - { os: windows-latest, preset: vcpkg-ubsan-debug }
+    runs-on: ${{ matrix.os }}
+    name: asan.${{ matrix.os }}.${{ matrix.preset }}
+    env:
+      UBSAN_OPTIONS: "print_stacktrace=1"
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Setup MSVC Developer Command Prompt
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        uses: ilammy/msvc-dev-cmd@v1
+      - uses: lukka/get-cmake@latest
+      - uses: lukka/run-vcpkg@main
+        with:
+          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
+          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }} -DRL_BUILD_EXTERNAL_PARSER=On
+      - name: Build
+        run: cmake --build build --target rltest binary_parser_unit_tests
+      - name: Run unit tests
+        run: |
+          cd build
+          ctest --verbose --output-on-failure

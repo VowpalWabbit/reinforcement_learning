@@ -58,3 +58,20 @@ BOOST_AUTO_TEST_CASE(exception_in_error_callback)
   fn.report_error(s);  // should not crash
   BOOST_ASSERT(i == -2);
 }
+
+void intptr_error_handler(const api_status& s, int* user_context)
+{
+  BOOST_ASSERT(s.get_error_code() == err);
+  BOOST_CHECK_EQUAL(s.get_error_msg(), err_msg);
+  *user_context = -3;
+}
+
+BOOST_AUTO_TEST_CASE(typed_error_callback)
+{
+  int i = 0;
+  error_callback_fn fn(intptr_error_handler, &i);
+  api_status s;
+  api_status::try_update(&s, err, err_msg);
+  fn.report_error(s);
+  BOOST_ASSERT(i == -3);
+}

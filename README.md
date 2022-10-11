@@ -9,19 +9,31 @@ Interaction-side integration library for Reinforcement Learning loops: Predict, 
 ## Compiling the library
 ### Getting the source code
 ```sh
-git clone https://github.com/VowpalWabbit/reinforcement_learning.git
-git submodule update --init --recursive
+git clone --recursive https://github.com/VowpalWabbit/reinforcement_learning.git
+cd reinforcement_learning
 ```
 
-## Ubuntu
-### Dependencies
+### Building with Vcpkg + CMake Presets
+#### Requirements
+* CMake 3.20+
+* Ninja
+
+#### Commands
+```sh
+cmake --preset=vcpkg-release
+cmake --build --preset=vcpkg-release
+```
+
+## Alternative system-specific build instructions
+### Ubuntu
+#### Dependencies
 Install the dependencies for this project with the following commands. We recommend the use of [vcpkg](https://github.com/microsoft/vcpkg) for installing `cpprestsdk` and `flatbuffers`.
 ```sh
 sudo apt-get install libboost-all-dev libssl-dev
 vcpkg install cpprestsdk flatbuffers
 ```
 
-### Configure + Build
+#### Configure + Build
 When configuring a CMake project using vcpkg dependencies, we must provide the full path to the `vcpkg.cmake` toolchain file.
 ```sh
 # Configure
@@ -35,22 +47,22 @@ cmake --build build --target rltest -j `nproc`
 cmake --build build --target test
 ```
 
-## MacOS
-### Dependencies
+### MacOS
+#### Dependencies
 MacOS dependencies can be managed through homebrew.
 ```sh
 brew install cpprestsdk flatbuffers openssl
 ```
 
-### Configure +  Build
+#### Configure +  Build
 In order to build using homebrew dependencies, you must invoke cmake this way:
 ```sh
 cmake -S . -B build -DOPENSSL_ROOT_DIR=`brew --prefix openssl` -DOPENSSL_LIBRARIES=`brew --prefix openssl`/lib
 cmake --build build --target all -j 4
 ```
 
-## Windows
-### Dependencies
+### Windows
+#### Dependencies
 Dependencies on Windows should be managed using [vcpkg](https://github.com/microsoft/vcpkg).
 ```cmd
 vcpkg install --triplet x64-windows zlib boost-system boost-program-options boost-test boost-align boost-foreach boost-math boost-uuid cpprestsdk flatbuffers openssl
@@ -58,7 +70,7 @@ vcpkg install --triplet x64-windows zlib boost-system boost-program-options boos
 
 If needed, add the flatbuffers executables to your PATH: `<vcpkg_root>\installed\x64-windows\tools\flatbuffers`
 
-### Configure + Build in Visual Studio
+#### Configure + Build in Visual Studio
 Open the project directory in Visual Studio. Building the library can be easily done in the GUI.
 - Edit CMake command line settings with `Project > CMake Settings for <project name>`
 - Run CMake configuration with `Project > Configure Cache`. Use `Project > Delete Cache and Reconfigure` to force a full reconfiguration starting from a clean working directory.
@@ -67,7 +79,7 @@ Open the project directory in Visual Studio. Building the library can be easily 
 
 This procedure has been verified to work well in Visual Studio 2022.
 
-### Configure with command line + Build in Visual Studio
+#### Configure with command line + Build in Visual Studio
 Alternatively, CMake configuration can be done in the command line.
 ```cmd
 cmake -S . -B build  -DCMAKE_TOOLCHAIN_FILE=<vcpkg_root>\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -A x64 -G "Visual Studio 16 2019"
