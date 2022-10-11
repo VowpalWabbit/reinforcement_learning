@@ -1,3 +1,15 @@
+// Windows may define a preprocessor macro named GetObject, which conflicts with RapidJSON
+// Undefine it if it's defined, then include the RapidJSON header
+// This step should come first before all other includes
+// clang-format off
+#ifdef GetObject
+#  define RL_WINDOWS_GETOBJECT_MACRO_UNDEF
+#  pragma push_macro("GetObject")
+#  undef GetObject
+#endif
+#include <rapidjson/document.h>
+// clang-format on
+
 #include "joiners/example_joiner.h"
 
 #include "event_processors/typed_events.h"
