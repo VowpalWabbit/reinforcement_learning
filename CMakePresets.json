@@ -13,7 +13,7 @@
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": {
           "type": "FILEPATH",
-          "value": "${sourceDir}/ext_libs/vowpal_wabbit/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          "value": "${sourceDir}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
         },
         "BUILD_TESTING": {
           "type": "BOOL",
