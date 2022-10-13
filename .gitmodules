@@ -10,3 +10,13 @@
 	path = ext_libs/pybind11
 	url = ../../pybind/pybind11
 	branch = stable
+[submodule "ext_libs/cpprestsdk"]
+	path = ext_libs/cpprestsdk
+	url = https://github.com/microsoft/cpprestsdk.git
+	branch = master
+[submodule "ext_libs/openssl"]
+	path = ext_libs/openssl
+	url = https://github.com/openssl/openssl.git
+[submodule "ext_libs/vcpkg"]
+	path = ext_libs/vcpkg
+	url = https://github.com/microsoft/vcpkg.git

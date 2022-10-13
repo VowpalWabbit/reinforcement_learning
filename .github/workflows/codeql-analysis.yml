@@ -1,0 +1,107 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ master ]
+  schedule:
+    - cron: '26 11 * * 5'
+
+jobs:
+  analyze:
+    name: Analyze
+    container:
+      image: vowpalwabbit/ubuntu2004-dev:latest
+    runs-on: ${{ matrix.config.os }}
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - { language: "cpp", os: ubuntu-latest }
+        - { language: "python", os: ubuntu-latest }
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.config.language }}
+        config-file: ./.github/codeql/codeql-config.yml
+    - name: Install python pip
+      if: matrix.config.language == 'python'
+      shell: bash
+      run: |
+        apt update
+        apt install -y python3-pip
+    - name: Autobuild Python
+      if: matrix.config.language == 'python'
+      uses: github/codeql-action/autobuild@v2
+    - name: Build C++
+      if: matrix.config.language == 'cpp'
+      shell: bash
+      run: |
+        apt update
+        apt install -y ninja-build
+        apt install -y libspdlog-dev libfmt-dev libboost-math-dev
+        cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=Off -DVCPKG_MANIFEST_MODE=Off
+        cmake --build build
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+
+  analyze-csharp:
+    name: Analyze CSharp bindings
+    runs-on: windows-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+    env:
+      SOURCE_DIR: ${{ github.workspace }}/reinforcement_learning
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      # 2022.03.10
+      VCPKG_REF: af2287382b1991dbdcb7e5112d236f3323b9dd7a
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        path: 'reinforcement_learning'
+        submodules: recursive
+    - name: Checkout vcpkg
+      uses: actions/checkout@v3
+      with:
+        path: 'vcpkg'
+        repository: 'microsoft/vcpkg'
+        ref: ${{ env.VCPKG_REF }}
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: csharp
+        config-file: ${{ env.SOURCE_DIR }}/.github/codeql/codeql-config.yml
+    - name: Restore vcpkg and build artifacts
+      uses: actions/cache@v2
+      with:
+        path: |
+          ${{ env.VCPKG_ROOT }}/installed/
+        key: |
+          rl-${{ env.VCPKG_REF }}-windows-2019-vcpkg-cache-invalidate-0
+    - name: msvc-dev-cmd
+      uses: ilammy/msvc-dev-cmd@v1
+    - run: ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
+    - run: ${{ env.SOURCE_DIR }}/.scripts/restore-cmake.cmd
+    - run: ${{ env.SOURCE_DIR }}/.scripts/build-cmake.cmd
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        paths: ${{ env.SOURCE_DIR }}

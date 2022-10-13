@@ -2,7 +2,9 @@ import struct
 from reinforcement_learning.messages.flatbuff.v2.EventBatch import EventBatch
 from reinforcement_learning.messages.flatbuff.v2.Event import Event
 from reinforcement_learning.messages.flatbuff.v2.EventEncoding import EventEncoding
-from reinforcement_learning.messages.flatbuff.v2.LearningModeType import LearningModeType
+from reinforcement_learning.messages.flatbuff.v2.LearningModeType import (
+    LearningModeType,
+)
 from reinforcement_learning.messages.flatbuff.v2.PayloadType import PayloadType
 from reinforcement_learning.messages.flatbuff.v2.OutcomeValue import OutcomeValue
 from reinforcement_learning.messages.flatbuff.v2.NumericOutcome import NumericOutcome
@@ -21,44 +23,59 @@ from reinforcement_learning.messages.flatbuff.v2.JoinedPayload import *
 from reinforcement_learning.messages.flatbuff.v2.CheckpointInfo import *
 from reinforcement_learning.messages.flatbuff.v2.RewardFunctionType import *
 
+
 class Base64Tensor:
     @staticmethod
     def parse(line):
         import numpy as np
         import base64
 
-        prefix, value = line.split(';')
-        #many hacks
-        shape = struct.unpack('4Q', base64.b64decode(prefix))
+        prefix, value = line.split(";")
+        # many hacks
+        shape = struct.unpack("4Q", base64.b64decode(prefix))
         shape = shape[1:]
-        return np.array(struct.unpack('%df' % np.prod(shape), base64.b64decode(value))).reshape(shape)
+        return np.array(
+            struct.unpack("%df" % np.prod(shape), base64.b64decode(value))
+        ).reshape(shape)
 
     @staticmethod
     def parse_dict(context):
-        return dict(map(lambda kv: (kv[0], Base64Tensor.parse(kv[1])), \
-            context.items()))
-    
+        return dict(map(lambda kv: (kv[0], Base64Tensor.parse(kv[1])), context.items()))
+
+
 class CbDsjsonParser:
     @staticmethod
     def parse(line):
         import json
+
         obj = json.loads(line)
-        return {'features': Base64Tensor.parse_dict(obj['c']), 'label': obj['_labelIndex'], 'cost': obj['_label_cost']}
+        return {
+            "features": Base64Tensor.parse_dict(obj["c"]),
+            "label": obj["_labelIndex"],
+            "cost": obj["_label_cost"],
+        }
+
 
 class CbDictParser:
     @staticmethod
     def parse(obj):
         import numpy as np
         import json
+
         # features is a json payload wrapped in a bytearray
-        features = json.loads(obj[0].decode('utf-8'))
+        features = json.loads(obj[0].decode("utf-8"))
         label = obj[1]
         # I think the logs provide 1-indexed values while the train function is expecting 0-indexed
         label = label - 1
         from torch import tensor
-        return {'features': Base64Tensor.parse_dict(features), 'label': label, 'cost': obj[2]}
 
-    
+        return {
+            "features": Base64Tensor.parse_dict(features),
+            "label": label,
+            "cost": obj[2],
+        }
+
+
 MSG_TYPE_HEADER = 0x55555555
 MSG_TYPE_CHECKPOINT = 0x11111111
 MSG_TYPE_REGULAR = 0xFFFFFFFF
@@ -73,12 +90,12 @@ class JoinedLogStreamReader:
         self.read_file_header()
 
     def parse_header(self):
-        if self.buf[0:4] != b'VWFB':
+        if self.buf[0:4] != b"VWFB":
             raise Exception("Invalid file magic")
 
-        self.version = struct.unpack('I', self.buf[4:8])[0]
+        self.version = struct.unpack("I", self.buf[4:8])[0]
         if self.version != 1:
-            raise Exception(f'Unsuported file version {self.version}')
+            raise Exception(f"Unsuported file version {self.version}")
         self.offset = 8
 
     def read(self, size):
@@ -89,27 +106,27 @@ class JoinedLogStreamReader:
         return data
 
     def read_message(self):
-        kind = struct.unpack('I', self.read(4))[0]
-        length = struct.unpack('I', self.read(4))[0]
+        kind = struct.unpack("I", self.read(4))[0]
+        length = struct.unpack("I", self.read(4))[0]
         payload = self.read(length)
-        #discard padding
+        # discard padding
         self.read(length % 8)
         return (kind, payload)
 
     def read_file_header(self):
         msg = self.read_message()
         if msg[0] != MSG_TYPE_HEADER:
-            raise f'Missing file header, found message of type {msg[0]} instead'
+            raise f"Missing file header, found message of type {msg[0]} instead"
 
         header = FileHeader.GetRootAsFileHeader(msg[1], 0)
         for i in range(header.PropertiesLength()):
             p = header.Properties(i)
-            self.headers[p.Key().decode('utf-8')] = p.Value().decode('utf-8')
+            self.headers[p.Key().decode("utf-8")] = p.Value().decode("utf-8")
 
     def checkpoint_info(self):
         msg = self.read_message()
         if msg[0] != MSG_TYPE_CHECKPOINT:
-            raise f'Missing checkpoint info, found message type of {msg[0]} instead'
+            raise f"Missing checkpoint info, found message type of {msg[0]} instead"
         return CheckpointInfo.GetRootAsCheckpointInfo(msg[1], 0)
 
     def messages(self):
@@ -118,9 +135,10 @@ class JoinedLogStreamReader:
             if msg[0] == MSG_TYPE_EOF:
                 break
             if msg[0] != MSG_TYPE_REGULAR:
-                raise f'Expected Regular message type, found {msg[0]} instead'
+                raise f"Expected Regular message type, found {msg[0]} instead"
             yield JoinedPayload.GetRootAsJoinedPayload(msg[1], 0)
         return None
+
 
 # partially ripped from the flatbuf parser
 class VWFlatbufferParser:
@@ -129,7 +147,7 @@ class VWFlatbufferParser:
         self.reader = JoinedLogStreamReader(data)
         self.current_id = None
         self.checkpoint_info = self.reader.checkpoint_info()
-        
+
         self.gen = self.read_event_series()
 
     def __iter__(self):
@@ -137,15 +155,16 @@ class VWFlatbufferParser:
 
     def read_as_string(self, table):
         off = table.Pos
-        length = flatbuffers.encode.Get(flatbuffers.number_types.UOffsetTFlags.packer_type, table.Bytes, off)
+        length = flatbuffers.encode.Get(
+            flatbuffers.number_types.UOffsetTFlags.packer_type, table.Bytes, off
+        )
         start = off + flatbuffers.number_types.UOffsetTFlags.bytewidth
-        return bytes(table.Bytes[start:start+length])
+        return bytes(table.Bytes[start : start + length])
 
     def cast(self, table, tmp_type):
         tmp = tmp_type()
         tmp.Init(table.Bytes, table.Pos)
         return tmp
-
 
     def parse_cb(self, payload):
         evt = CbEvent.GetRootAsCbEvent(payload, 0)
@@ -180,9 +199,10 @@ class VWFlatbufferParser:
         elif reward_fn_type == RewardFunctionType.Earliest:
             return rewards[0]
         elif reward_fn_type == RewardFunctionType.Average:
-            return sum(rewards)/len(rewards)
+            return sum(rewards) / len(rewards)
         elif reward_fn_type == RewardFunctionType.Median:
             from statistics import median
+
             return median(rewards)
         elif reward_fn_type == RewardFunctionType.Sum:
             return sum(rewards)
@@ -192,7 +212,6 @@ class VWFlatbufferParser:
             return max(rewards)
         else:
             raise Exception("Unknown reward function type")
-        
 
     # reads all events associated with the next event_id
     def read_event_series(self, timestamp=None):
@@ -211,14 +230,14 @@ class VWFlatbufferParser:
                 evt = Event.GetRootAsEvent(joined_event, 0)
                 m = evt.Meta()
                 event_payload = evt.PayloadAsNumpy()
-            
+
                 if m.Encoding() == EventEncoding.Zstd:
                     event_payload = zstd.decompress(event_payload)
 
                 if m.PayloadType() == PayloadType.CB:
                     # ew gross
                     if label is not None:
-                        cost = -1*self.apply_reward_fn(rewards)
+                        cost = -1 * self.apply_reward_fn(rewards)
                         yield current_payload, label, cost
                     current_id = m.Id()
                     current_payload, label = self.parse_cb(event_payload)
@@ -232,6 +251,6 @@ class VWFlatbufferParser:
                     raise Exception("Not Implemented")
                     continue
                 else:
-                    raise Exception('unknown payload type')
+                    raise Exception("unknown payload type")
 
         return current_payload, label, cost

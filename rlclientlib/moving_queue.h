@@ -3,39 +3,31 @@
 #include <cstddef>
 #include <queue>
 
-namespace reinforcement_learning {
+namespace reinforcement_learning
+{
+// a moving non-concurrent queue
+template <class T>
+class moving_queue
+{
+  using queue_t = std::queue<T>;
 
-  //a moving non-concurrent queue
-  template <class T>
-  class moving_queue {
-    using queue_t = std::queue<T>;
+  queue_t _queue;
 
-    queue_t _queue;
-
-  public:
-    void pop(T* item)
+public:
+  void pop(T* item)
+  {
+    if (!_queue.empty())
     {
-      if (!_queue.empty())
-      {
-        *item = std::move(_queue.front());
-        _queue.pop();
-      }
+      *item = std::move(_queue.front());
+      _queue.pop();
     }
+  }
 
-    void push(T& item) {
-      push(std::move(item));
-    }
+  void push(T& item) { push(std::move(item)); }
 
-    void push(T&& item)
-    {
-      _queue.push(std::forward<T>(item));
-    }
+  void push(T&& item) { _queue.push(std::forward<T>(item)); }
 
-    //approximate size
-    size_t size()
-    {
-      return _queue.size();
-    }
-  };
-}
-
+  // approximate size
+  size_t size() { return _queue.size(); }
+};
+}  // namespace reinforcement_learning

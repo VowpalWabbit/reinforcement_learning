@@ -1,0 +1,4 @@
+name: "CodeQL config"
+paths-ignore:
+  - bindings/python/docs/
+  - ext_libs/

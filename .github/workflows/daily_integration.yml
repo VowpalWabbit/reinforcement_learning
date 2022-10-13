@@ -12,7 +12,7 @@ on:
     - cron: "0 8 * * *"
 
 jobs:
-  LatestVW:
+  LatestVW_RLClientLib:
     container:
       image: vowpalwabbit/rl-ubuntu-1804:latest
     runs-on: ubuntu-latest
@@ -20,11 +20,12 @@ jobs:
       # v1 must be used because newer versions require a node.js version that will not run on this old image.
       - uses: actions/checkout@v1
         with:
-          submodules: 'true'
+          submodules: recursive
       - name: Update VW to latest
         shell: bash
         run: |
           pushd ext_libs/vowpal_wabbit
+          git config --global --add safe.directory "$(pwd)"
           git pull origin master
           popd
       - name: Build
@@ -33,3 +34,26 @@ jobs:
       - name: Test
         shell: bash
         run: ./.scripts/linux/test.sh
+
+  LatestVW_BinaryParser:
+    container:
+      image: vowpalwabbit/rl-ubuntu-1804:latest
+    runs-on: ubuntu-latest
+    steps:
+      # v1 must be used because newer versions require a node.js version that will not run on this old image.
+      - uses: actions/checkout@v1
+        with:
+          submodules: recursive
+      - name: Update VW to latest
+        shell: bash
+        run: |
+          pushd ext_libs/vowpal_wabbit
+          git config --global --add safe.directory "$(pwd)"
+          git pull origin master
+          popd
+      - name: Build
+        shell: bash
+        run: ./.scripts/linux/build-vw-bp.sh
+      - name: Test
+        shell: bash
+        run: ./.scripts/linux/test-vw-bp.sh
