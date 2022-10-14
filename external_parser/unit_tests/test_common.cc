@@ -43,7 +43,7 @@ void clear_examples(VW::multi_ex& examples, VW::workspace* vw)
 {
   if (vw->l->is_multiline())
   {
-    multi_ex multi_exs;
+    VW::multi_ex multi_exs;
     for (auto* ex : examples) { multi_exs.push_back(ex); }
     vw->finish_example(multi_exs);
     multi_exs.clear();

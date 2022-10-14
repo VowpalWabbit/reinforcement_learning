@@ -58,7 +58,7 @@ class multistep_example_joiner : public i_joiner
 public:
   multistep_example_joiner(VW::workspace* vw);  // TODO rule of 5
 
-  virtual ~multistep_example_joiner();
+  ~multistep_example_joiner() override;
 
   void set_reward_function(const v2::RewardFunctionType type, bool sticky) override;
   void set_default_reward(float default_reward, bool sticky) override;
@@ -97,7 +97,7 @@ private:
   void populate_episodic_rewards();
 
 private:
-  std::vector<example*> _example_pool;
+  std::vector<VW::example*> _example_pool;
 
   VW::workspace* _vw;
   flatbuffers::DetachedBuffer _detached_buffer;

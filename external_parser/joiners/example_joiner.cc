@@ -49,19 +49,19 @@ example_joiner::~example_joiner()
   if (_binary_to_json) { _outfile.close(); }
 }
 
-example* example_joiner::get_or_create_example()
+VW::example* example_joiner::get_or_create_example()
 {
   // alloc new element if we don't have any left
-  if (_example_pool.size() == 0)
+  if (_example_pool.empty())
   {
-    auto ex = VW::alloc_examples(1);
+    auto* ex = VW::alloc_examples(1);
     _vw->example_parser->lbl_parser.default_label(ex->l);
 
     return ex;
   }
 
   // get last element
-  example* ex = _example_pool.back();
+  VW::example* ex = _example_pool.back();
   _example_pool.pop_back();
 
   _vw->example_parser->lbl_parser.default_label(ex->l);
@@ -70,11 +70,14 @@ example* example_joiner::get_or_create_example()
   return ex;
 }
 
-void example_joiner::return_example(example* ex) { _example_pool.push_back(ex); }
+void example_joiner::return_example(VW::example* ex) { _example_pool.push_back(ex); }
 
-example& example_joiner::get_or_create_example_f(void* vw) { return *(((example_joiner*)vw)->get_or_create_example()); }
+VW::example& example_joiner::get_or_create_example_f(void* vw)
+{
+  return *(((example_joiner*)vw)->get_or_create_example());
+}
 
-void example_joiner::return_example_f(void* vw, example* ex) { ((example_joiner*)vw)->return_example(ex); }
+void example_joiner::return_example_f(void* vw, VW::example* ex) { ((example_joiner*)vw)->return_example(ex); }
 
 bool example_joiner::process_event(const v2::JoinedEvent& joined_event)
 {
@@ -174,7 +177,7 @@ void example_joiner::set_reward_function(const v2::RewardFunctionType type, bool
       break;
   }
 
-  if (reward_calculation) { _reward_calculation.set(reward_calculation, sticky); }
+  if (reward_calculation != nullptr) { _reward_calculation.set(reward_calculation, sticky); }
 }
 
 void example_joiner::clear_batch_info()
@@ -340,7 +343,7 @@ bool example_joiner::process_outcome(
     const v2::Event& event, const v2::Metadata& metadata, const TimePoint& enqueued_time_utc)
 {
   reward::outcome_event o_event;
-  o_event.metadata = {metadata.app_id() ? metadata.app_id()->str() : "", metadata.payload_type(),
+  o_event.metadata = {metadata.app_id() != nullptr ? metadata.app_id()->str() : "", metadata.payload_type(),
       metadata.pass_probability(), metadata.encoding(), metadata.id()->str(), v2::LearningModeType_Online};
 
   o_event.enqueued_time_utc = enqueued_time_utc;
@@ -455,8 +458,8 @@ bool example_joiner::process_joined(VW::multi_ex& examples)
 
   for (auto& joined_event : _batch_grouped_events[id])
   {
-    auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
-    auto metadata = event->meta();
+    const auto* event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
+    const auto* metadata = event->meta();
     auto enqueued_time_utc =
         get_enqueued_time(joined_event->timestamp(), metadata->client_time_utc(), _loop_info.use_client_time, logger);
     const auto& payload_type = metadata->payload_type();
@@ -476,7 +479,7 @@ bool example_joiner::process_joined(VW::multi_ex& examples)
   // without having to duplicate the cleanup code
   bool clear_examples = false;
   auto clear_event_id_on_exit = VW::scope_exit([&] {
-    if (je)
+    if (je != nullptr)
     {
       if (_vw->example_parser->metrics)
       {

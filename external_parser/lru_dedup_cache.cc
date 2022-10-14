@@ -1,6 +1,6 @@
 #include "lru_dedup_cache.h"
 
-void lru_dedup_cache::add(uint64_t dedup_id, example* ex)
+void lru_dedup_cache::add(uint64_t dedup_id, VW::example* ex)
 {
   dedup_examples.emplace(dedup_id, ex);
   lru.push_front(dedup_id);
