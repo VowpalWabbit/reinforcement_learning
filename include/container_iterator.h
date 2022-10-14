@@ -10,9 +10,15 @@ namespace reinforcement_learning
  * @brief Forward iterator class used to access the TElem collection
  */
 template <typename TElem, typename TColl = std::vector<TElem>>
-class container_iterator : public std::iterator<std::random_access_iterator_tag, TElem>
+class container_iterator
 {
 public:
+  using iterator_category = std::random_access_iterator_tag;
+  using value_type = TElem;
+  using difference_type = std::ptrdiff_t;
+  using pointer = TElem*;
+  using reference = TElem&;
+
   //! Construct an iterator using container implementation
   container_iterator(TColl& coll) : _coll(coll), _idx(0)
   {
@@ -97,9 +103,15 @@ private:
  * @brief Forward const iterator class used to access the TElem collection
  */
 template <typename TElem, typename TColl = std::vector<TElem>>
-class const_container_iterator : public std::iterator<std::random_access_iterator_tag, TElem>
+class const_container_iterator
 {
 public:
+  using iterator_category = std::random_access_iterator_tag;
+  using value_type = TElem;
+  using difference_type = std::ptrdiff_t;
+  using pointer = const TElem*;
+  using reference = const TElem&;
+
   //! Construct an iterator using container implementation
   const_container_iterator(const TColl& coll) : _coll(coll), _idx(0)
   {

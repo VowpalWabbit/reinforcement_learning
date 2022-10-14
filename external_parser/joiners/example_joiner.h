@@ -21,9 +21,9 @@ public:
   example_joiner(VW::workspace* vw);  // TODO rule of 5
   example_joiner(VW::workspace* vw, bool binary_to_json, std::string outfile_name);
 
-  virtual ~example_joiner();
+  ~example_joiner() override;
 
-  void set_reward_function(const v2::RewardFunctionType type, bool sticky = false) override;
+  void set_reward_function(v2::RewardFunctionType type, bool sticky = false) override;
   void set_default_reward(float default_reward, bool sticky = false) override;
   void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky = false) override;
   void set_problem_type_config(v2::ProblemType problem_type, bool sticky = false) override;
@@ -102,13 +102,13 @@ private:
   void invalidate_joined_event(const std::string& id);
   void clear_vw_examples(VW::multi_ex& examples);
 
-  example* get_or_create_example();
+  VW::example* get_or_create_example();
 
-  static example& get_or_create_example_f(void* vw);
+  static VW::example& get_or_create_example_f(void* vw);
 
-  void return_example(example* ex);
+  void return_example(VW::example* ex);
 
-  static void return_example_f(void* vw, example* ex);
+  static void return_example_f(void* vw, VW::example* ex);
 
   lru_dedup_cache _dedup_cache;
   // from event id to all the information required to create a complete
@@ -118,7 +118,7 @@ private:
   std::unordered_map<std::string, std::vector<const v2::JoinedEvent*>> _batch_grouped_events;
   std::queue<std::string> _batch_event_order;
 
-  std::vector<example*> _example_pool;
+  std::vector<VW::example*> _example_pool;
 
   VW::workspace* _vw;
   flatbuffers::DetachedBuffer _detached_buffer;

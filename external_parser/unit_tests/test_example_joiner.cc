@@ -3,6 +3,7 @@
 #include "joiners/example_joiner.h"
 #include "test_common.h"
 #include "vw/config/options_cli.h"
+#include "vw/core/ccb_reduction_features.h"
 #include "vw/core/reductions/conditional_contextual_bandit.h"
 
 BOOST_AUTO_TEST_CASE(example_joiner_test_ca)
@@ -167,11 +168,11 @@ BOOST_AUTO_TEST_CASE(example_joiner_test_cbb)
   // first example is shared example
   BOOST_CHECK_EQUAL(VW::reductions::ccb::ec_is_example_header(*examples[0]), true);
   // next two examples are actions
-  BOOST_CHECK_EQUAL(examples[1]->l.conditional_contextual_bandit.type == CCB::example_type::action, true);
-  BOOST_CHECK_EQUAL(examples[2]->l.conditional_contextual_bandit.type == CCB::example_type::action, true);
+  BOOST_CHECK_EQUAL(examples[1]->l.conditional_contextual_bandit.type == VW::ccb_example_type::ACTION, true);
+  BOOST_CHECK_EQUAL(examples[2]->l.conditional_contextual_bandit.type == VW::ccb_example_type::ACTION, true);
   // next two examples are slots
-  BOOST_CHECK_EQUAL(examples[3]->l.conditional_contextual_bandit.type == CCB::example_type::slot, true);
-  BOOST_CHECK_EQUAL(examples[4]->l.conditional_contextual_bandit.type == CCB::example_type::slot, true);
+  BOOST_CHECK_EQUAL(examples[3]->l.conditional_contextual_bandit.type == VW::ccb_example_type::SLOT, true);
+  BOOST_CHECK_EQUAL(examples[4]->l.conditional_contextual_bandit.type == VW::ccb_example_type::SLOT, true);
   // last example is empty
   BOOST_CHECK_EQUAL(VW::example_is_newline(*examples[5]), true);
 

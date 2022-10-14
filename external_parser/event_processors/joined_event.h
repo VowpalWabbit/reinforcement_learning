@@ -4,6 +4,7 @@
 // VW headers
 // vw.h has to come before json_utils.h
 // clang-format off
+#include "vw/core/ccb_label.h"
 #include "vw/core/vw.h"
 #include "vw/core/json_utils.h"
 #include "vw/core/example.h"
@@ -25,7 +26,7 @@ struct MultiSlotInteraction
 inline void calculate_multislot_interaction_metrics(
     dsjson_metrics* metrics, MultiSlotInteraction multi_slot_interaction, float first_slot_original_reward_neg)
 {
-  if (metrics)
+  if (metrics != nullptr)
   {
     metrics->DsjsonSumCostOriginalFirstSlot += first_slot_original_reward_neg;
 
@@ -145,9 +146,9 @@ struct cb_joined_event : public typed_joined_event
 
   void calculate_metrics(dsjson_metrics* metrics) override
   {
-    if (metrics)
+    if (metrics != nullptr)
     {
-      if (interaction_data.actions.size() == 0) { metrics->NumberOfEventsZeroActions++; }
+      if (interaction_data.actions.empty()) { metrics->NumberOfEventsZeroActions++; }
       else if (interaction_data.actions[0] == CB_BASELINE_ACTION)
       {
         metrics->DsjsonSumCostOriginalBaseline += -1.f * original_reward;
@@ -166,7 +167,7 @@ struct ccb_joined_event : public typed_joined_event
   std::vector<float> original_rewards;
   std::map<int, std::vector<reward::outcome_event>> outcomes_map;
 
-  ~ccb_joined_event() = default;
+  ~ccb_joined_event() override = default;
   bool is_skip_learn() const override { return multi_slot_interaction.skip_learn; }
   void set_skip_learn(bool sl) override { multi_slot_interaction.skip_learn = sl; }
 
@@ -196,15 +197,15 @@ struct ccb_joined_event : public typed_joined_event
     {
       ex->l.conditional_contextual_bandit.weight = weight;
 
-      if (ex->l.conditional_contextual_bandit.type == CCB::example_type::slot)
+      if (ex->l.conditional_contextual_bandit.type == VW::ccb_example_type::SLOT)
       {
         auto& slot_label = ex->l.conditional_contextual_bandit;
         if (multi_slot_interaction.interaction_data.size() > slot_index)
         {
           const auto& slot_data = multi_slot_interaction.interaction_data[slot_index];
-          if ((slot_data.actions.size() != 0) && (slot_data.probabilities.size() != 0))
+          if (!slot_data.actions.empty() && !slot_data.probabilities.empty())
           {
-            auto outcome = new CCB::conditional_contextual_bandit_outcome();
+            auto* outcome = new VW::ccb_outcome();
 
             if (slot_data.actions.size() != slot_data.probabilities.size())
             {
@@ -244,7 +245,7 @@ struct ccb_joined_event : public typed_joined_event
       return;
     }
 
-    if (slot_id_to_index_map.size() > 0)
+    if (!slot_id_to_index_map.empty())
     {
       for (auto& outcome : outcome_events)
       {
@@ -291,7 +292,7 @@ struct ccb_joined_event : public typed_joined_event
 
   void calculate_metrics(dsjson_metrics* metrics) override
   {
-    if (metrics)
+    if (metrics != nullptr)
     {
       float first_slot_original_reward_neg = 0.f;
       if (!original_rewards.empty()) { first_slot_original_reward_neg = -1.f * original_rewards[0]; }
@@ -313,7 +314,7 @@ struct slates_joined_event : public typed_joined_event
   float reward;
   float original_reward;
 
-  ~slates_joined_event() = default;
+  ~slates_joined_event() override = default;
 
   bool is_skip_learn() const override { return multi_slot_interaction.skip_learn; }
   void set_skip_learn(bool sl) override { multi_slot_interaction.skip_learn = sl; }
@@ -377,7 +378,7 @@ struct slates_joined_event : public typed_joined_event
 
   void calculate_metrics(dsjson_metrics* metrics) override
   {
-    if (metrics)
+    if (metrics != nullptr)
     {
       float original_reward_neg = -1.f * original_reward;
       calculate_multislot_interaction_metrics(metrics, multi_slot_interaction, original_reward_neg);
@@ -403,7 +404,7 @@ struct ca_joined_event : public typed_joined_event
   float reward = 0.0f;
   float original_reward = 0.0f;
 
-  ~ca_joined_event() = default;
+  ~ca_joined_event() override = default;
 
   bool is_skip_learn() const override { return interaction_data.skipLearn; }
 
@@ -440,7 +441,7 @@ struct ca_joined_event : public typed_joined_event
       return false;
     }
 
-    example* ex = examples[0];
+    VW::example* ex = examples[0];
     ex->l.cb_cont.costs.push_back({interaction_data.action, -1.f * reward, interaction_data.pdf_value});
     return true;
   }
@@ -463,7 +464,7 @@ struct ca_joined_event : public typed_joined_event
 
   void calculate_metrics(dsjson_metrics* metrics) override
   {
-    if (metrics && std::isnan(interaction_data.action)) { metrics->NumberOfEventsZeroActions++; }
+    if ((metrics != nullptr) && std::isnan(interaction_data.action)) { metrics->NumberOfEventsZeroActions++; }
   }
 
   float get_sum_original_reward() const override { return original_reward; }
@@ -537,7 +538,7 @@ struct multistep_joined_event
       : interaction_metadata(std::move(mi)), cb_data(std::move(data)), outcome_events({})
   {
   }
-  multistep_joined_event() {}
+  multistep_joined_event() = default;
 
   metadata::event_metadata_info interaction_metadata;
   std::unique_ptr<cb_joined_event> cb_data;

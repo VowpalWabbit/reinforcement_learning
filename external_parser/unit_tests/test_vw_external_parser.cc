@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(ccb_simple)
     BOOST_CHECK_EQUAL(examples[4]->indices[0], 'S');
     BOOST_CHECK_EQUAL(examples[5]->indices.size(), 0);  // newline example
 
-    multi_ex multi_exs;
+    VW::multi_ex multi_exs;
     for (auto* ex : examples) { multi_exs.push_back(ex); }
     vw->learn(multi_exs);
 
@@ -597,7 +597,7 @@ BOOST_AUTO_TEST_CASE(ccb_apprentice_mode)
       size_t slot_idx = 0;
       for (auto* ex : examples)
       {
-        if (ex->l.conditional_contextual_bandit.type == CCB::example_type::slot)
+        if (ex->l.conditional_contextual_bandit.type == VW::ccb_example_type::SLOT)
         {
           // check default cost
           slot_idx++;
@@ -623,7 +623,7 @@ BOOST_AUTO_TEST_CASE(ccb_apprentice_mode)
       size_t slot_idx = 0;
       for (auto* ex : examples)
       {
-        if (ex->l.conditional_contextual_bandit.type == CCB::example_type::slot)
+        if (ex->l.conditional_contextual_bandit.type == VW::ccb_example_type::SLOT)
         {
           slot_idx++;
           if (slot_idx == 1)
