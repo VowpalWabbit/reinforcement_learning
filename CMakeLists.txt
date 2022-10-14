@@ -23,7 +23,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS On)
 
 project(reinforcement_learning)
 
-#set(CMAKE_CXX_STANDARD 11)
 # Add support for building library with latest version of C++ supported by your compiler
 # Copied from VW
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake/")
@@ -120,14 +119,15 @@ include(ext_libs/ext_libs.cmake)
 
 add_subdirectory(rlclientlib)
 add_subdirectory(rlclientlib/extensions)
-add_subdirectory(examples)
-add_subdirectory(test_tools/joiner)
-add_subdirectory(test_tools/sender_test)
-add_subdirectory(test_tools/example_gen)
 
 if(RL_BUILD_EXTERNAL_PARSER)
   add_subdirectory(external_parser)
 endif()
+
+add_subdirectory(examples)
+add_subdirectory(test_tools/joiner)
+add_subdirectory(test_tools/sender_test)
+add_subdirectory(test_tools/example_gen)
 
 # enable_testing should be run after ext_libs so that the vw unit tests arent turned on.
 enable_testing()
