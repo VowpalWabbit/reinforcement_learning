@@ -3,6 +3,7 @@
 #include "joiners/example_joiner.h"
 #include "test_common.h"
 #include "vw/config/options_cli.h"
+#include "vw/core/ccb_reduction_features.h"
 #include "vw/core/parse_primitives.h"
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
@@ -29,6 +30,9 @@ std::vector<float> get_float_rewards(std::string int_file_name, std::string obs_
       break;
     case v2::ProblemType_SLATES:
       command = "--quiet --binary_parser --ccb_explore_adf --slates";
+      break;
+    default:
+      assert(false);
       break;
   }
 
@@ -87,7 +91,7 @@ std::vector<float> get_float_rewards(std::string int_file_name, std::string obs_
 
       for (auto* example : examples)
       {
-        if (example->l.conditional_contextual_bandit.type == CCB::example_type::slot)
+        if (example->l.conditional_contextual_bandit.type == VW::ccb_example_type::SLOT)
         { rewards.push_back(-1.f * example->l.conditional_contextual_bandit.outcome->cost); }
       }
     }
@@ -108,6 +112,9 @@ std::vector<float> get_float_rewards(std::string int_file_name, std::string obs_
       }
     }
     break;
+    default:
+      assert(false);
+      break;
   }
 
   clear_examples(examples, vw.get());

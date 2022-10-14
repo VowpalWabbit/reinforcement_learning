@@ -4,6 +4,7 @@
 #include "parse_example_binary.h"
 #include "test_common.h"
 #include "vw/config/options_cli.h"
+#include "vw/core/ccb_reduction_features.h"
 #include "vw/core/parse_primitives.h"
 #include "vw/core/reductions/conditional_contextual_bandit.h"
 
@@ -65,6 +66,7 @@ void should_add_examples(std::string& infile, v2::ProblemType problem_type = v2:
       command = "--quiet --binary_parser --ccb_explore_adf --slates";
       break;
     default:
+      assert(false);
       break;
   }
 
@@ -100,11 +102,11 @@ void should_add_examples(std::string& infile, v2::ProblemType problem_type = v2:
       // first example is shared example
       BOOST_CHECK_EQUAL(VW::reductions::ccb::ec_is_example_header(*examples[0]), true);
       // next two examples are actions
-      BOOST_CHECK_EQUAL(examples[1]->l.conditional_contextual_bandit.type == CCB::example_type::action, true);
-      BOOST_CHECK_EQUAL(examples[2]->l.conditional_contextual_bandit.type == CCB::example_type::action, true);
+      BOOST_CHECK_EQUAL(examples[1]->l.conditional_contextual_bandit.type == VW::ccb_example_type::ACTION, true);
+      BOOST_CHECK_EQUAL(examples[2]->l.conditional_contextual_bandit.type == VW::ccb_example_type::ACTION, true);
       // next two examples are slots
-      BOOST_CHECK_EQUAL(examples[3]->l.conditional_contextual_bandit.type == CCB::example_type::slot, true);
-      BOOST_CHECK_EQUAL(examples[4]->l.conditional_contextual_bandit.type == CCB::example_type::slot, true);
+      BOOST_CHECK_EQUAL(examples[3]->l.conditional_contextual_bandit.type == VW::ccb_example_type::SLOT, true);
+      BOOST_CHECK_EQUAL(examples[4]->l.conditional_contextual_bandit.type == VW::ccb_example_type::SLOT, true);
       // last example is empty
       BOOST_CHECK_EQUAL(VW::example_is_newline(*examples[5]), true);
       break;
@@ -135,6 +137,9 @@ void should_add_examples(std::string& infile, v2::ProblemType problem_type = v2:
       BOOST_CHECK_EQUAL(examples[8]->indices.size(), 0);  // newline example
 
       set_slates_label(examples);  // set the shared pred label for clear example
+      break;
+    default:
+      assert(false);
       break;
   }
 
