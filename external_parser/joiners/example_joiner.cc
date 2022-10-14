@@ -595,9 +595,7 @@ void example_joiner::on_batch_read() {}
 
 metrics::joiner_metrics example_joiner::get_metrics() { return _joiner_metrics; }
 
-int example_joiner::events_in_queue() {
-  return _batch_event_order.size();
-}
+int example_joiner::events_in_queue() { return _batch_event_order.size(); }
 
 void example_joiner::apply_cli_overrides(VW::workspace*, const VW::external::parser_options&) {}
 

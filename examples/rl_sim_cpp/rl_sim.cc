@@ -376,7 +376,8 @@ int rl_sim::init_rl()
     return -1;
   }
 
-  if(_options["local_loop"].as<bool>()) {
+  if (_options["local_loop"].as<bool>())
+  {
     local_loop = true;
     std::cout << "Using --local_loop, replacing some config vars." << std::endl;
     if (_loop_kind != CB)
@@ -386,22 +387,23 @@ int rl_sim::init_rl()
     }
 
     config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, "LOCAL_MODEL");
-    std::cout << "Setting " << r::name::INTERACTION_SENDER_IMPLEMENTATION << "=LOCAL_MODEL" <<std::endl;
+    std::cout << "Setting " << r::name::INTERACTION_SENDER_IMPLEMENTATION << "=LOCAL_MODEL" << std::endl;
     config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, "LOCAL_MODEL");
-    std::cout << "Setting " << r::name::OBSERVATION_SENDER_IMPLEMENTATION << "=LOCAL_MODEL" <<std::endl;
+    std::cout << "Setting " << r::name::OBSERVATION_SENDER_IMPLEMENTATION << "=LOCAL_MODEL" << std::endl;
     config.set(r::name::MODEL_SRC, "LOCAL_MODEL");
-    std::cout << "Setting " << r::name::MODEL_SRC << "=LOCAL_MODEL" <<std::endl;
+    std::cout << "Setting " << r::name::MODEL_SRC << "=LOCAL_MODEL" << std::endl;
     config.set(r::name::MODEL_IMPLEMENTATION, "VW");
-    std::cout << "Setting " << r::name::MODEL_IMPLEMENTATION << "=VW" <<std::endl;
+    std::cout << "Setting " << r::name::MODEL_IMPLEMENTATION << "=VW" << std::endl;
     config.set(r::name::PROTOCOL_VERSION, "2");
-    std::cout << "Setting " << r::name::PROTOCOL_VERSION << "=2" <<std::endl;
+    std::cout << "Setting " << r::name::PROTOCOL_VERSION << "=2" << std::endl;
     config.set(r::name::OBSERVATION_SEND_BATCH_INTERVAL_MS, "100");
-    std::cout << "Setting " << r::name::OBSERVATION_SEND_BATCH_INTERVAL_MS << "=100" <<std::endl;
+    std::cout << "Setting " << r::name::OBSERVATION_SEND_BATCH_INTERVAL_MS << "=100" << std::endl;
     config.set(r::name::MODEL_REFRESH_INTERVAL_MS, "2000");
-    std::cout << "Setting " << r::name::MODEL_REFRESH_INTERVAL_MS << "=2000" <<std::endl;
+    std::cout << "Setting " << r::name::MODEL_REFRESH_INTERVAL_MS << "=2000" << std::endl;
   }
 
-  if(_options["log_to_file"].as<bool>()) {
+  if (_options["log_to_file"].as<bool>())
+  {
     if (local_loop)
     {
       std::cerr << "--local_loop and --log_to_file can't be used together." << std::endl;
@@ -411,7 +413,8 @@ int rl_sim::init_rl()
     config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
   }
 
-  if (!_options["get_model"].as<bool>()) {
+  if (!_options["get_model"].as<bool>())
+  {
     if (local_loop)
     {
       std::cerr << "--local_loop and --get_model can't be used together." << std::endl;
@@ -429,26 +432,23 @@ int rl_sim::init_rl()
   // Trace log API calls to the console
   if (!_quiet) { config.set(r::name::TRACE_LOG_IMPLEMENTATION, r::value::CONSOLE_TRACE_LOGGER); }
 
-  if(local_loop)
+  if (local_loop)
   {
     _local_model = std::unique_ptr<local_model>(new local_model);
     auto* raw_local_model = _local_model.get();
-    r::data_transport_factory.register_type(
-        "LOCAL_MODEL", [raw_local_model](r::model_management::i_data_transport **retval,
-                           const r::utility::configuration &config,
-                           r::i_trace *trace_logger, r::api_status *status) {
-            raw_local_model->set_trace_logger(trace_logger);
-            *retval = new local_model_proxy(raw_local_model);
-            return 0;
+    r::data_transport_factory.register_type("LOCAL_MODEL",
+        [raw_local_model](r::model_management::i_data_transport** retval, const r::utility::configuration& config,
+            r::i_trace* trace_logger, r::api_status* status) {
+          raw_local_model->set_trace_logger(trace_logger);
+          *retval = new local_model_proxy(raw_local_model);
+          return 0;
         });
-    r::sender_factory.register_type(
-        "LOCAL_MODEL",
-        [raw_local_model](r::i_sender **retval, const r::utility::configuration &config,
-            r::error_callback_fn *error_cb, r::i_trace *trace_logger,
-            r::api_status *status) {
-            raw_local_model->set_trace_logger(trace_logger);
-            *retval = new local_model_proxy(raw_local_model);
-            return 0;
+    r::sender_factory.register_type("LOCAL_MODEL",
+        [raw_local_model](r::i_sender** retval, const r::utility::configuration& config, r::error_callback_fn* error_cb,
+            r::i_trace* trace_logger, r::api_status* status) {
+          raw_local_model->set_trace_logger(trace_logger);
+          *retval = new local_model_proxy(raw_local_model);
+          return 0;
         });
   }
 

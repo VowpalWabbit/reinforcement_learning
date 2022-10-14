@@ -7,9 +7,9 @@
  */
 #pragma once
 #include "live_model.h"
+#include "local_loop.h"
 #include "person.h"
 #include "robot_joint.h"
-#include "local_loop.h"
 
 #include <boost/program_options.hpp>
 
