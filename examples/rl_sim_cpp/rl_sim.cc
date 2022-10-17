@@ -181,11 +181,13 @@ int rl_sim::ca_loop()
     const auto req_id = create_event_id();
     r::api_status status;
 
+    RL_IGNORE_DEPRECATED_USAGE_START
     if (_rl->request_continuous_action(req_id.c_str(), context_json, response, &status) != err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
+    RL_IGNORE_DEPRECATED_USAGE_END
     const auto chosen_action = response.get_chosen_action();
     const auto outcome = joint.get_outcome(chosen_action, _random_seed);
     if (_rl->report_outcome(req_id.c_str(), outcome, &status) != err::success && outcome > 0.00001f)
@@ -222,11 +224,13 @@ int rl_sim::ccb_loop()
     r::api_status status;
 
     // Choose an action
+    RL_IGNORE_DEPRECATED_USAGE_START
     if (_rl->request_multi_slot_decision(event_id.c_str(), context_json, decision, &status) != err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
+    RL_IGNORE_DEPRECATED_USAGE_END
 
     auto index = 0;
     for (auto& response : decision)
@@ -287,11 +291,13 @@ int rl_sim::slates_loop()
     r::api_status status;
 
     // Choose an action
+    RL_IGNORE_DEPRECATED_USAGE_START
     if (_rl->request_multi_slot_decision(event_id.c_str(), context_json.c_str(), decision, &status) != err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
+    RL_IGNORE_DEPRECATED_USAGE_END
 
     float outcome = 0;
     int index = 0;
