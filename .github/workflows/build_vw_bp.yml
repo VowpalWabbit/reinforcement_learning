@@ -19,9 +19,10 @@ jobs:
       # v1 must be used because newer versions require a node.js version that will not run on this old image.
       - uses: actions/checkout@v1
         with:
-          submodules: 'true'
+          submodules: recursive
       - run: ./.scripts/linux/build-vw-bp.sh
       - run: ./.scripts/linux/test-vw-bp.sh
+
   build-linux-valgrind:
     name: binary_parser-valgrind.ubuntu18.04
     container:
@@ -31,19 +32,21 @@ jobs:
       # v1 must be used because newer versions require a node.js version that will not run on this old image.
       - uses: actions/checkout@v1
         with:
-          submodules: 'true'
+          submodules: recursive
       - run: ./.scripts/linux/build-vw-bp.sh
       - run: ./.scripts/linux/unit-tests-vw-bp-valgrind.sh
+
   build-macos:
-    name: binary_parser.macos-10.15
-    runs-on: macos-10.15
+    name: binary_parser.macos-11
+    runs-on: macos-11
     steps:
       - uses: actions/checkout@v2
         with:
-          submodules: 'recursive'
-      - run: ./.scripts/macos/restore.sh
-      - run: ./.scripts/macos/build.sh
-      - run: ./.scripts/macos/test.sh
+          submodules: recursive
+      - run: ./.scripts/macos/restore-vw-bp.sh
+      - run: ./.scripts/macos/build-vw-bp.sh
+      - run: ./.scripts/macos/test-vw-bp.sh
+
   build-windows:
     name: binary_parser.windows-2019
     runs-on: windows-2019
@@ -56,7 +59,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           path: 'reinforcement_learning'
-          submodules: true
+          submodules: recursive
       - uses: actions/checkout@v2
         with:
           path: 'vcpkg'

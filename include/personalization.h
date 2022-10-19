@@ -1,8 +1,8 @@
 #pragma once
-#include "live_model.h"
 #include "api_status.h"
-#include "ranking_response.h"
-#include "configuration.h"
 #include "config_utility.h"
+#include "configuration.h"
+#include "live_model.h"
+#include "ranking_response.h"
 
 namespace personalization = reinforcement_learning;

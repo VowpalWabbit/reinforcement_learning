@@ -2,6 +2,7 @@
 // individual contributors. All rights reserved. Released under a BSD (revised)
 // license as described in the file LICENSE.
 
+#include "parse_example_external.h"
 #include "vw/common/vw_exception.h"
 #include "vw/config/option_group_definition.h"
 #include "vw/config/options.h"
@@ -12,22 +13,20 @@
 #include "vw/core/metric_sink.h"
 #include "vw/core/vw.h"
 
-#include "parse_example_external.h"
-
 #include <iostream>
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
 using namespace VW::config;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[])
+{
   bool should_use_onethread = false;
   std::string log_level;
   std::string log_output_stream;
   option_group_definition driver_config("Driver");
-  driver_config.add(make_option("onethread", should_use_onethread)
-                        .help("Disable parse thread"));
+  driver_config.add(make_option("onethread", should_use_onethread).help("Disable parse thread"));
   driver_config.add(make_option("log_level", log_level)
                         .default_value("info")
                         .hidden()
@@ -45,66 +44,75 @@ int main(int argc, char *argv[]) {
                               "Compat is now deprecated so it is recommended "
                               "that stdout or stderr is chosen"));
 
-  try {
-    auto options = VW::make_unique<options_cli>(
-        std::vector<std::string>(argv + 1, argv + argc));
+  try
+  {
+    auto options = VW::make_unique<options_cli>(std::vector<std::string>(argv + 1, argv + argc));
     options->add_and_parse(driver_config);
     auto all = VW::external::initialize_with_binary_parser(std::move(options));
     all->vw_is_main = true;
 
     auto skip_driver = all->options->get_typed_option<bool>("dry_run").value();
-    if (skip_driver) {
+    if (skip_driver)
+    {
       // Leave deletion up to the unique_ptr
       VW::finish(*all, false);
       return 0;
     }
 
-    if (should_use_onethread) {
-      VW::LEARNER::generic_driver_onethread(*all);
-    } else {
+    if (should_use_onethread) { VW::LEARNER::generic_driver_onethread(*all); }
+    else
+    {
       VW::start_parser(*all);
       VW::LEARNER::generic_driver(*all);
       VW::end_parser(*all);
     }
 
-    if (all->example_parser->exc_ptr) {
-      std::rethrow_exception(all->example_parser->exc_ptr);
-    }
+    if (all->example_parser->exc_ptr) { std::rethrow_exception(all->example_parser->exc_ptr); }
 
     VW::sync_stats(*all);
     // Leave deletion up to the unique_ptr
     VW::finish(*all, false);
-  } catch (const VW::vw_exception &e) {
-    if (log_level != "off") {
-      if (log_output_stream == "compat" || log_output_stream == "stderr") {
-        std::cerr << "[critical] vw (" << e.Filename() << ":" << e.LineNumber()
-                  << "): " << e.what() << std::endl;
-      } else {
-        std::cout << "[critical] vw (" << e.Filename() << ":" << e.LineNumber()
-                  << "): " << e.what() << std::endl;
+  }
+  catch (const VW::vw_exception& e)
+  {
+    if (log_level != "off")
+    {
+      if (log_output_stream == "compat" || log_output_stream == "stderr")
+      { std::cerr << "[critical] vw (" << e.Filename() << ":" << e.LineNumber() << "): " << e.what() << std::endl; }
+      else
+      {
+        std::cout << "[critical] vw (" << e.Filename() << ":" << e.LineNumber() << "): " << e.what() << std::endl;
       }
     }
     return 1;
-  } catch (const std::exception &e) {
+  }
+  catch (const std::exception& e)
+  {
     // vw is implemented as a library, so we use 'throw runtime_error()'
     // error 'handling' everywhere.  To reduce stderr pollution
     // everything gets caught here & the error message is printed
     // sans the excess exception noise, and core dump.
     // TODO: If loggers are instantiated within struct vw, this line lives
     // outside of that. Log as critical for now
-    if (log_level != "off") {
-      if (log_output_stream == "compat" || log_output_stream == "stderr") {
-        std::cerr << "[critical] vw: " << e.what() << std::endl;
-      } else {
+    if (log_level != "off")
+    {
+      if (log_output_stream == "compat" || log_output_stream == "stderr")
+      { std::cerr << "[critical] vw: " << e.what() << std::endl; }
+      else
+      {
         std::cout << "[critical] vw: " << e.what() << std::endl;
       }
     }
     return 1;
-  } catch (...) {
-    if (log_level != "off") {
-      if (log_output_stream == "compat" || log_output_stream == "stderr") {
-        std::cerr << "[critical] Unknown exception occurred" << std::endl;
-      } else {
+  }
+  catch (...)
+  {
+    if (log_level != "off")
+    {
+      if (log_output_stream == "compat" || log_output_stream == "stderr")
+      { std::cerr << "[critical] Unknown exception occurred" << std::endl; }
+      else
+      {
         std::cout << "[critical] vw: unknown exception" << std::endl;
       }
     }

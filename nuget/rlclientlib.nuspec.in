@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<package>
+  <metadata>
+    <id>@RL_NUGET_PACKAGE_NAME@-v@MSVC_TOOLSET_VERSION@-@NATIVE_NUGET_PLATFORM_TAG@</id>
+    <version>@RL_NUGET_PACKAGE_VERSION@</version>
+    <title>Reinforcement Learning Client Library - Static Build</title>
+    <authors>John Langford et al</authors>
+    <license type="expression">MIT</license>
+    <description>RLClientLib is an Interaction-side integration library for Reinforcement Learning loops: Predict, Log, Learn, Update</description>
+    <copyright>Copyright (c) by respective owners including Yahoo!, Microsoft, and individual contributors.</copyright>
+    <tags>native</tags>
+  </metadata>
+  <files>
+      <file src="@RL_NUGET_PACKAGE_NAME@-v@MSVC_TOOLSET_VERSION@-@NATIVE_NUGET_PLATFORM_TAG@.targets" target="build" />
+      <file src="lib\*.lib" target="lib" />
+      <file src="include\rlclientlib\*.h" target="include" />
+      <file src="include\nonstd\*.h" target="include\nonstd" />
+  </files>
+</package>

@@ -24,9 +24,8 @@ jobs:
     steps:
       # v1 must be used because newer versions require a node.js version that will not run on this old image.
       - uses: actions/checkout@v1
-      - name: Clone submodules
-        shell: bash
-        run: git submodule update --init --recursive
+        with:
+          submodules: recursive
       - name: Build wheel
         shell: bash
         run: |
@@ -52,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          submodules: 'recursive'
+          submodules: recursive
       - name: Download Wheel
         uses: actions/download-artifact@v1
         with:

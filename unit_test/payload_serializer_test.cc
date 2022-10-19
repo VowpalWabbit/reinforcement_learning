@@ -1,18 +1,17 @@
 #define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
-#   define BOOST_TEST_MODULE Main
+#  define BOOST_TEST_MODULE Main
 #endif
 
-#include "action_flags.h"
-#include "ranking_response.h"
 #include "serialization/payload_serializer.h"
-
-#include "generated/v2/OutcomeEvent_generated.h"
-#include "generated/v2/CbEvent_generated.h"
-#include "generated/v2/CaEvent_generated.h"
-#include "generated/v2/MultiSlotEvent_generated.h"
-
 #include <boost/test/unit_test.hpp>
+
+#include "action_flags.h"
+#include "generated/v2/CaEvent_generated.h"
+#include "generated/v2/CbEvent_generated.h"
+#include "generated/v2/MultiSlotEvent_generated.h"
+#include "generated/v2/OutcomeEvent_generated.h"
+#include "ranking_response.h"
 
 using namespace reinforcement_learning;
 using namespace reinforcement_learning::logger;
@@ -23,7 +22,8 @@ namespace r = reinforcement_learning;
 
 const float tolerance = 0.00001f;
 
-BOOST_AUTO_TEST_CASE(cb_payload_serializer_test) {
+BOOST_AUTO_TEST_CASE(cb_payload_serializer_test)
+{
   cb_serializer serializer;
   ranking_response rr("event_id");
   rr.set_model_id("model_id");
@@ -33,14 +33,14 @@ BOOST_AUTO_TEST_CASE(cb_payload_serializer_test) {
   std::vector<uint64_t> action_ids;
   std::vector<float> probs;
   std::string model_id(rr.get_model_id());
-  for (auto const& r : rr) {
+  for (auto const& r : rr)
+  {
     action_ids.push_back(r.action_id + 1);
     probs.push_back(r.probability);
   }
 
   const auto buffer = serializer.event(
-    "my_context", action_flags::DEFERRED, v2::LearningModeType_Apprentice, action_ids, probs, model_id
-  );
+      "my_context", action_flags::DEFERRED, v2::LearningModeType_Apprentice, action_ids, probs, model_id);
 
   const auto event = v2::GetCbEvent(buffer.data());
 
@@ -71,13 +71,8 @@ BOOST_AUTO_TEST_CASE(ca_payload_serializer_test)
   response.set_chosen_action_pdf_value(pdf_value);
   response.set_model_id("model_id");
 
-  const auto buffer = serializer.event(
-    "my_context",
-    action_flags::DEFERRED,
-    response.get_chosen_action(),
-    response.get_chosen_action_pdf_value(),
-    response.get_model_id()
-  );
+  const auto buffer = serializer.event("my_context", action_flags::DEFERRED, response.get_chosen_action(),
+      response.get_chosen_action_pdf_value(), response.get_model_id());
 
   const auto event = v2::GetCaEvent(buffer.data());
 
@@ -91,14 +86,16 @@ BOOST_AUTO_TEST_CASE(ca_payload_serializer_test)
   BOOST_CHECK_EQUAL(event->deferred_action(), true);
 }
 
-BOOST_AUTO_TEST_CASE(multi_slot_payload_serializer_test){
+BOOST_AUTO_TEST_CASE(multi_slot_payload_serializer_test)
+{
   multi_slot_serializer serializer;
 
-  vector<vector<uint32_t>> actions{ { 2, 1, 0 }, { 1, 0 }};
-  vector<vector<float>> probs{ { 0.5f, 0.3f, 0.2f }, { 0.8f, 0.2f }};
+  vector<vector<uint32_t>> actions{{2, 1, 0}, {1, 0}};
+  vector<vector<float>> probs{{0.5f, 0.3f, 0.2f}, {0.8f, 0.2f}};
   vector<std::string> slot_ids = {"0", "1"};
-  vector<int> baseline_actions = { 1, 0 };
-  const auto buffer = serializer.event("my_context", action_flags::DEFAULT, actions, probs, "model_id", slot_ids, baseline_actions, v2::LearningModeType_Apprentice);
+  vector<int> baseline_actions = {1, 0};
+  const auto buffer = serializer.event("my_context", action_flags::DEFAULT, actions, probs, "model_id", slot_ids,
+      baseline_actions, v2::LearningModeType_Apprentice);
 
   const auto event = v2::GetMultiSlotEvent(buffer.data());
 
@@ -109,27 +106,26 @@ BOOST_AUTO_TEST_CASE(multi_slot_payload_serializer_test){
   BOOST_CHECK_EQUAL("model_id", event->model_id()->c_str());
 
   const auto& slots = *event->slots();
-  for (flatbuffers::uoffset_t i = 0; i < slots.size(); ++i) {
+  for (flatbuffers::uoffset_t i = 0; i < slots.size(); ++i)
+  {
     BOOST_CHECK_EQUAL(slot_ids[i], slots[i]->id()->str());
     BOOST_CHECK_EQUAL(actions[i].size(), slots[i]->action_ids()->size());
     BOOST_CHECK_EQUAL(probs[i].size(), slots[i]->probabilities()->size());
-    for (flatbuffers::uoffset_t j = 0; j < actions[i].size(); ++j) {
-        BOOST_CHECK_EQUAL(actions[i][j], (*slots[i]->action_ids())[j]);
-    }
-    for (flatbuffers::uoffset_t j = 0; j < probs[i].size(); ++j) {
-        BOOST_CHECK_CLOSE(probs[i][j], (*slots[i]->probabilities())[j], tolerance);
-    }
+    for (flatbuffers::uoffset_t j = 0; j < actions[i].size(); ++j)
+    { BOOST_CHECK_EQUAL(actions[i][j], (*slots[i]->action_ids())[j]); }
+    for (flatbuffers::uoffset_t j = 0; j < probs[i].size(); ++j)
+    { BOOST_CHECK_CLOSE(probs[i][j], (*slots[i]->probabilities())[j], tolerance); }
   }
 
   const auto& baseline = *event->baseline_actions();
-  for (flatbuffers::uoffset_t i = 0; i < baseline_actions.size(); ++i) {
-    BOOST_CHECK_EQUAL(baseline_actions[i], baseline[i]);
-  }
+  for (flatbuffers::uoffset_t i = 0; i < baseline_actions.size(); ++i)
+  { BOOST_CHECK_EQUAL(baseline_actions[i], baseline[i]); }
 
   BOOST_CHECK_EQUAL(false, event->deferred_action());
 }
 
-BOOST_AUTO_TEST_CASE(outcome_string_single_payload_serializer_test) {
+BOOST_AUTO_TEST_CASE(outcome_string_single_payload_serializer_test)
+{
   outcome_serializer serializer;
 
   const auto buffer = serializer.string_event("my_outcome");
@@ -142,7 +138,8 @@ BOOST_AUTO_TEST_CASE(outcome_string_single_payload_serializer_test) {
   BOOST_CHECK_EQUAL("my_outcome", event->value_as_literal()->c_str());
 }
 
-BOOST_AUTO_TEST_CASE(outcome_float_single_payload_serializer_test) {
+BOOST_AUTO_TEST_CASE(outcome_float_single_payload_serializer_test)
+{
   outcome_serializer serializer;
 
   const auto buffer = serializer.numeric_event(1.5);
@@ -155,7 +152,8 @@ BOOST_AUTO_TEST_CASE(outcome_float_single_payload_serializer_test) {
   BOOST_CHECK_CLOSE(1.5, event->value_as_numeric()->value(), tolerance);
 }
 
-BOOST_AUTO_TEST_CASE(outcome_string_indexed_payload_serializer_test) {
+BOOST_AUTO_TEST_CASE(outcome_string_indexed_payload_serializer_test)
+{
   outcome_serializer serializer;
 
   const auto buffer = serializer.string_event(2, "my_outcome");
@@ -169,7 +167,8 @@ BOOST_AUTO_TEST_CASE(outcome_string_indexed_payload_serializer_test) {
   BOOST_CHECK_EQUAL(2, event->index_as_numeric()->index());
 }
 
-BOOST_AUTO_TEST_CASE(outcome_float_indexed_payload_serializer_test) {
+BOOST_AUTO_TEST_CASE(outcome_float_indexed_payload_serializer_test)
+{
   outcome_serializer serializer;
 
   const auto buffer = serializer.numeric_event(2, 1.5);
@@ -183,8 +182,8 @@ BOOST_AUTO_TEST_CASE(outcome_float_indexed_payload_serializer_test) {
   BOOST_CHECK_EQUAL(2, event->index_as_numeric()->index());
 }
 
-
-BOOST_AUTO_TEST_CASE(outcome_float_string_indexed_payload_serializer_test) {
+BOOST_AUTO_TEST_CASE(outcome_float_string_indexed_payload_serializer_test)
+{
   outcome_serializer serializer;
 
   const auto buffer = serializer.numeric_event("index", 1.5);
@@ -198,7 +197,8 @@ BOOST_AUTO_TEST_CASE(outcome_float_string_indexed_payload_serializer_test) {
   BOOST_CHECK_EQUAL("index", event->index_as_literal()->c_str());
 }
 
-BOOST_AUTO_TEST_CASE(outcome_action_taken_payload_serializer_test) {
+BOOST_AUTO_TEST_CASE(outcome_action_taken_payload_serializer_test)
+{
   outcome_serializer serializer;
 
   const auto buffer = serializer.report_action_taken();
@@ -209,7 +209,8 @@ BOOST_AUTO_TEST_CASE(outcome_action_taken_payload_serializer_test) {
   BOOST_CHECK_EQUAL(true, event->action_taken());
 }
 
-BOOST_AUTO_TEST_CASE(dedup_info_serialization_test) {
+BOOST_AUTO_TEST_CASE(dedup_info_serialization_test)
+{
   dedup_info_serializer serializer;
 
   std::vector<std::string> object_vals;

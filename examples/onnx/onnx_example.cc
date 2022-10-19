@@ -1,21 +1,21 @@
-#include <fstream>
-#include <iostream>
-
 #include "config_utility.h"
 #include "configuration.h"
 #include "factory_resolver.h"
 #include "live_model.h"
+#include "onnx_extension.h"
 #include "ranking_response.h"
 
-#include "onnx_extension.h"
+#include <fstream>
+#include <iostream>
 
 namespace r = reinforcement_learning;
 namespace u = reinforcement_learning::utility;
 
-void logging_error_fn(const r::api_status &status, void *) { std::cerr << status.get_error_msg() << std::endl; }
+void logging_error_fn(const r::api_status& status, void*) { std::cerr << status.get_error_msg() << std::endl; }
 
 #define CHECK_EXIT(x)                                   \
-  do {                                                  \
+  do                                                    \
+  {                                                     \
     int retval__LINE__ = (x);                           \
     if (retval__LINE__ != 0)                            \
     {                                                   \
@@ -24,7 +24,7 @@ void logging_error_fn(const r::api_status &status, void *) { std::cerr << status
     }                                                   \
   } while (0)
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
   if (argc != 3)
   {

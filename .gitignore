@@ -16,11 +16,15 @@
 *.csproj.user
 *.VC.db
 .vs
+# VS CMake configuration
+CMakeSettings.json
 
 # Ignore NuGet Packages
 *.nupkg
 # Ignore the packages folder
 **/packages
+# Ignore nuget_staging directory used for building the nuget package
+nuget_staging/
 
 build
 ext_deps
