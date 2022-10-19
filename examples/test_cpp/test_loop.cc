@@ -205,11 +205,13 @@ void test_loop::ccb_loop(size_t thread_id) const
     const auto event_ids_c = to_const_char(event_ids);
     const std::string warmup_id = "_warmup_" + std::string(event_ids[0]);
     const auto context = test_inputs.get_context(0, 0, event_ids);
+    RL_IGNORE_DEPRECATED_USAGE_START
     if (rl->request_decision(context.c_str(), response, &status) != err::success)
     {
       std::cout << "Warmup is failed. " << status.get_error_msg() << std::endl;
       return;
     }
+    RL_IGNORE_DEPRECATED_USAGE_END
 
     r::utility::data_buffer buffer;
     r::logger::fb_collection_serializer<r::decision_ranking_event> serializer(
@@ -238,11 +240,13 @@ void test_loop::ccb_loop(size_t thread_id) const
     const auto event_ids = test_inputs.create_event_ids(thread_id, example_id);
     const auto event_ids_c = to_const_char(event_ids);
     const auto context = test_inputs.get_context(thread_id, example_id, event_ids);
+    RL_IGNORE_DEPRECATED_USAGE_START
     if (rl->request_decision(context.c_str(), response, &status) != err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
+    RL_IGNORE_DEPRECATED_USAGE_END
 
     if (test_inputs.is_rewarded(thread_id, example_id))
     {

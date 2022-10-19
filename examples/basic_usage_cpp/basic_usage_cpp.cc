@@ -126,11 +126,13 @@ int basic_usage_ca()
   // Response class
   r::continuous_action_response response;
 
+  RL_IGNORE_DEPRECATED_USAGE_START
   if (rl.request_continuous_action(event_id, context, response, &status) != err::success)
   {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
+  RL_IGNORE_DEPRECATED_USAGE_END
   //! [(3) Choose a continuous action]
 
   //! [(4) Use the response]
@@ -188,11 +190,13 @@ int basic_usage_ccb()
   // Response class
   r::decision_response response;
 
+  RL_IGNORE_DEPRECATED_USAGE_START
   if (rl.request_decision(context, response, &status) != err::success)
   {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
+  RL_IGNORE_DEPRECATED_USAGE_END
   //! [(3) Choose an action]
 
   //! [(4) Use the response / report outcome]
@@ -244,11 +248,13 @@ int basic_usage_slates()
   // Response class
   r::multi_slot_response response;
 
+  RL_IGNORE_DEPRECATED_USAGE_START
   if (rl.request_multi_slot_decision("event_id", context, response, &status) != err::success)
   {
     std::cout << status.get_error_msg() << std::endl;
     return -1;
   }
+  RL_IGNORE_DEPRECATED_USAGE_END
   //! [(3) Choose an action]
 
   //! [(4) Use the response]

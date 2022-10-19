@@ -283,30 +283,38 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
     case CCB_ACTION:
     {  // "ccb",
       r::multi_slot_response response;
+      RL_IGNORE_DEPRECATED_USAGE_START
       if (rl.request_multi_slot_decision(event_id, JSON_CCB_CONTEXT, action_flag, response, &status) != err::success)
       { std::cout << status.get_error_msg() << std::endl; }
+      RL_IGNORE_DEPRECATED_USAGE_END
       break;
     };
     case CCB_WITH_SLOT_ID_ACTION:
     {  // "ccb-with-slot-id",
       r::multi_slot_response response;
+      RL_IGNORE_DEPRECATED_USAGE_START
       if (rl.request_multi_slot_decision(event_id, JSON_CCB_WITH_SLOT_ID_CONTEXT, action_flag, response, &status) !=
           err::success)
       { std::cout << status.get_error_msg() << std::endl; }
+      RL_IGNORE_DEPRECATED_USAGE_END
       break;
     };
     case SLATES_ACTION:
     {  // "slates",
       r::multi_slot_response response;
+      RL_IGNORE_DEPRECATED_USAGE_START
       if (rl.request_multi_slot_decision(event_id, JSON_SLATES_CONTEXT, action_flag, response, &status) != err::success)
       { std::cout << status.get_error_msg() << std::endl; }
+      RL_IGNORE_DEPRECATED_USAGE_END
       break;
     };
     case CA_ACTION:
     {  // "ca",
       r::continuous_action_response response;
+      RL_IGNORE_DEPRECATED_USAGE_START
       if (rl.request_continuous_action(event_id, JSON_CA_CONTEXT, action_flag, response, &status) != err::success)
       { std::cout << status.get_error_msg() << std::endl; }
+      RL_IGNORE_DEPRECATED_USAGE_END
       break;
     };
     case F_REWARD:  // "float"
@@ -388,9 +396,11 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
     {  // "ccb",
       r::multi_slot_response response;
       std::vector<int> baselines{1, 0};
+      RL_IGNORE_DEPRECATED_USAGE_START
       if (rl.request_multi_slot_decision(event_id, JSON_CCB_CONTEXT, 0, response, baselines.data(), 2, &status) !=
           err::success)
       { std::cout << status.get_error_msg() << std::endl; }
+      RL_IGNORE_DEPRECATED_USAGE_END
       break;
     };
     case CB_LOOP:
@@ -426,8 +436,10 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
     case CA_LOOP:
     {  // "ca_loop",
       r::continuous_action_response response;
+      RL_IGNORE_DEPRECATED_USAGE_START
       if (rl.request_continuous_action(event_id, JSON_CA_CONTEXT, action_flag, response, &status) != err::success)
       { std::cout << status.get_error_msg() << std::endl; }
+      RL_IGNORE_DEPRECATED_USAGE_END
       auto num_of_rewards = static_cast<size_t>(get_random_number(rng));
       for (size_t i = 0; i < num_of_rewards; i++)
       {
@@ -461,15 +473,19 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
       if ((rand_number % 2) != 0u)
       {
         r::multi_slot_response response;
+        RL_IGNORE_DEPRECATED_USAGE_START
         if (rl.request_multi_slot_decision(event_id, JSON_CCB_CONTEXT, action_flag, response, &status) != err::success)
         { std::cout << status.get_error_msg() << std::endl; }
+        RL_IGNORE_DEPRECATED_USAGE_END
       }
       else
       {
         r::multi_slot_response response;
+        RL_IGNORE_DEPRECATED_USAGE_START
         if (rl.request_multi_slot_decision(event_id, JSON_CCB_WITH_SLOT_ID_CONTEXT, action_flag, response, &status) !=
             err::success)
         { std::cout << status.get_error_msg() << std::endl; }
+        RL_IGNORE_DEPRECATED_USAGE_END
       }
 
       send_ccb_outcome(rng, gen_random_reward, event_id, rl, status);
@@ -499,16 +515,20 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
       if ((rand_number % 2) != 0u)
       {
         r::multi_slot_response response;
+        RL_IGNORE_DEPRECATED_USAGE_START
         if (rl.request_multi_slot_decision(
                 event_id, JSON_CCB_CONTEXT, action_flag, response, baselines.data(), 2, &status) != err::success)
         { std::cout << status.get_error_msg() << std::endl; }
+        RL_IGNORE_DEPRECATED_USAGE_END
       }
       else
       {
         r::multi_slot_response response;
+        RL_IGNORE_DEPRECATED_USAGE_START
         if (rl.request_multi_slot_decision(event_id, JSON_CCB_WITH_SLOT_ID_CONTEXT, action_flag, response,
                 baselines.data(), 2, &status) != err::success)
         { std::cout << status.get_error_msg() << std::endl; }
+        RL_IGNORE_DEPRECATED_USAGE_END
       }
 
       send_ccb_outcome(rng, gen_random_reward, event_id, rl, status);
@@ -531,8 +551,10 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
     {  // "slates action and random number of float rewards"
       std::cout << "request multi-slot decision with baseline for event: " << event_id << std::endl;
       r::multi_slot_response response;
+      RL_IGNORE_DEPRECATED_USAGE_START
       if (rl.request_multi_slot_decision(event_id, JSON_SLATES_CONTEXT, action_flag, response, &status) != err::success)
       { std::cout << status.get_error_msg() << std::endl; }
+      RL_IGNORE_DEPRECATED_USAGE_END
 
       auto num_of_rewards = static_cast<size_t>(get_random_number(rng));
       for (size_t i = 0; i < num_of_rewards; i++)
