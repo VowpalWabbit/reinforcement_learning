@@ -1,6 +1,6 @@
 #define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
-#  define BOOST_TEST_MODULE Main
+#   define BOOST_TEST_MODULE Main
 #endif
 
 #include "str_util.h"
@@ -9,8 +9,7 @@
 using namespace reinforcement_learning::utility;
 using namespace std;
 
-BOOST_AUTO_TEST_CASE(str_functions)
-{
+BOOST_AUTO_TEST_CASE(str_functions) {
   string tval = " TRUE ";
   str_util::to_lower(tval);
   BOOST_CHECK_EQUAL(tval, " true ");

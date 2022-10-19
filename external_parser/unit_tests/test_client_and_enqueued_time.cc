@@ -1,23 +1,21 @@
-#include <boost/test/unit_test.hpp>
-
 #include "joiners/example_joiner.h"
 #include "test_common.h"
 #include "vw/config/options_cli.h"
 #include "vw/core/memory.h"
+#include <boost/test/unit_test.hpp>
 
-void process(
-    VW::workspace* vw, example_joiner& joiner, VW::multi_ex& examples, std::string int_file, std::string obs_file)
-{
+void process(VW::workspace *vw, example_joiner &joiner, VW::multi_ex &examples,
+             std::string int_file, std::string obs_file) {
   std::string input_files = get_test_files_location();
 
   auto interaction_buffer = read_file(input_files + int_file);
   // need to keep the fb buffer around in order to process the event
   std::vector<flatbuffers::DetachedBuffer> int_detached_buffers;
 
-  auto joined_cb_events = wrap_into_joined_events(interaction_buffer, int_detached_buffers);
+  auto joined_cb_events =
+      wrap_into_joined_events(interaction_buffer, int_detached_buffers);
 
-  for (auto& je : joined_cb_events)
-  {
+  for (auto &je : joined_cb_events) {
     joiner.process_event(*je);
     examples.push_back(VW::new_unused_example(*vw));
   }
@@ -26,19 +24,20 @@ void process(
   std::vector<flatbuffers::DetachedBuffer> obs_detached_buffers;
 
   auto observation_buffer = read_file(input_files + obs_file);
-  joined_cb_events = wrap_into_joined_events(observation_buffer, obs_detached_buffers);
+  joined_cb_events =
+      wrap_into_joined_events(observation_buffer, obs_detached_buffers);
 
-  for (auto& je : joined_cb_events) { joiner.process_event(*je); }
+  for (auto &je : joined_cb_events) {
+    joiner.process_event(*je);
+  }
 
   BOOST_CHECK_EQUAL(joiner.processing_batch(), true);
 
   joiner.process_joined(examples);
 }
 
-BOOST_AUTO_TEST_CASE(test_use_client_time_missing_and_configured_to_true)
-{
-  auto options = VW::make_unique<VW::config::options_cli>(
-      std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
+BOOST_AUTO_TEST_CASE(test_use_client_time_missing_and_configured_to_true) {
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   example_joiner joiner(vw.get());
@@ -53,7 +52,8 @@ BOOST_AUTO_TEST_CASE(test_use_client_time_missing_and_configured_to_true)
   // enqueued time goes from latest to earliest
   // client time goes from earliest to latest
   float earliest_enqueued = -3.f;
-  process(vw.get(), joiner, examples, "/reward_functions/cb/cb_v2.fb", "/reward_functions/cb/f-reward_3obs_v2.fb");
+  process(vw.get(), joiner, examples, "/reward_functions/cb/cb_v2.fb",
+          "/reward_functions/cb/f-reward_3obs_v2.fb");
 
   BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].action, 1);
   BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, earliest_enqueued);
@@ -64,10 +64,8 @@ BOOST_AUTO_TEST_CASE(test_use_client_time_missing_and_configured_to_true)
   VW::finish(*vw, false);
 }
 
-BOOST_AUTO_TEST_CASE(test_use_client_time_existing_and_configured_to_false)
-{
-  auto options = VW::make_unique<VW::config::options_cli>(
-      std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
+BOOST_AUTO_TEST_CASE(test_use_client_time_existing_and_configured_to_false) {
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   example_joiner joiner(vw.get());
@@ -83,8 +81,8 @@ BOOST_AUTO_TEST_CASE(test_use_client_time_existing_and_configured_to_false)
   // client time goes from earliest to latest
   float earliest_enqueued = -5.f;
   float earliest_client = -1.f;
-  process(
-      vw.get(), joiner, examples, "/client_time/cb_v2_client_time.fb", "/client_time/f-reward_3obs_v2_client_time.fb");
+  process(vw.get(), joiner, examples, "/client_time/cb_v2_client_time.fb",
+          "/client_time/f-reward_3obs_v2_client_time.fb");
 
   BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].action, 1);
   BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, earliest_enqueued);
@@ -95,10 +93,8 @@ BOOST_AUTO_TEST_CASE(test_use_client_time_existing_and_configured_to_false)
   VW::finish(*vw, false);
 }
 
-BOOST_AUTO_TEST_CASE(test_use_client_time_existing_and_configured_to_true)
-{
-  auto options = VW::make_unique<VW::config::options_cli>(
-      std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
+BOOST_AUTO_TEST_CASE(test_use_client_time_existing_and_configured_to_true) {
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   example_joiner joiner(vw.get());
@@ -114,8 +110,8 @@ BOOST_AUTO_TEST_CASE(test_use_client_time_existing_and_configured_to_true)
   // client time goes from earliest to latest
   float earliest_enqueued = -5.f;
   float earliest_client = -1.f;
-  process(
-      vw.get(), joiner, examples, "/client_time/cb_v2_client_time.fb", "/client_time/f-reward_3obs_v2_client_time.fb");
+  process(vw.get(), joiner, examples, "/client_time/cb_v2_client_time.fb",
+          "/client_time/f-reward_3obs_v2_client_time.fb");
 
   BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].action, 1);
   BOOST_CHECK_EQUAL(examples[1]->l.cb.costs[0].cost, earliest_client);

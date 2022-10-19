@@ -1,33 +1,32 @@
 #pragma once
 
-#include "experiment_controller.h"
-#include "live_model.h"
-#include "test_data_provider.h"
-
-#include <boost/program_options.hpp>
 #include <memory>
+#include <boost/program_options.hpp>
 
-enum class LoopKind
-{
+#include "experiment_controller.h"
+#include "test_data_provider.h"
+#include "live_model.h"
+
+enum class LoopKind {
   CB,
   CCB,
   MULTISTEP,
 };
 
-class test_loop
-{
+class test_loop {
 public:
   test_loop(size_t index, const boost::program_options::variables_map& vm);
   bool init();
   void run() const;
 
 private:
-  static int load_file(const std::string& file_name, std::string& config_str);
-  static int load_config_from_json(const std::string& file_name, reinforcement_learning::utility::configuration& config,
-      reinforcement_learning::api_status* status);
-  static std::string generate_experiment_name(const std::string& experiment_name_base, size_t threads, size_t features,
-      size_t actions, size_t slots, size_t episode_length, size_t index);
-  static LoopKind get_loop_kind(const boost::program_options::variables_map& vm);
+  int load_file(const std::string& file_name, std::string& config_str) const;
+  int load_config_from_json(const std::string& file_name,
+    reinforcement_learning::utility::configuration& config,
+    reinforcement_learning::api_status* status) const;
+  std::string generate_experiment_name(const std::string& experiment_name_base,
+	  size_t threads, size_t features, size_t actions, size_t slots, size_t episode_length, size_t index) const;
+  LoopKind get_loop_kind(const boost::program_options::variables_map& vm) const;
 
   void cb_loop(size_t thread_id) const;
   void ccb_loop(size_t thread_id) const;

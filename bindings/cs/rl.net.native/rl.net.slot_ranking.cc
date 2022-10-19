@@ -7,38 +7,57 @@ private:
   reinforcement_learning::slot_ranking::const_iterator end;
 
 public:
-  inline slot_enumerator_adapter(const reinforcement_learning::slot_ranking* slot)
-      : current{slot->begin()}, end{slot->end()}
-  {
-  }
+  inline slot_enumerator_adapter(const reinforcement_learning::slot_ranking* slot) : current{ slot->begin() }, end{ slot->end() }
+  {}
 
   inline int check_current()
   {
-    if (this->current != this->end) { return 1; }
+    if (this->current != this->end)
+    {
+      return 1;
+    }
 
     return 0;
   }
 
   inline int move_next()
   {
-    if ((this->current != this->end) && ((++this->current) != this->end)) { return 1; }
+    if ((this->current != this->end) &&
+      ((++this->current) != this->end))
+    {
+      return 1;
+    }
 
     return 0;
   }
 
-  inline reinforcement_learning::action_prob operator*() const { return *this->current; }
+  inline reinforcement_learning::action_prob operator*() const
+  {
+    return *this->current;
+  }
 };
 
-API reinforcement_learning::slot_ranking* CreateSlotRanking() { return new reinforcement_learning::slot_ranking(); }
+API reinforcement_learning::slot_ranking* CreateSlotRanking()
+{
+  return new reinforcement_learning::slot_ranking();
+}
 
-API void DeleteSlotRanking(reinforcement_learning::slot_ranking* slot) { delete slot; }
+API void DeleteSlotRanking(reinforcement_learning::slot_ranking* slot)
+{
+  delete slot;
+}
 
-API const char* GetSlotId(reinforcement_learning::slot_ranking* slot) { return slot->get_id(); }
+API const char* GetSlotId(reinforcement_learning::slot_ranking* slot)
+{
+  return slot->get_id();
+}
 
-API size_t GetSlotActionCount(reinforcement_learning::slot_ranking* slot) { return slot->size(); }
+API size_t GetSlotActionCount(reinforcement_learning::slot_ranking* slot)
+{
+  return slot->size();
+}
 
-API int GetSlotChosenAction(
-    reinforcement_learning::slot_ranking* slot, size_t* action_id, reinforcement_learning::api_status* status)
+API int GetSlotChosenAction(reinforcement_learning::slot_ranking* slot, size_t* action_id, reinforcement_learning::api_status* status)
 {
   return slot->get_chosen_action_id(*action_id, status);
 }
@@ -48,11 +67,20 @@ API slot_enumerator_adapter* CreateSlotEnumeratorAdapter(reinforcement_learning:
   return new slot_enumerator_adapter(slot);
 }
 
-API void DeleteSlotEnumeratorAdapter(slot_enumerator_adapter* adapter) { delete adapter; }
+API void DeleteSlotEnumeratorAdapter(slot_enumerator_adapter* adapter)
+{
+  delete adapter;
+}
 
-API int SlotEnumeratorInit(slot_enumerator_adapter* adapter) { return adapter->check_current(); }
+API int SlotEnumeratorInit(slot_enumerator_adapter* adapter)
+{
+  return adapter->check_current();
+}
 
-API int SlotEnumeratorMoveNext(slot_enumerator_adapter* adapter) { return adapter->move_next(); }
+API int SlotEnumeratorMoveNext(slot_enumerator_adapter* adapter)
+{
+  return adapter->move_next();
+}
 
 API reinforcement_learning::action_prob_d GetSlotEnumeratorCurrent(slot_enumerator_adapter* adapter)
 {

@@ -1,14 +1,11 @@
-#include <boost/test/unit_test.hpp>
-
 #include "lru_dedup_cache.h"
 #include "parse_example_external.h"
 #include "test_common.h"
 #include "vw/config/options_cli.h"
+#include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_CASE(test_lru_add_new_examples_to_cache)
-{
-  auto options = VW::make_unique<VW::config::options_cli>(
-      std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
+BOOST_AUTO_TEST_CASE(test_lru_add_new_examples_to_cache) {
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   VW::multi_ex examples;
@@ -44,7 +41,7 @@ BOOST_AUTO_TEST_CASE(test_lru_add_new_examples_to_cache)
 
   // check examples are OK
   BOOST_CHECK_EQUAL(dedup_cache.dedup_examples.size(), 2);
-  auto* ex_0 = dedup_cache.dedup_examples[dedup_id_0];
+  auto *ex_0 = dedup_cache.dedup_examples[dedup_id_0];
   BOOST_CHECK_EQUAL(ex_0->indices.size(), 1);
   BOOST_CHECK_EQUAL(ex_0->indices[0], 'A');
   BOOST_CHECK_EQUAL(ex_0->feature_space['A'].indices.size(), 1);
@@ -52,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_lru_add_new_examples_to_cache)
   BOOST_CHECK_EQUAL(ex_0->feature_space['A'].values.size(), 1);
   BOOST_CHECK_EQUAL(ex_0->feature_space['A'].values[0], 0.2f);
 
-  auto* ex_1 = dedup_cache.dedup_examples[dedup_id_1];
+  auto *ex_1 = dedup_cache.dedup_examples[dedup_id_1];
   BOOST_CHECK_EQUAL(ex_1->indices.size(), 1);
   BOOST_CHECK_EQUAL(ex_1->indices[0], 'B');
   BOOST_CHECK_EQUAL(ex_1->feature_space['B'].indices.size(), 1);
@@ -70,10 +67,8 @@ BOOST_AUTO_TEST_CASE(test_lru_add_new_examples_to_cache)
   VW::finish(*vw, false);
 }
 
-BOOST_AUTO_TEST_CASE(test_lru_update)
-{
-  auto options = VW::make_unique<VW::config::options_cli>(
-      std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
+BOOST_AUTO_TEST_CASE(test_lru_update) {
+  auto options = VW::make_unique<VW::config::options_cli>(std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
   auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
   VW::multi_ex examples;
@@ -107,7 +102,7 @@ BOOST_AUTO_TEST_CASE(test_lru_update)
 
   // check examples are OK
   BOOST_CHECK_EQUAL(dedup_cache.dedup_examples.size(), 2);
-  auto* ex_0 = dedup_cache.dedup_examples[dedup_id_0];
+  auto *ex_0 = dedup_cache.dedup_examples[dedup_id_0];
   BOOST_CHECK_EQUAL(ex_0->indices.size(), 1);
   BOOST_CHECK_EQUAL(ex_0->indices[0], 'A');
   BOOST_CHECK_EQUAL(ex_0->feature_space['A'].indices.size(), 1);
@@ -115,7 +110,7 @@ BOOST_AUTO_TEST_CASE(test_lru_update)
   BOOST_CHECK_EQUAL(ex_0->feature_space['A'].values.size(), 1);
   BOOST_CHECK_EQUAL(ex_0->feature_space['A'].values[0], 0.2f);
 
-  auto* ex_1 = dedup_cache.dedup_examples[dedup_id_1];
+  auto *ex_1 = dedup_cache.dedup_examples[dedup_id_1];
   BOOST_CHECK_EQUAL(ex_1->indices.size(), 1);
   BOOST_CHECK_EQUAL(ex_1->indices[0], 'B');
   BOOST_CHECK_EQUAL(ex_1->feature_space['B'].indices.size(), 1);

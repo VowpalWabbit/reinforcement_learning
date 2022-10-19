@@ -11,7 +11,6 @@ cd $REPO_DIR
 cmake -S . -B build -G Ninja \
     -Drlclientlib_BUILD_ONNXRUNTIME_EXTENSION=On \
     -DFMT_SYS_DEP=ON \
-    -DSPDLOG_SYS_DEP=ON \
-    -DVCPKG_MANIFEST_MODE=Off
+    -DSPDLOG_SYS_DEP=ON
 
 cmake --build build --target all

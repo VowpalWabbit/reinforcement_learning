@@ -4,10 +4,9 @@
 
 class slot_enumerator_adapter;
 
-// Global Exports
-extern "C"
-{
-  // NOTE: THIS IS  NOT POLYMORPHISM SAFE
+//Global Exports
+extern "C" {
+  //NOTE: THIS IS  NOT POLYMORPHISM SAFE
   API reinforcement_learning::slot_ranking* CreateSlotRanking();
   API void DeleteSlotRanking(reinforcement_learning::slot_ranking* slot);
 
@@ -18,8 +17,7 @@ extern "C"
 
   API size_t GetSlotActionCount(reinforcement_learning::slot_ranking* slot);
 
-  API int GetSlotChosenAction(reinforcement_learning::slot_ranking* slot, size_t* action_id,
-      reinforcement_learning::api_status* status = nullptr);
+  API int GetSlotChosenAction(reinforcement_learning::slot_ranking* slot, size_t* action_id, reinforcement_learning::api_status* status = nullptr);
 
   API slot_enumerator_adapter* CreateSlotEnumeratorAdapter(reinforcement_learning::slot_ranking* slot);
   API void DeleteSlotEnumeratorAdapter(slot_enumerator_adapter* adapter);

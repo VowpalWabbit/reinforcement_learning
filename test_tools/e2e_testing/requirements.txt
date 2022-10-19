@@ -1,3 +1,0 @@
-flatbuffers
-numpy
-zstd

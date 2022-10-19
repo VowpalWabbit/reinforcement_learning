@@ -9,36 +9,37 @@
 
 constexpr size_t BINARY_PARSER_VERSION = 1;
 
-constexpr unsigned int MSG_TYPE_FILEMAGIC = 0x42465756;  //'VWFB'
+constexpr unsigned int MSG_TYPE_FILEMAGIC = 0x42465756; //'VWFB'
 constexpr unsigned int MSG_TYPE_HEADER = 0x55555555;
 constexpr unsigned int MSG_TYPE_REGULAR = 0xFFFFFFFF;
 constexpr unsigned int MSG_TYPE_CHECKPOINT = 0x11111111;
 constexpr unsigned int MSG_TYPE_EOF = 0xAAAAAAAA;
 
-namespace VW
-{
-namespace external
-{
-class binary_parser : public parser
-{
+namespace VW {
+namespace external {
+
+class binary_parser : public parser {
 public:
-  binary_parser(std::unique_ptr<i_joiner>&& joiner, VW::io::logger logger);  // taking ownership of joiner
+  binary_parser(
+      std::unique_ptr<i_joiner> &&joiner, VW::io::logger logger); // taking ownership of joiner
   ~binary_parser();
-  bool parse_examples(VW::workspace* all, io_buf& io_buf, VW::multi_ex& examples) override;
-  bool read_version(io_buf& input);
-  bool read_header(io_buf& input);
-  bool read_checkpoint_msg(io_buf& input);
-  bool read_regular_msg(io_buf& input, VW::multi_ex& examples, bool& ignore_msg);
-  bool skip_over_unknown_payload(io_buf& input);
-  bool advance_to_next_payload_type(io_buf& input, unsigned int& payload_type);
-  void persist_metrics(metric_sink& metrics) override;
+  bool parse_examples(VW::workspace *all, io_buf &io_buf,
+                      VW::multi_ex &examples) override;
+  bool read_version(io_buf &input);
+  bool read_header(io_buf &input);
+  bool read_checkpoint_msg(io_buf &input);
+  bool read_regular_msg(io_buf &input, VW::multi_ex &examples,
+                        bool &ignore_msg);
+  bool skip_over_unknown_payload(io_buf &input);
+  bool advance_to_next_payload_type(io_buf &input, unsigned int &payload_type);
+  void persist_metrics(metric_sink &metrics) override;
 
 private:
-  bool process_next_in_batch(VW::multi_ex& examples);
+  bool process_next_in_batch(VW::multi_ex &examples);
   std::unique_ptr<i_joiner> _example_joiner;
-  char* _payload;
+  char *_payload;
   uint32_t _payload_size;
   uint64_t _total_size_read;
 };
-}  // namespace external
-}  // namespace VW
+} // namespace external
+} // namespace VW

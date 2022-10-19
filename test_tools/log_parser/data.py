@@ -23,12 +23,10 @@ import reinforcement_learning.messages.flatbuff.v2.TimeStamp as _TimeStamp
 
 def EndVector(builder, size):
     from packaging import version
-
     if version.parse(flatbuffers.__version__).major >= 2:
         return builder.EndVector()
     else:
         return builder.EndVector(size)
-
 
 def mk_offsets_vector(builder, arr, startFun):
     startFun(builder, len(arr))
@@ -36,31 +34,24 @@ def mk_offsets_vector(builder, arr, startFun):
         builder.PrependUOffsetTRelative(arr[i])
     return EndVector(builder, len(arr))
 
-
 def mk_bytes_vector(builder, arr):
-    return builder.CreateNumpyVector(np.array(list(arr), dtype="b"))
-
+    return builder.CreateNumpyVector(np.array(list(arr), dtype='b'))
 
 def mk_long_vector(builder, arr):
     return builder.CreateNumpyVector(np.array(list(arr), dtype=np.int64))
 
-
 def mk_float_vector(builder, arr):
     return builder.CreateNumpyVector(np.array(list(arr), dtype=np.float32))
 
-
 def mk_timestamp(builder, dt):
-    return _TimeStamp.CreateTimeStamp(
-        builder,
-        dt.year,
-        dt.month,
-        dt.day,
-        dt.hour,
-        dt.minute,
-        dt.second,
-        int(dt.microsecond),
-    )
-
+    return _TimeStamp.CreateTimeStamp(builder,
+                dt.year,
+                dt.month,
+                dt.day,
+                dt.hour,
+                dt.minute,
+                dt.second,
+                int(dt.microsecond))
 
 @dataclass
 class Metadata:
@@ -75,17 +66,12 @@ class Metadata:
 
         _Metadata.MetadataStart(builder)
         _Metadata.MetadataAddId(builder, id)
-        _Metadata.MetadataAddClientTimeUtc(
-            builder, mk_timestamp(builder, self.client_time_utc)
-        )
+        _Metadata.MetadataAddClientTimeUtc(builder, mk_timestamp(builder, self.client_time_utc))
         _Metadata.MetadataAddPayloadType(builder, self.payload_type)
         _Metadata.MetadataAddEncoding(builder, self.encoding)
-        _Metadata.MetadataAddPassProbability(
-            builder=builder, passProbability=self.pass_prob
-        )
+        _Metadata.MetadataAddPassProbability(builder=builder, passProbability = self.pass_prob)
 
         return _Metadata.MetadataEnd(builder)
-
 
 @dataclass
 class CbPayload:
@@ -98,7 +84,7 @@ class CbPayload:
 
     def to(self, builder):
         actions = mk_long_vector(builder, self.actions)
-        ctx = mk_bytes_vector(builder, bytes(self.context, "utf-8"))
+        ctx = mk_bytes_vector(builder, bytes(self.context, 'utf-8'))
         probs = mk_float_vector(builder, self.probs)
         model_id = builder.CreateString(self.model_id)
 
@@ -110,7 +96,6 @@ class CbPayload:
         _CbEvent.CbEventAddModelId(builder, model_id)
         _CbEvent.CbEventAddLearningMode(builder, self.learning_mode)
         return _CbEvent.CbEventEnd(builder)
-
 
 @dataclass
 class MultiStepPayload:
@@ -124,15 +109,11 @@ class MultiStepPayload:
 
     def to(self, builder):
         actions = mk_long_vector(builder, self.actions)
-        ctx = mk_bytes_vector(builder, bytes(self.context, "utf-8"))
+        ctx = mk_bytes_vector(builder, bytes(self.context, 'utf-8'))
         probs = mk_float_vector(builder, self.probs)
         model_id = builder.CreateString(self.model_id)
         id = builder.CreateString(self.id)
-        previous_id = (
-            builder.CreateString(self.previous_id)
-            if self.previous_id is not None
-            else None
-        )
+        previous_id = builder.CreateString(self.previous_id) if self.previous_id is not None else None
 
         _MultiStepEvent.MultiStepEventStart(builder)
         _MultiStepEvent.MultiStepEventAddEventId(builder, id)
@@ -144,7 +125,6 @@ class MultiStepPayload:
         _MultiStepEvent.MultiStepEventAddProbabilities(builder, probs)
         _MultiStepEvent.MultiStepEventAddModelId(builder, model_id)
         return _MultiStepEvent.MultiStepEventEnd(builder)
-
 
 @dataclass
 class OutcomePayload:
@@ -159,7 +139,7 @@ class OutcomePayload:
         elif self.value is None:
             value_type = _OutcomeValue.OutcomeValue.NONE
         else:
-            raise "Unknown value type"
+            raise 'Unknown value type'
 
         if self.id is None:
             index_type = _IndexValue.IndexValue.NONE
@@ -168,8 +148,8 @@ class OutcomePayload:
         elif isinstance(self.id, str):
             index_type = _IndexValue.IndexValue.literal
         else:
-            raise "Unknown index type"
-
+            raise 'Unknown index type'
+        
         outcome = None
         if value_type == _OutcomeValue.OutcomeValue.numeric:
             _NumericOutcome.NumericOutcomeStart(builder)
@@ -194,18 +174,14 @@ class OutcomePayload:
         _OutcomeEvent.OutcomeEventAddValueType(builder, value_type)
         if value_type != _OutcomeValue.OutcomeValue.NONE:
             _OutcomeEvent.OutcomeEventAddValue(builder, outcome)
-        _OutcomeEvent.OutcomeEventAddActionTaken(
-            builder, value_type == _OutcomeValue.OutcomeValue.NONE
-        )
+        _OutcomeEvent.OutcomeEventAddActionTaken(builder, value_type == _OutcomeValue.OutcomeValue.NONE)
 
         return _OutcomeEvent.OutcomeEventEnd(builder)
-
 
 def serialize(payload):
     builder = flatbuffers.Builder(0)
     builder.Finish(payload.to(builder))
     return builder.Output()
-
 
 def event_2_builder(meta, payload, builder):
     payload_str = serialize(payload)
@@ -216,55 +192,49 @@ def event_2_builder(meta, payload, builder):
     _Event.EventStart(builder)
     _Event.EventAddMeta(builder, metadata_offset)
     _Event.EventAddPayload(builder, payload_offset)
-    return _Event.EventEnd(builder)
-
+    return _Event.EventEnd(builder)    
 
 @dataclass
 class CbEvent:
-    id: str = "id"
+    id: str = 'id'
     client_time_utc: datetime = datetime(2021, 1, 1, 0, 0, 0)
     encoding: _EventEncoding.EventEncoding = _EventEncoding.EventEncoding.Identity
-    pass_prob: float = 1.0
+    pass_prob: float = 1.
 
     context: str = """{"_multi":[{"a1":"f1"},{"a2":"f2"}]}"""
     actions: list = field(default_factory=lambda: [1, 2])
     probs: list = field(default_factory=lambda: [0.5, 0.5])
     deferred: bool = False
-    model_id: str = "model"
-    learning_mode: _LearningModeType.LearningModeType = (
-        _LearningModeType.LearningModeType.Online
-    )
+    model_id: str = 'model'
+    learning_mode: _LearningModeType.LearningModeType = _LearningModeType.LearningModeType.Online 
 
     def to(self, builder):
         return event_2_builder(
             Metadata(
-                payload_type=_PayloadType.PayloadType.CB,
-                id=self.id,
-                client_time_utc=self.client_time_utc,
-                encoding=self.encoding,
-                pass_prob=self.pass_prob,
-            ),
+                payload_type = _PayloadType.PayloadType.CB,
+                id = self.id,
+                client_time_utc = self.client_time_utc,
+                encoding = self.encoding,
+                pass_prob = self.pass_prob),
             CbPayload(
-                context=self.context,
-                actions=self.actions,
-                probs=self.probs,
-                deferred=self.deferred,
-                model_id=self.model_id,
-                learning_mode=self.learning_mode,
-            ),
-            builder,
+                context = self.context,
+                actions = self.actions,
+                probs = self.probs,
+                deferred = self.deferred,
+                model_id = self.model_id,
+                learning_mode = self.learning_mode),
+            builder             
         )
 
     def serialize(self):
         return serialize(self)
 
-
 @dataclass
 class OutcomeEvent:
-    primary_id: str = "id"
+    primary_id: str = 'id'
     client_time_utc: datetime = datetime(2021, 1, 1, 0, 0, 0)
     encoding: _EventEncoding.EventEncoding = _EventEncoding.EventEncoding.Identity
-    pass_prob: float = 1.0
+    pass_prob: float = 1.
 
     secondary_id: Union[str, int] = None
     value: Union[str, int] = None
@@ -272,70 +242,65 @@ class OutcomeEvent:
     def to(self, builder):
         return event_2_builder(
             Metadata(
-                payload_type=_PayloadType.PayloadType.Outcome,
-                id=self.primary_id,
-                client_time_utc=self.client_time_utc,
-                encoding=self.encoding,
-                pass_prob=self.pass_prob,
-            ),
-            OutcomePayload(id=self.secondary_id, value=self.value),
-            builder,
+                payload_type = _PayloadType.PayloadType.Outcome,
+                id = self.primary_id,
+                client_time_utc = self.client_time_utc,
+                encoding = self.encoding,
+                pass_prob = self.pass_prob),
+            OutcomePayload(
+                id = self.secondary_id,
+                value = self.value),
+            builder              
         )
 
     def serialize(self):
         return serialize(self)
 
-
 @dataclass
 class MultiStepEvent:
-    episode_id: str = "episode"
+    episode_id: str = 'episode'
     client_time_utc: datetime = datetime(2021, 1, 1, 0, 0, 0)
     encoding: _EventEncoding.EventEncoding = _EventEncoding.EventEncoding.Identity
-    pass_prob: float = 1.0
+    pass_prob: float = 1.
 
-    event_id: str = "0"
+    event_id: str = '0'
     previous_id: str = None
     context: str = """{"_multi":[{"a1":"f1"},{"a2":"f2"}]}"""
     actions: list = field(default_factory=lambda: [1, 2])
     probs: list = field(default_factory=lambda: [0.5, 0.5])
     deferred: bool = False
-    model_id: str = "model"
+    model_id: str = 'model'
 
     def to(self, builder):
         return event_2_builder(
             Metadata(
-                payload_type=_PayloadType.PayloadType.MultiStep,
-                id=self.episode_id,
-                client_time_utc=self.client_time_utc,
-                encoding=self.encoding,
-                pass_prob=self.pass_prob,
-            ),
+                payload_type = _PayloadType.PayloadType.MultiStep,
+                id = self.episode_id,
+                client_time_utc = self.client_time_utc,
+                encoding = self.encoding,
+                pass_prob = self.pass_prob),
             MultiStepPayload(
-                id=self.event_id,
-                previous_id=self.previous_id,
-                context=self.context,
-                actions=self.actions,
-                probs=self.probs,
-                deferred=self.deferred,
-                model_id=self.model_id,
-            ),
-            builder,
+                id = self.event_id,
+                previous_id = self.previous_id,
+                context = self.context,
+                actions = self.actions,
+                probs = self.probs,
+                deferred = self.deferred,
+                model_id = self.model_id),
+            builder                
         )
 
     def serialize(self):
         return serialize(self)
 
-
 @dataclass
 class JoinedEvent:
     event: Union[CbEvent, MultiStepEvent, OutcomeEvent] = None
-    timestamp: datetime = datetime(2021, 1, 1, 0, 0, 0)
+    timestamp: datetime = datetime(2021, 1, 1, 0, 0, 0) 
 
     def to(self, builder):
         payload_off = mk_bytes_vector(builder, self.event.serialize())
         _JoinedEvent.JoinedEventStart(builder)
         _JoinedEvent.JoinedEventAddEvent(builder, payload_off)
-        _JoinedEvent.JoinedEventAddTimestamp(
-            builder, mk_timestamp(builder, self.timestamp)
-        )
+        _JoinedEvent.JoinedEventAddTimestamp(builder, mk_timestamp(builder, self.timestamp))
         return _JoinedEvent.JoinedEventEnd(builder)

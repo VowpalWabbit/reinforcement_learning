@@ -2,17 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 if(POLICY CMP0074)
     cmake_policy(SET CMP0074 NEW)
 endif()
-
-# Set this to on so that tooling can make use of the outputted compile commands (such as clang-tidy)
-set(CMAKE_EXPORT_COMPILE_COMMANDS On)
-
 project(vw_binary_parser)
 
-if(DEFINED RL_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD ${RL_CXX_STANDARD})
-else()
-  set(CMAKE_CXX_STANDARD 11)
-endif()
+set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG")
@@ -51,38 +43,24 @@ else()
   set(flatc_location ${FLATBUFFERS_FLATC_EXECUTABLE})
 endif()
 
-# set vw cmake flags
-# This is not longer using the injected method, but implemented in this repo just consuming vw as a lib
-set(BUILD_EXTERNAL_PARSER OFF CACHE BOOL "")
-set(BUILD_FLATBUFFERS OFF CACHE BOOL "")
-set(DO_NOT_BUILD_VW_C_WRAPPER OFF CACHE BOOL "")
-set(BUILD_JAVA OFF CACHE BOOL "")
-set(BUILD_PYTHON OFF CACHE BOOL "")
-set(BUILD_EXPERIMENTAL_BINDING OFF CACHE BOOL "")
-set(BUILD_TESTING OFF CACHE BOOL "")
-
-if(STATIC_LINK_BINARY_PARSER)
-  set(STATIC_LINK_VW ON CACHE BOOL "" FORCE)
-endif()
-
-if(RL_USE_UBSAN)
-  # Flatbuffers generated code gives pointer alignment errors with UBSan
-  add_compile_options(-fno-sanitize=alignment)
-  add_link_options(-fno-sanitize=alignment)
-endif()
-
-if(NOT TARGET libzstd_static)
+option(RL_EXTERNAL_PARSER_OTHER_DEPS "Add the other deps." ON)
+if (RL_EXTERNAL_PARSER_OTHER_DEPS)
   add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../ext_libs/zstd/build/cmake ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser/zstd EXCLUDE_FROM_ALL)
-endif()
 
-if(NOT TARGET vw_core)
-  if(RL_USE_ASAN)
-    set(VW_USE_ASAN ON CACHE BOOL "" FORCE)
+  # set vw cmake flags
+  # This is not longer using the injected method, but implemented in this repo just consuming vw as a lib
+  set(BUILD_EXTERNAL_PARSER OFF CACHE BOOL "")
+  set(BUILD_FLATBUFFERS OFF CACHE BOOL "")
+  set(DO_NOT_BUILD_VW_C_WRAPPER OFF CACHE BOOL "")
+  set(BUILD_JAVA OFF CACHE BOOL "")
+  set(BUILD_PYTHON OFF CACHE BOOL "")
+  set(BUILD_EXPERIMENTAL_BINDING OFF CACHE BOOL "")
+  set(BUILD_TESTING OFF CACHE BOOL "")
+
+  if(STATIC_LINK_BINARY_PARSER)
+    set(STATIC_LINK_VW ON CACHE BOOL "" FORCE)
   endif()
-  if(RL_USE_UBSAN)
-    set(VW_USE_UBSAN ON CACHE BOOL "" FORCE)
-  endif()
-  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../ext_libs/vowpal_wabbit ${CMAKE_CURRENT_BINARY_DIR}/vw_binary_parser)
 endif()
 
 # Flatbuffer generation

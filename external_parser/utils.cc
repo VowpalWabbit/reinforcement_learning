@@ -4,13 +4,13 @@
 
 #include <cstring>
 #ifndef _WIN32
-#  define _stricmp strcasecmp
+#define _stricmp strcasecmp
 #endif
 
-namespace VW
-{
-namespace external
-{
-bool stricmp(const char* first, const char* second) { return _stricmp(first, second); }
-}  // namespace external
-}  // namespace VW
+namespace VW {
+namespace external {
+    bool stricmp(const char* first, const char* second) {
+        return _stricmp(first, second);
+    }
+} // namespace external
+} // namespace VW

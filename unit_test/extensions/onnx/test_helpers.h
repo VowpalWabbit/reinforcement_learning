@@ -1,23 +1,25 @@
 #pragma once
 #include <boost/test/unit_test.hpp>
 
-#include "api_status.h"
-#include "err_constants.h"
-#include "global_fixture.h"
 #include "onnx_extension.h"
 #include "onnx_input.h"
 
-#include <core/session/onnxruntime_cxx_api.h>
-#include <cpprest/asyncrt_utils.h>
+#include "global_fixture.h"
 
-#include <map>
-#include <sstream>
-#include <tuple>
+#include "api_status.h"
+#include "err_constants.h"
+
 #include <vector>
+#include <map>
+#include <tuple>
+#include <sstream>
+
+#include <cpprest/asyncrt_utils.h>
+#include <core/session/onnxruntime_cxx_api.h>
 
 #ifdef WIN32
-#  define WIN32_LEAN_AND_MEAN
-#  include <Windows.h>
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 #endif
 
 namespace r = reinforcement_learning;
@@ -46,23 +48,23 @@ inline void require_status(const r::api_status& status, int expected_code)
   BOOST_REQUIRE_MESSAGE(status.get_error_code() == expected_code, status.get_error_msg());
 }
 
-inline void require_success(const r::api_status& status) { require_status(status, r::error_code::success); }
+inline void require_success(const r::api_status& status)
+{
+  require_status(status, r::error_code::success);
+}
 
 template <typename string_t>
-inline void validate_input_context(
-    o::onnx_input_builder& input_context, size_t expected_count, std::vector<string_t> expected_names)
+inline void validate_input_context(o::onnx_input_builder& input_context, size_t expected_count, std::vector<string_t> expected_names)
 {
   size_t input_count = input_context.input_count();
   BOOST_REQUIRE_EQUAL(input_count, expected_count);
 
   std::vector<const char*> input_names = input_context.input_names();
   BOOST_REQUIRE_EQUAL(input_names.size(), input_count);
-  BOOST_REQUIRE_EQUAL_COLLECTIONS(
-      input_names.cbegin(), input_names.cend(), expected_names.cbegin(), expected_names.cend());
+  BOOST_REQUIRE_EQUAL_COLLECTIONS(input_names.cbegin(), input_names.cend(), expected_names.cbegin(), expected_names.cend());
 }
 
-inline void validate_empty(o::onnx_input_builder& input_context,
-    const Ort::MemoryInfo& memory_info = GlobalConfig::instance()->get_memory_info())
+inline void validate_empty(o::onnx_input_builder& input_context, const Ort::MemoryInfo& memory_info = GlobalConfig::instance()->get_memory_info())
 {
   validate_input_context(input_context, 0, TestEmptyNames);
   std::vector<Ort::Value> values;
@@ -83,23 +85,32 @@ inline void validate_tensor(Ort::Value& parsed_value, dimensions expected_dimens
 
   std::vector<int64_t> parsed_dimensions = type_shape_info.GetShape();
   BOOST_REQUIRE_EQUAL_COLLECTIONS(
-      parsed_dimensions.cbegin(), parsed_dimensions.cend(), expected_dimensions.cbegin(), expected_dimensions.cend());
+    parsed_dimensions.cbegin(),
+    parsed_dimensions.cend(),
+    expected_dimensions.cbegin(),
+    expected_dimensions.cend()
+  );
 
   float* parsed_values = parsed_value.GetTensorMutableData<float>();
   BOOST_REQUIRE_EQUAL_COLLECTIONS(
-      parsed_values, parsed_values + parsed_element_count, expected_values.cbegin(), expected_values.cend());
+    parsed_values,
+    parsed_values + parsed_element_count,
+    expected_values.cbegin(),
+    expected_values.cend()
+  );
 }
 
 template <typename string_t>
-inline void validate_tensors(o::onnx_input_builder& input_context, expectations<string_t> expectations,
-    const Ort::MemoryInfo& memory_info = GlobalConfig::instance()->get_memory_info())
+inline void validate_tensors(o::onnx_input_builder& input_context, expectations<string_t> expectations, const Ort::MemoryInfo& memory_info = GlobalConfig::instance()->get_memory_info())
 {
   std::map<string_t, size_t> input_name_map;
   size_t expected_input_count = input_context.input_count();
   std::vector<const char*> input_names = input_context.input_names();
 
   for (size_t i = 0; i < expected_input_count; i++)
-  { input_name_map.insert(std::make_pair(string_t{input_names[i]}, i)); }
+  {
+    input_name_map.insert(std::make_pair(string_t{input_names[i]}, i));
+  }
 
   std::vector<Ort::Value> inputs;
 
@@ -130,39 +141,39 @@ inline void validate_tensors(o::onnx_input_builder& input_context, expectations<
 #ifdef WIN32
 inline std::wstring s2ws(const std::string& s)
 {
-  int len;
-  int slength = static_cast<int>(s.length());
-  len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
-  std::wstring r(len, L'\0');
-  MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, &r[0], len);
-  return r;
+    int len;
+    int slength = static_cast<int>(s.length());
+    len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+    std::wstring r(len, L'\0');
+    MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, &r[0], len);
+    return r;
 }
 
 inline std::string ws2s(const std::wstring& s)
 {
-  int len;
-  int slength = static_cast<int>(s.length());
-  len = WideCharToMultiByte(CP_ACP, 0, s.c_str(), slength, 0, 0, 0, 0);
-  std::string r(len, '\0');
-  WideCharToMultiByte(CP_ACP, 0, s.c_str(), slength, &r[0], len, 0, 0);
-  return r;
+    int len;
+    int slength = static_cast<int>(s.length());
+    len = WideCharToMultiByte(CP_ACP, 0, s.c_str(), slength, 0, 0, 0, 0);
+    std::string r(len, '\0');
+    WideCharToMultiByte(CP_ACP, 0, s.c_str(), slength, &r[0], len, 0, 0);
+    return r;
 }
 #endif
 
 inline std::string to_base64(const o::bytes_t& bytes)
 {
 #ifdef WIN32
-  return ws2s(::utility::conversions::to_base64(bytes));
+    return ws2s(::utility::conversions::to_base64(bytes));
 #else
-  return ::utility::conversions::to_base64(bytes);
+    return ::utility::conversions::to_base64(bytes);
 #endif
 }
 inline o::bytes_t from_base64(const std::string& str)
 {
 #ifdef WIN32
-  return ::utility::conversions::from_base64(s2ws(str));
+    return ::utility::conversions::from_base64(s2ws(str));
 #else
-  return ::utility::conversions::from_base64(str);
+    return ::utility::conversions::from_base64(str);
 #endif
 }
 
@@ -182,16 +193,14 @@ std::string encode_tensor_data(const dimensions& dimensions, const tensor_raw& v
     o::bytes_t dimensions_bytes_back = from_base64(dimensions_base64);
     o::bytes_t values_bytes_back = from_base64(values_base64);
 
-    BOOST_REQUIRE_EQUAL_COLLECTIONS(
-        values_bytes.cbegin(), values_bytes.cend(), values_bytes_back.cbegin(), values_bytes_back.cend());
+    BOOST_REQUIRE_EQUAL_COLLECTIONS(values_bytes.cbegin(), values_bytes.cend(), values_bytes_back.cbegin(), values_bytes_back.cend());
 
     float* values_data_back = (float*)values_bytes_back.data();
     size_t values_count = values.size();
 
     BOOST_REQUIRE_EQUAL_COLLECTIONS(values_data_back, values_data_back + values_count, values.cbegin(), values.cend());
 
-    Ort::Value tensor = Ort::Value::CreateTensor<float>(GlobalConfig::instance()->get_memory_info(), values_data_back,
-        values_count, dimensions.data(), dimensions.size());
+    Ort::Value tensor = Ort::Value::CreateTensor<float>(GlobalConfig::instance()->get_memory_info(), values_data_back, values_count, dimensions.data(), dimensions.size());
     float* tensor_data = tensor.GetTensorMutableData<float>();
 
     BOOST_REQUIRE_EQUAL_COLLECTIONS(tensor_data, tensor_data + values_count, values.cbegin(), values.cend());

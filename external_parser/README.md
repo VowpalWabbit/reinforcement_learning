@@ -80,11 +80,11 @@ from `external_parser`:
 - cmake ..
 - make -j $(nproc)
 
-vw executable located at: `external_parser/build/vw`
+vw executable located at: `external_parser/build/vw_binary_parser/vowpalwabbit/vw`
 
 ### Run
 
-`./vw -d <file> --binary_parser [other vw args]`
+`./vowpalwabbit/vw -d <file> --binary_parser [other vw args]`
 
 
 ## Windows
@@ -114,8 +114,8 @@ from `external_parser` (replace `Release` with `Debug` if you want a debug build
 
 `vw_binary_parser.sln` will be available under `build` and can be used to open the solution in visual studio
 
-vw executable located at: `external_parser\build\Release\vw.exe`
+vw executable located at: `external_parser\build\vw_binary_parser\vowpalwabbit\Release\vw.exe`
 
 ### Run
 
-`.\Release\vw.exe -d <file> --binary_parser [other vw args]`
+`.\vw_binary_parser\vowpalwabbit\Release\vw.exe -d <file> --binary_parser [other vw args]`

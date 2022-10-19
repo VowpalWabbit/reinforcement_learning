@@ -1,77 +1,66 @@
 #include "model_mgmt.h"
 
-#include <cstring>
 #include <new>
+#include <cstring>
 
-namespace reinforcement_learning
-{
-namespace model_management
-{
-model_data::model_data() = default;
+namespace reinforcement_learning {
+  namespace model_management {
 
-// copy constructor: allocate new memory and copy over other's data
-model_data::model_data(model_data const& other)
-    : _data(new char[other._data_sz]), _data_sz(other._data_sz), _refresh_count(other._refresh_count)
-{
-  if (_data_sz > 0) { std::memcpy(_data, other._data, _data_sz); }
-}
+    model_data::model_data() = default;
 
-// move constructor: take other's data pointer and set original pointer to null
-model_data::model_data(model_data&& other) noexcept
-    : _data(other._data), _data_sz(other._data_sz), _refresh_count(other._refresh_count)
-{
-  other._data = nullptr;
-}
+    model_data::~model_data() {
+      free();
+    }
 
-// pass-by-value assignment operator
-model_data& model_data::operator=(model_data other) noexcept
-{
-  std::swap(_data, other._data);
-  std::swap(_data_sz, other._data_sz);
-  std::swap(_refresh_count, other._refresh_count);
-  return *this;
-}
+    char* model_data::data() const {
+      return _data;
+    }
 
-model_data::~model_data() { free(); }
+    void model_data::increment_refresh_count() {
+      ++_refresh_count;
+    }
 
-char* model_data::data() const { return _data; }
+    size_t model_data::data_sz() const {
+      return _data_sz;
+    }
 
-void model_data::increment_refresh_count() { ++_refresh_count; }
+    uint32_t model_data::refresh_count() const {
+      return _refresh_count;
+    }
 
-size_t model_data::data_sz() const { return _data_sz; }
+    void model_data::data_sz(const size_t fillsz) {
+      _data_sz = fillsz;
+    }
 
-uint32_t model_data::refresh_count() const { return _refresh_count; }
+    char* model_data::alloc(const size_t desired) {
+      free();
+      _data = new(std::nothrow) char[desired];
+      _data_sz = (_data == nullptr) ? 0 : desired;
+      return _data;
+    }
 
-void model_data::data_sz(const size_t fillsz) { _data_sz = fillsz; }
+    void model_data::free() {
+      if (_data != nullptr) {
+        delete[] _data;
+        _data = nullptr;
+      }
+      _data_sz = 0;
+    }
 
-char* model_data::alloc(const size_t desired)
-{
-  // wrap the allocation in a unique_ptr for exception safety
-  std::unique_ptr<char> data_new(new char[desired]);
-  char* data_new_ptr = data_new.get();
-  std::swap(_data, data_new_ptr);
-  data_new.release();
-  _data_sz = desired;
+    model_data::model_data(model_data const& other) {
+      *this = other;
+    }
 
-  // after swap, data_new_ptr now holds the original _data ptr
-  if (data_new_ptr != nullptr)
-  {
-    delete[] data_new_ptr;
-    data_new_ptr = nullptr;
-  }
+    model_data& model_data::operator=(model_data const& other) {
+      if (this != &other) {
+        // alloc will free an existing buffer, alloc the required size and set the _data_sz property.
+        _data = alloc(other._data_sz);
+        _refresh_count = other._refresh_count;
 
-  return _data;
-}
+        // Copy the contents of the other buffer to this object.
+        std::memcpy(_data, other._data, _data_sz);
+      }
 
-void model_data::free()
-{
-  if (_data != nullptr)
-  {
-    delete[] _data;
-    _data = nullptr;
-  }
-  _data_sz = 0;
-}
-
-}  // namespace model_management
-}  // namespace reinforcement_learning
+      return *this;
+    }
+}}

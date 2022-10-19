@@ -2,10 +2,8 @@
 #include <string>
 #include <vector>
 
-namespace reinforcement_learning
-{
-namespace utility
-{
+namespace reinforcement_learning { namespace utility {
+
 /*
  * Data buffer used for serialized messages.  Data buffer
  * consists of 2 parts.  1) preamble 2) body
@@ -15,20 +13,19 @@ namespace utility
  * preamble: is n bytes immediately before the body.
  * preamble is usually 8 bytes and sometimes zero if there is no preamble
  */
-class data_buffer
-{
+class data_buffer {
 public:
   using value_type = unsigned char;
 
   explicit data_buffer(size_t body_size = 1024);
 
   // Get a pointer to beginning of preamble
-  value_type* preamble_begin();
+  value_type *preamble_begin();
 
   size_t preamble_size() const;
 
   // Return pointer to beginning of buffer, starting at offset from the real beginning.
-  value_type* body_begin();
+  value_type *body_begin();
 
   // Body size (does not include the preamble)
   size_t body_filled_size() const;
@@ -58,7 +55,7 @@ public:
   void reset();
 
   // Get the beginning of the raw buffer
-  value_type* raw_begin();
+  value_type *raw_begin();
 
 private:
   std::vector<value_type> _buffer;
@@ -69,5 +66,5 @@ private:
   // Size in bytes of the preamble region
   const size_t _preamble_size;
 };
-}  // namespace utility
-}  // namespace reinforcement_learning
+} // namespace utility
+} // namespace reinforcement_learning

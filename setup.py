@@ -63,7 +63,6 @@ class CMakeBuild(build_ext):
             "-DCMAKE_BUILD_TYPE={}".format(cfg),  # not used on MSVC, but no harm
             "-DRL_BUILD_PYTHON=On",
             "-DRL_STATIC_DEPS=On",
-            "-DVCPKG_MANIFEST_MODE=Off",
         ]
 
         if self.distribution.cmake_options is not None:

@@ -6,10 +6,9 @@ IF DEFINED DebugBuildScripts (
 SETLOCAL
 
 CALL %~dp0init.cmd
-REM CD out of the repo dir as we need to avoid vcpkg recognizing the manifest
-PUSHD %~dp0\..\..\
+PUSHD %~dp0\..\
 
-%vcpkgPath% install "--overlay-triplets=%rlRoot%\custom-triplets" --triplet=x64-windows-v141 --host-triplet=x64-windows-v141 cpprestsdk flatbuffers openssl-windows
+%vcpkgPath% install "--overlay-triplets=custom-triplets" --triplet=x64-windows-v141 --host-triplet=x64-windows-v141 cpprestsdk flatbuffers openssl-windows
 
 REM TODO: This really should be out-of-source (also, can we switch to vcpkg for these?)
 ECHO Restoring "%rlRoot%\ext_libs\vowpal_wabbit\vowpalwabbit\packages.config"

@@ -1,12 +1,10 @@
-#include "onnx_input.h"
-
 #include <string>
 #include <vector>
 
-namespace reinforcement_learning
-{
-namespace onnx
-{
+#include "onnx_input.h"
+
+namespace reinforcement_learning { namespace onnx {
+
 // This implements a very restricted parser/serializer for a JSON-like dialect to
 // describe input to the ONNX Runtime
 //
@@ -26,35 +24,45 @@ namespace onnx
 
 namespace tensor_parser
 {
-struct parser_context
-{
-public:
-  const std::string line() const { return _line; }
-
-  parser_context(const std::string line, onnx_input_builder& input_builder)
-      : _line(line), _parsed(false), _input_builder(input_builder)
+  struct parser_context
   {
-    _reading_head = _line.c_str();
-  }
+  public:
+    const std::string line() const
+    {
+      return _line;
+    }
 
-  inline const std::vector<std::string> errors() const { return _errors; }
+    parser_context(const std::string line, onnx_input_builder& input_builder) : _line(line), _parsed(false), _input_builder(input_builder)
+    {
+      _reading_head = _line.c_str();
+    }
 
-  inline size_t position() const { return std::distance(_line.c_str(), _reading_head); }
+    inline const std::vector<std::string> errors() const
+    {
+      return _errors;
+    }
 
-  inline const onnx_input_builder& input_builder() const { return _input_builder; }
+    inline size_t position() const
+    {
+      return std::distance(_line.c_str(), _reading_head);
+    }
 
-private:
-  bool _parsed;
-  const char* _reading_head;
-  const std::string _line;
+    inline const onnx_input_builder& input_builder() const
+    {
+        return _input_builder;
+    }
 
-  std::vector<std::string> _errors;
-  onnx_input_builder& _input_builder;
+  private:
+    bool _parsed;
+    const char* _reading_head;
+    const std::string _line;
 
-  friend bool parse(parser_context& context);
-};
+    std::vector<std::string> _errors;
+    onnx_input_builder& _input_builder;
 
-bool parse(parser_context& context);
-}  // namespace tensor_parser
-}  // namespace onnx
-}  // namespace reinforcement_learning
+    friend bool parse(parser_context& context);
+  };
+
+  bool parse(parser_context& context);
+}
+}}

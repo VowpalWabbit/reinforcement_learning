@@ -1,14 +1,13 @@
 #include "test_loop.h"
 
-#include "config_utility.h"
 #include "constants.h"
+#include "config_utility.h"
 #include "error_callback_fn.h"
 #include "factory_resolver.h"
-#include "utility/data_buffer_streambuf.h"
-
 #include <fstream>
 #include <iostream>
 #include <thread>
+#include "utility/data_buffer_streambuf.h"
 
 namespace r = reinforcement_learning;
 namespace u = r::utility;
@@ -18,41 +17,38 @@ namespace po = boost::program_options;
 namespace chrono = std::chrono;
 
 test_loop::test_loop(const boost::program_options::variables_map& vm)
-    : _message_size(vm["message_size"].as<size_t>())
-    , _message_count(vm["message_count"].as<size_t>())
-    , _threads(vm["threads"].as<size_t>())
-    , _json_config(vm["json_config"].as<std::string>())
+  : _message_size(vm["message_size"].as<size_t>())
+  , _message_count(vm["message_count"].as<size_t>())
+  , _threads(vm["threads"].as<size_t>())
+  , _json_config(vm["json_config"].as<std::string>())
 {
 }
 
-void on_error(const r::api_status& status, void* /*unused*/) { std::cerr << status.get_error_msg() << std::endl; }
+void on_error(const r::api_status& status, void*) {
+  std::cerr << status.get_error_msg() << std::endl;
+}
 
-bool test_loop::init()
-{
+bool test_loop::init() {
   std::cout << "Initializing...." << std::endl;
   r::api_status status;
   u::configuration config;
 
   r::error_callback_fn error_callback(&on_error, nullptr);
 
-  if (load_config_from_json(_json_config, config, &status) != err::success)
-  {
+  if (load_config_from_json(_json_config, config, &status) != err::success) {
     std::cout << status.get_error_msg() << std::endl;
     return false;
   }
   config.set(r::name::INTERACTION_EH_TASKS_LIMIT, std::to_string(_threads).c_str());
-  const auto* const sender_impl =
-      config.get(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_EH_SENDER);
-  r::i_sender* sender = nullptr;
-  if (r::sender_factory.create(&sender, sender_impl, config, &error_callback, &status) != r::error_code::success)
-  {
+  const auto sender_impl = config.get(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_EH_SENDER);
+  r::i_sender* sender;
+  if (r::sender_factory.create(&sender, sender_impl, config, &error_callback, &status) != r::error_code::success) {
     std::cout << status.get_error_msg() << std::endl;
     return false;
   }
   _sender.reset(sender);
 
-  if (_sender->init(config, &status) != r::error_code::success)
-  {
+  if (_sender->init(config, &status) != r::error_code::success) {
     std::cout << status.get_error_msg() << std::endl;
     return false;
   }
@@ -60,24 +56,23 @@ bool test_loop::init()
   return true;
 }
 
-void test_loop::init_messages()
-{
+void test_loop::init_messages() {
   std::vector<char> buffer(_message_size * 1024, '0');
-  _message = std::string(buffer.data(), _message_size);
+  _message = std::string(&buffer[0], _message_size);
 }
 
-int test_loop::load_config_from_json(const std::string& file_name, u::configuration& config, r::api_status* status)
-{
+int test_loop::load_config_from_json(const std::string& file_name,
+  u::configuration& config,
+  r::api_status* status) const {
   std::string config_str;
   RETURN_IF_FAIL(load_file(file_name, config_str));
   return cfg::create_from_json(config_str, config, nullptr, status);
 }
 
-int test_loop::load_file(const std::string& file_name, std::string& config_str)
-{
+int test_loop::load_file(const std::string& file_name, std::string& config_str) const {
   std::ifstream fs;
   fs.open(file_name);
-  if (!fs.good()) { return err::invalid_argument; }
+  if (!fs.good()) return err::invalid_argument;
   std::stringstream buffer;
   buffer << fs.rdbuf();
   config_str = buffer.str();
@@ -87,14 +82,12 @@ int test_loop::load_file(const std::string& file_name, std::string& config_str)
 using buffer_t = reinforcement_learning::utility::data_buffer;
 using bufferptr_t = std::shared_ptr<buffer_t>;
 
-void test_loop::run()
-{
+void test_loop::run() {
   std::cout << "Testing...." << std::endl;
   const auto start = chrono::high_resolution_clock::now();
   auto const step = _message_count / 100;
-  for (size_t i = 0; i < _message_count; ++i)
-  {
-    if (step > 0 && i % step == 0) { std::cout << "\r" << (i / step) << "%"; }
+  for (size_t i = 0; i < _message_count; ++i) {
+    if (step > 0 && i % step == 0) std::cout << "\r" << (i / step) << "%";
     auto message = get_message(i);
     bufferptr_t buff(new buffer_t());
     reinforcement_learning::utility::data_buffer_streambuf sbuff1(buff.get());
@@ -111,4 +104,8 @@ void test_loop::run()
   std::cout << "Throughput: " << ((float)(Kb * 1000000)) / duration << " Kb/s" << std::endl;
 }
 
-std::string test_loop::get_message(size_t i) const { return _message; }
+std::string test_loop::get_message(size_t i) const
+{
+  return _message;
+}
+
