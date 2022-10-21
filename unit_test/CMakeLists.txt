@@ -17,6 +17,7 @@ set(TEST_SOURCES
   json_serializer_test.cc
   learning_mode_test.cc
   live_model_test.cc
+  local_client_test.cc
   main.cc
   mock_http_client.cc
   mock_util.cc

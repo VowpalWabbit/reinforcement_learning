@@ -19,7 +19,7 @@ set(RL_FLAT_BUFFER_FILES_V1
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/SlatesEvent.fbs" )
 
 set(RL_FLAT_BUFFER_FILES_V2
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CaEvent.fbs" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CaEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CbEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/DedupInfo.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Event.fbs"
@@ -53,6 +53,7 @@ set(PROJECT_SOURCES
   dedup.cc
   error_callback_fn.cc
   factory_resolver.cc
+  federation/local_client.cc
   generic_event.cc
   learning_mode.cc
   live_model.cc
@@ -141,6 +142,7 @@ set(PROJECT_PRIVATE_HEADERS
   dedup.h
   federation/federated_client.h
   federation/joined_log_provider.h
+  federation/local_client.h
   generic_event.h
   live_model_impl.h
   logger/async_batcher.h
