@@ -12,6 +12,7 @@
     "boost-program-options",
     "boost-regex",
     "boost-system",
+    "boost-test",
     "boost-thread",
     "boost-uuid",
     "cpprestsdk",
@@ -21,11 +22,5 @@
     "rapidjson",
     "spdlog",
     "zlib"
-  ],
-  "features": {
-    "tests": {
-      "description": "Build Tests",
-      "dependencies": ["boost-test"]
-    }
-  }
+  ]
 }
