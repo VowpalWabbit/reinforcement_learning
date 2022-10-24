@@ -1,0 +1,191 @@
+name: .NET Nugets
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
+  pull_request:
+    branches:
+      - '*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  build_nuget_dotnet:
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - { os: "windows-latest", runtime_id: "win-x64", vcpkg_target_triplet: "x64-windows-static" }
+          - { os: "ubuntu-latest", runtime_id: "linux-x64", vcpkg_target_triplet: "x64-linux" }
+          - { os: "macos-latest", runtime_id: "osx-x64", vcpkg_target_triplet: "x64-osx" }
+    runs-on: ${{matrix.config.os}}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Setup MSVC Developer Command Prompt
+        if: ${{ startsWith(matrix.config.os, 'windows') }}
+        uses: ilammy/msvc-dev-cmd@v1
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+      - name: Install dotnet t4
+        run: dotnet tool install --global dotnet-t4
+
+      - name: Update git tags
+        # Needed because actions/checkout performs a shallow checkout without tags
+        run: |
+          git fetch --unshallow --tags --recurse-submodules=no
+
+      - name: Get version number
+        id: get_version
+        shell: bash
+        run: |
+          echo "::set-output name=version::0.1.0+$GITHUB_SHA"
+
+      # Build .NET Core, all platforms
+      - name: Configure .NET Core
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
+          -Drlclientlib_BUILD_DOTNET=On
+          -Drlclientlib_DOTNET_USE_MSPROJECT=Off
+          -DRL_NUGET_PACKAGE_VERSION="${{ steps.get_version.outputs.version }}"
+          -DBUILD_FLATBUFFERS=Off
+          -DRAPIDJSON_SYS_DEP=Off
+          -DFMT_SYS_DEP=Off
+          -DSPDLOG_SYS_DEP=Off
+          -DVW_ZLIB_SYS_DEP=Off
+          -DVW_BOOST_MATH_SYS_DEP=Off
+          -DVW_BUILD_VW_C_WRAPPER=Off
+          -DBUILD_TESTING=Off
+          -DRL_OPENSSL_SYS_DEP=On
+          -DRL_CPPRESTSDK_SYS_DEP=On
+      - name: Build .NET Core native binary
+        run: cmake --build build --config Release -t rl.net.native
+
+      - name: Upload .NET Core Runtime
+        uses: actions/upload-artifact@v1
+        with:
+          name: RLNuget-${{matrix.config.runtime_id}}
+          path: build/bindings/cs/rl.net.native/
+
+      - name: Build the dotnet core dll
+        if: ${{ startsWith(matrix.config.os, 'windows') }}
+        run: |
+          cmake --build build --config Release -t rl.net
+      - name: Upload .NET Core dll
+        if: ${{ startsWith(matrix.config.os, 'windows') }}
+        uses: actions/upload-artifact@v1
+        with:
+          name: RLNuget-dotnet
+          path: build/bindings/cs/rl.net/
+
+
+#  nuget pack dotnet.nuspec -p:RL_NUGET_PACKAGE_VERSION=${{ steps.get_version.outputs.version }}
+
+
+      # Create the combined package on Windows
+      # - name: Package Combined
+      #   if: ${{ startsWith(matrix.config.os, 'windows') }}
+      #   shell: powershell
+      #   id: generate-nuget
+      #   run: |
+      #     cd nuget_staging
+      #
+      #     $NugetFileName = Get-ChildItem *.nupkg -name
+      #     echo "::set-output name=NugetFileName::$NugetFileName"
+      # - name: Upload Combined
+      #   if: ${{ startsWith(matrix.config.os, 'windows') }}
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: VowpalWabbit.${{steps.get_version.outputs.version}}.nupkg
+      #     path: nuget_staging/${{ steps.generate-nuget.outputs.NugetFileName }}
+
+      # # Create the .NET Core runtime package, all platforms
+      # - name: Package .NET Core Runtime
+      #   shell: bash
+      #   id: generate-runtime-nuget
+      #   run: |
+      #     cd nuget_staging
+      #     nuget pack dotnetcore_runtime.nuspec
+      #     NugetFileName=(*runtime*.nupkg)
+      #     echo "::set-output name=NugetFileName::${NugetFileName[0]}"
+      # - name: Upload .NET Core Runtime
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: VowpalWabbit.runtime.${{matrix.config.runtime_id}}.${{steps.get_version.outputs.version}}.nupkg
+      #     path: nuget_staging/${{ steps.generate-runtime-nuget.outputs.NugetFileName }}
+
+  # test_nuget_dotnetcore:
+  #   needs: [build_nuget_dotnet]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       config:
+  #         - { os: "windows-latest", runtime_id: "win-x64" }
+  #         - { os: "ubuntu-latest", runtime_id: "linux-x64" }
+  #         - { os: "macos-latest", runtime_id: "osx-x64" }
+  #   runs-on: ${{matrix.config.os}}
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         submodules: 'recursive'
+  #     - if: ${{ startsWith(matrix.config.os, 'windows') }}
+  #       uses: ilammy/msvc-dev-cmd@v1
+
+  #     # Get version number
+  #     - name: Update git tags
+  #       # Needed because actions/checkout performs a shallow checkout without tags
+  #       run: git fetch --unshallow --tags --recurse-submodules=no
+  #     - name: Get version number
+  #       id: get_version
+  #       shell: bash
+  #       run: |
+  #         version=$(./utl/version_number.py)
+  #         echo "Generated version number: $version"
+  #         echo "::set-output name=version::$version"
+
+  #     # Download the previously built Nuget packages
+  #     - name: Clear nuget cache
+  #       run: dotnet nuget locals all --clear
+  #     - uses: actions/download-artifact@v1
+  #       with:
+  #         name: VowpalWabbit.${{steps.get_version.outputs.version}}.nupkg
+  #         path: downloaded_nugets
+  #     - uses: actions/download-artifact@v1
+  #       with:
+  #         name: VowpalWabbit.runtime.win-x64.${{steps.get_version.outputs.version}}.nupkg
+  #         path: downloaded_nugets
+  #     - uses: actions/download-artifact@v1
+  #       with:
+  #         name: VowpalWabbit.runtime.linux-x64.${{steps.get_version.outputs.version}}.nupkg
+  #         path: downloaded_nugets
+  #     - uses: actions/download-artifact@v1
+  #       with:
+  #         name: VowpalWabbit.runtime.osx-x64.${{steps.get_version.outputs.version}}.nupkg
+  #         path: downloaded_nugets
+  #     - name: List downloaded packages
+  #       run: ls downloaded_nugets
+
+  #       # Some of these commands may generate an error message because we are installing packages from local source with remote dependencies
+  #       # The missing dependencies are installed in later steps
+  #     - name: Install package
+  #       run: |
+  #         set +e
+  #         cd nuget/dotnet/test
+  #         dotnet add dotnetcore_nuget_test.csproj package VowpalWabbit --version ${{steps.get_version.outputs.version}} --source "${{github.workspace}}/downloaded_nugets" --no-restore
+  #         dotnet restore dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}} --source "${{github.workspace}}/downloaded_nugets"
+  #         dotnet restore dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}}
+  #         exit 0
+  #     - name: Build and run test
+  #       run: |
+  #         cd nuget/dotnet/test
+  #         dotnet build dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}} --output build --no-restore --self-contained
+  #         ./build/dotnetcore_nuget_test
