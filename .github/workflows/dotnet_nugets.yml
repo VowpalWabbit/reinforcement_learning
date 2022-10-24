@@ -65,6 +65,7 @@ jobs:
             build/bindings/cs/rl.net.native/*.dll
             build/bindings/cs/rl.net.native/*.dylib
             build/bindings/cs/rl.net.native/*.so
+          if-no-files-found: ignore
 
       - name: Build the dotnet core dll
         if: ${{ startsWith(matrix.config.os, 'windows') }}
