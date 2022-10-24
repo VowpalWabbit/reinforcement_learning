@@ -18,6 +18,11 @@ if (NOT CMAKE_BUILD_TYPE AND NOT GENERATOR_IS_MULTI_CONFIG)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+option(BUILD_TESTING "Build tests" ON)
+if(BUILD_TESTING)
+  list(APPEND VCPKG_MANIFEST_FEATURES "tests")
+endif()
+
 # Set this to on so that tooling can make use of the outputted compile commands (such as clang-tidy)
 set(CMAKE_EXPORT_COMPILE_COMMANDS On)
 

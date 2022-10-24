@@ -45,11 +45,11 @@ jobs:
           -Drlclientlib_DOTNET_USE_MSPROJECT=Off
           -DRL_NUGET_PACKAGE_VERSION="${{ steps.get_version.outputs.version }}"
           -DBUILD_FLATBUFFERS=Off
-          -DRAPIDJSON_SYS_DEP=Off
-          -DFMT_SYS_DEP=Off
-          -DSPDLOG_SYS_DEP=Off
-          -DVW_ZLIB_SYS_DEP=Off
-          -DVW_BOOST_MATH_SYS_DEP=Off
+          -DRAPIDJSON_SYS_DEP=ON
+          -DFMT_SYS_DEP=ON
+          -DSPDLOG_SYS_DEP=ON
+          -DVW_ZLIB_SYS_DEP=ON
+          -DVW_BOOST_MATH_SYS_DEP=ON
           -DVW_BUILD_VW_C_WRAPPER=Off
           -DBUILD_TESTING=Off
           -DRL_OPENSSL_SYS_DEP=On
@@ -61,7 +61,10 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: RLNuget-${{matrix.config.runtime_id}}
-          path: build/bindings/cs/rl.net.native/
+          path: |
+            build/bindings/cs/rl.net.native/*.dll
+            build/bindings/cs/rl.net.native/*.dylib
+            build/bindings/cs/rl.net.native/*.so
 
       - name: Build the dotnet core dll
         if: ${{ startsWith(matrix.config.os, 'windows') }}
