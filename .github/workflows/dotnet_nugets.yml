@@ -57,39 +57,31 @@ jobs:
           -DBUILD_TESTING=Off
           -DRL_OPENSSL_SYS_DEP=On
           -DRL_CPPRESTSDK_SYS_DEP=On
-      - name: Build .NET Core native binary
-        run: cmake --build build --config Release -t rl.net.native
 
-      - name: Build .NET Core native binary
-        run: |
-          ls
-          cd build
-          echo ---
-          ls
-          cd bindings
-          echo ---
-          ls
-          cd cs
-          echo ---
-          cd rl.net.native
-          ls
-
-      - name: Upload .NET Core Runtime
-        uses: actions/upload-artifact@v1
-        with:
-          name: RLNuget-${{matrix.config.runtime_id}}
-          path: build/bindings/cs/rl.net.native
-
-      - name: Build the dotnet core dll
-        if: ${{ startsWith(matrix.config.os, 'windows') }}
+      - run: cmake --build build --config Release -t rl.net.native
+      - if: ${{ startsWith(matrix.config.os, 'windows') }}
         run: |
           cmake --build build --config Release -t rl.net
-      - name: Upload .NET Core dll
-        if: ${{ startsWith(matrix.config.os, 'windows') }}
+
+      - if: ${{ startsWith(matrix.config.os, 'windows') }}
         uses: actions/upload-artifact@v1
         with:
-          name: RLNuget-dotnet
-          path: build/bindings/cs/rl.net/
+          name: artifacts
+          path: |
+            build/binaries/rl.net.native.dll
+            build/binaries/Rl.Net.dll
+
+      - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
+        uses: actions/upload-artifact@v1
+        with:
+          name: artifacts
+          path: build/bindings/cs/rl.net.native/librl.net.native.so
+
+      - if: ${{ startsWith(matrix.config.os, 'osx') }}
+        uses: actions/upload-artifact@v1
+        with:
+          name: artifacts
+          path: build/bindings/cs/rl.net.native/librl.net.native.dylib
 
       - name: Get version number
         id: get_version
