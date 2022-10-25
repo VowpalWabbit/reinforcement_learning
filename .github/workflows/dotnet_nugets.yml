@@ -77,7 +77,7 @@ jobs:
           name: artifacts
           path: build/bindings/cs/rl.net.native/librl.net.native.so
 
-      - if: ${{ startsWith(matrix.config.os, 'osx') }}
+      - if: ${{ startsWith(matrix.config.os, 'macos') }}
         uses: actions/upload-artifact@v1
         with:
           name: artifacts
@@ -93,14 +93,12 @@ jobs:
         with:
           name: artifacts
           path: artifacts
-      - uses: actions/setup-dotnet@v3
-      - run: |
-          dotnet pack ../nuget/dotnet/dotnetcore.nuspec -p:RL_NUGET_PACKAGE_VERSION=0.1.0+$GITHUB_SHA -o nuget_output
-        working-directory: artifacts
+      - uses: NuGet/setup-nuget@v1.1.1
+      - run: nuget pack nuget/dotnet/dotnetcore.nuspec -Properties RL_NUGET_PACKAGE_VERSION=0.1.0+$GITHUB_SHA -BasePath artifacts -OutputDirectory nuget_output
       - uses: actions/upload-artifact@v1
         with:
           name: dist
-          path: artifacts/nuget_output/
+          path: nuget_output/
 
   test_nuget:
     needs: package_nuget
