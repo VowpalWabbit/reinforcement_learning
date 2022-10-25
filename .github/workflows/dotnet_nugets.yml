@@ -61,8 +61,7 @@ jobs:
 
       - run: cmake --build build --config Release -t rl.net.native
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
-        run: |
-          cmake --build build --config Release -t rl.net
+        run: cmake --build build --config Release -t rl.net
 
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
         uses: actions/upload-artifact@v1
@@ -70,7 +69,7 @@ jobs:
           name: artifacts
           path: |
             build/binaries/rl.net.native.dll
-            build/binaries/Rl.Net.dll
+            build/binaries/rl.net.dll
 
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
         uses: actions/upload-artifact@v1
