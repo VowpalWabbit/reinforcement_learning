@@ -39,8 +39,11 @@ jobs:
       - name: Configure .NET Core
         run: >
           cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_TARGET_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
+          -DVCPKG_DEFAULT_HOST_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
+          -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
           -Drlclientlib_BUILD_DOTNET=On
           -Drlclientlib_DOTNET_USE_MSPROJECT=Off
           -DRL_NUGET_PACKAGE_VERSION="${{ steps.get_version.outputs.version }}"
@@ -56,6 +59,20 @@ jobs:
           -DRL_CPPRESTSDK_SYS_DEP=On
       - name: Build .NET Core native binary
         run: cmake --build build --config Release -t rl.net.native
+
+      - name: Build .NET Core native binary
+        run: |
+          ls
+          cd build
+          echo ---
+          ls
+          cd bindings
+          echo ---
+          ls
+          cd cs
+          echo ---
+          cd rl.net.native
+          ls
 
       - name: Upload .NET Core Runtime
         uses: actions/upload-artifact@v1
