@@ -42,7 +42,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_TARGET_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
-          -DVCPKG_DEFAULT_HOST_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
+          -DVCPKG_HOST_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
           -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
           -Drlclientlib_BUILD_DOTNET=On
           -Drlclientlib_DOTNET_USE_MSPROJECT=Off
@@ -78,7 +78,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: RLNuget-${{matrix.config.runtime_id}}
-          path: build/bindings/cs/rl.net.native/*
+          path: build/bindings/cs/rl.net.native
 
       - name: Build the dotnet core dll
         if: ${{ startsWith(matrix.config.os, 'windows') }}
