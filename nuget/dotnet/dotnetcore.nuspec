@@ -1,6 +1,4 @@
 <?xml version="1.0"?>
-<!-- Nuspec file for .NET Core package (without support for .NET Framework) -->
-<!-- RL_NUGET_PACKAGE_NAME and RL_NUGET_PACKAGE_VERSION should be defined in CMake command line -->
 <package>
   <metadata>
     <title>VowpalWabbit.RL</title>
@@ -24,7 +22,6 @@
   <files>
     <file src="rl.net.dll" target="lib/netstandard2.0" />
     <file src="rl.net.native.dll" target="runtimes/win-x64/native" />
-    <file src="rl.net.native.pdb" target="runtimes/win-x64/native" />
     <file src="librl.net.native.so" target="runtimes/linux-x64/native"/>
     <file src="librl.net.native.dylib" target="runtimes/osx-x64/native"/>
   </files>
