@@ -1,3 +1,5 @@
+#pragma once
+
 #include "api_status.h"
 #include "sender.h"
 

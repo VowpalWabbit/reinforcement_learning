@@ -1,4 +1,4 @@
-#include "vw_trainable_model.h"
+#include "federation/vw_trainable_model.h"
 
 #include "constants.h"
 #include "err_constants.h"
@@ -62,7 +62,12 @@ void trainable_vw_model::copy_current_model_to_starting()
   temp_buffer.add_file(VW::io::create_vector_writer(backing_vector));
   VW::save_predictor(*_model, temp_buffer);
 
-  auto options = VW::make_unique<VW::config::options_cli>(VW::split_command_line(_command_line));
+  auto args = VW::split_command_line(_command_line);
+  if (std::find(args.begin(), args.end(), "--preserve_performance_counters") == args.end())
+  {
+    args.emplace_back("--preserve_performance_counters");
+  }
+  auto options = VW::make_unique<VW::config::options_cli>(args);
   _starting_model = VW::initialize_experimental(std::move(options), VW::io::create_buffer_view(backing_vector->data(), backing_vector->size()), nullptr, nullptr, nullptr);
 }
 

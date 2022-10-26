@@ -1,7 +1,9 @@
+#pragma once
+
 #include "api_status.h"
 #include "configuration.h"
 #include "model_mgmt.h"
-#include "vw_local_joiner.h"
+#include "federation/vw_local_joiner.h"
 
 #include "vw/core/global_data.h"
 #include "vw/core/merge.h"

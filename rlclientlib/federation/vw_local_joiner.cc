@@ -1,4 +1,4 @@
-#include "vw_local_joiner.h"
+#include "federation/vw_local_joiner.h"
 
 #include "constants.h"
 #include "err_constants.h"
@@ -118,7 +118,10 @@ vw_joined_log_batch::vw_joined_log_batch(std::shared_ptr<VW::workspace> joiner_w
 
 vw_joined_log_batch::~vw_joined_log_batch()
 {
-  _joiner_workspace->finish_example(_examples);
+  for(auto* example : _examples)
+  {
+    _joiner_workspace->finish_example(*example);
+  }
 }
 
 void vw_joined_log_batch::add_example(VW::example* example)

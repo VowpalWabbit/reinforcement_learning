@@ -1,3 +1,5 @@
+#pragma once
+
 #include "api_status.h"
 #include "configuration.h"
 #include "data_buffer.h"
