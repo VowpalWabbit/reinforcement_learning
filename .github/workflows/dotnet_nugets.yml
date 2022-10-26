@@ -82,6 +82,7 @@ jobs:
 
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
         run: |
+          mkdir -p symbols
           objcopy --only-keep-debug build/bindings/cs/rl.net.native/librl.net.native.so symbols/librl.net.native.debug
           strip --strip-debug --strip-unneeded build/bindings/cs/rl.net.native/librl.net.native.so
 
@@ -99,6 +100,7 @@ jobs:
 
       - if: ${{ startsWith(matrix.config.os, 'macos') }}
         run: |
+          mkdir -p symbols
           dsymutil build/bindings/cs/rl.net.native/librl.net.native.dylib --flat -o symbols/librl.net.native.dylib.dSYM
           strip -S build/bindings/cs/rl.net.native/librl.net.native.dylib
 
