@@ -2,8 +2,8 @@
 
 #include "constants.h"
 #include "err_constants.h"
-#include "message_type.h"
-#include "preamble.h"
+#include "logger/message_type.h"
+#include "logger/preamble.h"
 #include "trace_logger.h"
 
 #include "vw/config/options_cli.h"

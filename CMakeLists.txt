@@ -117,12 +117,12 @@ include(GNUInstallDirs)
 
 include(ext_libs/ext_libs.cmake)
 
-add_subdirectory(rlclientlib)
-add_subdirectory(rlclientlib/extensions)
-
 if(RL_BUILD_EXTERNAL_PARSER)
   add_subdirectory(external_parser)
 endif()
+
+add_subdirectory(rlclientlib)
+add_subdirectory(rlclientlib/extensions)
 
 add_subdirectory(examples)
 add_subdirectory(test_tools/joiner)

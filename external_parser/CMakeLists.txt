@@ -142,6 +142,7 @@ target_link_libraries(rl_binary_parser PUBLIC vw_core RapidJSON PRIVATE libzstd_
 target_include_directories(rl_binary_parser
   PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/
+    ${CMAKE_CURRENT_LIST_DIR}/generated/v2/
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/zstd/lib/
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/date/
     ${FLATBUFFERS_INCLUDE_DIR}

@@ -33,6 +33,8 @@ int trainable_vw_model::get_data(model_management::model_data& data, api_status*
 
   auto* buffer_to_copy_to = data.alloc(backing_buffer->size());
   std::memcpy(buffer_to_copy_to, backing_buffer->data(), backing_buffer->size());
+
+  return error_code::success;
 }
 
 int trainable_vw_model::learn(vw_joined_log_batch& joined_logs, api_status* status)
@@ -43,6 +45,7 @@ int trainable_vw_model::learn(vw_joined_log_batch& joined_logs, api_status* stat
     _model->learn(*example);
     joined_logs.finish_example(example);
   }
+  return error_code::success;
 }
 
 VW::model_delta trainable_vw_model::get_model_delta()

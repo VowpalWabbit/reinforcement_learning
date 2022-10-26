@@ -16,6 +16,8 @@ class vw_joined_log_batch : public i_joined_log_batch
 {
 public:
   vw_joined_log_batch(std::shared_ptr<VW::workspace> joiner_workspace);
+  ~vw_joined_log_batch() override;
+
   void add_example(VW::example* example);
   // get next item in batch, outputs nullptr when empty
   virtual int next(std::unique_ptr<VW::io::reader>& chunk_reader, api_status* status = nullptr) override;

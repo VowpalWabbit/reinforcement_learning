@@ -235,6 +235,11 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   target_link_libraries(rlclientlib PUBLIC Boost::thread)
 endif()
 
+# Link to external binary parser for local joining code
+if (RL_BUILD_EXTERNAL_PARSER)
+  target_link_libraries(rlclientlib PUBLIC rl_binary_parser)
+endif()
+
 # Set paths for installing library and header files
 install(
   TARGETS rlclientlib
