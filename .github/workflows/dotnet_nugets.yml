@@ -40,11 +40,12 @@ jobs:
       - name: Configure .NET Core
         run: >
           cmake -S . -B build -G Ninja
-          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
           -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_TARGET_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
           -DVCPKG_HOST_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
           -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+          -DPDB_OUTPUT_DIRECTORY=${{github.workspace}}/build/binaries/
           -Drlclientlib_BUILD_DOTNET=On
           -Drlclientlib_DOTNET_USE_MSPROJECT=Off
           -DRL_NUGET_PACKAGE_VERSION="${{ steps.get_version.outputs.version }}"
@@ -59,9 +60,9 @@ jobs:
           -DRL_OPENSSL_SYS_DEP=On
           -DRL_CPPRESTSDK_SYS_DEP=On
 
-      - run: cmake --build build --config Release -t rl.net.native
+      - run: cmake --build build --config RelWithDebInfo -t rl.net.native
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
-        run: cmake --build build --config Release -t rl.net
+        run: cmake --build build --config RelWithDebInfo -t rl.net
 
       - run: ls
 
