@@ -6,7 +6,7 @@ using System.IO;
 
 Console.WriteLine("Running RL C# test...");
 var test = new RLTest();
-test.TestBuilderSimple();
+test.RLTestSimple();
 Console.WriteLine("Done");
 
 public class RLTest
