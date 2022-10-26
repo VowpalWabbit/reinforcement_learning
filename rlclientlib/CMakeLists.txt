@@ -53,7 +53,10 @@ set(PROJECT_SOURCES
   dedup.cc
   error_callback_fn.cc
   factory_resolver.cc
+  federation/event_cache.cc
   federation/local_client.cc
+  federation/vw_local_joiner.cc
+  federation/vw_trainable_model.cc
   generic_event.cc
   learning_mode.cc
   live_model.cc
@@ -140,9 +143,12 @@ set(PROJECT_PUBLIC_HEADERS
 set(PROJECT_PRIVATE_HEADERS
   console_tracer.h
   dedup.h
+  federation/event_cache.h
   federation/federated_client.h
   federation/joined_log_provider.h
   federation/local_client.h
+  federation/vw_local_joiner.h
+  federation/vw_trainable_model.h
   generic_event.h
   live_model_impl.h
   logger/async_batcher.h
