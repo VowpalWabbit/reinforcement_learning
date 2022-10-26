@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
   <metadata>
-    <title>VowpalWabbit.RL</title>
-    <id>VowpalWabbit.RL</id>
+    <title>RL.Net</title>
+    <id>RL.Net</id>
     <tags>vw vowpal wabbit langford ml machine learning</tags>
     <authors>John Langford et al</authors>
     <version>$RL_NUGET_PACKAGE_VERSION$</version>

@@ -1,12 +1,16 @@
 name: .NET Nugets
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
   pull_request:
     branches:
       - '*'
+
+env:
+  RL_NUGET_VERSION:  0.0.${{github.run_number}}+${{github.sha}}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
@@ -40,7 +44,7 @@ jobs:
       - name: Configure .NET Core
         run: >
           cmake -S . -B build -G Ninja
-          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
           -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_TARGET_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
           -DVCPKG_HOST_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
@@ -60,17 +64,26 @@ jobs:
           -DRL_OPENSSL_SYS_DEP=On
           -DRL_CPPRESTSDK_SYS_DEP=On
 
-      - run: cmake --build build --config Release -t rl.net.native
+      - run: cmake --build build --config RelWithDebInfo -t rl.net.native
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
-        run: cmake --build build --config Release -t rl.net
-
-      - run: ls
+        run: cmake --build build --config RelWithDebInfo -t rl.net
 
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
         uses: actions/upload-artifact@v1
         with:
           name: artifacts
-          path: build/binaries/
+          path: build/binaries/rl.net.dll
+
+      - if: ${{ startsWith(matrix.config.os, 'windows') }}
+        uses: actions/upload-artifact@v1
+        with:
+          name: symbols
+          path: build/binaries/rl.net.pdb
+
+      - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
+        run: |
+          objcopy --only-keep-debug build/bindings/cs/rl.net.native/librl.net.native.so symbols/librl.net.native.debug
+          strip --strip-debug --strip-unneeded build/bindings/cs/rl.net.native/librl.net.native.so
 
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
         uses: actions/upload-artifact@v1
@@ -78,12 +91,28 @@ jobs:
           name: artifacts
           path: build/bindings/cs/rl.net.native/librl.net.native.so
 
+      - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
+        uses: actions/upload-artifact@v1
+        with:
+          name: symbols
+          path: symbols/librl.net.native.debug
+
+      - if: ${{ startsWith(matrix.config.os, 'macos') }}
+        run: |
+          dsymutil build/bindings/cs/rl.net.native/librl.net.native.dylib --flat -o symbols/librl.net.native.dylib.dSYM
+          strip -S build/bindings/cs/rl.net.native/librl.net.native.dylib
+
       - if: ${{ startsWith(matrix.config.os, 'macos') }}
         uses: actions/upload-artifact@v1
         with:
           name: artifacts
           path: build/bindings/cs/rl.net.native/librl.net.native.dylib
 
+      - if: ${{ startsWith(matrix.config.os, 'macos') }}
+        uses: actions/upload-artifact@v1
+        with:
+          name: symbols
+          path: symbols/librl.net.native.dylib.dSYM
 
   package_nuget:
     needs: build_nuget_dotnet
@@ -95,7 +124,7 @@ jobs:
           name: artifacts
           path: artifacts
       - uses: NuGet/setup-nuget@v1.1.1
-      - run: nuget pack nuget/dotnet/dotnetcore.nuspec -Properties RL_NUGET_PACKAGE_VERSION=0.0.$GITHUB_RUN_ID+$GITHUB_SHA -BasePath artifacts -OutputDirectory nuget_output
+      - run: nuget pack nuget/dotnet/dotnetcore.nuspec -Properties RL_NUGET_PACKAGE_VERSION=$RL_NUGET_VERSION -BasePath artifacts -OutputDirectory nuget_output
       - uses: actions/upload-artifact@v1
         with:
           name: dist
@@ -122,7 +151,7 @@ jobs:
         run: |
           set +e
           cd nuget/dotnet/test
-          dotnet add dotnetcore_nuget_test.csproj package VowpalWabbit.RL --version 0.0.$GITHUB_RUN_ID+$GITHUB_SHA --source "${{github.workspace}}/dist" --no-restore
+          dotnet add dotnetcore_nuget_test.csproj package RL.Net --version $RL_NUGET_VERSION --source "${{github.workspace}}/dist" --no-restore
           dotnet restore dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}} --source "${{github.workspace}}/dist"
           dotnet restore dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}}
       - name: Build and run test
