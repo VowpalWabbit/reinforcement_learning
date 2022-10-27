@@ -13,7 +13,7 @@ if(WIN32)
   message(STATUS "WinSDK Version: ${CMAKE_SYSTEM_VERSION}")
 endif()
 
-if(NOT MSVC)
+if(NOT WIN32)
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG")
   set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG")
 endif()

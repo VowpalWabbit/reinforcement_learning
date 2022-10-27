@@ -49,7 +49,6 @@ jobs:
           -DVCPKG_TARGET_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
           -DVCPKG_HOST_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
           -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
-          -DPDB_OUTPUT_DIRECTORY=${{github.workspace}}/build/binaries/
           -Drlclientlib_BUILD_DOTNET=On
           -Drlclientlib_DOTNET_USE_MSPROJECT=Off
           -DBUILD_FLATBUFFERS=Off
@@ -65,7 +64,19 @@ jobs:
 
       - run: cmake --build build --config RelWithDebInfo -t rl.net.native
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
-        run: cmake --build build --config RelWithDebInfo -t rl.net --verbose
+        run: |
+          cmake --build build --config RelWithDebInfo -t rl.net
+          echo "---"
+          ls build
+          echo "---"
+          ls build/binaries
+          echo "---"
+          ls bindings\cs\rl.net\obj
+          echo "---"
+          ls bindings\cs\rl.net\obj\x64
+          echo "---"
+          ls bindings\cs\rl.net\obj\x64\Release\
+          echo "---"
 
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
         uses: actions/upload-artifact@v1
@@ -79,7 +90,9 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: symbols
-          path: build/binaries/rl.net.pdb
+          path: |
+            build/binaries/rl.net.pdb
+            build/binaries/rl.net.native.pdb
 
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
         run: |
