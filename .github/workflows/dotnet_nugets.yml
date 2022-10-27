@@ -34,6 +34,8 @@ jobs:
       - name: Setup MSVC Developer Command Prompt
         if: ${{ startsWith(matrix.config.os, 'windows') }}
         uses: ilammy/msvc-dev-cmd@v1
+      - if: ${{ startsWith(matrix.config.os, 'windows') }}
+        run: where al
       - name: Install Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
       - name: Install dotnet t4
