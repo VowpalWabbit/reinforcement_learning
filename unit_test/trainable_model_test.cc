@@ -1,12 +1,12 @@
-#include "federation/vw_trainable_model.h"
-#include "federation/vw_local_joiner.h"
+#include <boost/test/unit_test.hpp>
+
 #include "constants.h"
 #include "err_constants.h"
+#include "federation/vw_local_joiner.h"
+#include "federation/vw_trainable_model.h"
 #include "vw/config/options_cli.h"
 #include "vw/core/shared_data.h"
 #include "vw/core/vw.h"
-
-#include <boost/test/unit_test.hpp>
 
 #include <memory>
 
@@ -14,7 +14,8 @@ using namespace reinforcement_learning;
 
 BOOST_AUTO_TEST_CASE(trainable_model_get_data)
 {
-  auto opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(std::vector<std::string>{"--quiet", "--preserve_performance_counters"}));
+  auto opts = std::unique_ptr<VW::config::options_i>(
+      new VW::config::options_cli(std::vector<std::string>{"--quiet", "--preserve_performance_counters"}));
   std::unique_ptr<VW::workspace> vw = VW::initialize_experimental(std::move(opts));
 
   // learn on one example
@@ -33,17 +34,21 @@ BOOST_AUTO_TEST_CASE(trainable_model_get_data)
   // get data out and check that it's equal
   model_management::model_data data_out;
   model.get_data(data_out);
-  opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(std::vector<std::string>{"--quiet", "--preserve_performance_counters"}));
-  std::unique_ptr<VW::workspace> vw_out = VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data_out.data(), data_out.data_sz()));
+  opts = std::unique_ptr<VW::config::options_i>(
+      new VW::config::options_cli(std::vector<std::string>{"--quiet", "--preserve_performance_counters"}));
+  std::unique_ptr<VW::workspace> vw_out =
+      VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data_out.data(), data_out.data_sz()));
   BOOST_CHECK_EQUAL(vw_out->sd->weighted_labeled_examples, example_count);
 }
 
 BOOST_AUTO_TEST_CASE(trainable_model_learn_and_create_delta)
 {
   // create 2 copies of the base VW workspace
-  auto opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(std::vector<std::string>{"--quiet", "--preserve_performance_counters"}));
+  auto opts = std::unique_ptr<VW::config::options_i>(
+      new VW::config::options_cli(std::vector<std::string>{"--quiet", "--preserve_performance_counters"}));
   std::unique_ptr<VW::workspace> vw1 = VW::initialize_experimental(std::move(opts));
-  opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(std::vector<std::string>{"--quiet", "--preserve_performance_counters"}));
+  opts = std::unique_ptr<VW::config::options_i>(
+      new VW::config::options_cli(std::vector<std::string>{"--quiet", "--preserve_performance_counters"}));
   std::unique_ptr<VW::workspace> vw2 = VW::initialize_experimental(std::move(opts));
 
   // learn on one example
@@ -61,7 +66,8 @@ BOOST_AUTO_TEST_CASE(trainable_model_learn_and_create_delta)
   model.set_model(std::move(vw1));
 
   // learn on another example
-  opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(std::vector<std::string>{"--quiet", "--preserve_performance_counters"}));
+  opts = std::unique_ptr<VW::config::options_i>(
+      new VW::config::options_cli(std::vector<std::string>{"--quiet", "--preserve_performance_counters"}));
   std::shared_ptr<VW::workspace> vw_for_joiner = VW::initialize_experimental(std::move(opts));
   vw_joined_log_batch batch(vw_for_joiner);
   ex = VW::read_example(*vw_for_joiner, "1 | b");
@@ -71,8 +77,10 @@ BOOST_AUTO_TEST_CASE(trainable_model_learn_and_create_delta)
   // get data in trainable model
   model_management::model_data data_out;
   model.get_data(data_out);
-  opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(std::vector<std::string>{"--quiet", "--preserve_performance_counters"}));
-  std::unique_ptr<VW::workspace> vw1_updated = VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data_out.data(), data_out.data_sz()));
+  opts = std::unique_ptr<VW::config::options_i>(
+      new VW::config::options_cli(std::vector<std::string>{"--quiet", "--preserve_performance_counters"}));
+  std::unique_ptr<VW::workspace> vw1_updated =
+      VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data_out.data(), data_out.data_sz()));
 
   // get model delta and update vw2 workspace
   auto delta = model.get_model_delta();

@@ -5,25 +5,25 @@
 #include "logger/message_type.h"
 #include "logger/preamble.h"
 #include "trace_logger.h"
-
 #include "vw/config/options_cli.h"
 #include "vw/core/cache.h"
 #include "vw/core/parse_primitives.h"
 
 namespace reinforcement_learning
 {
-
-vw_local_joiner::vw_local_joiner(const utility::configuration& config, i_trace* trace_logger, api_status* status) : _trace_logger(trace_logger)
+vw_local_joiner::vw_local_joiner(const utility::configuration& config, i_trace* trace_logger, api_status* status)
+    : _trace_logger(trace_logger)
 {
   if (config.get_int(name::PROTOCOL_VERSION, 999) != 2)
-  { 
+  {
     TRACE_ERROR(_trace_logger, "Protocol version 2 is required");
     // TODO handle error
     // Can't return error code in constructor
   }
 
   std::string cmd_str = config.get(name::MODEL_VW_INITIAL_COMMAND_LINE,
-      "--cb_explore_adf --driver_output_off --epsilon 0.2 --power_t 0 -l 0.001 --cb_type mtr -q :: --preserve-performance-counters");
+      "--cb_explore_adf --driver_output_off --epsilon 0.2 --power_t 0 -l 0.001 --cb_type mtr -q :: "
+      "--preserve-performance-counters");
   auto cmd_list = VW::split_command_line(cmd_str);
   auto options = VW::make_unique<VW::config::options_cli>(cmd_list);
   _joiner_workspace = VW::initialize_experimental(std::move(options));
@@ -42,20 +42,17 @@ int vw_local_joiner::add_events(const std::vector<buffer>& events, api_status* s
     pre.read_from_bytes(data->preamble_begin(), pre.size());
     if (pre.msg_type != logger::message_type::fb_generic_event_collection)
     {
-      RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << " Message type " << pre.msg_type << " cannot be handled.";
+      RETURN_ERROR_LS(_trace_logger, status, invalid_argument)
+          << " Message type " << pre.msg_type << " cannot be handled.";
     }
 
     auto res = messages::flatbuff::v2::GetEventBatch(data->body_begin());
     flatbuffers::Verifier verifier(data->body_begin(), data->body_filled_size());
     if (!res->Verify(verifier))
-    { 
-      RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << "verify failed for fb_generic_event_collection";
-    }
+    { RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << "verify failed for fb_generic_event_collection"; }
 
     if (res->metadata()->content_encoding()->str() != "IDENTITY")
-    {
-      RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << "Can only handle IDENTITY encoding";
-    }
+    { RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << "Can only handle IDENTITY encoding"; }
 
     for (auto message : *res->events())
     {
@@ -115,14 +112,13 @@ int vw_local_joiner::invoke_join(std::unique_ptr<i_joined_log_batch>& batch_out,
 }
 
 vw_joined_log_batch::vw_joined_log_batch(std::shared_ptr<VW::workspace> joiner_workspace)
-  : _joiner_workspace(std::move(joiner_workspace)) { }
+    : _joiner_workspace(std::move(joiner_workspace))
+{
+}
 
 vw_joined_log_batch::~vw_joined_log_batch()
 {
-  for(auto* example : _examples)
-  {
-    _joiner_workspace->finish_example(*example);
-  }
+  for (auto* example : _examples) { _joiner_workspace->finish_example(*example); }
 
   if (_output_example_ptr != nullptr)
   {
@@ -131,10 +127,7 @@ vw_joined_log_batch::~vw_joined_log_batch()
   }
 }
 
-void vw_joined_log_batch::add_example(VW::example* example)
-{
-  _examples.push_back(example);
-}
+void vw_joined_log_batch::add_example(VW::example* example) { _examples.push_back(example); }
 
 int vw_joined_log_batch::next(std::unique_ptr<VW::io::reader>& chunk_reader, api_status* status)
 {
@@ -195,4 +188,4 @@ void vw_joined_log_batch::finish_example(VW::example* example)
 }
 */
 
-}
+}  // namespace reinforcement_learning

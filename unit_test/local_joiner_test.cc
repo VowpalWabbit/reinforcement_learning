@@ -1,9 +1,8 @@
-#include "federation/vw_local_joiner.h"
+#include <boost/test/unit_test.hpp>
 
+#include "federation/vw_local_joiner.h"
 #include "vw/config/options_cli.h"
 #include "vw/core/vw.h"
-
-#include <boost/test/unit_test.hpp>
 
 #include <memory>
 

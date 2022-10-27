@@ -7,7 +7,6 @@
 
 namespace reinforcement_learning
 {
-
 class event_cache_memory : public i_sender
 {
 public:
@@ -29,4 +28,4 @@ private:
 class event_cache_disk : public i_sender {};
 */
 
-}
+}  // namespace reinforcement_learning

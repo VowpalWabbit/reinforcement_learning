@@ -5,7 +5,6 @@
 #include "data_buffer.h"
 #include "joined_log_provider.h"
 #include "joiners/example_joiner.h"
-
 #include "vw/core/global_data.h"
 
 #include <memory>
@@ -13,7 +12,6 @@
 
 namespace reinforcement_learning
 {
-
 class vw_joined_log_batch : public i_joined_log_batch
 {
 public:
@@ -60,4 +58,4 @@ private:
   i_trace* _trace_logger = nullptr;
 };
 
-}
+}  // namespace reinforcement_learning

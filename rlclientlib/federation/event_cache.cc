@@ -2,7 +2,6 @@
 
 namespace reinforcement_learning
 {
-
 int event_cache_memory::v_send(const buffer& data, api_status* status)
 {
   _events.push_back(data);
@@ -16,4 +15,4 @@ std::vector<std::shared_ptr<utility::data_buffer>> event_cache_memory::get_event
   return events;
 }
 
-}
+}  // namespace reinforcement_learning

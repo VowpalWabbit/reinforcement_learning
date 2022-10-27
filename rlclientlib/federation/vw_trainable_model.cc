@@ -2,18 +2,17 @@
 
 #include "constants.h"
 #include "err_constants.h"
-
 #include "vw/config/options_cli.h"
 #include "vw/core/parse_primitives.h"
 #include "vw/core/vw.h"
 
 namespace reinforcement_learning
 {
-
 trainable_vw_model::trainable_vw_model(const utility::configuration& config)
 {
   _command_line = config.get(name::MODEL_VW_INITIAL_COMMAND_LINE,
-      "--cb_explore_adf --driver_output_off --epsilon 0.2 --power_t 0 -l 0.001 --cb_type mtr -q :: --preserve-performance-counters");
+      "--cb_explore_adf --driver_output_off --epsilon 0.2 --power_t 0 -l 0.001 --cb_type mtr -q :: "
+      "--preserve-performance-counters");
   auto options = VW::make_unique<VW::config::options_cli>(VW::split_command_line(_command_line));
   _model = VW::initialize_experimental(std::move(options));
   copy_current_model_to_starting();
@@ -75,11 +74,10 @@ void trainable_vw_model::copy_current_model_to_starting()
 
   auto args = VW::split_command_line(_command_line);
   if (std::find(args.begin(), args.end(), "--preserve_performance_counters") == args.end())
-  {
-    args.emplace_back("--preserve_performance_counters");
-  }
+  { args.emplace_back("--preserve_performance_counters"); }
   auto options = VW::make_unique<VW::config::options_cli>(args);
-  _starting_model = VW::initialize_experimental(std::move(options), VW::io::create_buffer_view(backing_vector->data(), backing_vector->size()), nullptr, nullptr, nullptr);
+  _starting_model = VW::initialize_experimental(std::move(options),
+      VW::io::create_buffer_view(backing_vector->data(), backing_vector->size()), nullptr, nullptr, nullptr);
 }
 
-}
+}  // namespace reinforcement_learning

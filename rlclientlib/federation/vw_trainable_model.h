@@ -2,9 +2,8 @@
 
 #include "api_status.h"
 #include "configuration.h"
-#include "model_mgmt.h"
 #include "federation/joined_log_provider.h"
-
+#include "model_mgmt.h"
 #include "vw/core/global_data.h"
 #include "vw/core/merge.h"
 
@@ -12,7 +11,6 @@
 
 namespace reinforcement_learning
 {
-
 class trainable_vw_model : public model_management::i_data_transport
 {
 public:
@@ -34,4 +32,4 @@ private:
   void copy_current_model_to_starting();
 };
 
-}
+}  // namespace reinforcement_learning
