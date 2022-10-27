@@ -17,8 +17,6 @@ set(TEST_SOURCES
   json_serializer_test.cc
   learning_mode_test.cc
   live_model_test.cc
-  local_client_test.cc
-  local_joiner_test.cc
   main.cc
   mock_http_client.cc
   mock_util.cc
@@ -38,7 +36,6 @@ set(TEST_SOURCES
   str_util_test.cc
   time_tests.cc
   trace_logger_test.cc
-  trainable_model_test.cc
   watchdog_test.cc
 )
 
@@ -47,6 +44,14 @@ if (vw_USE_AZURE_FACTORIES)
     http_transport_client_test.cc
     mock_http_client.cc
     http_client_test.cc
+  )
+endif()
+
+if(RL_BUILD_FEDERATION)
+  list(APPEND TEST_SOURCES
+    local_client_test.cc
+    local_joiner_test.cc
+    trainable_model_test.cc
   )
 endif()
 
