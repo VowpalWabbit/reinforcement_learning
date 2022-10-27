@@ -21,18 +21,27 @@ public:
   ~vw_joined_log_batch() override;
 
   void add_example(VW::example* example);
+
   // get next item in batch, outputs nullptr when empty
   virtual int next(std::unique_ptr<VW::io::reader>& chunk_reader, api_status* status = nullptr) override;
+
+  /*
   // get next raw VW example, outputs nullptr if empty
   int next_example(VW::example** example_out, api_status* status = nullptr);
   // destructor for examples returned by next_example()
   void finish_example(VW::example* example);
+  */
 
 private:
-  VW::multi_ex _examples;
+  std::vector<VW::example*> _examples = {};
+
   // we need to hold a pointer to the joiner's workspace, which created the examples
   // so that finish_example can be called when we are done using the examples
-  std::shared_ptr<VW::workspace> _joiner_workspace;
+  std::shared_ptr<VW::workspace> _joiner_workspace = nullptr;
+
+  // track the example returned by the most recent call to next()
+  VW::example* _output_example_ptr = nullptr;
+  std::shared_ptr<std::vector<char>> _output_example_buffer = {};
 };
 
 class vw_local_joiner : public i_joined_log_provider

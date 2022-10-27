@@ -7,6 +7,7 @@
 #include "trace_logger.h"
 
 #include "vw/config/options_cli.h"
+#include "vw/core/cache.h"
 #include "vw/core/parse_primitives.h"
 
 namespace reinforcement_learning
@@ -81,32 +82,32 @@ int vw_local_joiner::invoke_join(std::unique_ptr<i_joined_log_batch>& batch_out,
   ss << "Joining " << _joiner->events_in_queue() << " events." << std::endl;
   TRACE_INFO(_trace_logger, ss.str());
 
-  VW::multi_ex ex;
+  std::vector<VW::example*> examples;
   std::unique_ptr<vw_joined_log_batch> joined_batch = VW::make_unique<vw_joined_log_batch>(_joiner_workspace);
 
   while (_joiner->processing_batch())
   {
-    ex.push_back(VW::new_unused_example(*_joiner_workspace));
+    examples.push_back(VW::new_unused_example(*_joiner_workspace));
 
     // False means there was a problem and we should try reading the next one.
-    if (!_joiner->process_joined(ex))
+    if (!_joiner->process_joined(examples))
     {
-      assert(ex.size() == 1);
-      auto* ex_to_return = ex.back();
-      ex.pop_back();
+      assert(examples.size() == 1);
+      auto* ex_to_return = examples.back();
+      examples.pop_back();
       VW::finish_example(*_joiner_workspace, *ex_to_return);
       continue;
     }
-    VW::setup_examples(*_joiner_workspace, ex);
+    VW::setup_examples(*_joiner_workspace, examples);
 
     // We must remove the trailing newline example.
-    auto* newline_ex = ex.back();
-    ex.pop_back();
+    auto* newline_ex = examples.back();
+    examples.pop_back();
     VW::finish_example(*_joiner_workspace, *newline_ex);
 
     // Add examples to batch
-    for (VW::example* e : ex) { joined_batch->add_example(e); }
-    ex.clear();
+    for (VW::example* e : examples) { joined_batch->add_example(e); }
+    examples.clear();
   }
 
   batch_out.reset(joined_batch.release());
@@ -122,6 +123,12 @@ vw_joined_log_batch::~vw_joined_log_batch()
   {
     _joiner_workspace->finish_example(*example);
   }
+
+  if (_output_example_ptr != nullptr)
+  {
+    _joiner_workspace->finish_example(*_output_example_ptr);
+    _output_example_ptr = nullptr;
+  }
 }
 
 void vw_joined_log_batch::add_example(VW::example* example)
@@ -131,10 +138,39 @@ void vw_joined_log_batch::add_example(VW::example* example)
 
 int vw_joined_log_batch::next(std::unique_ptr<VW::io::reader>& chunk_reader, api_status* status)
 {
-  // TODO serialize example
+  // free the previous output example, if it exists
+  if (_output_example_ptr != nullptr)
+  {
+    _joiner_workspace->finish_example(*_output_example_ptr);
+    _output_example_ptr = nullptr;
+  }
+
+  // clear output state
+  chunk_reader.reset(nullptr);
+  _output_example_buffer = std::make_shared<std::vector<char>>();
+
+  // output the next example in the batch
+  if (!_examples.empty())
+  {
+    io_buf io_writer;
+    VW::details::cache_temp_buffer temp_buffer;
+
+    VW::example* example = _examples.back();
+    _examples.pop_back();
+
+    io_writer.add_file(VW::io::create_vector_writer(_output_example_buffer));
+    VW::write_example_to_cache(
+        io_writer, example, _joiner_workspace->example_parser->lbl_parser, _joiner_workspace->parse_mask, temp_buffer);
+    io_writer.flush();
+
+    _output_example_ptr = example;
+    chunk_reader = VW::io::create_buffer_view(_output_example_buffer->data(), _output_example_buffer->size());
+  }
+
   return error_code::success;
 }
 
+/*
 int vw_joined_log_batch::next_example(VW::example** example_out, api_status* status)
 {
   if (_examples.empty())
@@ -157,5 +193,6 @@ void vw_joined_log_batch::finish_example(VW::example* example)
     _joiner_workspace->finish_example(*example);
   }
 }
+*/
 
 }

@@ -3,7 +3,7 @@
 #include "api_status.h"
 #include "configuration.h"
 #include "model_mgmt.h"
-#include "federation/vw_local_joiner.h"
+#include "federation/joined_log_provider.h"
 
 #include "vw/core/global_data.h"
 #include "vw/core/merge.h"
@@ -22,7 +22,7 @@ public:
   // output current model state to buffer
   virtual int get_data(model_management::model_data& data, api_status* status = nullptr) override;
   // remove examples from joined_logs and train model on them
-  int learn(vw_joined_log_batch& joined_logs, api_status* status = nullptr);
+  int learn(i_joined_log_batch& joined_logs, api_status* status = nullptr);
   // generate a model_delta from the current model state and the previous call to get_model_delta() or set_model()
   VW::model_delta get_model_delta();
 

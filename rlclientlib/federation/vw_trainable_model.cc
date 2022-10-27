@@ -5,6 +5,7 @@
 
 #include "vw/config/options_cli.h"
 #include "vw/core/parse_primitives.h"
+#include "vw/core/vw.h"
 
 namespace reinforcement_learning
 {
@@ -37,13 +38,23 @@ int trainable_vw_model::get_data(model_management::model_data& data, api_status*
   return error_code::success;
 }
 
-int trainable_vw_model::learn(vw_joined_log_batch& joined_logs, api_status* status)
+int trainable_vw_model::learn(i_joined_log_batch& joined_logs, api_status* status)
 {
-  VW::example *example = nullptr;
-  while (joined_logs.next_example(&example, status), example != nullptr)
+  std::unique_ptr<VW::io::reader> example_buffer;
+  while (joined_logs.next(example_buffer, status), example_buffer.get() != nullptr)
   {
-    _model->learn(*example);
-    joined_logs.finish_example(example);
+    io_buf io_reader;
+    io_reader.add_file(std::move(example_buffer));
+
+    VW::multi_ex examples;
+    examples.push_back(VW::new_unused_example(*_model));
+    VW::read_example_from_cache(_model.get(), io_reader, examples);
+
+    assert(examples.size() == 1);
+    assert(examples[0] != nullptr);
+    VW::setup_example(*_model, examples[0]);
+    _model->learn(*examples[0]);
+    _model->finish_example(*examples[0]);
   }
   return error_code::success;
 }
