@@ -52,7 +52,6 @@ jobs:
           -DPDB_OUTPUT_DIRECTORY=${{github.workspace}}/build/binaries/
           -Drlclientlib_BUILD_DOTNET=On
           -Drlclientlib_DOTNET_USE_MSPROJECT=Off
-          -DRL_NUGET_PACKAGE_VERSION="${{ steps.get_version.outputs.version }}"
           -DBUILD_FLATBUFFERS=Off
           -DRAPIDJSON_SYS_DEP=ON
           -DFMT_SYS_DEP=ON
@@ -66,7 +65,7 @@ jobs:
 
       - run: cmake --build build --config RelWithDebInfo -t rl.net.native
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
-        run: cmake --build build --config RelWithDebInfo -t rl.net
+        run: cmake --build build --config RelWithDebInfo -t rl.net --verbose
 
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
         uses: actions/upload-artifact@v1
