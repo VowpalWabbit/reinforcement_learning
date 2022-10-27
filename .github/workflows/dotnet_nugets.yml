@@ -72,7 +72,9 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: artifacts
-          path: build/binaries/rl.net.dll
+          path: |
+            build/binaries/rl.net.dll
+            build/binaries/rl.net.native.dll
 
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
         uses: actions/upload-artifact@v1
