@@ -32,8 +32,9 @@ jobs:
     runs-on: ${{matrix.config.os}}
     steps:
       - uses: actions/checkout@v2
-        with:
-          submodules: true
+      - run: |
+          git submodule update --init ext_libs/vcpkg
+          git submodule update --init ext_libs/vowpal_wabbit
       - name: Setup MSVC Developer Command Prompt
         if: ${{ startsWith(matrix.config.os, 'windows') }}
         uses: ilammy/msvc-dev-cmd@v1
