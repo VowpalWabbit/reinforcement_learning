@@ -14,6 +14,7 @@ on:
 
 env:
   RL_NUGET_VERSION:  0.2.${{github.run_number}}+${{github.sha}}
+  VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
@@ -25,9 +26,9 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: "windows-latest", runtime_id: "win-x64", vcpkg_target_triplet: "x64-windows-static" }
-          - { os: "ubuntu-latest", runtime_id: "linux-x64", vcpkg_target_triplet: "x64-linux" }
-          - { os: "macos-latest", runtime_id: "osx-x64", vcpkg_target_triplet: "x64-osx" }
+          - { os: "windows-latest", runtime_id: "win-x64", vcpkg_target_triplet: "x64-windows-static", booststrap_vcpkg_file: "bootstrap-vcpkg.bat" }
+          - { os: "ubuntu-latest", runtime_id: "linux-x64", vcpkg_target_triplet: "x64-linux", booststrap_vcpkg_file: "bootstrap-vcpkg.sh" }
+          - { os: "macos-latest", runtime_id: "osx-x64", vcpkg_target_triplet: "x64-osx", booststrap_vcpkg_file: "bootstrap-vcpkg.sh" }
     runs-on: ${{matrix.config.os}}
     steps:
       - uses: actions/checkout@v2
@@ -41,6 +42,23 @@ jobs:
       - name: Install dotnet t4
         if: ${{ startsWith(matrix.config.os, 'windows') }}
         run: dotnet tool install --global dotnet-t4
+
+      - name: Setup vcpkg
+        if: ${{ startsWith(matrix.config.os, 'windows') }}
+        run: |
+          mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          cd ext_libs/vcpkg/
+          ./${{ matrix.config.booststrap_vcpkg_file }}
+          ./vcpkg --version > ${{ github.workspace }}/vcpkg-version.txt
+
+      - name: Cache vcpkg
+        uses: actions/cache@v2
+        id: vcpkg-cache
+        env:
+          cache-name: vcpkg-cache
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json', 'vcpkg-version.txt') }}
 
       - name: Configure .NET Core
         run: >
