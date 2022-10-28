@@ -79,18 +79,16 @@ jobs:
           echo "---"
 
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: artifacts
-          path: build/binaries/
+          path: build/binaries/*.dll
 
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: symbols
-          path: |
-            build/binaries/rl.net.pdb
-            build/binaries/rl.net.native.pdb
+          path: build/binaries/*.pdb
 
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
         run: |
@@ -99,13 +97,13 @@ jobs:
           strip --strip-debug --strip-unneeded build/bindings/cs/rl.net.native/librl.net.native.so
 
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: artifacts
           path: build/bindings/cs/rl.net.native/librl.net.native.so
 
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: symbols
           path: symbols/librl.net.native.debug
@@ -117,13 +115,13 @@ jobs:
           strip -S build/bindings/cs/rl.net.native/librl.net.native.dylib
 
       - if: ${{ startsWith(matrix.config.os, 'macos') }}
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: artifacts
           path: build/bindings/cs/rl.net.native/librl.net.native.dylib
 
       - if: ${{ startsWith(matrix.config.os, 'macos') }}
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: symbols
           path: symbols/librl.net.native.dylib.dSYM
@@ -133,7 +131,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v1
+      - uses: actions/download-artifact@v3
         with:
           name: artifacts
           path: artifacts
@@ -156,7 +154,7 @@ jobs:
     runs-on: ${{matrix.config.os}}
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v1
+      - uses: actions/download-artifact@v3
         with:
           name: dist
           path: dist
