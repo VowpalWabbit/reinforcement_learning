@@ -20,8 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build_nuget_dotnet:
-    name: build-nuget-${{matrix.config.os}}
+  build-nuget-dotnet:
     strategy:
       fail-fast: false
       matrix:
@@ -43,7 +42,6 @@ jobs:
         if: ${{ startsWith(matrix.config.os, 'windows') }}
         run: dotnet tool install --global dotnet-t4
 
-      # Build .NET Core, all platforms
       - name: Configure .NET Core
         run: >
           cmake -S . -B build -G Ninja
@@ -67,19 +65,7 @@ jobs:
 
       - run: cmake --build build --config RelWithDebInfo -t rl.net.native
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
-        run: |
-          cmake --build build --config RelWithDebInfo -t rl.net
-          echo "---"
-          ls build
-          echo "---"
-          ls build/binaries
-          echo "---"
-          ls bindings\cs\rl.net\obj
-          echo "---"
-          ls bindings\cs\rl.net\obj\x64
-          echo "---"
-          ls bindings\cs\rl.net\obj\x64\Release\
-          echo "---"
+        run: cmake --build build --config RelWithDebInfo -t rl.net
 
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
         uses: actions/upload-artifact@v3
@@ -129,8 +115,8 @@ jobs:
           name: symbols
           path: symbols/librl.net.native.dSYM
 
-  package_nuget:
-    needs: build_nuget_dotnet
+  package-nuget:
+    needs: build-nuget-dotnet
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -145,8 +131,8 @@ jobs:
           name: dist
           path: nuget_output/
 
-  test_nuget:
-    needs: package_nuget
+  test-nuget:
+    needs: package-nuget
     strategy:
       fail-fast: false
       matrix:
@@ -163,6 +149,7 @@ jobs:
           path: dist
       - uses: actions/setup-dotnet@v3
       - name: Install package
+        # enable error ignoring state with +e because we need to restore from two sources
         run: |
           set +e
           cd nuget/dotnet/test
