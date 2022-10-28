@@ -75,7 +75,7 @@ jobs:
       uses: github/codeql-action/init@v2
       with:
         languages: csharp
-        config-file: ${{ env.SOURCE_DIR }}/.github/codeql/codeql-config.yml
+        config-file: .github/codeql/codeql-config.yml
     - uses: ilammy/msvc-dev-cmd@v1
     - uses: seanmiddleditch/gha-setup-ninja@master
     - run: dotnet tool install --global dotnet-t4
@@ -121,5 +121,3 @@ jobs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
-      with:
-        paths: ${{ env.SOURCE_DIR }}
