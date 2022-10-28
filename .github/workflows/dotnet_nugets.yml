@@ -51,7 +51,7 @@ jobs:
           ./vcpkg --version > ${{ github.workspace }}/vcpkg-version.txt
 
       - name: Cache vcpkg
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: vcpkg-cache
         env:
           cache-name: vcpkg-cache
