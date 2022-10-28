@@ -1,3 +1,6 @@
+# Changing this name will cause github.run_number to be reset and affect the
+# versioning strategy of this file. Therefore, if we change this name major or
+# minor must also be changed to ensure a correct lineage of versions.
 name: .NET Nugets
 
 on:
@@ -10,7 +13,7 @@ on:
       - '*'
 
 env:
-  RL_NUGET_VERSION:  0.0.${{github.run_number}}+${{github.sha}}
+  RL_NUGET_VERSION:  0.2.${{github.run_number}}+${{github.sha}}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
@@ -111,7 +114,7 @@ jobs:
       - if: ${{ startsWith(matrix.config.os, 'macos') }}
         run: |
           mkdir -p symbols
-          dsymutil build/bindings/cs/rl.net.native/librl.net.native.dylib --flat -o symbols/librl.net.native.dylib.dSYM
+          dsymutil build/bindings/cs/rl.net.native/librl.net.native.dylib --flat -o symbols/librl.net.native.dSYM
           strip -S build/bindings/cs/rl.net.native/librl.net.native.dylib
 
       - if: ${{ startsWith(matrix.config.os, 'macos') }}
@@ -124,7 +127,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: symbols
-          path: symbols/librl.net.native.dylib.dSYM
+          path: symbols/librl.net.native.dSYM
 
   package_nuget:
     needs: build_nuget_dotnet
