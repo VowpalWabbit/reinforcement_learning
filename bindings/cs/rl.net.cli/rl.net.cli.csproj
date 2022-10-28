@@ -13,6 +13,8 @@
     <AssemblyName>Rl.Net.Cli</AssemblyName>
     <RootNamespace>Rl.Net.Cli</RootNamespace>
     <HighEntropyVA>true</HighEntropyVA>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildProjectDir)..\..\..\ext_libs\vowpal_wabbit\cs\vw_key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <Import Project="$(PackagingIntegration)" Condition="Exists('$(PackagingIntegration)')" />
