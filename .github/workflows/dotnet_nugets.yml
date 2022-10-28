@@ -44,7 +44,6 @@ jobs:
         run: dotnet tool install --global dotnet-t4
 
       - name: Setup vcpkg
-        if: ${{ startsWith(matrix.config.os, 'windows') }}
         run: |
           mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
           cd ext_libs/vcpkg/
