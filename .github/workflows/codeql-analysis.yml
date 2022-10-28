@@ -99,7 +99,7 @@ jobs:
     - name: Configure .NET Core
       run: >
         cmake -S . -B build -G Ninja
-        -DCMAKE_BUILD_TYPE=Debug
+        -DCMAKE_BUILD_TYPE=Release
         -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake
         -DVCPKG_TARGET_TRIPLET=x64-windows-static
         -DVCPKG_HOST_TRIPLET=x64-windows-static
@@ -117,7 +117,7 @@ jobs:
         -DRL_OPENSSL_SYS_DEP=On
         -DRL_CPPRESTSDK_SYS_DEP=On
 
-    - run: cmake --build build --config Debug -t rl.net.cli
+    - run: cmake --build build --config Release -t rl.net.cli
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
