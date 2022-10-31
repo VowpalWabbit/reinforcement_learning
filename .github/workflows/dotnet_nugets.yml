@@ -52,9 +52,9 @@ jobs:
 
       - name: Cache vcpkg
         uses: actions/cache@v3
-        id: vcpkg-cache
+        id: vcpkg-cache-debug
         env:
-          cache-name: vcpkg-cache
+          cache-name: vcpkg-cache-debug
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json', 'vcpkg-version.txt') }}
