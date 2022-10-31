@@ -9,9 +9,6 @@ on:
   schedule:
     - cron: '26 11 * * 5'
 
-env:
-  VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
-
 jobs:
   analyze:
     name: Analyze
