@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Runtime.InteropServices;
 
-using RlNetNative;
+using Rl.Net.Native;
 using System.Text;
 
 namespace Rl.Net {
