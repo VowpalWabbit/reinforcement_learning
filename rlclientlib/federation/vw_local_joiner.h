@@ -23,12 +23,10 @@ public:
   // get next item in batch, outputs nullptr when empty
   virtual int next(std::unique_ptr<VW::io::reader>& chunk_reader, api_status* status = nullptr) override;
 
-  /*
   // get next raw VW example, outputs nullptr if empty
   int next_example(VW::example** example_out, api_status* status = nullptr);
   // destructor for examples returned by next_example()
   void finish_example(VW::example* example);
-  */
 
 private:
   std::vector<VW::example*> _examples = {};

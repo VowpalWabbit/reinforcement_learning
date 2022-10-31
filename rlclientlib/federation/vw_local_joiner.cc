@@ -28,9 +28,42 @@ vw_local_joiner::vw_local_joiner(const utility::configuration& config, i_trace* 
   auto options = VW::make_unique<VW::config::options_cli>(cmd_list);
   _joiner_workspace = VW::initialize_experimental(std::move(options));
   _joiner = VW::make_unique<example_joiner>(_joiner_workspace.get());
-  _joiner->set_problem_type_config(messages::flatbuff::v2::ProblemType_CB);
-  _joiner->set_learning_mode_config(messages::flatbuff::v2::LearningModeType_Online);
-  _joiner->set_reward_function(messages::flatbuff::v2::RewardFunctionType_Earliest);
+
+  std::string problem_type = config.get(name::JOINER_PROBLEM_TYPE, value::PROBLEM_TYPE_UNKNOWN);
+  if (problem_type == value::PROBLEM_TYPE_CB)
+    _joiner->set_problem_type_config(messages::flatbuff::v2::ProblemType_CB);
+  else if (problem_type == value::PROBLEM_TYPE_CCB)
+    _joiner->set_problem_type_config(messages::flatbuff::v2::ProblemType_CCB);
+  else if (problem_type == value::PROBLEM_TYPE_SLATES)
+    _joiner->set_problem_type_config(messages::flatbuff::v2::ProblemType_SLATES);
+  else if (problem_type == value::PROBLEM_TYPE_CA)
+    _joiner->set_problem_type_config(messages::flatbuff::v2::ProblemType_CA);
+  else if (problem_type == value::PROBLEM_TYPE_MULTISTEP)
+    _joiner->set_problem_type_config(messages::flatbuff::v2::ProblemType_MULTISTEP);
+  else
+    _joiner->set_problem_type_config(messages::flatbuff::v2::ProblemType_UNKNOWN);
+
+  std::string learning_mode = config.get(name::JOINER_LEARNING_MODE, value::LEARNING_MODE_ONLINE);
+  if (learning_mode == value::LEARNING_MODE_APPRENTICE)
+    _joiner->set_learning_mode_config(messages::flatbuff::v2::LearningModeType_Apprentice);
+  else if (learning_mode == value::LEARNING_MODE_LOGGINGONLY)
+    _joiner->set_learning_mode_config(messages::flatbuff::v2::LearningModeType_LoggingOnly);
+  else
+    _joiner->set_learning_mode_config(messages::flatbuff::v2::LearningModeType_Online);
+
+  std::string reward_function = config.get(name::JOINER_REWARD_FUNCTION, value::REWARD_FUNCTION_EARLIEST);
+  if (reward_function == value::REWARD_FUNCTION_AVERAGE)
+    _joiner->set_reward_function(messages::flatbuff::v2::RewardFunctionType_Average);
+  else if (reward_function == value::REWARD_FUNCTION_MEDIAN)
+    _joiner->set_reward_function(messages::flatbuff::v2::RewardFunctionType_Median);
+  else if (reward_function == value::REWARD_FUNCTION_SUM)
+    _joiner->set_reward_function(messages::flatbuff::v2::RewardFunctionType_Sum);
+  else if (reward_function == value::REWARD_FUNCTION_MIN)
+    _joiner->set_reward_function(messages::flatbuff::v2::RewardFunctionType_Min);
+  else if (reward_function == value::REWARD_FUNCTION_MAX)
+    _joiner->set_reward_function(messages::flatbuff::v2::RewardFunctionType_Max);
+  else
+    _joiner->set_reward_function(messages::flatbuff::v2::RewardFunctionType_Earliest);
   _joiner->set_default_reward(0.f);
 }
 
@@ -163,7 +196,6 @@ int vw_joined_log_batch::next(std::unique_ptr<VW::io::reader>& chunk_reader, api
   return error_code::success;
 }
 
-/*
 int vw_joined_log_batch::next_example(VW::example** example_out, api_status* status)
 {
   if (_examples.empty())
@@ -186,6 +218,5 @@ void vw_joined_log_batch::finish_example(VW::example* example)
     _joiner_workspace->finish_example(*example);
   }
 }
-*/
 
 }  // namespace reinforcement_learning

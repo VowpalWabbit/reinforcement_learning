@@ -95,6 +95,12 @@ const char* const MODEL_FILE_NAME = "model_file_loader.file_name";
 const char* const MODEL_FILE_MUST_EXIST = "model_file_loader.file_must_exist";
 
 const char* const ZSTD_COMPRESSION_LEVEL = "zstd.compression_level";
+
+// local joiner for federated learning
+const char* const JOINER_PROBLEM_TYPE = "joiner.problem.type";
+const char* const JOINER_REWARD_FUNCTION = "joiner.reward.function";
+const char* const JOINER_LEARNING_MODE = "joiner.learning.mode";
+
 }  // namespace name
 }  // namespace reinforcement_learning
 
@@ -134,6 +140,19 @@ const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
 const int DEFAULT_VW_POOL_INIT_SIZE = 4;
 const int DEFAULT_PROTOCOL_VERSION = 1;
 const char* const DEFAULT_AUDIT_OUTPUT_PATH = "audit";
+
+const char* const PROBLEM_TYPE_UNKNOWN = "PROBLEM_TYPE_UNKNOWN";
+const char* const PROBLEM_TYPE_CB = "PROBLEM_TYPE_CB";
+const char* const PROBLEM_TYPE_CCB = "PROBLEM_TYPE_CCB";
+const char* const PROBLEM_TYPE_SLATES = "PROBLEM_TYPE_SLATES";
+const char* const PROBLEM_TYPE_CA = "PROBLEM_TYPE_CA";
+const char* const PROBLEM_TYPE_MULTISTEP = "PROBLEM_TYPE_MULTISTEP";
+const char* const REWARD_FUNCTION_EARLIEST = "REWARD_FUNCTION_EARLIEST";
+const char* const REWARD_FUNCTION_AVERAGE = "REWARD_FUNCTION_AVERAGE";
+const char* const REWARD_FUNCTION_MEDIAN = "REWARD_FUNCTION_MEDIAN";
+const char* const REWARD_FUNCTION_SUM = "REWARD_FUNCTION_SUM";
+const char* const REWARD_FUNCTION_MIN = "REWARD_FUNCTION_MEAN";
+const char* const REWARD_FUNCTION_MAX = "REWARD_FUNCTION_MAX";
 
 const char* get_default_episode_sender();
 const char* get_default_observation_sender();
