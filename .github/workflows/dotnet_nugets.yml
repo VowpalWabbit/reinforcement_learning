@@ -80,7 +80,7 @@ jobs:
           -DRL_OPENSSL_SYS_DEP=On
           -DRL_CPPRESTSDK_SYS_DEP=On
 
-      - run: cmake --build build --config RelWithDebInfo -t rl.net.native
+      - run: cmake --build build --config RelWithDebInfo -t rlnetnative
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
         run: cmake --build build --config RelWithDebInfo -t rl.net
 
@@ -99,38 +99,38 @@ jobs:
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
         run: |
           mkdir -p symbols
-          objcopy --only-keep-debug build/bindings/cs/rl.net.native/librl.net.native.so symbols/librl.net.native.debug
-          strip --strip-debug --strip-unneeded build/bindings/cs/rl.net.native/librl.net.native.so
+          objcopy --only-keep-debug build/bindings/cs/rl.net.native/librlnetnative.so symbols/librlnetnative.debug
+          strip --strip-debug --strip-unneeded build/bindings/cs/rl.net.native/librlnetnative.so
 
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
         uses: actions/upload-artifact@v3
         with:
           name: artifacts
-          path: build/bindings/cs/rl.net.native/librl.net.native.so
+          path: build/bindings/cs/rl.net.native/librlnetnative.so
 
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
         uses: actions/upload-artifact@v3
         with:
           name: symbols
-          path: symbols/librl.net.native.debug
+          path: symbols/librlnetnative.debug
 
       - if: ${{ startsWith(matrix.config.os, 'macos') }}
         run: |
           mkdir -p symbols
-          dsymutil build/bindings/cs/rl.net.native/librl.net.native.dylib --flat -o symbols/librl.net.native.dSYM
-          strip -S build/bindings/cs/rl.net.native/librl.net.native.dylib
+          dsymutil build/bindings/cs/rl.net.native/librlnetnative.dylib --flat -o symbols/librlnetnative.dSYM
+          strip -S build/bindings/cs/rl.net.native/librlnetnative.dylib
 
       - if: ${{ startsWith(matrix.config.os, 'macos') }}
         uses: actions/upload-artifact@v3
         with:
           name: artifacts
-          path: build/bindings/cs/rl.net.native/librl.net.native.dylib
+          path: build/bindings/cs/rl.net.native/librlnetnative.dylib
 
       - if: ${{ startsWith(matrix.config.os, 'macos') }}
         uses: actions/upload-artifact@v3
         with:
           name: symbols
-          path: symbols/librl.net.native.dSYM
+          path: symbols/librlnetnative.dSYM
 
   package-nuget:
     needs: build-nuget-dotnet

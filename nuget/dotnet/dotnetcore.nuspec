@@ -21,8 +21,10 @@
   </metadata>
   <files>
     <file src="rl.net.dll" target="lib/netstandard2.0" />
-    <file src="rl.net.native.dll" target="runtimes/win-x64/native" />
-    <file src="librl.net.native.so" target="runtimes/linux-x64/native"/>
-    <file src="librl.net.native.dylib" target="runtimes/osx-x64/native"/>
+    <file src="../nuget/dotnet/rl.net.props" target="build/net461" />
+    <file src="../nuget/dotnet/rl.net.targets" target="build/net461" />
+    <file src="rlnetnative.dll" target="runtimes/win-x64/native" />
+    <file src="librlnetnative.so" target="runtimes/linux-x64/native"/>
+    <file src="librlnetnative.dylib" target="runtimes/osx-x64/native"/>
   </files>
 </package>

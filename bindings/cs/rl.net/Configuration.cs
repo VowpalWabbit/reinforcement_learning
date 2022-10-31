@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Runtime.InteropServices;
 
-using Rl.Net.Native;
+using RlNetNative;
 using System.Text;
 
 namespace Rl.Net {
@@ -14,13 +14,13 @@ namespace Rl.Net {
         // The publics in this class are just a verbose, but jittably-efficient way of enabling overriding a native invocation
         internal static partial class NativeMethods
         {
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             public static extern IntPtr CreateConfig();
 
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             public static extern void DeleteConfig(IntPtr config);
 
-            [DllImport("rl.net.native", EntryPoint = "LoadConfigurationFromJson")]
+            [DllImport("rlnetnative", EntryPoint = "LoadConfigurationFromJson")]
             private static extern int LoadConfigurationFromJsonNative(int jsonLength, IntPtr json, IntPtr config, IntPtr apiStatus);
 
             internal static Func<int, IntPtr, IntPtr, IntPtr, int> LoadConfigurationFromJsonOverride { get; set; }
@@ -35,7 +35,7 @@ namespace Rl.Net {
                 return LoadConfigurationFromJsonNative(jsonLength, json, config, apiStatus);
             }
 
-            [DllImport("rl.net.native", EntryPoint = "ConfigurationSet")]
+            [DllImport("rlnetnative", EntryPoint = "ConfigurationSet")]
             private static extern void ConfigurationSetNative(IntPtr config, IntPtr name, IntPtr value);
 
             internal static Action<IntPtr, IntPtr, IntPtr> ConfigurationSetOverride { get; set; }
@@ -51,7 +51,7 @@ namespace Rl.Net {
                 ConfigurationSetNative(config, name, value);
             }
 
-            [DllImport("rl.net.native", EntryPoint = "ConfigurationGet")]
+            [DllImport("rlnetnative", EntryPoint = "ConfigurationGet")]
             private static extern IntPtr ConfigurationGetNative(IntPtr config, IntPtr name, IntPtr defVal);
 
             internal static Func<IntPtr, IntPtr, IntPtr, IntPtr> ConfigurationGetOverride { get; set; }

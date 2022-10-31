@@ -12,13 +12,13 @@ namespace Rl.Net {
     {
         internal partial class NativeMethods
         {
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             public static extern IntPtr CreateRankingResponse();
 
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             public static extern void DeleteRankingResponse(IntPtr rankingResponse);
 
-            [DllImport("rl.net.native", EntryPoint = "GetRankingEventId")]
+            [DllImport("rlnetnative", EntryPoint = "GetRankingEventId")]
             private static extern IntPtr GetRankingEventIdNative(IntPtr rankingResponse);
 
             internal static Func<IntPtr, IntPtr> GetRankingEventIdOverride { get; set; }
@@ -33,7 +33,7 @@ namespace Rl.Net {
                 return GetRankingEventIdNative(rankingResponse);
             }
 
-            [DllImport("rl.net.native", EntryPoint = "GetRankingModelId")]
+            [DllImport("rlnetnative", EntryPoint = "GetRankingModelId")]
             private static extern IntPtr GetRankingModelIdNative(IntPtr rankingResponse);
 
             internal static Func<IntPtr, IntPtr> GetRankingModelIdOverride { get; set; }
@@ -50,10 +50,10 @@ namespace Rl.Net {
 
             // TODO: CLS-compliance requires that we not publically expose unsigned types.
             // Probably not a big issue ("9e18 actions ought to be enough for anyone...")
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             public static extern UIntPtr GetRankingActionCount(IntPtr rankingResponse);
 
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             public static extern int GetRankingChosenAction(IntPtr rankingResponse, out UIntPtr action_id, IntPtr status);
         }
     }
@@ -162,7 +162,7 @@ namespace Rl.Net {
 
         private class RankingResponseEnumerator : NativeObject<RankingResponseEnumerator>, IEnumerator<ActionProbability>
         {
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             private static extern IntPtr CreateRankingEnumeratorAdapter(IntPtr rankingResponse);
 
             private static New<RankingResponseEnumerator> BindConstructorArguments(RankingResponse rankingResponse)
@@ -176,16 +176,16 @@ namespace Rl.Net {
                 });
             }
 
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             private static extern void DeleteRankingEnumeratorAdapter(IntPtr rankingEnumeratorAdapter);
 
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             private static extern int RankingEnumeratorInit(IntPtr rankingEnumeratorAdapter);
 
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             private static extern int RankingEnumeratorMoveNext(IntPtr rankingEnumeratorAdapter);
 
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             private static extern ActionProbability GetRankingEnumeratorCurrent(IntPtr rankingEnumeratorAdapter);
 
             private bool initialState = true;

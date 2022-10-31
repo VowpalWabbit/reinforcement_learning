@@ -13,13 +13,13 @@ namespace Rl.Net
     {
         internal partial class NativeMethods
         {
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             public static extern IntPtr CreateSlotRanking();
 
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             public static extern void DeleteSlotRanking(IntPtr slot);
 
-            [DllImport("rl.net.native", EntryPoint = "GetSlotId")]
+            [DllImport("rlnetnative", EntryPoint = "GetSlotId")]
             private static extern IntPtr GetSlotIdNative(IntPtr slotRanking);
 
             internal static Func<IntPtr, IntPtr> GetSlotIdOverride { get; set; }
@@ -34,10 +34,10 @@ namespace Rl.Net
                 return GetSlotIdNative(slotRanking);
             }
 
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             public static extern UIntPtr GetSlotActionCount(IntPtr slotRanking);
 
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             public static extern int GetSlotChosenAction(IntPtr slotRanking, out UIntPtr action_id, IntPtr status);
         }
     }
@@ -122,7 +122,7 @@ namespace Rl.Net
 
         private class SlotRankingEnumerator : NativeObject<SlotRankingEnumerator>, IEnumerator<ActionProbability>
         {
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             private static extern IntPtr CreateSlotEnumeratorAdapter(IntPtr slotResponse);
 
             private static New<SlotRankingEnumerator> BindConstructorArguments(SlotRanking slotRanking)
@@ -136,16 +136,16 @@ namespace Rl.Net
                 });
             }
 
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             private static extern void DeleteSlotEnumeratorAdapter(IntPtr slotEnumeratorAdapter);
 
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             private static extern int SlotEnumeratorInit(IntPtr slotEnumeratorAdapter);
 
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             private static extern int SlotEnumeratorMoveNext(IntPtr slotEnumeratorAdapter);
 
-            [DllImport("rl.net.native")]
+            [DllImport("rlnetnative")]
             private static extern ActionProbability GetSlotEnumeratorCurrent(IntPtr slotEnumeratorAdapter);
 
             private bool initialState = true;
