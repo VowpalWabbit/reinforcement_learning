@@ -49,7 +49,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
-          key: ${{ runner.os }}-build-${{ matrix.config.vcpkg_target_triplet }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
+          key: ${{ runner.os }}-build-${{ matrix.config.vcpkg_target_triplet }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}
 
       - name: Configure .NET Core
         run: >
@@ -134,7 +134,7 @@ jobs:
           name: artifacts
           path: artifacts
       - uses: NuGet/setup-nuget@v1.1.1
-      - run: nuget pack nuget/dotnet/dotnetcore.nuspec -Properties RL_NUGET_PACKAGE_VERSION=$RL_NUGET_VERSION -BasePath artifacts -OutputDirectory nuget_output
+      - run: nuget pack nuget/dotnet/rl.net.nuspec -Properties RL_NUGET_PACKAGE_VERSION=$RL_NUGET_VERSION -BasePath artifacts -OutputDirectory nuget_output
       - uses: actions/upload-artifact@v1
         with:
           name: dist
