@@ -46,7 +46,7 @@ class vw_local_joiner : public i_joined_log_provider
 
 public:
   vw_local_joiner(const utility::configuration& config, i_trace* trace_logger = nullptr, api_status* status = nullptr);
-  int add_events(const std::vector<buffer>& events, api_status* status = nullptr);
+  virtual int add_events(const std::vector<buffer>& events, api_status* status = nullptr) override;
   virtual int invoke_join(std::unique_ptr<i_joined_log_batch>& batch, api_status* status = nullptr) override;
   void set_trace_logger(i_trace* trace_logger);
 

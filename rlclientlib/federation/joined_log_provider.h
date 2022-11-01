@@ -1,6 +1,7 @@
 #pragma once
 
 #include "api_status.h"
+#include "data_buffer.h"
 #include "future_compat.h"
 #include "vw/io/io_adapter.h"
 
@@ -25,6 +26,11 @@ struct i_joined_log_batch
 struct i_joined_log_provider
 {
   virtual ~i_joined_log_provider() = default;
+
+  // Add events to the joiner to be processed when invoke_join() is called.
+  // The contents of the binary data buffer is implementation dependent.
+  RL_ATTR(nodiscard)
+  virtual int add_events(const std::vector<std::shared_ptr<utility::data_buffer>>& events, api_status* status = nullptr) = 0;
 
   /// Runs the join operation and returns the resulting batch which can be consumed.
   /// The format of the data returned in the batch it implementation dependent.

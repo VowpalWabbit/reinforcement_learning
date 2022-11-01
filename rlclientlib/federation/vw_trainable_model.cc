@@ -8,12 +8,14 @@
 
 namespace reinforcement_learning
 {
-trainable_vw_model::trainable_vw_model(const utility::configuration& config)
+trainable_vw_model::trainable_vw_model(const std::string& command_line)
 {
+  /*
   _command_line = config.get(name::MODEL_VW_INITIAL_COMMAND_LINE,
       "--cb_explore_adf --driver_output_off --epsilon 0.2 --power_t 0 -l 0.001 --cb_type mtr -q :: "
       "--preserve-performance-counters");
-  auto options = VW::make_unique<VW::config::options_cli>(VW::split_command_line(_command_line));
+  */
+  auto options = VW::make_unique<VW::config::options_cli>(VW::split_command_line(command_line));
   _model = VW::initialize_experimental(std::move(options));
   copy_current_model_to_starting();
 }

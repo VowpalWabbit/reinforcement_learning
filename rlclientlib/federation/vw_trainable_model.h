@@ -14,7 +14,7 @@ namespace reinforcement_learning
 class trainable_vw_model : public model_management::i_data_transport
 {
 public:
-  trainable_vw_model(const utility::configuration& config);
+  trainable_vw_model(const std::string& command_line);
   // overwrite internal VW model
   void set_model(std::unique_ptr<VW::workspace>&& model);
   // output current model state to buffer
