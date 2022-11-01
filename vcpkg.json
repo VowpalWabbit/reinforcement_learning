@@ -22,5 +22,12 @@
     "rapidjson",
     "spdlog",
     "zlib"
-  ]
+  ],
+  "builtin-baseline": "3d8f78171a2a37d461077bf8d063256b63e25a4f",
+  "overrides": [
+    {
+        "name": "flatbuffers",
+        "version": "1.12.0#2"
+    }
+]
 }
