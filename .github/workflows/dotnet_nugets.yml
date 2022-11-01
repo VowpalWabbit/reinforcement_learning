@@ -26,9 +26,9 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: "windows-latest", runtime_id: "win-x64", vcpkg_target_triplet: "x64-windows-static", booststrap_vcpkg_file: "bootstrap-vcpkg.bat" }
-          - { os: "ubuntu-latest", runtime_id: "linux-x64", vcpkg_target_triplet: "x64-linux", booststrap_vcpkg_file: "bootstrap-vcpkg.sh" }
-          - { os: "macos-latest", runtime_id: "osx-x64", vcpkg_target_triplet: "x64-osx", booststrap_vcpkg_file: "bootstrap-vcpkg.sh" }
+          - { os: "windows-latest", runtime_id: "win-x64", vcpkg_target_triplet: "x64-windows-static" }
+          - { os: "ubuntu-latest", runtime_id: "linux-x64", vcpkg_target_triplet: "x64-linux" }
+          - { os: "macos-latest", runtime_id: "osx-x64", vcpkg_target_triplet: "x64-osx" }
     runs-on: ${{matrix.config.os}}
     steps:
       - uses: actions/checkout@v2
@@ -37,27 +37,19 @@ jobs:
       - name: Setup MSVC Developer Command Prompt
         if: ${{ startsWith(matrix.config.os, 'windows') }}
         uses: ilammy/msvc-dev-cmd@v1
-      - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
+      - uses: lukka/get-cmake@latest
       - name: Install dotnet t4
         if: ${{ startsWith(matrix.config.os, 'windows') }}
         run: dotnet tool install --global dotnet-t4
 
-      - name: Setup vcpkg
-        run: |
-          mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-          cd ext_libs/vcpkg/
-          ./${{ matrix.config.booststrap_vcpkg_file }}
-          ./vcpkg --version > ${{ github.workspace }}/vcpkg-version.txt
-
-      - name: Cache vcpkg
+      - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
+        shell: bash
+      - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+      - name: Cache vcpkg binary cache
         uses: actions/cache@v3
-        id: vcpkg-cache
-        env:
-          cache-name: vcpkg-cache
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json', 'vcpkg-version.txt') }}
+          key: ${{ runner.os }}-build-${{ matrix.config.vcpkg_target_triplet }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
 
       - name: Configure .NET Core
         run: >
