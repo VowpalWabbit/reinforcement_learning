@@ -28,6 +28,11 @@ public:
   // destructor for examples returned by next_example()
   void finish_example(VW::example* example);
 
+  vw_joined_log_batch(const vw_joined_log_batch&) = delete;
+  vw_joined_log_batch(vw_joined_log_batch&&) = delete;
+  vw_joined_log_batch& operator=(const vw_joined_log_batch&) = delete;
+  vw_joined_log_batch& operator=(vw_joined_log_batch&&) = delete;
+
 private:
   std::vector<VW::example*> _examples = {};
 
