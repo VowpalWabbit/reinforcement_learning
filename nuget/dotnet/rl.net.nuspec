@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <title>RL.Net</title>
+    <id>RL.Net</id>
+    <tags>vw vowpal wabbit langford ml machine learning</tags>
+    <authors>John Langford et al</authors>
+    <version>$RL_NUGET_PACKAGE_VERSION$</version>
+    <projectUrl>https://github.com/VowpalWabbit/reinforcement_learning</projectUrl>
+    <license type="expression">MIT</license>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Interaction-side integration library for Reinforcement Learning loops: Predict, Log, [Learn,] Update</description>
+    <copyright>Copyright © Microsoft Corp 2018-2022, and many individual contributors. All rights reserved.</copyright>
+
+    <dependencies>
+      <group targetFramework="netstandard2.0">
+        <dependency id="NETStandard.Library" version="[2.0.0,)" />
+      </group>
+    </dependencies>
+
+  </metadata>
+  <files>
+    <file src="rl.net.dll" target="lib/netstandard2.0" />
+    <file src="rl.net.dll" target="ref/netstandard2.0" />
+    <file src="rl.net.dll" target="runtimes/win-x64/lib/netstandard2.0" />
+    <file src="rl.net.dll" target="runtimes/linux-x64/lib/netstandard2.0" />
+    <file src="rl.net.dll" target="runtimes/osx-x64/lib/netstandard2.0" />
+    <file src="../nuget/dotnet/rl.net.props" target="build/net461" />
+    <file src="../nuget/dotnet/rl.net.targets" target="build/net461" />
+    <file src="rlnetnative.dll" target="runtimes/win-x64/native" />
+    <file src="librlnetnative.so" target="runtimes/linux-x64/native"/>
+    <file src="librlnetnative.dylib" target="runtimes/osx-x64/native"/>
+  </files>
+</package>

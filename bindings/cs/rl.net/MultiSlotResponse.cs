@@ -12,19 +12,19 @@ namespace Rl.Net {
     {
         internal partial class NativeMethods
         {
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern int GetSlotEntryActionId(IntPtr slotEntryResponse);
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern float GetSlotEntryProbability(IntPtr slotEntryResponse);
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern IntPtr CreateMultiSlotResponse();
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern void DeleteMultiSlotResponse(IntPtr multiSlotResponse);
 
-            [DllImport("rl.net.native.dll", EntryPoint = "GetMultiSlotModelId")]
+            [DllImport("rlnetnative", EntryPoint = "GetMultiSlotModelId")]
             private static extern IntPtr GetMultiSlotModelIdNative(IntPtr multiSlotResponse);
 
             internal static Func<IntPtr, IntPtr> GetMultiSlotModelIdOverride { get; set; }
@@ -40,7 +40,7 @@ namespace Rl.Net {
             }
 
 
-            [DllImport("rl.net.native.dll", EntryPoint = "GetMultiSlotEventId")]
+            [DllImport("rlnetnative", EntryPoint = "GetMultiSlotEventId")]
             private static extern IntPtr GetMultiSlotEventIdNative(IntPtr multiSlotResponse);
 
             internal static Func<IntPtr, IntPtr> GetMultiSlotEventIdOverride { get; set; }
@@ -57,7 +57,7 @@ namespace Rl.Net {
 
             // TODO: CLS-compliance requires that we not publically expose unsigned types.
             // Probably not a big issue ("9e18 actions ought to be enough for anyone...")
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern UIntPtr GetMultiSlotSize(IntPtr decisionResponse);
         }
     }
@@ -144,7 +144,7 @@ namespace Rl.Net {
 
         private class MultiSlotResponseEnumerator : NativeObject<MultiSlotResponseEnumerator>, IEnumerator<SlotEntryResponse>
         {
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             private static extern IntPtr CreateMultiSlotEnumeratorAdapter(IntPtr multiSlotResponse);
 
             private static New<MultiSlotResponseEnumerator> BindConstructorArguments(MultiSlotResponse multiSlotResponse)
@@ -158,16 +158,16 @@ namespace Rl.Net {
                 });
             }
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             private static extern void DeleteMultiSlotEnumeratorAdapter(IntPtr multiSlotEnumeratorAdapter);
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             private static extern int MultiSlotEnumeratorInit(IntPtr multiSlotEnumeratorAdapter);
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             private static extern int MultiSlotEnumeratorMoveNext(IntPtr multiSlotEnumeratorAdapter);
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             private static extern IntPtr GetMultiSlotEnumeratorCurrent(IntPtr multiSlotEnumeratorAdapter);
 
             private bool initialState = true;

@@ -7,13 +7,13 @@ using Rl.Net.Native;
 namespace Rl.Net {
     public sealed class FactoryContext : NativeObject<FactoryContext>
     {
-        [DllImport("rl.net.native.dll")]
+        [DllImport("rlnetnative")]
         private static extern IntPtr CreateFactoryContext();
 
-        [DllImport("rl.net.native.dll")]
+        [DllImport("rlnetnative")]
         private static extern void DeleteFactoryContext(IntPtr context);
 
-        [DllImport("rl.net.native.dll")]
+        [DllImport("rlnetnative")]
         private static extern IntPtr SetFactoryContextBindingSenderFactory(IntPtr context, sender_create_fn create_Fn, sender_vtable vtable);
 
         public FactoryContext() : base(new New<FactoryContext>(CreateFactoryContext), new Delete<FactoryContext>(DeleteFactoryContext))

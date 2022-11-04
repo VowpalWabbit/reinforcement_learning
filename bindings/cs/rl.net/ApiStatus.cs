@@ -8,22 +8,22 @@ using System.Text;
 namespace Rl.Net {
     public sealed class ApiStatus : NativeObject<ApiStatus>
     {
-        [DllImport("rl.net.native.dll")]
+        [DllImport("rlnetnative")]
         private static extern IntPtr CreateApiStatus();
 
-        [DllImport("rl.net.native.dll")]
+        [DllImport("rlnetnative")]
         private static extern void DeleteApiStatus(IntPtr config);
 
-        [DllImport("rl.net.native.dll")]
+        [DllImport("rlnetnative")]
         private static extern IntPtr GetApiStatusErrorMessage(IntPtr status);
 
-        [DllImport("rl.net.native.dll")]
+        [DllImport("rlnetnative")]
         private static extern int GetApiStatusErrorCode(IntPtr status);
 
-        [DllImport("rl.net.native.dll")]
+        [DllImport("rlnetnative")]
         private static extern void UpdateApiStatusSafe(IntPtr status, int error_code, IntPtr message);
-        
-        [DllImport("rl.net.native.dll")] 
+
+        [DllImport("rlnetnative")]
         private static extern void ClearApiStatusSafe(IntPtr status);
 
         public ApiStatus() : base(new New<ApiStatus>(CreateApiStatus), new Delete<ApiStatus>(DeleteApiStatus))
@@ -43,7 +43,7 @@ namespace Rl.Net {
                 GC.KeepAlive(this);
                 return result;
             }
-        } 
+        }
 
         public string ErrorMessage
         {
@@ -62,8 +62,8 @@ namespace Rl.Net {
 
         internal static void Update(ApiStatus status, int errorCode, string message)
         {
-            unsafe 
-            { 
+            unsafe
+            {
                 fixed (byte* messageBytes = NativeMethods.StringEncoding.GetBytes(message))
                 {
                     IntPtr messagePtr = new IntPtr(messageBytes);

@@ -12,25 +12,25 @@ namespace Rl.Net {
     {
         internal partial class NativeMethods
         {
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern IntPtr CreateSlotResponse();
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern IntPtr GetSlotSlotId(IntPtr slotResponse);
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern int GetSlotActionId(IntPtr slotResponse);
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern float GetSlotProbability(IntPtr slotResponse);
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern IntPtr CreateDecisionResponse();
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern void DeleteDecisionResponse(IntPtr decisionResponse);
 
-            [DllImport("rl.net.native.dll", EntryPoint = "GetDecisionModelId")]
+            [DllImport("rlnetnative", EntryPoint = "GetDecisionModelId")]
             private static extern IntPtr GetDecisionModelIdNative(IntPtr decisionResponse);
 
             internal static Func<IntPtr, IntPtr> GetDecisionModelIdOverride { get; set; }
@@ -47,7 +47,7 @@ namespace Rl.Net {
 
             // TODO: CLS-compliance requires that we not publically expose unsigned types.
             // Probably not a big issue ("9e18 actions ought to be enough for anyone...")
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern UIntPtr GetDecisionSize(IntPtr decisionResponse);
         }
     }
@@ -115,7 +115,7 @@ namespace Rl.Net {
             {
                 ulong unsignedSize = NativeMethods.GetDecisionSize(this.DangerousGetHandle()).ToUInt64();
                 Debug.Assert(unsignedSize < Int64.MaxValue, "We do not support collections with size larger than _I64_MAX/Int64.MaxValue");
-    
+
                 GC.KeepAlive(this);
                 return (long)unsignedSize;
             }
@@ -133,31 +133,31 @@ namespace Rl.Net {
 
         private class DecisionResponseEnumerator : NativeObject<DecisionResponseEnumerator>, IEnumerator<SlotResponse>
         {
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             private static extern IntPtr CreateDecisionEnumeratorAdapter(IntPtr decisionResponse);
 
             private static New<DecisionResponseEnumerator> BindConstructorArguments(DecisionResponse decisionResponse)
             {
-                return new New<DecisionResponseEnumerator>(() => 
+                return new New<DecisionResponseEnumerator>(() =>
                 {
                     IntPtr result = CreateDecisionEnumeratorAdapter(decisionResponse.DangerousGetHandle());
 
                     GC.KeepAlive(decisionResponse); // Extend the lifetime of this handle because the delegate (and its data) is not stored on the heap.
                     return result;
-                    
+
                 });
             }
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             private static extern void DeleteDecisionEnumeratorAdapter(IntPtr decisionEnumeratorAdapter);
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             private static extern int DecisionEnumeratorInit(IntPtr decisionEnumeratorAdapter);
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             private static extern int DecisionEnumeratorMoveNext(IntPtr decisionEnumeratorAdapter);
-        
-            [DllImport("rl.net.native.dll")]
+
+            [DllImport("rlnetnative")]
             private static extern IntPtr GetDecisionEnumeratorCurrent(IntPtr decisionEnumeratorAdapter);
 
             private bool initialState = true;
