@@ -128,6 +128,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Update git tags
+        # Needed because actions/checkout performs a shallow checkout without tags
+        run: git fetch --unshallow --tags --recurse-submodules=no
+
       - name: Get version number
         shell: bash
         run: |
@@ -158,6 +162,10 @@ jobs:
     runs-on: ${{matrix.config.os}}
     steps:
       - uses: actions/checkout@v2
+      - name: Update git tags
+        # Needed because actions/checkout performs a shallow checkout without tags
+        run: git fetch --unshallow --tags --recurse-submodules=no
+
       - name: Get version number
         shell: bash
         run: |
