@@ -109,7 +109,6 @@ if(RL_BUILD_FEDERATION)
   list(APPEND PROJECT_SOURCES
     federation/event_cache.cc
     federation/local_client.cc
-    federation/vw_local_joiner.cc
     federation/vw_trainable_model.cc
   )
 endif()
@@ -191,7 +190,6 @@ if(RL_BUILD_FEDERATION)
     federation/federated_client.h
     federation/joined_log_provider.h
     federation/local_client.h
-    federation/vw_local_joiner.h
     federation/vw_trainable_model.h
   )
 endif()

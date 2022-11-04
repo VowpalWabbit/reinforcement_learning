@@ -21,9 +21,7 @@
 #include <cstdio>
 #include <memory>
 
-namespace rl = reinforcement_learning;
-namespace rerr = reinforcement_learning::error_code;
-namespace rutil = reinforcement_learning::utility;
+using namespace reinforcement_learning;
 
 VW::multi_ex parse_json(VW::workspace& all, const std::string& line)
 {
@@ -37,26 +35,26 @@ VW::multi_ex parse_json(VW::workspace& all, const std::string& line)
 
 BOOST_AUTO_TEST_CASE(get_model_twice_fails)
 {
-  rutil::configuration config;
-  std::unique_ptr<rl::i_federated_client> client;
-  BOOST_CHECK_EQUAL(rl::create_local_client(config, client, nullptr, nullptr), rerr::success);
-  rl::model_management::model_data data;
+  utility::configuration config;
+  std::unique_ptr<i_federated_client> client;
+  BOOST_CHECK_EQUAL(local_client::create_local_client(client, config, nullptr, nullptr), error_code::success);
+  model_management::model_data data;
   bool model_received = false;
-  BOOST_CHECK_EQUAL(client->try_get_model("test_app_id", data, model_received), rerr::success);
+  BOOST_CHECK_EQUAL(client->try_get_model("test_app_id", data, model_received), error_code::success);
   BOOST_CHECK(data.data_sz() > 0);
   BOOST_CHECK_EQUAL(model_received, true);
-  BOOST_CHECK_NE(client->try_get_model("test_app_id", data, model_received), rerr::success);
+  BOOST_CHECK_NE(client->try_get_model("test_app_id", data, model_received), error_code::success);
 }
 
 BOOST_AUTO_TEST_CASE(send_delta_update)
 {
-  rutil::configuration config;
-  std::unique_ptr<rl::i_federated_client> client;
-  BOOST_CHECK_EQUAL(rl::create_local_client(config, client, nullptr, nullptr), rerr::success);
+  utility::configuration config;
+  std::unique_ptr<i_federated_client> client;
+  BOOST_CHECK_EQUAL(local_client::create_local_client(client, config, nullptr, nullptr), error_code::success);
   BOOST_CHECK_NE(client.get(), nullptr);
-  rl::model_management::model_data data;
+  model_management::model_data data;
   bool model_received = false;
-  BOOST_CHECK_EQUAL(client->try_get_model("test_app_id", data, model_received), rerr::success);
+  BOOST_CHECK_EQUAL(client->try_get_model("test_app_id", data, model_received), error_code::success);
   auto opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(std::vector<std::string>{}));
   auto original_workspace =
       VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data.data(), data.data_sz()));
@@ -100,11 +98,11 @@ BOOST_AUTO_TEST_CASE(send_delta_update)
   delta.serialize(*writer);
   BOOST_CHECK_EQUAL(
       client->report_result(reinterpret_cast<const uint8_t*>(backing_buffer->data()), backing_buffer->size()),
-      rerr::success);
+      error_code::success);
   BOOST_CHECK_NE(
       client->report_result(reinterpret_cast<const uint8_t*>(backing_buffer->data()), backing_buffer->size()),
-      rerr::success);
+      error_code::success);
 
   model_received = false;
-  BOOST_CHECK_EQUAL(client->try_get_model("test_app_id", data, model_received), rerr::success);
+  BOOST_CHECK_EQUAL(client->try_get_model("test_app_id", data, model_received), error_code::success);
 }

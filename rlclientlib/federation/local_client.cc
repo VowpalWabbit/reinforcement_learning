@@ -12,14 +12,16 @@
 #include "vw/core/vw.h"
 #include "vw/io/io_adapter.h"
 
-reinforcement_learning::local_client::local_client(std::unique_ptr<VW::workspace> initial_model, i_trace* trace_logger)
+namespace reinforcement_learning
+{
+local_client::local_client(std::unique_ptr<VW::workspace> initial_model, i_trace* trace_logger)
     : _current_model(std::move(initial_model)), _state(state_t::model_available), _trace_logger(trace_logger)
 {
 }
 
-reinforcement_learning::local_client::~local_client() = default;
+local_client::~local_client() = default;
 
-int reinforcement_learning::local_client::try_get_model(const std::string& app_id,
+int local_client::try_get_model(const std::string& app_id,
     /* inout */ model_management::model_data& data, /* out */ bool& model_received, api_status* status)
 {
   switch (_state)
@@ -50,7 +52,7 @@ int reinforcement_learning::local_client::try_get_model(const std::string& app_i
   return error_code::success;
 }
 
-int reinforcement_learning::local_client::report_result(const uint8_t* payload, size_t size, api_status* status)
+int local_client::report_result(const uint8_t* payload, size_t size, api_status* status)
 {
   switch (_state)
   {
@@ -77,8 +79,8 @@ int reinforcement_learning::local_client::report_result(const uint8_t* payload, 
   return error_code::success;
 }
 
-int reinforcement_learning::create_local_client(const utility::configuration& config,
-    /*out*/ std::unique_ptr<i_federated_client>& object, i_trace* trace_logger, api_status* status)
+int local_client::create_local_client(std::unique_ptr<i_federated_client>& output, const utility::configuration& config,
+    i_trace* trace_logger, api_status* status)
 {
   // Create empty model based on ML args on first call
   std::string initial_command_line(config.get(
@@ -88,6 +90,8 @@ int reinforcement_learning::create_local_client(const utility::configuration& co
   auto args = VW::make_unique<VW::config::options_cli>(VW::split_command_line(initial_command_line));
   auto workspace = VW::initialize_experimental(std::move(args));
 
-  object = VW::make_unique<local_client>(std::move(workspace), trace_logger);
-  return reinforcement_learning::error_code::success;
+  output = std::unique_ptr<i_federated_client>(new local_client(std::move(workspace), trace_logger));
+  return error_code::success;
 }
+
+}  // namespace reinforcement_learning

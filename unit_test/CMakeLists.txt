@@ -50,7 +50,6 @@ endif()
 if(RL_BUILD_FEDERATION)
   list(APPEND TEST_SOURCES
     local_client_test.cc
-    local_joiner_test.cc
     trainable_model_test.cc
   )
 endif()
