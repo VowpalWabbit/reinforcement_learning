@@ -16,22 +16,23 @@ namespace reinforcement_learning
 live_model::live_model(const utility::configuration& config, error_fn fn, void* err_context,
     trace_logger_factory_t* trace_factory, data_transport_factory_t* t_factory, model_factory_t* m_factory,
     sender_factory_t* s_factory, time_provider_factory_t* time_prov_factory)
+    : _pimpl(new live_model_impl(
+          config, fn, err_context, trace_factory, t_factory, m_factory, s_factory, time_prov_factory))
+    , _rank_builder(_pimpl.get())
 {
-  _pimpl = std::unique_ptr<live_model_impl>(
-      new live_model_impl(config, fn, err_context, trace_factory, t_factory, m_factory, s_factory, time_prov_factory));
 }
 
 live_model::live_model(const utility::configuration& config, std::function<void(const api_status&)> error_cb,
     trace_logger_factory_t* trace_factory, data_transport_factory_t* t_factory, model_factory_t* m_factory,
     sender_factory_t* s_factory, time_provider_factory_t* time_prov_factory)
+    : _pimpl(new live_model_impl(
+          config, std::move(error_cb), trace_factory, t_factory, m_factory, s_factory, time_prov_factory))
+    , _rank_builder(_pimpl.get())
 {
-  _pimpl = std::unique_ptr<live_model_impl>(new live_model_impl(
-      config, std::move(error_cb), trace_factory, t_factory, m_factory, s_factory, time_prov_factory));
 }
 
-live_model::live_model(live_model&& other) noexcept
+live_model::live_model(live_model&& other) noexcept : _pimpl(other._pimpl.release()), _rank_builder(_pimpl.get())
 {
-  std::swap(_pimpl, other._pimpl);
   _initialized = other._initialized;
 }
 
@@ -43,6 +44,8 @@ live_model& live_model::operator=(live_model&& other) noexcept
   _initialized = other._initialized;
   return *this;
 }
+
+rank_builder& live_model::get_rank_builder() { return _rank_builder; }
 
 int live_model::init(api_status* status)
 {
@@ -64,13 +67,13 @@ int live_model::choose_rank(
     const char* event_id, string_view context_json, ranking_response& response, api_status* status)
 {
   INIT_CHECK();
-  return choose_rank(event_id, context_json, action_flags::DEFAULT, response, status);
+  return _rank_builder.set_event_id(event_id).set_context(context_json).rank(response, status);
 }
 
 int live_model::choose_rank(string_view context_json, ranking_response& response, api_status* status)
 {
   INIT_CHECK();
-  return choose_rank(context_json, action_flags::DEFAULT, response, status);
+  return _rank_builder.set_context(context_json).rank(response, status);
 }
 
 // not implemented yet
@@ -78,7 +81,7 @@ int live_model::choose_rank(
     const char* event_id, string_view context_json, unsigned int flags, ranking_response& response, api_status* status)
 {
   INIT_CHECK();
-  return _pimpl->choose_rank(event_id, context_json, flags, response, status);
+  return _rank_builder.set_event_id(event_id).set_flags(flags).set_context(context_json).rank(response, status);
 }
 
 // not implemented yet
@@ -86,7 +89,7 @@ int live_model::choose_rank(
     string_view context_json, unsigned int flags, ranking_response& response, api_status* status)
 {
   INIT_CHECK();
-  return _pimpl->choose_rank(context_json, flags, response, status);
+  return _rank_builder.set_context(context_json).set_flags(flags).rank(response, status);
 }
 
 int live_model::request_continuous_action(const char* event_id, string_view context_json, unsigned int flags,
