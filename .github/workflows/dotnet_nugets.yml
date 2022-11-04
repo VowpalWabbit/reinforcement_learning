@@ -13,7 +13,6 @@ on:
       - '*'
 
 env:
-  RL_NUGET_VERSION:  0.2.${{github.run_number}}+${{github.sha}}
   VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
 
 concurrency:
@@ -49,7 +48,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
-          key: ${{ runner.os }}-build-${{ matrix.config.vcpkg_target_triplet }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}
+          key: ${{ matrix.config.os }}-build-${{ matrix.config.vcpkg_target_triplet }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}
 
       - name: Configure .NET Core
         run: >
@@ -129,6 +128,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Get version number
+        shell: bash
+        run: |
+          GENERATED_VERSION=$(./.scripts/version_number.py)
+          echo "Generated version number: $version"
+          echo "RL_NUGET_VERSION=$GENERATED_VERSION" >> $GITHUB_ENV
+
       - uses: actions/download-artifact@v3
         with:
           name: artifacts
@@ -152,6 +158,12 @@ jobs:
     runs-on: ${{matrix.config.os}}
     steps:
       - uses: actions/checkout@v2
+      - name: Get version number
+        shell: bash
+        run: |
+          GENERATED_VERSION=$(./.scripts/version_number.py)
+          echo "Generated version number: $version"
+          echo "RL_NUGET_VERSION=$GENERATED_VERSION" >> $GITHUB_ENV
       - uses: actions/download-artifact@v3
         with:
           name: dist
