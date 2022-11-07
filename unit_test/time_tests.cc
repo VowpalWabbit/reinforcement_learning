@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(time_round_trip)
   r::clock_time_provider ctp;
   auto now = ctp.gmt_now();
   auto roundtripped = r::timestamp_from_chrono(r::chrono_from_timestamp(now));
-  BOOST_CHECK(now == roundtripped);
+  BOOST_CHECK_EQUAL(now, roundtripped);
 }
 
 BOOST_AUTO_TEST_CASE(time_ordering)

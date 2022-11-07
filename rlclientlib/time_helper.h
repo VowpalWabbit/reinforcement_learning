@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstdint>
 #include <tuple>
+#include <iostream>
 
 namespace reinforcement_learning
 {
@@ -15,6 +16,8 @@ struct timestamp
   uint8_t minute = 0;       // minute [0-60]
   uint8_t second = 0;       // second [0-60]
   uint32_t sub_second = 0;  // 0.1 u_second [0 - 9,999,999]
+
+  friend std::ostream& operator<<(std::ostream& os, const timestamp& dt);
 };
 
 timestamp timestamp_from_chrono(const std::chrono::system_clock::time_point&);

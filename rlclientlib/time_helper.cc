@@ -7,6 +7,14 @@
 
 namespace reinforcement_learning
 {
+
+std::ostream& operator<<(std::ostream& os, const timestamp& dt)
+{
+  os << +dt.year << "-" << +dt.month << "-" << +dt.day << " " << +dt.hour << ":" << +dt.minute << ":" << +dt.second
+     << "." << +dt.sub_second;
+  return os;
+}
+
 timestamp timestamp_from_chrono(const std::chrono::system_clock::time_point& tp)
 {
   timestamp ts;
