@@ -23,7 +23,7 @@ jobs:
       matrix:
         os: ["windows-2019"]
         toolset: ["v141", "v142"]
-  
+
     steps:
       # Get repository and setup dependencies
       - uses: actions/checkout@v2
@@ -56,7 +56,7 @@ jobs:
       # Get version number
       - name: Update git tags
         # Needed because actions/checkout performs a shallow checkout without tags
-        run: git fetch --unshallow --tags --recurse-submodules=no
+        run: git fetch --unshallow --tags --recurse-submodules=no --force
       - name: Get version number
         id: get_version
         shell: bash
@@ -64,7 +64,7 @@ jobs:
           version=$(./.scripts/version_number.py)
           echo "Generated version number: $version"
           echo "::set-output name=version::$version"
-      
+
       # Compile code and create package
       - name: Configure
         run: >
@@ -127,7 +127,7 @@ jobs:
       # Get version number
       - name: Update git tags
         # Needed because actions/checkout performs a shallow checkout without tags
-        run: git fetch --unshallow --tags --recurse-submodules=no
+        run: git fetch --unshallow --tags --recurse-submodules=no --force
       - name: Get version number
         id: get_version
         shell: bash
@@ -135,7 +135,7 @@ jobs:
           version=$(./.scripts/version_number.py)
           echo "Generated version number: $version"
           echo "::set-output name=version::$version"
-      
+
       # Download and install nuget
       - uses: actions/download-artifact@v1
         with:
@@ -156,7 +156,7 @@ jobs:
         run: |
           cd nuget\test\packages
           mv * RLClientLibNativeStatic-${{ matrix.toolset }}-x64
-      
+
       # Compile and run
       - name: Build test
         run: |

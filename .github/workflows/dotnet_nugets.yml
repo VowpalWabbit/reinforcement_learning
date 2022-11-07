@@ -132,7 +132,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Update git tags
         # Needed because actions/checkout performs a shallow checkout without tags
-        run: git fetch --unshallow --tags --recurse-submodules=no
+        run: git fetch --unshallow --tags --recurse-submodules=no --force
 
       - name: Get version number
         shell: bash
@@ -166,7 +166,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Update git tags
         # Needed because actions/checkout performs a shallow checkout without tags
-        run: git fetch --unshallow --tags --recurse-submodules=no
+        run: git fetch --unshallow --tags --recurse-submodules=no --force
 
       - name: Get version number
         shell: bash
