@@ -1,12 +1,16 @@
 #include "time_helper.h"
 
 #include "date.h"
+
+#include <chrono>
+#include <ctime>
+
 namespace reinforcement_learning
 {
-timestamp clock_time_provider::gmt_now()
+
+timestamp timestamp_from_chrono(const std::chrono::system_clock::time_point& tp)
 {
   timestamp ts;
-  const auto tp = std::chrono::system_clock::now();
   const auto dp = date::floor<date::days>(tp);
   const auto ymd = date::year_month_day(dp);
   const auto time = date::make_time(tp - dp);
@@ -18,5 +22,16 @@ timestamp clock_time_provider::gmt_now()
   ts.second = static_cast<uint8_t>(time.seconds().count());
   ts.sub_second = static_cast<uint32_t>(time.subseconds().count());
   return ts;
+}
+
+std::chrono::system_clock::time_point chrono_from_timestamp(const timestamp& ts)
+{
+  return date::sys_days{date::year{ts.year}/ts.month/ts.day} +
+      std::chrono::hours{ts.hour} + std::chrono::minutes{ts.minute} + std::chrono::seconds{ts.second} + std::chrono::microseconds {ts.sub_second};
+}
+
+timestamp clock_time_provider::gmt_now()
+{
+  return timestamp_from_chrono(std::chrono::system_clock::now());
 }
 }  // namespace reinforcement_learning
