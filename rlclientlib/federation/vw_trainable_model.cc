@@ -13,8 +13,7 @@
 namespace reinforcement_learning
 {
 int trainable_vw_model::create_trainable_vw_model(std::unique_ptr<trainable_vw_model>& output,
-    const utility::configuration& config, std::unique_ptr<i_joined_log_provider>&& eud_joiner, i_trace* trace_logger,
-    api_status* status)
+    const utility::configuration& config, i_trace* trace_logger, api_status* status)
 {
   int protocol_version = config.get_int(name::PROTOCOL_VERSION, 0);
   if (protocol_version != 2)
@@ -26,14 +25,13 @@ int trainable_vw_model::create_trainable_vw_model(std::unique_ptr<trainable_vw_m
   std::string reward_function = config.get(name::JOINER_REWARD_FUNCTION, value::REWARD_FUNCTION_EARLIEST);
 
   output = std::unique_ptr<trainable_vw_model>(
-      new trainable_vw_model(std::move(eud_joiner), command_line, problem_type, learning_mode, reward_function));
+      new trainable_vw_model(command_line, problem_type, learning_mode, reward_function));
   return error_code::success;
 }
 
-trainable_vw_model::trainable_vw_model(std::unique_ptr<i_joined_log_provider>&& eud_joiner, std::string command_line,
-    std::string problem_type, std::string learning_mode, std::string reward_function)
-    : _eud_joiner(std::move(eud_joiner))
-    , _command_line(std::move(command_line))
+trainable_vw_model::trainable_vw_model(
+    std::string command_line, std::string problem_type, std::string learning_mode, std::string reward_function)
+    : _command_line(std::move(command_line))
     , _problem_type(std::move(problem_type))
     , _learning_mode(std::move(learning_mode))
     , _reward_function(std::move(reward_function))
@@ -70,11 +68,13 @@ int trainable_vw_model::get_data(model_management::model_data& data, api_status*
   return error_code::success;
 }
 
-int trainable_vw_model::learn(api_status* status)
+int trainable_vw_model::learn(std::unique_ptr<VW::io::reader>&& binary_log, api_status* status)
 {
-  std::unique_ptr<VW::io::reader> binary_log = nullptr;
-  RETURN_IF_FAIL(_eud_joiner->invoke_join(binary_log, status));
-  if (binary_log.get() == nullptr) { return error_code::success; }
+  if (binary_log.get() == nullptr)
+  {
+    // TODO handle this as error?
+    return error_code::success;
+  }
 
   io_buf io_reader;
   io_reader.add_file(std::move(binary_log));

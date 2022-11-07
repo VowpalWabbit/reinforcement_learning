@@ -6,6 +6,7 @@
 #include "err_constants.h"
 #include "error_callback_fn.h"
 #include "factory_resolver.h"
+#include "federation/local_loop_controller.h"
 #include "internal_constants.h"
 #include "logger/preamble_sender.h"
 #include "ranking_response.h"
@@ -675,6 +676,15 @@ int live_model_impl::init_model_mgmt(api_status* status)
   const auto* const tranport_impl = _configuration.get(name::MODEL_SRC, value::get_default_data_transport());
   m::i_data_transport* ptransport = nullptr;
   RETURN_IF_FAIL(_t_factory->create(&ptransport, tranport_impl, _configuration, status));
+
+  local_loop_controller* local_loop_transport = dynamic_cast<local_loop_controller*>(ptransport);
+  if (local_loop_transport != nullptr)
+  {
+    // The i_data_transport returned by factory is actually a local_loop_controller
+    // Register its sender factory so that events will be sent to it
+    _sender_factory->register_type(value::LOCAL_LOOP_SENDER, local_loop_transport->get_local_sender_factory());
+  }
+
   // This class manages lifetime of transport
   this->_transport.reset(ptransport);
 

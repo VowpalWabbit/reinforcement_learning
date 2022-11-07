@@ -12,14 +12,6 @@
 
 using namespace reinforcement_learning;
 
-class test_joined_log_provider : public i_joined_log_provider
-{
-  virtual int invoke_join(std::unique_ptr<VW::io::reader>& output, api_status* status = nullptr) override
-  {
-    output.reset(nullptr);
-  }
-};
-
 void setup_config(utility::configuration& config)
 {
   config.set(name::PROTOCOL_VERSION, "2");
@@ -45,10 +37,8 @@ BOOST_AUTO_TEST_CASE(trainable_model_set_get_data)
   BOOST_CHECK_EQUAL(example_count, 1.f);
 
   // put the workspace into trainable_vw_model
-  std::unique_ptr<i_joined_log_provider> eud_joiner(new test_joined_log_provider());
   std::unique_ptr<trainable_vw_model> model;
-  BOOST_CHECK_EQUAL(
-      trainable_vw_model::create_trainable_vw_model(model, config, std::move(eud_joiner)), error_code::success);
+  BOOST_CHECK_EQUAL(trainable_vw_model::create_trainable_vw_model(model, config), error_code::success);
   model->set_model(std::move(vw));
 
   // get data out and check that it's equal
@@ -61,6 +51,16 @@ BOOST_AUTO_TEST_CASE(trainable_model_set_get_data)
 }
 
 /*
+
+class test_joined_log_provider : public i_joined_log_provider
+{
+  virtual int invoke_join(std::unique_ptr<VW::io::reader>& output, api_status* status = nullptr) override
+  {
+    output.reset(nullptr);
+    return error_code::success;
+  }
+};
+
 BOOST_AUTO_TEST_CASE(trainable_model_learn_and_create_delta)
 {
   const std::string command_line = "--quiet --preserve_performance_counters";

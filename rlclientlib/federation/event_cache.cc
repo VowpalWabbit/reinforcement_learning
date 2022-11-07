@@ -2,7 +2,7 @@
 
 namespace reinforcement_learning
 {
-int event_cache_memory::v_send(const buffer& data, api_status* status)
+int event_cache_memory::add_event(const buffer& data, api_status* status)
 {
   _events.push_back(data);
   return error_code::success;
