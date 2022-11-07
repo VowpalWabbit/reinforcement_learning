@@ -14,7 +14,9 @@ git_shallow = subprocess.check_output(
 ).strip()
 if git_shallow != "false":
     debug_print("Error: Git repository is shallow!")
-    debug_print("To fix, run: 'git fetch --unshallow --tags --recurse-submodules=no --force'")
+    debug_print(
+        "To fix, run: 'git fetch --unshallow --tags --recurse-submodules=no --force'"
+    )
     sys.exit(1)
 
 git_describe = subprocess.check_output(
