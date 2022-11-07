@@ -2,6 +2,8 @@ name: Windows Nuget
 
 on:
   push:
+    tags:
+      - '*'
     branches:
       - master
       - 'releases/**'
