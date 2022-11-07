@@ -25,10 +25,7 @@ inline bool operator==(const timestamp& lhs, const timestamp& rhs)
   return std::tie(lhs.year, lhs.month, lhs.day, lhs.hour, lhs.minute, lhs.second, lhs.sub_second) ==
       std::tie(rhs.year, rhs.month, rhs.day, rhs.hour, rhs.minute, rhs.second, rhs.sub_second);
 }
-inline bool operator!=(const timestamp& lhs, const timestamp& rhs)
-{
-  return !(lhs == rhs);
-}
+inline bool operator!=(const timestamp& lhs, const timestamp& rhs) { return !(lhs == rhs); }
 
 inline bool operator<(const timestamp& lhs, const timestamp& rhs)
 {
@@ -36,20 +33,11 @@ inline bool operator<(const timestamp& lhs, const timestamp& rhs)
       std::tie(rhs.year, rhs.month, rhs.day, rhs.hour, rhs.minute, rhs.second, rhs.sub_second);
 }
 
-inline bool operator<=(const timestamp& lhs, const timestamp& rhs)
-{
-  return (lhs < rhs) || (lhs == rhs);
-}
+inline bool operator<=(const timestamp& lhs, const timestamp& rhs) { return (lhs < rhs) || (lhs == rhs); }
 
-inline bool operator>(const timestamp& lhs, const timestamp& rhs)
-{
-  return !(lhs <= rhs);
-}
+inline bool operator>(const timestamp& lhs, const timestamp& rhs) { return !(lhs <= rhs); }
 
-inline bool operator>=(const timestamp& lhs, const timestamp& rhs)
-{
-  return !(lhs < rhs);
-}
+inline bool operator>=(const timestamp& lhs, const timestamp& rhs) { return !(lhs < rhs); }
 
 class i_time_provider
 {

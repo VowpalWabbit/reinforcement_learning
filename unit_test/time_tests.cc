@@ -31,8 +31,6 @@ BOOST_AUTO_TEST_CASE(time_usage)
   }
 }
 
-
-
 BOOST_AUTO_TEST_CASE(time_round_trip)
 {
   r::clock_time_provider ctp;
@@ -53,7 +51,6 @@ BOOST_AUTO_TEST_CASE(time_ordering)
   BOOST_CHECK(r::timestamp_from_chrono(std::chrono::system_clock::now() - date::months(1)) < now);
   BOOST_CHECK(r::timestamp_from_chrono(std::chrono::system_clock::now() - date::years(1)) < now);
 }
-
 
 // BOOST_AUTO_TEST_CASE(time_loop) {
 //	r::clock_time_provider ctp;
