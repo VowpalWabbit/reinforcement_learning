@@ -146,7 +146,6 @@ int report_error(api_status* status, int scode, const All&... all)
   }
   return scode;
 }
-}  // namespace reinforcement_learning
 
 /**
  * @brief left shift operator to serialize types into stringstream held in status_builder
@@ -164,8 +163,6 @@ reinforcement_learning::status_builder& operator<<(reinforcement_learning::statu
   return sbuilder;
 }
 
-namespace reinforcement_learning
-{
 /**
  * @brief Terminates recursion of report_error
  *
@@ -228,7 +225,7 @@ int report_error(status_builder& sbuilder, const First& first, const Rest&... re
   do                                                                                                            \
   {                                                                                                             \
     if (status != nullptr)                                                                                      \
-    {                                                                                                           \
+    {                                                                                          \
       reinforcement_learning::status_builder sbuilder(trace, status, reinforcement_learning::error_code::code); \
       sbuilder << reinforcement_learning::error_code::code##_s;                                                 \
       return report_error(sbuilder, __VA_ARGS__);                                                               \
