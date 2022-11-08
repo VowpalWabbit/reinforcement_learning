@@ -119,6 +119,7 @@ int file_model_loader_create(
   return error_code::success;
 }
 
+#ifdef RL_BUILD_FEDERATION
 int local_loop_controller_create(
     m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
 {
@@ -128,6 +129,7 @@ int local_loop_controller_create(
   *retval = output.release();
   return error_code::success;
 }
+#endif
 
 int null_time_provider_create(
     i_time_provider** retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
@@ -153,7 +155,16 @@ void factory_initializer::register_default_factories()
 
   data_transport_factory.register_type(value::NO_MODEL_DATA, empty_data_transport_create);
   data_transport_factory.register_type(value::FILE_MODEL_DATA, file_model_loader_create);
+
+#ifdef RL_BUILD_FEDERATION
   data_transport_factory.register_type(value::LOCAL_LOOP_MODEL_DATA, local_loop_controller_create);
+#else
+  data_transport_factory.register_type(value::LOCAL_LOOP_MODEL_DATA,
+      [](m::i_data_transport**, const u::configuration&, i_trace* trace_logger, api_status* status) {
+        RETURN_ERROR_ARG(trace_logger, status, create_fn_exception,
+            "Cannot use LOCAL_LOOP_MODEL_DATA because rlclientlib was not compiled with federated learning enabled");
+      });
+#endif
 
   model_factory.register_type(value::VW, model_create<m::vw_model>);
   model_factory.register_type(value::PASSTHROUGH_PDF_MODEL, model_create<m::pdf_model>);
@@ -187,8 +198,7 @@ void factory_initializer::register_default_factories()
   // Register a default factory for LOCAL_LOOP_SENDER that returns an error
   // When initializing live_model_impl with LOCAL_LOOP_DATA_TRANSPORT, we overwrite this with the actual factory
   sender_factory.register_type(value::LOCAL_LOOP_SENDER,
-      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger,
-          api_status* status) {
+      [](i_sender**, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status) {
         RETURN_ERROR_ARG(
             trace_logger, status, create_fn_exception, "Must use LOCAL_LOOP_SENDER with LOCAL_LOOP_DATA_TRANSPORT");
       });

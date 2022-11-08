@@ -24,9 +24,8 @@ int local_loop_controller::create_local_loop_controller(std::unique_ptr<local_lo
   // TODO if additional types of i_event_cache are implemented, determine which type to create from config
   auto event_source = std::unique_ptr<i_event_cache>(new event_cache_memory());
 
-  output =
-      std::unique_ptr<local_loop_controller>(new local_loop_controller(std::move(app_id), std::move(federated_client),
-          std::move(joiner), std::move(trainable_model), std::move(event_source)));
+  output = std::unique_ptr<local_loop_controller>(new local_loop_controller(std::move(app_id),
+      std::move(federated_client), std::move(joiner), std::move(trainable_model), std::move(event_source)));
   return error_code::success;
 }
 

@@ -677,6 +677,7 @@ int live_model_impl::init_model_mgmt(api_status* status)
   m::i_data_transport* ptransport = nullptr;
   RETURN_IF_FAIL(_t_factory->create(&ptransport, tranport_impl, _configuration, status));
 
+#ifdef RL_BUILD_FEDERATION
   local_loop_controller* local_loop_transport = dynamic_cast<local_loop_controller*>(ptransport);
   if (local_loop_transport != nullptr)
   {
@@ -684,6 +685,7 @@ int live_model_impl::init_model_mgmt(api_status* status)
     // Register its sender factory so that events will be sent to it
     _sender_factory->register_type(value::LOCAL_LOOP_SENDER, local_loop_transport->get_local_sender_factory());
   }
+#endif
 
   // This class manages lifetime of transport
   this->_transport.reset(ptransport);

@@ -51,6 +51,7 @@ option(RL_USE_UBSAN "Compile with UndefinedBehaviorSanitizer" OFF)
 option(RL_BUILD_FEDERATION "Build code for Federated Learning" OFF)
 
 if(RL_BUILD_FEDERATION)
+  add_compile_definitions(RL_BUILD_FEDERATION)
   # Needed for joiner code
   set(RL_BUILD_EXTERNAL_PARSER ON CACHE BOOL "" FORCE)
 endif()
