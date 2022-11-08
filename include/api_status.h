@@ -225,7 +225,7 @@ int report_error(status_builder& sbuilder, const First& first, const Rest&... re
   do                                                                                                            \
   {                                                                                                             \
     if (status != nullptr)                                                                                      \
-    {                                                                                          \
+    {                                                                                                           \
       reinforcement_learning::status_builder sbuilder(trace, status, reinforcement_learning::error_code::code); \
       sbuilder << reinforcement_learning::error_code::code##_s;                                                 \
       return report_error(sbuilder, __VA_ARGS__);                                                               \

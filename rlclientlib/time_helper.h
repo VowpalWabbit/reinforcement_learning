@@ -2,8 +2,8 @@
 
 #include <chrono>
 #include <cstdint>
-#include <tuple>
 #include <iostream>
+#include <tuple>
 
 namespace reinforcement_learning
 {
