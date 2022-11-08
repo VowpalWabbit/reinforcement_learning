@@ -6,7 +6,6 @@
 #include "err_constants.h"
 #include "error_callback_fn.h"
 #include "factory_resolver.h"
-#include "federation/local_loop_controller.h"
 #include "internal_constants.h"
 #include "logger/preamble_sender.h"
 #include "ranking_response.h"
@@ -17,6 +16,10 @@
 #include "vw/common/hash.h"
 #include "vw/explore/explore.h"
 #include "vw_model/safe_vw.h"
+
+#ifdef RL_BUILD_FEDERATION
+#include "federation/local_loop_controller.h"
+#endif
 
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>

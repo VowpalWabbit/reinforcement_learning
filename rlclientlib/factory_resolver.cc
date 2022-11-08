@@ -3,12 +3,15 @@
 #include "api_status.h"
 #include "constants.h"
 #include "err_constants.h"
-#include "federation/local_loop_controller.h"
 #include "logger/event_logger.h"
 #include "model_mgmt/empty_data_transport.h"
 #include "utility/watchdog.h"
 #include "vw_model/pdf_model.h"
 #include "vw_model/vw_model.h"
+
+#ifdef RL_BUILD_FEDERATION
+#include "federation/local_loop_controller.h"
+#endif
 
 #ifdef USE_AZURE_FACTORIES
 #  include "azure_factories.h"
