@@ -39,11 +39,13 @@ public:
   std::function<int(i_sender**, const utility::configuration&, error_callback_fn*, i_trace*, api_status*)>
   get_local_sender_factory();
 
+  virtual ~local_loop_controller() = default;
+
 private:
   // Constructor is private because objects should be created using the factory function
   local_loop_controller(std::string app_id, std::unique_ptr<i_federated_client>&& federated_client,
       std::unique_ptr<i_joined_log_provider>&& joiner, std::unique_ptr<trainable_vw_model>&& trainable_model,
-      std::unique_ptr<i_event_cache>&& event_source, i_trace* trace_logger = nullptr);
+      std::unique_ptr<i_event_cache>&& event_source);
 
   // Internal implemetation to run joining and traning to update local state
   RL_ATTR(nodiscard)
@@ -55,7 +57,6 @@ private:
   std::unique_ptr<i_joined_log_provider> _joiner = nullptr;
   std::unique_ptr<trainable_vw_model> _trainable_model = nullptr;
   std::unique_ptr<i_event_cache> _event_source = nullptr;
-  i_trace* _trace_logger = nullptr;
 
   // If the federated client has received a new global model,
   // we need to train on local events and upload a model delta.

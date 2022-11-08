@@ -12,9 +12,7 @@ int local_loop_controller::create_local_loop_controller(std::unique_ptr<local_lo
     const reinforcement_learning::utility::configuration& config, i_trace* trace_logger, api_status* status)
 {
   std::string app_id = config.get(name::APP_ID, "");
-  std::string command_line = config.get(name::MODEL_VW_INITIAL_COMMAND_LINE,
-      "--cb_explore_adf --driver_output_off --epsilon 0.2 --power_t 0 -l 0.001 --cb_type mtr -q :: "
-      "--preserve-performance-counters");
+  std::string command_line = config.get(name::MODEL_VW_INITIAL_COMMAND_LINE, "--quiet --preserve_performance_counters");
   std::unique_ptr<i_federated_client> federated_client;
   std::unique_ptr<i_joined_log_provider> joiner;
   std::unique_ptr<trainable_vw_model> trainable_model;
@@ -28,19 +26,18 @@ int local_loop_controller::create_local_loop_controller(std::unique_ptr<local_lo
 
   output =
       std::unique_ptr<local_loop_controller>(new local_loop_controller(std::move(app_id), std::move(federated_client),
-          std::move(joiner), std::move(trainable_model), std::move(event_source), trace_logger));
+          std::move(joiner), std::move(trainable_model), std::move(event_source)));
   return error_code::success;
 }
 
 local_loop_controller::local_loop_controller(std::string app_id, std::unique_ptr<i_federated_client>&& federated_client,
     std::unique_ptr<i_joined_log_provider>&& joiner, std::unique_ptr<trainable_vw_model>&& trainable_model,
-    std::unique_ptr<i_event_cache>&& event_source, i_trace* trace_logger)
+    std::unique_ptr<i_event_cache>&& event_source)
     : _app_id(std::move(app_id))
     , _federated_client(std::move(federated_client))
     , _joiner(std::move(joiner))
     , _trainable_model(std::move(trainable_model))
     , _event_source(std::move(event_source))
-    , _trace_logger(trace_logger)
 {
 }
 
