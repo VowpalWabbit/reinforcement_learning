@@ -10,7 +10,7 @@
 #include "vw_model/vw_model.h"
 
 #ifdef RL_BUILD_FEDERATION
-#include "federation/local_loop_controller.h"
+#  include "federation/local_loop_controller.h"
 #endif
 
 #ifdef USE_AZURE_FACTORIES

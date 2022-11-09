@@ -18,7 +18,7 @@
 #include "vw_model/safe_vw.h"
 
 #ifdef RL_BUILD_FEDERATION
-#include "federation/local_loop_controller.h"
+#  include "federation/local_loop_controller.h"
 #endif
 
 #include <boost/uuid/random_generator.hpp>
