@@ -58,6 +58,10 @@ int live_model_impl::init(api_status* status)
 {
   RETURN_IF_FAIL(init_trace(status));
   RETURN_IF_FAIL(init_model(status));
+
+  // Note: init_model_mgmt MUST come before init_loggers!
+  // This is because if local_loop_controller is used as the data transport,
+  // it needs to register its internal sender factory before init_loggers() is called.
   RETURN_IF_FAIL(init_model_mgmt(status));
   RETURN_IF_FAIL(init_loggers(status));
 
