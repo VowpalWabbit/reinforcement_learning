@@ -28,7 +28,9 @@ set(RL_FLAT_BUFFER_FILES_V2
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Metadata.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiSlotEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiStepEvent.fbs"
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/OutcomeEvent.fbs")
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/OutcomeEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/ProblemType.fbs"
+)
 
 add_flatbuffer_schema(
   TARGET fbgenerator_v1
