@@ -1,5 +1,10 @@
 #pragma once
+
+#include <chrono>
 #include <cstdint>
+#include <iostream>
+#include <tuple>
+
 namespace reinforcement_learning
 {
 struct timestamp
@@ -11,7 +16,30 @@ struct timestamp
   uint8_t minute = 0;       // minute [0-60]
   uint8_t second = 0;       // second [0-60]
   uint32_t sub_second = 0;  // 0.1 u_second [0 - 9,999,999]
+  friend std::ostream& operator<<(std::ostream& os, const timestamp& dt);
 };
+
+timestamp timestamp_from_chrono(const std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>&);
+std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> chrono_from_timestamp(const timestamp&);
+
+inline bool operator==(const timestamp& lhs, const timestamp& rhs)
+{
+  return std::tie(lhs.year, lhs.month, lhs.day, lhs.hour, lhs.minute, lhs.second, lhs.sub_second) ==
+      std::tie(rhs.year, rhs.month, rhs.day, rhs.hour, rhs.minute, rhs.second, rhs.sub_second);
+}
+inline bool operator!=(const timestamp& lhs, const timestamp& rhs) { return !(lhs == rhs); }
+
+inline bool operator<(const timestamp& lhs, const timestamp& rhs)
+{
+  return std::tie(lhs.year, lhs.month, lhs.day, lhs.hour, lhs.minute, lhs.second, lhs.sub_second) <
+      std::tie(rhs.year, rhs.month, rhs.day, rhs.hour, rhs.minute, rhs.second, rhs.sub_second);
+}
+
+inline bool operator<=(const timestamp& lhs, const timestamp& rhs) { return (lhs < rhs) || (lhs == rhs); }
+
+inline bool operator>(const timestamp& lhs, const timestamp& rhs) { return !(lhs <= rhs); }
+
+inline bool operator>=(const timestamp& lhs, const timestamp& rhs) { return !(lhs < rhs); }
 
 class i_time_provider
 {
