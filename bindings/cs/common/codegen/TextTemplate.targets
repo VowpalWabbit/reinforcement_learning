@@ -15,14 +15,13 @@
     </ItemGroup>
 
     <MakeDir Directories="$(IntermediateOutputPath)" />
-
     <PropertyGroup>
-      <Parameters>@(TextTransformParameter -> '-a:%(Identity)=%(Value)', ' ')</Parameters>
+      <Parameters>@(TextTransformParameter -> '-a !!%(Identity)!%(Value)', ' ')</Parameters>
       <TaskCommand>$(T4Command) "%(TextTemplate.Identity)" -o "$([System.IO.Path]::Combine($(IntermediateOutputPath),%(TextTemplate.FileName).T4Generated.cs))" $(Parameters)</TaskCommand>
     </PropertyGroup>
-    
+
     <Exec WorkingDirectory="$(ProjectDir)" Command="$(TaskCommand)"/>
-    
+
     <ItemGroup>
         <Compile Include="$(IntermediateOutputPath)\*.T4Generated.cs"/>
     </ItemGroup>
@@ -32,4 +31,3 @@
     <Delete Files="@(T4Generated)" />
   </Target>
 </Project>
-
