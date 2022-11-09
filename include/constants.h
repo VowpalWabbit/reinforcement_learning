@@ -26,6 +26,7 @@ const char* const HTTP_API_KEY = "http.api.key";
 const char* const HTTP_API_HEADER_KEY_NAME = "http.api.header.key.name";
 const char* const AUDIT_ENABLED = "audit.enabled";
 const char* const AUDIT_OUTPUT_PATH = "audit.output.path";
+const char* const EUD_DURATION = "eud.duration";
 
 // Episode
 const char* const EPISODE_EH_HOST = "episode.eventhub.host";
