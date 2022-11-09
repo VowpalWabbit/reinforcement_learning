@@ -27,7 +27,8 @@ timestamp timestamp_from_chrono(const std::chrono::time_point<std::chrono::syste
   timestamp ts;
   const auto dp = date::floor<date::days>(tp);
   const auto ymd = date::year_month_day(dp);
-  const auto time = date::make_time(tp - dp);
+  const auto duration_since_start_of_day = tp - dp;
+  const auto time = date::make_time(duration_since_start_of_day);
   ts.year = int(ymd.year());
   ts.month = unsigned(ymd.month());
   ts.day = unsigned(ymd.day());
@@ -35,7 +36,7 @@ timestamp timestamp_from_chrono(const std::chrono::time_point<std::chrono::syste
   ts.minute = time.minutes().count();
   ts.second = static_cast<uint8_t>(time.seconds().count());
   std::chrono::duration<uint64_t, one_hundred_nano> usec_since_start_of_day =
-      std::chrono::duration_cast<one_hundred_nanoseconds>(tp - dp);
+      std::chrono::duration_cast<one_hundred_nanoseconds>(duration_since_start_of_day);
   ts.sub_second = static_cast<uint32_t>(usec_since_start_of_day.count() % ONE_HUNDRED_NANO_DENOMINATOR);
   return ts;
 }
