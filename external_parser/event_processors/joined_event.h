@@ -17,7 +17,7 @@ namespace joined_event
 {
 struct MultiSlotInteraction
 {
-  std::vector<DecisionServiceInteraction> interaction_data;
+  std::vector<VW::details::decision_service_interaction> interaction_data;
   std::vector<unsigned> baseline_actions;
   bool skip_learn;
   float probability_of_drop{0.f};
@@ -28,19 +28,19 @@ inline void calculate_multislot_interaction_metrics(
 {
   if (metrics != nullptr)
   {
-    metrics->DsjsonSumCostOriginalFirstSlot += first_slot_original_reward_neg;
+    metrics->dsjson_sum_cost_original_first_slot += first_slot_original_reward_neg;
 
     if (!multi_slot_interaction.interaction_data.empty() &&
         !multi_slot_interaction.interaction_data[0].actions.empty() && !multi_slot_interaction.baseline_actions.empty())
     {
       if (multi_slot_interaction.interaction_data[0].actions[0] == multi_slot_interaction.baseline_actions[0])
       {
-        metrics->DsjsonNumberOfLabelEqualBaselineFirstSlot++;
-        metrics->DsjsonSumCostOriginalLabelEqualBaselineFirstSlot += first_slot_original_reward_neg;
+        metrics->dsjson_number_of_label_equal_baseline_first_slot++;
+        metrics->dsjson_sum_cost_original_label_equal_baseline_first_slot += first_slot_original_reward_neg;
       }
       else
       {
-        metrics->DsjsonNumberOfLabelNotEqualBaselineFirstSlot++;
+        metrics->dsjson_number_of_label_not_equal_baseline_first_slot++;
       }
     }
   }
@@ -67,7 +67,7 @@ struct typed_joined_event
 
 struct cb_joined_event : public typed_joined_event
 {
-  DecisionServiceInteraction interaction_data;
+  VW::details::decision_service_interaction interaction_data;
   // Default Baseline Action for CB is 1 (rl client recommended actions are 1
   // indexed in the CB case)
   static const unsigned CB_BASELINE_ACTION = 1;
@@ -76,9 +76,9 @@ struct cb_joined_event : public typed_joined_event
 
   ~cb_joined_event() = default;
 
-  bool is_skip_learn() const override { return interaction_data.skipLearn; }
+  bool is_skip_learn() const override { return interaction_data.skip_learn; }
 
-  void set_skip_learn(bool sl) override { interaction_data.skipLearn = sl; }
+  void set_skip_learn(bool sl) override { interaction_data.skip_learn = sl; }
 
   void set_apprentice_reward() override
   {
@@ -98,31 +98,31 @@ struct cb_joined_event : public typed_joined_event
   {
     if (interaction_data.actions.empty())
     {
-      logger.out_warn("missing actions for event [{}]", interaction_data.eventId);
+      logger.out_warn("missing actions for event [{}]", interaction_data.event_id);
       return false;
     }
 
     if (interaction_data.probabilities.empty())
     {
-      logger.out_warn("missing probabilities for event [{}]", interaction_data.eventId);
+      logger.out_warn("missing probabilities for event [{}]", interaction_data.event_id);
       return false;
     }
 
     if (std::any_of(interaction_data.probabilities.begin(), interaction_data.probabilities.end(),
             [](float p) { return std::isnan(p); }))
-    { logger.out_warn("distribution for event [{}] contains invalid probabilities", interaction_data.eventId); }
+    { logger.out_warn("distribution for event [{}] contains invalid probabilities", interaction_data.event_id); }
 
     int index = interaction_data.actions[0];
     auto action = interaction_data.actions[0];
     auto probability = interaction_data.probabilities[0];
-    if (interaction_data.probabilityOfDrop >= 1.f || interaction_data.probabilityOfDrop < 0)
+    if (interaction_data.probability_of_drop >= 1.f || interaction_data.probability_of_drop < 0)
     {
-      logger.out_warn("Probability of drop should be within [0, 1): [{}]", interaction_data.eventId);
+      logger.out_warn("Probability of drop should be within [0, 1): [{}]", interaction_data.event_id);
       return false;
     }
 
     examples[index]->l.cb.costs.push_back({-1.f * reward, action, probability});
-    auto weight = 1.f / (1.f - interaction_data.probabilityOfDrop);
+    auto weight = 1.f / (1.f - interaction_data.probability_of_drop);
 
     for (auto* e : examples) { e->l.cb.weight = weight; }
 
@@ -148,10 +148,10 @@ struct cb_joined_event : public typed_joined_event
   {
     if (metrics != nullptr)
     {
-      if (interaction_data.actions.empty()) { metrics->NumberOfEventsZeroActions++; }
+      if (interaction_data.actions.empty()) { metrics->number_of_events_zero_actions++; }
       else if (interaction_data.actions[0] == CB_BASELINE_ACTION)
       {
-        metrics->DsjsonSumCostOriginalBaseline += -1.f * original_reward;
+        metrics->dsjson_sum_cost_original_baseline += -1.f * original_reward;
       }
     }
   }
@@ -212,7 +212,7 @@ struct ccb_joined_event : public typed_joined_event
               logger.out_warn(
                   "actions and probabilities for event [{}] don't have the "
                   "same size. Actions [{}], probabilities [{}]",
-                  slot_data.eventId, slot_data.actions.size(), slot_data.probabilities.size());
+                  slot_data.event_id, slot_data.actions.size(), slot_data.probabilities.size());
               continue;
             }
 
@@ -331,9 +331,9 @@ struct slates_joined_event : public typed_joined_event
       ex->l.slates.labeled = true;
       ex->l.slates.weight = weight;
 
-      if (ex->l.slates.type == VW::slates::example_type::shared) { ex->l.slates.cost = -1.f * reward; }
+      if (ex->l.slates.type == VW::slates::example_type::SHARED) { ex->l.slates.cost = -1.f * reward; }
 
-      if (ex->l.slates.type == VW::slates::example_type::slot)
+      if (ex->l.slates.type == VW::slates::example_type::SLOT)
       {
         auto& slot_label = ex->l.slates;
         if (multi_slot_interaction.interaction_data.size() > slot_index)
@@ -346,7 +346,7 @@ struct slates_joined_event : public typed_joined_event
               logger.out_warn(
                   "actions and probabilities for event [{}] don't have the "
                   "same size. Actions [{}], probabilities [{}]",
-                  slot_data.eventId, slot_data.actions.size(), slot_data.probabilities.size());
+                  slot_data.event_id, slot_data.actions.size(), slot_data.probabilities.size());
               continue;
             }
 
@@ -388,27 +388,27 @@ struct slates_joined_event : public typed_joined_event
   float get_sum_original_reward() const override { return original_reward; }
 };  // slates_joined_event
 
-struct DecisionServiceInteractionCats
+struct decision_service_interaction_cats
 {
-  std::string eventId;
+  std::string event_id;
   std::string timestamp;
   float action;
   float pdf_value;
-  float probabilityOfDrop = 0.f;
-  bool skipLearn{false};
+  float probability_of_drop = 0.f;
+  bool skip_learn{false};
 };
 
 struct ca_joined_event : public typed_joined_event
 {
-  DecisionServiceInteractionCats interaction_data;
+  decision_service_interaction_cats interaction_data;
   float reward = 0.0f;
   float original_reward = 0.0f;
 
   ~ca_joined_event() override = default;
 
-  bool is_skip_learn() const override { return interaction_data.skipLearn; }
+  bool is_skip_learn() const override { return interaction_data.skip_learn; }
 
-  void set_skip_learn(bool sl) override { interaction_data.skipLearn = sl; }
+  void set_skip_learn(bool sl) override { interaction_data.skip_learn = sl; }
 
   void set_apprentice_reward() override
   {
@@ -424,20 +424,20 @@ struct ca_joined_event : public typed_joined_event
   {
     if (std::isnan(interaction_data.action))
     {
-      logger.out_warn("missing action for event [{}]", interaction_data.eventId);
+      logger.out_warn("missing action for event [{}]", interaction_data.event_id);
       return false;
     }
 
     if (std::isnan(interaction_data.pdf_value))
     {
-      logger.out_warn("missing pdf_value for event [{}]", interaction_data.eventId);
+      logger.out_warn("missing pdf_value for event [{}]", interaction_data.event_id);
       return false;
     }
 
     if (examples.size() != 1)
     {
       logger.out_warn(
-          "example size must be 1, instead got [{}] for event [{}]", examples.size(), interaction_data.eventId);
+          "example size must be 1, instead got [{}] for event [{}]", examples.size(), interaction_data.event_id);
       return false;
     }
 
@@ -464,7 +464,7 @@ struct ca_joined_event : public typed_joined_event
 
   void calculate_metrics(dsjson_metrics* metrics) override
   {
-    if ((metrics != nullptr) && std::isnan(interaction_data.action)) { metrics->NumberOfEventsZeroActions++; }
+    if ((metrics != nullptr) && std::isnan(interaction_data.action)) { metrics->number_of_events_zero_actions++; }
   }
 
   float get_sum_original_reward() const override { return original_reward; }

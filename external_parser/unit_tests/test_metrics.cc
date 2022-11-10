@@ -4,6 +4,7 @@
 #include "rapidjson/document.h"
 #include "test_common.h"
 #include "vw/config/options_cli.h"
+#include "vw/core/learner.h"
 #include "vw/core/parse_primitives.h"
 #include "vw/io/logger.h"
 

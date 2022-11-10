@@ -9,9 +9,8 @@
 #include "utils.h"
 #include "vw/io/logger.h"
 
-#include <limits.h>
-#include <time.h>
-
+#include <climits>
+#include <ctime>
 #include <map>
 #include <queue>
 #include <stack>
@@ -21,6 +20,7 @@
 #include "vw/core/example.h"
 #include "vw/core/parse_example_json.h"
 #include "vw/core/parser.h"
+#include "vw/core/scope_exit.h"
 #include "vw/core/v_array.h"
 #include "vw/io/logger.h"
 
@@ -241,13 +241,13 @@ joined_event::multistep_joined_event multistep_example_joiner::process_interacti
 
   auto cb_data = VW::make_unique<joined_event::cb_joined_event>();
 
-  cb_data->interaction_data.eventId = event.event_id()->str();
+  cb_data->interaction_data.event_id = event.event_id()->str();
   cb_data->interaction_data.actions = {
       event.action_ids()->data(), event.action_ids()->data() + event.action_ids()->size()};
   cb_data->interaction_data.probabilities = {
       event.probabilities()->data(), event.probabilities()->data() + event.probabilities()->size()};
-  cb_data->interaction_data.probabilityOfDrop = 1.f - metadata.pass_probability();
-  cb_data->interaction_data.skipLearn = event.deferred_action();
+  cb_data->interaction_data.probability_of_drop = 1.f - metadata.pass_probability();
+  cb_data->interaction_data.skip_learn = event.deferred_action();
 
   std::string line_vec(reinterpret_cast<char const*>(event.context()->data()), event.context()->size());
 

@@ -7,6 +7,7 @@
 #include "parse_example_binary.h"
 #include "parse_example_converter.h"
 #include "utils.h"
+#include "vw/core/metric_sink.h"
 #include "vw/core/parse_args.h"
 #include "vw/io/logger.h"
 
@@ -81,7 +82,7 @@ std::unique_ptr<parser> parser::get_external_parser(VW::workspace* all, const pa
     {
       const auto& infile_path = all->data_filename;
       const auto& infile_name = infile_path.substr(0, infile_path.find_last_of('.'));
-      const auto& infile_extension = infile_path.substr(infile_path.find_last_of(".") + 1);
+      const auto& infile_extension = infile_path.substr(infile_path.find_last_of('.') + 1);
 
       if (infile_extension == "dsjson")
       {
