@@ -195,13 +195,13 @@ pplx::task<http_response> http_transport_client<TAuthorization>::http_request_ta
       static int const LINEAR_DELAY_MS_PER_FAILURE = 2000;
       int delay_ms = (1 + try_count) * LINEAR_DELAY_MS_PER_FAILURE;
 
-      TRACE_ERROR(_trace, u::concat("HTTP request failed with ", response_code, "retrying in ", delay_ms, "ms..."));      
+      TRACE_ERROR(_trace, u::concat("HTTP request failed with ", response_code, ", retrying in ", delay_ms, "ms..."));      
 
       concurrency::wait(delay_ms);
     }
     else
     {
-      TRACE_ERROR(_trace, u::concat("HTTP request failed with ", response_code, "retrying..."));
+      TRACE_ERROR(_trace, u::concat("HTTP request failed with ", response_code, ", retrying..."));
     }
 
     // return a new task which will resubmit the original request
