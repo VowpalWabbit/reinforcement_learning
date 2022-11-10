@@ -85,7 +85,7 @@ VW::example& safe_vw::get_or_create_example_f(void* vw) { return *(((safe_vw*)vw
 
 void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& actions, std::vector<float>& scores)
 {
-  DecisionServiceInteraction interaction;
+  VW::details::decision_service_interaction interaction;
 
   VW::multi_ex examples;
   examples.push_back(get_or_create_example());
