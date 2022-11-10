@@ -123,35 +123,7 @@ http_transport_client<TAuthorization>::http_request_task::http_request_task(i_ht
 
 template <typename TAuthorization>
 pplx::task<web::http::status_code> http_transport_client<TAuthorization>::http_request_task::send_request()
-{  
-  auto playground = concurrency::create_task(
-  []() {
-    return 1;
-  });
-  auto followup = playground.then(
-  [](int arg) {
-    return arg + 1;
-  });
-  auto followup2 = followup.then(
-  [](int arg) {
-    return arg + 1;
-  });
-  auto increment_lambda =
-    [](int arg) {
-      return arg + 1;
-    };
-  auto other_increment_lambda =
-    [](int arg) {
-      return arg + 1;
-    };
-
-  auto followup3 = followup2.then(increment_lambda);
-  auto followup4 = followup3.then(other_increment_lambda);
-
-  int result = followup4.get();
-
-
-
+{
   return send_request_with_retries(0 /* inital try */).then([this](pplx::task<http_response> response)
     {
       web::http::status_code code = status_codes::InternalError;
@@ -166,7 +138,8 @@ pplx::task<web::http::status_code> http_transport_client<TAuthorization>::http_r
       }
 
       return code;
-    });
+    }
+  );
 }
 
 
@@ -183,28 +156,37 @@ pplx::task<http_response> http_transport_client<TAuthorization>::http_request_ta
   request.set_body(stream, container_size);
 
   // lambda which examines the provided task and either 1) generates a replacement task to retry
-  // the request, or 2) passes thgenerates a task that immediately echos the argumentyields the response
-  auto retry_task_on_fail_lambda = [this, try_count](http_response response) -> pplx::task<http_response>
+  // the request, or 2) passes the provided task downstream to emit its response
+  auto retry_request_on_failure_lambda = [this, try_count](pplx::task<http_response> response_task) -> pplx::task<http_response>
   {
-    auto response_code = response.status_code();
-    bool is_200_class = (response_code >= status_codes::OK) && (response_code < status_codes::MultipleChoices);
-    if (is_200_class)
+    web::http::status_code response_code = status_codes::InternalError;
+    
+    try
     {
-      // We have succeeded, make a task which returns response
-      return concurrency::create_task([response]() { return response; });
+      response_code = response_task.get().status_code();
+    }
+    catch (const std::exception& e)
+    {
+      TRACE_ERROR(_trace, e.what());
+    }
+
+    bool success = (response_code >= status_codes::OK) && (response_code < status_codes::MultipleChoices);
+    if (success)
+    {
+      return response_task;
     }
 
     // If the response is not success class then it has failed. Retry if possible otherwise report background error.
 
     if (try_count >= _max_retries)
     {
+      // We have exhausted retry attempts, log and return the task describing the failure
       api_status status;
       auto msg = u::concat("(expected 201): Found ", response_code, ", failed after ", try_count, " retries.");
       api_status::try_update(&status, error_code::http_bad_status_code, msg.c_str());
       ERROR_CALLBACK(_error_callback, status);
 
-      // We have exhausted retry attempts, make a task which returns response
-      return concurrency::create_task([response]() { return response; });
+      return response_task;
     }
 
     if (status_codes::TooManyRequests == response_code)
@@ -222,11 +204,11 @@ pplx::task<http_response> http_transport_client<TAuthorization>::http_request_ta
       TRACE_ERROR(_trace, u::concat("HTTP request failed with ", response_code, "retrying..."));
     }
 
-    // return a task which will resubmit the original request
+    // return a new task which will resubmit the original request
     return send_request_with_retries(try_count + 1);
   };
 
-  return _client->request(request).then(retry_on_fail_lambda).then(retry_on_fail_lambda);
+  return _client->request(request).then(retry_request_on_failure_lambda);
 }
 
 template <typename TAuthorization>
