@@ -82,6 +82,7 @@ reinforcement_learning::messages::flatbuff::v2::TimeStamp from_rl_timestamp(cons
 int emit_filemagic_message(std::vector<uint8_t>& output)
 {
   // TODO consider doing this a safer way
+  // Check endianness requirement of format and make sure we get that right here.
   uint32_t filemagic = 0x42465756;
   output.reserve(output.size() + 4);
   output.insert(std::end(output), reinterpret_cast<uint8_t*>(&filemagic), reinterpret_cast<uint8_t*>(&filemagic) + 4);
@@ -92,6 +93,7 @@ int emit_regular_message(std::vector<uint8_t>& output, flatbuffers::FlatBufferBu
     flatbuffers::Offset<reinforcement_learning::messages::flatbuff::v2::JoinedPayload> joined_payload)
 {
   // TODO consider doing this a safer way
+  // Check endianness requirement of format and make sure we get that right here.
   uint32_t regular = 0xFFFFFFFF;
   output.reserve(output.size() + 4);
   output.insert(std::end(output), reinterpret_cast<uint8_t*>(&regular), reinterpret_cast<uint8_t*>(&regular) + 4);
