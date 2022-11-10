@@ -34,7 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: |
-          git submodule update --init ext_libs/vcpkg ext_libs/vowpal_wabbit ext_libs/zstd
+          git submodule update --init ext_libs/vcpkg ext_libs/vowpal_wabbit ext_libs/vowpal_wabbit/eigen ext_libs/zstd
       - name: Setup MSVC Developer Command Prompt
         if: ${{ startsWith(matrix.config.os, 'windows') }}
         uses: ilammy/msvc-dev-cmd@v1
