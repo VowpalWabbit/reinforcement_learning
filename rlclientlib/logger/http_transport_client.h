@@ -15,6 +15,7 @@
 
 #include <cpprest/http_headers.h>
 #include <pplx/pplxtasks.h>
+#include <agents.h>
 
 #include <memory>
 #include <sstream>
@@ -66,7 +67,13 @@ private:
     int join();
 
   private:
-    pplx::task<web::http::status_code> send_request(size_t try_count);
+    // repeat request until success or _max_retries attempted
+    // returns the http::status_code of the final attempt.
+    pplx::task<web::http::status_code> send_request();
+
+    // repeat request until success or _max_retries attempted
+    // returns the http_reponse of the final attempt.
+    pplx::task<http_response> send_request_with_retries(size_t try_count);
 
     i_http_client* _client;
     http_headers _headers;
@@ -111,11 +118,60 @@ http_transport_client<TAuthorization>::http_request_task::http_request_task(i_ht
     , _error_callback(error_callback)
     , _trace(trace)
 {
-  _task = send_request(0 /* inital try */);
+  _task = send_request();
 }
 
 template <typename TAuthorization>
-pplx::task<web::http::status_code> http_transport_client<TAuthorization>::http_request_task::send_request(
+pplx::task<web::http::status_code> http_transport_client<TAuthorization>::http_request_task::send_request()
+{  
+  auto playground = concurrency::create_task(
+  []() {
+    return 1;
+  });
+  auto followup = playground.then(
+  [](int arg) {
+    return arg + 1;
+  });
+  auto followup2 = followup.then(
+  [](int arg) {
+    return arg + 1;
+  });
+  auto increment_lambda =
+    [](int arg) {
+      return arg + 1;
+    };
+  auto other_increment_lambda =
+    [](int arg) {
+      return arg + 1;
+    };
+
+  auto followup3 = followup2.then(increment_lambda);
+  auto followup4 = followup3.then(other_increment_lambda);
+
+  int result = followup4.get();
+
+
+
+  return send_request_with_retries(0 /* inital try */).then([this](pplx::task<http_response> response)
+    {
+      web::http::status_code code = status_codes::InternalError;
+
+      try
+      {
+        code = response.get().status_code();
+      }
+      catch (const std::exception& e)
+      {
+        TRACE_ERROR(_trace, e.what());
+      }
+
+      return code;
+    });
+}
+
+
+template <typename TAuthorization>
+pplx::task<http_response> http_transport_client<TAuthorization>::http_request_task::send_request_with_retries(
     size_t try_count)
 {
   http_request request(methods::POST);
@@ -126,45 +182,51 @@ pplx::task<web::http::status_code> http_transport_client<TAuthorization>::http_r
   const auto stream = concurrency::streams::bytestream::open_istream(container);
   request.set_body(stream, container_size);
 
-  return _client->request(request).then([this, try_count](pplx::task<http_response> response) {
-    web::http::status_code code = status_codes::InternalError;
-    api_status status;
-
-    try
+  // lambda which examines the provided task and either 1) generates a replacement task to retry
+  // the request, or 2) passes thgenerates a task that immediately echos the argumentyields the response
+  auto retry_task_on_fail_lambda = [this, try_count](http_response response) -> pplx::task<http_response>
+  {
+    auto response_code = response.status_code();
+    bool is_200_class = (response_code >= status_codes::OK) && (response_code < status_codes::MultipleChoices);
+    if (is_200_class)
     {
-      code = response.get().status_code();
-    }
-    catch (const std::exception& e)
-    {
-      TRACE_ERROR(_trace, e.what());
-    }
-
-    // If the response is not the expected code then it has failed. Retry if possible otherwise report background
-    // error.
-    if (code != status_codes::Created && code != status_codes::NoContent)
-    {
-      // Stop condition of recurison.
-      if (try_count < _max_retries)
-      {
-        TRACE_ERROR(_trace, "HTTP request failed, retrying...");
-
-        // Yes, recursively send another request inside this one. If a subsequent request returns success we are
-        // good, otherwise the failure will propagate.
-        return send_request(try_count + 1).get();
-      }
-      else
-      {
-        auto msg = u::concat("(expected 201): Found ", code, ", failed after ", try_count, " retries.");
-        api_status::try_update(&status, error_code::http_bad_status_code, msg.c_str());
-        ERROR_CALLBACK(_error_callback, status);
-
-        return code;
-      }
+      // We have succeeded, make a task which returns response
+      return concurrency::create_task([response]() { return response; });
     }
 
-    // We have succeeded, return success.
-    return code;
-  });
+    // If the response is not success class then it has failed. Retry if possible otherwise report background error.
+
+    if (try_count >= _max_retries)
+    {
+      api_status status;
+      auto msg = u::concat("(expected 201): Found ", response_code, ", failed after ", try_count, " retries.");
+      api_status::try_update(&status, error_code::http_bad_status_code, msg.c_str());
+      ERROR_CALLBACK(_error_callback, status);
+
+      // We have exhausted retry attempts, make a task which returns response
+      return concurrency::create_task([response]() { return response; });
+    }
+
+    if (status_codes::TooManyRequests == response_code)
+    {
+      // if server says it's too busy, delay retry for a while to give it time to recover
+      static int const LINEAR_DELAY_MS_PER_FAILURE = 2000;
+      int delay_ms = (1 + try_count) * LINEAR_DELAY_MS_PER_FAILURE;
+
+      TRACE_ERROR(_trace, u::concat("HTTP request failed with ", response_code, "retrying in ", delay_ms, "ms..."));      
+
+      concurrency::wait(delay_ms);
+    }
+    else
+    {
+      TRACE_ERROR(_trace, u::concat("HTTP request failed with ", response_code, "retrying..."));
+    }
+
+    // return a task which will resubmit the original request
+    return send_request_with_retries(try_count + 1);
+  };
+
+  return _client->request(request).then(retry_on_fail_lambda).then(retry_on_fail_lambda);
 }
 
 template <typename TAuthorization>
