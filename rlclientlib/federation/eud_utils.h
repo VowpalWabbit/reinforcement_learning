@@ -6,7 +6,6 @@
 #include "future_compat.h"
 #include "generated/v2/Event_generated.h"
 #include "generated/v2/Metadata_generated.h"
-#include "api_status.h"
 #include "joined_log_provider.h"
 #include "logger/message_type.h"
 #include "logger/preamble.h"
@@ -39,12 +38,14 @@ inline int parse_int(reinforcement_learning::string_view s, int& out, reinforcem
   return 0;
 }
 
-
-inline int parse_eud(reinforcement_learning::string_view eud_str, std::chrono::seconds& out, reinforcement_learning::api_status* status)
+inline int parse_eud(
+    reinforcement_learning::string_view eud_str, std::chrono::seconds& out, reinforcement_learning::api_status* status)
 {
   std::vector<std::string> components;
   VW::tokenize(':', eud_str, components);
-  if (components.size() != 3 || std::any_of(components.begin(), components.end(), [](const std::string& component){return component.empty() || !std::all_of(component.begin(), component.end(), ::isdigit);}))
+  if (components.size() != 3 || std::any_of(components.begin(), components.end(), [](const std::string& component) {
+        return component.empty() || !std::all_of(component.begin(), component.end(), ::isdigit);
+      }))
   { RETURN_ERROR_ARG(nullptr, status, invalid_argument, "invalid format of eudduration"); }
 
   int hours{};

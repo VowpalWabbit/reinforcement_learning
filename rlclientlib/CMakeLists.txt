@@ -56,6 +56,7 @@ set(PROJECT_SOURCES
   error_callback_fn.cc
   factory_resolver.cc
   federation/local_client.cc
+  federation/sender_joined_log_provider.cc
   generic_event.cc
   learning_mode.cc
   live_model.cc
@@ -145,6 +146,7 @@ set(PROJECT_PRIVATE_HEADERS
   federation/federated_client.h
   federation/joined_log_provider.h
   federation/local_client.h
+  federation/sender_joined_log_provider.h
   generic_event.h
   live_model_impl.h
   logger/async_batcher.h

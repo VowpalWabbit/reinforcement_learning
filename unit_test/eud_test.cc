@@ -26,9 +26,9 @@ BOOST_AUTO_TEST_CASE(parse_eud_tests)
   BOOST_CHECK_EQUAL(parse_eud("1:0:0", duration, nullptr), error_code::success);
   BOOST_CHECK(duration == std::chrono::hours(1));
   BOOST_CHECK_EQUAL(parse_eud("1:25:0", duration, nullptr), error_code::success);
-  BOOST_CHECK(duration == std::chrono::hours(1)+ std::chrono::minutes(25));
+  BOOST_CHECK(duration == std::chrono::hours(1) + std::chrono::minutes(25));
   BOOST_CHECK_EQUAL(parse_eud("1:25:1", duration, nullptr), error_code::success);
-  BOOST_CHECK(duration == std::chrono::hours(1)+ std::chrono::minutes(25) + std::chrono::seconds(1));
+  BOOST_CHECK(duration == std::chrono::hours(1) + std::chrono::minutes(25) + std::chrono::seconds(1));
   BOOST_CHECK_EQUAL(parse_eud("83:25:1", duration, nullptr), error_code::success);
-  BOOST_CHECK(duration == std::chrono::hours(83)+ std::chrono::minutes(25) + std::chrono::seconds(1));
+  BOOST_CHECK(duration == std::chrono::hours(83) + std::chrono::minutes(25) + std::chrono::seconds(1));
 }
