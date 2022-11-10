@@ -160,6 +160,9 @@ int sender_joined_log_provider::invoke_join(std::unique_ptr<VW::io::reader>& bat
         }
         _observations.erase(event_id);
       }
+
+      auto joined_payload = reinforcement_learning::messages::flatbuff::v2::CreateJoinedPayloadDirect(fbb, &events);
+      emit_regular_message(result, fbb, joined_payload);
       _interactions.erase(it++);
     }
     else
@@ -168,9 +171,6 @@ int sender_joined_log_provider::invoke_join(std::unique_ptr<VW::io::reader>& bat
       // break;
       ++it;
     }
-
-    auto joined_payload = reinforcement_learning::messages::flatbuff::v2::CreateJoinedPayloadDirect(fbb, &events);
-    emit_regular_message(result, fbb, joined_payload);
   }
 
   batch.reset(new buffer_reader(std::move(result)));
