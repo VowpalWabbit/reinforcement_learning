@@ -15,6 +15,7 @@
 
 #include <cpprest/http_headers.h>
 #include <pplx/pplxtasks.h>
+#include <agents.h>
 
 #include <memory>
 #include <sstream>
