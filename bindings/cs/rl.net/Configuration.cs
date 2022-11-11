@@ -14,13 +14,13 @@ namespace Rl.Net {
         // The publics in this class are just a verbose, but jittably-efficient way of enabling overriding a native invocation
         internal static partial class NativeMethods
         {
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern IntPtr CreateConfig();
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern void DeleteConfig(IntPtr config);
 
-            [DllImport("rl.net.native.dll", EntryPoint = "LoadConfigurationFromJson")]
+            [DllImport("rlnetnative", EntryPoint = "LoadConfigurationFromJson")]
             private static extern int LoadConfigurationFromJsonNative(int jsonLength, IntPtr json, IntPtr config, IntPtr apiStatus);
 
             internal static Func<int, IntPtr, IntPtr, IntPtr, int> LoadConfigurationFromJsonOverride { get; set; }
@@ -35,7 +35,7 @@ namespace Rl.Net {
                 return LoadConfigurationFromJsonNative(jsonLength, json, config, apiStatus);
             }
 
-            [DllImport("rl.net.native.dll", EntryPoint = "ConfigurationSet")]
+            [DllImport("rlnetnative", EntryPoint = "ConfigurationSet")]
             private static extern void ConfigurationSetNative(IntPtr config, IntPtr name, IntPtr value);
 
             internal static Action<IntPtr, IntPtr, IntPtr> ConfigurationSetOverride { get; set; }
@@ -51,7 +51,7 @@ namespace Rl.Net {
                 ConfigurationSetNative(config, name, value);
             }
 
-            [DllImport("rl.net.native.dll", EntryPoint = "ConfigurationGet")]
+            [DllImport("rlnetnative", EntryPoint = "ConfigurationGet")]
             private static extern IntPtr ConfigurationGetNative(IntPtr config, IntPtr name, IntPtr defVal);
 
             internal static Func<IntPtr, IntPtr, IntPtr, IntPtr> ConfigurationGetOverride { get; set; }
@@ -75,7 +75,7 @@ namespace Rl.Net {
 
     public sealed class Configuration: NativeObject<Configuration>, IReadOnlyConfiguration
     {
-        
+
 
         public Configuration() : base(new New<Configuration>(NativeMethods.CreateConfig), new Delete<Configuration>(NativeMethods.DeleteConfig))
         {

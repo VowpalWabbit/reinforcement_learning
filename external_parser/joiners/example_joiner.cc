@@ -35,7 +35,7 @@ example_joiner::example_joiner(VW::workspace* vw)
 {
 }
 
-example_joiner::example_joiner(VW::workspace* vw, bool binary_to_json, std::string outfile_name)
+example_joiner::example_joiner(VW::workspace* vw, bool binary_to_json, const std::string& outfile_name)
     : i_joiner(vw->logger), _vw(vw), _reward_calculation(&reward::earliest), _binary_to_json(binary_to_json)
 {
   _outfile.open(outfile_name, std::ofstream::out);
@@ -567,22 +567,22 @@ void example_joiner::persist_metrics()
 {
   if (_vw->example_parser->metrics)
   {
-    _vw->example_parser->metrics->NumberOfSkippedEvents = _joiner_metrics.number_of_skipped_events;
+    _vw->example_parser->metrics->number_of_skipped_events = _joiner_metrics.number_of_skipped_events;
 
-    _vw->example_parser->metrics->DsjsonSumCostOriginal = _joiner_metrics.sum_cost_original;
+    _vw->example_parser->metrics->dsjson_sum_cost_original = _joiner_metrics.sum_cost_original;
 
     if (!_joiner_metrics.first_event_id.empty())
     {
-      _vw->example_parser->metrics->FirstEventId = std::move(_joiner_metrics.first_event_id);
+      _vw->example_parser->metrics->first_event_id = std::move(_joiner_metrics.first_event_id);
 
-      _vw->example_parser->metrics->FirstEventTime = std::move(
+      _vw->example_parser->metrics->first_event_time = std::move(
           date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.first_event_timestamp)));
     }
     if (!_joiner_metrics.last_event_id.empty())
     {
-      _vw->example_parser->metrics->LastEventId = std::move(_joiner_metrics.last_event_id);
+      _vw->example_parser->metrics->last_event_id = std::move(_joiner_metrics.last_event_id);
 
-      _vw->example_parser->metrics->LastEventTime = std::move(
+      _vw->example_parser->metrics->last_event_time = std::move(
           date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.last_event_timestamp)));
     }
   }

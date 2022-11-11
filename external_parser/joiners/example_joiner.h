@@ -19,7 +19,7 @@ class example_joiner : public i_joiner
 {
 public:
   example_joiner(VW::workspace* vw);  // TODO rule of 5
-  example_joiner(VW::workspace* vw, bool binary_to_json, std::string outfile_name);
+  example_joiner(VW::workspace* vw, bool binary_to_json, const std::string& outfile_name);
 
   ~example_joiner() override;
 

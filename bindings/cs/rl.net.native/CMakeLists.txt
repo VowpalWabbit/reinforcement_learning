@@ -35,20 +35,20 @@ set(rl_net_native_HEADERS
 source_group("Sources" FILES ${rl_net_native_SOURCES})
 source_group("Headers" FILES ${rl_net_native_HEADERS})
 
-add_library(rl.net.native SHARED
+add_library(rlnetnative SHARED
   ${rl_net_native_SOURCES} ${rl_net_native_HEADERS}
 )
 
 if(MSVC)
-  target_compile_options(rl.net.native PRIVATE /guard:cf)
+  target_compile_options(rlnetnative PRIVATE /guard:cf)
 endif()
 
-set_target_properties(rl.net.native PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_include_directories(rl.net.native PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(rl.net.native PUBLIC rlclientlib)
+set_target_properties(rlnetnative PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_include_directories(rlnetnative PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(rlnetnative PUBLIC rlclientlib)
 
 # Enable warnings as errors, crossplatform
-target_compile_options(rl.net.native PRIVATE
+target_compile_options(rlnetnative PRIVATE
      $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
           -Werror>
      $<$<CXX_COMPILER_ID:MSVC>:

@@ -28,11 +28,11 @@ set(RL_NET_SOURCES
 )
 
 if (rlclientlib_DOTNET_USE_MSPROJECT)
-  include_external_msproject(rl.net ${CMAKE_CURRENT_SOURCE_DIR}/rl.net.csproj rl.net.native)
+  include_external_msproject(rl.net ${CMAKE_CURRENT_SOURCE_DIR}/rl.net.csproj rlnetnative)
 else()
   add_custom_target(rl.net
-      COMMAND ${DOTNET_COMMAND} build ${CMAKE_CURRENT_SOURCE_DIR} -o $<TARGET_FILE_DIR:rl.net.native> -v m --nologo --no-dependencies /clp:NoSummary
+      COMMAND ${DOTNET_COMMAND} build ${CMAKE_CURRENT_SOURCE_DIR} -o $<TARGET_FILE_DIR:rlnetnative> -v n --nologo --no-dependencies /clp:NoSummary --configuration "$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>$<$<CONFIG:RelWithDebInfo>:Release>"
       COMMENT Building rl.net
-      DEPENDS rl.net.native
+      DEPENDS rlnetnative
       SOURCES ${RL_NET_SOURCES})
 endif()

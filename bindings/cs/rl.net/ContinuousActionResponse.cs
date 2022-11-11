@@ -12,13 +12,13 @@ namespace Rl.Net {
     {
         internal partial class NativeMethods
         {
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern IntPtr CreateContinuousActionResponse();
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern void DeleteContinuousActionResponse(IntPtr response);
 
-            [DllImport("rl.net.native.dll", EntryPoint = "GetContinuousActionEventId")]
+            [DllImport("rlnetnative", EntryPoint = "GetContinuousActionEventId")]
             private static extern IntPtr GetContinuousActionEventIdNative(IntPtr response);
 
             internal static Func<IntPtr, IntPtr> GetContinuousActionEventIdOverride { get; set; }
@@ -33,7 +33,7 @@ namespace Rl.Net {
                 return GetContinuousActionEventIdNative(response);
             }
 
-            [DllImport("rl.net.native.dll", EntryPoint = "GetContinuousActionModelId")]
+            [DllImport("rlnetnative", EntryPoint = "GetContinuousActionModelId")]
             private static extern IntPtr GetContinuousActionModelIdNative(IntPtr response);
 
             internal static Func<IntPtr, IntPtr> GetContinuousActionModelIdOverride { get; set; }
@@ -48,10 +48,10 @@ namespace Rl.Net {
                 return GetContinuousActionModelIdNative(response);
             }
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern float GetContinuousActionChosenAction(IntPtr response);
 
-            [DllImport("rl.net.native.dll")]
+            [DllImport("rlnetnative")]
             public static extern float GetContinuousActionChosenActionPdfValue(IntPtr response);
         }
     }
