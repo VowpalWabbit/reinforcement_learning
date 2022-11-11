@@ -13,14 +13,24 @@
 
 namespace reinforcement_learning
 {
-struct sender_joined_log_provider : public i_joined_log_provider
+class sender_joined_log_provider : public i_joined_log_provider
 {
+public:
   int init(const reinforcement_learning::utility::configuration& config, reinforcement_learning::api_status* status);
 
+  // Perform EUD joining on events that have previously been added
+  // Output is a binary joined log that can be consumed by the binary parser
   RL_ATTR(nodiscard)
   int invoke_join(std::unique_ptr<VW::io::reader>& batch, api_status* status = nullptr) override;
 
-  int v_send(const i_sender::buffer& data, reinforcement_learning::api_status* status);
+  // Add an event batch to the joiner
+  // Input should consist of a preamble and an EventBatch flatbuffer
+  RL_ATTR(nodiscard)
+  int add_events(const i_sender::buffer& data, reinforcement_learning::api_status* status);
+
+  // Return an object of type i_sender that will forward data to add_events() of this object
+  // Each call returns a new output, and the caller of this function takes ownership of it
+  std::unique_ptr<i_sender> get_sender_proxy();
 
 private:
   reinforcement_learning::i_trace* _trace_logger = nullptr;
@@ -30,24 +40,4 @@ private:
   std::mutex _mutex;
 };
 
-struct sender_joined_log_provider_proxy : public reinforcement_learning::i_sender
-{
-  explicit sender_joined_log_provider_proxy(sender_joined_log_provider_proxy* sender) : _sender(sender) {}
-  ~sender_joined_log_provider_proxy() override = default;
-
-  int init(
-      const reinforcement_learning::utility::configuration& config, reinforcement_learning::api_status* status) override
-  {
-    return error_code::success;
-  }
-
-protected:
-  int v_send(const buffer& data, reinforcement_learning::api_status* status) override
-  {
-    return _sender->v_send(data, status);
-  }
-
-private:
-  sender_joined_log_provider_proxy* _sender;
-};
 }  // namespace reinforcement_learning

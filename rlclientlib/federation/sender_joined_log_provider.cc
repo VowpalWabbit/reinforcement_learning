@@ -35,6 +35,7 @@ using namespace reinforcement_learning;
 
 namespace
 {
+// A class of type VW::io::reader that takes ownership of a binary buffer
 class buffer_reader : public VW::io::reader
 {
 public:
@@ -58,6 +59,22 @@ public:
 private:
   std::vector<uint8_t> _buffer;
   uint8_t* _read_head;
+};
+
+// A class of type i_sender that forwards data to a sender_joined_log_provider object
+class sender_joined_log_provider_proxy : public i_sender
+{
+public:
+  explicit sender_joined_log_provider_proxy(sender_joined_log_provider* sender) : _sender(sender) {}
+  ~sender_joined_log_provider_proxy() override = default;
+
+  int init(const utility::configuration& config, api_status* status) override { return error_code::success; }
+
+protected:
+  int v_send(const buffer& data, api_status* status) override { return _sender->add_events(data, status); }
+
+private:
+  sender_joined_log_provider* _sender;
 };
 
 timestamp to_rl_timestamp(const reinforcement_learning::messages::flatbuff::v2::TimeStamp& ts)
@@ -180,7 +197,7 @@ int sender_joined_log_provider::invoke_join(std::unique_ptr<VW::io::reader>& bat
   return 0;
 }
 
-int sender_joined_log_provider::v_send(const i_sender::buffer& data, reinforcement_learning::api_status* status)
+int sender_joined_log_provider::add_events(const i_sender::buffer& data, reinforcement_learning::api_status* status)
 {
   std::lock_guard<std::mutex> lock(_mutex);
 
@@ -219,6 +236,11 @@ int sender_joined_log_provider::v_send(const i_sender::buffer& data, reinforceme
     { _observations[event_id].emplace_back(std::make_tuple(event_timestamp, std::move(payload))); }
   }
   return reinforcement_learning::error_code::success;
+}
+
+std::unique_ptr<i_sender> sender_joined_log_provider::get_sender_proxy()
+{
+  return std::unique_ptr<i_sender>(new sender_joined_log_provider_proxy(this));
 }
 
 }  // namespace reinforcement_learning
