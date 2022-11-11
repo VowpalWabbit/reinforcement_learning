@@ -18,6 +18,8 @@
 
 #include <memory>
 #include <sstream>
+#include <chrono>
+#include <atomic>
 
 using namespace web::http;
 using namespace std::chrono;
@@ -39,7 +41,8 @@ public:
 
   // Takes the ownership of the i_http_client and delete it at the end of lifetime
   http_transport_client(
-      i_http_client* client, size_t tasks_count, size_t MAX_RETRIES, i_trace* trace, error_callback_fn* _error_cb);
+      i_http_client* client, size_t tasks_count, size_t MAX_RETRIES, std::chrono::milliseconds max_retry_duration,
+      i_trace * trace, error_callback_fn* _error_cb);
   ~http_transport_client();
 
 protected:
@@ -51,8 +54,11 @@ private:
   public:
     using buffer = std::shared_ptr<utility::data_buffer>;
     http_request_task() = default;
-    http_request_task(i_http_client* client, http_headers headers, const buffer& data,
-        size_t max_retries = 1,  // If MAX_RETRIES is set to 1, only the initial request will be attempted.
+    http_request_task(
+        i_http_client* client, http_headers headers, const buffer& data,
+        size_t max_retries = 0,  // If MAX_RETRIES is set to 0, only the initial request will be attempted.
+        std::chrono::milliseconds max_retry_duration = std::chrono::milliseconds::max(),  // retries will halt before max_retries attempts if this time elapses
+                                               // first
         error_callback_fn* error_callback = nullptr, i_trace* trace = nullptr);
 
     // The constructor kicks off an async request which captures the this variable. If this object is moved then the
@@ -62,8 +68,13 @@ private:
     http_request_task(const http_request_task&) = delete;
     http_request_task& operator=(const http_request_task&) = delete;
 
+    enum class JoinMode
+    {
+      STOP_RETRIES,
+      COMPLETE_RETRIES
+    };
     // Return error_code
-    int join();
+    int join(JoinMode join_mode);
 
   private:
     // repeat request until success or _max_retries attempted
@@ -80,14 +91,16 @@ private:
 
     pplx::task<web::http::status_code> _task;
 
-    size_t _max_retries = 1;
+    std::chrono::time_point<std::chrono::system_clock> _start_time = std::chrono::system_clock::now();
+    size_t _max_retry_count = 1;    
+    std::atomic<std::chrono::milliseconds> _max_retry_duration = std::chrono::milliseconds::max();
 
     error_callback_fn* _error_callback;
     i_trace* _trace;
   };
 
 private:
-  int pop_task(api_status* status);
+  int pop_task(api_status* status, typename http_request_task::JoinMode join_mode);
 
   // cannot be copied or assigned
   http_transport_client(const http_transport_client&) = delete;
@@ -102,18 +115,23 @@ private:
   std::mutex _mutex;
   moving_queue<std::unique_ptr<http_request_task>> _tasks;
   const size_t _max_tasks_count;
-  const size_t _max_retries;
+  const size_t _max_retry_count;
+  const std::chrono::milliseconds _max_retry_duration;
   i_trace* _trace;
   error_callback_fn* _error_callback;
 };
 
 template <typename TAuthorization>
 http_transport_client<TAuthorization>::http_request_task::http_request_task(i_http_client* client, http_headers headers,
-    const buffer& post_data, size_t max_retries, error_callback_fn* error_callback, i_trace* trace)
+    const buffer& post_data, size_t max_retries, std::chrono::milliseconds max_retry_duration,
+    error_callback_fn* error_callback,
+    i_trace* trace)
     : _client(client)
     , _headers(headers)
     , _post_data(post_data)
-    , _max_retries(max_retries)
+    , _start_time(std::chrono::system_clock::now())
+    , _max_retry_count(max_retries)
+    , _max_retry_duration(max_retry_duration)
     , _error_callback(error_callback)
     , _trace(trace)
 {
@@ -176,32 +194,27 @@ pplx::task<http_response> http_transport_client<TAuthorization>::http_request_ta
     }
 
     // If the response is not success class then it has failed. Retry if possible otherwise report background error.
-
-    if (try_count >= _max_retries)
+    auto deadline = _start_time + _max_retry_duration.load();
+    if ((try_count >= _max_retry_count) || (std::chrono::system_clock::now() > deadline))
     {
       // We have exhausted retry attempts, log and return the task describing the failure
+
+      // actual runtime might not equal _max_retry_duration if _max_retry_duration was modified elsewhere
+      auto actual_runtime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - _start_time);
+
       api_status status;
-      auto msg = u::concat("(expected 201): Found ", response_code, ", failed after ", try_count, " retries.");
+      auto msg = u::concat("(expected 201): Found ", response_code, ", failed after ", try_count, " retries over ", actual_runtime.count(), "ms.");
       api_status::try_update(&status, error_code::http_bad_status_code, msg.c_str());
       ERROR_CALLBACK(_error_callback, status);
 
       return response_task;
     }
 
-    if (status_codes::TooManyRequests == response_code)
-    {
-      // if server says it's too busy, delay retry for a while to give it time to recover
-      static int const LINEAR_DELAY_MS_PER_FAILURE = 2000;
-      int delay_ms = (1 + try_count) * LINEAR_DELAY_MS_PER_FAILURE;
+    static const std::chrono::milliseconds RETRY_DELAY = std::chrono::milliseconds(1000);
+    TRACE_ERROR(_trace, u::concat("HTTP request failed with ", response_code, ", retrying in ", RETRY_DELAY.count(), "ms..."));      
 
-      TRACE_ERROR(_trace, u::concat("HTTP request failed with ", response_code, ", retrying in ", delay_ms, "ms..."));      
-
-      pplx::wait(delay_ms);
-    }
-    else
-    {
-      TRACE_ERROR(_trace, u::concat("HTTP request failed with ", response_code, ", retrying..."));
-    }
+    // using sleep_for is regrettable because it blocks this thread, but pplx doesn't implement better yield options.
+    std::this_thread::sleep_for(RETRY_DELAY);    
 
     // return a new task which will resubmit the original request
     return send_request_with_retries(try_count + 1);
@@ -211,8 +224,12 @@ pplx::task<http_response> http_transport_client<TAuthorization>::http_request_ta
 }
 
 template <typename TAuthorization>
-int http_transport_client<TAuthorization>::http_request_task::join()
+int http_transport_client<TAuthorization>::http_request_task::join(JoinMode join_mode)
 {
+  if (JoinMode::STOP_RETRIES == join_mode) {
+    _max_retry_duration.store(std::chrono::milliseconds::min());
+  }
+  
   _task.get();
 
   // The task may have failed but was reported with the callback. This function's primary purpose
@@ -228,7 +245,7 @@ int http_transport_client<TAuthorization>::init(const utility::configuration& co
 }
 
 template <typename TAuthorization>
-int http_transport_client<TAuthorization>::pop_task(api_status* status)
+int http_transport_client<TAuthorization>::pop_task(api_status* status, typename http_request_task::JoinMode join_mode)
 {
   // This function must be under a lock as there is a delay between popping from the queue and joining the task, but it
   // should essentially be atomic.
@@ -240,7 +257,7 @@ int http_transport_client<TAuthorization>::pop_task(api_status* status)
   try
   {
     // This will block if the task is not complete yet.
-    RETURN_IF_FAIL(oldest->join());
+    RETURN_IF_FAIL(oldest->join(join_mode));
   }
   catch (...)
   {
@@ -260,10 +277,10 @@ int http_transport_client<TAuthorization>::v_send(const buffer& post_data, api_s
   try
   {
     // Before creating the task, ensure that it is allowed to be created.
-    if (_tasks.size() >= _max_tasks_count) { RETURN_IF_FAIL(pop_task(status)); }
+    if (_tasks.size() >= _max_tasks_count) { RETURN_IF_FAIL(pop_task(status,  http_request_task::JoinMode::COMPLETE_RETRIES)); }
 
     std::unique_ptr<http_request_task> request_task(
-        new http_request_task(_client.get(), headers, post_data, _max_retries, _error_callback, _trace));
+        new http_request_task(_client.get(), headers, post_data, _max_retry_count, _max_retry_duration, _error_callback, _trace));
     _tasks.push(std::move(request_task));
   }
   catch (const std::exception& e)
@@ -275,10 +292,11 @@ int http_transport_client<TAuthorization>::v_send(const buffer& post_data, api_s
 
 template <typename TAuthorization>
 http_transport_client<TAuthorization>::http_transport_client(i_http_client* client, size_t max_tasks_count,
-    size_t max_retries, i_trace* trace, error_callback_fn* error_callback)
+    size_t max_retries, std::chrono::milliseconds max_retry_duration, i_trace* trace, error_callback_fn* error_callback)
     : _client(client)
     , _max_tasks_count(max_tasks_count)
-    , _max_retries(max_retries)
+    , _max_retry_count(max_retries)
+    , _max_retry_duration(max_retry_duration)
     , _trace(trace)
     , _error_callback(error_callback)
 {
@@ -289,7 +307,7 @@ http_transport_client<TAuthorization>::~http_transport_client()
 {
   while (_tasks.size() != 0)
   {
-    auto result = pop_task(nullptr);
+    auto result = pop_task(nullptr, http_request_task::JoinMode::STOP_RETRIES);
     if (!result)
     {
       auto message =
