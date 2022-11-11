@@ -10,7 +10,7 @@ namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 const int DEFAULT_REWARD = -1000;
 const int DEFAULT_REWARD_APPRENTICE = 0;
 
-std::vector<float> get_float_rewards(std::string int_file_name, std::string obs_file_name,
+std::vector<float> get_float_rewards(const std::string& int_file_name, const std::string& obs_file_name,
     v2::RewardFunctionType reward_function_type, v2::LearningModeType learning_mode = v2::LearningModeType_Online,
     v2::ProblemType problem_type = v2::ProblemType_CB, float default_reward = DEFAULT_REWARD)
 {
@@ -107,7 +107,7 @@ std::vector<float> get_float_rewards(std::string int_file_name, std::string obs_
 
       for (auto* example : examples)
       {
-        if (example->l.slates.type == VW::slates::example_type::shared)
+        if (example->l.slates.type == VW::slates::example_type::SHARED)
         { rewards.push_back(-1.f * example->l.slates.cost); }
       }
     }

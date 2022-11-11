@@ -23,7 +23,7 @@ void clear_examples(VW::multi_ex& examples, VW::workspace* vw);
 
 void set_buffer_as_vw_input(const std::vector<char>& buffer, VW::workspace* vw);
 
-std::vector<char> read_file(std::string file_name);
+std::vector<char> read_file(const std::string& file_name);
 
 std::string get_test_files_location();
 
