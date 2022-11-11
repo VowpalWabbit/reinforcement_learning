@@ -28,7 +28,9 @@ set(RL_FLAT_BUFFER_FILES_V2
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Metadata.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiSlotEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiStepEvent.fbs"
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/OutcomeEvent.fbs")
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/OutcomeEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/ProblemType.fbs"
+)
 
 add_flatbuffer_schema(
   TARGET fbgenerator_v1
@@ -110,6 +112,7 @@ if(RL_BUILD_FEDERATION)
     federation/event_cache.cc
     federation/local_client.cc
     federation/local_loop_controller.cc
+    federation/sender_joined_log_provider.cc
     federation/vw_trainable_model.cc
   )
 endif()
@@ -192,6 +195,7 @@ if(RL_BUILD_FEDERATION)
     federation/joined_log_provider.h
     federation/local_client.h
     federation/local_loop_controller.h
+    federation/sender_joined_log_provider.h
     federation/vw_trainable_model.h
   )
 endif()
