@@ -203,11 +203,12 @@ BOOST_AUTO_TEST_CASE(retry_http_send_fail_retry_time_exhausted)
     BOOST_CHECK_EQUAL(eh.send(db1, &ret), r::error_code::success);
   }
 
-  // 1 second between retries, 5.5 second retry budget, should allow us to retry at least twice
-  BOOST_CHECK_GT(tries, 2);
-
-  // Should have taken at least RETRY_TIME_MS to give up attempting retries
   auto actual_retry_time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start_time);
+
+  // 1 second between retries, 5.5 second retry budget, should allow at least three attempts (initial + two retries)
+  BOOST_CHECK_GE(tries, 3);
+
+  // Should have taken at least RETRY_TIME_MS to give up attempting retries  
   BOOST_CHECK_GT(actual_retry_time_ms.count(), RETRY_TIME_MS.count());
 
   BOOST_CHECK_EQUAL(counter._err_count, 1);
