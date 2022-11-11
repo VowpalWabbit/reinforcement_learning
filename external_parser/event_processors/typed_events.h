@@ -6,6 +6,7 @@
 #include "generated/v2/MultiSlotEvent_generated.h"
 #include "joined_event.h"
 #include "loop.h"
+#include "vw/core/json_utils.h"
 #include "zstd.h"
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
@@ -52,8 +53,8 @@ struct event_processor<v2::MultiSlotEvent>
     size_t slot_index = 0;
     for (auto* slot_event : *evt.slots())
     {
-      DecisionServiceInteraction data;
-      data.eventId = slot_event->id() == nullptr ? metadata.id()->str() : slot_event->id()->str();
+      VW::details::decision_service_interaction data;
+      data.event_id = slot_event->id() == nullptr ? metadata.id()->str() : slot_event->id()->str();
 
       if (is_ccb && slot_event->id() != nullptr)
       { ccb_data->slot_id_to_index_map.insert(std::pair<std::string, int>(slot_event->id()->str(), slot_index)); }
@@ -123,15 +124,15 @@ struct event_processor<v2::CbEvent>
   {
     auto cb_data = VW::make_unique<joined_event::cb_joined_event>();
 
-    cb_data->interaction_data.eventId = metadata.id()->str();
+    cb_data->interaction_data.event_id = metadata.id()->str();
     cb_data->interaction_data.actions.reserve(evt.action_ids()->size());
     for (const auto& a : *evt.action_ids()) { cb_data->interaction_data.actions.emplace_back(a); }
 
     cb_data->interaction_data.probabilities.reserve(evt.probabilities()->size());
     for (const auto& prob : *evt.probabilities()) { cb_data->interaction_data.probabilities.emplace_back(prob); }
 
-    cb_data->interaction_data.probabilityOfDrop = 1.f - metadata.pass_probability();
-    cb_data->interaction_data.skipLearn = evt.deferred_action();
+    cb_data->interaction_data.probability_of_drop = 1.f - metadata.pass_probability();
+    cb_data->interaction_data.skip_learn = evt.deferred_action();
 
     return {TimePoint(enqueued_time_utc),
         {metadata.app_id() ? metadata.app_id()->str() : "", metadata.payload_type(), metadata.pass_probability(),
@@ -170,11 +171,11 @@ struct event_processor<v2::CaEvent>
       const v2::CaEvent& evt, const v2::Metadata& metadata, const TimePoint& enqueued_time_utc, std::string&& line_vec)
   {
     auto ca_data = VW::make_unique<joined_event::ca_joined_event>();
-    ca_data->interaction_data.eventId = metadata.id()->str();
+    ca_data->interaction_data.event_id = metadata.id()->str();
     ca_data->interaction_data.action = evt.action();
     ca_data->interaction_data.pdf_value = evt.pdf_value();
-    ca_data->interaction_data.probabilityOfDrop = 1.f - metadata.pass_probability();
-    ca_data->interaction_data.skipLearn = evt.deferred_action();
+    ca_data->interaction_data.probability_of_drop = 1.f - metadata.pass_probability();
+    ca_data->interaction_data.skip_learn = evt.deferred_action();
 
     return {TimePoint(enqueued_time_utc),
         {metadata.app_id() ? metadata.app_id()->str() : "", metadata.payload_type(), metadata.pass_probability(),
