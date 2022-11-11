@@ -75,7 +75,8 @@ BOOST_AUTO_TEST_CASE(send_something_eventhub_authorization)
   mock_http_client* http_client = new mock_http_client("localhost:8080");
 
   // create a client
-  r::http_transport_client<r::eventhub_http_authorization> eh(http_client, 1, 1, UNLIMITED_RETRY_TIME, nullptr, nullptr);
+  r::http_transport_client<r::eventhub_http_authorization> eh(
+      http_client, 1, 1, UNLIMITED_RETRY_TIME, nullptr, nullptr);
   r::api_status ret;
 
   std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
@@ -103,8 +104,9 @@ BOOST_AUTO_TEST_CASE(retry_http_send_success)
 
   int tries = 0;
   int succeed_after_n_tries = 3;
-  http_client->set_responder(
-      methods::POST, [&tries, succeed_after_n_tries](const http_request& message, http_response& resp) {
+  http_client->set_responder(methods::POST,
+      [&tries, succeed_after_n_tries](const http_request& message, http_response& resp)
+      {
         tries++;
 
         if (tries > succeed_after_n_tries) { resp.set_status_code(status_codes::Created); }
@@ -120,7 +122,8 @@ BOOST_AUTO_TEST_CASE(retry_http_send_success)
   // Use scope to force destructor and therefore flushing of buffers.
   {
     // create a client
-    r::http_transport_client<r::eventhub_http_authorization> eh(http_client, 1, 8 /* retries */, UNLIMITED_RETRY_TIME, nullptr, &error_callback);
+    r::http_transport_client<r::eventhub_http_authorization> eh(
+        http_client, 1, 8 /* retries */, UNLIMITED_RETRY_TIME, nullptr, &error_callback);
     reinforcement_learning::api_status ret;
 
     std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
@@ -143,10 +146,12 @@ BOOST_AUTO_TEST_CASE(retry_http_send_fail_retries_exhausted)
   const int MAX_RETRIES = 10;
 
   int tries = 0;
-  http_client->set_responder(methods::POST, [&tries](const http_request& message, http_response& resp) {
-    tries++;
-    resp.set_status_code(status_codes::InternalError);
-  });
+  http_client->set_responder(methods::POST,
+      [&tries](const http_request& message, http_response& resp)
+      {
+        tries++;
+        resp.set_status_code(status_codes::InternalError);
+      });
 
   error_counter counter;
   r::error_callback_fn error_callback(&error_counter_func, &counter);
@@ -154,7 +159,8 @@ BOOST_AUTO_TEST_CASE(retry_http_send_fail_retries_exhausted)
   // Use scope to force destructor and therefore flushing of buffers.
   {
     // create a client
-    r::http_transport_client<r::eventhub_http_authorization> eh(http_client, 1, MAX_RETRIES, UNLIMITED_RETRY_TIME, nullptr, &error_callback);
+    r::http_transport_client<r::eventhub_http_authorization> eh(
+        http_client, 1, MAX_RETRIES, UNLIMITED_RETRY_TIME, nullptr, &error_callback);
 
     r::api_status ret;
     std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
@@ -189,10 +195,11 @@ BOOST_AUTO_TEST_CASE(retry_http_send_fail_retry_time_exhausted)
 
   auto start_time = std::chrono::system_clock::now();
 
-  // Use scope to force destructor and therefore flushing of buffers.  
+  // Use scope to force destructor and therefore flushing of buffers.
   {
     // create a client
-    r::http_transport_client<r::eventhub_http_authorization> eh(http_client, 1, UNLIMITED_RETRIES, RETRY_TIME_MS, nullptr, &error_callback);
+    r::http_transport_client<r::eventhub_http_authorization> eh(
+        http_client, 1, UNLIMITED_RETRIES, RETRY_TIME_MS, nullptr, &error_callback);
 
     r::api_status ret;
     std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
@@ -203,12 +210,13 @@ BOOST_AUTO_TEST_CASE(retry_http_send_fail_retry_time_exhausted)
     BOOST_CHECK_EQUAL(eh.send(db1, &ret), r::error_code::success);
   }
 
-  auto actual_retry_time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start_time);
+  auto actual_retry_time_ms =
+      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start_time);
 
   // 1 second between retries, 5.5 second retry budget, should allow at least three attempts (initial + two retries)
   BOOST_CHECK_GE(tries, 3);
 
-  // Should have taken at least RETRY_TIME_MS to give up attempting retries  
+  // Should have taken at least RETRY_TIME_MS to give up attempting retries
   BOOST_CHECK_GT(actual_retry_time_ms.count(), RETRY_TIME_MS.count());
 
   BOOST_CHECK_EQUAL(counter._err_count, 1);
@@ -221,8 +229,9 @@ BOOST_AUTO_TEST_CASE(http_in_order_after_retry)
   const int MAX_RETRIES = 10;
   int tries = 0;
   std::vector<std::string> received_messages;
-  http_client->set_responder(
-      methods::POST, [&tries, &received_messages](const http_request& message, http_response& resp) {
+  http_client->set_responder(methods::POST,
+      [&tries, &received_messages](const http_request& message, http_response& resp)
+      {
         tries++;
 
         // Succeed every 4th attempt.
@@ -248,7 +257,8 @@ BOOST_AUTO_TEST_CASE(http_in_order_after_retry)
   // Use scope to force destructor and therefore flushing of buffers.
   {
     // create a client
-    r::http_transport_client<r::eventhub_http_authorization> eh(http_client, 1, MAX_RETRIES, UNLIMITED_RETRY_TIME, nullptr, &error_callback);
+    r::http_transport_client<r::eventhub_http_authorization> eh(
+        http_client, 1, MAX_RETRIES, UNLIMITED_RETRY_TIME, nullptr, &error_callback);
 
     r::api_status ret;
     std::shared_ptr<u::data_buffer> db1(new u::data_buffer());
