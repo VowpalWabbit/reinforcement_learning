@@ -20,6 +20,7 @@
 #include <chrono>
 #include <memory>
 #include <sstream>
+#include <thread>
 
 using namespace web::http;
 using namespace std::chrono;
