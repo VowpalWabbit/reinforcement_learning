@@ -68,13 +68,8 @@ private:
     http_request_task(const http_request_task&) = delete;
     http_request_task& operator=(const http_request_task&) = delete;
 
-    enum class JoinMode
-    {
-      STOP_RETRIES,
-      COMPLETE_RETRIES
-    };
     // Return error_code
-    int join(JoinMode join_mode);
+    int join();
 
   private:
     // repeat request until success or _max_retries attempted
@@ -93,14 +88,14 @@ private:
 
     std::chrono::time_point<std::chrono::system_clock> _start_time = std::chrono::system_clock::now();
     size_t _max_retry_count = 1;    
-    std::atomic<std::chrono::milliseconds> _max_retry_duration = std::chrono::milliseconds::max();
+    std::chrono::milliseconds _max_retry_duration = std::chrono::milliseconds::max();
 
     error_callback_fn* _error_callback;
     i_trace* _trace;
   };
 
 private:
-  int pop_task(api_status* status, typename http_request_task::JoinMode join_mode);
+  int pop_task(api_status* status);
 
   // cannot be copied or assigned
   http_transport_client(const http_transport_client&) = delete;
@@ -194,12 +189,12 @@ pplx::task<http_response> http_transport_client<TAuthorization>::http_request_ta
     }
 
     // If the response is not success class then it has failed. Retry if possible otherwise report background error.
-    auto deadline = _start_time + _max_retry_duration.load();
+    auto deadline = _start_time + _max_retry_duration;
     if ((try_count >= _max_retry_count) || (std::chrono::system_clock::now() > deadline))
     {
       // We have exhausted retry attempts, log and return the task describing the failure
 
-      // actual runtime might not equal _max_retry_duration if _max_retry_duration was modified elsewhere
+      // actual runtime might not equal _max_retry_duration if most recent HTTP request took a long time
       auto actual_runtime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - _start_time);
 
       api_status status;
@@ -224,12 +219,8 @@ pplx::task<http_response> http_transport_client<TAuthorization>::http_request_ta
 }
 
 template <typename TAuthorization>
-int http_transport_client<TAuthorization>::http_request_task::join(JoinMode join_mode)
+int http_transport_client<TAuthorization>::http_request_task::join()
 {
-  if (JoinMode::STOP_RETRIES == join_mode) {
-    _max_retry_duration.store(std::chrono::milliseconds::min());
-  }
-  
   _task.get();
 
   // The task may have failed but was reported with the callback. This function's primary purpose
@@ -245,7 +236,7 @@ int http_transport_client<TAuthorization>::init(const utility::configuration& co
 }
 
 template <typename TAuthorization>
-int http_transport_client<TAuthorization>::pop_task(api_status* status, typename http_request_task::JoinMode join_mode)
+int http_transport_client<TAuthorization>::pop_task(api_status* status)
 {
   // This function must be under a lock as there is a delay between popping from the queue and joining the task, but it
   // should essentially be atomic.
@@ -257,7 +248,7 @@ int http_transport_client<TAuthorization>::pop_task(api_status* status, typename
   try
   {
     // This will block if the task is not complete yet.
-    RETURN_IF_FAIL(oldest->join(join_mode));
+    RETURN_IF_FAIL(oldest->join());
   }
   catch (...)
   {
@@ -277,7 +268,7 @@ int http_transport_client<TAuthorization>::v_send(const buffer& post_data, api_s
   try
   {
     // Before creating the task, ensure that it is allowed to be created.
-    if (_tasks.size() >= _max_tasks_count) { RETURN_IF_FAIL(pop_task(status,  http_request_task::JoinMode::COMPLETE_RETRIES)); }
+    if (_tasks.size() >= _max_tasks_count) { RETURN_IF_FAIL(pop_task(status)); }
 
     std::unique_ptr<http_request_task> request_task(
         new http_request_task(_client.get(), headers, post_data, _max_retry_count, _max_retry_duration, _error_callback, _trace));
@@ -307,7 +298,7 @@ http_transport_client<TAuthorization>::~http_transport_client()
 {
   while (_tasks.size() != 0)
   {
-    auto result = pop_task(nullptr, http_request_task::JoinMode::STOP_RETRIES);
+    auto result = pop_task(nullptr);
     if (!result)
     {
       auto message =
