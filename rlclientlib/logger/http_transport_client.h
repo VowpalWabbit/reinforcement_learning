@@ -15,7 +15,6 @@
 
 #include <cpprest/http_headers.h>
 #include <pplx/pplxtasks.h>
-#include <agents.h>
 
 #include <memory>
 #include <sstream>
@@ -197,7 +196,7 @@ pplx::task<http_response> http_transport_client<TAuthorization>::http_request_ta
 
       TRACE_ERROR(_trace, u::concat("HTTP request failed with ", response_code, ", retrying in ", delay_ms, "ms..."));      
 
-      concurrency::wait(delay_ms);
+      pplx::wait(delay_ms);
     }
     else
     {
