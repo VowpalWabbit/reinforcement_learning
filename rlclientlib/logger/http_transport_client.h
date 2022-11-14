@@ -55,9 +55,9 @@ private:
     http_request_task() = default;
     http_request_task(i_http_client* client, http_headers headers, const buffer& data,
         size_t max_retries = 0,  // If MAX_RETRIES is set to 0, only the initial request will be attempted.
-        std::chrono::milliseconds max_retry_duration =
-            std::chrono::milliseconds::max(),  // retries will halt before max_retries attempts if this time elapses
-                                               // first
+        std::chrono::milliseconds max_retry_duration = std::chrono::milliseconds(
+            360000),  // retries will halt before max_retries attempts if this time elapses
+                      // first
         error_callback_fn* error_callback = nullptr, i_trace* trace = nullptr);
 
     // The constructor kicks off an async request which captures the this variable. If this object is moved then the
