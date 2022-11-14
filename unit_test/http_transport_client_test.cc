@@ -104,9 +104,8 @@ BOOST_AUTO_TEST_CASE(retry_http_send_success)
 
   int tries = 0;
   int succeed_after_n_tries = 3;
-  http_client->set_responder(methods::POST,
-      [&tries, succeed_after_n_tries](const http_request& message, http_response& resp)
-      {
+  http_client->set_responder(
+      methods::POST, [&tries, succeed_after_n_tries](const http_request& message, http_response& resp) {
         tries++;
 
         if (tries > succeed_after_n_tries) { resp.set_status_code(status_codes::Created); }
@@ -146,12 +145,10 @@ BOOST_AUTO_TEST_CASE(retry_http_send_fail_retries_exhausted)
   const int MAX_RETRIES = 10;
 
   int tries = 0;
-  http_client->set_responder(methods::POST,
-      [&tries](const http_request& message, http_response& resp)
-      {
-        tries++;
-        resp.set_status_code(status_codes::InternalError);
-      });
+  http_client->set_responder(methods::POST, [&tries](const http_request& message, http_response& resp) {
+    tries++;
+    resp.set_status_code(status_codes::InternalError);
+  });
 
   error_counter counter;
   r::error_callback_fn error_callback(&error_counter_func, &counter);
@@ -183,12 +180,10 @@ BOOST_AUTO_TEST_CASE(retry_http_send_fail_retry_time_exhausted)
   const std::chrono::milliseconds RETRY_TIME_MS(5555);
 
   int tries = 0;
-  http_client->set_responder(methods::POST,
-      [&tries](const http_request& message, http_response& resp)
-      {
-        tries++;
-        resp.set_status_code(status_codes::InternalError);
-      });
+  http_client->set_responder(methods::POST, [&tries](const http_request& message, http_response& resp) {
+    tries++;
+    resp.set_status_code(status_codes::InternalError);
+  });
 
   error_counter counter;
   r::error_callback_fn error_callback(&error_counter_func, &counter);
@@ -229,9 +224,8 @@ BOOST_AUTO_TEST_CASE(http_in_order_after_retry)
   const int MAX_RETRIES = 10;
   int tries = 0;
   std::vector<std::string> received_messages;
-  http_client->set_responder(methods::POST,
-      [&tries, &received_messages](const http_request& message, http_response& resp)
-      {
+  http_client->set_responder(
+      methods::POST, [&tries, &received_messages](const http_request& message, http_response& resp) {
         tries++;
 
         // Succeed every 4th attempt.

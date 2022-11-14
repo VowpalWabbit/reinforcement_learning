@@ -135,23 +135,20 @@ http_transport_client<TAuthorization>::http_request_task::http_request_task(i_ht
 template <typename TAuthorization>
 pplx::task<web::http::status_code> http_transport_client<TAuthorization>::http_request_task::send_request()
 {
-  return send_request_with_retries(0 /* inital try */)
-      .then(
-          [this](pplx::task<http_response> response)
-          {
-            web::http::status_code code = status_codes::InternalError;
+  return send_request_with_retries(0 /* inital try */).then([this](pplx::task<http_response> response) {
+    web::http::status_code code = status_codes::InternalError;
 
-            try
-            {
-              code = response.get().status_code();
-            }
-            catch (const std::exception& e)
-            {
-              TRACE_ERROR(_trace, e.what());
-            }
+    try
+    {
+      code = response.get().status_code();
+    }
+    catch (const std::exception& e)
+    {
+      TRACE_ERROR(_trace, e.what());
+    }
 
-            return code;
-          });
+    return code;
+  });
 }
 
 template <typename TAuthorization>
@@ -169,8 +166,7 @@ pplx::task<http_response> http_transport_client<TAuthorization>::http_request_ta
   // lambda which examines the provided task and either 1) generates a replacement task to retry
   // the request, or 2) passes the provided task downstream to emit its response
   auto retry_request_on_failure_lambda = [this, try_count](
-                                             pplx::task<http_response> response_task) -> pplx::task<http_response>
-  {
+                                             pplx::task<http_response> response_task) -> pplx::task<http_response> {
     web::http::status_code response_code = status_codes::InternalError;
 
     try
