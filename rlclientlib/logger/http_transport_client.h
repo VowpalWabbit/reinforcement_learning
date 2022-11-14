@@ -16,7 +16,6 @@
 #include <cpprest/http_headers.h>
 #include <pplx/pplxtasks.h>
 
-#include <atomic>
 #include <chrono>
 #include <memory>
 #include <sstream>
