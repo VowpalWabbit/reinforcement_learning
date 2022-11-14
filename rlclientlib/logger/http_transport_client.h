@@ -87,7 +87,7 @@ private:
 
     std::chrono::time_point<std::chrono::system_clock> _start_time = std::chrono::system_clock::now();
     size_t _max_retry_count = 1;
-    std::chrono::milliseconds _max_retry_duration = std::chrono::milliseconds::max();
+    std::chrono::milliseconds _max_retry_duration;
 
     error_callback_fn* _error_callback;
     i_trace* _trace;
@@ -181,18 +181,15 @@ pplx::task<http_response> http_transport_client<TAuthorization>::http_request_ta
     if (success) { return response_task; }
 
     // If the response is not success class then it has failed. Retry if possible otherwise report background error.
-    auto deadline = _start_time + _max_retry_duration;
-    if ((try_count >= _max_retry_count) || (std::chrono::system_clock::now() > deadline))
+    auto elapsed_time =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - _start_time);
+    if ((try_count >= _max_retry_count) || (elapsed_time > _max_retry_duration))
     {
       // We have exhausted retry attempts, log and return the task describing the failure
 
-      // actual runtime might not equal _max_retry_duration if most recent HTTP request took a long time
-      auto actual_runtime =
-          std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - _start_time);
-
       api_status status;
       auto msg = u::concat("(expected 201): Found ", response_code, ", failed after ", try_count, " retries over ",
-          actual_runtime.count(), "ms.");
+          elapsed_time.count(), "ms.");
       api_status::try_update(&status, error_code::http_bad_status_code, msg.c_str());
       ERROR_CALLBACK(_error_callback, status);
 
