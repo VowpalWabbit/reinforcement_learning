@@ -109,7 +109,6 @@ endif()
 
 if(RL_BUILD_FEDERATION)
   list(APPEND PROJECT_SOURCES
-    federation/event_cache.cc
     federation/local_client.cc
     federation/local_loop_controller.cc
     federation/sender_joined_log_provider.cc
@@ -190,7 +189,7 @@ endif()
 
 if(RL_BUILD_FEDERATION)
   list(APPEND PROJECT_PRIVATE_HEADERS
-    federation/event_cache.h
+    federation/event_sink.h
     federation/federated_client.h
     federation/joined_log_provider.h
     federation/local_client.h
