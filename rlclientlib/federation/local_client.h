@@ -11,7 +11,7 @@ class local_client : i_federated_client
 {
 public:
   RL_ATTR(nodiscard)
-  static int create_local_client(std::unique_ptr<i_federated_client>& output, const utility::configuration& config,
+  static int create(std::unique_ptr<i_federated_client>& output, const utility::configuration& config,
       i_trace* trace_logger = nullptr, api_status* status = nullptr);
 
   RL_ATTR(nodiscard)

@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(get_model_twice_fails)
 {
   utility::configuration config;
   std::unique_ptr<i_federated_client> client;
-  BOOST_CHECK_EQUAL(local_client::create_local_client(client, config, nullptr, nullptr), error_code::success);
+  BOOST_CHECK_EQUAL(local_client::create(client, config, nullptr, nullptr), error_code::success);
   model_management::model_data data;
   bool model_received = false;
   BOOST_CHECK_EQUAL(client->try_get_model("test_app_id", data, model_received), error_code::success);
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(send_delta_update)
 {
   utility::configuration config;
   std::unique_ptr<i_federated_client> client;
-  BOOST_CHECK_EQUAL(local_client::create_local_client(client, config, nullptr, nullptr), error_code::success);
+  BOOST_CHECK_EQUAL(local_client::create(client, config, nullptr, nullptr), error_code::success);
   BOOST_CHECK_NE(client.get(), nullptr);
   model_management::model_data data;
   bool model_received = false;

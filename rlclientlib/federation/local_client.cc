@@ -79,7 +79,7 @@ int local_client::report_result(const uint8_t* payload, size_t size, api_status*
   return error_code::success;
 }
 
-int local_client::create_local_client(std::unique_ptr<i_federated_client>& output, const utility::configuration& config,
+int local_client::create(std::unique_ptr<i_federated_client>& output, const utility::configuration& config,
     i_trace* trace_logger, api_status* status)
 {
   // Create empty model based on ML args on first call

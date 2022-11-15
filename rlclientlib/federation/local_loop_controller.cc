@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "err_constants.h"
 #include "federation/local_client.h"
+#include "federation/sender_joined_log_provider.h"
 #include "model_mgmt.h"
 #include "vw/io/io_adapter.h"
 
@@ -12,31 +13,36 @@ int local_loop_controller::create_local_loop_controller(std::unique_ptr<local_lo
     const reinforcement_learning::utility::configuration& config, i_trace* trace_logger, api_status* status)
 {
   std::string app_id = config.get(name::APP_ID, "");
-  std::string command_line = config.get(name::MODEL_VW_INITIAL_COMMAND_LINE, "--quiet --preserve_performance_counters");
+
   std::unique_ptr<i_federated_client> federated_client;
-  std::unique_ptr<i_joined_log_provider> joiner;
   std::unique_ptr<trainable_vw_model> trainable_model;
+  std::unique_ptr<sender_joined_log_provider> sender_joiner;
+  RETURN_IF_FAIL(local_client::create(federated_client, config, trace_logger, status));
+  RETURN_IF_FAIL(trainable_vw_model::create(trainable_model, config, trace_logger, status));
+  RETURN_IF_FAIL(sender_joined_log_provider::create(sender_joiner, config, trace_logger, status));
 
-  // RETURN_IF_FAIL(vw_local_joiner::create_vw_local_joiner(joiner, config, trace_logger, status));
-  RETURN_IF_FAIL(local_client::create_local_client(federated_client, config, trace_logger, status));
-  RETURN_IF_FAIL(trainable_vw_model::create_trainable_vw_model(trainable_model, config, trace_logger, status));
-
-  // TODO if additional types of i_event_cache are implemented, determine which type to create from config
-  auto event_source = std::unique_ptr<i_event_cache>(new event_cache_memory());
+  // sender_joiner is both an i_joined_log_provider and an i_event_sink
+  // we need to convert to shared_ptr and create copies for each base type
+  std::shared_ptr<sender_joined_log_provider> sender_joiner_shared;
+  std::shared_ptr<i_joined_log_provider> joiner;
+  std::shared_ptr<i_event_sink> event_sink;
+  sender_joiner_shared = std::move(sender_joiner);
+  joiner = std::static_pointer_cast<i_joined_log_provider>(sender_joiner_shared);
+  event_sink = std::static_pointer_cast<i_event_sink>(sender_joiner_shared);
 
   output = std::unique_ptr<local_loop_controller>(new local_loop_controller(std::move(app_id),
-      std::move(federated_client), std::move(joiner), std::move(trainable_model), std::move(event_source)));
+      std::move(federated_client), std::move(trainable_model), std::move(joiner), std::move(event_sink)));
   return error_code::success;
 }
 
 local_loop_controller::local_loop_controller(std::string app_id, std::unique_ptr<i_federated_client>&& federated_client,
-    std::unique_ptr<i_joined_log_provider>&& joiner, std::unique_ptr<trainable_vw_model>&& trainable_model,
-    std::unique_ptr<i_event_cache>&& event_source)
+      std::unique_ptr<trainable_vw_model>&& trainable_model, std::shared_ptr<i_joined_log_provider>&& joiner,
+      std::shared_ptr<i_event_sink>&& event_sink)
     : _app_id(std::move(app_id))
     , _federated_client(std::move(federated_client))
-    , _joiner(std::move(joiner))
     , _trainable_model(std::move(trainable_model))
-    , _event_source(std::move(event_source))
+    , _joiner(std::move(joiner))
+    , _event_sink(std::move(event_sink))
 {
 }
 
@@ -74,15 +80,9 @@ int local_loop_controller::update_global(api_status* status)
 
 int local_loop_controller::update_local(api_status* status)
 {
-  if (_event_source != nullptr)
-  {
-    auto events = _event_source->get_events();
-
-    std::unique_ptr<VW::io::reader> examples;
-    RETURN_IF_FAIL(_joiner->invoke_join(examples, status));
-    ;
-    RETURN_IF_FAIL(_trainable_model->learn(std::move(examples), status));
-  }
+  std::unique_ptr<VW::io::reader> binary_log;
+  RETURN_IF_FAIL(_joiner->invoke_join(binary_log, status));
+  RETURN_IF_FAIL(_trainable_model->learn(std::move(binary_log), status));
   return error_code::success;
 }
 
@@ -93,7 +93,7 @@ int local_loop_controller::get_data(model_management::model_data& data, api_stat
   return error_code::success;
 }
 
-std::unique_ptr<i_sender> local_loop_controller::get_local_sender() { return _event_source->get_sender_proxy(); }
+std::unique_ptr<i_sender> local_loop_controller::get_local_sender() { return _event_sink->get_sender_proxy(); }
 
 std::function<int(i_sender**, const utility::configuration&, error_callback_fn*, i_trace*, api_status*)>
 local_loop_controller::get_local_sender_factory()

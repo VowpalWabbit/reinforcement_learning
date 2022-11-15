@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(trainable_model_set_get_data)
 
   // put the workspace into trainable_vw_model
   std::unique_ptr<trainable_vw_model> model;
-  BOOST_CHECK_EQUAL(trainable_vw_model::create_trainable_vw_model(model, config), error_code::success);
+  BOOST_CHECK_EQUAL(trainable_vw_model::create(model, config), error_code::success);
   model->set_model(std::move(vw));
 
   // get data out and check that it's equal
