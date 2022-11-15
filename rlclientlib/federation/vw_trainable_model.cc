@@ -25,16 +25,17 @@ int trainable_vw_model::create(std::unique_ptr<trainable_vw_model>& output, cons
   std::string reward_function = config.get(name::JOINER_REWARD_FUNCTION, value::REWARD_FUNCTION_EARLIEST);
 
   output = std::unique_ptr<trainable_vw_model>(
-      new trainable_vw_model(command_line, problem_type, learning_mode, reward_function));
+      new trainable_vw_model(command_line, problem_type, learning_mode, reward_function, trace_logger));
   return error_code::success;
 }
 
-trainable_vw_model::trainable_vw_model(
-    std::string command_line, std::string problem_type, std::string learning_mode, std::string reward_function)
+trainable_vw_model::trainable_vw_model(std::string command_line, std::string problem_type, std::string learning_mode,
+    std::string reward_function, i_trace* trace_logger)
     : _command_line(std::move(command_line))
     , _problem_type(std::move(problem_type))
     , _learning_mode(std::move(learning_mode))
     , _reward_function(std::move(reward_function))
+    , _trace_logger(trace_logger)
 {
   auto options = VW::make_unique<VW::config::options_cli>(VW::split_command_line(_command_line));
   _model = VW::initialize_experimental(std::move(options));
@@ -114,6 +115,33 @@ int trainable_vw_model::learn(std::unique_ptr<VW::io::reader>&& binary_log, api_
     example_out.clear();
   } while (example_was_parsed);
 
+  return error_code::success;
+}
+
+int trainable_vw_model::learn(VW::workspace& example_ws, std::vector<VW::example*>& examples, api_status* status)
+{
+  // examples may be from a different workspace, and must be copied to this workspace
+  for (auto example : examples)
+  {
+    io_buf io_writer;
+    VW::details::cache_temp_buffer temp_buffer;
+    auto example_buffer = std::make_shared<std::vector<char>>();
+    io_writer.add_file(VW::io::create_vector_writer(example_buffer));
+    VW::write_example_to_cache(
+        io_writer, example, example_ws.example_parser->lbl_parser, example_ws.parse_mask, temp_buffer);
+    io_writer.flush();
+
+    io_buf io_reader;
+    io_reader.add_file(VW::io::create_buffer_view(example_buffer->data(), example_buffer->size()));
+    VW::multi_ex examples;
+    examples.push_back(VW::new_unused_example(*_model));
+    VW::read_example_from_cache(_model.get(), io_reader, examples);
+
+    VW::setup_example(*_model, examples[0]);
+    _model->learn(*examples[0]);
+    _model->finish_example(*examples[0]);
+    examples.clear();
+  }
   return error_code::success;
 }
 

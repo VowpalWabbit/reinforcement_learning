@@ -43,34 +43,21 @@ BOOST_AUTO_TEST_CASE(trainable_model_set_get_data)
 
   // get data out and check that it's equal
   model_management::model_data data_out;
-  model->get_data(data_out);
+  BOOST_CHECK_EQUAL(model->get_data(data_out), error_code::success);
   opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(VW::split_command_line(command_line)));
   std::unique_ptr<VW::workspace> vw_out =
       VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data_out.data(), data_out.data_sz()));
   BOOST_CHECK_EQUAL(vw_out->sd->weighted_labeled_examples, example_count);
 }
 
-/*
-
-class test_joined_log_provider : public i_joined_log_provider
-{
-  virtual int invoke_join(std::unique_ptr<VW::io::reader>& output, api_status* status = nullptr) override
-  {
-    output.reset(nullptr);
-    return error_code::success;
-  }
-};
-
 BOOST_AUTO_TEST_CASE(trainable_model_learn_and_create_delta)
 {
   const std::string command_line = "--quiet --preserve_performance_counters";
 
   // create 2 copies of the base VW workspace
-  auto opts = std::unique_ptr<VW::config::options_i>(
-    new VW::config::options_cli(VW::split_command_line(command_line)));
+  auto opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(VW::split_command_line(command_line)));
   std::unique_ptr<VW::workspace> vw1 = VW::initialize_experimental(std::move(opts));
-  opts = std::unique_ptr<VW::config::options_i>(
-    new VW::config::options_cli(VW::split_command_line(command_line)));
+  opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(VW::split_command_line(command_line)));
   std::unique_ptr<VW::workspace> vw2 = VW::initialize_experimental(std::move(opts));
 
   // learn on one example
@@ -82,28 +69,30 @@ BOOST_AUTO_TEST_CASE(trainable_model_learn_and_create_delta)
   vw2->finish_example(*ex);
 
   // put the workspace into trainable_vw_model
-  trainable_vw_model model(command_line);
-  model.set_model(std::move(vw1));
+  std::unique_ptr<trainable_vw_model> trainable_model;
+  utility::configuration config;
+  config.set(name::PROTOCOL_VERSION, "2");
+  config.set(name::MODEL_VW_INITIAL_COMMAND_LINE, command_line.c_str());
+  BOOST_CHECK_EQUAL(trainable_vw_model::create(trainable_model, config), error_code::success);
+  trainable_model->set_model(std::move(vw1));
 
   // learn on another example
-  opts = std::unique_ptr<VW::config::options_i>(
-    new VW::config::options_cli(VW::split_command_line(command_line)));
-  std::shared_ptr<VW::workspace> vw_for_joiner = VW::initialize_experimental(std::move(opts));
-  vw_joined_log_batch batch(vw_for_joiner);
-  ex = VW::read_example(*vw_for_joiner, "1 | b");
-  batch.add_example(ex);
-  model.learn(batch);
+  opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(VW::split_command_line(command_line)));
+  std::unique_ptr<VW::workspace> vw3 = VW::initialize_experimental(std::move(opts));
+  std::vector<VW::example*> examples;
+  examples.push_back(VW::read_example(*vw3, "1 | b"));
+  BOOST_CHECK_EQUAL(trainable_model->learn(*vw3, examples), error_code::success);
+  vw3->finish_example(*examples.back());
 
   // get data in trainable model
   model_management::model_data data_out;
-  model.get_data(data_out);
-  opts = std::unique_ptr<VW::config::options_i>(
-    new VW::config::options_cli(VW::split_command_line(command_line)));
+  BOOST_CHECK_EQUAL(trainable_model->get_data(data_out), error_code::success);
+  opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(VW::split_command_line(command_line)));
   std::unique_ptr<VW::workspace> vw1_updated =
-    VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data_out.data(), data_out.data_sz()));
+      VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data_out.data(), data_out.data_sz()));
 
   // get model delta and update vw2 workspace
-  auto delta = model.get_model_delta();
+  auto delta = trainable_model->get_model_delta();
   auto vw2_updated = *vw2 + delta;
   VW::workspace* delta_ws = delta.unsafe_get_workspace_ptr();
   BOOST_CHECK_EQUAL(delta_ws->sd->weighted_labeled_examples, 1.f);
@@ -112,4 +101,3 @@ BOOST_AUTO_TEST_CASE(trainable_model_learn_and_create_delta)
   BOOST_CHECK_EQUAL(vw1_updated->sd->weighted_labeled_examples, 2.f);
   BOOST_CHECK_EQUAL(vw2_updated->sd->weighted_labeled_examples, 2.f);
 }
-*/
