@@ -75,6 +75,7 @@ set(PROJECT_SOURCES
   multi_slot_response_detailed.cc
   ranking_event.cc
   ranking_response.cc
+  request_builders.cc
   sampling.cc
   serialization/payload_serializer.cc
   slot_ranking.cc
@@ -129,6 +130,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/object_factory.h
   ../include/personalization.h
   ../include/ranking_response.h
+  ../include/request_builders.h
   ../include/rl_string_view.h
   ../include/sender.h
   ../include/slot_ranking.h

@@ -6,17 +6,13 @@
  * @date 2018-07-18
  */
 #pragma once
-#include "action_flags.h"
-#include "continuous_action_response.h"
-#include "decision_response.h"
 #include "err_constants.h"
 #include "factory_resolver.h"
 #include "future_compat.h"
-#include "multi_slot_response.h"
-#include "multi_slot_response_detailed.h"
 #include "multistep.h"
-#include "ranking_response.h"
+#include "request_builders.h"
 #include "sender.h"
+#include "vw/core/example.h"
 
 #include <functional>
 #include <memory>
@@ -106,6 +102,8 @@ public:
    * @return int Return error code.  This will also be returned in the api_status object
    */
   int init(api_status* status = nullptr);
+
+  rank_builder& get_rank_builder();
 
   /**
    * @brief Choose an action, given a list of actions, action features and context features. The
@@ -487,6 +485,8 @@ private:
   const std::vector<int> default_baseline_vector = std::vector<int>();
   static std::vector<int> c_array_to_vector(
       const int* c_array, size_t array_size);  //! Convert baseline_actions from c array to std vector.
+
+  rank_builder _rank_builder;
 };
 
 /**
