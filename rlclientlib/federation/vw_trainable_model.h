@@ -16,8 +16,8 @@ class trainable_vw_model
 {
 public:
   RL_ATTR(nodiscard)
-  static int create(std::unique_ptr<trainable_vw_model>& output,
-      const utility::configuration& config, i_trace* trace_logger = nullptr, api_status* status = nullptr);
+  static int create(std::unique_ptr<trainable_vw_model>& output, const utility::configuration& config,
+      i_trace* trace_logger = nullptr, api_status* status = nullptr);
 
   // output current model state to buffer
   RL_ATTR(nodiscard)

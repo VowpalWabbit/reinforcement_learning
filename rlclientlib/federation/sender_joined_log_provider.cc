@@ -114,7 +114,8 @@ int emit_regular_message(std::vector<uint8_t>& output, flatbuffers::FlatBufferBu
 namespace reinforcement_learning
 {
 RL_ATTR(nodiscard)
-int sender_joined_log_provider::create(std::unique_ptr<sender_joined_log_provider>& output, const utility::configuration& config, i_trace* trace_logger, api_status* status)
+int sender_joined_log_provider::create(std::unique_ptr<sender_joined_log_provider>& output,
+    const utility::configuration& config, i_trace* trace_logger, api_status* status)
 {
   if (config.get_int(reinforcement_learning::name::PROTOCOL_VERSION, 999) != 2)
   { RETURN_ERROR_LS(trace_logger, status, invalid_argument) << " protocol version 2 required"; }
@@ -130,8 +131,10 @@ int sender_joined_log_provider::create(std::unique_ptr<sender_joined_log_provide
   return error_code::success;
 }
 
-sender_joined_log_provider::sender_joined_log_provider(std::chrono::seconds eud_offset, i_trace* trace_logger) : _eud_offset(eud_offset), _trace_logger(trace_logger)
-{ }
+sender_joined_log_provider::sender_joined_log_provider(std::chrono::seconds eud_offset, i_trace* trace_logger)
+    : _eud_offset(eud_offset), _trace_logger(trace_logger)
+{
+}
 
 RL_ATTR(nodiscard)
 int sender_joined_log_provider::invoke_join(std::unique_ptr<VW::io::reader>& batch, api_status* status)

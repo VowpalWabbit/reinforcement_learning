@@ -12,8 +12,8 @@
 
 namespace reinforcement_learning
 {
-int trainable_vw_model::create(std::unique_ptr<trainable_vw_model>& output,
-    const utility::configuration& config, i_trace* trace_logger, api_status* status)
+int trainable_vw_model::create(std::unique_ptr<trainable_vw_model>& output, const utility::configuration& config,
+    i_trace* trace_logger, api_status* status)
 {
   int protocol_version = config.get_int(name::PROTOCOL_VERSION, 0);
   if (protocol_version != 2)

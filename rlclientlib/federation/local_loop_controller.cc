@@ -36,8 +36,8 @@ int local_loop_controller::create_local_loop_controller(std::unique_ptr<local_lo
 }
 
 local_loop_controller::local_loop_controller(std::string app_id, std::unique_ptr<i_federated_client>&& federated_client,
-      std::unique_ptr<trainable_vw_model>&& trainable_model, std::shared_ptr<i_joined_log_provider>&& joiner,
-      std::shared_ptr<i_event_sink>&& event_sink)
+    std::unique_ptr<trainable_vw_model>&& trainable_model, std::shared_ptr<i_joined_log_provider>&& joiner,
+    std::shared_ptr<i_event_sink>&& event_sink)
     : _app_id(std::move(app_id))
     , _federated_client(std::move(federated_client))
     , _trainable_model(std::move(trainable_model))

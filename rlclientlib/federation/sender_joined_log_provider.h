@@ -18,7 +18,8 @@ class sender_joined_log_provider : public i_joined_log_provider, public i_event_
 {
 public:
   RL_ATTR(nodiscard)
-  static int create(std::unique_ptr<sender_joined_log_provider>& output, const utility::configuration& config, i_trace* trace_logger = nullptr, api_status* status = nullptr);
+  static int create(std::unique_ptr<sender_joined_log_provider>& output, const utility::configuration& config,
+      i_trace* trace_logger = nullptr, api_status* status = nullptr);
 
   // Perform EUD joining on events that have previously been added
   // Output is a binary joined log that can be consumed by the binary parser
