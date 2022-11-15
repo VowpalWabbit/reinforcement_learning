@@ -85,7 +85,7 @@ private:
 
     pplx::task<web::http::status_code> _task;
 
-    std::chrono::time_point<std::chrono::system_clock> _start_time = std::chrono::system_clock::now();
+    std::chrono::time_point<std::chrono::system_clock> _start_time;
     size_t _max_retry_count = 1;
     std::chrono::milliseconds _max_retry_duration;
 
