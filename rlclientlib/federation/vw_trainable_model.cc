@@ -24,8 +24,19 @@ int trainable_vw_model::create(std::unique_ptr<trainable_vw_model>& output, cons
   std::string learning_mode = config.get(name::JOINER_LEARNING_MODE, value::LEARNING_MODE_ONLINE);
   std::string reward_function = config.get(name::JOINER_REWARD_FUNCTION, value::REWARD_FUNCTION_EARLIEST);
 
-  output = std::unique_ptr<trainable_vw_model>(
-      new trainable_vw_model(command_line, problem_type, learning_mode, reward_function, trace_logger));
+  try
+  {
+    output = std::unique_ptr<trainable_vw_model>(
+        new trainable_vw_model(command_line, problem_type, learning_mode, reward_function, trace_logger));
+  }
+  catch (const std::exception& e)
+  {
+    RETURN_ERROR_ARG(trace_logger, status, model_update_error, e.what());
+  }
+  catch (...)
+  {
+    RETURN_ERROR_ARG(trace_logger, status, model_update_error, "Unknown error");
+  }
   return error_code::success;
 }
 
@@ -42,30 +53,72 @@ trainable_vw_model::trainable_vw_model(std::string command_line, std::string pro
   copy_current_model_to_starting();
 }
 
-void trainable_vw_model::set_model(std::unique_ptr<VW::workspace>&& model)
+int trainable_vw_model::set_model(std::unique_ptr<VW::workspace>&& model, api_status* status)
 {
-  _model = std::move(model);
-  copy_current_model_to_starting();
+  try
+  {
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      _model = std::move(model);
+    }
+    copy_current_model_to_starting();
+  }
+  catch (const std::exception& e)
+  {
+    RETURN_ERROR_ARG(_trace_logger, status, model_update_error, e.what());
+  }
+  catch (...)
+  {
+    RETURN_ERROR_ARG(_trace_logger, status, model_update_error, "Unknown error");
+  }
+  return error_code::success;
 }
 
-void trainable_vw_model::set_data(const model_management::model_data& data)
+int trainable_vw_model::set_data(const model_management::model_data& data, api_status* status)
 {
-  auto opts =
-      std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(VW::split_command_line(_command_line)));
-  _model = VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data.data(), data.data_sz()));
-  copy_current_model_to_starting();
+  try
+  {
+    auto opts =
+        std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(VW::split_command_line(_command_line)));
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      _model = VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data.data(), data.data_sz()));
+    }
+    copy_current_model_to_starting();
+  }
+  catch (const std::exception& e)
+  {
+    RETURN_ERROR_ARG(_trace_logger, status, model_update_error, e.what());
+  }
+  catch (...)
+  {
+    RETURN_ERROR_ARG(_trace_logger, status, model_update_error, "Unknown error");
+  }
+  return error_code::success;
 }
 
 int trainable_vw_model::get_data(model_management::model_data& data, api_status* status)
 {
-  io_buf buffer;
-  auto backing_buffer = std::make_shared<std::vector<char>>();
-  buffer.add_file(VW::io::create_vector_writer(backing_buffer));
-  VW::save_predictor(*_model, buffer);
-
-  auto* buffer_to_copy_to = data.alloc(backing_buffer->size());
-  std::memcpy(buffer_to_copy_to, backing_buffer->data(), backing_buffer->size());
-
+  try
+  {
+    io_buf buffer;
+    auto backing_buffer = std::make_shared<std::vector<char>>();
+    buffer.add_file(VW::io::create_vector_writer(backing_buffer));
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      VW::save_predictor(*_model, buffer);
+    }
+    auto* destination_buffer = data.alloc(backing_buffer->size());
+    std::memcpy(destination_buffer, backing_buffer->data(), backing_buffer->size());
+  }
+  catch (const std::exception& e)
+  {
+    RETURN_ERROR_ARG(_trace_logger, status, model_update_error, e.what());
+  }
+  catch (...)
+  {
+    RETURN_ERROR_ARG(_trace_logger, status, model_update_error, "Unknown error");
+  }
   return error_code::success;
 }
 
@@ -77,79 +130,138 @@ int trainable_vw_model::learn(std::unique_ptr<VW::io::reader>&& binary_log, api_
     return error_code::success;
   }
 
-  io_buf io_reader;
-  io_reader.add_file(std::move(binary_log));
-
-  std::unique_ptr<i_joiner> joiner;
-  if (_problem_type == value::PROBLEM_TYPE_MULTISTEP)
-  { joiner = std::unique_ptr<i_joiner>(new example_joiner(_model.get())); }
-  else
+  try
   {
-    joiner = std::unique_ptr<i_joiner>(new multistep_example_joiner(_model.get()));
-  }
+    std::lock_guard<std::mutex> lock(_mutex);
 
-  // Set the default joiner options if no checkpoint message is present in the binary log
-  configure_joiner(joiner);
+    io_buf io_reader;
+    io_reader.add_file(std::move(binary_log));
 
-  // TODO should we have an actual logger?
-  VW::external::binary_parser binary_parser(std::move(joiner), VW::io::create_null_logger());
-
-  bool example_was_parsed = false;
-  VW::multi_ex example_out;
-  do
-  {
-    example_out.push_back(VW::new_unused_example(*_model));
-    example_was_parsed = binary_parser.parse_examples(_model.get(), io_reader, example_out);
-
-    if (example_was_parsed)
+    std::unique_ptr<i_joiner> joiner;
+    if (_problem_type == value::PROBLEM_TYPE_MULTISTEP)
+    { joiner = std::unique_ptr<i_joiner>(new example_joiner(_model.get())); }
+    else
     {
-      VW::setup_examples(*_model, example_out);
-      if (_problem_type == value::PROBLEM_TYPE_MULTISTEP) { _model->learn(example_out); }
-      else
-      {
-        _model->learn(*example_out[0]);
-      }
+      joiner = std::unique_ptr<i_joiner>(new multistep_example_joiner(_model.get()));
     }
 
-    for (auto* ex : example_out) { VW::finish_example(*_model, *ex); }
-    example_out.clear();
-  } while (example_was_parsed);
+    // Set the default joiner options if no checkpoint message is present in the binary log
+    configure_joiner(joiner);
 
+    // TODO should we have an actual logger?
+    VW::external::binary_parser binary_parser(std::move(joiner), VW::io::create_null_logger());
+
+    bool example_was_parsed = false;
+    VW::multi_ex example_out;
+    do
+    {
+      example_out.push_back(VW::new_unused_example(*_model));
+      example_was_parsed = binary_parser.parse_examples(_model.get(), io_reader, example_out);
+
+      if (example_was_parsed)
+      {
+        VW::setup_examples(*_model, example_out);
+        if (_problem_type == value::PROBLEM_TYPE_MULTISTEP) { _model->learn(example_out); }
+        else
+        {
+          _model->learn(*example_out[0]);
+        }
+      }
+
+      for (auto* ex : example_out) { VW::finish_example(*_model, *ex); }
+      example_out.clear();
+    } while (example_was_parsed);
+  }
+  catch (const std::exception& e)
+  {
+    RETURN_ERROR_ARG(_trace_logger, status, model_rank_error, e.what());
+  }
+  catch (...)
+  {
+    RETURN_ERROR_ARG(_trace_logger, status, model_rank_error, "Unknown error");
+  }
   return error_code::success;
 }
 
 int trainable_vw_model::learn(VW::workspace& example_ws, std::vector<VW::example*>& examples, api_status* status)
 {
-  // examples may be from a different workspace, and must be copied to this workspace
-  for (auto example : examples)
+  try
   {
-    io_buf io_writer;
-    VW::details::cache_temp_buffer temp_buffer;
-    auto example_buffer = std::make_shared<std::vector<char>>();
-    io_writer.add_file(VW::io::create_vector_writer(example_buffer));
-    VW::write_example_to_cache(
-        io_writer, example, example_ws.example_parser->lbl_parser, example_ws.parse_mask, temp_buffer);
-    io_writer.flush();
+    std::lock_guard<std::mutex> lock(_mutex);
 
-    io_buf io_reader;
-    io_reader.add_file(VW::io::create_buffer_view(example_buffer->data(), example_buffer->size()));
-    VW::multi_ex examples;
-    examples.push_back(VW::new_unused_example(*_model));
-    VW::read_example_from_cache(_model.get(), io_reader, examples);
+    // examples may be from a different workspace, and must be copied to this workspace
+    for (auto example : examples)
+    {
+      io_buf io_writer;
+      VW::details::cache_temp_buffer temp_buffer;
+      auto example_buffer = std::make_shared<std::vector<char>>();
+      io_writer.add_file(VW::io::create_vector_writer(example_buffer));
+      VW::write_example_to_cache(
+          io_writer, example, example_ws.example_parser->lbl_parser, example_ws.parse_mask, temp_buffer);
+      io_writer.flush();
 
-    VW::setup_example(*_model, examples[0]);
-    _model->learn(*examples[0]);
-    _model->finish_example(*examples[0]);
-    examples.clear();
+      io_buf io_reader;
+      io_reader.add_file(VW::io::create_buffer_view(example_buffer->data(), example_buffer->size()));
+      VW::multi_ex examples;
+      examples.push_back(VW::new_unused_example(*_model));
+      VW::read_example_from_cache(_model.get(), io_reader, examples);
+
+      VW::setup_example(*_model, examples[0]);
+      _model->learn(*examples[0]);
+      _model->finish_example(*examples[0]);
+    }
+  }
+  catch (const std::exception& e)
+  {
+    RETURN_ERROR_ARG(_trace_logger, status, model_rank_error, e.what());
+  }
+  catch (...)
+  {
+    RETURN_ERROR_ARG(_trace_logger, status, model_rank_error, "Unknown error");
   }
   return error_code::success;
 }
 
-VW::model_delta trainable_vw_model::get_model_delta()
+int trainable_vw_model::get_model_delta(VW::model_delta& output, api_status* status)
 {
-  auto delta = *_model - *_starting_model;
-  copy_current_model_to_starting();
-  return delta;
+  try
+  {
+    VW::model_delta delta(nullptr);
+    {
+      std::lock_guard<std::mutex> lock(_mutex);
+      delta = *_model - *_starting_model;
+    }
+    copy_current_model_to_starting();
+    output = std::move(delta);
+  }
+  catch (const std::exception& e)
+  {
+    RETURN_ERROR_ARG(_trace_logger, status, model_update_error, e.what());
+  }
+  catch (...)
+  {
+    RETURN_ERROR_ARG(_trace_logger, status, model_update_error, "Unknown error");
+  }
+  return error_code::success;
+}
+
+int trainable_vw_model::get_model_delta(VW::io::writer& output, api_status* status)
+{
+  try
+  {
+    VW::model_delta delta(nullptr);
+    RETURN_IF_FAIL(get_model_delta(delta, status));
+    delta.serialize(output);
+  }
+  catch (const std::exception& e)
+  {
+    RETURN_ERROR_ARG(_trace_logger, status, model_update_error, e.what());
+  }
+  catch (...)
+  {
+    RETURN_ERROR_ARG(_trace_logger, status, model_update_error, "Unknown error");
+  }
+  return error_code::success;
 }
 
 void trainable_vw_model::copy_current_model_to_starting()
@@ -157,17 +269,25 @@ void trainable_vw_model::copy_current_model_to_starting()
   auto backing_vector = std::make_shared<std::vector<char>>();
   io_buf temp_buffer;
   temp_buffer.add_file(VW::io::create_vector_writer(backing_vector));
-  VW::save_predictor(*_model, temp_buffer);
+
+  {
+    std::lock_guard<std::mutex> lock(_mutex);
+    VW::save_predictor(*_model, temp_buffer);
+  }
 
   auto args = VW::split_command_line(_command_line);
   if (std::find(args.begin(), args.end(), "--preserve_performance_counters") == args.end())
   { args.emplace_back("--preserve_performance_counters"); }
   auto options = VW::make_unique<VW::config::options_cli>(args);
-  _starting_model = VW::initialize_experimental(std::move(options),
-      VW::io::create_buffer_view(backing_vector->data(), backing_vector->size()), nullptr, nullptr, nullptr);
+
+  {
+    std::lock_guard<std::mutex> lock(_mutex);
+    _starting_model = VW::initialize_experimental(std::move(options),
+        VW::io::create_buffer_view(backing_vector->data(), backing_vector->size()), nullptr, nullptr, nullptr);
+  }
 }
 
-void trainable_vw_model::configure_joiner(std::unique_ptr<i_joiner>& joiner)
+void trainable_vw_model::configure_joiner(std::unique_ptr<i_joiner>& joiner) const
 {
   if (_problem_type == value::PROBLEM_TYPE_CB)
     joiner->set_problem_type_config(messages::flatbuff::v2::ProblemType_CB);

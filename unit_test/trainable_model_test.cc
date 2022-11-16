@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(trainable_model_set_get_data)
   // put the workspace into trainable_vw_model
   std::unique_ptr<trainable_vw_model> model;
   BOOST_CHECK_EQUAL(trainable_vw_model::create(model, config), error_code::success);
-  model->set_model(std::move(vw));
+  BOOST_CHECK_EQUAL(model->set_model(std::move(vw)), error_code::success);
 
   // get data out and check that it's equal
   model_management::model_data data_out;
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(trainable_model_learn_and_create_delta)
   config.set(name::PROTOCOL_VERSION, "2");
   config.set(name::MODEL_VW_INITIAL_COMMAND_LINE, command_line.c_str());
   BOOST_CHECK_EQUAL(trainable_vw_model::create(trainable_model, config), error_code::success);
-  trainable_model->set_model(std::move(vw1));
+  BOOST_CHECK_EQUAL(trainable_model->set_model(std::move(vw1)), error_code::success);
 
   // learn on another example
   opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(VW::split_command_line(command_line)));
@@ -92,7 +92,8 @@ BOOST_AUTO_TEST_CASE(trainable_model_learn_and_create_delta)
       VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data_out.data(), data_out.data_sz()));
 
   // get model delta and update vw2 workspace
-  auto delta = trainable_model->get_model_delta();
+  VW::model_delta delta(nullptr);
+  BOOST_CHECK_EQUAL(trainable_model->get_model_delta(delta), error_code::success);
   auto vw2_updated = *vw2 + delta;
   VW::workspace* delta_ws = delta.unsafe_get_workspace_ptr();
   BOOST_CHECK_EQUAL(delta_ws->sd->weighted_labeled_examples, 1.f);

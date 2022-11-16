@@ -40,6 +40,7 @@ public:
 
   // Returns a i_sender proxy object to be used for sending events to the internal event sink
   std::unique_ptr<i_sender> get_local_sender();
+
   // Returns a sender factory function bound to get_local_sender()
   std::function<int(i_sender**, const utility::configuration&, error_callback_fn*, i_trace*, api_status*)>
   get_local_sender_factory();

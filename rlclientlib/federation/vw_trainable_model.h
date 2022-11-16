@@ -23,9 +23,13 @@ public:
   RL_ATTR(nodiscard)
   int get_data(model_management::model_data& data, api_status* status = nullptr);
 
-  // Overwrite internal VW model
-  void set_model(std::unique_ptr<VW::workspace>&& model);
-  void set_data(const model_management::model_data& data);
+  // Overwrite internal VW model with another model
+  RL_ATTR(nodiscard)
+  int set_model(std::unique_ptr<VW::workspace>&& model, api_status* status = nullptr);
+
+  // Overwrite internal VW model with the given model data
+  RL_ATTR(nodiscard)
+  int set_data(const model_management::model_data& data, api_status* status = nullptr);
 
   // Train model on data from a joined binary log
   RL_ATTR(nodiscard)
@@ -38,7 +42,11 @@ public:
 
   // Generate a model_delta from the current model state and the previous call to
   // get_model_delta() or set_model() or set_data()
-  VW::model_delta get_model_delta();
+  RL_ATTR(nodiscard)
+  int get_model_delta(VW::model_delta& output, api_status* status = nullptr);
+
+  RL_ATTR(nodiscard)
+  int get_model_delta(VW::io::writer& output, api_status* status = nullptr);
 
 private:
   // Private constructor because we should create objects with factory function
@@ -48,15 +56,18 @@ private:
   // Need to keep both current and starting model in order to create model_delta
   std::unique_ptr<VW::workspace> _model = nullptr;
   std::unique_ptr<VW::workspace> _starting_model = nullptr;
+
   void copy_current_model_to_starting();
 
-  std::string _command_line;
-  std::string _problem_type;
-  std::string _learning_mode;
-  std::string _reward_function;
-  void configure_joiner(std::unique_ptr<i_joiner>& joiner);
+  const std::string _command_line;
+  const std::string _problem_type;
+  const std::string _learning_mode;
+  const std::string _reward_function;
+
+  void configure_joiner(std::unique_ptr<i_joiner>& joiner) const;
 
   i_trace* _trace_logger = nullptr;
+  std::mutex _mutex;
 };
 
 }  // namespace reinforcement_learning
