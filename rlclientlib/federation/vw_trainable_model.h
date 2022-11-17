@@ -38,7 +38,7 @@ public:
   // Train model on VW::example* objects
   // This does not call VW::finish_example on the examples passed into here
   RL_ATTR(nodiscard)
-  int learn(VW::workspace& example_ws, std::vector<VW::example*>& examples, api_status* status = nullptr);
+  int learn(VW::workspace& example_ws, VW::multi_ex& examples, api_status* status = nullptr);
 
   // Generate a model_delta from the current model state and the previous call to
   // get_model_delta() or set_model() or set_data()

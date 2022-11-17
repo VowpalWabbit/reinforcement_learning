@@ -8,7 +8,31 @@
 #include "vw/config/options_cli.h"
 #include "vw/core/parse_primitives.h"
 #include "vw/core/vw.h"
+#include "vw/core/learner.h"
 #include "vw/io/logger.h"
+
+namespace
+{
+// Helper function to train model on VW::multi_ex
+// examples is cleared at the end of this function
+void learn_and_finish_examples(VW::workspace& vw, VW::multi_ex& examples)
+{
+  VW::setup_examples(vw, examples);
+  if (vw.l->is_multiline())
+  {
+    vw.learn(examples);
+    vw.finish_example(examples);
+  }
+  else
+  {
+    for (auto example : examples)
+      vw.learn(*example);
+    for (auto example : examples)
+      vw.finish_example(*example);
+  }
+  examples.clear();
+}
+}
 
 namespace reinforcement_learning
 {
@@ -160,16 +184,15 @@ int trainable_vw_model::learn(std::unique_ptr<VW::io::reader>&& binary_log, api_
 
       if (example_was_parsed)
       {
-        VW::setup_examples(*_model, example_out);
-        if (_problem_type == value::PROBLEM_TYPE_MULTISTEP) { _model->learn(example_out); }
-        else
-        {
-          _model->learn(*example_out[0]);
-        }
+        learn_and_finish_examples(*_model, example_out);
       }
-
-      for (auto* ex : example_out) { VW::finish_example(*_model, *ex); }
-      example_out.clear();
+      else
+      {
+        // cleanup the unused example that the parser was called with
+        assert(example_out.size() == 1);
+        _model->finish_example(*example_out[0]);
+        example_out.clear();
+      }
     } while (example_was_parsed);
   }
   catch (const std::exception& e)
@@ -183,11 +206,12 @@ int trainable_vw_model::learn(std::unique_ptr<VW::io::reader>&& binary_log, api_
   return error_code::success;
 }
 
-int trainable_vw_model::learn(VW::workspace& example_ws, std::vector<VW::example*>& examples, api_status* status)
+int trainable_vw_model::learn(VW::workspace& example_ws, VW::multi_ex& examples, api_status* status)
 {
   try
   {
     std::lock_guard<std::mutex> lock(_mutex);
+    VW::multi_ex examples_copied;
 
     // examples may be from a different workspace, and must be copied to this workspace
     for (auto example : examples)
@@ -202,14 +226,13 @@ int trainable_vw_model::learn(VW::workspace& example_ws, std::vector<VW::example
 
       io_buf io_reader;
       io_reader.add_file(VW::io::create_buffer_view(example_buffer->data(), example_buffer->size()));
-      VW::multi_ex examples;
-      examples.push_back(VW::new_unused_example(*_model));
-      VW::read_example_from_cache(_model.get(), io_reader, examples);
-
-      VW::setup_example(*_model, examples[0]);
-      _model->learn(*examples[0]);
-      _model->finish_example(*examples[0]);
+      VW::multi_ex example_out;
+      example_out.push_back(VW::new_unused_example(*_model));
+      VW::read_example_from_cache(_model.get(), io_reader, example_out);
+      examples_copied.insert(examples_copied.end(), example_out.begin(), example_out.end());
     }
+
+    learn_and_finish_examples(*_model, examples_copied);
   }
   catch (const std::exception& e)
   {
