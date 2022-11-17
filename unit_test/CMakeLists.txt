@@ -4,7 +4,6 @@ set(TEST_SOURCES
   data_buffer_test.cc
   data_callback_test.cc
   dedup_test.cc
-  eud_test.cc
   err_callback_test.cc
   event_queue_test.cc
   explore_test.cc
@@ -50,7 +49,9 @@ endif()
 
 if(RL_BUILD_FEDERATION)
   list(APPEND TEST_SOURCES
+    eud_test.cc
     local_client_test.cc
+    local_loop_controller_test.cc
     trainable_model_test.cc
   )
 endif()

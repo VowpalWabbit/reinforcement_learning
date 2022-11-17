@@ -23,9 +23,8 @@ class local_loop_controller : public model_management::i_data_transport
 {
 public:
   RL_ATTR(nodiscard)
-  static int create_local_loop_controller(std::unique_ptr<local_loop_controller>& output,
-      const reinforcement_learning::utility::configuration& config, i_trace* trace_logger = nullptr,
-      api_status* status = nullptr);
+  static int create(std::unique_ptr<local_loop_controller>& output, const utility::configuration& config,
+      i_trace* trace_logger = nullptr, api_status* status = nullptr);
 
   // Get model data in binary format
   // This will perform joining and training on any observed events, and then return the updated model
@@ -47,7 +46,7 @@ public:
 
   virtual ~local_loop_controller() = default;
 
-private:
+protected:
   // Constructor is private because objects should be created using the factory function
   local_loop_controller(std::string app_id, std::unique_ptr<i_federated_client>&& federated_client,
       std::unique_ptr<trainable_vw_model>&& trainable_model, std::shared_ptr<i_joined_log_provider>&& joiner,

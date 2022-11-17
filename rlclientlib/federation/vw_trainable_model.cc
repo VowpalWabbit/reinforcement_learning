@@ -6,9 +6,9 @@
 #include "joiners/multistep_example_joiner.h"
 #include "parse_example_binary.h"
 #include "vw/config/options_cli.h"
+#include "vw/core/learner.h"
 #include "vw/core/parse_primitives.h"
 #include "vw/core/vw.h"
-#include "vw/core/learner.h"
 #include "vw/io/logger.h"
 
 namespace
@@ -25,14 +25,12 @@ void learn_and_finish_examples(VW::workspace& vw, VW::multi_ex& examples)
   }
   else
   {
-    for (auto example : examples)
-      vw.learn(*example);
-    for (auto example : examples)
-      vw.finish_example(*example);
+    for (auto example : examples) vw.learn(*example);
+    for (auto example : examples) vw.finish_example(*example);
   }
   examples.clear();
 }
-}
+}  // namespace
 
 namespace reinforcement_learning
 {
@@ -182,10 +180,7 @@ int trainable_vw_model::learn(std::unique_ptr<VW::io::reader>&& binary_log, api_
       example_out.push_back(VW::new_unused_example(*_model));
       example_was_parsed = binary_parser.parse_examples(_model.get(), io_reader, example_out);
 
-      if (example_was_parsed)
-      {
-        learn_and_finish_examples(*_model, example_out);
-      }
+      if (example_was_parsed) { learn_and_finish_examples(*_model, example_out); }
       else
       {
         // cleanup the unused example that the parser was called with

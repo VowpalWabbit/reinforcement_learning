@@ -128,7 +128,7 @@ int local_loop_controller_create(
 {
   TRACE_INFO(trace_logger, "Local loop controller i_data_transport created.");
   std::unique_ptr<local_loop_controller> output;
-  RETURN_IF_FAIL(local_loop_controller::create_local_loop_controller(output, config, trace_logger, status));
+  RETURN_IF_FAIL(local_loop_controller::create(output, config, trace_logger, status));
   *retval = output.release();
   return error_code::success;
 }

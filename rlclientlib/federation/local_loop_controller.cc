@@ -9,7 +9,7 @@
 
 namespace reinforcement_learning
 {
-int local_loop_controller::create_local_loop_controller(std::unique_ptr<local_loop_controller>& output,
+int local_loop_controller::create(std::unique_ptr<local_loop_controller>& output,
     const reinforcement_learning::utility::configuration& config, i_trace* trace_logger, api_status* status)
 {
   std::string app_id = config.get(name::APP_ID, "");

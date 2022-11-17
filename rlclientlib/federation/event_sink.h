@@ -17,7 +17,7 @@ public:
   // Add an event batch
   // Input should consist of a preamble and an EventBatch flatbuffer
   RL_ATTR(nodiscard)
-  virtual int receive_events(const buffer& data, api_status* status) = 0;
+  virtual int receive_events(const buffer& data, api_status* status = nullptr) = 0;
 
   // Return an object of type i_sender that will forward data to receive_events() of this object
   // Each call returns a new output, and the caller of this function takes ownership of it
