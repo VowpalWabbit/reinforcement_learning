@@ -39,7 +39,7 @@ class buffer_reader : public VW::io::reader
 {
 public:
   buffer_reader(std::vector<uint8_t>&& buffer)
-      : VW::io::reader(true), _buffer(std::move(buffer)), _read_head(buffer.data())
+      : VW::io::reader(true), _buffer(std::move(buffer)), _read_head(_buffer.data())
   {
   }
   ~buffer_reader() override = default;
