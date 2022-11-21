@@ -170,14 +170,14 @@ BOOST_AUTO_TEST_CASE(update_get_model_data)
 {
   // create the local_loop_controller
   auto config = get_test_config();
-  auto test_llc = create_test_local_loop_controller(config);
-  auto generic_client = dynamic_cast<test_local_loop_controller*>(test_llc.get())->get_client();
-  BOOST_CHECK_NE(generic_client, nullptr);
-  auto mock_client = dynamic_cast<mock_federated_client*>(generic_client);
+  auto llc = create_test_local_loop_controller(config);
+  auto test_llc = dynamic_cast<test_local_loop_controller*>(llc.get());
+  BOOST_CHECK_NE(test_llc, nullptr);
+  auto mock_client = dynamic_cast<mock_federated_client*>(test_llc->get_client());
   BOOST_CHECK_NE(mock_client, nullptr);
 
   // this should do nothing because there's no global model to retrieve yet
-  BOOST_CHECK_EQUAL(test_llc->update_global(), error_code::success);
+  BOOST_CHECK_EQUAL(llc->update_global(), error_code::success);
 
   // create a model and train on an example
   const std::string command_line = config.get(name::MODEL_VW_INITIAL_COMMAND_LINE, "");
@@ -189,28 +189,30 @@ BOOST_AUTO_TEST_CASE(update_get_model_data)
   // this should update the internal model
   model_management::model_data serialized_vw = test_utils::save_vw(*vw);
   mock_client->load_model_data(serialized_vw);
-  BOOST_CHECK_EQUAL(test_llc->update_global(), error_code::success);
+  BOOST_CHECK_EQUAL(llc->update_global(), error_code::success);
 
   // check that data retrieved is the same as data provided
   model_management::model_data data_out;
-  BOOST_CHECK_EQUAL(test_llc->get_data(data_out), error_code::success);
-  BOOST_CHECK_EQUAL(serialized_vw.data_sz(), data_out.data_sz());
-  BOOST_CHECK_EQUAL(std::memcmp(serialized_vw.data(), data_out.data(), serialized_vw.data_sz()), 0);
+  BOOST_CHECK_EQUAL(llc->get_data(data_out), error_code::success);
+  test_utils::compare_vw(*vw, *test_utils::create_vw(command_line, data_out));
 
   // this should generate a model delta
-  BOOST_CHECK_EQUAL(test_llc->update_global(), error_code::success);
+  BOOST_CHECK_EQUAL(llc->update_global(), error_code::success);
   auto serialized_delta = mock_client->get_result();
   BOOST_CHECK_NE(serialized_delta.size(), 0);
 
   // check that data has not changed
-  BOOST_CHECK_EQUAL(test_llc->get_data(data_out), error_code::success);
-  BOOST_CHECK_EQUAL(serialized_vw.data_sz(), data_out.data_sz());
-  BOOST_CHECK_EQUAL(std::memcmp(serialized_vw.data(), data_out.data(), serialized_vw.data_sz()), 0);
+  BOOST_CHECK_EQUAL(llc->get_data(data_out), error_code::success);
+  test_utils::compare_vw(*vw, *test_utils::create_vw(command_line, data_out));
+
+  // check that data has not changed
+  BOOST_CHECK_EQUAL(llc->get_data(data_out), error_code::success);
+  test_utils::compare_vw(*vw, *test_utils::create_vw(command_line, data_out));
 
   // delta should do nothing since we didn't train on any new examples
   auto delta_reader =
       VW::io::create_buffer_view(reinterpret_cast<const char*>(serialized_delta.data()), serialized_delta.size());
   auto delta = VW::model_delta::deserialize(*delta_reader);
   auto vw_new = *vw + *delta;
-  BOOST_CHECK_EQUAL(vw->sd->weighted_labeled_examples, vw_new->sd->weighted_labeled_examples);
+  test_utils::compare_vw(*vw, *vw_new);
 }

@@ -17,6 +17,8 @@ namespace
 // examples is cleared at the end of this function
 void learn_and_finish_examples(VW::workspace& vw, VW::multi_ex& examples)
 {
+  if (examples.empty()) return;
+
   VW::setup_examples(vw, examples);
   if (vw.l->is_multiline())
   {
@@ -28,6 +30,7 @@ void learn_and_finish_examples(VW::workspace& vw, VW::multi_ex& examples)
     for (auto example : examples) vw.learn(*example);
     for (auto example : examples) vw.finish_example(*example);
   }
+
   examples.clear();
 }
 }  // namespace
