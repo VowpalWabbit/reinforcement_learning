@@ -5,18 +5,15 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "common_test_utils.h"
 #include "err_constants.h"
 #include "factory_resolver.h"
 #include "federation/federated_client.h"
 #include "federation/local_client.h"
-#include "vw/config/options.h"
-#include "vw/config/options_cli.h"
-#include "vw/core/io_buf.h"
 #include "vw/core/merge.h"
 #include "vw/core/parse_example.h"
 #include "vw/core/parse_example_json.h"
 #include "vw/core/vw.h"
-#include "vw/io/io_adapter.h"
 
 #include <cstdio>
 #include <memory>
@@ -55,12 +52,9 @@ BOOST_AUTO_TEST_CASE(send_delta_update)
   model_management::model_data data;
   bool model_received = false;
   BOOST_CHECK_EQUAL(client->try_get_model("test_app_id", data, model_received), error_code::success);
-  auto opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(std::vector<std::string>{}));
-  auto original_workspace =
-      VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data.data(), data.data_sz()));
-  opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(std::vector<std::string>{}));
-  auto workspace =
-      VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data.data(), data.data_sz()));
+
+  auto original_workspace = test_utils::create_vw("", data);
+  auto workspace = test_utils::create_vw("", data);
   std::string json_text = R"(
     {
       "s_": "1",

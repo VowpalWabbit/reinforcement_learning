@@ -1,10 +1,9 @@
 #include <boost/test/unit_test.hpp>
 
+#include "common_test_utils.h"
 #include "constants.h"
 #include "err_constants.h"
 #include "federation/vw_trainable_model.h"
-#include "vw/config/options_cli.h"
-#include "vw/core/parse_primitives.h"
 #include "vw/core/shared_data.h"
 #include "vw/core/vw.h"
 
@@ -26,8 +25,7 @@ BOOST_AUTO_TEST_CASE(trainable_model_set_get_data)
   utility::configuration config;
   setup_config(config);
   const std::string command_line = config.get(name::MODEL_VW_INITIAL_COMMAND_LINE, "");
-  auto opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(VW::split_command_line(command_line)));
-  std::unique_ptr<VW::workspace> vw = VW::initialize_experimental(std::move(opts));
+  auto vw = test_utils::create_vw(command_line);
 
   // learn on one example
   auto ex = VW::read_example(*vw, "1 | a");
@@ -44,9 +42,7 @@ BOOST_AUTO_TEST_CASE(trainable_model_set_get_data)
   // get data out and check that it's equal
   model_management::model_data data_out;
   BOOST_CHECK_EQUAL(model->get_data(data_out), error_code::success);
-  opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(VW::split_command_line(command_line)));
-  std::unique_ptr<VW::workspace> vw_out =
-      VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data_out.data(), data_out.data_sz()));
+  auto vw_out = test_utils::create_vw(command_line, data_out);
   BOOST_CHECK_EQUAL(vw_out->sd->weighted_labeled_examples, example_count);
 }
 
@@ -55,10 +51,8 @@ BOOST_AUTO_TEST_CASE(trainable_model_learn_and_create_delta)
   const std::string command_line = "--quiet --preserve_performance_counters";
 
   // create 2 copies of the base VW workspace
-  auto opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(VW::split_command_line(command_line)));
-  std::unique_ptr<VW::workspace> vw1 = VW::initialize_experimental(std::move(opts));
-  opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(VW::split_command_line(command_line)));
-  std::unique_ptr<VW::workspace> vw2 = VW::initialize_experimental(std::move(opts));
+  auto vw1 = test_utils::create_vw(command_line);
+  auto vw2 = test_utils::create_vw(command_line);
 
   // learn on one example
   VW::example* ex = VW::read_example(*vw1, "1 | a");
@@ -76,9 +70,8 @@ BOOST_AUTO_TEST_CASE(trainable_model_learn_and_create_delta)
   BOOST_CHECK_EQUAL(trainable_vw_model::create(trainable_model, config), error_code::success);
   BOOST_CHECK_EQUAL(trainable_model->set_model(std::move(vw1)), error_code::success);
 
-  // learn on another example
-  opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(VW::split_command_line(command_line)));
-  std::unique_ptr<VW::workspace> vw3 = VW::initialize_experimental(std::move(opts));
+  // train the trainable_vw_model on another example
+  auto vw3 = test_utils::create_vw(command_line);
   std::vector<VW::example*> examples;
   examples.push_back(VW::read_example(*vw3, "1 | b"));
   BOOST_CHECK_EQUAL(trainable_model->learn(*vw3, examples), error_code::success);
@@ -87,9 +80,7 @@ BOOST_AUTO_TEST_CASE(trainable_model_learn_and_create_delta)
   // get data in trainable model
   model_management::model_data data_out;
   BOOST_CHECK_EQUAL(trainable_model->get_data(data_out), error_code::success);
-  opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(VW::split_command_line(command_line)));
-  std::unique_ptr<VW::workspace> vw1_updated =
-      VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data_out.data(), data_out.data_sz()));
+  auto vw1_updated = test_utils::create_vw(command_line, data_out);
 
   // get model delta and update vw2 workspace
   VW::model_delta delta(nullptr);

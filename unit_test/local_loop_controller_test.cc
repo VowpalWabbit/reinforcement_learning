@@ -1,5 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
+#include "common_test_utils.h"
 #include "configuration.h"
 #include "constants.h"
 #include "err_constants.h"
@@ -8,11 +9,8 @@
 #include "federation/local_client.h"
 #include "federation/local_loop_controller.h"
 #include "federation/sender_joined_log_provider.h"
-#include "vw/config/options_cli.h"
-#include "vw/core/parse_primitives.h"
 #include "vw/core/shared_data.h"
 #include "vw/core/vw.h"
-#include "vw/io/io_adapter.h"
 
 using namespace reinforcement_learning;
 
@@ -183,30 +181,21 @@ BOOST_AUTO_TEST_CASE(update_get_model_data)
 
   // create a model and train on an example
   const std::string command_line = config.get(name::MODEL_VW_INITIAL_COMMAND_LINE, "");
-  auto opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(VW::split_command_line(command_line)));
-  auto vw = VW::initialize_experimental(std::move(opts));
+  auto vw = test_utils::create_vw(command_line);
   auto ex = VW::read_example(*vw, "1 | a");
   vw->learn(*ex);
   vw->finish_example(*ex);
 
-  // serialize the model for mock client to consume
-  io_buf io_buffer;
-  auto backing_buffer = std::make_shared<std::vector<char>>();
-  io_buffer.add_file(VW::io::create_vector_writer(backing_buffer));
-  VW::save_predictor(*vw, io_buffer);
-
   // this should update the internal model
-  model_management::model_data data_in;
-  auto* data_in_buffer = data_in.alloc(backing_buffer->size());
-  std::memcpy(data_in_buffer, backing_buffer->data(), backing_buffer->size());
-  mock_client->load_model_data(data_in);
+  model_management::model_data serialized_vw = test_utils::save_vw(*vw);
+  mock_client->load_model_data(serialized_vw);
   BOOST_CHECK_EQUAL(test_llc->update_global(), error_code::success);
 
   // check that data retrieved is the same as data provided
   model_management::model_data data_out;
   BOOST_CHECK_EQUAL(test_llc->get_data(data_out), error_code::success);
-  BOOST_CHECK_EQUAL(data_in.data_sz(), data_out.data_sz());
-  BOOST_CHECK_EQUAL(std::memcmp(data_in.data(), data_out.data(), data_in.data_sz()), 0);
+  BOOST_CHECK_EQUAL(serialized_vw.data_sz(), data_out.data_sz());
+  BOOST_CHECK_EQUAL(std::memcmp(serialized_vw.data(), data_out.data(), serialized_vw.data_sz()), 0);
 
   // this should generate a model delta
   BOOST_CHECK_EQUAL(test_llc->update_global(), error_code::success);
@@ -215,8 +204,8 @@ BOOST_AUTO_TEST_CASE(update_get_model_data)
 
   // check that data has not changed
   BOOST_CHECK_EQUAL(test_llc->get_data(data_out), error_code::success);
-  BOOST_CHECK_EQUAL(data_in.data_sz(), data_out.data_sz());
-  BOOST_CHECK_EQUAL(std::memcmp(data_in.data(), data_out.data(), data_in.data_sz()), 0);
+  BOOST_CHECK_EQUAL(serialized_vw.data_sz(), data_out.data_sz());
+  BOOST_CHECK_EQUAL(std::memcmp(serialized_vw.data(), data_out.data(), serialized_vw.data_sz()), 0);
 
   // delta should do nothing since we didn't train on any new examples
   auto delta_reader =
