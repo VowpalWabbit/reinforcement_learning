@@ -2,6 +2,7 @@
 
 #include "api_status.h"
 #include "error_callback_fn.h"
+#include "factory_resolver.h"
 #include "federation/event_sink.h"
 #include "federation/federated_client.h"
 #include "federation/joined_log_provider.h"
@@ -41,8 +42,7 @@ public:
   std::unique_ptr<i_sender> get_local_sender();
 
   // Returns a sender factory function bound to get_local_sender()
-  std::function<int(i_sender**, const utility::configuration&, error_callback_fn*, i_trace*, api_status*)>
-  get_local_sender_factory();
+  sender_factory_t::create_fn get_local_sender_factory();
 
   virtual ~local_loop_controller() = default;
 

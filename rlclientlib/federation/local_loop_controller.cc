@@ -94,8 +94,7 @@ int local_loop_controller::get_data(model_management::model_data& data, api_stat
 
 std::unique_ptr<i_sender> local_loop_controller::get_local_sender() { return _event_sink->get_sender_proxy(); }
 
-std::function<int(i_sender**, const utility::configuration&, error_callback_fn*, i_trace*, api_status*)>
-local_loop_controller::get_local_sender_factory()
+sender_factory_t::create_fn local_loop_controller::get_local_sender_factory()
 {
   return [this](i_sender** retval, const utility::configuration& cfg, error_callback_fn* error_cb,
              i_trace* trace_logger, api_status* status) {

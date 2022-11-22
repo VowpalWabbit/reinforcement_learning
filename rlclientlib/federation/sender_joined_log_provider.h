@@ -29,7 +29,7 @@ public:
   // Add an event batch to the joiner
   // Input should consist of a preamble and an EventBatch flatbuffer
   RL_ATTR(nodiscard)
-  virtual int receive_events(const i_sender::buffer& data, api_status* status) override;
+  virtual int receive_events(const i_sender::buffer& data, api_status* status = nullptr) override;
 
   virtual ~sender_joined_log_provider() = default;
 
