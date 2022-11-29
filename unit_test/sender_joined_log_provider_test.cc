@@ -16,6 +16,7 @@
 
 #include <flatbuffers/flatbuffers.h>
 
+#include <chrono>
 #include <cstdint>
 #include <set>
 #include <vector>
@@ -78,7 +79,13 @@ struct test_event
 
 inline bool operator<(const test_event& te1, const test_event& te2)
 {
-  return std::tie(te2._event_id, te2._time, te2._payload_type, te2._payload) <
+  return std::tie(te1._event_id, te1._time, te1._payload_type, te1._payload) <
+      std::tie(te2._event_id, te2._time, te2._payload_type, te2._payload);
+}
+
+inline bool operator==(const test_event& te1, const test_event& te2)
+{
+  return std::tie(te1._event_id, te1._time, te1._payload_type, te1._payload) ==
       std::tie(te2._event_id, te2._time, te2._payload_type, te2._payload);
 }
 
@@ -104,6 +111,8 @@ struct test_event_batch
     }
     return true;
   }
+
+  bool operator==(const std::set<test_event>& other) { return _batch == other; }
 };  // struct test_event_batch
 
 std::shared_ptr<utility::data_buffer> create_message(test_event t_event)
@@ -130,6 +139,7 @@ std::shared_ptr<utility::data_buffer> create_message(test_event t_event)
   auto data_buffer = std::make_shared<utility::data_buffer>(body_size);
   BOOST_TEST(pre.write_to_bytes(data_buffer->preamble_begin(), data_buffer->preamble_size()));
   std::memcpy(data_buffer->body_begin(), event_batch_buffer.data(), event_batch_buffer.size());
+  data_buffer->set_body_endoffset(data_buffer->get_body_beginoffset() + event_batch_buffer.size());
   return data_buffer;
 }
 
@@ -229,26 +239,115 @@ std::vector<test_event_batch> parse_joined_log(std::unique_ptr<VW::io::reader>&&
   return output;
 }
 
-utility::configuration get_test_config()
+std::unique_ptr<sender_joined_log_provider> create_test_object()
 {
   utility::configuration config;
   config.set(name::MODEL_VW_INITIAL_COMMAND_LINE, "--quiet --preserve_performance_counters");
   config.set(name::PROTOCOL_VERSION, "2");
-  config.set(name::EUD_DURATION, "0:0:0");
-  return config;
+  config.set(name::EUD_DURATION, "0:0:10");  // EUD set to 10 seconds for all tests here
+
+  std::unique_ptr<sender_joined_log_provider> sjlp;
+  BOOST_CHECK_EQUAL(sender_joined_log_provider::create(sjlp, config), error_code::success);
+  return sjlp;
+}
+
+timestamp get_time(int seconds_from_now = 0)
+{
+  auto now = std::chrono::system_clock::now();
+  auto time = now + std::chrono::seconds(seconds_from_now);
+  return timestamp_from_chrono(time);
 }
 
 }  // namespace
 
-BOOST_AUTO_TEST_CASE(empty_join_test)
+BOOST_AUTO_TEST_CASE(empty_join)
 {
-  auto config = get_test_config();
-  std::unique_ptr<sender_joined_log_provider> sjlp;
-  BOOST_CHECK_EQUAL(sender_joined_log_provider::create(sjlp, config), error_code::success);
+  auto sjlp = create_test_object();
+  std::unique_ptr<VW::io::reader> output;
+  BOOST_CHECK_EQUAL(sjlp->invoke_join(output), error_code::success);
+
+  auto result = parse_joined_log(std::move(output));
+  BOOST_CHECK_EQUAL(result.size(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(one_interaction_before_eud)
+{
+  auto sjlp = create_test_object();
+  test_event evt("id", get_time(0), fbv2::PayloadType_CB, "test payload");
+  sjlp->receive_events(create_message(evt));
 
   std::unique_ptr<VW::io::reader> output;
   BOOST_CHECK_EQUAL(sjlp->invoke_join(output), error_code::success);
 
   auto result = parse_joined_log(std::move(output));
   BOOST_CHECK_EQUAL(result.size(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(one_interaction_after_eud)
+{
+  auto sjlp = create_test_object();
+  test_event evt("id", get_time(-99), fbv2::PayloadType_CB, "test payload");
+  sjlp->receive_events(create_message(evt));
+
+  std::unique_ptr<VW::io::reader> output;
+  BOOST_CHECK_EQUAL(sjlp->invoke_join(output), error_code::success);
+
+  auto result = parse_joined_log(std::move(output));
+  BOOST_CHECK_EQUAL(result.size(), 1);
+  BOOST_CHECK(result[0] == (std::set<test_event>{evt}));
+}
+
+BOOST_AUTO_TEST_CASE(one_interaction_with_observations)
+{
+  auto sjlp = create_test_object();
+  test_event evt1("id", get_time(-20), fbv2::PayloadType_CB, "test payload");
+  test_event evt2("id", get_time(-19), fbv2::PayloadType_Outcome, "observation 1");
+  test_event evt3("id", get_time(-15), fbv2::PayloadType_Outcome, "observation 2");
+  test_event evt4("id", get_time(-5), fbv2::PayloadType_Outcome, "this observation is past eud");
+  sjlp->receive_events(create_message(evt1));
+  sjlp->receive_events(create_message(evt2));
+  sjlp->receive_events(create_message(evt3));
+  sjlp->receive_events(create_message(evt4));
+
+  std::unique_ptr<VW::io::reader> output;
+  BOOST_CHECK_EQUAL(sjlp->invoke_join(output), error_code::success);
+
+  auto result = parse_joined_log(std::move(output));
+  BOOST_CHECK_EQUAL(result.size(), 1);
+  BOOST_CHECK(result[0] == (std::set<test_event>{evt1, evt2, evt3}));
+}
+
+BOOST_AUTO_TEST_CASE(multiple_interactions_and_observations)
+{
+  auto sjlp = create_test_object();
+  test_event evt1("id_0", get_time(-20), fbv2::PayloadType_CB, "test payload");
+  test_event evt2("id_0", get_time(-19), fbv2::PayloadType_Outcome, "observation 1");
+  test_event evt3("id_0", get_time(-15), fbv2::PayloadType_Outcome, "observation 2");
+  test_event evt4("id_0", get_time(-5), fbv2::PayloadType_Outcome, "this observation is past eud");
+  test_event evt5("id_1", get_time(-80), fbv2::PayloadType_CB, "test payload");
+  test_event evt6("id_2", get_time(-50), fbv2::PayloadType_CB, "test payload");
+  test_event evt7("id_2", get_time(-49), fbv2::PayloadType_Outcome, "observation 1");
+  test_event evt8("id_3", get_time(-1), fbv2::PayloadType_CB, "this event is before eud");
+  test_event evt9("id_4", get_time(-15), fbv2::PayloadType_CB, "test payload");
+
+  // add events in order of time
+  sjlp->receive_events(create_message(evt5));
+  sjlp->receive_events(create_message(evt6));
+  sjlp->receive_events(create_message(evt7));
+  sjlp->receive_events(create_message(evt1));
+  sjlp->receive_events(create_message(evt2));
+  sjlp->receive_events(create_message(evt9));
+  sjlp->receive_events(create_message(evt3));
+  sjlp->receive_events(create_message(evt4));
+  sjlp->receive_events(create_message(evt8));
+
+  std::unique_ptr<VW::io::reader> output;
+  BOOST_CHECK_EQUAL(sjlp->invoke_join(output), error_code::success);
+
+  auto result = parse_joined_log(std::move(output));
+  BOOST_CHECK_EQUAL(result.size(), 4);
+  BOOST_CHECK(result[0] == (std::set<test_event>{evt5}));
+  BOOST_CHECK(result[1] == (std::set<test_event>{evt6, evt7}));
+  BOOST_CHECK(result[2] == (std::set<test_event>{evt1, evt2, evt3}));
+  BOOST_CHECK(result[3] == (std::set<test_event>{evt9}));
 }

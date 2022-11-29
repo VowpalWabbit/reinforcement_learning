@@ -111,6 +111,11 @@ int emit_regular_message(std::vector<uint8_t>& output, flatbuffers::FlatBufferBu
 
   output.reserve(output.size() + size);
   output.insert(std::end(output), buffer.data(), buffer.data() + size);
+
+  uint32_t padding_size = size % 8;
+  output.reserve(output.size() + padding_size);
+  output.insert(std::end(output), padding_size, 0);
+
   return 0;
 }
 }  // namespace
@@ -217,20 +222,29 @@ int sender_joined_log_provider::receive_events(const i_sender::buffer& data, rei
   if (res->metadata()->content_encoding()->str() != "IDENTITY")
   { RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << "Can only handle IDENTITY encoding"; }
 
-  for (auto message : *res->events())
+  for (auto serialized_event : *res->events())
   {
-    const auto* event_payload = message->payload();
-    auto* event = flatbuffers::GetRoot<reinforcement_learning::messages::flatbuff::v2::Event>(event_payload);
+    const auto* serialized_payload = serialized_event->payload();
+    const auto* event =
+        flatbuffers::GetRoot<reinforcement_learning::messages::flatbuff::v2::Event>(serialized_payload->data());
 
     std::string event_id = event->meta()->id()->str();
-    std::vector<uint8_t> payload(message->payload()->data(), message->payload()->data() + message->payload()->size());
+    std::vector<uint8_t> joined_event_data(
+        serialized_payload->data(), serialized_payload->data() + serialized_payload->size());
     auto event_timestamp = to_rl_timestamp(*event->meta()->client_time_utc());
 
-    if (event->meta()->payload_type() == reinforcement_learning::messages::flatbuff::v2::PayloadType_CB)
-    { _interactions.emplace(std::make_tuple(event_timestamp, event_id), std::move(payload)); }
-
-    if (event->meta()->payload_type() == reinforcement_learning::messages::flatbuff::v2::PayloadType_Outcome)
-    { _observations[event_id].emplace_back(std::make_tuple(event_timestamp, std::move(payload))); }
+    switch (event->meta()->payload_type())
+    {
+      case reinforcement_learning::messages::flatbuff::v2::PayloadType_CB:
+        _interactions.emplace(std::make_tuple(event_timestamp, event_id), std::move(joined_event_data));
+        break;
+      case reinforcement_learning::messages::flatbuff::v2::PayloadType_Outcome:
+        _observations[event_id].emplace_back(std::make_tuple(event_timestamp, std::move(joined_event_data)));
+        break;
+      default:
+        RETURN_ERROR_LS(_trace_logger, status, invalid_argument)
+            << "Could not process payload type: " << event->meta()->payload_type();
+    }
   }
   return reinforcement_learning::error_code::success;
 }
