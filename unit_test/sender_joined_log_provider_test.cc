@@ -137,7 +137,7 @@ bool read_uint32(io_buf& buffer, uint32_t& output)
 {
   char* read_ptr = nullptr;
   auto len = buffer.buf_read(read_ptr, sizeof(uint32_t));
-  if (len < sizeof(uint32_t) || read_ptr == nullptr) return false;
+  if (len != sizeof(uint32_t) || read_ptr == nullptr) return false;
   output = *reinterpret_cast<uint32_t*>(read_ptr);
   return true;
 }
@@ -154,7 +154,7 @@ bool read_message(io_buf& buffer, uint32_t& message_type_out, std::vector<uint8_
   }
 
   uint32_t size = 0;
-  BOOST_TEST(read_uint32(buffer, size));
+  BOOST_TEST(read_uint32(buffer, size), "could not read payload size");
 
   if (message_type_out == MSG_TYPE_FILEMAGIC)
   {
@@ -180,12 +180,14 @@ bool read_message(io_buf& buffer, uint32_t& message_type_out, std::vector<uint8_
   return true;
 }
 
-std::vector<test_event_batch> parse_joined_log(io_buf& buffer)
+std::vector<test_event_batch> parse_joined_log(std::unique_ptr<VW::io::reader>&& joined_log)
 {
-  uint32_t message_type;
-  std::vector<uint8_t> payload;
+  io_buf buffer;
+  buffer.add_file(std::move(joined_log));
 
   // must begin with file magic message
+  uint32_t message_type;
+  std::vector<uint8_t> payload;
   BOOST_TEST(read_message(buffer, message_type, payload), "could not read file magic message at start of binary log");
   BOOST_CHECK_EQUAL(message_type, MSG_TYPE_FILEMAGIC);
   BOOST_TEST(payload.empty(), "file magic message has non-empty payload");
@@ -196,20 +198,28 @@ std::vector<test_event_batch> parse_joined_log(io_buf& buffer)
     if (message_type == MSG_TYPE_REGULAR)
     {
       auto joined_payload = flatbuffers::GetRoot<fbv2::JoinedPayload>(payload.data());
-      auto verifier = flatbuffers::Verifier(payload.data(), payload.size());
-      BOOST_TEST(joined_payload->Verify(verifier), "verification failed on JoinedPayload flatbuffer");
+      auto joined_payload_verifier = flatbuffers::Verifier(payload.data(), payload.size());
+      BOOST_TEST(joined_payload->Verify(joined_payload_verifier), "verification failed on JoinedPayload flatbuffer");
 
       test_event_batch batch;
       auto joined_payload_events = joined_payload->events();
+      BOOST_CHECK_NE(joined_payload_events, nullptr);
+
       for (auto joined_event : *joined_payload_events)
       {
+        BOOST_CHECK_NE(joined_event, nullptr);
+        BOOST_CHECK_NE(joined_event->event(), nullptr);
         auto event_fb = flatbuffers::GetRoot<fbv2::Event>(joined_event->event()->data());
+        auto event_verifier = flatbuffers::Verifier(joined_event->event()->data(), joined_event->event()->size());
+        BOOST_TEST(event_fb->Verify(event_verifier), "verification failed on Event flatbuffer");
+
         BOOST_CHECK_NE(event_fb->payload(), nullptr);
         BOOST_CHECK_NE(event_fb->meta(), nullptr);
         BOOST_CHECK_NE(event_fb->meta()->id(), nullptr);
         BOOST_CHECK_NE(event_fb->meta()->client_time_utc(), nullptr);
         BOOST_TEST(batch.add_event(test_event(event_fb)), "tried to insert duplicate event into event batch");
       }
+
       BOOST_TEST(batch.verify(), "event batch was empty or has bad event id");
       output.push_back(std::move(batch));
     }
@@ -229,3 +239,16 @@ utility::configuration get_test_config()
 }
 
 }  // namespace
+
+BOOST_AUTO_TEST_CASE(empty_join_test)
+{
+  auto config = get_test_config();
+  std::unique_ptr<sender_joined_log_provider> sjlp;
+  BOOST_CHECK_EQUAL(sender_joined_log_provider::create(sjlp, config), error_code::success);
+
+  std::unique_ptr<VW::io::reader> output;
+  BOOST_CHECK_EQUAL(sjlp->invoke_join(output), error_code::success);
+
+  auto result = parse_joined_log(std::move(output));
+  BOOST_CHECK_EQUAL(result.size(), 0);
+}

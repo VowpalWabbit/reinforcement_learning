@@ -79,31 +79,35 @@ reinforcement_learning::messages::flatbuff::v2::TimeStamp from_rl_timestamp(cons
       ts.year, ts.month, ts.day, ts.hour, ts.minute, ts.second, ts.sub_second);
 }
 
-int emit_filemagic_message(std::vector<uint8_t>& output)
+void emit_uint32(std::vector<uint8_t>& output, uint32_t data)
 {
   // TODO consider doing this a safer way
   // Check endianness requirement of format and make sure we get that right here.
-  uint32_t filemagic = 0x42465756;
-  output.reserve(output.size() + 4);
-  output.insert(std::end(output), reinterpret_cast<uint8_t*>(&filemagic), reinterpret_cast<uint8_t*>(&filemagic) + 4);
+  output.reserve(output.size() + sizeof(uint32_t));
+  output.insert(
+      std::end(output), reinterpret_cast<uint8_t*>(&data), reinterpret_cast<uint8_t*>(&data) + sizeof(uint32_t));
+}
+
+int emit_filemagic_message(std::vector<uint8_t>& output)
+{
+  constexpr uint32_t filemagic = 0x42465756;
+  constexpr uint32_t version = 1;
+  emit_uint32(output, filemagic);
+  emit_uint32(output, version);
   return 0;
 }
 
 int emit_regular_message(std::vector<uint8_t>& output, flatbuffers::FlatBufferBuilder& fbb,
     flatbuffers::Offset<reinforcement_learning::messages::flatbuff::v2::JoinedPayload> joined_payload)
 {
-  // TODO consider doing this a safer way
-  // Check endianness requirement of format and make sure we get that right here.
-  uint32_t regular = 0xFFFFFFFF;
-  output.reserve(output.size() + 4);
-  output.insert(std::end(output), reinterpret_cast<uint8_t*>(&regular), reinterpret_cast<uint8_t*>(&regular) + 4);
+  constexpr uint32_t regular = 0xFFFFFFFF;
+  emit_uint32(output, regular);
 
   fbb.Finish(joined_payload);
   auto buffer = fbb.Release();
 
   uint32_t size = buffer.size();
-  output.reserve(output.size() + 4);
-  output.insert(std::end(output), reinterpret_cast<uint8_t*>(&size), reinterpret_cast<uint8_t*>(&size) + 4);
+  emit_uint32(output, size);
 
   output.reserve(output.size() + size);
   output.insert(std::end(output), buffer.data(), buffer.data() + size);
