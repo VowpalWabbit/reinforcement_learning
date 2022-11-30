@@ -17,7 +17,7 @@ namespace
 // examples is cleared at the end of this function
 void learn_and_finish_examples(VW::workspace& vw, VW::multi_ex& examples)
 {
-  if (examples.empty()) return;
+  if (examples.empty()) { return; }
 
   VW::setup_examples(vw, examples);
   if (vw.l->is_multiline())
@@ -27,8 +27,8 @@ void learn_and_finish_examples(VW::workspace& vw, VW::multi_ex& examples)
   }
   else
   {
-    for (auto example : examples) vw.learn(*example);
-    for (auto example : examples) vw.finish_example(*example);
+    for (auto example : examples) { vw.learn(*example); }
+    for (auto example : examples) { vw.finish_example(*example); }
   }
 
   examples.clear();
@@ -311,37 +311,61 @@ void trainable_vw_model::copy_current_model_to_starting()
 void trainable_vw_model::configure_joiner(std::unique_ptr<i_joiner>& joiner) const
 {
   if (_problem_type == value::PROBLEM_TYPE_CB)
-    joiner->set_problem_type_config(messages::flatbuff::v2::ProblemType_CB);
+  { joiner->set_problem_type_config(messages::flatbuff::v2::ProblemType_CB); }
   else if (_problem_type == value::PROBLEM_TYPE_CCB)
+  {
     joiner->set_problem_type_config(messages::flatbuff::v2::ProblemType_CCB);
+  }
   else if (_problem_type == value::PROBLEM_TYPE_SLATES)
+  {
     joiner->set_problem_type_config(messages::flatbuff::v2::ProblemType_SLATES);
+  }
   else if (_problem_type == value::PROBLEM_TYPE_CA)
+  {
     joiner->set_problem_type_config(messages::flatbuff::v2::ProblemType_CA);
+  }
   else if (_problem_type == value::PROBLEM_TYPE_MULTISTEP)
+  {
     joiner->set_problem_type_config(messages::flatbuff::v2::ProblemType_MULTISTEP);
+  }
   else
+  {
     joiner->set_problem_type_config(messages::flatbuff::v2::ProblemType_UNKNOWN);
+  }
 
   if (_learning_mode == value::LEARNING_MODE_APPRENTICE)
-    joiner->set_learning_mode_config(messages::flatbuff::v2::LearningModeType_Apprentice);
+  { joiner->set_learning_mode_config(messages::flatbuff::v2::LearningModeType_Apprentice); }
   else if (_learning_mode == value::LEARNING_MODE_LOGGINGONLY)
+  {
     joiner->set_learning_mode_config(messages::flatbuff::v2::LearningModeType_LoggingOnly);
+  }
   else
+  {
     joiner->set_learning_mode_config(messages::flatbuff::v2::LearningModeType_Online);
+  }
 
   if (_reward_function == value::REWARD_FUNCTION_AVERAGE)
-    joiner->set_reward_function(messages::flatbuff::v2::RewardFunctionType_Average);
+  { joiner->set_reward_function(messages::flatbuff::v2::RewardFunctionType_Average); }
   else if (_reward_function == value::REWARD_FUNCTION_MEDIAN)
+  {
     joiner->set_reward_function(messages::flatbuff::v2::RewardFunctionType_Median);
+  }
   else if (_reward_function == value::REWARD_FUNCTION_SUM)
+  {
     joiner->set_reward_function(messages::flatbuff::v2::RewardFunctionType_Sum);
+  }
   else if (_reward_function == value::REWARD_FUNCTION_MIN)
+  {
     joiner->set_reward_function(messages::flatbuff::v2::RewardFunctionType_Min);
+  }
   else if (_reward_function == value::REWARD_FUNCTION_MAX)
+  {
     joiner->set_reward_function(messages::flatbuff::v2::RewardFunctionType_Max);
+  }
   else
+  {
     joiner->set_reward_function(messages::flatbuff::v2::RewardFunctionType_Earliest);
+  }
   joiner->set_default_reward(0.f);
 }
 

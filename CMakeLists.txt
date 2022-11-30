@@ -153,6 +153,13 @@ if(RL_BUILD_BENCHMARKS)
   add_subdirectory(benchmarks)
 endif()
 
+# Add a target to generate all flatbuffer header files, used for clang-tidy
+add_custom_target(fbgen)
+add_dependencies(fbgen fbgenerator_v1 fbgenerator_v2)
+if(TARGET fbgen_external_parser)
+  add_dependencies(fbgen fbgen_external_parser)
+endif()
+
 # Add the nuget subdirectory last
 if(RL_BUILD_NUGET)
   if(WIN32)

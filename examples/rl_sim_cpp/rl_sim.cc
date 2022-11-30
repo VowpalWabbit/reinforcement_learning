@@ -602,7 +602,7 @@ std::string rl_sim::create_event_id()
   return oss.str();
 }
 
-rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm)), _loop_kind(CB)
+rl_sim::rl_sim(const boost::program_options::variables_map& vm) : _options(vm), _loop_kind(CB)
 {
   if (_options["ccb"].as<bool>()) { _loop_kind = CCB; }
   else if (_options["slates"].as<bool>())
