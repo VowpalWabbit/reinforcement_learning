@@ -32,12 +32,6 @@ public:
   RL_ATTR(nodiscard)
   virtual int get_data(model_management::model_data& data, api_status* status = nullptr) override;
 
-  // This updates global state with the federated learning server.
-  // If applicable, it will first report a model delta from local training.
-  // Then it attempts to retreive a new global model.
-  RL_ATTR(nodiscard)
-  int update_global(api_status* status = nullptr);
-
   // Returns a i_sender proxy object to be used for sending events to the internal event sink
   std::unique_ptr<i_sender> get_local_sender();
 
@@ -51,6 +45,12 @@ protected:
   local_loop_controller(std::string app_id, std::unique_ptr<i_federated_client>&& federated_client,
       std::unique_ptr<trainable_vw_model>&& trainable_model, std::shared_ptr<i_joined_log_provider>&& joiner,
       std::shared_ptr<i_event_sink>&& event_sink);
+
+  // This updates global state with the federated learning server.
+  // If applicable, it will first report a model delta from local training.
+  // Then it attempts to retreive a new global model.
+  RL_ATTR(nodiscard)
+  int update_global(api_status* status = nullptr);
 
   // Internal implemetation to run joining and traning to update local state
   RL_ATTR(nodiscard)

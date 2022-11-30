@@ -50,9 +50,6 @@ int local_loop_controller::update_global(api_status* status)
 {
   if (_need_to_send_model_delta)
   {
-    // train on any remaining events
-    RETURN_IF_FAIL(update_local(status));
-
     // get and send the model delta
     auto buffer = std::make_shared<std::vector<char>>();
     auto writer = VW::io::create_vector_writer(buffer);
@@ -88,6 +85,7 @@ int local_loop_controller::update_local(api_status* status)
 int local_loop_controller::get_data(model_management::model_data& data, api_status* status)
 {
   RETURN_IF_FAIL(update_local(status));
+  RETURN_IF_FAIL(update_global(status));
   RETURN_IF_FAIL(_trainable_model->get_data(data, status));
   return error_code::success;
 }

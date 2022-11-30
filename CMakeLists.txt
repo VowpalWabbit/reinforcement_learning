@@ -53,7 +53,7 @@ option(RL_BUILD_NUGET "Build the Nuget package" OFF)
 option(RL_BUILD_EXTERNAL_PARSER "Build external parser version of VW" OFF)
 option(RL_USE_ASAN "Compile with AddressSanitizer" OFF)
 option(RL_USE_UBSAN "Compile with UndefinedBehaviorSanitizer" OFF)
-option(RL_BUILD_FEDERATION "Build code for Federated Learning" OFF)
+option(RL_BUILD_FEDERATION "Build code for Federated Learning" ON)
 
 if(RL_BUILD_FEDERATION)
   add_compile_definitions(RL_BUILD_FEDERATION)
