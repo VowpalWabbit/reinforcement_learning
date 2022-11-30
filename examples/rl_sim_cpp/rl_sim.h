@@ -27,7 +27,7 @@ public:
    *
    * @param vm User defined options
    */
-  explicit rl_sim(boost::program_options::variables_map vm);
+  explicit rl_sim(const boost::program_options::variables_map& vm);
 
   /**
    * @brief Simulation loop

@@ -19,9 +19,7 @@
 #include "vw/common/text_utils.h"
 #include "vw/io/io_adapter.h"
 
-#include <flatbuffers/buffer.h>
-#include <flatbuffers/detached_buffer.h>
-#include <flatbuffers/flatbuffer_builder.h>
+#include <flatbuffers/flatbuffers.h>
 
 #include <chrono>
 #include <cstdint>

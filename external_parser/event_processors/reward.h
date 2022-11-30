@@ -12,7 +12,7 @@ struct outcome_event
   {
   }
   metadata::event_metadata_info metadata;
-  v2::IndexValue index_type;
+  reinforcement_learning::messages::flatbuff::v2::IndexValue index_type;
   std::string s_index;
   int index;
   std::string s_value;

@@ -23,8 +23,6 @@
 #include "vw/core/json_utils.h"
 // clang-format on
 
-namespace v2 = reinforcement_learning::messages::flatbuff::v2;
-
 enum multistep_reward_funtion_type
 {
   Identity = 0,
