@@ -131,12 +131,12 @@ std::shared_ptr<utility::data_buffer> create_message(test_event t_event)
   auto event_batch_buffer = batch_builder.Release();
 
   // create preamble and put the flatbuffer into utility::data_buffer
-  auto body_size = event_batch_buffer.size();
-  logger::preamble pre = {.reserved = 0,
-      .version = 0,
-      .msg_type = logger::message_type::fb_generic_event_collection,
-      .msg_size = static_cast<uint32_t>(body_size)};
-  auto data_buffer = std::make_shared<utility::data_buffer>(body_size);
+  logger::preamble pre;
+  pre.reserved = 0;
+  pre.version = 0;
+  pre.msg_type = logger::message_type::fb_generic_event_collection;
+  pre.msg_size = static_cast<uint32_t>(event_batch_buffer.size());
+  auto data_buffer = std::make_shared<utility::data_buffer>(event_batch_buffer.size());
   BOOST_TEST(pre.write_to_bytes(data_buffer->preamble_begin(), data_buffer->preamble_size()));
   std::memcpy(data_buffer->body_begin(), event_batch_buffer.data(), event_batch_buffer.size());
   data_buffer->set_body_endoffset(data_buffer->get_body_beginoffset() + event_batch_buffer.size());

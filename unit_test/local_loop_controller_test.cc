@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(sender_factory_test)
   const char* test_data = "Testing the sender...";
   auto test_data_len = std::char_traits<char>::length(test_data);
 
-  std::shared_ptr<utility::data_buffer> buffer_in = std::make_unique<utility::data_buffer>(test_data_len);
+  std::shared_ptr<utility::data_buffer> buffer_in = VW::make_unique<utility::data_buffer>(test_data_len);
   std::memcpy(buffer_in->raw_begin(), test_data, test_data_len);
   sender->send(buffer_in);
 

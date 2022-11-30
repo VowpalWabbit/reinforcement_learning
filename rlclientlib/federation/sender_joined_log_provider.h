@@ -10,6 +10,7 @@
 #include "vw/io/io_adapter.h"
 
 #include <map>
+#include <mutex>
 #include <unordered_map>
 
 namespace reinforcement_learning
