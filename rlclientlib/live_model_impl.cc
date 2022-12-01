@@ -685,12 +685,24 @@ int live_model_impl::init_model_mgmt(api_status* status)
   RETURN_IF_FAIL(_t_factory->create(&ptransport, tranport_impl, _configuration, status));
 
 #ifdef RL_BUILD_FEDERATION
-  local_loop_controller* local_loop_transport = dynamic_cast<local_loop_controller*>(ptransport);
-  if (local_loop_transport != nullptr)
+  try
   {
-    // The i_data_transport returned by factory is actually a local_loop_controller
-    // Register its sender factory so that events will be sent to it
-    _sender_factory->register_type(value::LOCAL_LOOP_SENDER, local_loop_transport->get_local_sender_factory());
+    local_loop_controller* local_loop_transport = dynamic_cast<local_loop_controller*>(ptransport);
+    if (local_loop_transport != nullptr)
+    {
+      // The i_data_transport returned by factory is actually a local_loop_controller
+      // Register its sender factory so that events will be sent to it
+      _sender_factory->register_type(value::LOCAL_LOOP_SENDER, local_loop_transport->get_local_sender_factory());
+    }
+  }
+  catch (const std::bad_typeid&)
+  {
+    // In MSVC implementation, dynamic_cast on pointers may throw bad_typeid
+    // Do nothing and skip the factory registration
+  }
+  catch (...)
+  {
+    RETURN_ERROR_ARG(_trace_logger.get(), status, create_fn_exception, "unknown exception");
   }
 #endif
 
