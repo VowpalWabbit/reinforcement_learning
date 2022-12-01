@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(one_interaction_before_eud)
 {
   auto sjlp = create_test_object();
   test_event evt("id", get_time(0), fbv2::PayloadType_CB, "test payload");
-  sjlp->receive_events(create_message(evt));
+  BOOST_CHECK_EQUAL(sjlp->receive_events(create_message(evt)), error_code::success);
 
   std::unique_ptr<VW::io::reader> output;
   BOOST_CHECK_EQUAL(sjlp->invoke_join(output), error_code::success);
@@ -287,7 +287,7 @@ BOOST_AUTO_TEST_CASE(one_interaction_after_eud)
 {
   auto sjlp = create_test_object();
   test_event evt("id", get_time(-99), fbv2::PayloadType_CB, "test payload");
-  sjlp->receive_events(create_message(evt));
+  BOOST_CHECK_EQUAL(sjlp->receive_events(create_message(evt)), error_code::success);
 
   std::unique_ptr<VW::io::reader> output;
   BOOST_CHECK_EQUAL(sjlp->invoke_join(output), error_code::success);
@@ -304,10 +304,10 @@ BOOST_AUTO_TEST_CASE(one_interaction_with_observations)
   test_event evt2("id", get_time(-19), fbv2::PayloadType_Outcome, "observation 1");
   test_event evt3("id", get_time(-15), fbv2::PayloadType_Outcome, "observation 2");
   test_event evt4("id", get_time(-5), fbv2::PayloadType_Outcome, "this observation is past eud");
-  sjlp->receive_events(create_message(evt1));
-  sjlp->receive_events(create_message(evt2));
-  sjlp->receive_events(create_message(evt3));
-  sjlp->receive_events(create_message(evt4));
+  BOOST_CHECK_EQUAL(sjlp->receive_events(create_message(evt1)), error_code::success);
+  BOOST_CHECK_EQUAL(sjlp->receive_events(create_message(evt2)), error_code::success);
+  BOOST_CHECK_EQUAL(sjlp->receive_events(create_message(evt3)), error_code::success);
+  BOOST_CHECK_EQUAL(sjlp->receive_events(create_message(evt4)), error_code::success);
 
   std::unique_ptr<VW::io::reader> output;
   BOOST_CHECK_EQUAL(sjlp->invoke_join(output), error_code::success);
@@ -331,15 +331,15 @@ BOOST_AUTO_TEST_CASE(multiple_interactions_and_observations)
   test_event evt9("id_4", get_time(-15), fbv2::PayloadType_CB, "test payload");
 
   // add events in order of time
-  sjlp->receive_events(create_message(evt5));
-  sjlp->receive_events(create_message(evt6));
-  sjlp->receive_events(create_message(evt7));
-  sjlp->receive_events(create_message(evt1));
-  sjlp->receive_events(create_message(evt2));
-  sjlp->receive_events(create_message(evt9));
-  sjlp->receive_events(create_message(evt3));
-  sjlp->receive_events(create_message(evt4));
-  sjlp->receive_events(create_message(evt8));
+  BOOST_CHECK_EQUAL(sjlp->receive_events(create_message(evt5)), error_code::success);
+  BOOST_CHECK_EQUAL(sjlp->receive_events(create_message(evt6)), error_code::success);
+  BOOST_CHECK_EQUAL(sjlp->receive_events(create_message(evt7)), error_code::success);
+  BOOST_CHECK_EQUAL(sjlp->receive_events(create_message(evt1)), error_code::success);
+  BOOST_CHECK_EQUAL(sjlp->receive_events(create_message(evt2)), error_code::success);
+  BOOST_CHECK_EQUAL(sjlp->receive_events(create_message(evt9)), error_code::success);
+  BOOST_CHECK_EQUAL(sjlp->receive_events(create_message(evt3)), error_code::success);
+  BOOST_CHECK_EQUAL(sjlp->receive_events(create_message(evt4)), error_code::success);
+  BOOST_CHECK_EQUAL(sjlp->receive_events(create_message(evt8)), error_code::success);
 
   std::unique_ptr<VW::io::reader> output;
   BOOST_CHECK_EQUAL(sjlp->invoke_join(output), error_code::success);
