@@ -19,6 +19,8 @@
 #include <fstream>
 #include <iostream>
 
+namespace v2 = reinforcement_learning::messages::flatbuff::v2;
+
 // TODO need to check if errors will be detected from stderr/stdout/other and
 // use appropriate logger
 
