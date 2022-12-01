@@ -163,7 +163,7 @@ int sender_joined_log_provider::invoke_join(std::unique_ptr<VW::io::reader>& bat
 
       auto ts = from_rl_timestamp(std::get<0>(it->first));
       events.push_back(reinforcement_learning::messages::flatbuff::v2::CreateJoinedEventDirect(fbb, &it->second, &ts));
-      const auto event_id = std::get<1>(it->first);
+      const auto& event_id = std::get<1>(it->first);
       const auto& observations = _observations.find(event_id);
       if (observations != _observations.end())
       {
