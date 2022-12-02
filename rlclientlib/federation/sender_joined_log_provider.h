@@ -39,8 +39,8 @@ private:
   std::map<std::tuple<timestamp, std::string>, std::vector<uint8_t>> _interactions;
   std::unordered_map<std::string, std::vector<std::tuple<timestamp, std::vector<uint8_t>>>> _observations;
   std::chrono::seconds _eud_offset;
-  std::mutex _mutex;
   reinforcement_learning::i_trace* _trace_logger = nullptr;
+  std::mutex _mutex;
 };
 
 }  // namespace reinforcement_learning

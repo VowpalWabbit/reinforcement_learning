@@ -1,5 +1,3 @@
-
-
 #include "sender_joined_log_provider.h"
 
 #include "api_status.h"
@@ -58,7 +56,7 @@ private:
   uint8_t* _read_head;
 };
 
-timestamp to_rl_timestamp(const reinforcement_learning::messages::flatbuff::v2::TimeStamp& ts)
+timestamp to_rl_timestamp(const messages::flatbuff::v2::TimeStamp& ts)
 {
   timestamp output;
   output.year = ts.year();
@@ -71,10 +69,9 @@ timestamp to_rl_timestamp(const reinforcement_learning::messages::flatbuff::v2::
   return output;
 }
 
-reinforcement_learning::messages::flatbuff::v2::TimeStamp from_rl_timestamp(const timestamp& ts)
+messages::flatbuff::v2::TimeStamp from_rl_timestamp(const timestamp& ts)
 {
-  return reinforcement_learning::messages::flatbuff::v2::TimeStamp(
-      ts.year, ts.month, ts.day, ts.hour, ts.minute, ts.second, ts.sub_second);
+  return messages::flatbuff::v2::TimeStamp(ts.year, ts.month, ts.day, ts.hour, ts.minute, ts.second, ts.sub_second);
 }
 
 void emit_uint32(std::vector<uint8_t>& output, uint32_t data)
@@ -96,7 +93,7 @@ int emit_filemagic_message(std::vector<uint8_t>& output)
 }
 
 int emit_regular_message(std::vector<uint8_t>& output, flatbuffers::FlatBufferBuilder& fbb,
-    flatbuffers::Offset<reinforcement_learning::messages::flatbuff::v2::JoinedPayload> joined_payload)
+    flatbuffers::Offset<messages::flatbuff::v2::JoinedPayload> joined_payload)
 {
   constexpr uint32_t regular = 0xFFFFFFFF;
   emit_uint32(output, regular);
@@ -124,15 +121,14 @@ RL_ATTR(nodiscard)
 int sender_joined_log_provider::create(std::unique_ptr<sender_joined_log_provider>& output,
     const utility::configuration& config, i_trace* trace_logger, api_status* status)
 {
-  if (config.get_int(reinforcement_learning::name::PROTOCOL_VERSION, 999) != 2)
+  if (config.get_int(name::PROTOCOL_VERSION, 999) != 2)
   { RETURN_ERROR_LS(trace_logger, status, invalid_argument) << " protocol version 2 required"; }
 
-  const auto* eud_duration = config.get(reinforcement_learning::name::EUD_DURATION, "UNSET");
-  if (eud_duration == reinforcement_learning::string_view("UNSET"))
-  { RETURN_ERROR_ARG(trace_logger, status, invalid_argument, "eudduration must be set"); }
+  std::string eud_duration = config.get(name::EUD_DURATION, "UNSET");
+  if (eud_duration == "UNSET") { RETURN_ERROR_ARG(trace_logger, status, invalid_argument, "eudduration must be set"); }
 
   std::chrono::seconds eud_offset;
-  RETURN_IF_FAIL(reinforcement_learning::parse_eud(eud_duration, eud_offset, status));
+  RETURN_IF_FAIL(parse_eud(eud_duration, eud_offset, status));
 
   output = std::unique_ptr<sender_joined_log_provider>(new sender_joined_log_provider(eud_offset, trace_logger));
   return error_code::success;
@@ -153,7 +149,7 @@ int sender_joined_log_provider::invoke_join(std::unique_ptr<VW::io::reader>& bat
   for (auto it = _interactions.cbegin(); it != _interactions.cend();)
   {
     flatbuffers::FlatBufferBuilder fbb;
-    std::vector<flatbuffers::Offset<reinforcement_learning::messages::flatbuff::v2::JoinedEvent>> events;
+    std::vector<flatbuffers::Offset<messages::flatbuff::v2::JoinedEvent>> events;
 
     const auto& item = *it;
     const auto interaction_time = chrono_from_timestamp(std::get<0>(it->first));
@@ -162,7 +158,7 @@ int sender_joined_log_provider::invoke_join(std::unique_ptr<VW::io::reader>& bat
       const auto reward_cutoff = interaction_time + _eud_offset;
 
       auto ts = from_rl_timestamp(std::get<0>(it->first));
-      events.push_back(reinforcement_learning::messages::flatbuff::v2::CreateJoinedEventDirect(fbb, &it->second, &ts));
+      events.push_back(messages::flatbuff::v2::CreateJoinedEventDirect(fbb, &it->second, &ts));
       const auto& event_id = std::get<1>(it->first);
       const auto& observations = _observations.find(event_id);
       if (observations != _observations.end())
@@ -173,14 +169,13 @@ int sender_joined_log_provider::invoke_join(std::unique_ptr<VW::io::reader>& bat
           if (observation_time <= reward_cutoff)
           {
             auto ts = from_rl_timestamp(std::get<0>(observation));
-            events.push_back(reinforcement_learning::messages::flatbuff::v2::CreateJoinedEventDirect(
-                fbb, &std::get<1>(observation), &ts));
+            events.push_back(messages::flatbuff::v2::CreateJoinedEventDirect(fbb, &std::get<1>(observation), &ts));
           }
         }
         _observations.erase(event_id);
       }
 
-      auto joined_payload = reinforcement_learning::messages::flatbuff::v2::CreateJoinedPayloadDirect(fbb, &events);
+      auto joined_payload = messages::flatbuff::v2::CreateJoinedPayloadDirect(fbb, &events);
       emit_regular_message(result, fbb, joined_payload);
       _interactions.erase(it++);
     }
@@ -197,20 +192,20 @@ int sender_joined_log_provider::invoke_join(std::unique_ptr<VW::io::reader>& bat
   return 0;
 }
 
-int sender_joined_log_provider::receive_events(const i_sender::buffer& data, reinforcement_learning::api_status* status)
+int sender_joined_log_provider::receive_events(const i_sender::buffer& data, api_status* status)
 {
   std::lock_guard<std::mutex> lock(_mutex);
 
-  reinforcement_learning::logger::preamble pre;
-  pre.read_from_bytes(data->preamble_begin(), reinforcement_learning::logger::preamble::size());
+  logger::preamble pre;
+  pre.read_from_bytes(data->preamble_begin(), logger::preamble::size());
 
-  if (pre.msg_type != reinforcement_learning::logger::message_type::fb_generic_event_collection)
+  if (pre.msg_type != logger::message_type::fb_generic_event_collection)
   {
     RETURN_ERROR_LS(_trace_logger, status, invalid_argument)
         << " Message type " << pre.msg_type << " cannot be handled.";
   }
 
-  auto res = reinforcement_learning::messages::flatbuff::v2::GetEventBatch(data->body_begin());
+  auto res = messages::flatbuff::v2::GetEventBatch(data->body_begin());
   flatbuffers::Verifier verifier(data->body_begin(), data->body_filled_size());
   auto result = res->Verify(verifier);
 
@@ -223,8 +218,7 @@ int sender_joined_log_provider::receive_events(const i_sender::buffer& data, rei
   for (auto serialized_event : *res->events())
   {
     const auto* serialized_payload = serialized_event->payload();
-    const auto* event =
-        flatbuffers::GetRoot<reinforcement_learning::messages::flatbuff::v2::Event>(serialized_payload->data());
+    const auto* event = flatbuffers::GetRoot<messages::flatbuff::v2::Event>(serialized_payload->data());
 
     std::string event_id = event->meta()->id()->str();
     std::vector<uint8_t> joined_event_data(
@@ -233,18 +227,24 @@ int sender_joined_log_provider::receive_events(const i_sender::buffer& data, rei
 
     switch (event->meta()->payload_type())
     {
-      case reinforcement_learning::messages::flatbuff::v2::PayloadType_CB:
+      case messages::flatbuff::v2::PayloadType_CB:
+      case messages::flatbuff::v2::PayloadType_CCB:
+      case messages::flatbuff::v2::PayloadType_Slates:
+      case messages::flatbuff::v2::PayloadType_CA:
+      case messages::flatbuff::v2::PayloadType_MultiStep:
         _interactions.emplace(std::make_tuple(event_timestamp, event_id), std::move(joined_event_data));
         break;
-      case reinforcement_learning::messages::flatbuff::v2::PayloadType_Outcome:
+
+      case messages::flatbuff::v2::PayloadType_Outcome:
         _observations[event_id].emplace_back(std::make_tuple(event_timestamp, std::move(joined_event_data)));
         break;
+
       default:
         RETURN_ERROR_LS(_trace_logger, status, invalid_argument)
             << "Could not process payload type: " << event->meta()->payload_type();
     }
   }
-  return reinforcement_learning::error_code::success;
+  return error_code::success;
 }
 
 }  // namespace reinforcement_learning

@@ -40,10 +40,7 @@ void finish_examples(VW::workspace& vw, VW::multi_ex& examples)
 {
   if (examples.empty()) { return; }
 
-  if (vw.l->is_multiline())
-  {
-    vw.finish_example(examples);
-  }
+  if (vw.l->is_multiline()) { vw.finish_example(examples); }
   else
   {
     for (auto example : examples) { vw.finish_example(*example); }

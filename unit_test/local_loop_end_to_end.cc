@@ -9,7 +9,8 @@ using namespace reinforcement_learning;
 BOOST_AUTO_TEST_CASE(local_loop_end_to_end_test)
 {
   utility::configuration config;
-  config.set(name::MODEL_VW_INITIAL_COMMAND_LINE, "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A --preserve_performance_counters");
+  config.set(name::MODEL_VW_INITIAL_COMMAND_LINE,
+      "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A --preserve_performance_counters");
   config.set(name::PROTOCOL_VERSION, "2");
   config.set(name::EUD_DURATION, "0:0:1");
   config.set(name::MODEL_SRC, value::LOCAL_LOOP_MODEL_DATA);
