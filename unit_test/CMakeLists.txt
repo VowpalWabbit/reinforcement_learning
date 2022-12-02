@@ -52,6 +52,7 @@ if(RL_BUILD_FEDERATION)
     eud_test.cc
     local_client_test.cc
     local_loop_controller_test.cc
+    local_loop_end_to_end.cc
     sender_joined_log_provider_test.cc
     trainable_model_test.cc
   )

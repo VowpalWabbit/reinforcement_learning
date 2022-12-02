@@ -33,6 +33,24 @@ void learn_and_finish_examples(VW::workspace& vw, VW::multi_ex& examples)
 
   examples.clear();
 }
+
+// Helper function to call finish_example on VW::multi_ex
+// examples is cleared at the end of this function
+void finish_examples(VW::workspace& vw, VW::multi_ex& examples)
+{
+  if (examples.empty()) { return; }
+
+  if (vw.l->is_multiline())
+  {
+    vw.finish_example(examples);
+  }
+  else
+  {
+    for (auto example : examples) { vw.finish_example(*example); }
+  }
+
+  examples.clear();
+}
 }  // namespace
 
 namespace reinforcement_learning
@@ -188,8 +206,7 @@ int trainable_vw_model::learn(std::unique_ptr<VW::io::reader>&& binary_log, api_
       {
         // cleanup the unused example that the parser was called with
         assert(example_out.size() == 1);
-        _model->finish_example(*example_out[0]);
-        example_out.clear();
+        finish_examples(*_model, example_out);
       }
     } while (example_was_parsed);
   }
