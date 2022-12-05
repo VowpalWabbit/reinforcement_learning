@@ -5,9 +5,11 @@
 #include "joiners/example_joiner.h"
 #include "joiners/multistep_example_joiner.h"
 #include "parse_example_binary.h"
+#include "str_util.h"
 #include "vw/config/options_cli.h"
 #include "vw/core/learner.h"
 #include "vw/core/parse_primitives.h"
+#include "vw/core/shared_data.h"
 #include "vw/core/vw.h"
 #include "vw/io/logger.h"
 
@@ -15,23 +17,27 @@ namespace
 {
 // Helper function to train model on VW::multi_ex
 // examples is cleared at the end of this function
-void learn_and_finish_examples(VW::workspace& vw, VW::multi_ex& examples)
+// returns number of examples learned
+int learn_and_finish_examples(VW::workspace& vw, VW::multi_ex& examples)
 {
-  if (examples.empty()) { return; }
+  if (examples.empty()) { return 0; }
 
   VW::setup_examples(vw, examples);
+
   if (vw.l->is_multiline())
   {
     vw.learn(examples);
     vw.finish_example(examples);
-  }
-  else
-  {
-    for (auto example : examples) { vw.learn(*example); }
-    for (auto example : examples) { vw.finish_example(*example); }
+    examples.clear();
+    return 1;
   }
 
+  // single line
+  for (auto example : examples) { vw.learn(*example); }
+  for (auto example : examples) { vw.finish_example(*example); }
+  int size = examples.size();
   examples.clear();
+  return size;
 }
 
 // Helper function to call finish_example on VW::multi_ex
@@ -47,6 +53,35 @@ void finish_examples(VW::workspace& vw, VW::multi_ex& examples)
   }
 
   examples.clear();
+}
+
+void vw_log_to_trace_logger(void* trace_logger, VW::io::log_level log_level, const std::string& msg)
+{
+  if (trace_logger == nullptr) { return; }
+  auto i_trace_ptr = static_cast<reinforcement_learning::i_trace*>(trace_logger);
+  switch (log_level)
+  {
+    case VW::io::log_level::TRACE_LEVEL:
+    case VW::io::log_level::DEBUG_LEVEL:
+      TRACE_DEBUG(i_trace_ptr, msg);
+      break;
+
+    case VW::io::log_level::INFO_LEVEL:
+      TRACE_INFO(i_trace_ptr, msg);
+      break;
+
+    case VW::io::log_level::WARN_LEVEL:
+      TRACE_WARN(i_trace_ptr, msg);
+      break;
+
+    case VW::io::log_level::ERROR_LEVEL:
+    case VW::io::log_level::CRITICAL_LEVEL:
+      TRACE_ERROR(i_trace_ptr, msg);
+      break;
+
+    default:
+      break;
+  }
 }
 }  // namespace
 
@@ -141,15 +176,21 @@ int trainable_vw_model::get_data(model_management::model_data& data, api_status*
 {
   try
   {
-    io_buf buffer;
+    int example_count = 0;
+    io_buf io_buffer;
     auto backing_buffer = std::make_shared<std::vector<char>>();
-    buffer.add_file(VW::io::create_vector_writer(backing_buffer));
+    io_buffer.add_file(VW::io::create_vector_writer(backing_buffer));
+
     {
       std::lock_guard<std::mutex> lock(_mutex);
-      VW::save_predictor(*_model, buffer);
+      example_count = _model->sd->weighted_labeled_examples;
+      VW::save_predictor(*_model, io_buffer);
     }
     auto* destination_buffer = data.alloc(backing_buffer->size());
     std::memcpy(destination_buffer, backing_buffer->data(), backing_buffer->size());
+
+    TRACE_INFO(_trace_logger,
+        utility::concat("trainable_vw_model::get_data() returning model trained on ", example_count, " examples"));
   }
   catch (const std::exception& e)
   {
@@ -167,6 +208,7 @@ int trainable_vw_model::learn(std::unique_ptr<VW::io::reader>&& binary_log, api_
   if (binary_log.get() == nullptr)
   {
     // TODO handle this as error?
+    TRACE_WARN(_trace_logger, "Received null binary log in trainable_vw_model::learn()");
     return error_code::success;
   }
 
@@ -179,18 +221,19 @@ int trainable_vw_model::learn(std::unique_ptr<VW::io::reader>&& binary_log, api_
 
     std::unique_ptr<i_joiner> joiner;
     if (_problem_type == value::PROBLEM_TYPE_MULTISTEP)
-    { joiner = std::unique_ptr<i_joiner>(new example_joiner(_model.get())); }
+    { joiner = std::unique_ptr<i_joiner>(new multistep_example_joiner(_model.get())); }
     else
     {
-      joiner = std::unique_ptr<i_joiner>(new multistep_example_joiner(_model.get()));
+      joiner = std::unique_ptr<i_joiner>(new example_joiner(_model.get()));
     }
 
     // Set the default joiner options if no checkpoint message is present in the binary log
     configure_joiner(joiner);
 
-    // TODO should we have an actual logger?
-    VW::external::binary_parser binary_parser(std::move(joiner), VW::io::create_null_logger());
+    VW::external::binary_parser binary_parser(
+        std::move(joiner), VW::io::create_custom_sink_logger(_trace_logger, vw_log_to_trace_logger));
 
+    int example_count = 0;
     bool example_was_parsed = false;
     VW::multi_ex example_out;
     do
@@ -198,7 +241,7 @@ int trainable_vw_model::learn(std::unique_ptr<VW::io::reader>&& binary_log, api_
       example_out.push_back(VW::new_unused_example(*_model));
       example_was_parsed = binary_parser.parse_examples(_model.get(), io_reader, example_out);
 
-      if (example_was_parsed) { learn_and_finish_examples(*_model, example_out); }
+      if (example_was_parsed) { example_count += learn_and_finish_examples(*_model, example_out); }
       else
       {
         // cleanup the unused example that the parser was called with
@@ -206,6 +249,8 @@ int trainable_vw_model::learn(std::unique_ptr<VW::io::reader>&& binary_log, api_
         finish_examples(*_model, example_out);
       }
     } while (example_was_parsed);
+
+    TRACE_INFO(_trace_logger, utility::concat("trainable_vw_model::learn() learned on ", example_count, " examples"));
   }
   catch (const std::exception& e)
   {
@@ -244,7 +289,8 @@ int trainable_vw_model::learn(VW::workspace& example_ws, VW::multi_ex& examples,
       examples_copied.insert(examples_copied.end(), example_out.begin(), example_out.end());
     }
 
-    learn_and_finish_examples(*_model, examples_copied);
+    int example_count = learn_and_finish_examples(*_model, examples_copied);
+    TRACE_INFO(_trace_logger, utility::concat("trainable_vw_model::learn() learned on ", example_count, " examples"));
   }
   catch (const std::exception& e)
   {
@@ -261,13 +307,22 @@ int trainable_vw_model::get_model_delta(VW::model_delta& output, api_status* sta
 {
   try
   {
+    int old_example_count = 0;
+    int new_example_count = 0;
     VW::model_delta delta(nullptr);
     {
       std::lock_guard<std::mutex> lock(_mutex);
+      old_example_count = _starting_model->sd->weighted_labeled_examples;
+      new_example_count = _model->sd->weighted_labeled_examples;
       delta = *_model - *_starting_model;
     }
     copy_current_model_to_starting();
     output = std::move(delta);
+
+    TRACE_INFO(_trace_logger,
+        utility::concat("trainable_vw_model::get_model_delta() created model delta with ",
+            new_example_count - old_example_count, " examples (current model: ", new_example_count,
+            ", previous model: ", old_example_count, ")"));
   }
   catch (const std::exception& e)
   {

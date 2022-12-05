@@ -682,7 +682,7 @@ int live_model_impl::init_model_mgmt(api_status* status)
   // Initialize transport for the model using transport factory
   const auto* const tranport_impl = _configuration.get(name::MODEL_SRC, value::get_default_data_transport());
   m::i_data_transport* ptransport = nullptr;
-  RETURN_IF_FAIL(_t_factory->create(&ptransport, tranport_impl, _configuration, status));
+  RETURN_IF_FAIL(_t_factory->create(&ptransport, tranport_impl, _configuration, _trace_logger.get(), status));
 
 #ifdef RL_BUILD_FEDERATION
   try

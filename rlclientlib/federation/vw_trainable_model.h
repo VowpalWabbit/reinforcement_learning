@@ -5,6 +5,7 @@
 #include "federation/joined_log_provider.h"
 #include "joiners/example_joiner.h"
 #include "model_mgmt.h"
+#include "trace_logger.h"
 #include "vw/core/global_data.h"
 #include "vw/core/merge.h"
 
