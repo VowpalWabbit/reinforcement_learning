@@ -255,7 +255,7 @@ timestamp get_time(int seconds_from_now = 0)
 {
   auto now = std::chrono::system_clock::now();
   auto time = now + std::chrono::seconds(seconds_from_now);
-  return timestamp_from_chrono(time);
+  return timestamp(time);
 }
 
 }  // namespace

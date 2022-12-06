@@ -79,8 +79,9 @@ if(RL_USE_UBSAN)
   if(MSVC)
     message(FATAL_ERROR "UBSan not supported on MSVC")
   else()
-    add_compile_options(-fsanitize=undefined -fno-sanitize-recover -fno-omit-frame-pointer -g3)
-    add_link_options(-fsanitize=undefined -fno-sanitize-recover -fno-omit-frame-pointer -g3)
+    # Flatbuffers gives errors with misaligned pointer sanitization, so disable it
+    add_compile_options(-fsanitize=undefined -fno-sanitize=alignment -fno-sanitize-recover -fno-omit-frame-pointer -g3)
+    add_link_options(-fsanitize=undefined -fno-sanitize=alignment -fno-sanitize-recover -fno-omit-frame-pointer -g3)
   endif()
 endif()
 

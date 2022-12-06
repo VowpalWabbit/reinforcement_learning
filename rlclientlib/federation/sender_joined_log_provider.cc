@@ -58,15 +58,7 @@ private:
 
 timestamp to_rl_timestamp(const messages::flatbuff::v2::TimeStamp& ts)
 {
-  timestamp output;
-  output.year = ts.year();
-  output.day = ts.day();
-  output.month = ts.month();
-  output.hour = ts.hour();
-  output.minute = ts.minute();
-  output.second = ts.second();
-  output.sub_second = ts.subsecond();
-  return output;
+  return timestamp(ts.year(), ts.month(), ts.day(), ts.hour(), ts.minute(), ts.second(), ts.subsecond());
 }
 
 messages::flatbuff::v2::TimeStamp from_rl_timestamp(const timestamp& ts)
@@ -152,7 +144,8 @@ int sender_joined_log_provider::invoke_join(std::unique_ptr<VW::io::reader>& bat
     std::vector<flatbuffers::Offset<messages::flatbuff::v2::JoinedEvent>> events;
 
     const auto& item = *it;
-    const auto interaction_time = chrono_from_timestamp(std::get<0>(it->first));
+    const auto interaction_timestamp = std::get<0>(it->first);
+    const auto interaction_time = interaction_timestamp.to_time_point();
     if (interaction_time <= eud_cutoff)
     {
       const auto reward_cutoff = interaction_time + _eud_offset;
@@ -165,7 +158,8 @@ int sender_joined_log_provider::invoke_join(std::unique_ptr<VW::io::reader>& bat
       {
         for (const auto& observation : observations->second)
         {
-          auto observation_time = chrono_from_timestamp(std::get<0>(observation));
+          const auto observation_timestamp = std::get<0>(observation);
+          const auto observation_time = observation_timestamp.to_time_point();
           if (observation_time <= reward_cutoff)
           {
             auto ts = from_rl_timestamp(std::get<0>(observation));

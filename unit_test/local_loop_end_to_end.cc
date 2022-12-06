@@ -11,6 +11,8 @@
 
 using namespace reinforcement_learning;
 
+namespace
+{
 void pick_context_and_desired_action(std::string& context, size_t& action)
 {
   int random = std::rand() % 4;
@@ -81,15 +83,18 @@ utility::configuration get_test_config()
   config.set(name::JOINER_REWARD_FUNCTION, value::REWARD_FUNCTION_EARLIEST);
   config.set(name::JOINER_LEARNING_MODE, value::LEARNING_MODE_ONLINE);
   config.set(name::MODEL_BACKGROUND_REFRESH, "false");
+  config.set(name::TIME_PROVIDER_IMPLEMENTATION, value::CLOCK_TIME_PROVIDER);
   return config;
 }
+}  // namespace
 
 BOOST_AUTO_TEST_CASE(local_loop_end_to_end_test)
 {
   auto config = get_test_config();
   // config.set(name::TRACE_LOG_IMPLEMENTATION, value::CONSOLE_TRACE_LOGGER);
 
-  // create a custom data_transport_factory_t that stores a pointer to the local_loop_controller
+  // create a custom data_transport_factory_t that saves a pointer
+  // to the local_loop_controller that was created
   local_loop_controller* test_local_loop_controller = nullptr;
   data_transport_factory_t test_data_transport_factory;
   test_data_transport_factory.register_type(value::LOCAL_LOOP_MODEL_DATA,
