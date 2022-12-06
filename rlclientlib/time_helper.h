@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstdint>
 #include <iostream>
+#include <ratio>
 #include <tuple>
 
 namespace reinforcement_learning
@@ -29,8 +30,12 @@ struct timestamp
   // Convert std::chrono::time_point to reinforcement_learning::timestamp
   explicit timestamp(const std::chrono::time_point<std::chrono::system_clock, timestamp::one_hundred_nanoseconds>&);
 
-  // Overload that takes std::chrono::nanoseconds as returned by system_clock::now() and typecasts it to 100ns
-  explicit timestamp(const std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>&);
+  // Overload that typecasts duration to 100ns
+  template <typename DurationT>
+  explicit timestamp(const std::chrono::time_point<std::chrono::system_clock, DurationT>& tp)
+      : timestamp(std::chrono::time_point_cast<timestamp::one_hundred_nanoseconds>(tp))
+  {
+  }
 
   // Convert to a std::chrono::time_point with 100ns resolution
   std::chrono::time_point<std::chrono::system_clock, timestamp::one_hundred_nanoseconds> to_time_point() const;

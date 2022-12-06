@@ -2,9 +2,7 @@
 
 #include "date.h"
 
-#include <chrono>
 #include <ctime>
-#include <ratio>
 
 namespace reinforcement_learning
 {
@@ -36,11 +34,6 @@ timestamp::timestamp(const std::chrono::time_point<std::chrono::system_clock, ti
   minute = time.minutes().count();
   second = static_cast<uint8_t>(time.seconds().count());
   sub_second = static_cast<uint32_t>(usec_since_start_of_day.count() % timestamp::one_hundred_nano::den);
-}
-
-timestamp::timestamp(const std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>& tp)
-    : timestamp(std::chrono::time_point_cast<timestamp::one_hundred_nanoseconds>(tp))
-{
 }
 
 std::chrono::time_point<std::chrono::system_clock, timestamp::one_hundred_nanoseconds> timestamp::to_time_point() const
