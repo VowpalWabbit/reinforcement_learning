@@ -11,7 +11,7 @@ namespace reinforcement_learning
 struct timestamp
 {
   using one_hundred_nano = std::ratio<1, 10000000>;
-  using one_hundred_nanoseconds = std::chrono::duration<uint64_t, one_hundred_nano>;
+  using one_hundred_nanoseconds = std::chrono::duration<int64_t, one_hundred_nano>;
 
   uint16_t year = 0;        // year
   uint8_t month = 0;        // month [1-12]
