@@ -35,13 +35,17 @@ int populate_response(const std::vector<std::vector<uint32_t>>& action_ids, cons
     i_trace* trace_logger, api_status* status)
 {
   if (action_ids.size() != pdfs.size())
-  { RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids and pdfs must be the same size"; }
+  {
+    RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids and pdfs must be the same size";
+  }
 
   response.set_model_id(std::move(model_id));
   for (size_t i = 0; i < action_ids.size(); i++)
   {
     if (action_ids[i].size() != pdfs[i].size())
-    { RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids[i] and pdfs[i] must be the same size"; }
+    {
+      RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids[i] and pdfs[i] must be the same size";
+    }
 
     response.push_back(event_ids[i], action_ids[i][0], pdfs[i][0]);
   }
@@ -63,10 +67,14 @@ int populate_multi_slot_response(const std::vector<std::vector<uint32_t>>& actio
     const std::vector<std::string>& slot_ids, multi_slot_response& response, i_trace* trace_logger, api_status* status)
 {
   if (action_ids.size() != pdfs.size())
-  { RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids and pdfs must be the same size"; }
+  {
+    RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids and pdfs must be the same size";
+  }
 
   if (action_ids.size() != slot_ids.size())
-  { RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids and slot_ids must be the same size"; }
+  {
+    RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids and slot_ids must be the same size";
+  }
 
   response.set_event_id(std::move(event_id));
   response.set_model_id(std::move(model_id));
@@ -74,7 +82,9 @@ int populate_multi_slot_response(const std::vector<std::vector<uint32_t>>& actio
   for (size_t i = 0; i < action_ids.size(); i++)
   {
     if (action_ids[i].size() != pdfs[i].size())
-    { RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids[i] and pdfs[i] must be the same size"; }
+    {
+      RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "action_ids[i] and pdfs[i] must be the same size";
+    }
 
     response.push_back(slot_ids[i], action_ids[i][0], pdfs[i][0]);
   }
@@ -128,7 +138,9 @@ int sample_and_populate_response(uint64_t rnd_seed, std::vector<int>& action_ids
     scode = e::swap_chosen(std::begin(response), std::end(response), chosen_index);
 
     if (S_EXPLORATION_OK != scode)
-    { RETURN_ERROR_LS(trace_logger, status, exploration_error) << "Exploration error code: " << scode; }
+    {
+      RETURN_ERROR_LS(trace_logger, status, exploration_error) << "Exploration error code: " << scode;
+    }
 
     return error_code::success;
   }

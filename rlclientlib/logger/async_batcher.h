@@ -132,10 +132,7 @@ int async_batcher<TEvent, TSerializer>::append(TFunc&& func, TEvent* event, api_
       std::unique_lock<std::mutex> lk(_m);
       _cv.wait(lk, [this] { return !_queue.is_full(); });
     }
-    else if (queue_mode_enum::DROP == _queue_mode)
-    {
-      _queue.prune(_pass_prob);
-    }
+    else if (queue_mode_enum::DROP == _queue_mode) { _queue.prune(_pass_prob); }
   }
 
   return error_code::success;
@@ -180,10 +177,7 @@ int async_batcher<TEvent, TSerializer>::fill_buffer(
     uint64_t original_event_count = (_buffer_end_event_index - buffer_start_event_index);
     RETURN_IF_FAIL(collection_serializer.finalize(status, original_event_count));
   }
-  else
-  {
-    RETURN_IF_FAIL(collection_serializer.finalize(status));
-  }
+  else { RETURN_IF_FAIL(collection_serializer.finalize(status)); }
   return error_code::success;
 }
 
@@ -204,7 +198,9 @@ void async_batcher<TEvent, TSerializer>::flush()
     auto buffer = _buffer_pool.acquire();
     if (fill_buffer(buffer, remaining, &status) != error_code::success) { ERROR_CALLBACK(_perror_cb, status); }
     if (_sender->send(TSerializer<TEvent>::message_id(), buffer, &status) != error_code::success)
-    { ERROR_CALLBACK(_perror_cb, status); }
+    {
+      ERROR_CALLBACK(_perror_cb, status);
+    }
   }
 }
 

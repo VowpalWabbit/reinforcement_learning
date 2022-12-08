@@ -43,7 +43,9 @@ std::string get_json_event(
   examples.push_back(VW::new_unused_example(*vw));
 
   while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0)
-  { examples.push_back(VW::new_unused_example(*vw)); }
+  {
+    examples.push_back(VW::new_unused_example(*vw));
+  }
 
   std::ostringstream dsjson_stream;
   std::string outfile_name = get_test_files_location() + outfile_path;

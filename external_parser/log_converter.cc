@@ -233,7 +233,9 @@ void build_ccb_json(std::ofstream& outfile, joined_event::joined_event& je, VW::
           writer.Key("Index");
 
           if (o.index_type == v2::IndexValue_literal)
-          { writer.String(o.s_index.c_str(), static_cast<rapidjson::SizeType>(o.s_index.length()), true); }
+          {
+            writer.String(o.s_index.c_str(), static_cast<rapidjson::SizeType>(o.s_index.length()), true);
+          }
           else
           {
             writer.String(std::to_string(o.index).c_str(),

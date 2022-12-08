@@ -79,7 +79,9 @@ int main(int argc, char* argv[])
     if (log_level != "off")
     {
       if (log_output_stream == "compat" || log_output_stream == "stderr")
-      { std::cerr << "[critical] vw (" << e.filename() << ":" << e.line_number() << "): " << e.what() << std::endl; }
+      {
+        std::cerr << "[critical] vw (" << e.filename() << ":" << e.line_number() << "): " << e.what() << std::endl;
+      }
       else
       {
         std::cout << "[critical] vw (" << e.filename() << ":" << e.line_number() << "): " << e.what() << std::endl;
@@ -98,11 +100,10 @@ int main(int argc, char* argv[])
     if (log_level != "off")
     {
       if (log_output_stream == "compat" || log_output_stream == "stderr")
-      { std::cerr << "[critical] vw: " << e.what() << std::endl; }
-      else
       {
-        std::cout << "[critical] vw: " << e.what() << std::endl;
+        std::cerr << "[critical] vw: " << e.what() << std::endl;
       }
+      else { std::cout << "[critical] vw: " << e.what() << std::endl; }
     }
     return 1;
   }
@@ -111,11 +112,10 @@ int main(int argc, char* argv[])
     if (log_level != "off")
     {
       if (log_output_stream == "compat" || log_output_stream == "stderr")
-      { std::cerr << "[critical] Unknown exception occurred" << std::endl; }
-      else
       {
-        std::cout << "[critical] vw: unknown exception" << std::endl;
+        std::cerr << "[critical] Unknown exception occurred" << std::endl;
       }
+      else { std::cout << "[critical] vw: unknown exception" << std::endl; }
     }
     return 1;
   }

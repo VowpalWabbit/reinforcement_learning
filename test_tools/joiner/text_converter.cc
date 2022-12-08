@@ -47,8 +47,7 @@ void convert_to_text(const std::string& file)
 
 void convert_to_text(std::istream& in_strm, std::ostream& out_strm)
 {
-  do
-  {
+  do {
     if (in_strm.fail() || in_strm.bad())
     {
       std::cerr << "Error in input stream." << std::endl;

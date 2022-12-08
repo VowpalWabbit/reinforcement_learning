@@ -52,23 +52,31 @@ void apply_cli_overrides(std::unique_ptr<i_joiner>& joiner, VW::workspace* all, 
   {
     v2::ProblemType problem_type;
     if (!str_to_enum(parsed_options.problem_type, problem_types, v2::ProblemType_UNKNOWN, problem_type))
-    { throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.problem_type); }
+    {
+      throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.problem_type);
+    }
     joiner->set_problem_type_config(problem_type, true);
   }
   if (all->options->was_supplied("use_client_time"))
-  { joiner->set_use_client_time(parsed_options.use_client_time, true); }
+  {
+    joiner->set_use_client_time(parsed_options.use_client_time, true);
+  }
   if (all->options->was_supplied("learning_mode"))
   {
     v2::LearningModeType learning_mode;
     if (!str_to_enum(parsed_options.learning_mode, learning_modes, v2::LearningModeType_MIN, learning_mode))
-    { throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.learning_mode); }
+    {
+      throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.learning_mode);
+    }
     joiner->set_learning_mode_config(learning_mode, true);
   }
   if (all->options->was_supplied("reward_function"))
   {
     v2::RewardFunctionType reward_function;
     if (!str_to_enum(parsed_options.reward_function, reward_functions, v2::RewardFunctionType_MIN, reward_function))
-    { throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.reward_function); }
+    {
+      throw std::runtime_error("Invalid argument to --problem_type " + parsed_options.reward_function);
+    }
     joiner->set_reward_function(reward_function, true);
   }
   joiner->apply_cli_overrides(all, parsed_options);
@@ -100,16 +108,15 @@ std::unique_ptr<parser> parser::get_external_parser(VW::workspace* all, const pa
 
       return VW::make_unique<binary_json_converter>(std::move(joiner), all->logger);
     }
-    else
-    {
-      joiner = VW::make_unique<example_joiner>(all);
-    }
+    else { joiner = VW::make_unique<example_joiner>(all); }
     if (parsed_options.multistep) { joiner = VW::make_unique<multistep_example_joiner>(all); }
 
     apply_cli_overrides(joiner, all, parsed_options);
 
     if (all->options->was_supplied("extra_metrics"))
-    { all->example_parser->metrics = VW::make_unique<dsjson_metrics>(); }
+    {
+      all->example_parser->metrics = VW::make_unique<dsjson_metrics>();
+    }
 
     return VW::make_unique<binary_parser>(std::move(joiner), all->logger);
   }

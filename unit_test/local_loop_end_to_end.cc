@@ -99,7 +99,8 @@ BOOST_AUTO_TEST_CASE(local_loop_end_to_end_test)
   data_transport_factory_t test_data_transport_factory;
   test_data_transport_factory.register_type(value::LOCAL_LOOP_MODEL_DATA,
       [&](model_management::i_data_transport** retval, const utility::configuration& cfg, i_trace* trace_logger,
-          api_status* status) {
+          api_status* status)
+      {
         std::unique_ptr<local_loop_controller> output;
         RETURN_IF_FAIL(local_loop_controller::create(output, cfg, trace_logger, status));
         test_local_loop_controller = output.release();

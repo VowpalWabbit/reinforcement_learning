@@ -70,7 +70,9 @@ int live_model_impl::init(api_status* status)
     if (_configuration.get_bool("interaction", name::USE_COMPRESSION, false) ||
         _configuration.get_bool("interaction", name::USE_DEDUP, false) ||
         _configuration.get_bool("observation", name::USE_COMPRESSION, false))
-    { RETURN_ERROR_LS(_trace_logger.get(), status, content_encoding_error); }
+    {
+      RETURN_ERROR_LS(_trace_logger.get(), status, content_encoding_error);
+    }
   }
 
   _initial_epsilon = _configuration.get_float(name::INITIAL_EPSILON, 0.2f);
@@ -94,10 +96,7 @@ int live_model_impl::choose_rank(
     RETURN_IF_FAIL(explore_only(event_id, context, response, status));
     response.set_model_id("N/A");
   }
-  else
-  {
-    RETURN_IF_FAIL(explore_exploit(event_id, context, response, status));
-  }
+  else { RETURN_IF_FAIL(explore_exploit(event_id, context, response, status)); }
   response.set_event_id(event_id);
 
   if (_learning_mode == LOGGINGONLY)
@@ -116,7 +115,9 @@ int live_model_impl::choose_rank(
 
   // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
   if (_watchdog.has_background_error_been_reported())
-  { RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred); }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+  }
 
   return error_code::success;
 }
@@ -148,7 +149,9 @@ int live_model_impl::request_continuous_action(const char* event_id, string_view
   RETURN_IF_FAIL(_interaction_logger->log_continuous_action(context.data(), flags, response, status));
 
   if (_watchdog.has_background_error_been_reported())
-  { RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred); }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+  }
 
   return error_code::success;
 }
@@ -212,7 +215,9 @@ int live_model_impl::request_decision(
 
   // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
   if (_watchdog.has_background_error_been_reported())
-  { RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred); }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+  }
 
   return error_code::success;
 }
@@ -285,7 +290,9 @@ int live_model_impl::request_multi_slot_decision(const char* event_id, string_vi
 
   // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
   if (_watchdog.has_background_error_been_reported())
-  { RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred); }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+  }
   return error_code::success;
 }
 
@@ -329,7 +336,9 @@ int live_model_impl::request_multi_slot_decision(const char* event_id, string_vi
 
   // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
   if (_watchdog.has_background_error_been_reported())
-  { RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred); }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+  }
   return error_code::success;
 }
 
@@ -615,7 +624,9 @@ int live_model_impl::explore_only(
 
   size_t action_count = context_info.actions.size();
   if (action_count < 1)
-  { RETURN_ERROR_LS(_trace_logger.get(), status, json_no_actions_found) << "Context must have at least one action"; }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, json_no_actions_found) << "Context must have at least one action";
+  }
 
   vector<float> pdf(action_count);
   // Generate a pdf with epsilon distributed between all action.
@@ -624,7 +635,9 @@ int live_model_impl::explore_only(
   const auto top_action_id = 0;
   auto scode = e::generate_epsilon_greedy(_initial_epsilon, top_action_id, begin(pdf), end(pdf));
   if (S_EXPLORATION_OK != scode)
-  { RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration error code: " << scode; }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration error code: " << scode;
+  }
 
   // The seed used is composed of uniform_hash(app_id) + uniform_hash(event_id)
   const uint64_t seed = VW::uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
@@ -634,7 +647,9 @@ int live_model_impl::explore_only(
   scode = e::sample_after_normalizing(seed, begin(pdf), end(pdf), chosen_index);
 
   if (S_EXPLORATION_OK != scode)
-  { RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration error code: " << scode; }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration error code: " << scode;
+  }
 
   // NOTE: When there is no model, the rank
   // step was done by the user.  i.e. Actions are already in ranked order
@@ -654,7 +669,9 @@ int live_model_impl::explore_only(
   scode = e::swap_chosen(begin(response), end(response), chosen_index);
 
   if (S_EXPLORATION_OK != scode)
-  { RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration (Swap) error code: " << scode; }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration (Swap) error code: " << scode;
+  }
 
   RETURN_IF_FAIL(response.set_chosen_action_id(chosen_index));
 
@@ -761,21 +778,27 @@ int live_model_impl::request_episodic_decision(const char* event_id, const char*
 int check_null_or_empty(const char* arg1, string_view arg2, i_trace* trace, api_status* status)
 {
   if ((arg1 == nullptr) || strlen(arg1) == 0 || arg2.empty())
-  { RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty"); }
+  {
+    RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty");
+  }
   return error_code::success;
 }
 
 int check_null_or_empty(string_view arg1, i_trace* trace, api_status* status)
 {
   if (arg1.empty())
-  { RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty"); }
+  {
+    RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty");
+  }
   return error_code::success;
 }
 
 int check_null_or_empty(const char* arg1, i_trace* trace, api_status* status)
 {
   if ((arg1 == nullptr) || strlen(arg1) == 0)
-  { RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty"); }
+  {
+    RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty");
+  }
   return error_code::success;
 }
 
@@ -811,7 +834,9 @@ int reset_chosen_action_multi_slot(multi_slot_response_detailed& response, const
   for (auto& slot : response)
   {
     if (!baseline_actions.empty() && baseline_actions.size() >= index)
-    { RETURN_IF_FAIL(slot.set_chosen_action_id(baseline_actions[index])); }
+    {
+      RETURN_IF_FAIL(slot.set_chosen_action_id(baseline_actions[index]));
+    }
     else
     {
       // implicit baseline is the action corresponding to the slot index
@@ -830,7 +855,9 @@ void autogenerate_missing_uuids(
   for (auto& complete_id : complete_ids)
   {
     if (complete_id.empty())
-    { complete_id = boost::uuids::to_string(boost::uuids::random_generator()()) + std::to_string(seed_shift); }
+    {
+      complete_id = boost::uuids::to_string(boost::uuids::random_generator()()) + std::to_string(seed_shift);
+    }
   }
 }
 }  // namespace reinforcement_learning

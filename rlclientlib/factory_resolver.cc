@@ -163,7 +163,8 @@ void factory_initializer::register_default_factories()
   data_transport_factory.register_type(value::LOCAL_LOOP_MODEL_DATA, local_loop_controller_create);
 #else
   data_transport_factory.register_type(value::LOCAL_LOOP_MODEL_DATA,
-      [](m::i_data_transport**, const u::configuration&, i_trace* trace_logger, api_status* status) {
+      [](m::i_data_transport**, const u::configuration&, i_trace* trace_logger, api_status* status)
+      {
         RETURN_ERROR_ARG(trace_logger, status, create_fn_exception,
             "Cannot use LOCAL_LOOP_MODEL_DATA because rlclientlib was not compiled with federated learning enabled");
       });
@@ -180,20 +181,20 @@ void factory_initializer::register_default_factories()
 
   // Register File loggers
   sender_factory.register_type(value::EPISODE_FILE_SENDER,
-      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger,
-          api_status* status) {
+      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status)
+      {
         const char* file_name = c.get(name::EPISODE_FILE_NAME, "episode.fb.data");
         return file_sender_create(retval, c, file_name, cb, trace_logger, status);
       });
   sender_factory.register_type(value::OBSERVATION_FILE_SENDER,
-      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger,
-          api_status* status) {
+      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status)
+      {
         const char* file_name = c.get(name::OBSERVATION_FILE_NAME, "observation.fb.data");
         return file_sender_create(retval, c, file_name, cb, trace_logger, status);
       });
   sender_factory.register_type(value::INTERACTION_FILE_SENDER,
-      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger,
-          api_status* status) {
+      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status)
+      {
         const char* file_name = c.get(name::INTERACTION_FILE_NAME, "interaction.fb.data");
         return file_sender_create(retval, c, file_name, cb, trace_logger, status);
       });
@@ -201,7 +202,8 @@ void factory_initializer::register_default_factories()
   // Register a default factory for LOCAL_LOOP_SENDER that returns an error
   // When initializing live_model_impl with LOCAL_LOOP_DATA_TRANSPORT, we overwrite this with the actual factory
   sender_factory.register_type(value::LOCAL_LOOP_SENDER,
-      [](i_sender**, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status) {
+      [](i_sender**, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status)
+      {
         RETURN_ERROR_ARG(
             trace_logger, status, create_fn_exception, "Must use LOCAL_LOOP_SENDER with LOCAL_LOOP_DATA_TRANSPORT");
       });

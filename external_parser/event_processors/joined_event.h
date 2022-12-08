@@ -36,10 +36,7 @@ inline void calculate_multislot_interaction_metrics(
         metrics->dsjson_number_of_label_equal_baseline_first_slot++;
         metrics->dsjson_sum_cost_original_label_equal_baseline_first_slot += first_slot_original_reward_neg;
       }
-      else
-      {
-        metrics->dsjson_number_of_label_not_equal_baseline_first_slot++;
-      }
+      else { metrics->dsjson_number_of_label_not_equal_baseline_first_slot++; }
     }
   }
 }
@@ -86,10 +83,7 @@ struct cb_joined_event : public typed_joined_event
       // Reward of 1 when we are match baseline and 0 otherwise
       reward = apprentice_matching_reward;
     }
-    else
-    {
-      reward = apprentice_not_matching_reward;
-    }
+    else { reward = apprentice_not_matching_reward; }
   }
 
   bool fill_in_label(VW::multi_ex& examples, VW::io::logger& logger) const override
@@ -108,7 +102,9 @@ struct cb_joined_event : public typed_joined_event
 
     if (std::any_of(interaction_data.probabilities.begin(), interaction_data.probabilities.end(),
             [](float p) { return std::isnan(p); }))
-    { logger.out_warn("distribution for event [{}] contains invalid probabilities", interaction_data.event_id); }
+    {
+      logger.out_warn("distribution for event [{}] contains invalid probabilities", interaction_data.event_id);
+    }
 
     int index = interaction_data.actions[0];
     auto action = interaction_data.actions[0];
@@ -137,11 +133,10 @@ struct cb_joined_event : public typed_joined_event
 
     if (interaction_metadata.learning_mode ==
         reinforcement_learning::messages::flatbuff::v2::LearningModeType_Apprentice)
-    { set_apprentice_reward(); }
-    else
     {
-      reward = original_reward;
+      set_apprentice_reward();
     }
+    else { reward = original_reward; }
   }
 
   void calculate_metrics(dsjson_metrics* metrics) override
@@ -179,11 +174,10 @@ struct ccb_joined_event : public typed_joined_event
       // Reward of 1 when we are match baseline and 0 otherwise
       if (!multi_slot_interaction.interaction_data[i].actions.empty() &&
           multi_slot_interaction.interaction_data[i].actions[0] == multi_slot_interaction.baseline_actions[i])
-      { rewards[i] = apprentice_matching_reward; }
-      else
       {
-        rewards[i] = apprentice_not_matching_reward;
+        rewards[i] = apprentice_matching_reward;
       }
+      else { rewards[i] = apprentice_not_matching_reward; }
     }
   }
 
@@ -217,7 +211,9 @@ struct ccb_joined_event : public typed_joined_event
             }
 
             for (size_t i = 0; i < slot_data.actions.size(); i++)
-            { outcome->probabilities.push_back({slot_data.actions[i], slot_data.probabilities[i]}); }
+            {
+              outcome->probabilities.push_back({slot_data.actions[i], slot_data.probabilities[i]});
+            }
             outcome->cost = -1.f * rewards[slot_index];
             slot_label.outcome = outcome;
           }
@@ -281,15 +277,16 @@ struct ccb_joined_event : public typed_joined_event
     for (int i = 0; i < static_cast<int>(num_of_slots); i++)
     {
       if (outcomes_map.find(i) != outcomes_map.end())
-      { original_rewards[i] = reward_function(outcomes_map[i], default_reward); }
+      {
+        original_rewards[i] = reward_function(outcomes_map[i], default_reward);
+      }
     }
 
     if (metadata_info.learning_mode == reinforcement_learning::messages::flatbuff::v2::LearningModeType_Apprentice)
-    { set_apprentice_reward(); }
-    else
     {
-      rewards.assign(original_rewards.begin(), original_rewards.end());
+      set_apprentice_reward();
     }
+    else { rewards.assign(original_rewards.begin(), original_rewards.end()); }
   }
 
   void calculate_metrics(dsjson_metrics* metrics) override
@@ -353,7 +350,9 @@ struct slates_joined_event : public typed_joined_event
             }
 
             for (size_t i = 0; i < slot_data.actions.size(); i++)
-            { slot_label.probabilities.push_back({slot_data.actions[i], slot_data.probabilities[i]}); }
+            {
+              slot_label.probabilities.push_back({slot_data.actions[i], slot_data.probabilities[i]});
+            }
           }
         }
         // process next slot from interaction_data vector
@@ -371,11 +370,10 @@ struct slates_joined_event : public typed_joined_event
     original_reward = reward_function(outcome_events, default_reward);
 
     if (metadata_info.learning_mode == reinforcement_learning::messages::flatbuff::v2::LearningModeType_Apprentice)
-    { logger.out_warn("Apprentice mode is not implmeneted for slates."); }
-    else
     {
-      reward = original_reward;
+      logger.out_warn("Apprentice mode is not implmeneted for slates.");
     }
+    else { reward = original_reward; }
   }
 
   void calculate_metrics(dsjson_metrics* metrics) override
@@ -458,11 +456,10 @@ struct ca_joined_event : public typed_joined_event
 
     if (interaction_metadata.learning_mode ==
         reinforcement_learning::messages::flatbuff::v2::LearningModeType_Apprentice)
-    { logger.out_warn("Apprentice mode is not implmeneted for cats."); }
-    else
     {
-      reward = original_reward;
+      logger.out_warn("Apprentice mode is not implmeneted for cats.");
     }
+    else { reward = original_reward; }
   }
 
   void calculate_metrics(dsjson_metrics* metrics) override
@@ -519,10 +516,7 @@ struct joined_event
       typed_data->set_skip_learn(false);
       return true;
     }
-    else
-    {
-      return false;
-    }
+    else { return false; }
   }
 
   void calc_reward(float default_reward, reward::RewardFunctionType reward_function, VW::io::logger& logger)
@@ -566,10 +560,7 @@ struct multistep_joined_event
       cb_data->set_skip_learn(false);
       return true;
     }
-    else
-    {
-      return false;
-    }
+    else { return false; }
   }
 
   void calc_reward(float default_reward, reward::RewardFunctionType reward_function, VW::io::logger& logger)

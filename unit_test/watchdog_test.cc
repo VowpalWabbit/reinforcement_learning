@@ -81,7 +81,8 @@ BOOST_AUTO_TEST_CASE(watchdog_report_with_error_handler)
   std::atomic<int> atomic_counter;
   atomic_counter.store(0);
 
-  auto const error_fn = [](const api_status&, void* arg) {
+  auto const error_fn = [](const api_status&, void* arg)
+  {
     auto counter = static_cast<std::atomic<int>*>(arg);
     counter->fetch_add(1);
   };
@@ -114,17 +115,19 @@ BOOST_AUTO_TEST_CASE(watchdog_multiple_threads)
   threads.reserve(num_threads);
   for (auto i = 0; i < num_threads; i++)
   {
-    threads.emplace_back([&, i]() {
-      watchdog.register_thread(std::this_thread::get_id(), utility::concat("Test thread ", i), timeout);
+    threads.emplace_back(
+        [&, i]()
+        {
+          watchdog.register_thread(std::this_thread::get_id(), utility::concat("Test thread ", i), timeout);
 
-      for (auto j = 0; j < num_iterations; j++)
-      {
-        watchdog.check_in(std::this_thread::get_id());
-        std::this_thread::sleep_for(std::chrono::milliseconds(safe_timeout));
-      }
+          for (auto j = 0; j < num_iterations; j++)
+          {
+            watchdog.check_in(std::this_thread::get_id());
+            std::this_thread::sleep_for(std::chrono::milliseconds(safe_timeout));
+          }
 
-      watchdog.unregister_thread(std::this_thread::get_id());
-    });
+          watchdog.unregister_thread(std::this_thread::get_id());
+        });
   }
 
   BOOST_CHECK_EQUAL(watchdog.has_background_error_been_reported(), false);

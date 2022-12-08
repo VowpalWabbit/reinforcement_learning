@@ -117,10 +117,7 @@ std::string test_data_provider::create_context_json(const std::string& cntxt, co
 {
   std::ostringstream oss;
   if (ccb) { oss << cntxt << ", " << action; }
-  else
-  {
-    oss << "{ " << cntxt << ", " << action << " }";
-  }
+  else { oss << "{ " << cntxt << ", " << action << " }"; }
 
   return oss.str();
 }
