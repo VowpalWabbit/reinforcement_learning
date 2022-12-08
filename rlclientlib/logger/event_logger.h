@@ -148,8 +148,7 @@ public:
     auto evt_sp = std::make_shared<outcome_event>();
     auto evt_copy = outcome_event::report_outcome(event_id, outcome, now);
     *evt_sp = std::move(evt_copy);
-    auto evt_fn = [evt_sp](outcome_event& out_evt, api_status* status) -> int
-    {
+    auto evt_fn = [evt_sp](outcome_event& out_evt, api_status* status) -> int {
       out_evt = std::move(*evt_sp);
       return error_code::success;
     };
@@ -179,8 +178,7 @@ public:
     // as a copy the ensure their lifetime.
     // TODO: See if there's a way to do this without the copy, since the pack can contain some pretty
     //       expensive objects
-    auto evt_fn = [evt_sp, type, ext, serializer, args...](generic_event& out_evt, api_status* status) -> int
-    {
+    auto evt_fn = [evt_sp, type, ext, serializer, args...](generic_event& out_evt, api_status* status) -> int {
       RETURN_IF_FAIL(evt_sp->transform(ext, serializer, status, args...));
       out_evt = std::move(*evt_sp);
       return error_code::success;

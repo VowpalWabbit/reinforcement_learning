@@ -73,9 +73,7 @@ int local_model::init(
     const reinforcement_learning::utility::configuration& config, reinforcement_learning::api_status* status)
 {
   if (config.get_int(rl::name::PROTOCOL_VERSION, 999) != 2)
-  {
-    RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << " protocol version 2 required";
-  }
+  { RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << " protocol version 2 required"; }
 
   if (!_vw_model)
   {
@@ -108,14 +106,10 @@ int local_model::v_send(const buffer& data, reinforcement_learning::api_status* 
     auto result = res->Verify(verifier);
 
     if (!result)
-    {
-      RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << "verify failed for fb_generic_event_collection";
-    }
+    { RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << "verify failed for fb_generic_event_collection"; }
 
     if (res->metadata()->content_encoding()->str() != "IDENTITY")
-    {
-      RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << "Can only handle IDENTITY encoding";
-    }
+    { RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << "Can only handle IDENTITY encoding"; }
 
     for (auto message : *res->events())
     {

@@ -43,9 +43,7 @@ cb_decision_gen::cb_decision_gen(int shared_features, int action_features, int a
     , passthrough(passthrough)
 {
   for (int i = 0; i < total_actions; ++i)
-  {
-    actions_set.push_back(mk_feature_vector(action_features, action_features * 3));
-  }
+  { actions_set.push_back(mk_feature_vector(action_features, action_features * 3)); }
 }
 
 std::string cb_decision_gen::gen_example()
@@ -79,7 +77,10 @@ std::string cb_decision_gen::gen_example()
     for (size_t i = 1; i < actions_per_decision; i++) { str << "," << (1 / actions_per_decision); }
     str << R"(]})";
   }
-  else { str << R"(]})"; }
+  else
+  {
+    str << R"(]})";
+  }
   temp_str = str.str();
 
   return temp_str;

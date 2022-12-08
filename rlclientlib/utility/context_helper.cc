@@ -105,9 +105,7 @@ struct MessageHandler : public rj::BaseReaderHandler<rj::UTF8<>, MessageHandler>
   bool StartObject()
   {
     if (((static_cast<int>(_is_multi) | static_cast<int>(_is_slots)) != 0) && _level == 1 && _array_level == 1)
-    {
-      _item_start = _is.Tell() - 1;
-    }
+    { _item_start = _is.Tell() - 1; }
 
     ++_level;
     return true;

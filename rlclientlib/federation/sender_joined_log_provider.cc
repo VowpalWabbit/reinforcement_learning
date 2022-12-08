@@ -114,9 +114,7 @@ int sender_joined_log_provider::create(std::unique_ptr<sender_joined_log_provide
     const utility::configuration& config, i_trace* trace_logger, api_status* status)
 {
   if (config.get_int(name::PROTOCOL_VERSION, 999) != 2)
-  {
-    RETURN_ERROR_LS(trace_logger, status, invalid_argument) << " protocol version 2 required";
-  }
+  { RETURN_ERROR_LS(trace_logger, status, invalid_argument) << " protocol version 2 required"; }
 
   std::string eud_duration = config.get(name::EUD_DURATION, "UNSET");
   if (eud_duration == "UNSET") { RETURN_ERROR_ARG(trace_logger, status, invalid_argument, "eudduration must be set"); }
@@ -206,14 +204,10 @@ int sender_joined_log_provider::receive_events(const i_sender::buffer& data, api
   auto result = res->Verify(verifier);
 
   if (!result)
-  {
-    RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << "verify failed for fb_generic_event_collection";
-  }
+  { RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << "verify failed for fb_generic_event_collection"; }
 
   if (res->metadata()->content_encoding()->str() != "IDENTITY")
-  {
-    RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << "Can only handle IDENTITY encoding";
-  }
+  { RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << "Can only handle IDENTITY encoding"; }
 
   for (auto serialized_event : *res->events())
   {

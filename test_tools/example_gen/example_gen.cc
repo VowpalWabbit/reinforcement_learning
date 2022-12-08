@@ -186,15 +186,11 @@ void send_ccb_outcome(
         std::cout << "report outcome: " << reward_0 << " for event: " << event_id << " for slot index: " << 0
                   << std::endl;
         if (rl.report_outcome(event_id, 0, reward_0, &status) != err::success)
-        {
-          std::cout << status.get_error_msg() << std::endl;
-        }
+        { std::cout << status.get_error_msg() << std::endl; }
         std::cout << "report outcome: " << reward_1 << " for event: " << event_id << " for slot index: " << 1
                   << std::endl;
         if (rl.report_outcome(event_id, 1, reward_1, &status) != err::success)
-        {
-          std::cout << status.get_error_msg() << std::endl;
-        }
+        { std::cout << status.get_error_msg() << std::endl; }
       }
       break;
     };
@@ -210,15 +206,11 @@ void send_ccb_outcome(
         std::cout << "report outcome: " << reward_0 << " for event: " << event_id << " for slot string index: slot_0"
                   << std::endl;
         if (rl.report_outcome(event_id, "slot_0", reward_0, &status) != err::success)
-        {
-          std::cout << status.get_error_msg() << std::endl;
-        }
+        { std::cout << status.get_error_msg() << std::endl; }
         std::cout << "report outcome: " << reward_1 << " for event: " << event_id << " for slot string index: slot_1"
                   << std::endl;
         if (rl.report_outcome(event_id, "slot_1", reward_1, &status) != err::success)
-        {
-          std::cout << status.get_error_msg() << std::endl;
-        }
+        { std::cout << status.get_error_msg() << std::endl; }
       }
       break;
     };
@@ -238,15 +230,11 @@ void send_ccb_outcome(
           std::cout << "report outcome: " << reward_0 << " for event: " << event_id << " for slot index: " << i
                     << std::endl;
           if (static_cast<int>(rl.report_outcome(event_id, i, reward_0, &status)) != err::success)
-          {
-            std::cout << status.get_error_msg() << std::endl;
-          }
+          { std::cout << status.get_error_msg() << std::endl; }
           std::cout << "report outcome: " << reward_1 << " for event: " << event_id
                     << " for slot string index: " << slot_ids[i].c_str() << std::endl;
           if (rl.report_outcome(event_id, slot_ids[i].c_str(), reward_1, &status) != err::success)
-          {
-            std::cout << status.get_error_msg() << std::endl;
-          }
+          { std::cout << status.get_error_msg() << std::endl; }
         }
       }
       break;
@@ -257,9 +245,7 @@ void send_ccb_outcome(
       std::cout << "report outcome: " << 1.5 << " for event: " << event_id << " for slot at out of bound index: 1000"
                 << std::endl;
       if (rl.report_outcome(event_id, 1000, 1.5, &status) != err::success)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
       break;
     };
 
@@ -283,9 +269,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
     {  // "cb",
       r::ranking_response response;
       if (rl.choose_rank(event_id, JSON_CB_CONTEXT, action_flag, response, &status) != 0)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
       break;
     }
     case INVALID_CB_ACTION:
@@ -293,9 +277,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
       r::ranking_response response;
       // call choose rank but with slates context
       if (rl.choose_rank(event_id, JSON_SLATES_CONTEXT, action_flag, response, &status) != 0)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
       break;
     }
     case CCB_ACTION:
@@ -303,9 +285,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
       r::multi_slot_response response;
       RL_IGNORE_DEPRECATED_USAGE_START
       if (rl.request_multi_slot_decision(event_id, JSON_CCB_CONTEXT, action_flag, response, &status) != err::success)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
       RL_IGNORE_DEPRECATED_USAGE_END
       break;
     };
@@ -315,9 +295,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
       RL_IGNORE_DEPRECATED_USAGE_START
       if (rl.request_multi_slot_decision(event_id, JSON_CCB_WITH_SLOT_ID_CONTEXT, action_flag, response, &status) !=
           err::success)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
       RL_IGNORE_DEPRECATED_USAGE_END
       break;
     };
@@ -326,9 +304,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
       r::multi_slot_response response;
       RL_IGNORE_DEPRECATED_USAGE_START
       if (rl.request_multi_slot_decision(event_id, JSON_SLATES_CONTEXT, action_flag, response, &status) != err::success)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
       RL_IGNORE_DEPRECATED_USAGE_END
       break;
     };
@@ -337,17 +313,13 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
       r::continuous_action_response response;
       RL_IGNORE_DEPRECATED_USAGE_START
       if (rl.request_continuous_action(event_id, JSON_CA_CONTEXT, action_flag, response, &status) != err::success)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
       RL_IGNORE_DEPRECATED_USAGE_END
       break;
     };
     case F_REWARD:  // "float"
       if (rl.report_outcome(event_id, reward, &status) != err::success)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
       break;
     case F_I_REWARD:  // "float-int",
     {
@@ -358,21 +330,15 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
         float reward_1 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
 
         if (rl.report_outcome(event_id, 0, reward_0, &status) != err::success)
-        {
-          std::cout << status.get_error_msg() << std::endl;
-        }
+        { std::cout << status.get_error_msg() << std::endl; }
         if (rl.report_outcome(event_id, 1, reward_1, &status) != err::success)
-        {
-          std::cout << status.get_error_msg() << std::endl;
-        }
+        { std::cout << status.get_error_msg() << std::endl; }
       }
     }
     break;
     case F_I_OUT_OF_BOUND_REWARD:
       if (rl.report_outcome(event_id, 1000, 1.5, &status) != err::success)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
       break;
     case F_S_REWARD:  // "float-string"
     {
@@ -383,13 +349,9 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
         float reward_1 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
 
         if (rl.report_outcome(event_id, "slot_0", reward_0, &status) != err::success)
-        {
-          std::cout << status.get_error_msg() << std::endl;
-        }
+        { std::cout << status.get_error_msg() << std::endl; }
         if (rl.report_outcome(event_id, "slot_1", reward_1, &status) != err::success)
-        {
-          std::cout << status.get_error_msg() << std::endl;
-        }
+        { std::cout << status.get_error_msg() << std::endl; }
       }
     }
     break;
@@ -406,41 +368,29 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
           float reward_1 = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
 
           if (static_cast<int>(rl.report_outcome(event_id, i, reward_0, &status)) != err::success)
-          {
-            std::cout << status.get_error_msg() << std::endl;
-          }
+          { std::cout << status.get_error_msg() << std::endl; }
 
           if (rl.report_outcome(event_id, slot_ids[i].c_str(), reward_1, &status) != err::success)
-          {
-            std::cout << status.get_error_msg() << std::endl;
-          }
+          { std::cout << status.get_error_msg() << std::endl; }
         }
       }
     }
     break;
     case S_REWARD:  // "string-reward",
       if (rl.report_outcome(event_id, "reward-str", &status) != err::success)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
       break;
     case S_I_REWARD:  // "string-int-reward",
       if (rl.report_outcome(event_id, 1, "reward-str", &status) != err::success)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
       break;
     case S_S_REWARD:  // "string-string-reward",
       if (rl.report_outcome(event_id, "index_id", "reward-str", &status) != err::success)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
       break;
     case ACTION_TAKEN:
       if (rl.report_action_taken(event_id, &status) != err::success)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
       break;
     case CCB_BASELINE_ACTION:
     {  // "ccb",
@@ -449,9 +399,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
       RL_IGNORE_DEPRECATED_USAGE_START
       if (rl.request_multi_slot_decision(event_id, JSON_CCB_CONTEXT, 0, response, baselines.data(), 2, &status) !=
           err::success)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
       RL_IGNORE_DEPRECATED_USAGE_END
       break;
     };
@@ -460,9 +408,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
       r::ranking_response response;
       std::cout << "choose rank for event: " << event_id << std::endl;
       if (rl.choose_rank(event_id, JSON_CB_CONTEXT, action_flag, response, &status) != 0)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
 
       auto num_of_rewards = static_cast<size_t>(get_random_number(rng));
       for (size_t i = 0; i < num_of_rewards; i++)
@@ -470,9 +416,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
         float reward = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
         std::cout << "report outcome: " << reward << " for event: " << event_id << std::endl;
         if (rl.report_outcome(event_id, reward, &status) != err::success)
-        {
-          std::cout << status.get_error_msg() << std::endl;
-        }
+        { std::cout << status.get_error_msg() << std::endl; }
       }
 
       if (action_flag == r::action_flags::DEFERRED)
@@ -483,9 +427,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
           // send activation
           std::cout << "sending activation for event_id: " << event_id << std::endl;
           if (rl.report_action_taken(event_id, &status) != err::success)
-          {
-            std::cout << status.get_error_msg() << std::endl;
-          }
+          { std::cout << status.get_error_msg() << std::endl; }
         }
       }
 
@@ -496,9 +438,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
       r::continuous_action_response response;
       RL_IGNORE_DEPRECATED_USAGE_START
       if (rl.request_continuous_action(event_id, JSON_CA_CONTEXT, action_flag, response, &status) != err::success)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
       RL_IGNORE_DEPRECATED_USAGE_END
       auto num_of_rewards = static_cast<size_t>(get_random_number(rng));
       for (size_t i = 0; i < num_of_rewards; i++)
@@ -506,9 +446,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
         float reward = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
         std::cout << "report outcome: " << reward << " for event: " << event_id << std::endl;
         if (rl.report_outcome(event_id, reward, &status) != err::success)
-        {
-          std::cout << status.get_error_msg() << std::endl;
-        }
+        { std::cout << status.get_error_msg() << std::endl; }
       }
 
       if (action_flag == r::action_flags::DEFERRED)
@@ -519,9 +457,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
           // send activation
           std::cout << "sending activation for event_id: " << event_id << std::endl;
           if (rl.report_action_taken(event_id, &status) != err::success)
-          {
-            std::cout << status.get_error_msg() << std::endl;
-          }
+          { std::cout << status.get_error_msg() << std::endl; }
         }
       }
 
@@ -539,9 +475,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
         r::multi_slot_response response;
         RL_IGNORE_DEPRECATED_USAGE_START
         if (rl.request_multi_slot_decision(event_id, JSON_CCB_CONTEXT, action_flag, response, &status) != err::success)
-        {
-          std::cout << status.get_error_msg() << std::endl;
-        }
+        { std::cout << status.get_error_msg() << std::endl; }
         RL_IGNORE_DEPRECATED_USAGE_END
       }
       else
@@ -550,9 +484,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
         RL_IGNORE_DEPRECATED_USAGE_START
         if (rl.request_multi_slot_decision(event_id, JSON_CCB_WITH_SLOT_ID_CONTEXT, action_flag, response, &status) !=
             err::success)
-        {
-          std::cout << status.get_error_msg() << std::endl;
-        }
+        { std::cout << status.get_error_msg() << std::endl; }
         RL_IGNORE_DEPRECATED_USAGE_END
       }
 
@@ -566,9 +498,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
           // send activation
           std::cout << "sending activation for event_id: " << event_id << std::endl;
           if (rl.report_action_taken(event_id, &status) != err::success)
-          {
-            std::cout << status.get_error_msg() << std::endl;
-          }
+          { std::cout << status.get_error_msg() << std::endl; }
         }
       }
 
@@ -588,9 +518,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
         RL_IGNORE_DEPRECATED_USAGE_START
         if (rl.request_multi_slot_decision(
                 event_id, JSON_CCB_CONTEXT, action_flag, response, baselines.data(), 2, &status) != err::success)
-        {
-          std::cout << status.get_error_msg() << std::endl;
-        }
+        { std::cout << status.get_error_msg() << std::endl; }
         RL_IGNORE_DEPRECATED_USAGE_END
       }
       else
@@ -599,9 +527,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
         RL_IGNORE_DEPRECATED_USAGE_START
         if (rl.request_multi_slot_decision(event_id, JSON_CCB_WITH_SLOT_ID_CONTEXT, action_flag, response,
                 baselines.data(), 2, &status) != err::success)
-        {
-          std::cout << status.get_error_msg() << std::endl;
-        }
+        { std::cout << status.get_error_msg() << std::endl; }
         RL_IGNORE_DEPRECATED_USAGE_END
       }
 
@@ -615,9 +541,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
           // send activation
           std::cout << "sending activation for event_id: " << event_id << std::endl;
           if (rl.report_action_taken(event_id, &status) != err::success)
-          {
-            std::cout << status.get_error_msg() << std::endl;
-          }
+          { std::cout << status.get_error_msg() << std::endl; }
         }
       }
 
@@ -629,9 +553,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
       r::multi_slot_response response;
       RL_IGNORE_DEPRECATED_USAGE_START
       if (rl.request_multi_slot_decision(event_id, JSON_SLATES_CONTEXT, action_flag, response, &status) != err::success)
-      {
-        std::cout << status.get_error_msg() << std::endl;
-      }
+      { std::cout << status.get_error_msg() << std::endl; }
       RL_IGNORE_DEPRECATED_USAGE_END
 
       auto num_of_rewards = static_cast<size_t>(get_random_number(rng));
@@ -640,9 +562,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
         float reward = gen_random_reward ? get_random_number(rng, 0) : 1.5f;
         std::cout << "report outcome: " << reward << " for event: " << event_id << std::endl;
         if (rl.report_outcome(event_id, reward, &status) != err::success)
-        {
-          std::cout << status.get_error_msg() << std::endl;
-        }
+        { std::cout << status.get_error_msg() << std::endl; }
       }
 
       if (action_flag == r::action_flags::DEFERRED)
@@ -653,9 +573,7 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
           // send activation
           std::cout << "sending activation for event_id: " << event_id << std::endl;
           if (rl.report_action_taken(event_id, &status) != err::success)
-          {
-            std::cout << status.get_error_msg() << std::endl;
-          }
+          { std::cout << status.get_error_msg() << std::endl; }
         }
       }
 
@@ -703,7 +621,10 @@ int run_config(int action, int count, int initial_seed, bool gen_random_reward, 
   {
     char event_id[128];
     if (initial_seed == -1) { strcpy(event_id, "abcdefghijklm"); }
-    else { sprintf(event_id, "%x", pseudo_random(initial_seed + i * 997739)); }
+    else
+    {
+      sprintf(event_id, "%x", pseudo_random(initial_seed + i * 997739));
+    }
 
     auto action_flag = i < deferred_action_count ? r::action_flags::DEFERRED : r::action_flags::DEFAULT;
 
@@ -766,9 +687,7 @@ int main(int argc, char* argv[])
     if (vm.count("deferred_action_count") > 0 &&
         !std::any_of(deferrable_interactions.begin(), deferrable_interactions.end(),
             [action_name](const std::string& evt_type) { return action_name == evt_type; }))
-    {
-      throw std::runtime_error("'--deferred_action' should be used with interaction event");
-    }
+    { throw std::runtime_error("'--deferred_action' should be used with interaction event"); }
   }
   catch (std::exception& e)
   {
@@ -792,9 +711,7 @@ int main(int argc, char* argv[])
     {
       if (run_config(i, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file, rng,
               epsilon) != 0)
-      {
-        return -1;
-      }
+      { return -1; }
     }
     return 0;
   }

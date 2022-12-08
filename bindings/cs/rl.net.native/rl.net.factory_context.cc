@@ -54,8 +54,7 @@ API void SetFactoryContextBindingSenderFactory(
     factory_context_t* context, rl_net_native::sender_create_fn create_fn, rl_net_native::sender_vtable vtable)
 {
   auto sender_factory_fn = [=](i_sender** retval, const utility::configuration& configuration,
-                               error_callback_fn* error_callback, i_trace* trace_logger, api_status* status)
-  {
+                               error_callback_fn* error_callback, i_trace* trace_logger, api_status* status) {
     void* managed_handle = create_fn(&configuration, invoke_error_callback, error_callback);
     *retval = new rl_net_native::binding_sender(managed_handle, vtable, trace_logger);
 

@@ -41,9 +41,7 @@ size_t data_buffer::get_body_endoffset() const { return _body_endoffset; }
 int data_buffer::set_body_endoffset(size_t endoffset)
 {
   if (endoffset > _buffer.size() || endoffset < preamble_size() || endoffset < _body_beginoffset)
-  {
-    return error_code::invalid_argument;
-  }
+  { return error_code::invalid_argument; }
 
   _body_endoffset = endoffset;
   return error_code::success;

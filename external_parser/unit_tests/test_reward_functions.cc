@@ -78,9 +78,7 @@ std::vector<float> get_float_rewards(const std::string& int_file_name, const std
       for (auto* example : examples)
       {
         if (!CB::ec_is_example_header(*example) && example->l.cb.costs.size() > 0)
-        {
-          rewards.push_back(-1.f * example->l.cb.costs[0].cost);
-        }
+        { rewards.push_back(-1.f * example->l.cb.costs[0].cost); }
       }
     }
     break;
@@ -94,9 +92,7 @@ std::vector<float> get_float_rewards(const std::string& int_file_name, const std
       for (auto* example : examples)
       {
         if (example->l.conditional_contextual_bandit.type == VW::ccb_example_type::SLOT)
-        {
-          rewards.push_back(-1.f * example->l.conditional_contextual_bandit.outcome->cost);
-        }
+        { rewards.push_back(-1.f * example->l.conditional_contextual_bandit.outcome->cost); }
       }
     }
     break;
@@ -112,9 +108,7 @@ std::vector<float> get_float_rewards(const std::string& int_file_name, const std
       for (auto* example : examples)
       {
         if (example->l.slates.type == VW::slates::example_type::SHARED)
-        {
-          rewards.push_back(-1.f * example->l.slates.cost);
-        }
+        { rewards.push_back(-1.f * example->l.slates.cost); }
       }
     }
     break;

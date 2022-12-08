@@ -14,7 +14,8 @@ namespace u = reinforcement_learning::utility;
 void logging_error_fn(const r::api_status& status, void*) { std::cerr << status.get_error_msg() << std::endl; }
 
 #define CHECK_EXIT(x)                                   \
-  do {                                                  \
+  do                                                    \
+  {                                                     \
     int retval__LINE__ = (x);                           \
     if (retval__LINE__ != 0)                            \
     {                                                   \

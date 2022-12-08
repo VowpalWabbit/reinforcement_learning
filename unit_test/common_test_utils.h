@@ -24,9 +24,7 @@ inline bool is_invoked_with(const std::string& arg)
   {
     if (reinforcement_learning::string_view(boost::unit_test::framework::master_test_suite().argv[i]).find(arg) !=
         std::string::npos)
-    {
-      return true;
-    }
+    { return true; }
   }
   return false;
 }
@@ -97,18 +95,14 @@ inline void compare_vw(const VW::workspace& vw1, const VW::workspace& vw2)
     auto& sw1 = weights1.sparse_weights;
     auto& sw2 = weights2.sparse_weights;
     for (auto it1 = sw1.cbegin(), it2 = sw2.cbegin(); it1 != sw1.cend() && it2 != sw2.cend(); ++it1, ++it2)
-    {
-      BOOST_CHECK_CLOSE(*it1, *it2, tolerance);
-    }
+    { BOOST_CHECK_CLOSE(*it1, *it2, tolerance); }
   }
   else
   {
     auto& dw1 = weights1.dense_weights;
     auto& dw2 = weights2.dense_weights;
     for (auto it1 = dw1.cbegin(), it2 = dw2.cbegin(); it1 != dw1.cend() && it2 != dw2.cend(); ++it1, ++it2)
-    {
-      BOOST_CHECK_CLOSE(*it1, *it2, tolerance);
-    }
+    { BOOST_CHECK_CLOSE(*it1, *it2, tolerance); }
   }
 }
 }  // namespace test_utils

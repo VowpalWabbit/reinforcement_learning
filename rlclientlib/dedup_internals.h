@@ -134,9 +134,7 @@ int dedup_state::get_all_values(I start, I end, generic_event::object_list_t& ac
   {
     auto content = _dict.get_object(start->first);
     if (content.size() == 0)
-    {
-      RETURN_ERROR_LS(nullptr, status, compression_error) << "Key not found while building batch dictionary";
-    }
+    { RETURN_ERROR_LS(nullptr, status, compression_error) << "Key not found while building batch dictionary"; }
     action_ids.push_back(start->first);
     action_values.push_back(content);
   }
@@ -151,9 +149,7 @@ int dedup_state::remove_all_values(I start, I end, api_status* status)
   for (; start != end; ++start)
   {
     if (!_dict.remove_object(start->first, start->second))
-    {
-      RETURN_ERROR_LS(nullptr, status, compression_error) << "Key not found while pruning dedup_dict";
-    }
+    { RETURN_ERROR_LS(nullptr, status, compression_error) << "Key not found while pruning dedup_dict"; }
   }
 
   return error_code::success;

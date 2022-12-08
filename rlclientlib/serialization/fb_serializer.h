@@ -384,10 +384,11 @@ template <>
 inline void fb_collection_serializer<generic_event>::create_header()
 {
   if (_original_event_count == 0)
+  { _batch_metadata_offset = v2::CreateBatchMetadataDirect(_builder, _content_encoding); }
+  else
   {
-    _batch_metadata_offset = v2::CreateBatchMetadataDirect(_builder, _content_encoding);
+    _batch_metadata_offset = v2::CreateBatchMetadataDirect(_builder, _content_encoding, _original_event_count);
   }
-  else { _batch_metadata_offset = v2::CreateBatchMetadataDirect(_builder, _content_encoding, _original_event_count); }
   return;
 }
 

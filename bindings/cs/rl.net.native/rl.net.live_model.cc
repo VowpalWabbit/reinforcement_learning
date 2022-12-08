@@ -26,11 +26,10 @@ API livemodel_context_t* CreateLiveModel(
   // Create a trace log factory by passing in below creator. It allows LiveModel to use trace_logger provided by user.
   const auto binding_tracer_create =
       [context](reinforcement_learning::i_trace** retval, const reinforcement_learning::utility::configuration& cfg,
-          reinforcement_learning::i_trace* trace_logger, reinforcement_learning::api_status* status)
-  {
-    *retval = new rl_net_native::binding_tracer(*context);
-    return reinforcement_learning::error_code::success;
-  };
+          reinforcement_learning::i_trace* trace_logger, reinforcement_learning::api_status* status) {
+        *retval = new rl_net_native::binding_tracer(*context);
+        return reinforcement_learning::error_code::success;
+      };
 
   // TODO: Unify this factory projection and the sender_factory projection in FactoryContext.
   reinforcement_learning::trace_logger_factory_t* trace_logger_factory =
@@ -42,9 +41,7 @@ API livemodel_context_t* CreateLiveModel(
   // This is a clone of cleanup_trace_logger_factory
   std::swap(trace_logger_factory, factory_context->trace_logger_factory);
   if (trace_logger_factory != nullptr && trace_logger_factory != &reinforcement_learning::trace_logger_factory)
-  {
-    delete trace_logger_factory;
-  }
+  { delete trace_logger_factory; }
 
   // Set TRACE_LOG_IMPLEMENTATION configuration to use trace logger.
   config->set(reinforcement_learning::name::TRACE_LOG_IMPLEMENTATION, rl_net_native::constants::BINDING_TRACE_LOGGER);
@@ -78,9 +75,7 @@ API int LiveModelChooseRank(livemodel_context_t* context, const char* event_id, 
     int context_json_size, reinforcement_learning::ranking_response* resp, reinforcement_learning::api_status* status)
 {
   if (event_id == nullptr)
-  {
-    return context->livemodel->choose_rank({context_json, static_cast<size_t>(context_json_size)}, *resp, status);
-  }
+  { return context->livemodel->choose_rank({context_json, static_cast<size_t>(context_json_size)}, *resp, status); }
 
   return context->livemodel->choose_rank(
       event_id, {context_json, static_cast<size_t>(context_json_size)}, *resp, status);

@@ -95,8 +95,7 @@ std::unique_ptr<i_sender> local_loop_controller::get_local_sender() { return _ev
 sender_factory_t::create_fn local_loop_controller::get_local_sender_factory()
 {
   return [this](i_sender** retval, const utility::configuration& cfg, error_callback_fn* error_cb,
-             i_trace* trace_logger, api_status* status)
-  {
+             i_trace* trace_logger, api_status* status) {
     std::unique_ptr<i_sender> proxy = this->get_local_sender();
     *retval = proxy.release();
     return error_code::success;

@@ -176,8 +176,14 @@ public:
       {
         _running = _running | (c - '0' + 52);  // 52 - 61
       }
-      else if (c == '+') { _running = _running | 62; }
-      else if (c == '/') { _running = _running | 63; }
+      else if (c == '+')
+      {
+        _running = _running | 62;
+      }
+      else if (c == '/')
+      {
+        _running = _running | 63;
+      }
       else
       {
         // TODO: Bad character
@@ -266,7 +272,10 @@ public:
         _value.push_back(c);
         _in_escape = false;
       }
-      else if (c == escape) { _in_escape = true; }
+      else if (c == escape)
+      {
+        _in_escape = true;
+      }
 
       return true;
     }
@@ -340,15 +349,14 @@ bool parse(parser_context& context)
 
   errors::error_context error_context(context._errors, "while parsing tensor notation", context);
 
-  do {
+  do
+  {
     std::string name;
     bytes_t tensor_shape_bytes;
     bytes_t tensor_data_bytes;
 
     if (!parse_tensor_name_value(reading_head, name, tensor_shape_bytes, tensor_data_bytes, error_context))
-    {
-      return false;
-    }
+    { return false; }
 
     context._input_builder.push_input(
         std::move(name), std::move(std::make_pair(tensor_shape_bytes, tensor_data_bytes)));

@@ -86,9 +86,7 @@ struct multi_slot_serializer : payload_serializer<generic_event::payload_type_t:
     copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
 
     for (size_t i = 0; i < action_ids.size(); i++)
-    {
-      slots.push_back(v2::CreateSlotEventDirect(fbb, &action_ids[i], &pdfs[i], slot_ids[i].c_str()));
-    }
+    { slots.push_back(v2::CreateSlotEventDirect(fbb, &action_ids[i], &pdfs[i], slot_ids[i].c_str())); }
     auto fb = v2::CreateMultiSlotEventDirect(fbb, &_context, &slots, model_version.c_str(),
         flags & action_flags::DEFERRED, &baseline_actions, learning_mode);
     fbb.Finish(fb);

@@ -30,7 +30,10 @@ generic_event::object_id_t dedup_dict::add_object(const char* start, size_t leng
   auto hash = hash_content(start, length);
   auto it = _entries.find(hash);
   if (it == _entries.end()) { _entries.insert({hash, dict_entry(start, length)}); }
-  else { ++it->second._count; }
+  else
+  {
+    ++it->second._count;
+  }
   return hash;
 }
 
@@ -104,13 +107,9 @@ int zstd_compressor::decompress(generic_event::payload_buffer_t& buf, api_status
 {
   size_t buff_size = ZSTD_getFrameContentSize(buf.data(), buf.size());
   if (buff_size == ZSTD_CONTENTSIZE_ERROR)
-  {
-    RETURN_ERROR_ARG(nullptr, status, compression_error, "Invalid compressed content.");
-  }
+  { RETURN_ERROR_ARG(nullptr, status, compression_error, "Invalid compressed content."); }
   if (buff_size == ZSTD_CONTENTSIZE_UNKNOWN)
-  {
-    RETURN_ERROR_ARG(nullptr, status, compression_error, "Unknown compressed size.");
-  }
+  { RETURN_ERROR_ARG(nullptr, status, compression_error, "Unknown compressed size."); }
 
   std::unique_ptr<uint8_t[]> data(fb::DefaultAllocator().allocate(buff_size));
   size_t res = ZSTD_decompress(data.get(), buff_size, buf.data(), buf.size());
@@ -188,7 +187,10 @@ int action_dict_builder::add(const generic_event::object_list_t& object_ids, api
       _used_objects.insert({aid, 1});
       _size_estimate += sizeof(size_t) + content.size();
     }
-    else { ++it->second; }
+    else
+    {
+      ++it->second;
+    }
   }
   return error_code::success;
 }

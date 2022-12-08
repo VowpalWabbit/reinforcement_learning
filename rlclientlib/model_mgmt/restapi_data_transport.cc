@@ -59,39 +59,32 @@ int restapi_data_transport::get_data_info(
   http_request request(_method_type);
   RETURN_IF_FAIL(add_authentiction_header(request.headers(), status));
   // Build request URI and start the request.
-  auto request_task = _httpcli->request(request).then(
-      [&](http_response response)
+  auto request_task = _httpcli->request(request).then([&](http_response response) {
+    if (response.status_code() != 200)
+    {
+      // if the call using HEAD fails, try with GET only once and return the results of GET request call
+      if (_retry_get_data)
       {
-        if (response.status_code() != 200)
-        {
-          // if the call using HEAD fails, try with GET only once and return the results of GET request call
-          if (_retry_get_data)
-          {
-            _retry_get_data = false;
-            _method_type = methods::GET;
-            RETURN_IF_FAIL(get_data_info(last_modified, sz, status));
-            return error_code::success;
-          }
-
-          RETURN_ERROR_ARG(
-              _trace, status, http_bad_status_code, "Found: ", response.status_code(), _httpcli->get_url());
-        }
-        const auto iter = response.headers().find(U("Last-Modified"));
-        if (iter == response.headers().end())
-        {
-          RETURN_ERROR_ARG(_trace, status, last_modified_not_found, _httpcli->get_url());
-        }
-
-        last_modified = ::utility::datetime::from_string(iter->second);
-        if (last_modified.to_interval() == 0)
-        {
-          RETURN_ERROR_ARG(_trace, status, last_modified_invalid, _httpcli->get_url());
-        }
-
-        sz = response.headers().content_length();
-
+        _retry_get_data = false;
+        _method_type = methods::GET;
+        RETURN_IF_FAIL(get_data_info(last_modified, sz, status));
         return error_code::success;
-      });
+      }
+
+      RETURN_ERROR_ARG(_trace, status, http_bad_status_code, "Found: ", response.status_code(), _httpcli->get_url());
+    }
+    const auto iter = response.headers().find(U("Last-Modified"));
+    if (iter == response.headers().end())
+    { RETURN_ERROR_ARG(_trace, status, last_modified_not_found, _httpcli->get_url()); }
+
+    last_modified = ::utility::datetime::from_string(iter->second);
+    if (last_modified.to_interval() == 0)
+    { RETURN_ERROR_ARG(_trace, status, last_modified_invalid, _httpcli->get_url()); }
+
+    sz = response.headers().content_length();
+
+    return error_code::success;
+  });
 
   // Wait for all the outstanding I/O to complete and handle any exceptions
   try
@@ -131,49 +124,48 @@ int restapi_data_transport::get_data(model_data& ret, api_status* status)
       _httpcli
           ->request(request)
           // Handle response headers arriving.
-          .then(
-              [&](const pplx::task<http_response>& resp_task)
-              {
-                auto response = resp_task.get();
-                if (response.status_code() != 200)
-                {
-                  RETURN_ERROR_ARG(
-                      _trace, status, http_bad_status_code, "Found: ", response.status_code(), _httpcli->get_url());
-                }
+          .then([&](const pplx::task<http_response>& resp_task) {
+            auto response = resp_task.get();
+            if (response.status_code() != 200)
+            {
+              RETURN_ERROR_ARG(
+                  _trace, status, http_bad_status_code, "Found: ", response.status_code(), _httpcli->get_url());
+            }
 
-                const auto iter = response.headers().find(U("Last-Modified"));
-                if (iter == response.headers().end())
-                {
-                  RETURN_ERROR_ARG(_trace, status, last_modified_not_found, _httpcli->get_url());
-                }
+            const auto iter = response.headers().find(U("Last-Modified"));
+            if (iter == response.headers().end())
+            { RETURN_ERROR_ARG(_trace, status, last_modified_not_found, _httpcli->get_url()); }
 
-                curr_last_modified = ::utility::datetime::from_string(iter->second);
-                if (curr_last_modified.to_interval() == 0)
-                {
-                  RETURN_ERROR_ARG(_trace, status, last_modified_invalid,
-                      "Found: ", ::utility::conversions::to_utf8string(curr_last_modified.to_string()),
-                      _httpcli->get_url());
-                }
+            curr_last_modified = ::utility::datetime::from_string(iter->second);
+            if (curr_last_modified.to_interval() == 0)
+            {
+              RETURN_ERROR_ARG(_trace, status, last_modified_invalid,
+                  "Found: ", ::utility::conversions::to_utf8string(curr_last_modified.to_string()),
+                  _httpcli->get_url());
+            }
 
-                curr_datasz = response.headers().content_length();
-                if (curr_datasz > 0)
-                {
-                  auto* const buff = ret.alloc(curr_datasz);
-                  const Concurrency::streams::rawptr_buffer<char> rb(buff, curr_datasz, std::ios::out);
+            curr_datasz = response.headers().content_length();
+            if (curr_datasz > 0)
+            {
+              auto* const buff = ret.alloc(curr_datasz);
+              const Concurrency::streams::rawptr_buffer<char> rb(buff, curr_datasz, std::ios::out);
 
-                  // Write response body into the file.
-                  const auto readval =
-                      response.body().read_to_end(rb).get();  // need to use task.get to throw exceptions properly
+              // Write response body into the file.
+              const auto readval =
+                  response.body().read_to_end(rb).get();  // need to use task.get to throw exceptions properly
 
-                  ret.data_sz(readval);
-                  ret.increment_refresh_count();
-                  _datasz = readval;
-                }
-                else { ret.data_sz(0); }
+              ret.data_sz(readval);
+              ret.increment_refresh_count();
+              _datasz = readval;
+            }
+            else
+            {
+              ret.data_sz(0);
+            }
 
-                _last_modified = curr_last_modified;
-                return error_code::success;
-              });
+            _last_modified = curr_last_modified;
+            return error_code::success;
+          });
 
   // Wait for all the outstanding I/O to complete and handle any exceptions
   try

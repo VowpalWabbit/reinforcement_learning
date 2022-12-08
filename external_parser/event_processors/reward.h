@@ -93,10 +93,11 @@ inline float median(const std::vector<outcome_event>& outcome_events, float defa
   {
     sort(values.begin(), values.end());
     if (outcome_events_size % 2 == 0)
+    { return (values[outcome_events_size / 2 - 1] + values[outcome_events_size / 2]) / 2; }
+    else
     {
-      return (values[outcome_events_size / 2 - 1] + values[outcome_events_size / 2]) / 2;
+      return values[outcome_events_size / 2];
     }
-    else { return values[outcome_events_size / 2]; }
   }
 
   return default_reward;
