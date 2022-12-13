@@ -72,8 +72,10 @@ float run_simulation(live_model& model, api_status& status, int iterations)
 utility::configuration get_test_config()
 {
   utility::configuration config;
+
+  // -q :: is necessary here
   config.set(name::MODEL_VW_INITIAL_COMMAND_LINE,
-      "--cb_explore_adf --json --quiet --epsilon 0.0 --preserve_performance_counters");
+      "--cb_explore_adf --json --quiet --epsilon 0.0 --preserve_performance_counters -q ::");
   config.set(name::PROTOCOL_VERSION, "2");
   config.set(name::EUD_DURATION, "0:0:1");
   config.set(name::MODEL_SRC, value::LOCAL_LOOP_MODEL_DATA);
@@ -84,6 +86,7 @@ utility::configuration get_test_config()
   config.set(name::JOINER_LEARNING_MODE, value::LEARNING_MODE_ONLINE);
   config.set(name::MODEL_BACKGROUND_REFRESH, "false");
   config.set(name::TIME_PROVIDER_IMPLEMENTATION, value::CLOCK_TIME_PROVIDER);
+
   return config;
 }
 }  // namespace
@@ -91,7 +94,6 @@ utility::configuration get_test_config()
 BOOST_AUTO_TEST_CASE(local_loop_end_to_end_test)
 {
   auto config = get_test_config();
-  // config.set(name::TRACE_LOG_IMPLEMENTATION, value::CONSOLE_TRACE_LOGGER);
 
   // create a custom data_transport_factory_t that saves a pointer
   // to the local_loop_controller that was created
@@ -119,7 +121,7 @@ BOOST_AUTO_TEST_CASE(local_loop_end_to_end_test)
   constexpr int iterations = 100;
   auto reward_before_update = run_simulation(model, status, iterations);
 
-  // wait for eud and update model
+  // wait past eud time and update model
   std::this_thread::sleep_for(std::chrono::milliseconds(1500));
   model.refresh_model(&status);
   BOOST_TEST(status.get_error_code() == error_code::success, status.get_error_msg());
@@ -131,7 +133,9 @@ BOOST_AUTO_TEST_CASE(local_loop_end_to_end_test)
   auto vw = test_utils::create_vw(config.get(name::MODEL_VW_INITIAL_COMMAND_LINE, nullptr), model_data);
   BOOST_CHECK_EQUAL(vw->sd->weighted_labeled_examples, iterations);
 
-  // this may be a bad check due to randomness
+  // check that updated model now has better statistical performance
   auto reward_after_update = run_simulation(model, status, iterations);
   BOOST_CHECK_GT(reward_after_update, reward_before_update);
+  // std::cerr << "Reward before training: " << reward_before_update << std::endl;
+  // std::cerr << "Reward after training: " << reward_after_update << std::endl;
 }

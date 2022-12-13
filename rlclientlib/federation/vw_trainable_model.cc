@@ -90,7 +90,7 @@ namespace reinforcement_learning
 int trainable_vw_model::create(std::unique_ptr<trainable_vw_model>& output, const utility::configuration& config,
     i_trace* trace_logger, api_status* status)
 {
-  int protocol_version = config.get_int(name::PROTOCOL_VERSION, 0);
+  int protocol_version = config.get_int(name::PROTOCOL_VERSION, 1);
   if (protocol_version != 2)
   { RETURN_ERROR_LS(trace_logger, status, invalid_argument) << "Protocol version 2 is required"; }
 
