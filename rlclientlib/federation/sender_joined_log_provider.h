@@ -9,8 +9,10 @@
 #include "time_helper.h"
 #include "vw/io/io_adapter.h"
 
-#include <map>
+//#include <map>
 #include <mutex>
+#include <set>
+#include <tuple>
 #include <unordered_map>
 
 namespace reinforcement_learning
@@ -35,9 +37,43 @@ public:
   virtual ~sender_joined_log_provider() = default;
 
 private:
+  // Internal object to store event data
+  struct event_data
+  {
+    const std::string _event_id;
+    const uint8_t* _data_ptr;
+    const size_t _size;
+    const timestamp _time;
+
+    // We must hold a copy of i_sender::buffer so that its shared_ptr doesn't go out of scope
+    i_sender::buffer _data_buffer;
+
+    event_data(std::string event_id, const uint8_t* data_ptr, size_t size, timestamp time, i_sender::buffer data_buffer)
+        : _event_id(std::move(event_id))
+        , _data_ptr(data_ptr)
+        , _size(size)
+        , _time(time)
+        , _data_buffer(std::move(data_buffer))
+    {
+    }
+
+    // Sort events by time, then by event_id
+    bool operator<(const event_data& other) const
+    {
+      return std::tie(_time, _event_id) < std::tie(other._time, other._event_id);
+    }
+    // bool operator==(const event_data& other) const { return std::tie(time, event_id) == std::tie(other.time,
+    // other.event_id); }
+  };
+
   sender_joined_log_provider(std::chrono::seconds eud_offset, i_trace* trace_logger);
-  std::map<std::tuple<timestamp, std::string>, std::vector<uint8_t>> _interactions;
-  std::unordered_map<std::string, std::vector<std::tuple<timestamp, std::vector<uint8_t>>>> _observations;
+
+  // Set of interaction events, sorted by time
+  std::set<event_data> _interactions;
+
+  // Map from event_id to vector of event_data objects
+  std::unordered_map<std::string, std::vector<event_data>> _observations;
+
   std::chrono::seconds _eud_offset;
   reinforcement_learning::i_trace* _trace_logger = nullptr;
   std::mutex _mutex;

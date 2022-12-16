@@ -21,7 +21,6 @@
 
 #include <chrono>
 #include <cstdint>
-#include <map>
 #include <memory>
 #include <ratio>
 #include <string>
@@ -56,12 +55,12 @@ private:
   uint8_t* _read_head;
 };
 
-timestamp to_rl_timestamp(const messages::flatbuff::v2::TimeStamp& ts)
+timestamp fb_to_rl_timestamp(const messages::flatbuff::v2::TimeStamp& ts)
 {
   return timestamp(ts.year(), ts.month(), ts.day(), ts.hour(), ts.minute(), ts.second(), ts.subsecond());
 }
 
-messages::flatbuff::v2::TimeStamp from_rl_timestamp(const timestamp& ts)
+messages::flatbuff::v2::TimeStamp rl_to_fb_timestamp(const timestamp& ts)
 {
   return messages::flatbuff::v2::TimeStamp(ts.year, ts.month, ts.day, ts.hour, ts.minute, ts.second, ts.sub_second);
 }
@@ -135,43 +134,56 @@ RL_ATTR(nodiscard)
 int sender_joined_log_provider::invoke_join(std::unique_ptr<VW::io::reader>& batch, api_status* status)
 {
   std::lock_guard<std::mutex> lock(_mutex);
-  std::vector<uint8_t> result;
+  std::vector<uint8_t> output;
   const auto eud_cutoff = std::chrono::system_clock::now() - _eud_offset;
-  emit_filemagic_message(result);
+
+  // Binary log starts with a FILEMAGIC header
+  emit_filemagic_message(output);
+
   for (auto it = _interactions.cbegin(); it != _interactions.cend();)
   {
     flatbuffers::FlatBufferBuilder fbb;
     std::vector<flatbuffers::Offset<messages::flatbuff::v2::JoinedEvent>> events;
 
-    const auto& item = *it;
-    const auto interaction_timestamp = std::get<0>(it->first);
-    const auto interaction_time = interaction_timestamp.to_time_point();
+    const auto& interaction_data = *it;
+    const auto interaction_time = interaction_data._time.to_time_point();
+
+    // Process all interactions that occurred before EUD cutoff time
     if (interaction_time <= eud_cutoff)
     {
       const auto reward_cutoff = interaction_time + _eud_offset;
 
-      auto ts = from_rl_timestamp(std::get<0>(it->first));
-      events.push_back(messages::flatbuff::v2::CreateJoinedEventDirect(fbb, &it->second, &ts));
-      const auto& event_id = std::get<1>(it->first);
-      const auto& observations = _observations.find(event_id);
-      if (observations != _observations.end())
+      // Add interaction to flatbuffer builder
+      auto interaction_fb_vec = fbb.CreateVector(interaction_data._data_ptr, interaction_data._size);
+      auto interaction_fb_time = rl_to_fb_timestamp(interaction_data._time);
+      events.push_back(messages::flatbuff::v2::CreateJoinedEvent(fbb, interaction_fb_vec, &interaction_fb_time));
+
+      // If there are corresponding observations with the event_id, process them
+      const auto& observation_iter = _observations.find(interaction_data._event_id);
+      bool interaction_has_observations = observation_iter != _observations.end();
+
+      if (interaction_has_observations)
       {
-        for (const auto& observation : observations->second)
+        for (const auto& observation_data : observation_iter->second)
         {
-          const auto observation_timestamp = std::get<0>(observation);
-          const auto observation_time = observation_timestamp.to_time_point();
+          const auto observation_time = observation_data._time.to_time_point();
           if (observation_time <= reward_cutoff)
           {
-            auto ts = from_rl_timestamp(std::get<0>(observation));
-            events.push_back(messages::flatbuff::v2::CreateJoinedEventDirect(fbb, &std::get<1>(observation), &ts));
+            // Add observation to flatbuffer
+            auto observation_fb_vec = fbb.CreateVector(observation_data._data_ptr, observation_data._size);
+            auto observation_fb_time = rl_to_fb_timestamp(observation_data._time);
+            events.push_back(messages::flatbuff::v2::CreateJoinedEvent(fbb, observation_fb_vec, &observation_fb_time));
           }
         }
-        _observations.erase(event_id);
       }
 
+      // Create the final flatbuffer output
       auto joined_payload = messages::flatbuff::v2::CreateJoinedPayloadDirect(fbb, &events);
-      emit_regular_message(result, fbb, joined_payload);
+      emit_regular_message(output, fbb, joined_payload);
+
+      // Clear data structures
       _interactions.erase(it++);
+      if (interaction_has_observations) { _observations.erase(observation_iter); }
     }
     else
     {
@@ -181,17 +193,15 @@ int sender_joined_log_provider::invoke_join(std::unique_ptr<VW::io::reader>& bat
     }
   }
 
-  batch.reset(new buffer_reader(std::move(result)));
+  batch.reset(new buffer_reader(std::move(output)));
 
   return 0;
 }
 
-int sender_joined_log_provider::receive_events(const i_sender::buffer& data, api_status* status)
+int sender_joined_log_provider::receive_events(const i_sender::buffer& data_buffer, api_status* status)
 {
-  std::lock_guard<std::mutex> lock(_mutex);
-
   logger::preamble pre;
-  pre.read_from_bytes(data->preamble_begin(), logger::preamble::size());
+  pre.read_from_bytes(data_buffer->preamble_begin(), logger::preamble::size());
 
   if (pre.msg_type != logger::message_type::fb_generic_event_collection)
   {
@@ -199,43 +209,49 @@ int sender_joined_log_provider::receive_events(const i_sender::buffer& data, api
         << " Message type " << pre.msg_type << " cannot be handled.";
   }
 
-  auto res = messages::flatbuff::v2::GetEventBatch(data->body_begin());
-  flatbuffers::Verifier verifier(data->body_begin(), data->body_filled_size());
-  auto result = res->Verify(verifier);
+  // Verify the flatbuffer
+  auto event_batch = messages::flatbuff::v2::GetEventBatch(data_buffer->body_begin());
+  flatbuffers::Verifier verifier(data_buffer->body_begin(), data_buffer->body_filled_size());
+  auto result = event_batch->Verify(verifier);
 
   if (!result)
   { RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << "verify failed for fb_generic_event_collection"; }
 
-  if (res->metadata()->content_encoding()->str() != "IDENTITY")
+  if (event_batch->metadata()->content_encoding()->str() != "IDENTITY")
   { RETURN_ERROR_LS(_trace_logger, status, invalid_argument) << "Can only handle IDENTITY encoding"; }
 
-  for (auto serialized_event : *res->events())
+  // Enter mutex lock
   {
-    const auto* serialized_payload = serialized_event->payload();
-    const auto* event = flatbuffers::GetRoot<messages::flatbuff::v2::Event>(serialized_payload->data());
-
-    std::string event_id = event->meta()->id()->str();
-    std::vector<uint8_t> joined_event_data(
-        serialized_payload->data(), serialized_payload->data() + serialized_payload->size());
-    auto event_timestamp = to_rl_timestamp(*event->meta()->client_time_utc());
-
-    switch (event->meta()->payload_type())
+    std::lock_guard<std::mutex> lock(_mutex);
+    for (auto serialized_event : *event_batch->events())
     {
-      case messages::flatbuff::v2::PayloadType_CB:
-      case messages::flatbuff::v2::PayloadType_CCB:
-      case messages::flatbuff::v2::PayloadType_Slates:
-      case messages::flatbuff::v2::PayloadType_CA:
-      case messages::flatbuff::v2::PayloadType_MultiStep:
-        _interactions.emplace(std::make_tuple(event_timestamp, event_id), std::move(joined_event_data));
-        break;
+      // Get the flatbuffer inside flatbuffer
+      const auto* serialized_payload = serialized_event->payload();
+      const auto* event = flatbuffers::GetRoot<messages::flatbuff::v2::Event>(serialized_payload->data());
 
-      case messages::flatbuff::v2::PayloadType_Outcome:
-        _observations[event_id].emplace_back(std::make_tuple(event_timestamp, std::move(joined_event_data)));
-        break;
+      // Read flatbuffer data and emplace into the corresponding data structure
+      std::string event_id = event->meta()->id()->str();
+      auto event_timestamp = fb_to_rl_timestamp(*event->meta()->client_time_utc());
+      switch (event->meta()->payload_type())
+      {
+        case messages::flatbuff::v2::PayloadType_CB:
+        case messages::flatbuff::v2::PayloadType_CCB:
+        case messages::flatbuff::v2::PayloadType_Slates:
+        case messages::flatbuff::v2::PayloadType_CA:
+        case messages::flatbuff::v2::PayloadType_MultiStep:
+          _interactions.emplace(
+              event_id, serialized_payload->data(), serialized_payload->size(), event_timestamp, data_buffer);
+          break;
 
-      default:
-        RETURN_ERROR_LS(_trace_logger, status, invalid_argument)
-            << "Could not process payload type: " << event->meta()->payload_type();
+        case messages::flatbuff::v2::PayloadType_Outcome:
+          _observations[event_id].emplace_back(
+              event_id, serialized_payload->data(), serialized_payload->size(), event_timestamp, data_buffer);
+          break;
+
+        default:
+          RETURN_ERROR_LS(_trace_logger, status, invalid_argument)
+              << "Could not process payload type: " << event->meta()->payload_type();
+      }
     }
   }
   return error_code::success;
