@@ -62,8 +62,6 @@ private:
     {
       return std::tie(_time, _event_id) < std::tie(other._time, other._event_id);
     }
-    // bool operator==(const event_data& other) const { return std::tie(time, event_id) == std::tie(other.time,
-    // other.event_id); }
   };
 
   sender_joined_log_provider(std::chrono::seconds eud_offset, i_trace* trace_logger);

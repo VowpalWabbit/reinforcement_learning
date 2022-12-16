@@ -140,62 +140,59 @@ int sender_joined_log_provider::invoke_join(std::unique_ptr<VW::io::reader>& bat
   // Binary log starts with a FILEMAGIC header
   emit_filemagic_message(output);
 
-  for (auto it = _interactions.cbegin(); it != _interactions.cend();)
+  for (auto interaction_iter = _interactions.cbegin(); interaction_iter != _interactions.cend();)
   {
     flatbuffers::FlatBufferBuilder fbb;
-    std::vector<flatbuffers::Offset<messages::flatbuff::v2::JoinedEvent>> events;
+    std::vector<flatbuffers::Offset<messages::flatbuff::v2::JoinedEvent>> joined_events;
 
-    const auto& interaction_data = *it;
+    const auto& interaction_data = *interaction_iter;
     const auto interaction_time = interaction_data._time.to_time_point();
+    const auto reward_cutoff = interaction_time + _eud_offset;
 
-    // Process all interactions that occurred before EUD cutoff time
-    if (interaction_time <= eud_cutoff)
+    // Only process interactions that occurred before EUD cutoff time
+    if (interaction_time > eud_cutoff)
     {
-      const auto reward_cutoff = interaction_time + _eud_offset;
+      // Interactions are in std::set sorted by timestamp, so once we see the
+      // first event after eud_cutoff, all later events are also after eud_cutoff
+      break;
+    }
 
-      // Add interaction to flatbuffer builder
-      auto interaction_fb_vec = fbb.CreateVector(interaction_data._data_ptr, interaction_data._size);
-      auto interaction_fb_time = rl_to_fb_timestamp(interaction_data._time);
-      events.push_back(messages::flatbuff::v2::CreateJoinedEvent(fbb, interaction_fb_vec, &interaction_fb_time));
+    // Add interaction to flatbuffer builder
+    auto interaction_fb_vec = fbb.CreateVector(interaction_data._data_ptr, interaction_data._size);
+    auto interaction_fb_time = rl_to_fb_timestamp(interaction_data._time);
+    joined_events.push_back(messages::flatbuff::v2::CreateJoinedEvent(fbb, interaction_fb_vec, &interaction_fb_time));
 
-      // If there are corresponding observations with the event_id, process them
-      const auto& observation_iter = _observations.find(interaction_data._event_id);
-      bool interaction_has_observations = observation_iter != _observations.end();
+    // If there are corresponding observations with the event_id, process them
+    const auto& observation_iter = _observations.find(interaction_data._event_id);
+    bool interaction_has_observations = observation_iter != _observations.end();
 
-      if (interaction_has_observations)
+    if (interaction_has_observations)
+    {
+      for (const auto& observation_data : observation_iter->second)
       {
-        for (const auto& observation_data : observation_iter->second)
+        const auto observation_time = observation_data._time.to_time_point();
+        if (observation_time <= reward_cutoff)
         {
-          const auto observation_time = observation_data._time.to_time_point();
-          if (observation_time <= reward_cutoff)
-          {
-            // Add observation to flatbuffer
-            auto observation_fb_vec = fbb.CreateVector(observation_data._data_ptr, observation_data._size);
-            auto observation_fb_time = rl_to_fb_timestamp(observation_data._time);
-            events.push_back(messages::flatbuff::v2::CreateJoinedEvent(fbb, observation_fb_vec, &observation_fb_time));
-          }
+          // Add observation to flatbuffer
+          auto observation_fb_vec = fbb.CreateVector(observation_data._data_ptr, observation_data._size);
+          auto observation_fb_time = rl_to_fb_timestamp(observation_data._time);
+          joined_events.push_back(
+              messages::flatbuff::v2::CreateJoinedEvent(fbb, observation_fb_vec, &observation_fb_time));
         }
       }
-
-      // Create the final flatbuffer output
-      auto joined_payload = messages::flatbuff::v2::CreateJoinedPayloadDirect(fbb, &events);
-      emit_regular_message(output, fbb, joined_payload);
-
-      // Clear data structures
-      _interactions.erase(it++);
-      if (interaction_has_observations) { _observations.erase(observation_iter); }
     }
-    else
-    {
-      // TODO make sure this is correct. As in does the timestamp ordering mean that all further events are within eud.
-      // break;
-      ++it;
-    }
+
+    // Create the final flatbuffer output
+    auto joined_payload = messages::flatbuff::v2::CreateJoinedPayloadDirect(fbb, &joined_events);
+    emit_regular_message(output, fbb, joined_payload);
+
+    // Clear data structures
+    _interactions.erase(interaction_iter++);
+    if (interaction_has_observations) { _observations.erase(observation_iter); }
   }
 
   batch.reset(new buffer_reader(std::move(output)));
-
-  return 0;
+  return error_code::success;
 }
 
 int sender_joined_log_provider::receive_events(const i_sender::buffer& data_buffer, api_status* status)
