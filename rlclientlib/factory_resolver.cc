@@ -199,11 +199,10 @@ void factory_initializer::register_default_factories()
       });
 
   // Register a default factory for LOCAL_LOOP_SENDER that returns an error
-  // When initializing live_model_impl with LOCAL_LOOP_DATA_TRANSPORT, we overwrite this with the actual factory
   sender_factory.register_type(value::LOCAL_LOOP_SENDER,
       [](i_sender**, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status) {
         RETURN_ERROR_ARG(
-            trace_logger, status, create_fn_exception, "Must use LOCAL_LOOP_SENDER with LOCAL_LOOP_DATA_TRANSPORT");
+            trace_logger, status, create_fn_exception, "Cannot create LOCAL_LOOP_SENDER using sender_factory");
       });
 }
 

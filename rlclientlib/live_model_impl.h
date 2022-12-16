@@ -81,7 +81,10 @@ private:
   int init_model(api_status* status);
   int init_model_mgmt(api_status* status);
   int init_loggers(api_status* status);
+  int init_loggers_common(i_sender* ranking_data_sender, i_sender* outcome_sender, api_status* status);
   int init_trace(api_status* status);
+  int init_local_loop(api_status* status);
+  int check_if_local_loop(bool& output, api_status* status);
   static void _handle_model_update(const model_management::model_data& data, live_model_impl* ctxt);
   void handle_model_update(const model_management::model_data& data);
   int explore_only(const char* event_id, string_view context, ranking_response& response, api_status* status) const;

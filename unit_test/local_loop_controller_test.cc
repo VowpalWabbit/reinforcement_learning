@@ -143,14 +143,8 @@ BOOST_AUTO_TEST_CASE(sender_factory_test)
   auto config = get_test_config();
   auto test_llc = create_test_local_loop_controller(config);
 
-  // create a sender
-  auto sender_factory = test_llc->get_local_sender_factory();
-  i_sender* sender_raw = nullptr;
-  sender_factory(&sender_raw, config, nullptr, nullptr, nullptr);
-  BOOST_CHECK_NE(sender_raw, nullptr);
-  std::unique_ptr<i_sender> sender(sender_raw);
-
-  // send some data
+  // create a sender and send some data
+  std::unique_ptr<i_sender> sender = test_llc->get_local_sender();
   const char* test_data = "Testing the sender...";
   auto test_data_len = std::char_traits<char>::length(test_data);
 
