@@ -46,7 +46,7 @@ inline int parse_eud(
   if (components.size() != 3 || std::any_of(components.begin(), components.end(), [](const std::string& component) {
         return component.empty() || !std::all_of(component.begin(), component.end(), ::isdigit);
       }))
-  { RETURN_ERROR_ARG(nullptr, status, invalid_argument, "invalid format of eudduration"); }
+  { RETURN_ERROR_ARG(nullptr, status, invalid_argument, "invalid format of eud duration"); }
 
   int hours{};
   RETURN_IF_FAIL(parse_int(components[0], hours, status));
