@@ -244,7 +244,7 @@ std::unique_ptr<sender_joined_log_provider> create_test_object()
   utility::configuration config;
   config.set(name::MODEL_VW_INITIAL_COMMAND_LINE, "--quiet --preserve_performance_counters");
   config.set(name::PROTOCOL_VERSION, "2");
-  config.set(name::EUD_DURATION, "0:0:10");  // EUD set to 10 seconds for all tests here
+  config.set(name::JOINER_EUD_DURATION, "0:0:10");  // EUD set to 10 seconds for all tests here
 
   std::unique_ptr<sender_joined_log_provider> sjlp;
   BOOST_CHECK_EQUAL(sender_joined_log_provider::create(sjlp, config), error_code::success);

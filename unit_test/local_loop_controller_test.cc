@@ -117,7 +117,7 @@ utility::configuration get_test_config()
   utility::configuration config;
   config.set(name::MODEL_VW_INITIAL_COMMAND_LINE, "--quiet --preserve_performance_counters");
   config.set(name::PROTOCOL_VERSION, "2");
-  config.set(name::EUD_DURATION, "0:0:0");
+  config.set(name::JOINER_EUD_DURATION, "0:0:0");
   return config;
 }
 

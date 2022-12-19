@@ -77,10 +77,10 @@ utility::configuration get_test_config()
   config.set(name::MODEL_VW_INITIAL_COMMAND_LINE,
       "--cb_explore_adf --json --quiet --epsilon 0.0 --preserve_performance_counters -q ::");
   config.set(name::PROTOCOL_VERSION, "2");
-  config.set(name::EUD_DURATION, "0:0:1");
   config.set(name::MODEL_SRC, value::LOCAL_LOOP_MODEL_DATA);
   config.set(name::INTERACTION_SENDER_IMPLEMENTATION, value::LOCAL_LOOP_SENDER);
   config.set(name::OBSERVATION_SENDER_IMPLEMENTATION, value::LOCAL_LOOP_SENDER);
+  config.set(name::JOINER_EUD_DURATION, "0:0:1");
   config.set(name::JOINER_PROBLEM_TYPE, value::PROBLEM_TYPE_CB);
   config.set(name::JOINER_REWARD_FUNCTION, value::REWARD_FUNCTION_EARLIEST);
   config.set(name::JOINER_LEARNING_MODE, value::LEARNING_MODE_ONLINE);

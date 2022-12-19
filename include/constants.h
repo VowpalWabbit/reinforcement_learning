@@ -26,7 +26,6 @@ const char* const HTTP_API_KEY = "http.api.key";
 const char* const HTTP_API_HEADER_KEY_NAME = "http.api.header.key.name";
 const char* const AUDIT_ENABLED = "audit.enabled";
 const char* const AUDIT_OUTPUT_PATH = "audit.output.path";
-const char* const EUD_DURATION = "eud.duration";
 
 // Episode
 const char* const EPISODE_EH_HOST = "episode.eventhub.host";
@@ -97,10 +96,13 @@ const char* const MODEL_FILE_MUST_EXIST = "model_file_loader.file_must_exist";
 
 const char* const ZSTD_COMPRESSION_LEVEL = "zstd.compression_level";
 
+#ifdef RL_BUILD_FEDERATION
 // local joiner for federated learning
+const char* const JOINER_EUD_DURATION = "eud.duration";
 const char* const JOINER_PROBLEM_TYPE = "joiner.problem.type";
 const char* const JOINER_REWARD_FUNCTION = "joiner.reward.function";
 const char* const JOINER_LEARNING_MODE = "joiner.learning.mode";
+#endif
 
 }  // namespace name
 }  // namespace reinforcement_learning
@@ -113,7 +115,6 @@ const char* const AZURE_STORAGE_BLOB = "AZURE_STORAGE_BLOB";
 const char* const NO_MODEL_DATA = "NO_MODEL_DATA";
 const char* const HTTP_MODEL_DATA = "HTTP_MODEL_DATA";
 const char* const FILE_MODEL_DATA = "FILE_MODEL_DATA";
-const char* const LOCAL_LOOP_MODEL_DATA = "LOCAL_LOOP_MODEL_DATA";
 const char* const VW = "VW";
 const char* const PASSTHROUGH_PDF_MODEL = "PASSTHROUGH_PDF";
 const char* const EPISODE_EH_SENDER = "EPISODE_EH_SENDER";
@@ -124,7 +125,6 @@ const char* const OBSERVATION_FILE_SENDER = "OBSERVATION_FILE_SENDER";
 const char* const INTERACTION_FILE_SENDER = "INTERACTION_FILE_SENDER";
 const char* const OBSERVATION_HTTP_API_SENDER = "OBSERVATION_HTTP_API_SENDER";
 const char* const INTERACTION_HTTP_API_SENDER = "INTERACTION_HTTP_API_SENDER";
-const char* const LOCAL_LOOP_SENDER = "LOCAL_LOOP_SENDER";
 const char* const NULL_TRACE_LOGGER = "NULL_TRACE_LOGGER";
 const char* const CONSOLE_TRACE_LOGGER = "CONSOLE_TRACE_LOGGER";
 const char* const NULL_TIME_PROVIDER = "NULL_TIME_PROVIDER";
@@ -144,6 +144,8 @@ const int DEFAULT_VW_POOL_INIT_SIZE = 4;
 const int DEFAULT_PROTOCOL_VERSION = 1;
 const char* const DEFAULT_AUDIT_OUTPUT_PATH = "audit";
 
+#ifdef RL_BUILD_FEDERATION
+// Configuration values for local joiner
 const char* const PROBLEM_TYPE_UNKNOWN = "PROBLEM_TYPE_UNKNOWN";
 const char* const PROBLEM_TYPE_CB = "PROBLEM_TYPE_CB";
 const char* const PROBLEM_TYPE_CCB = "PROBLEM_TYPE_CCB";
@@ -156,6 +158,16 @@ const char* const REWARD_FUNCTION_MEDIAN = "REWARD_FUNCTION_MEDIAN";
 const char* const REWARD_FUNCTION_SUM = "REWARD_FUNCTION_SUM";
 const char* const REWARD_FUNCTION_MIN = "REWARD_FUNCTION_MEAN";
 const char* const REWARD_FUNCTION_MAX = "REWARD_FUNCTION_MAX";
+#endif
+
+// These are outside of #ifdef section so that we can recognize them as invalid
+// configuration options when rlclientlib is compiled without RL_BUILD_FEDERATION
+//
+// Use local_loop_controller for model data
+const char* const LOCAL_LOOP_MODEL_DATA = "LOCAL_LOOP_MODEL_DATA";
+// Send events to local_loop_controller
+const char* const LOCAL_LOOP_SENDER = "LOCAL_LOOP_SENDER";
+
 
 const char* get_default_episode_sender();
 const char* get_default_observation_sender();

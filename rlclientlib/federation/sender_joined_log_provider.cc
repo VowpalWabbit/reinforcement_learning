@@ -115,7 +115,7 @@ int sender_joined_log_provider::create(std::unique_ptr<sender_joined_log_provide
   if (config.get_int(name::PROTOCOL_VERSION, 999) != 2)
   { RETURN_ERROR_LS(trace_logger, status, invalid_argument) << " protocol version 2 required"; }
 
-  std::string eud_duration = config.get(name::EUD_DURATION, "UNSET");
+  std::string eud_duration = config.get(name::JOINER_EUD_DURATION, "UNSET");
   if (eud_duration == "UNSET") { RETURN_ERROR_ARG(trace_logger, status, invalid_argument, "eudduration must be set"); }
 
   std::chrono::seconds eud_offset;
