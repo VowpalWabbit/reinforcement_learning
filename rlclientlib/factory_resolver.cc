@@ -201,8 +201,8 @@ void factory_initializer::register_default_factories()
   // Register a default factory for LOCAL_LOOP_SENDER that returns an error
   sender_factory.register_type(value::LOCAL_LOOP_SENDER,
       [](i_sender**, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status) {
-        RETURN_ERROR_ARG(
-            trace_logger, status, create_fn_exception, "LOCAL_LOOP_SENDER must be used with model source set to LOCAL_LOOP_MODEL_DATA");
+        RETURN_ERROR_ARG(trace_logger, status, create_fn_exception,
+            "LOCAL_LOOP_SENDER must be used with model source set to LOCAL_LOOP_MODEL_DATA");
       });
 }
 
