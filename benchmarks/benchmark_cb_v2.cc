@@ -91,7 +91,10 @@ static void bench_cb(benchmark::State& state, ExtraArgs&&... extra_args)
 // x number of total examples so x number of total rank calls to benchmark
 // compression (on/off)
 // dedup (on/off)
-BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload, 20, 10, 50, 2000, 500, false, false);
-BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload_compression, 20, 10, 50, 2000, 500, true, false);
-BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload_dedup, 20, 10, 50, 2000, 500, false, true);
-BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload_compression_dedup, 20, 10, 50, 2000, 500, true, true);
+BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload, 20, 10, 50, 2000, 500, false, false)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload_compression, 20, 10, 50, 2000, 500, true, false)
+    ->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload_dedup, 20, 10, 50, 2000, 500, false, true)
+    ->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload_compression_dedup, 20, 10, 50, 2000, 500, true, true)
+    ->Unit(benchmark::kMillisecond);
