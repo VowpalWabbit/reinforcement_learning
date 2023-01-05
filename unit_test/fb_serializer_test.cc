@@ -109,14 +109,8 @@ BOOST_AUTO_TEST_CASE(fb_serializer_ranking_event)
     BOOST_CHECK_EQUAL(event.deferred_action(), false);
     BOOST_CHECK_EQUAL(event.pass_probability(), 0.33f);
     if (i % learning_mode_count == 0) { BOOST_CHECK_EQUAL(event.learning_mode(), LearningModeType_Online); }
-    else if (i % learning_mode_count == 1)
-    {
-      BOOST_CHECK_EQUAL(event.learning_mode(), LearningModeType_Apprentice);
-    }
-    else
-    {
-      BOOST_CHECK_EQUAL(event.learning_mode(), LearningModeType_LoggingOnly);
-    }
+    else if (i % learning_mode_count == 1) { BOOST_CHECK_EQUAL(event.learning_mode(), LearningModeType_Apprentice); }
+    else { BOOST_CHECK_EQUAL(event.learning_mode(), LearningModeType_LoggingOnly); }
   }
 }
 

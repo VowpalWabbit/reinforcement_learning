@@ -120,8 +120,7 @@ void periodic_background_proc<BGProc>::time_loop()
   _watchdog.register_thread(
       std::this_thread::get_id(), _proc_name, static_cast<long long>(_interval_ms * timeout_grace_multiplier_c));
 
-  do
-  {
+  do {
     api_status status;
 
     // Check in to the watchdog to report this thread is still alive.

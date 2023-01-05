@@ -62,10 +62,7 @@ int get_export_frequency(const u::configuration& cc, int& interval_ms, r::api_st
     if (interval_ms == 0) { RETURN_ERROR_LS(nullptr, status, bad_time_interval); }
     return e::success;
   }
-  else
-  {
-    RETURN_ERROR_LS(nullptr, status, bad_time_interval);
-  }
+  else { RETURN_ERROR_LS(nullptr, status, bad_time_interval); }
 }
 
 void dummy_error_fn(const r::api_status& err, void* ctxt) { *((int*)ctxt) = 10; }

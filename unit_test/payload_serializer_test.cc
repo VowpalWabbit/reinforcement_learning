@@ -112,14 +112,20 @@ BOOST_AUTO_TEST_CASE(multi_slot_payload_serializer_test)
     BOOST_CHECK_EQUAL(actions[i].size(), slots[i]->action_ids()->size());
     BOOST_CHECK_EQUAL(probs[i].size(), slots[i]->probabilities()->size());
     for (flatbuffers::uoffset_t j = 0; j < actions[i].size(); ++j)
-    { BOOST_CHECK_EQUAL(actions[i][j], (*slots[i]->action_ids())[j]); }
+    {
+      BOOST_CHECK_EQUAL(actions[i][j], (*slots[i]->action_ids())[j]);
+    }
     for (flatbuffers::uoffset_t j = 0; j < probs[i].size(); ++j)
-    { BOOST_CHECK_CLOSE(probs[i][j], (*slots[i]->probabilities())[j], tolerance); }
+    {
+      BOOST_CHECK_CLOSE(probs[i][j], (*slots[i]->probabilities())[j], tolerance);
+    }
   }
 
   const auto& baseline = *event->baseline_actions();
   for (flatbuffers::uoffset_t i = 0; i < baseline_actions.size(); ++i)
-  { BOOST_CHECK_EQUAL(baseline_actions[i], baseline[i]); }
+  {
+    BOOST_CHECK_EQUAL(baseline_actions[i], baseline[i]);
+  }
 
   BOOST_CHECK_EQUAL(false, event->deferred_action());
 }

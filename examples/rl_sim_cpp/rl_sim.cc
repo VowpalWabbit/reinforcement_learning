@@ -190,7 +190,9 @@ int rl_sim::ca_loop()
     const auto chosen_action = response.get_chosen_action();
     const auto outcome = joint.get_outcome(chosen_action, _random_seed);
     if (_rl->report_outcome(req_id.c_str(), outcome, &status) != err::success && outcome > 0.00001f)
-    { std::cout << status.get_error_msg() << std::endl; }
+    {
+      std::cout << status.get_error_msg() << std::endl;
+    }
 
     stats.record(joint.id(), chosen_action, outcome);
 
@@ -472,7 +474,9 @@ std::string rl_sim::get_action_features()
   // R"("_multi": [ { "TAction":{"topic":"HerbGarden"} }, { "TAction":{"topic":"MachineLearning"} } ])";
   oss << R"("_multi": [ )";
   for (auto idx = 0; idx < _topics.size() - 1; ++idx)
-  { oss << R"({ "TAction":{"topic":")" << _topics[idx] << R"("} }, )"; }
+  {
+    oss << R"({ "TAction":{"topic":")" << _topics[idx] << R"("} }, )";
+  }
   oss << R"({ "TAction":{"topic":")" << _topics.back() << R"("} } ])";
   return oss.str();
 }
@@ -547,18 +551,9 @@ std::string rl_sim::create_event_id()
 rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm)), _loop_kind(CB)
 {
   if (_options["ccb"].as<bool>()) { _loop_kind = CCB; }
-  else if (_options["slates"].as<bool>())
-  {
-    _loop_kind = Slates;
-  }
-  else if (_options["ca"].as<bool>())
-  {
-    _loop_kind = CA;
-  }
-  else if (_options["multistep"].as<bool>())
-  {
-    _loop_kind = Multistep;
-  }
+  else if (_options["slates"].as<bool>()) { _loop_kind = Slates; }
+  else if (_options["ca"].as<bool>()) { _loop_kind = CA; }
+  else if (_options["multistep"].as<bool>()) { _loop_kind = Multistep; }
 
   _num_events = _options["num_events"].as<int>();
   _random_seed = _options["random_seed"].as<uint64_t>();
