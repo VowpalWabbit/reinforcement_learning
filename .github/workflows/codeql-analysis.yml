@@ -88,7 +88,7 @@ jobs:
       uses: github/codeql-action/init@v2
       with:
         languages: csharp
-        config-file: ${{ env.SOURCE_DIR }}/.github/codeql/codeql-config.yml
+        config-file: ./.github/codeql/codeql-config.yml
 
       # Setup vcpkg cache
       - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
@@ -102,10 +102,8 @@ jobs:
           key: ${{ env.cache-name }}-${{ github.workflow }}-${{ github.action }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}
 
     - run: ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
-    - run: ${{ env.SOURCE_DIR }}/.scripts/restore-cmake.cmd
-    - run: ${{ env.SOURCE_DIR }}/.scripts/build-cmake.cmd
+    - run: ./.scripts/restore-cmake.cmd
+    - run: ./.scripts/build-cmake.cmd
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
-      with:
-        paths: ${{ env.SOURCE_DIR }}

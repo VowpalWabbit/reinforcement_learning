@@ -77,6 +77,6 @@ jobs:
           key: ${{ env.cache-name }}-${{ github.workflow }}-${{ github.action }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}
 
       - run: ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
-      - run: ${{ env.SOURCE_DIR }}/.scripts/restore-vw-bp-deps.cmd
-      - run: ${{ env.SOURCE_DIR }}/.scripts/build-vw-bp.cmd
-      - run: ${{ env.SOURCE_DIR }}/.scripts/test-vw-bp.cmd
+      - run: ./.scripts/restore-vw-bp-deps.cmd
+      - run: ./.scripts/build-vw-bp.cmd
+      - run: ./.scripts/test-vw-bp.cmd
