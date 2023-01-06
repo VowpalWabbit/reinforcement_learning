@@ -152,7 +152,7 @@ target_include_directories(rl_binary_parser
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/date/
 )
 
-# If flatbuffers found via CONFIG, add it as a library dependency
+# If flatbuffers found via CONFIG, add its target as a library dependency
 # Otherwise, the flatbuffers MODULE defines FLATBUFFERS_INCLUDE_DIR to add to the include path
 if(TARGET flatbuffers::flatbuffers)
   target_link_libraries(rl_binary_parser PRIVATE flatbuffers::flatbuffers)

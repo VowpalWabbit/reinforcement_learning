@@ -5,7 +5,7 @@ IF DEFINED DebugBuildScripts (
 
 SETLOCAL
 
-CALL %~dp0init.cmd
+CALL %~dp0init-cmake.cmd
 REM CD out of the repo dir as we need to avoid vcpkg recognizing the manifest
 PUSHD %~dp0\..\..\
 

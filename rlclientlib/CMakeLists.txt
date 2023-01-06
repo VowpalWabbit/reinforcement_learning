@@ -216,7 +216,7 @@ target_include_directories(rlclientlib
 
 target_link_libraries(rlclientlib PUBLIC Boost::system vw_common vw_core PRIVATE RapidJSON)
 
-# If flatbuffers found via CONFIG, add it as a library dependency
+# If flatbuffers found via CONFIG, add its target as a library dependency
 # Otherwise, the flatbuffers MODULE defines FLATBUFFERS_INCLUDE_DIR to add to the include path
 if(TARGET flatbuffers::flatbuffers)
   target_link_libraries(rlclientlib PRIVATE flatbuffers::flatbuffers)

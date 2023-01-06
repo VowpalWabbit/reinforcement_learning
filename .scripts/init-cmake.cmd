@@ -25,8 +25,14 @@ IF NOT DEFINED VCPKG_ROOT (
     EXIT /b 1
 )
 
+IF NOT DEFINED VCPKG_DEFAULT_BINARY_CACHE (
+    ECHO ERROR: VCPKG_DEFAULT_BINARY_CACHE is not configured. Cannot find vcpkg binary installation location.
+    EXIT /b 1
+)
+
 SET "vcpkgPath=%VCPKG_ROOT%\vcpkg.exe"
-SET "VcpkgCmake=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake"
+SET "vcpkgInstalledDir=%VCPKG_DEFAULT_BINARY_CACHE%"
+SET "vcpkgCmake=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake"
 
 REM Repo-specific paths
 IF NOT DEFINED rlRoot (

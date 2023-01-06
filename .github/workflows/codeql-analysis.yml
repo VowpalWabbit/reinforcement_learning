@@ -9,9 +9,6 @@ on:
   schedule:
     - cron: '26 11 * * 5'
 
-env:
-  VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
   cancel-in-progress: true
@@ -76,8 +73,9 @@ jobs:
       fail-fast: false
     env:
       VCPKG_ROOT: ${{ github.workspace }}/ext_libs/vcpkg
+      VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
 
-    steps:
+      steps:
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
