@@ -5,8 +5,8 @@ if(FLATBUFFERS_FOUND)
   get_property(flatc_location TARGET flatbuffers::flatc PROPERTY LOCATION)
 else()
   # Fallback to the old version
-  #find_package(Flatbuffers MODULE REQUIRED)
-  #set(flatc_location ${FLATBUFFERS_FLATC_EXECUTABLE})
+  find_package(Flatbuffers MODULE REQUIRED)
+  set(flatc_location ${FLATBUFFERS_FLATC_EXECUTABLE})
 endif()
 
 include(FlatbufferUtils)
