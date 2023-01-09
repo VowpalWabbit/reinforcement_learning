@@ -104,6 +104,8 @@ jobs:
       - name: Setup MSVC Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1
       - uses: lukka/get-cmake@latest
+      - name: Install dotnet t4
+        run: dotnet tool install --global dotnet-t4
       - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
         shell: bash
       - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
