@@ -1,6 +1,7 @@
 include(FindPackageHandleStandardArgs)
 
 # On Linux this should find the .so and on Windows this should find the .lib import for the dll
+message("Finding ONNX - search path ${ONNXRUNTIME_ROOT}")
 find_library(ONNXRUNTIME_LIB
   NAMES onnxruntime
   PATHS "${ONNXRUNTIME_ROOT}"
@@ -23,25 +24,33 @@ if(WIN32)
 endif()
 
 find_path(ONNXRUNTIME_INCLUDE_DIR_ROOT
-  NAMES include/onnxruntime/core/session
+  NAMES "onnxruntime_cxx_api.h"
   PATHS "${ONNXRUNTIME_ROOT}"
-  PATH_SUFFIXES include
+  PATH_SUFFIXES 
+    "include/onnxruntime/core/session"
+    "include/onnxruntime/core"
+    "include/onnxruntime"
+    "include"
 )
 
 # There may be many files names version.h in the search path. So we find the one
 # with the expected preprocessor definition ONNXRUNTIME_VERSION_STRING and then
 # read the version file from that one.
-file(GLOB_RECURSE FOUND_VERSION_FILES "${ONNXRUNTIME_INCLUDE_DIR_ROOT}/**/version.h")
-foreach(VERSION_FILE ${FOUND_VERSION_FILES})
-  file(READ ${VERSION_FILE} VERSION_FILE_CONTENTS)
-  string(FIND "${VERSION_FILE_CONTENTS}" "ONNXRUNTIME_VERSION_STRING" FIND_RESULT)
+if(EXISTS "${ONNXRUNTIME_ROOT}/VERSION_NUMBER")
+  file(STRINGS "${ONNXRUNTIME_ROOT}/VERSION_NUMBER" ONNXRUNTIME_VERSION LIMIT_COUNT 1)
+else()
+  file(GLOB_RECURSE FOUND_VERSION_FILES "${ONNXRUNTIME_INCLUDE_DIR_ROOT}/**/version.h")
+  foreach(VERSION_FILE ${FOUND_VERSION_FILES})
+    file(READ ${VERSION_FILE} VERSION_FILE_CONTENTS)
+    string(FIND "${VERSION_FILE_CONTENTS}" "ONNXRUNTIME_VERSION_STRING" FIND_RESULT)
 
-  if(NOT ${FIND_RESULT} EQUAL -1)
-    string(REGEX MATCH "\"(.*)\"" ONNX_VERSION_OUTPUT_UNUSED ${VERSION_FILE_CONTENTS})
-    set(ONNXRUNTIME_VERSION ${CMAKE_MATCH_1})
-    break()
-  endif ()
-endforeach()
+    if(NOT ${FIND_RESULT} EQUAL -1)
+      string(REGEX MATCH "\"(.*)\"" ONNX_VERSION_OUTPUT_UNUSED ${VERSION_FILE_CONTENTS})
+      set(ONNXRUNTIME_VERSION ${CMAKE_MATCH_1})
+      break()
+    endif ()
+  endforeach()
+endif()
 
 # The ${ONNXRUNTIME_REQUIRED_IMPLIB_VAR_NAME} is intentionally different to the
 # others as the value of this variable is the name of the implib var IF it is
@@ -57,7 +66,7 @@ if(ONNXRUNTIME_FOUND)
     IMPORTED_LOCATION "${ONNXRUNTIME_LIB}"
   )
 
-  set(ONNXRUNTIME_INCLUDE_DIRS "${ONNXRUNTIME_INCLUDE_DIR_ROOT}/include/onnxruntime")
+  set(ONNXRUNTIME_INCLUDE_DIRS "${ONNXRUNTIME_INCLUDE_DIR_ROOT}")
   target_include_directories(onnxruntime INTERFACE ${ONNXRUNTIME_INCLUDE_DIRS})
 endif()
 

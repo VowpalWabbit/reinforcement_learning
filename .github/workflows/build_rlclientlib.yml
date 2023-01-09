@@ -17,36 +17,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: rlclientlib-${{ matrix.config.os }}
-    runs-on: ${{ matrix.config.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - { os: "windows-latest" }
-          - { os: "ubuntu-latest" }
-          - { os: "macos-latest" }
+  build-ubuntu:
+  # Ubuntu build has ONNX extension and Valgrind test
+    name: rlclientlib-ubuntu
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: Setup MSVC Developer Command Prompt
-        if: ${{ startsWith(matrix.config.os, 'windows') }}
-        uses: ilammy/msvc-dev-cmd@v1
       - uses: lukka/get-cmake@latest
-      - name: Install dotnet t4
-        if: ${{ startsWith(matrix.config.os, 'windows') }}
-        run: dotnet tool install --global dotnet-t4
+      - name: Install ONNX
+        run: |
+          ONNX_FILENAME="onnxruntime-linux-x64-1.13.1"
+          wget "https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/$ONNX_FILENAME.tgz"
+          tar xvf "$ONNX_FILENAME.tgz"
+          echo "ONNXRUNTIME_ROOT=$ONNX_FILENAME" >> $GITHUB_ENV
       - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
-        shell: bash
       - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
       - uses: actions/cache@v3
         env:
           cache-name: vcpkg-cache
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
-          key: ${{ matrix.os }}-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
+          key: ubuntu-latest-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
       - uses: lukka/run-vcpkg@main
         with:
           vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
@@ -58,7 +51,8 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
           -DFMT_SYS_DEP=ON
           -DSPDLOG_SYS_DEP=ON
-          -Drlclientlib_BUILD_ONNXRUNTIME_EXTENSION=${{ startsWith(matrix.config.os, 'ubuntu') }}
+          -Drlclientlib_BUILD_ONNXRUNTIME_EXTENSION=ON
+          -DONNXRUNTIME_ROOT="${{ github.workspace }}/${{ env.ONNXRUNTIME_ROOT }}"
       - name: Build
         run: |
           cmake --build build
@@ -67,7 +61,83 @@ jobs:
           cd build
           ctest --verbose --output-on-failure
       - name: Test with Valgrind
-        if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
         run: |
           cd build
           valgrind --quiet --error-exitcode=100 --undef-value-errors=no --leak-check=full ./unit_test/rltest -- valgrind
+
+  build-macos:
+    name: rlclientlib-macos
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - uses: lukka/get-cmake@latest
+      - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
+        shell: bash
+      - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+      - uses: actions/cache@v3
+        env:
+          cache-name: vcpkg-cache
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
+          key: macos-latest-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
+      - uses: lukka/run-vcpkg@main
+        with:
+          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
+          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
+      - name: Configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          -DFMT_SYS_DEP=ON
+          -DSPDLOG_SYS_DEP=ON
+      - name: Build
+        run: |
+          cmake --build build
+      - name: Test
+        run: |
+          cd build
+          ctest --verbose --output-on-failure
+
+  build-windows:
+  # Windows build has C# bindings
+    name: rlclientlib-windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Setup MSVC Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1
+      - uses: lukka/get-cmake@latest
+      - name: Install dotnet t4
+        run: dotnet tool install --global dotnet-t4
+      - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
+        shell: bash
+      - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+      - uses: actions/cache@v3
+        env:
+          cache-name: vcpkg-cache
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
+          key: windows-latest-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
+      - uses: lukka/run-vcpkg@main
+        with:
+          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
+          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
+      - name: Configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          -DFMT_SYS_DEP=ON
+          -DSPDLOG_SYS_DEP=ON
+      - name: Build
+        run: |
+          cmake --build build
+      - name: Test
+        run: |
+          cd build
+          ctest --verbose --output-on-failure

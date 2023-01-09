@@ -27,10 +27,6 @@
     "benchmarks": {
       "description": "Build Benchmarks",
       "dependencies": ["benchmark"]
-    },
-    "onnx": {
-      "description": "Build ONNX extension",
-      "dependencies": ["onnx"]
     }
   }
 }

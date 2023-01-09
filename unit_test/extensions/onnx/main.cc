@@ -5,7 +5,7 @@
 #include "global_fixture.h"
 #include "onnx_extension.h"
 
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 
 #include <memory>
 

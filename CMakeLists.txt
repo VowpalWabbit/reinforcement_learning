@@ -33,11 +33,6 @@ if(RL_BUILD_BENCHMARKS)
   list(APPEND VCPKG_MANIFEST_FEATURES "benchmarks")
 endif()
 
-option(rlclientlib_BUILD_ONNXRUNTIME_EXTENSION "Build OnnxRuntime Inference Extension" OFF)
-if(rlclientlib_BUILD_ONNXRUNTIME_EXTENSION)
-  list(APPEND VCPKG_MANIFEST_FEATURES "onnx")
-endif()
-
 project(reinforcement_learning)
 
 #set(CMAKE_CXX_STANDARD 11)
@@ -66,6 +61,7 @@ option(RL_BUILD_NUGET "Build the Nuget package" OFF)
 option(RL_BUILD_EXTERNAL_PARSER "Build external parser version of VW" OFF)
 option(RL_USE_ASAN "Compile with AddressSanitizer" OFF)
 option(RL_USE_UBSAN "Compile with UndefinedBehaviorSanitizer" OFF)
+option(rlclientlib_BUILD_ONNXRUNTIME_EXTENSION "Build OnnxRuntime Inference Extension" OFF)
 
 if(RL_USE_ASAN)
   add_compile_definitions(RL_USE_ASAN VW_USE_ASAN)

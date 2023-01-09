@@ -2,7 +2,7 @@
 #include "api_status.h"
 #include "rl_string_view.h"
 
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 
 #include <algorithm>
 #include <string>
