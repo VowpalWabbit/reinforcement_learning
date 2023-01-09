@@ -37,12 +37,10 @@ jobs:
         with:
           vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
           vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
-      - uses: lukka/run-cmake@v10
-        with:
-          cmakeListsTxtPath: "${{ github.workspace }}/CMakeLists.txt"
-          configurePreset: "vcpkg-release"
-          configurePresetAdditionalArgs: "-DRL_BUILD_BENCHMARKS=ON"
-          buildPreset: "vcpkg-release"
+      - name: Configure
+        run: cmake --preset vcpkg-release -DRL_BUILD_BENCHMARKS=ON
+      - name: Build
+        run: cmake --build build --target rl_benchmarks
       - name: Run benchmarks
         run: >
           ./build/benchmarks/rl_benchmarks
