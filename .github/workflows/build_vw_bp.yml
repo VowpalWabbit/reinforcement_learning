@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: "windows-latest", vcpkg_target_triplet: "x64-windows-static" }
+          - { os: "windows-latest", vcpkg_target_triplet: "x64-windows" }
           - { os: "ubuntu-latest", vcpkg_target_triplet: "x64-linux" }
           - { os: "macos-latest", vcpkg_target_triplet: "x64-osx" }
     env:
@@ -55,7 +55,6 @@ jobs:
           cd external_parser;
           cmake -S . -B build -G Ninja
           -DCMAKE_BUILD_TYPE=Debug
-          -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
           -DVCPKG_MANIFEST_DIR="${{ github.workspace }}"
           -DVCPKG_TARGET_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
