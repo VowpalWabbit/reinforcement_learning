@@ -43,3 +43,9 @@ REM Repo-specific paths
 IF NOT DEFINED vwBinaryParserRoot (
     SET vwBinaryParserRoot=%~dp0..\external_parser
 )
+
+ECHO cmake version:
+cmake --version
+
+ECHO vcpkg version:
+%vcpkgPath% --version
