@@ -47,7 +47,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/../cmake/M
 # ------------
 
 # First try to find the config version. Newer, used by vcpkg etc
-set(CMAKE_FIND_DEBUG_MODE TRUE)
 find_package(Flatbuffers CONFIG)
 if(TARGET flatbuffers::flatbuffers AND TARGET flatbuffers::flatc)
   get_property(flatc_location TARGET flatbuffers::flatc PROPERTY LOCATION)
@@ -58,7 +57,6 @@ else()
   set(flatc_location ${FLATBUFFERS_FLATC_EXECUTABLE})
   message(STATUS "Found Flatbuffers with MODULE, flatc located at: ${flatc_location}")
 endif()
-set(CMAKE_FIND_DEBUG_MODE FALSE)
 
 # set vw cmake flags
 # This is not longer using the injected method, but implemented in this repo just consuming vw as a lib
