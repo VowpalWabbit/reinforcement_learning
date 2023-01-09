@@ -14,67 +14,55 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-linux:
-    name: binary_parser.ubuntu18.04
-    container:
-      image: vowpalwabbit/rl-ubuntu-1804:latest
-    runs-on: ubuntu-latest
-    steps:
-      # v1 must be used because newer versions require a node.js version that will not run on this old image.
-      - uses: actions/checkout@v1
-        with:
-          submodules: recursive
-      - run: ./.scripts/linux/build-vw-bp.sh
-      - run: ./.scripts/linux/test-vw-bp.sh
-
-  build-linux-valgrind:
-    name: binary_parser-valgrind.ubuntu18.04
-    container:
-      image: vowpalwabbit/rl-ubuntu-1804:latest
-    runs-on: ubuntu-latest
-    steps:
-      # v1 must be used because newer versions require a node.js version that will not run on this old image.
-      - uses: actions/checkout@v1
-        with:
-          submodules: recursive
-      - run: ./.scripts/linux/build-vw-bp.sh
-      - run: ./.scripts/linux/unit-tests-vw-bp-valgrind.sh
-
-  build-macos:
-    name: binary_parser.macos-11
-    runs-on: macos-11
+  build:
+    name: binary-parser-${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - { os: "windows-latest", vcpkg_target_triplet: "x64-windows-static" }
+          - { os: "ubuntu-latest", vcpkg_target_triplet: "x64-linux" }
+          - { os: "macos-latest", vcpkg_target_triplet: "x64-osx" }
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
-      - run: ./.scripts/macos/restore-vw-bp.sh
-      - run: ./.scripts/macos/build-vw-bp.sh
-      - run: ./.scripts/macos/test-vw-bp.sh
-
-  build-windows:
-    name: binary_parser.windows-2019
-    runs-on: windows-2019
-    env:
-      VCPKG_ROOT: ${{ github.workspace }}/ext_libs/vcpkg
-      VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
-    steps:
-      - uses: actions/checkout@v2
+      - name: Setup MSVC Developer Command Prompt
+        if: ${{ startsWith(matrix.config.os, 'windows') }}
+        uses: ilammy/msvc-dev-cmd@v1
+      - uses: lukka/get-cmake@latest
+      - uses: lukka/run-vcpkg@main
         with:
-          submodules: recursive
-      - uses: ilammy/msvc-dev-cmd@v1
-
-      # Setup vcpkg cache
-      - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
-        shell: bash
-      - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-      - uses: actions/cache@v3
-        env:
-          cache-name: vcpkg-cache
-        with:
-          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
-          key: ${{ env.cache-name }}-${{ github.workflow }}-${{ github.action }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}
-
-      - run: ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
-      - run: ./.scripts/restore-vw-bp-deps.cmd
-      - run: ./.scripts/build-vw-bp.cmd
-      - run: ./.scripts/test-vw-bp.cmd
+          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
+          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
+      - name: Configure
+        run: >
+          cd external_parser;
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          -DVCPKG_MANIFEST_MODE=On
+          -DVCPKG_MANIFEST_DIR="${{ github.workspace }}"
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
+          -DVCPKG_HOST_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
+          -DWARNING_AS_ERROR=OFF
+          -Wno-deprecated
+      - name: Build
+        run: |
+          cd external_parser
+          cmake --build build
+      - name: Test
+        run: |
+          cd external_parser/build
+          ctest --verbose --output-on-failure
+      - name: Test binary parser VW executable
+        run: |
+          cd external_parser/build
+          ./vw --extra_metrics metrics.json -d ../unit_tests/test_files/valid_joined_logs/cb_simple.log --binary_parser --cb_explore_adf
+          python3 -m json.tool metrics.json
+      - name: Test with Valgrind
+        if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
+        run: |
+          cd external_parser/build
+          valgrind --quiet --error-exitcode=100 --undef-value-errors=no --leak-check=full ./unit_tests/binary_parser_unit_tests
