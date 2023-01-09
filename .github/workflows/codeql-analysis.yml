@@ -21,15 +21,17 @@ concurrency:
 jobs:
   analyze-cpp:
     name: Analyze C++
-    container:
-      image: vowpalwabbit/ubuntu2004-dev:latest
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           submodules: recursive
+      - uses: lukka/get-cmake@latest
+      - uses: lukka/run-vcpkg@main
+        with:
+          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
+          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
