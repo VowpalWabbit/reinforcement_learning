@@ -13,12 +13,9 @@ on:
 
 jobs:
   LatestVW_RLClientLib:
-    container:
-      image: vowpalwabbit/rl-ubuntu-1804:latest
     runs-on: ubuntu-latest
     steps:
-      # v1 must be used because newer versions require a node.js version that will not run on this old image.
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Update VW to latest
@@ -28,20 +25,31 @@ jobs:
           git config --global --add safe.directory "$(pwd)"
           git pull origin master
           popd
+      - uses: lukka/get-cmake@latest
+      - uses: lukka/run-vcpkg@main
+        with:
+          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
+          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
+      - name: Configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          -DFMT_SYS_DEP=ON
+          -DSPDLOG_SYS_DEP=ON
+          -Drlclientlib_BUILD_ONNXRUNTIME_EXTENSION=ON
       - name: Build
-        shell: bash
-        run: ./.scripts/linux/build.sh
+        run: |
+          cmake --build build
       - name: Test
-        shell: bash
-        run: ./.scripts/linux/test.sh
+        run: |
+          cd build
+          ctest --verbose --output-on-failure
 
   LatestVW_BinaryParser:
-    container:
-      image: vowpalwabbit/rl-ubuntu-1804:latest
     runs-on: ubuntu-latest
     steps:
-      # v1 must be used because newer versions require a node.js version that will not run on this old image.
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Update VW to latest
@@ -51,9 +59,27 @@ jobs:
           git config --global --add safe.directory "$(pwd)"
           git pull origin master
           popd
+      - uses: lukka/get-cmake@latest
+      - uses: lukka/run-vcpkg@main
+        with:
+          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
+          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
+      - name: Configure
+        run: >
+          cd external_parser;
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          -DVCPKG_MANIFEST_DIR="${{ github.workspace }}"
+          -DWARNING_AS_ERROR=OFF
+          -Wno-deprecated
+          -DFMT_SYS_DEP=ON
+          -DSPDLOG_SYS_DEP=ON
       - name: Build
-        shell: bash
-        run: ./.scripts/linux/build-vw-bp.sh
+        run: |
+          cd external_parser
+          cmake --build build
       - name: Test
-        shell: bash
-        run: ./.scripts/linux/test-vw-bp.sh
+        run: |
+          cd external_parser/build
+          ctest --verbose --output-on-failure

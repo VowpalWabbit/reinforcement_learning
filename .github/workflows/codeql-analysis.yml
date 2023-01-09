@@ -9,99 +9,107 @@ on:
   schedule:
     - cron: '26 11 * * 5'
 
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
   cancel-in-progress: true
 
 jobs:
-  analyze:
-    name: Analyze
+  analyze-cpp:
+    name: Analyze C++
     container:
       image: vowpalwabbit/ubuntu2004-dev:latest
-    runs-on: ${{ matrix.config.os }}
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-        - { language: "cpp", os: ubuntu-latest }
-        - { language: "python", os: ubuntu-latest }
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-      with:
-        submodules: recursive
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
-      with:
-        languages: ${{ matrix.config.language }}
-        config-file: ./.github/codeql/codeql-config.yml
-    - name: Install python pip
-      if: matrix.config.language == 'python'
-      shell: bash
-      run: |
-        apt update
-        apt install -y python3-pip
-    - name: Autobuild Python
-      if: matrix.config.language == 'python'
-      uses: github/codeql-action/autobuild@v2
-    - name: Build C++
-      if: matrix.config.language == 'cpp'
-      shell: bash
-      run: |
-        apt update
-        apt install -y ninja-build
-        apt install -y libspdlog-dev libfmt-dev libboost-math-dev
-        cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=Off -DVCPKG_MANIFEST_MODE=Off
-        cmake --build build
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: cpp
+          config-file: ./.github/codeql/codeql-config.yml
+      - name: Configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          -DFMT_SYS_DEP=ON
+          -DSPDLOG_SYS_DEP=ON
+          -DBUILD_TESTING=OFF
+      - name: Build
+        run: |
+          cmake --build build
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+  analyze-python:
+    name: Analyze Python bindings
+    container:
+      image: vowpalwabbit/ubuntu2004-dev:latest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: python
+          config-file: ./.github/codeql/codeql-config.yml
+      - name: Install python pip
+        shell: bash
+        run: |
+          apt update
+          apt install -y python3-pip
+      - name: Autobuild Python
+        uses: github/codeql-action/autobuild@v2
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
 
   analyze-csharp:
     name: Analyze CSharp bindings
     runs-on: windows-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    strategy:
-      fail-fast: false
     env:
       VCPKG_ROOT: ${{ github.workspace }}/ext_libs/vcpkg
       VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
 
-      steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-      with:
-        submodules: recursive
-    - name: msvc-dev-cmd
-      uses: ilammy/msvc-dev-cmd@v1
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
-      with:
-        languages: csharp
-        config-file: ./.github/codeql/codeql-config.yml
-
-      # Setup vcpkg cache
-      - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
-        shell: bash
-      - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-      - uses: actions/cache@v3
-        env:
-          cache-name: vcpkg-cache
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
-          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
-          key: ${{ env.cache-name }}-${{ github.workflow }}-${{ github.action }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}
+          submodules: recursive
+      - name: Setup MSVC Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1
+      - uses: lukka/get-cmake@latest
+      - uses: lukka/run-vcpkg@main
+        with:
+          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
+          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
 
-    - run: ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
-    - run: ./.scripts/restore-cmake.cmd
-    - run: ./.scripts/build-cmake.cmd
-
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: csharp
+          config-file: ./.github/codeql/codeql-config.yml
+      - name: Configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          -DFMT_SYS_DEP=ON
+          -DSPDLOG_SYS_DEP=ON
+          -Drlclientlib_BUILD_DOTNET=ON
+      - name: Build
+        run: |
+          cmake --build build
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2

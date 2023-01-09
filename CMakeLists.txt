@@ -26,6 +26,18 @@ endif()
 # Set this to on so that tooling can make use of the outputted compile commands (such as clang-tidy)
 set(CMAKE_EXPORT_COMPILE_COMMANDS On)
 
+# Options that add Vcpkg package requirements
+# All additions to VCPKG_MANIFEST_FEATURES list must come before project()
+option(RL_BUILD_BENCHMARKS "Build benchmarks" OFF)
+if(RL_BUILD_BENCHMARKS)
+  list(APPEND VCPKG_MANIFEST_FEATURES "benchmarks")
+endif()
+
+option(rlclientlib_BUILD_ONNXRUNTIME_EXTENSION "Build OnnxRuntime Inference Extension" OFF)
+if(rlclientlib_BUILD_ONNXRUNTIME_EXTENSION)
+  list(APPEND VCPKG_MANIFEST_FEATURES "onnx")
+endif()
+
 project(reinforcement_learning)
 
 #set(CMAKE_CXX_STANDARD 11)
