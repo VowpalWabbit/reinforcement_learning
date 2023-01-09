@@ -38,7 +38,7 @@ jobs:
         with:
           cmakeListsTxtPath: "${{ github.workspace }}/CMakeLists.txt"
           configurePreset: "vcpkg-release"
-          configurePresetAdditionalArgs: ["-DRL_BUILD_BENCHMARKS=ON"]
+          configurePresetAdditionalArgs: "-DRL_BUILD_BENCHMARKS=ON"
           buildPreset: "vcpkg-release"
       - name: Run benchmarks
         run: >
