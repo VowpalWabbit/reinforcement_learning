@@ -86,6 +86,15 @@ if(RL_USE_UBSAN)
   endif()
 endif()
 
+if(UNIX AND NOT APPLE)
+  # Temporary workaround for VW 9.6 missing size_t on Linux builds
+  # TODO remove when VW submodule is updated
+  # This must be stddef.h and not cstddef because it also applies to C code
+  add_compile_options(-include stddef.h)
+  # Enable C++17 math functions in C++11
+  add_compile_definitions(__STDCPP_WANT_MATH_SPEC_FUNCS__)
+endif()
+
 # For Nuget package don't use system libraries, use vendored ones in ext_libs instead
 if(RL_BUILD_NUGET)
   set(RAPIDJSON_SYS_DEP OFF CACHE BOOL "" FORCE)
