@@ -24,8 +24,10 @@ jobs:
           - { os: "windows-latest", vcpkg_target_triplet: "x64-windows-static" }
           - { os: "ubuntu-latest", vcpkg_target_triplet: "x64-linux" }
           - { os: "macos-latest", vcpkg_target_triplet: "x64-osx" }
+    env:
+      VCPKG_DEFAULT_TRIPLET: ${{ matrix.config.vcpkg_target_triplet }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Setup MSVC Developer Command Prompt
@@ -41,6 +43,7 @@ jobs:
           cd external_parser;
           cmake -S . -B build -G Ninja
           -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
           -DVCPKG_MANIFEST_MODE=On
           -DVCPKG_MANIFEST_DIR="${{ github.workspace }}"
@@ -48,6 +51,8 @@ jobs:
           -DVCPKG_HOST_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
           -DWARNING_AS_ERROR=OFF
           -Wno-deprecated
+          -DFMT_SYS_DEP=ON
+          -DSPDLOG_SYS_DEP=ON
       - name: Build
         run: |
           cd external_parser
