@@ -57,7 +57,7 @@ jobs:
     env:
       VCPKG_ROOT: ${{ github.workspace }}/ext_libs/vcpkg
       VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
-      steps:
+    steps:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
