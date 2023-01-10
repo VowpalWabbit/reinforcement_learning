@@ -30,8 +30,8 @@ jobs:
         run: |
           pushd ext_libs/vowpal_wabbit
           git config --global --add safe.directory "$(pwd)"
-          git checkout master
-          git pull
+          git fetch origin master
+          git reset --hard origin/master
           popd
       - uses: lukka/get-cmake@latest
       - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
@@ -74,8 +74,8 @@ jobs:
         run: |
           pushd ext_libs/vowpal_wabbit
           git config --global --add safe.directory "$(pwd)"
-          git checkout master
-          git pull
+          git fetch origin master
+          git reset --hard origin/master
           popd
       - uses: lukka/get-cmake@latest
       - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
