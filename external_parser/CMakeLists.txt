@@ -2,11 +2,23 @@ cmake_minimum_required(VERSION 3.5)
 if(POLICY CMP0074)
     cmake_policy(SET CMP0074 NEW)
 endif()
+if(POLICY CMP0091)
+    cmake_policy(SET CMP0091 NEW)
+endif()
 
 # Set this to on so that tooling can make use of the outputted compile commands (such as clang-tidy)
 set(CMAKE_EXPORT_COMPILE_COMMANDS On)
 
 project(vw_binary_parser)
+
+if(UNIX AND NOT APPLE)
+  # Temporary workaround for VW 9.6 missing size_t on Linux builds
+  # TODO remove when VW submodule is updated
+  # This must be stddef.h and not cstddef because it also applies to C code
+  add_compile_options(-include stddef.h)
+  # Enable C++17 math functions in C++11
+  add_compile_definitions(__STDCPP_WANT_MATH_SPEC_FUNCS__)
+endif()
 
 if(DEFINED RL_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD ${RL_CXX_STANDARD})
@@ -44,13 +56,15 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/../cmake/M
 # ------------
 
 # First try to find the config version. Newer, used by vcpkg etc
-find_package(Flatbuffers CONFIG QUIET)
-if(FLATBUFFERS_FOUND)
+find_package(Flatbuffers CONFIG)
+if(TARGET flatbuffers::flatbuffers AND TARGET flatbuffers::flatc)
   get_property(flatc_location TARGET flatbuffers::flatc PROPERTY LOCATION)
+  message(STATUS "Found Flatbuffers with CONFIG, flatc located at: ${flatc_location}")
 else()
   # Fallback to the old version
   find_package(Flatbuffers MODULE REQUIRED)
   set(flatc_location ${FLATBUFFERS_FLATC_EXECUTABLE})
+  message(STATUS "Found Flatbuffers with MODULE, flatc located at: ${flatc_location}")
 endif()
 
 # set vw cmake flags
@@ -146,8 +160,15 @@ target_include_directories(rl_binary_parser
     ${CMAKE_CURRENT_LIST_DIR}/
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/zstd/lib/
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/date/
-    ${FLATBUFFERS_INCLUDE_DIR}
-  )
+)
+
+# If flatbuffers found via CONFIG, add its target as a library dependency
+# Otherwise, the flatbuffers MODULE defines FLATBUFFERS_INCLUDE_DIR to add to the include path
+if(TARGET flatbuffers::flatbuffers)
+  target_link_libraries(rl_binary_parser PRIVATE flatbuffers::flatbuffers)
+else()
+  target_include_directories(rl_binary_parser PRIVATE ${FLATBUFFERS_INCLUDE_DIR})
+endif()
 add_dependencies(rl_binary_parser fbgen)
 
 add_executable(rl_binary_parser_bin main.cc)

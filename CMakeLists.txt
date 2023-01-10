@@ -26,6 +26,13 @@ endif()
 # Set this to on so that tooling can make use of the outputted compile commands (such as clang-tidy)
 set(CMAKE_EXPORT_COMPILE_COMMANDS On)
 
+# Options that add Vcpkg package requirements
+# All additions to VCPKG_MANIFEST_FEATURES list must come before project()
+option(RL_BUILD_BENCHMARKS "Build benchmarks" OFF)
+if(RL_BUILD_BENCHMARKS)
+  list(APPEND VCPKG_MANIFEST_FEATURES "benchmarks")
+endif()
+
 project(reinforcement_learning)
 
 #set(CMAKE_CXX_STANDARD 11)
@@ -54,6 +61,7 @@ option(RL_BUILD_NUGET "Build the Nuget package" OFF)
 option(RL_BUILD_EXTERNAL_PARSER "Build external parser version of VW" OFF)
 option(RL_USE_ASAN "Compile with AddressSanitizer" OFF)
 option(RL_USE_UBSAN "Compile with UndefinedBehaviorSanitizer" OFF)
+option(rlclientlib_BUILD_ONNXRUNTIME_EXTENSION "Build OnnxRuntime Inference Extension" OFF)
 
 if(RL_USE_ASAN)
   add_compile_definitions(RL_USE_ASAN VW_USE_ASAN)
@@ -76,6 +84,15 @@ if(RL_USE_UBSAN)
     add_compile_options(-fsanitize=undefined -fno-sanitize-recover -fno-omit-frame-pointer -g3)
     add_link_options(-fsanitize=undefined -fno-sanitize-recover -fno-omit-frame-pointer -g3)
   endif()
+endif()
+
+if(UNIX AND NOT APPLE)
+  # Temporary workaround for VW 9.6 missing size_t on Linux builds
+  # TODO remove when VW submodule is updated
+  # This must be stddef.h and not cstddef because it also applies to C code
+  add_compile_options(-include stddef.h)
+  # Enable C++17 math functions in C++11
+  add_compile_definitions(__STDCPP_WANT_MATH_SPEC_FUNCS__)
 endif()
 
 # For Nuget package don't use system libraries, use vendored ones in ext_libs instead
