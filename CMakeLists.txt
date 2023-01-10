@@ -31,6 +31,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS On)
 option(RL_BUILD_BENCHMARKS "Build benchmarks" OFF)
 if(RL_BUILD_BENCHMARKS)
   list(APPEND VCPKG_MANIFEST_FEATURES "benchmarks")
+  # benchmark needs to be 1.7.1 or higher.  1.7.1 of benchmark fixes windows build issues
+  list(APPEND VCPKG_OVERLAY_PORTS ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg-overlay/ports)
 endif()
 
 project(reinforcement_learning)

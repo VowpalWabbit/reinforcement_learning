@@ -51,8 +51,8 @@ static void bench_cb(benchmark::State& state, ExtraArgs&&... extra_args)
   config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
   config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
   config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
-  config.set(r::name::INTERACTION_FILE_NAME, "/dev/null");
-  config.set(r::name::OBSERVATION_FILE_NAME, "/dev/null");
+  config.set(r::name::INTERACTION_FILE_NAME, r::DEV_NULL);
+  config.set(r::name::OBSERVATION_FILE_NAME, r::DEV_NULL);
   config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
   // config.set(r::name::MODEL_IMPLEMENTATION, r::value::PASSTHROUGH_PDF_MODEL);
   config.set(r::name::VW_POOL_INIT_SIZE, "1");

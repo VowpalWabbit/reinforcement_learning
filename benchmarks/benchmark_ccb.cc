@@ -57,8 +57,8 @@ static void bench_ccb(benchmark::State& state, ExtraArgs&&... extra_args)
   config.set(r::name::MODEL_FILE_MUST_EXIST, "true");
   config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
   config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
-  config.set(r::name::INTERACTION_FILE_NAME, "/dev/null");
-  config.set(r::name::OBSERVATION_FILE_NAME, "/dev/null");
+  config.set(r::name::INTERACTION_FILE_NAME, r::DEV_NULL);
+  config.set(r::name::OBSERVATION_FILE_NAME, r::DEV_NULL);
   config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
   config.set(r::name::VW_POOL_INIT_SIZE, "1");
   config.set(r::name::INTERACTION_USE_COMPRESSION, compression ? "true" : "false");
@@ -125,7 +125,7 @@ static void bench_ccb(benchmark::State& state, ExtraArgs&&... extra_args)
 }
 
 BENCHMARK_CAPTURE(bench_ccb, ccb_adf_diff_char_interactions_predict,
-    10,     // number of examples
+    1,     // number of examples
     30,     // shared_feats_size
     20,     // shared_feats_count (actual number of shared features in example)
     30,     // action_feats_size

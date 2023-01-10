@@ -26,7 +26,7 @@
   "features": {
     "benchmarks": {
       "description": "Build Benchmarks",
-      "dependencies": ["benchmark"]
+      "dependencies": [{"name":"benchmark", "version>=":"1.7.1"}]
     }
   }
 }

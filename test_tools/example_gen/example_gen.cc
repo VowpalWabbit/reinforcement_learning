@@ -78,11 +78,11 @@ void load_config_from_json(int action, u::configuration& config, bool enable_app
     if (is_observation)
     {
       config.set("observation.file.name", file_name.c_str());
-      config.set("interaction.file.name", "/dev/null");
+      config.set("interaction.file.name", r::DEV_NULL);
     }
     else
     {
-      config.set("observation.file.name", "/dev/null");
+      config.set("observation.file.name", r::DEV_NULL);
       config.set("interaction.file.name", file_name.c_str());
     }
   }
