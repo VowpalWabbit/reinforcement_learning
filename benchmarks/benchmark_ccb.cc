@@ -125,7 +125,7 @@ static void bench_ccb(benchmark::State& state, ExtraArgs&&... extra_args)
 }
 
 BENCHMARK_CAPTURE(bench_ccb, ccb_adf_diff_char_interactions_predict,
-    1,     // number of examples
+    1,      // number of examples
     30,     // shared_feats_size
     20,     // shared_feats_count (actual number of shared features in example)
     30,     // action_feats_size

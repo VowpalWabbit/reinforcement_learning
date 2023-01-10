@@ -69,7 +69,9 @@ cb_decision_gen::cb_decision_gen(int shared_features, int action_features, int a
     , passthrough(passthrough)
 {
   for (int i = 0; i < total_actions; ++i)
-  { actions_set.push_back(make_feature_vector(action_features, action_features * 3, rand)); }
+  {
+    actions_set.push_back(make_feature_vector(action_features, action_features * 3, rand));
+  }
 }
 
 std::string cb_decision_gen::gen_example()
@@ -108,7 +110,9 @@ ccb_decision_gen::ccb_decision_gen(int shared_features_size, int shared_features
     , rand(initial_seed)
 {
   for (int i = 0; i < total_actions; ++i)
-  { actions_set.push_back(make_feature_vector(action_features_count, action_features_size, rand)); }
+  {
+    actions_set.push_back(make_feature_vector(action_features_count, action_features_size, rand));
+  }
 }
 
 std::string ccb_decision_gen::gen_example()
