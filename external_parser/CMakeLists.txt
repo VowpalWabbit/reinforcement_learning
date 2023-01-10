@@ -11,6 +11,15 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS On)
 
 project(vw_binary_parser)
 
+if(UNIX AND NOT APPLE)
+  # Temporary workaround for VW 9.6 missing size_t on Linux builds
+  # TODO remove when VW submodule is updated
+  # This must be stddef.h and not cstddef because it also applies to C code
+  add_compile_options(-include stddef.h)
+  # Enable C++17 math functions in C++11
+  add_compile_definitions(__STDCPP_WANT_MATH_SPEC_FUNCS__)
+endif()
+
 if(DEFINED RL_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD ${RL_CXX_STANDARD})
 else()
