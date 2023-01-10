@@ -63,6 +63,7 @@ jobs:
       - name: Test with Valgrind
         run: |
           cd build
+          sudo apt install -y valgrind
           valgrind --quiet --error-exitcode=100 --undef-value-errors=no --leak-check=full ./unit_test/rltest -- valgrind
 
   build-macos:
