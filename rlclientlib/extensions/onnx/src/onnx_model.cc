@@ -101,12 +101,8 @@ int onnx_model::update(const model_management::model_data& data, bool& model_rea
     size_t output_count = new_session->GetOutputCount();
     for (output_index = 0; output_index < output_count; output_index++)
     {
-      char* output_name = new_session->GetOutputName(output_index, DefaultOnnxAllocator);
-
-      if (_output_name == output_name) { found_output = true; }
-
-      DefaultOnnxAllocator.Free(output_name);
-
+      auto output_name = new_session->GetOutputNameAllocated(output_index, DefaultOnnxAllocator);
+      if (_output_name == output_name.get()) { found_output = true; }
       if (found_output) { break; }
     }
 

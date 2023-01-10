@@ -7,7 +7,7 @@
 #include "onnx_extension.h"
 #include "onnx_input.h"
 
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 #include <cpprest/asyncrt_utils.h>
 
 #include <map>
