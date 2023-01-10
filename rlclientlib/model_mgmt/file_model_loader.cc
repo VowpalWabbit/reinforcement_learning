@@ -66,7 +66,9 @@ int file_model_loader::get_data(model_data& data, api_status* status)
     in_strm.seekg(0, std::ios::beg);
     auto* const buff = data.alloc(curr_file_size);
     if (!in_strm.read(buff, curr_file_size))
-    { RETURN_ERROR_LS(_trace, status, file_read_error) << " file_name = " << _file_name; }
+    {
+      RETURN_ERROR_LS(_trace, status, file_read_error) << " file_name = " << _file_name;
+    }
     data.data_sz(curr_file_size);
     data.increment_refresh_count();
     in_strm.close();

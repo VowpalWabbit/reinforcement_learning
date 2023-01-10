@@ -20,11 +20,13 @@ const std::string& mock_http_client::get_url() const { return _url; }
 mock_http_client::response_t mock_http_client::request(mock_http_client::request_t request)
 {
   auto responder = _responders[request.method()];
-  return response_t([responder, request]() {
-    http_response resp;
-    responder(request, resp);
-    return resp;
-  });
+  return response_t(
+      [responder, request]()
+      {
+        http_response resp;
+        responder(request, resp);
+        return resp;
+      });
 }
 
 mock_http_client::response_t mock_http_client::request(mock_http_client::method_t method)
