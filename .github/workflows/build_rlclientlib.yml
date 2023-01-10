@@ -18,9 +18,14 @@ concurrency:
 
 jobs:
   build-ubuntu:
-  # Ubuntu build has ONNX extension and Valgrind test
-    name: rlclientlib-ubuntu
+    # Ubuntu build has ONNX extension and Valgrind test
+    # Release build is slower, so only do it on Ubuntu
+    name: rlclientlib-${{ matrix.build_type }}-ubuntu-latest
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [debug, release]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -47,7 +52,7 @@ jobs:
       - name: Configure
         run: >
           cmake -S . -B build -G Ninja
-          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
           -DFMT_SYS_DEP=ON
           -DSPDLOG_SYS_DEP=ON
@@ -67,7 +72,7 @@ jobs:
           valgrind --quiet --error-exitcode=100 --undef-value-errors=no --leak-check=full ./unit_test/rltest -- valgrind
 
   build-macos:
-    name: rlclientlib-macos
+    name: rlclientlib-debug-macos-latest
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -103,8 +108,8 @@ jobs:
           ctest --verbose --output-on-failure
 
   build-windows:
-  # Windows build has C# bindings
-    name: rlclientlib-windows
+    # Windows build has C# bindings
+    name: rlclientlib-debug-windows-latest
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
