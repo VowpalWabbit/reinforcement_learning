@@ -115,18 +115,9 @@ void parse_and_send(std::string& line, r::live_model& rl, r::api_status& status,
     bool is_ca = obj.HasMember("_label_ca");
 
     if (is_dangling) { parse_and_send_outcome(obj, rl, status, debug); }
-    else if (is_ca)
-    {
-      parse_and_send_ca_event(obj, rl, status, debug);
-    }
-    else if (!is_ccb)
-    {
-      parse_and_send_cb_event(obj, rl, status, debug);
-    }
-    else
-    {
-      parse_and_send_ccb_event(obj, rl, status, debug);
-    }
+    else if (is_ca) { parse_and_send_ca_event(obj, rl, status, debug); }
+    else if (!is_ccb) { parse_and_send_cb_event(obj, rl, status, debug); }
+    else { parse_and_send_ccb_event(obj, rl, status, debug); }
   }
   catch (const std::exception& e)
   {

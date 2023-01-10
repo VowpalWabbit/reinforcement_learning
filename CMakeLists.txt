@@ -26,6 +26,13 @@ endif()
 # Set this to on so that tooling can make use of the outputted compile commands (such as clang-tidy)
 set(CMAKE_EXPORT_COMPILE_COMMANDS On)
 
+# Options that add Vcpkg package requirements
+# All additions to VCPKG_MANIFEST_FEATURES list must come before project()
+option(RL_BUILD_BENCHMARKS "Build benchmarks" OFF)
+if(RL_BUILD_BENCHMARKS)
+  list(APPEND VCPKG_MANIFEST_FEATURES "benchmarks")
+endif()
+
 project(reinforcement_learning)
 
 # Add support for building library with latest version of C++ supported by your compiler
@@ -45,7 +52,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(RL_BUILD_PYTHON "Build the Python bindings" OFF)
 option(RL_USE_ZSTD "Whether to enable usage of zstandard compression" ON)
 option(RL_STATIC_DEPS "Only use static dependencies" OFF)
-option(RL_BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" ON)
 option(RL_OPENSSL_SYS_DEP "Use system-wide openssl library" ON)
 option(RL_CPPRESTSDK_SYS_DEP "Use system-wide cpprestsdk library" ON)
@@ -53,6 +59,14 @@ option(RL_BUILD_NUGET "Build the Nuget package" OFF)
 option(RL_BUILD_EXTERNAL_PARSER "Build external parser version of VW" OFF)
 option(RL_USE_ASAN "Compile with AddressSanitizer" OFF)
 option(RL_USE_UBSAN "Compile with UndefinedBehaviorSanitizer" OFF)
+option(RL_BUILD_FEDERATION "Build code for Federated Learning" ON)
+option(rlclientlib_BUILD_ONNXRUNTIME_EXTENSION "Build OnnxRuntime Inference Extension" OFF)
+
+if(RL_BUILD_FEDERATION)
+  add_compile_definitions(RL_BUILD_FEDERATION)
+  # Needed for joiner code
+  set(RL_BUILD_EXTERNAL_PARSER ON CACHE BOOL "" FORCE)
+endif()
 
 if(RL_USE_ASAN)
   add_compile_definitions(RL_USE_ASAN VW_USE_ASAN)
@@ -72,9 +86,19 @@ if(RL_USE_UBSAN)
   if(MSVC)
     message(FATAL_ERROR "UBSan not supported on MSVC")
   else()
-    add_compile_options(-fsanitize=undefined -fno-sanitize-recover -fno-omit-frame-pointer -g3)
-    add_link_options(-fsanitize=undefined -fno-sanitize-recover -fno-omit-frame-pointer -g3)
+    # Flatbuffers gives errors with misaligned pointer sanitization, so disable it
+    add_compile_options(-fsanitize=undefined -fno-sanitize=alignment -fno-sanitize-recover -fno-omit-frame-pointer -g3)
+    add_link_options(-fsanitize=undefined -fno-sanitize=alignment -fno-sanitize-recover -fno-omit-frame-pointer -g3)
   endif()
+endif()
+
+if(UNIX AND NOT APPLE)
+  # Temporary workaround for VW 9.6 missing size_t on Linux builds
+  # TODO remove when VW submodule is updated
+  # This must be stddef.h and not cstddef because it also applies to C code
+  add_compile_options(-include stddef.h)
+  # Enable C++17 math functions in C++11
+  add_compile_definitions(__STDCPP_WANT_MATH_SPEC_FUNCS__)
 endif()
 
 # For Nuget package don't use system libraries, use vendored ones in ext_libs instead
@@ -122,12 +146,12 @@ include(GNUInstallDirs)
 
 include(ext_libs/ext_libs.cmake)
 
-add_subdirectory(rlclientlib)
-add_subdirectory(rlclientlib/extensions)
-
 if(RL_BUILD_EXTERNAL_PARSER)
   add_subdirectory(external_parser)
 endif()
+
+add_subdirectory(rlclientlib)
+add_subdirectory(rlclientlib/extensions)
 
 add_subdirectory(examples)
 add_subdirectory(test_tools/joiner)
@@ -144,6 +168,13 @@ add_subdirectory(unit_test)
 add_subdirectory(unit_test/extensions)
 if(RL_BUILD_BENCHMARKS)
   add_subdirectory(benchmarks)
+endif()
+
+# Add a target to generate all flatbuffer header files, used for clang-tidy
+add_custom_target(fbgen)
+add_dependencies(fbgen fbgenerator_v1 fbgenerator_v2)
+if(TARGET fbgen_external_parser)
+  add_dependencies(fbgen fbgen_external_parser)
 endif()
 
 # Add the nuget subdirectory last

@@ -17,10 +17,15 @@
 #include "vw/explore/explore.h"
 #include "vw_model/safe_vw.h"
 
+#ifdef RL_BUILD_FEDERATION
+#  include "federation/local_loop_controller.h"
+#endif
+
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <cmath>
 #include <cstring>
+#include <memory>
 
 // Some namespace changes for more concise code
 namespace e = exploration;
@@ -50,19 +55,66 @@ void default_error_callback(const api_status& status, void* watchdog_context)
   watchdog->set_unhandled_background_error(true);
 }
 
+int live_model_impl::check_if_local_loop(bool& output, api_status* status)
+{
+  std::string model_src = _configuration.get(name::MODEL_SRC, value::get_default_data_transport());
+  std::string interaction_sender =
+      _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::get_default_interaction_sender());
+  std::string observation_sender =
+      _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::get_default_observation_sender());
+
+  if (model_src != value::LOCAL_LOOP_MODEL_DATA && interaction_sender != value::LOCAL_LOOP_SENDER &&
+      observation_sender != value::LOCAL_LOOP_SENDER)
+  {
+    // no local loop options used
+    output = false;
+    return error_code::success;
+  }
+
+  if (model_src == value::LOCAL_LOOP_MODEL_DATA)
+  {
+    // (model_src == LOCAL_LOOP_MODEL_DATA) determines that local loop is used
+    // set default value of sender implementation to LOCAL_LOOP_SENDER
+    interaction_sender = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::LOCAL_LOOP_SENDER);
+    observation_sender = _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::LOCAL_LOOP_SENDER);
+
+    // check that senders are set to allowed values here
+    // currently, only LOCAL_LOOP_SENDER is allowed
+    if (interaction_sender == value::LOCAL_LOOP_SENDER && observation_sender == value::LOCAL_LOOP_SENDER)
+    {
+      output = true;
+      return error_code::success;
+    }
+  }
+
+  RETURN_ERROR_ARG(_trace_logger.get(), status, invalid_argument,
+      "Incompatible values for configuration options MODEL_SRC=", model_src,
+      " and INTERACTION_SENDER_IMPLEMENTATION=", interaction_sender,
+      " and OBSERVATION_SENDER_IMPLEMENTATION=", observation_sender);
+}
+
 int live_model_impl::init(api_status* status)
 {
   RETURN_IF_FAIL(init_trace(status));
   RETURN_IF_FAIL(init_model(status));
-  RETURN_IF_FAIL(init_model_mgmt(status));
-  RETURN_IF_FAIL(init_loggers(status));
+
+  bool is_local_loop = false;
+  RETURN_IF_FAIL(check_if_local_loop(is_local_loop, status));
+  if (is_local_loop) { RETURN_IF_FAIL(init_local_loop(status)); }
+  else
+  {
+    RETURN_IF_FAIL(init_model_mgmt(status));
+    RETURN_IF_FAIL(init_loggers(status));
+  }
 
   if (_protocol_version == 1)
   {
     if (_configuration.get_bool("interaction", name::USE_COMPRESSION, false) ||
         _configuration.get_bool("interaction", name::USE_DEDUP, false) ||
         _configuration.get_bool("observation", name::USE_COMPRESSION, false))
-    { RETURN_ERROR_LS(_trace_logger.get(), status, content_encoding_error); }
+    {
+      RETURN_ERROR_LS(_trace_logger.get(), status, content_encoding_error);
+    }
   }
 
   _initial_epsilon = _configuration.get_float(name::INITIAL_EPSILON, 0.2f);
@@ -86,10 +138,7 @@ int live_model_impl::choose_rank(
     RETURN_IF_FAIL(explore_only(event_id, context, response, status));
     response.set_model_id("N/A");
   }
-  else
-  {
-    RETURN_IF_FAIL(explore_exploit(event_id, context, response, status));
-  }
+  else { RETURN_IF_FAIL(explore_exploit(event_id, context, response, status)); }
   response.set_event_id(event_id);
 
   if (_learning_mode == LOGGINGONLY)
@@ -108,7 +157,9 @@ int live_model_impl::choose_rank(
 
   // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
   if (_watchdog.has_background_error_been_reported())
-  { RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred); }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+  }
 
   return error_code::success;
 }
@@ -140,7 +191,9 @@ int live_model_impl::request_continuous_action(const char* event_id, string_view
   RETURN_IF_FAIL(_interaction_logger->log_continuous_action(context.data(), flags, response, status));
 
   if (_watchdog.has_background_error_been_reported())
-  { RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred); }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+  }
 
   return error_code::success;
 }
@@ -204,7 +257,9 @@ int live_model_impl::request_decision(
 
   // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
   if (_watchdog.has_background_error_been_reported())
-  { RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred); }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+  }
 
   return error_code::success;
 }
@@ -277,7 +332,9 @@ int live_model_impl::request_multi_slot_decision(const char* event_id, string_vi
 
   // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
   if (_watchdog.has_background_error_been_reported())
-  { RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred); }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+  }
   return error_code::success;
 }
 
@@ -321,7 +378,9 @@ int live_model_impl::request_multi_slot_decision(const char* event_id, string_vi
 
   // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
   if (_watchdog.has_background_error_been_reported())
-  { RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred); }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+  }
   return error_code::success;
 }
 
@@ -488,6 +547,24 @@ int live_model_impl::init_loggers(api_status* status)
       &ranking_data_sender, ranking_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
   RETURN_IF_FAIL(ranking_data_sender->init(_configuration, status));
 
+  // Get the name of raw data (as opposed to message) sender for observations.
+  const auto* const outcome_sender_impl =
+      _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::get_default_observation_sender());
+  i_sender* outcome_sender = nullptr;
+
+  // Use the name to create an instance of raw data sender for observations
+  _configuration.set(config_constants::CONFIG_SECTION, config_constants::OBSERVATION);
+  RETURN_IF_FAIL(_sender_factory->create(
+      &outcome_sender, outcome_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
+  RETURN_IF_FAIL(outcome_sender->init(_configuration, status));
+
+  RETURN_IF_FAIL(init_loggers_common(ranking_data_sender, outcome_sender, status));
+  return error_code::success;
+}
+
+// Common part for both init_loggers and init_local_loop
+int live_model_impl::init_loggers_common(i_sender* ranking_data_sender, i_sender* outcome_sender, api_status* status)
+{
   // Create a message sender that will prepend the message with a preamble and send the raw data using the
   // factory created raw data sender
   l::i_message_sender* ranking_msg_sender = new l::preamble_message_sender(ranking_data_sender);
@@ -513,17 +590,6 @@ int live_model_impl::init_loggers(api_status* status)
   _interaction_logger.reset(new logger::interaction_logger_facade(_model->model_type(), _configuration,
       ranking_msg_sender, _watchdog, ranking_time_provider, _logger_extensions.get(), &_error_cb));
   RETURN_IF_FAIL(_interaction_logger->init(status));
-
-  // Get the name of raw data (as opposed to message) sender for observations.
-  const auto* const outcome_sender_impl =
-      _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::get_default_observation_sender());
-  i_sender* outcome_sender = nullptr;
-
-  // Use the name to create an instance of raw data sender for observations
-  _configuration.set(config_constants::CONFIG_SECTION, config_constants::OBSERVATION);
-  RETURN_IF_FAIL(_sender_factory->create(
-      &outcome_sender, outcome_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
-  RETURN_IF_FAIL(outcome_sender->init(_configuration, status));
 
   // Create a message sender that will prepend the message with a preamble and send the raw data using the
   // factory created raw data sender
@@ -607,7 +673,9 @@ int live_model_impl::explore_only(
 
   size_t action_count = context_info.actions.size();
   if (action_count < 1)
-  { RETURN_ERROR_LS(_trace_logger.get(), status, json_no_actions_found) << "Context must have at least one action"; }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, json_no_actions_found) << "Context must have at least one action";
+  }
 
   vector<float> pdf(action_count);
   // Generate a pdf with epsilon distributed between all action.
@@ -616,7 +684,9 @@ int live_model_impl::explore_only(
   const auto top_action_id = 0;
   auto scode = e::generate_epsilon_greedy(_initial_epsilon, top_action_id, begin(pdf), end(pdf));
   if (S_EXPLORATION_OK != scode)
-  { RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration error code: " << scode; }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration error code: " << scode;
+  }
 
   // The seed used is composed of uniform_hash(app_id) + uniform_hash(event_id)
   const uint64_t seed = VW::uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
@@ -626,7 +696,9 @@ int live_model_impl::explore_only(
   scode = e::sample_after_normalizing(seed, begin(pdf), end(pdf), chosen_index);
 
   if (S_EXPLORATION_OK != scode)
-  { RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration error code: " << scode; }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration error code: " << scode;
+  }
 
   // NOTE: When there is no model, the rank
   // step was done by the user.  i.e. Actions are already in ranked order
@@ -646,7 +718,9 @@ int live_model_impl::explore_only(
   scode = e::swap_chosen(begin(response), end(response), chosen_index);
 
   if (S_EXPLORATION_OK != scode)
-  { RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration (Swap) error code: " << scode; }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration (Swap) error code: " << scode;
+  }
 
   RETURN_IF_FAIL(response.set_chosen_action_id(chosen_index));
 
@@ -674,19 +748,77 @@ int live_model_impl::init_model_mgmt(api_status* status)
   // Initialize transport for the model using transport factory
   const auto* const tranport_impl = _configuration.get(name::MODEL_SRC, value::get_default_data_transport());
   m::i_data_transport* ptransport = nullptr;
-  RETURN_IF_FAIL(_t_factory->create(&ptransport, tranport_impl, _configuration, status));
+  RETURN_IF_FAIL(_t_factory->create(&ptransport, tranport_impl, _configuration, _trace_logger.get(), status));
+
   // This class manages lifetime of transport
-  this->_transport.reset(ptransport);
+  _transport.reset(ptransport);
 
   if (_bg_model_proc)
   {
     // Initialize background process and start downloading models
-    this->_model_download.reset(new m::model_downloader(ptransport, &_data_cb, _trace_logger.get()));
+    this->_model_download.reset(new m::model_downloader(_transport.get(), &_data_cb, _trace_logger.get()));
     return _bg_model_proc->init(_model_download.get(), status);
   }
-
   return refresh_model(status);
 }
+
+#ifdef RL_BUILD_FEDERATION
+int live_model_impl::init_local_loop(api_status* status)
+{
+  std::string model_src = _configuration.get(name::MODEL_SRC, value::get_default_data_transport());
+
+  // This function should only be called when the configuration is set to use LOCAL_LOOP_MODEL_DATA
+  assert(model_src == value::LOCAL_LOOP_MODEL_DATA);
+
+  // Creating i_data_transport with type LOCAL_LOOP_MODEL_DATA results in local_loop_controller
+  m::i_data_transport* output = nullptr;
+  RETURN_IF_FAIL(_t_factory->create(&output, model_src, _configuration, _trace_logger.get(), status));
+  std::unique_ptr<local_loop_controller> llc(reinterpret_cast<local_loop_controller*>(output));
+
+  // Create senders with default sender implementation set to LOCAL_LOOP_SENDER
+  std::string interaction_sender_type =
+      _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::LOCAL_LOOP_SENDER);
+  std::string observation_sender_type =
+      _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::LOCAL_LOOP_SENDER);
+
+  i_sender* interaction_sender = nullptr;
+  if (interaction_sender_type == value::LOCAL_LOOP_SENDER) { interaction_sender = llc->get_local_sender().release(); }
+  else
+  {
+    RETURN_IF_FAIL(_sender_factory->create(
+        &interaction_sender, interaction_sender_type, _configuration, &_error_cb, _trace_logger.get(), status));
+    RETURN_IF_FAIL(interaction_sender->init(_configuration, status));
+  }
+
+  i_sender* observation_sender = nullptr;
+  if (observation_sender_type == value::LOCAL_LOOP_SENDER) { observation_sender = llc->get_local_sender().release(); }
+  else
+  {
+    RETURN_IF_FAIL(_sender_factory->create(
+        &observation_sender, observation_sender_type, _configuration, &_error_cb, _trace_logger.get(), status));
+    RETURN_IF_FAIL(observation_sender->init(_configuration, status));
+  }
+
+  RETURN_IF_FAIL(init_loggers_common(interaction_sender, observation_sender, status));
+
+  // Set live_model_impl's data transport to local loop controller
+  _transport = std::move(llc);
+
+  if (_bg_model_proc)
+  {
+    // Initialize background process and start downloading models
+    this->_model_download.reset(new m::model_downloader(_transport.get(), &_data_cb, _trace_logger.get()));
+    return _bg_model_proc->init(_model_download.get(), status);
+  }
+  return refresh_model(status);
+}
+#else
+int live_model_impl::init_local_loop(api_status* status)
+{
+  RETURN_ERROR_ARG(_trace_logger.get(), status, invalid_argument,
+      "Cannot use LOCAL_LOOP_MODEL_DATA because library was compiled without support for federated learning");
+}
+#endif
 
 int live_model_impl::request_episodic_decision(const char* event_id, const char* previous_id, string_view context_json,
     unsigned int flags, ranking_response& resp, episode_state& episode, api_status* status)
@@ -730,21 +862,27 @@ int live_model_impl::request_episodic_decision(const char* event_id, const char*
 int check_null_or_empty(const char* arg1, string_view arg2, i_trace* trace, api_status* status)
 {
   if ((arg1 == nullptr) || strlen(arg1) == 0 || arg2.empty())
-  { RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty"); }
+  {
+    RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty");
+  }
   return error_code::success;
 }
 
 int check_null_or_empty(string_view arg1, i_trace* trace, api_status* status)
 {
   if (arg1.empty())
-  { RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty"); }
+  {
+    RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty");
+  }
   return error_code::success;
 }
 
 int check_null_or_empty(const char* arg1, i_trace* trace, api_status* status)
 {
   if ((arg1 == nullptr) || strlen(arg1) == 0)
-  { RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty"); }
+  {
+    RETURN_ERROR_ARG(trace, status, invalid_argument, "one of the arguments passed to the ds is null or empty");
+  }
   return error_code::success;
 }
 
@@ -780,7 +918,9 @@ int reset_chosen_action_multi_slot(multi_slot_response_detailed& response, const
   for (auto& slot : response)
   {
     if (!baseline_actions.empty() && baseline_actions.size() >= index)
-    { RETURN_IF_FAIL(slot.set_chosen_action_id(baseline_actions[index])); }
+    {
+      RETURN_IF_FAIL(slot.set_chosen_action_id(baseline_actions[index]));
+    }
     else
     {
       // implicit baseline is the action corresponding to the slot index
@@ -799,7 +939,9 @@ void autogenerate_missing_uuids(
   for (auto& complete_id : complete_ids)
   {
     if (complete_id.empty())
-    { complete_id = boost::uuids::to_string(boost::uuids::random_generator()()) + std::to_string(seed_shift); }
+    {
+      complete_id = boost::uuids::to_string(boost::uuids::random_generator()()) + std::to_string(seed_shift);
+    }
   }
 }
 }  // namespace reinforcement_learning

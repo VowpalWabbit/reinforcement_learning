@@ -1,5 +1,6 @@
 #include "factory_resolver.h"
 
+#include "api_status.h"
 #include "constants.h"
 #include "err_constants.h"
 #include "logger/event_logger.h"
@@ -7,6 +8,10 @@
 #include "utility/watchdog.h"
 #include "vw_model/pdf_model.h"
 #include "vw_model/vw_model.h"
+
+#ifdef RL_BUILD_FEDERATION
+#  include "federation/local_loop_controller.h"
+#endif
 
 #ifdef USE_AZURE_FACTORIES
 #  include "azure_factories.h"
@@ -117,6 +122,18 @@ int file_model_loader_create(
   return error_code::success;
 }
 
+#ifdef RL_BUILD_FEDERATION
+int local_loop_controller_create(
+    m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
+{
+  TRACE_INFO(trace_logger, "Local loop controller i_data_transport created.");
+  std::unique_ptr<local_loop_controller> output;
+  RETURN_IF_FAIL(local_loop_controller::create(output, config, trace_logger, status));
+  *retval = output.release();
+  return error_code::success;
+}
+#endif
+
 int null_time_provider_create(
     i_time_provider** retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
 {
@@ -142,6 +159,17 @@ void factory_initializer::register_default_factories()
   data_transport_factory.register_type(value::NO_MODEL_DATA, empty_data_transport_create);
   data_transport_factory.register_type(value::FILE_MODEL_DATA, file_model_loader_create);
 
+#ifdef RL_BUILD_FEDERATION
+  data_transport_factory.register_type(value::LOCAL_LOOP_MODEL_DATA, local_loop_controller_create);
+#else
+  data_transport_factory.register_type(value::LOCAL_LOOP_MODEL_DATA,
+      [](m::i_data_transport**, const u::configuration&, i_trace* trace_logger, api_status* status)
+      {
+        RETURN_ERROR_ARG(trace_logger, status, create_fn_exception,
+            "Cannot use LOCAL_LOOP_MODEL_DATA because rlclientlib was not compiled with federated learning enabled");
+      });
+#endif
+
   model_factory.register_type(value::VW, model_create<m::vw_model>);
   model_factory.register_type(value::PASSTHROUGH_PDF_MODEL, model_create<m::pdf_model>);
 
@@ -153,22 +181,30 @@ void factory_initializer::register_default_factories()
 
   // Register File loggers
   sender_factory.register_type(value::EPISODE_FILE_SENDER,
-      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger,
-          api_status* status) {
+      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status)
+      {
         const char* file_name = c.get(name::EPISODE_FILE_NAME, "episode.fb.data");
         return file_sender_create(retval, c, file_name, cb, trace_logger, status);
       });
   sender_factory.register_type(value::OBSERVATION_FILE_SENDER,
-      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger,
-          api_status* status) {
+      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status)
+      {
         const char* file_name = c.get(name::OBSERVATION_FILE_NAME, "observation.fb.data");
         return file_sender_create(retval, c, file_name, cb, trace_logger, status);
       });
   sender_factory.register_type(value::INTERACTION_FILE_SENDER,
-      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger,
-          api_status* status) {
+      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status)
+      {
         const char* file_name = c.get(name::INTERACTION_FILE_NAME, "interaction.fb.data");
         return file_sender_create(retval, c, file_name, cb, trace_logger, status);
+      });
+
+  // Register a default factory for LOCAL_LOOP_SENDER that returns an error
+  sender_factory.register_type(value::LOCAL_LOOP_SENDER,
+      [](i_sender**, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status)
+      {
+        RETURN_ERROR_ARG(trace_logger, status, create_fn_exception,
+            "LOCAL_LOOP_SENDER must be used with model source set to LOCAL_LOOP_MODEL_DATA");
       });
 }
 

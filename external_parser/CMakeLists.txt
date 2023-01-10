@@ -2,11 +2,23 @@ cmake_minimum_required(VERSION 3.5)
 if(POLICY CMP0074)
     cmake_policy(SET CMP0074 NEW)
 endif()
+if(POLICY CMP0091)
+    cmake_policy(SET CMP0091 NEW)
+endif()
 
 # Set this to on so that tooling can make use of the outputted compile commands (such as clang-tidy)
 set(CMAKE_EXPORT_COMPILE_COMMANDS On)
 
 project(vw_binary_parser)
+
+if(UNIX AND NOT APPLE)
+  # Temporary workaround for VW 9.6 missing size_t on Linux builds
+  # TODO remove when VW submodule is updated
+  # This must be stddef.h and not cstddef because it also applies to C code
+  add_compile_options(-include stddef.h)
+  # Enable C++17 math functions in C++11
+  add_compile_definitions(__STDCPP_WANT_MATH_SPEC_FUNCS__)
+endif()
 
 if(DEFINED RL_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD ${RL_CXX_STANDARD})
@@ -44,13 +56,15 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/../cmake/M
 # ------------
 
 # First try to find the config version. Newer, used by vcpkg etc
-find_package(Flatbuffers CONFIG QUIET)
-if(FLATBUFFERS_FOUND)
+find_package(Flatbuffers CONFIG)
+if(TARGET flatbuffers::flatbuffers AND TARGET flatbuffers::flatc)
   get_property(flatc_location TARGET flatbuffers::flatc PROPERTY LOCATION)
+  message(STATUS "Found Flatbuffers with CONFIG, flatc located at: ${flatc_location}")
 else()
   # Fallback to the old version
   find_package(Flatbuffers MODULE REQUIRED)
   set(flatc_location ${FLATBUFFERS_FLATC_EXECUTABLE})
+  message(STATUS "Found Flatbuffers with MODULE, flatc located at: ${flatc_location}")
 endif()
 
 # set vw cmake flags
@@ -106,7 +120,7 @@ set(RL_FLAT_BUFFER_FILES
 )
 
 add_flatbuffer_schema(
-  TARGET fbgen
+  TARGET fbgen_external_parser
   SCHEMAS ${RL_FLAT_BUFFER_FILES}
   OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated/v2/
   FLATC_EXE ${flatc_location}
@@ -140,24 +154,40 @@ set(binary_parser_sources
 )
 
 add_library(rl_binary_parser STATIC ${binary_parser_headers} ${binary_parser_sources})
+set_target_properties(rl_binary_parser PROPERTIES POSITION_INDEPENDENT_CODE ON)
+if(WIN32)
+  set_target_properties(rl_binary_parser PROPERTIES DEBUG_POSTFIX d)
+endif()
+
 target_link_libraries(rl_binary_parser PUBLIC vw_core RapidJSON PRIVATE libzstd_static)
 target_include_directories(rl_binary_parser
   PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/
+    ${CMAKE_CURRENT_LIST_DIR}/generated/v2/
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/zstd/lib/
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/date/
-    ${FLATBUFFERS_INCLUDE_DIR}
-  )
-add_dependencies(rl_binary_parser fbgen)
+)
+
+# If flatbuffers found via CONFIG, add its target as a library dependency
+# Otherwise, the flatbuffers MODULE defines FLATBUFFERS_INCLUDE_DIR to add to the include path
+if(TARGET flatbuffers::flatbuffers)
+  target_link_libraries(rl_binary_parser PRIVATE flatbuffers::flatbuffers)
+else()
+  target_include_directories(rl_binary_parser PRIVATE ${FLATBUFFERS_INCLUDE_DIR})
+endif()
+add_dependencies(rl_binary_parser fbgen_external_parser)
 
 add_executable(rl_binary_parser_bin main.cc)
 target_link_libraries(rl_binary_parser_bin PUBLIC rl_binary_parser)
-set_target_properties(rl_binary_parser_bin PROPERTIES OUTPUT_NAME "vw")
+if (NOT rlclientlib_BUILD_DOTNET)
+  # The build for .NET bindings configures all binary output to a single directory
+  # In this case we can't name the binary parser "vw", since this will overwrite the real vw executable
+  set_target_properties(rl_binary_parser_bin PROPERTIES OUTPUT_NAME "vw")
+endif()
 
 if(STATIC_LINK_BINARY_PARSER AND NOT APPLE)
   target_link_libraries(rl_binary_parser_bin PRIVATE -static)
 endif()
-
 
 # Tests
 # -----

@@ -2,6 +2,8 @@
 
 #include "vw/io/logger.h"
 
+namespace v2 = reinforcement_learning::messages::flatbuff::v2;
+
 TimePoint timestamp_to_chrono(const v2::TimeStamp& ts)
 {
   // --- date transformation ---

@@ -2,6 +2,7 @@ set(all_sources
   benchmark_main.cc
   benchmarks_common.cc
   benchmark_cb_v2.cc
+  benchmark_ccb.cc
 )
 
 add_executable(rl_benchmarks

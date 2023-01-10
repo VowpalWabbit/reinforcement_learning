@@ -19,27 +19,36 @@ class example_joiner : public i_joiner
 {
 public:
   example_joiner(VW::workspace* vw);  // TODO rule of 5
-  example_joiner(VW::workspace* vw, bool binary_to_json, std::string outfile_name);
+  example_joiner(VW::workspace* vw, bool binary_to_json, const std::string& outfile_name);
 
   ~example_joiner() override;
 
-  void set_reward_function(v2::RewardFunctionType type, bool sticky = false) override;
+  void set_reward_function(
+      reinforcement_learning::messages::flatbuff::v2::RewardFunctionType type, bool sticky = false) override;
   void set_default_reward(float default_reward, bool sticky = false) override;
-  void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky = false) override;
-  void set_problem_type_config(v2::ProblemType problem_type, bool sticky = false) override;
+  void set_learning_mode_config(
+      reinforcement_learning::messages::flatbuff::v2::LearningModeType learning_mode, bool sticky = false) override;
+  void set_problem_type_config(
+      reinforcement_learning::messages::flatbuff::v2::ProblemType problem_type, bool sticky = false) override;
   void set_use_client_time(bool use_client_time, bool sticky = false) override;
   void apply_cli_overrides(VW::workspace* all, const VW::external::parser_options& parsed_options) override;
   bool joiner_ready() override;
 
   float default_reward() const { return _loop_info.default_reward; }
-  v2::LearningModeType learning_mode_config() const { return _loop_info.learning_mode_config; }
-  v2::ProblemType problem_type_config() const { return _loop_info.problem_type_config; }
+  reinforcement_learning::messages::flatbuff::v2::LearningModeType learning_mode_config() const
+  {
+    return _loop_info.learning_mode_config;
+  }
+  reinforcement_learning::messages::flatbuff::v2::ProblemType problem_type_config() const
+  {
+    return _loop_info.problem_type_config;
+  }
   bool use_client_time() const { return _loop_info.use_client_time; }
 
   // Takes an event which will have a timestamp and event payload
   // groups all events interactions with their event observations based on their
   // id. The grouped events can be processed when process_joined() is called
-  bool process_event(const v2::JoinedEvent& joined_event) override;
+  bool process_event(const reinforcement_learning::messages::flatbuff::v2::JoinedEvent& joined_event) override;
 
   /**
    * Takes all grouped events, processes them (e.g. decompression) and populates
@@ -91,12 +100,15 @@ public:
   void persist_metrics() override;
 
 private:
-  bool process_dedup(const v2::Event& event, const v2::Metadata& metadata);
+  bool process_dedup(const reinforcement_learning::messages::flatbuff::v2::Event& event,
+      const reinforcement_learning::messages::flatbuff::v2::Metadata& metadata);
 
-  bool process_interaction(
-      const v2::Event& event, const v2::Metadata& metadata, const TimePoint& enqueued_time_utc, VW::multi_ex& examples);
+  bool process_interaction(const reinforcement_learning::messages::flatbuff::v2::Event& event,
+      const reinforcement_learning::messages::flatbuff::v2::Metadata& metadata, const TimePoint& enqueued_time_utc,
+      VW::multi_ex& examples);
 
-  bool process_outcome(const v2::Event& event, const v2::Metadata& metadata, const TimePoint& enqueued_time_utc);
+  bool process_outcome(const reinforcement_learning::messages::flatbuff::v2::Event& event,
+      const reinforcement_learning::messages::flatbuff::v2::Metadata& metadata, const TimePoint& enqueued_time_utc);
 
   void clear_batch_info();
   void clear_event_id_batch_info(const std::string& id);
@@ -116,7 +128,8 @@ private:
   // (multi)example
   std::unordered_map<std::string, joined_event::joined_event> _batch_grouped_examples;
   // from event id to all the events that have that event id
-  std::unordered_map<std::string, std::vector<const v2::JoinedEvent*>> _batch_grouped_events;
+  std::unordered_map<std::string, std::vector<const reinforcement_learning::messages::flatbuff::v2::JoinedEvent*>>
+      _batch_grouped_events;
   std::queue<std::string> _batch_event_order;
 
   std::vector<VW::example*> _example_pool;

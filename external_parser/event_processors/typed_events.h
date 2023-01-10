@@ -6,18 +6,18 @@
 #include "generated/v2/MultiSlotEvent_generated.h"
 #include "joined_event.h"
 #include "loop.h"
+#include "vw/core/json_utils.h"
 #include "zstd.h"
-
-namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 namespace typed_event
 {
 template <typename T>
 struct event_processor;
 template <>
-struct event_processor<v2::MultiSlotEvent>
+struct event_processor<reinforcement_learning::messages::flatbuff::v2::MultiSlotEvent>
 {
-  static bool is_valid(const v2::MultiSlotEvent& evt, const loop::loop_info& loop_info, VW::io::logger& logger)
+  static bool is_valid(const reinforcement_learning::messages::flatbuff::v2::MultiSlotEvent& evt,
+      const loop::loop_info& loop_info, VW::io::logger& logger)
   {
     if (evt.context() == nullptr || evt.slots() == nullptr) { return false; }
 
@@ -33,18 +33,24 @@ struct event_processor<v2::MultiSlotEvent>
     return true;
   }
 
-  static v2::LearningModeType get_learning_mode(const v2::MultiSlotEvent& evt) { return evt.learning_mode(); }
+  static reinforcement_learning::messages::flatbuff::v2::LearningModeType get_learning_mode(
+      const reinforcement_learning::messages::flatbuff::v2::MultiSlotEvent& evt)
+  {
+    return evt.learning_mode();
+  }
 
-  static std::string get_context(const v2::MultiSlotEvent& evt)
+  static std::string get_context(const reinforcement_learning::messages::flatbuff::v2::MultiSlotEvent& evt)
   {
     return {reinterpret_cast<char const*>(evt.context()->data()), evt.context()->size()};
   }
 
-  static joined_event::joined_event fill_in_joined_event(const v2::MultiSlotEvent& evt, const v2::Metadata& metadata,
-      const TimePoint& enqueued_time_utc, std::string&& line_vec)
+  static joined_event::joined_event fill_in_joined_event(
+      const reinforcement_learning::messages::flatbuff::v2::MultiSlotEvent& evt,
+      const reinforcement_learning::messages::flatbuff::v2::Metadata& metadata, const TimePoint& enqueued_time_utc,
+      std::string&& line_vec)
   {
     joined_event::MultiSlotInteraction multislot_data;
-    bool is_ccb = metadata.payload_type() == v2::PayloadType_CCB;
+    bool is_ccb = metadata.payload_type() == reinforcement_learning::messages::flatbuff::v2::PayloadType_CCB;
 
     auto ccb_data = VW::make_unique<joined_event::ccb_joined_event>();
     auto slates_data = VW::make_unique<joined_event::slates_joined_event>();
@@ -52,11 +58,13 @@ struct event_processor<v2::MultiSlotEvent>
     size_t slot_index = 0;
     for (auto* slot_event : *evt.slots())
     {
-      DecisionServiceInteraction data;
-      data.eventId = slot_event->id() == nullptr ? metadata.id()->str() : slot_event->id()->str();
+      VW::details::decision_service_interaction data;
+      data.event_id = slot_event->id() == nullptr ? metadata.id()->str() : slot_event->id()->str();
 
       if (is_ccb && slot_event->id() != nullptr)
-      { ccb_data->slot_id_to_index_map.insert(std::pair<std::string, int>(slot_event->id()->str(), slot_index)); }
+      {
+        ccb_data->slot_id_to_index_map.insert(std::pair<std::string, int>(slot_event->id()->str(), slot_index));
+      }
 
       data.actions.reserve(slot_event->action_ids()->size());
       for (const auto& a : *slot_event->action_ids()) { data.actions.emplace_back(a); }
@@ -93,9 +101,10 @@ struct event_processor<v2::MultiSlotEvent>
 };
 
 template <>
-struct event_processor<v2::CbEvent>
+struct event_processor<reinforcement_learning::messages::flatbuff::v2::CbEvent>
 {
-  static bool is_valid(const v2::CbEvent& evt, const loop::loop_info& loop_info, VW::io::logger& logger)
+  static bool is_valid(const reinforcement_learning::messages::flatbuff::v2::CbEvent& evt,
+      const loop::loop_info& loop_info, VW::io::logger& logger)
   {
     if (evt.context() == nullptr || evt.action_ids() == nullptr || evt.probabilities() == nullptr) { return false; }
 
@@ -111,27 +120,33 @@ struct event_processor<v2::CbEvent>
     return true;
   }
 
-  static v2::LearningModeType get_learning_mode(const v2::CbEvent& evt) { return evt.learning_mode(); }
+  static reinforcement_learning::messages::flatbuff::v2::LearningModeType get_learning_mode(
+      const reinforcement_learning::messages::flatbuff::v2::CbEvent& evt)
+  {
+    return evt.learning_mode();
+  }
 
-  static std::string get_context(const v2::CbEvent& evt)
+  static std::string get_context(const reinforcement_learning::messages::flatbuff::v2::CbEvent& evt)
   {
     return {reinterpret_cast<char const*>(evt.context()->data()), evt.context()->size()};
   }
 
   static joined_event::joined_event fill_in_joined_event(
-      const v2::CbEvent& evt, const v2::Metadata& metadata, const TimePoint& enqueued_time_utc, std::string&& line_vec)
+      const reinforcement_learning::messages::flatbuff::v2::CbEvent& evt,
+      const reinforcement_learning::messages::flatbuff::v2::Metadata& metadata, const TimePoint& enqueued_time_utc,
+      std::string&& line_vec)
   {
     auto cb_data = VW::make_unique<joined_event::cb_joined_event>();
 
-    cb_data->interaction_data.eventId = metadata.id()->str();
+    cb_data->interaction_data.event_id = metadata.id()->str();
     cb_data->interaction_data.actions.reserve(evt.action_ids()->size());
     for (const auto& a : *evt.action_ids()) { cb_data->interaction_data.actions.emplace_back(a); }
 
     cb_data->interaction_data.probabilities.reserve(evt.probabilities()->size());
     for (const auto& prob : *evt.probabilities()) { cb_data->interaction_data.probabilities.emplace_back(prob); }
 
-    cb_data->interaction_data.probabilityOfDrop = 1.f - metadata.pass_probability();
-    cb_data->interaction_data.skipLearn = evt.deferred_action();
+    cb_data->interaction_data.probability_of_drop = 1.f - metadata.pass_probability();
+    cb_data->interaction_data.skip_learn = evt.deferred_action();
 
     return {TimePoint(enqueued_time_utc),
         {metadata.app_id() ? metadata.app_id()->str() : "", metadata.payload_type(), metadata.pass_probability(),
@@ -141,9 +156,10 @@ struct event_processor<v2::CbEvent>
 };
 
 template <>
-struct event_processor<v2::CaEvent>
+struct event_processor<reinforcement_learning::messages::flatbuff::v2::CaEvent>
 {
-  static bool is_valid(const v2::CaEvent& evt, const loop::loop_info& loop_info, VW::io::logger& logger)
+  static bool is_valid(const reinforcement_learning::messages::flatbuff::v2::CaEvent& evt,
+      const loop::loop_info& loop_info, VW::io::logger& logger)
   {
     if (evt.context() == nullptr) { return false; }
 
@@ -159,22 +175,28 @@ struct event_processor<v2::CaEvent>
     return true;
   }
 
-  static v2::LearningModeType get_learning_mode(const v2::CaEvent& evt) { return evt.learning_mode(); }
+  static reinforcement_learning::messages::flatbuff::v2::LearningModeType get_learning_mode(
+      const reinforcement_learning::messages::flatbuff::v2::CaEvent& evt)
+  {
+    return evt.learning_mode();
+  }
 
-  static std::string get_context(const v2::CaEvent& evt)
+  static std::string get_context(const reinforcement_learning::messages::flatbuff::v2::CaEvent& evt)
   {
     return {reinterpret_cast<char const*>(evt.context()->data()), evt.context()->size()};
   }
 
   static joined_event::joined_event fill_in_joined_event(
-      const v2::CaEvent& evt, const v2::Metadata& metadata, const TimePoint& enqueued_time_utc, std::string&& line_vec)
+      const reinforcement_learning::messages::flatbuff::v2::CaEvent& evt,
+      const reinforcement_learning::messages::flatbuff::v2::Metadata& metadata, const TimePoint& enqueued_time_utc,
+      std::string&& line_vec)
   {
     auto ca_data = VW::make_unique<joined_event::ca_joined_event>();
-    ca_data->interaction_data.eventId = metadata.id()->str();
+    ca_data->interaction_data.event_id = metadata.id()->str();
     ca_data->interaction_data.action = evt.action();
     ca_data->interaction_data.pdf_value = evt.pdf_value();
-    ca_data->interaction_data.probabilityOfDrop = 1.f - metadata.pass_probability();
-    ca_data->interaction_data.skipLearn = evt.deferred_action();
+    ca_data->interaction_data.probability_of_drop = 1.f - metadata.pass_probability();
+    ca_data->interaction_data.skip_learn = evt.deferred_action();
 
     return {TimePoint(enqueued_time_utc),
         {metadata.app_id() ? metadata.app_id()->str() : "", metadata.payload_type(), metadata.pass_probability(),
@@ -184,10 +206,11 @@ struct event_processor<v2::CaEvent>
 };
 
 template <typename T>
-bool process_compression(const uint8_t* data, size_t size, const v2::Metadata& metadata, const T*& payload,
+bool process_compression(const uint8_t* data, size_t size,
+    const reinforcement_learning::messages::flatbuff::v2::Metadata& metadata, const T*& payload,
     flatbuffers::DetachedBuffer& detached_buffer, VW::io::logger& logger)
 {
-  if (metadata.encoding() == v2::EventEncoding_Zstd)
+  if (metadata.encoding() == reinforcement_learning::messages::flatbuff::v2::EventEncoding_Zstd)
   {
     size_t buff_size = ZSTD_getFrameContentSize(data, size);
     if (buff_size == ZSTD_CONTENTSIZE_ERROR)
@@ -226,10 +249,7 @@ bool process_compression(const uint8_t* data, size_t size, const v2::Metadata& m
     detached_buffer = flatbuffers::DetachedBuffer(nullptr, false, data_ptr, 0, data_ptr, res);
     payload = flatbuffers::GetRoot<T>(detached_buffer.data());
   }
-  else
-  {
-    payload = flatbuffers::GetRoot<T>(data);
-  }
+  else { payload = flatbuffers::GetRoot<T>(data); }
   return true;
 }
 }  // namespace typed_event

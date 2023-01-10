@@ -19,6 +19,8 @@
 #include <fstream>
 #include <iostream>
 
+namespace v2 = reinforcement_learning::messages::flatbuff::v2;
+
 // TODO need to check if errors will be detected from stderr/stdout/other and
 // use appropriate logger
 
@@ -84,7 +86,11 @@ namespace VW
 namespace external
 {
 binary_parser::binary_parser(std::unique_ptr<i_joiner>&& joiner, VW::io::logger logger)
-    : parser(logger), _example_joiner(std::move(joiner)), _payload(nullptr), _payload_size(0), _total_size_read(0)
+    : parser(std::move(logger))
+    , _example_joiner(std::move(joiner))
+    , _payload(nullptr)
+    , _payload_size(0)
+    , _total_size_read(0)
 {
 }
 

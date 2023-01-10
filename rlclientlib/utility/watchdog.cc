@@ -44,7 +44,9 @@ void watchdog::check_in(std::thread::id const& thread_id)
 
   auto const it = _thread_infos.find(thread_id);
   if (it == _thread_infos.end())
-  { throw std::runtime_error(concat("Thread ", thread_id, " must be registered before being used.")); }
+  {
+    throw std::runtime_error(concat("Thread ", thread_id, " must be registered before being used."));
+  }
 
   auto& thread_info = it->second;
   thread_info.last_check_in_time = clock_t::now();
@@ -101,10 +103,7 @@ void watchdog::loop()
         if (thread_info.last_verify_time - thread_info.last_check_in_time > thread_info.timeout)
         {
           if (_error_callback != nullptr) { failed_thread_names.push_back(thread_info.thread_name); }
-          else
-          {
-            set_unhandled_background_error(true);
-          }
+          else { set_unhandled_background_error(true); }
         }
       }
     }

@@ -9,71 +9,82 @@ on:
     branches:
       - '*'
 
+env:
+  VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
 jobs:
-  build-linux:
-    name: binary_parser.ubuntu18.04
-    container:
-      image: vowpalwabbit/rl-ubuntu-1804:latest
-    runs-on: ubuntu-latest
-    steps:
-      # v1 must be used because newer versions require a node.js version that will not run on this old image.
-      - uses: actions/checkout@v1
-        with:
-          submodules: recursive
-      - run: ./.scripts/linux/build-vw-bp.sh
-      - run: ./.scripts/linux/test-vw-bp.sh
-
-  build-linux-valgrind:
-    name: binary_parser-valgrind.ubuntu18.04
-    container:
-      image: vowpalwabbit/rl-ubuntu-1804:latest
-    runs-on: ubuntu-latest
-    steps:
-      # v1 must be used because newer versions require a node.js version that will not run on this old image.
-      - uses: actions/checkout@v1
-        with:
-          submodules: recursive
-      - run: ./.scripts/linux/build-vw-bp.sh
-      - run: ./.scripts/linux/unit-tests-vw-bp-valgrind.sh
-
-  build-macos:
-    name: binary_parser.macos-11
-    runs-on: macos-11
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - run: ./.scripts/macos/restore-vw-bp.sh
-      - run: ./.scripts/macos/build-vw-bp.sh
-      - run: ./.scripts/macos/test-vw-bp.sh
-
-  build-windows:
-    name: binary_parser.windows-2019
-    runs-on: windows-2019
+  build-binary-parser:
+    name: binary-parser-${{ matrix.build.build_type }}-${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - { os: "windows-latest", vcpkg_target_triplet: "x64-windows-static" }
+          - { os: "ubuntu-latest", vcpkg_target_triplet: "x64-linux" }
+          - { os: "macos-latest", vcpkg_target_triplet: "x64-osx" }
+        build:
+          # Set the appropriate static runtime for MSVC on Windows
+          # CMake ignores the CMAKE_MSVC_RUNTIME_LIBRARY option on other platforms
+          - { build_type: "debug", msvc_runtime: "MultiThreadedDebug" }
+          - { build_type: "release", msvc_runtime: "MultiThreaded" }
     env:
-      SOURCE_DIR: ${{ github.workspace }}/reinforcement_learning
-      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-      # 2022.03.10
-      VCPKG_REF: af2287382b1991dbdcb7e5112d236f3323b9dd7a
+      VCPKG_DEFAULT_TRIPLET: ${{ matrix.config.vcpkg_target_triplet }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
-          path: 'reinforcement_learning'
           submodules: recursive
-      - uses: actions/checkout@v2
+      - name: Setup MSVC Developer Command Prompt
+        if: ${{ startsWith(matrix.config.os, 'windows') }}
+        uses: ilammy/msvc-dev-cmd@v1
+      - uses: lukka/get-cmake@latest
+      - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
+        shell: bash
+      - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+      - uses: actions/cache@v3
+        env:
+          cache-name: vcpkg-cache
         with:
-          path: 'vcpkg'
-          repository: 'microsoft/vcpkg'
-          ref: ${{ env.VCPKG_REF }}
-      - name: Restore vcpkg and build artifacts
-        uses: actions/cache@v2
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
+          key: ${{ matrix.config.os }}-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
+      - uses: lukka/run-vcpkg@main
         with:
-          path: |
-            ${{ env.VCPKG_ROOT }}/installed/
-          key: |
-            vw-bp-${{ env.VCPKG_REF }}-windows-2019-vcpkg-cache-invalidate-0
-      - uses: ilammy/msvc-dev-cmd@v1
-      - run: ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
-      - run: ${{ env.SOURCE_DIR }}/.scripts/restore-vw-bp-deps.cmd
-      - run: ${{ env.SOURCE_DIR }}/.scripts/build-vw-bp.cmd
-      - run: ${{ env.SOURCE_DIR }}/.scripts/test-vw-bp.cmd
+          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
+          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
+      - name: Configure
+        run: >
+          cd external_parser;
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=${{ matrix.build.build_type }}
+          -DCMAKE_MSVC_RUNTIME_LIBRARY=${{ matrix.build.msvc_runtime }}
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          -DVCPKG_MANIFEST_DIR="${{ github.workspace }}"
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
+          -DVCPKG_HOST_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
+          -DWARNING_AS_ERROR=OFF
+          -Wno-deprecated
+          -DFMT_SYS_DEP=ON
+          -DSPDLOG_SYS_DEP=ON
+      - name: Build
+        run: |
+          cd external_parser
+          cmake --build build
+      - name: Test
+        run: |
+          cd external_parser/build
+          ctest --verbose --output-on-failure
+      - name: Test binary parser VW executable
+        run: |
+          cd external_parser/build
+          ./vw --extra_metrics metrics.json -d ../unit_tests/test_files/valid_joined_logs/cb_simple.log --binary_parser --cb_explore_adf
+          python3 -m json.tool metrics.json
+      - name: Test with Valgrind
+        if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
+        run: |
+          cd external_parser/build
+          sudo apt install -y valgrind
+          valgrind --quiet --error-exitcode=100 --undef-value-errors=no --leak-check=full ./unit_tests/binary_parser_unit_tests

@@ -5,25 +5,20 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "common_test_utils.h"
 #include "err_constants.h"
 #include "factory_resolver.h"
 #include "federation/federated_client.h"
 #include "federation/local_client.h"
-#include "vw/config/options.h"
-#include "vw/config/options_cli.h"
-#include "vw/core/io_buf.h"
 #include "vw/core/merge.h"
 #include "vw/core/parse_example.h"
 #include "vw/core/parse_example_json.h"
 #include "vw/core/vw.h"
-#include "vw/io/io_adapter.h"
 
 #include <cstdio>
 #include <memory>
 
-namespace rl = reinforcement_learning;
-namespace rerr = reinforcement_learning::error_code;
-namespace rutil = reinforcement_learning::utility;
+using namespace reinforcement_learning;
 
 VW::multi_ex parse_json(VW::workspace& all, const std::string& line)
 {
@@ -37,32 +32,29 @@ VW::multi_ex parse_json(VW::workspace& all, const std::string& line)
 
 BOOST_AUTO_TEST_CASE(get_model_twice_fails)
 {
-  rutil::configuration config;
-  std::unique_ptr<rl::i_federated_client> client;
-  BOOST_CHECK_EQUAL(rl::create_local_client(config, client, nullptr, nullptr), rerr::success);
-  rl::model_management::model_data data;
+  utility::configuration config;
+  std::unique_ptr<i_federated_client> client;
+  BOOST_CHECK_EQUAL(local_client::create(client, config, nullptr, nullptr), error_code::success);
+  model_management::model_data data;
   bool model_received = false;
-  BOOST_CHECK_EQUAL(client->try_get_model("test_app_id", data, model_received), rerr::success);
+  BOOST_CHECK_EQUAL(client->try_get_model("test_app_id", data, model_received), error_code::success);
   BOOST_CHECK(data.data_sz() > 0);
   BOOST_CHECK_EQUAL(model_received, true);
-  BOOST_CHECK_NE(client->try_get_model("test_app_id", data, model_received), rerr::success);
+  BOOST_CHECK_NE(client->try_get_model("test_app_id", data, model_received), error_code::success);
 }
 
 BOOST_AUTO_TEST_CASE(send_delta_update)
 {
-  rutil::configuration config;
-  std::unique_ptr<rl::i_federated_client> client;
-  BOOST_CHECK_EQUAL(rl::create_local_client(config, client, nullptr, nullptr), rerr::success);
+  utility::configuration config;
+  std::unique_ptr<i_federated_client> client;
+  BOOST_CHECK_EQUAL(local_client::create(client, config, nullptr, nullptr), error_code::success);
   BOOST_CHECK_NE(client.get(), nullptr);
-  rl::model_management::model_data data;
+  model_management::model_data data;
   bool model_received = false;
-  BOOST_CHECK_EQUAL(client->try_get_model("test_app_id", data, model_received), rerr::success);
-  auto opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(std::vector<std::string>{}));
-  auto original_workspace =
-      VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data.data(), data.data_sz()));
-  opts = std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(std::vector<std::string>{}));
-  auto workspace =
-      VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data.data(), data.data_sz()));
+  BOOST_CHECK_EQUAL(client->try_get_model("test_app_id", data, model_received), error_code::success);
+
+  auto original_workspace = test_utils::create_vw("", data);
+  auto workspace = test_utils::create_vw("", data);
   std::string json_text = R"(
     {
       "s_": "1",
@@ -100,11 +92,11 @@ BOOST_AUTO_TEST_CASE(send_delta_update)
   delta.serialize(*writer);
   BOOST_CHECK_EQUAL(
       client->report_result(reinterpret_cast<const uint8_t*>(backing_buffer->data()), backing_buffer->size()),
-      rerr::success);
+      error_code::success);
   BOOST_CHECK_NE(
       client->report_result(reinterpret_cast<const uint8_t*>(backing_buffer->data()), backing_buffer->size()),
-      rerr::success);
+      error_code::success);
 
   model_received = false;
-  BOOST_CHECK_EQUAL(client->try_get_model("test_app_id", data, model_received), rerr::success);
+  BOOST_CHECK_EQUAL(client->try_get_model("test_app_id", data, model_received), error_code::success);
 }

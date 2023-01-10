@@ -4,8 +4,10 @@ namespace reinforcement_learning
 {
 #ifdef _WIN32
 const char* const PATH_DELIMITER = "\\";
+const char* const DEV_NULL = "nul";
 #else
 const char* const PATH_DELIMITER = "/";
+const char* const DEV_NULL = "/dev/null";
 #endif
 
 namespace name
@@ -34,6 +36,7 @@ const char* const EPISODE_EH_KEY_NAME = "episode.eventhub.keyname";
 const char* const EPISODE_EH_KEY = "episode.eventhub.key";
 const char* const EPISODE_EH_TASKS_LIMIT = "episode.eventhub.tasks_limit";
 const char* const EPISODE_EH_MAX_HTTP_RETRIES = "episode.eventhub.max_http_retries";
+const char* const EPISODE_EH_MAX_HTTP_RETRY_DURATION_MS = "episode.eventhub.max_http_retry_duration_ms";
 const char* const EPISODE_SENDER_IMPLEMENTATION = "episode.sender.implementation";
 
 // Interaction
@@ -43,6 +46,7 @@ const char* const INTERACTION_EH_KEY_NAME = "interaction.eventhub.keyname";
 const char* const INTERACTION_EH_KEY = "interaction.eventhub.key";
 const char* const INTERACTION_EH_TASKS_LIMIT = "interaction.eventhub.tasks_limit";
 const char* const INTERACTION_EH_MAX_HTTP_RETRIES = "interaction.eventhub.max_http_retries";
+const char* const INTERACTION_EH_MAX_HTTP_RETRY_DURATION_MS = "interaction.eventhub.max_http_retry_duration_ms";
 const char* const INTERACTION_SEND_HIGH_WATER_MARK = "interaction.send.highwatermark";
 const char* const INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB = "interaction.send.queue.maxcapacity.kb";
 const char* const INTERACTION_SEND_BATCH_INTERVAL_MS = "interaction.send.batchintervalms";
@@ -53,6 +57,7 @@ const char* const INTERACTION_QUEUE_MODE = "interaction.queue.mode";
 const char* const INTERACTION_HTTP_API_HOST = "interaction.http.api.host";
 const char* const INTERACTION_APIM_TASKS_LIMIT = "interaction.apim.tasks_limit";
 const char* const INTERACTION_APIM_MAX_HTTP_RETRIES = "interaction.apim.max_http_retries";
+const char* const INTERACTION_APIM_MAX_HTTP_RETRY_DURATION_MS = "interaction.apim.max_http_retry_duration_ms";
 const char* const INTERACTION_SUBSAMPLE_RATE = "interaction.subsample.rate";
 
 // Observation
@@ -62,6 +67,7 @@ const char* const OBSERVATION_EH_KEY_NAME = "observation.eventhub.keyname";
 const char* const OBSERVATION_EH_KEY = "observation.eventhub.key";
 const char* const OBSERVATION_EH_TASKS_LIMIT = "observation.eventhub.tasks_limit";
 const char* const OBSERVATION_EH_MAX_HTTP_RETRIES = "observation.eventhub.max_http_retries";
+const char* const OBSERVATION_EH_MAX_HTTP_RETRY_DURATION_MS = "observation.eventhub.max_http_retry_duration_ms";
 const char* const OBSERVATION_SEND_HIGH_WATER_MARK = "observation.send.highwatermark";
 const char* const OBSERVATION_SEND_QUEUE_MAX_CAPACITY_KB = "observation.send.queue.maxcapacity.kb";
 const char* const OBSERVATION_SEND_BATCH_INTERVAL_MS = "observation.send.batchintervalms";
@@ -71,6 +77,7 @@ const char* const OBSERVATION_QUEUE_MODE = "observation.queue.mode";
 const char* const OBSERVATION_HTTP_API_HOST = "observation.http.api.host";
 const char* const OBSERVATION_APIM_TASKS_LIMIT = "observation.apim.tasks_limit";
 const char* const OBSERVATION_APIM_MAX_HTTP_RETRIES = "observation.apim.max_http_retries";
+const char* const OBSERVATION_APIM_MAX_HTTP_RETRY_DURATION_MS = "observation.apim.max_http_retry_duration_ms";
 const char* const OBSERVATION_SUBSAMPLE_RATE = "observation.subsample.rate";
 
 // global sender properties
@@ -95,6 +102,15 @@ const char* const MODEL_FILE_NAME = "model_file_loader.file_name";
 const char* const MODEL_FILE_MUST_EXIST = "model_file_loader.file_must_exist";
 
 const char* const ZSTD_COMPRESSION_LEVEL = "zstd.compression_level";
+
+#ifdef RL_BUILD_FEDERATION
+// local joiner for federated learning
+const char* const JOINER_EUD_DURATION = "eud.duration";
+const char* const JOINER_PROBLEM_TYPE = "joiner.problem.type";
+const char* const JOINER_REWARD_FUNCTION = "joiner.reward.function";
+const char* const JOINER_LEARNING_MODE = "joiner.learning.mode";
+#endif
+
 }  // namespace name
 }  // namespace reinforcement_learning
 
@@ -134,6 +150,30 @@ const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
 const int DEFAULT_VW_POOL_INIT_SIZE = 4;
 const int DEFAULT_PROTOCOL_VERSION = 1;
 const char* const DEFAULT_AUDIT_OUTPUT_PATH = "audit";
+
+#ifdef RL_BUILD_FEDERATION
+// Configuration values for local joiner
+const char* const PROBLEM_TYPE_UNKNOWN = "PROBLEM_TYPE_UNKNOWN";
+const char* const PROBLEM_TYPE_CB = "PROBLEM_TYPE_CB";
+const char* const PROBLEM_TYPE_CCB = "PROBLEM_TYPE_CCB";
+const char* const PROBLEM_TYPE_SLATES = "PROBLEM_TYPE_SLATES";
+const char* const PROBLEM_TYPE_CA = "PROBLEM_TYPE_CA";
+const char* const PROBLEM_TYPE_MULTISTEP = "PROBLEM_TYPE_MULTISTEP";
+const char* const REWARD_FUNCTION_EARLIEST = "REWARD_FUNCTION_EARLIEST";
+const char* const REWARD_FUNCTION_AVERAGE = "REWARD_FUNCTION_AVERAGE";
+const char* const REWARD_FUNCTION_MEDIAN = "REWARD_FUNCTION_MEDIAN";
+const char* const REWARD_FUNCTION_SUM = "REWARD_FUNCTION_SUM";
+const char* const REWARD_FUNCTION_MIN = "REWARD_FUNCTION_MEAN";
+const char* const REWARD_FUNCTION_MAX = "REWARD_FUNCTION_MAX";
+#endif
+
+// These are outside of #ifdef section so that we can recognize them as invalid
+// configuration options when rlclientlib is compiled without RL_BUILD_FEDERATION
+//
+// Use local_loop_controller for model data
+const char* const LOCAL_LOOP_MODEL_DATA = "LOCAL_LOOP_MODEL_DATA";
+// Send events to local_loop_controller
+const char* const LOCAL_LOOP_SENDER = "LOCAL_LOOP_SENDER";
 
 const char* get_default_episode_sender();
 const char* get_default_observation_sender();

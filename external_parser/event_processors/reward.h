@@ -12,7 +12,7 @@ struct outcome_event
   {
   }
   metadata::event_metadata_info metadata;
-  v2::IndexValue index_type;
+  reinforcement_learning::messages::flatbuff::v2::IndexValue index_type;
   std::string s_index;
   int index;
   std::string s_value;
@@ -93,11 +93,10 @@ inline float median(const std::vector<outcome_event>& outcome_events, float defa
   {
     sort(values.begin(), values.end());
     if (outcome_events_size % 2 == 0)
-    { return (values[outcome_events_size / 2 - 1] + values[outcome_events_size / 2]) / 2; }
-    else
     {
-      return values[outcome_events_size / 2];
+      return (values[outcome_events_size / 2 - 1] + values[outcome_events_size / 2]) / 2;
     }
+    else { return values[outcome_events_size / 2]; }
   }
 
   return default_reward;

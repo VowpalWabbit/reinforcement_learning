@@ -17,8 +17,7 @@ const char* const STR_LEVEL_ERROR = "ERROR";
 const char* get_log_level_string(int log_level);
 
 #define TRACE_LOG(logger, level, msg)                   \
-  do                                                    \
-  {                                                     \
+  do {                                                  \
     if (logger != nullptr) { logger->log(level, msg); } \
   } while (0)
 

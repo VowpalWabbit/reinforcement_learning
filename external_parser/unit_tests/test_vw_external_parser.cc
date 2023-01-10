@@ -4,6 +4,7 @@
 #include "test_common.h"
 #include "vw/config/options_cli.h"
 #include "vw/core/ccb_label.h"
+#include "vw/core/learner.h"
 #include "vw/core/parse_primitives.h"
 
 BOOST_AUTO_TEST_CASE(cb_simple)

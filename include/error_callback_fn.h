@@ -5,8 +5,7 @@
 namespace reinforcement_learning
 {
 #define ERROR_CALLBACK(fn, status)                   \
-  do                                                 \
-  {                                                  \
+  do {                                               \
     if (fn != nullptr) { fn->report_error(status); } \
   } while (0)
 
@@ -28,10 +27,7 @@ public:
   {
     std::lock_guard<std::mutex> lock(_mutex);
     if (fn != nullptr) { _fn = std::bind(fn, std::placeholders::_1, context); }
-    else
-    {
-      _fn = nullptr;
-    }
+    else { _fn = nullptr; }
   }
 
   template <typename ContextT>
@@ -39,10 +35,7 @@ public:
   {
     std::lock_guard<std::mutex> lock(_mutex);
     if (fn != nullptr) { _fn = std::bind(fn, std::placeholders::_1, context); }
-    else
-    {
-      _fn = nullptr;
-    }
+    else { _fn = nullptr; }
   }
 
   void report_error(api_status& s);

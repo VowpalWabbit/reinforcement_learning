@@ -1,12 +1,15 @@
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/../cmake/Modules/")
+
 # First try to find the config version. Newer, used by vcpkg etc
-find_package(Flatbuffers CONFIG QUIET)
-if(FLATBUFFERS_FOUND)
+find_package(Flatbuffers CONFIG)
+if(TARGET flatbuffers::flatbuffers AND TARGET flatbuffers::flatc)
   get_property(flatc_location TARGET flatbuffers::flatc PROPERTY LOCATION)
+  message(STATUS "Found Flatbuffers with CONFIG, flatc located at: ${flatc_location}")
 else()
   # Fallback to the old version
   find_package(Flatbuffers MODULE REQUIRED)
   set(flatc_location ${FLATBUFFERS_FLATC_EXECUTABLE})
+  message(STATUS "Found Flatbuffers with MODULE, flatc located at: ${flatc_location}")
 endif()
 
 include(FlatbufferUtils)
@@ -28,7 +31,9 @@ set(RL_FLAT_BUFFER_FILES_V2
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Metadata.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiSlotEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiStepEvent.fbs"
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/OutcomeEvent.fbs")
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/OutcomeEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/ProblemType.fbs"
+)
 
 add_flatbuffer_schema(
   TARGET fbgenerator_v1
@@ -53,7 +58,6 @@ set(PROJECT_SOURCES
   dedup.cc
   error_callback_fn.cc
   factory_resolver.cc
-  federation/local_client.cc
   generic_event.cc
   learning_mode.cc
   live_model.cc
@@ -106,6 +110,15 @@ if(vw_USE_AZURE_FACTORIES)
   )
 endif()
 
+if(RL_BUILD_FEDERATION)
+  list(APPEND PROJECT_SOURCES
+    federation/local_client.cc
+    federation/local_loop_controller.cc
+    federation/sender_joined_log_provider.cc
+    federation/vw_trainable_model.cc
+  )
+endif()
+
 set(PROJECT_PUBLIC_HEADERS
   ../include/action_flags.h
   ../include/api_status.h
@@ -140,9 +153,6 @@ set(PROJECT_PUBLIC_HEADERS
 set(PROJECT_PRIVATE_HEADERS
   console_tracer.h
   dedup.h
-  federation/federated_client.h
-  federation/joined_log_provider.h
-  federation/local_client.h
   generic_event.h
   live_model_impl.h
   logger/async_batcher.h
@@ -180,6 +190,18 @@ if(vw_USE_AZURE_FACTORIES)
   )
 endif()
 
+if(RL_BUILD_FEDERATION)
+  list(APPEND PROJECT_PRIVATE_HEADERS
+    federation/event_sink.h
+    federation/federated_client.h
+    federation/joined_log_provider.h
+    federation/local_client.h
+    federation/local_loop_controller.h
+    federation/sender_joined_log_provider.h
+    federation/vw_trainable_model.h
+  )
+endif()
+
 source_group("Sources" FILES ${PROJECT_SOURCES})
 source_group("Public headers" FILES ${PROJECT_PUBLIC_HEADERS})
 source_group("Private headers" FILES ${PROJECT_PRIVATE_HEADERS})
@@ -205,15 +227,23 @@ endif()
 
 target_compile_definitions(rlclientlib PRIVATE FLATBUFFERS_SPAN_MINIMAL)
 
-target_include_directories( rlclientlib
-                            PUBLIC
-                            ${CMAKE_CURRENT_SOURCE_DIR}/../include
-                            PRIVATE
-                            ${CMAKE_CURRENT_SOURCE_DIR}
-                            ${FLATBUFFERS_INCLUDE_DIR}
-                            ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date
-                            )
+target_include_directories(rlclientlib
+  PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date
+)
+
 target_link_libraries(rlclientlib PUBLIC Boost::system vw_common vw_core PRIVATE RapidJSON)
+
+# If flatbuffers found via CONFIG, add its target as a library dependency
+# Otherwise, the flatbuffers MODULE defines FLATBUFFERS_INCLUDE_DIR to add to the include path
+if(TARGET flatbuffers::flatbuffers)
+  target_link_libraries(rlclientlib PRIVATE flatbuffers::flatbuffers)
+else()
+  target_include_directories(rlclientlib PRIVATE ${FLATBUFFERS_INCLUDE_DIR})
+endif()
 
 if (vw_USE_AZURE_FACTORIES)
   target_link_libraries(rlclientlib PUBLIC cpprestsdk::cpprest OpenSSL::SSL OpenSSL::Crypto)
@@ -227,6 +257,11 @@ endif()
 # On MacOS linking fails unless we explicitly add Boost::thread. It seems like CppRestSDK isn't exporting dependencies properly.
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   target_link_libraries(rlclientlib PUBLIC Boost::thread)
+endif()
+
+# Link to external binary parser for local joining code
+if (RL_BUILD_EXTERNAL_PARSER)
+  target_link_libraries(rlclientlib PUBLIC rl_binary_parser)
 endif()
 
 # Set paths for installing library and header files
