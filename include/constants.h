@@ -4,8 +4,10 @@ namespace reinforcement_learning
 {
 #ifdef _WIN32
 const char* const PATH_DELIMITER = "\\";
+const char* const DEV_NULL = "nul";
 #else
 const char* const PATH_DELIMITER = "/";
+const char* const DEV_NULL = "/dev/null";
 #endif
 
 namespace name
