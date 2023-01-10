@@ -19,7 +19,8 @@ set(RL_FLAT_BUFFER_FILES_V1
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/Metadata.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/OutcomeEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/RankingEvent.fbs"
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/SlatesEvent.fbs" )
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/SlatesEvent.fbs"
+)
 
 set(RL_FLAT_BUFFER_FILES_V2
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CaEvent.fbs"
