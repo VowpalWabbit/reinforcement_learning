@@ -17,8 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: binary-parser-${{ matrix.config.os }}
+  build-debug:
+    name: binary-parser-debug-${{ matrix.config.os }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
@@ -79,6 +79,62 @@ jobs:
           python3 -m json.tool metrics.json
       - name: Test with Valgrind
         if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
+        run: |
+          cd external_parser/build
+          sudo apt install -y valgrind
+          valgrind --quiet --error-exitcode=100 --undef-value-errors=no --leak-check=full ./unit_tests/binary_parser_unit_tests
+
+  build-release:
+    # Release build is slower, so only do it on Ubuntu
+    name: binary-parser-release-ubuntu-latest
+    runs-on: ubuntu-latest
+    env:
+      VCPKG_DEFAULT_TRIPLET: "x64-linux"
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - uses: lukka/get-cmake@latest
+      - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
+        shell: bash
+      - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+      - uses: actions/cache@v3
+        env:
+          cache-name: vcpkg-cache
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
+          key: ${{ matrix.config.os }}-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
+      - uses: lukka/run-vcpkg@main
+        with:
+          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
+          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
+      - name: Configure
+        run: >
+          cd external_parser;
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          -DVCPKG_MANIFEST_DIR="${{ github.workspace }}"
+          -DVCPKG_TARGET_TRIPLET="x64-linux"
+          -DVCPKG_HOST_TRIPLET="x64-linux"
+          -DWARNING_AS_ERROR=OFF
+          -Wno-deprecated
+          -DFMT_SYS_DEP=ON
+          -DSPDLOG_SYS_DEP=ON
+      - name: Build
+        run: |
+          cd external_parser
+          cmake --build build
+      - name: Test
+        run: |
+          cd external_parser/build
+          ctest --verbose --output-on-failure
+      - name: Test binary parser VW executable
+        run: |
+          cd external_parser/build
+          ./vw --extra_metrics metrics.json -d ../unit_tests/test_files/valid_joined_logs/cb_simple.log --binary_parser --cb_explore_adf
+          python3 -m json.tool metrics.json
+      - name: Test with Valgrind
         run: |
           cd external_parser/build
           sudo apt install -y valgrind
