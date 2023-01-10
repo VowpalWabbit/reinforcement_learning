@@ -16,8 +16,10 @@
 #include <cpprest/http_headers.h>
 #include <pplx/pplxtasks.h>
 
+#include <chrono>
 #include <memory>
 #include <sstream>
+#include <thread>
 
 using namespace web::http;
 using namespace std::chrono;
@@ -38,8 +40,8 @@ public:
   virtual int init(const utility::configuration& config, api_status* status) override;
 
   // Takes the ownership of the i_http_client and delete it at the end of lifetime
-  http_transport_client(
-      i_http_client* client, size_t tasks_count, size_t MAX_RETRIES, i_trace* trace, error_callback_fn* _error_cb);
+  http_transport_client(i_http_client* client, size_t tasks_count, size_t MAX_RETRIES,
+      std::chrono::milliseconds max_retry_duration, i_trace* trace, error_callback_fn* _error_cb);
   ~http_transport_client();
 
 protected:
@@ -52,7 +54,10 @@ private:
     using buffer = std::shared_ptr<utility::data_buffer>;
     http_request_task() = default;
     http_request_task(i_http_client* client, http_headers headers, const buffer& data,
-        size_t max_retries = 1,  // If MAX_RETRIES is set to 1, only the initial request will be attempted.
+        size_t max_retries = 0,  // If MAX_RETRIES is set to 0, only the initial request will be attempted.
+        std::chrono::milliseconds max_retry_duration = std::chrono::milliseconds(
+            360000),  // retries will halt before max_retries attempts if this time elapses
+                      // first
         error_callback_fn* error_callback = nullptr, i_trace* trace = nullptr);
 
     // The constructor kicks off an async request which captures the this variable. If this object is moved then the
@@ -66,7 +71,13 @@ private:
     int join();
 
   private:
-    pplx::task<web::http::status_code> send_request(size_t try_count);
+    // repeat request until success or _max_retries attempted
+    // returns the http::status_code of the final attempt.
+    pplx::task<web::http::status_code> send_request();
+
+    // repeat request until success or _max_retries attempted
+    // returns the http_reponse of the final attempt.
+    pplx::task<http_response> send_request_with_retries(size_t try_count);
 
     i_http_client* _client;
     http_headers _headers;
@@ -74,7 +85,9 @@ private:
 
     pplx::task<web::http::status_code> _task;
 
-    size_t _max_retries = 1;
+    std::chrono::time_point<std::chrono::system_clock> _start_time;
+    size_t _max_retry_count = 1;
+    std::chrono::milliseconds _max_retry_duration;
 
     error_callback_fn* _error_callback;
     i_trace* _trace;
@@ -96,26 +109,52 @@ private:
   std::mutex _mutex;
   moving_queue<std::unique_ptr<http_request_task>> _tasks;
   const size_t _max_tasks_count;
-  const size_t _max_retries;
+  const size_t _max_retry_count;
+  const std::chrono::milliseconds _max_retry_duration;
   i_trace* _trace;
   error_callback_fn* _error_callback;
 };
 
 template <typename TAuthorization>
 http_transport_client<TAuthorization>::http_request_task::http_request_task(i_http_client* client, http_headers headers,
-    const buffer& post_data, size_t max_retries, error_callback_fn* error_callback, i_trace* trace)
+    const buffer& post_data, size_t max_retries, std::chrono::milliseconds max_retry_duration,
+    error_callback_fn* error_callback, i_trace* trace)
     : _client(client)
     , _headers(headers)
     , _post_data(post_data)
-    , _max_retries(max_retries)
+    , _start_time(std::chrono::system_clock::now())
+    , _max_retry_count(max_retries)
+    , _max_retry_duration(max_retry_duration)
     , _error_callback(error_callback)
     , _trace(trace)
 {
-  _task = send_request(0 /* inital try */);
+  _task = send_request();
 }
 
 template <typename TAuthorization>
-pplx::task<web::http::status_code> http_transport_client<TAuthorization>::http_request_task::send_request(
+pplx::task<web::http::status_code> http_transport_client<TAuthorization>::http_request_task::send_request()
+{
+  return send_request_with_retries(0 /* inital try */)
+      .then(
+          [this](pplx::task<http_response> response)
+          {
+            web::http::status_code code = status_codes::InternalError;
+
+            try
+            {
+              code = response.get().status_code();
+            }
+            catch (const std::exception& e)
+            {
+              TRACE_ERROR(_trace, e.what());
+            }
+
+            return code;
+          });
+}
+
+template <typename TAuthorization>
+pplx::task<http_response> http_transport_client<TAuthorization>::http_request_task::send_request_with_retries(
     size_t try_count)
 {
   http_request request(methods::POST);
@@ -126,45 +165,53 @@ pplx::task<web::http::status_code> http_transport_client<TAuthorization>::http_r
   const auto stream = concurrency::streams::bytestream::open_istream(container);
   request.set_body(stream, container_size);
 
-  return _client->request(request).then([this, try_count](pplx::task<http_response> response) {
-    web::http::status_code code = status_codes::InternalError;
-    api_status status;
+  // lambda which examines the provided task and either 1) generates a replacement task to retry
+  // the request, or 2) passes the provided task downstream to emit its response
+  auto retry_request_on_failure_lambda = [this, try_count](
+                                             pplx::task<http_response> response_task) -> pplx::task<http_response>
+  {
+    web::http::status_code response_code = status_codes::InternalError;
 
     try
     {
-      code = response.get().status_code();
+      response_code = response_task.get().status_code();
     }
     catch (const std::exception& e)
     {
       TRACE_ERROR(_trace, e.what());
     }
 
-    // If the response is not the expected code then it has failed. Retry if possible otherwise report background
-    // error.
-    if (code != status_codes::Created && code != status_codes::NoContent)
+    bool success = (response_code >= status_codes::OK) && (response_code < status_codes::MultipleChoices);
+    if (success) { return response_task; }
+
+    // If the response is not success class then it has failed. Retry if possible otherwise report background error.
+    auto elapsed_time =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - _start_time);
+    if ((try_count >= _max_retry_count) || (elapsed_time > _max_retry_duration))
     {
-      // Stop condition of recurison.
-      if (try_count < _max_retries)
-      {
-        TRACE_ERROR(_trace, "HTTP request failed, retrying...");
+      // We have exhausted retry attempts, log and return the task describing the failure
 
-        // Yes, recursively send another request inside this one. If a subsequent request returns success we are
-        // good, otherwise the failure will propagate.
-        return send_request(try_count + 1).get();
-      }
-      else
-      {
-        auto msg = u::concat("(expected 201): Found ", code, ", failed after ", try_count, " retries.");
-        api_status::try_update(&status, error_code::http_bad_status_code, msg.c_str());
-        ERROR_CALLBACK(_error_callback, status);
+      api_status status;
+      auto msg = u::concat("(expected 201): Found ", response_code, ", failed after ", try_count, " retries over ",
+          elapsed_time.count(), "ms.");
+      api_status::try_update(&status, error_code::http_bad_status_code, msg.c_str());
+      ERROR_CALLBACK(_error_callback, status);
 
-        return code;
-      }
+      return response_task;
     }
 
-    // We have succeeded, return success.
-    return code;
-  });
+    static const std::chrono::milliseconds RETRY_DELAY = std::chrono::milliseconds(1000);
+    TRACE_ERROR(
+        _trace, u::concat("HTTP request failed with ", response_code, ", retrying in ", RETRY_DELAY.count(), "ms..."));
+
+    // using sleep_for is regrettable because it blocks this thread, but pplx doesn't implement better yield options.
+    std::this_thread::sleep_for(RETRY_DELAY);
+
+    // return a new task which will resubmit the original request
+    return send_request_with_retries(try_count + 1);
+  };
+
+  return _client->request(request).then(retry_request_on_failure_lambda);
 }
 
 template <typename TAuthorization>
@@ -219,8 +266,8 @@ int http_transport_client<TAuthorization>::v_send(const buffer& post_data, api_s
     // Before creating the task, ensure that it is allowed to be created.
     if (_tasks.size() >= _max_tasks_count) { RETURN_IF_FAIL(pop_task(status)); }
 
-    std::unique_ptr<http_request_task> request_task(
-        new http_request_task(_client.get(), headers, post_data, _max_retries, _error_callback, _trace));
+    std::unique_ptr<http_request_task> request_task(new http_request_task(
+        _client.get(), headers, post_data, _max_retry_count, _max_retry_duration, _error_callback, _trace));
     _tasks.push(std::move(request_task));
   }
   catch (const std::exception& e)
@@ -232,10 +279,11 @@ int http_transport_client<TAuthorization>::v_send(const buffer& post_data, api_s
 
 template <typename TAuthorization>
 http_transport_client<TAuthorization>::http_transport_client(i_http_client* client, size_t max_tasks_count,
-    size_t max_retries, i_trace* trace, error_callback_fn* error_callback)
+    size_t max_retries, std::chrono::milliseconds max_retry_duration, i_trace* trace, error_callback_fn* error_callback)
     : _client(client)
     , _max_tasks_count(max_tasks_count)
-    , _max_retries(max_retries)
+    , _max_retry_count(max_retries)
+    , _max_retry_duration(max_retry_duration)
     , _trace(trace)
     , _error_callback(error_callback)
 {

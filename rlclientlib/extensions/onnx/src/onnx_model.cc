@@ -101,12 +101,8 @@ int onnx_model::update(const model_management::model_data& data, bool& model_rea
     size_t output_count = new_session->GetOutputCount();
     for (output_index = 0; output_index < output_count; output_index++)
     {
-      char* output_name = new_session->GetOutputName(output_index, DefaultOnnxAllocator);
-
-      if (_output_name == output_name) { found_output = true; }
-
-      DefaultOnnxAllocator.Free(output_name);
-
+      auto output_name = new_session->GetOutputNameAllocated(output_index, DefaultOnnxAllocator);
+      if (_output_name == output_name.get()) { found_output = true; }
       if (found_output) { break; }
     }
 
@@ -120,7 +116,9 @@ int onnx_model::update(const model_management::model_data& data, bool& model_rea
     Ort::TypeInfo output_type_info = new_session->GetOutputTypeInfo(output_index);
     if (output_type_info.GetONNXType() != ONNX_TYPE_TENSOR ||
         output_type_info.GetTensorTypeAndShapeInfo().GetElementType() != ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT)
-    { RETURN_ERROR_LS(_trace_logger, status, model_update_error) << "Invalid output type. Expected: tensor<float>."; }
+    {
+      RETURN_ERROR_LS(_trace_logger, status, model_update_error) << "Invalid output type. Expected: tensor<float>.";
+    }
 
     // TODO: Should we add additional checks to make sure the next two sets are atomic?
     _output_index = output_index;

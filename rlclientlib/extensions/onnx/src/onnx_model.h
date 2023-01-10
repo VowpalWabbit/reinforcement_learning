@@ -2,7 +2,7 @@
 #include "err_constants.h"
 #include "model_mgmt.h"
 
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 
 #include <string>
 

@@ -45,16 +45,7 @@ void parse_and_run(int argc, char** argv)
   store(parse_command_line(argc, argv, desc), vm);
 
   if (is_help(vm)) { std::cout << desc << std::endl; }
-  else if (vm["print"].as<bool>())
-  {
-    joiner::convert_to_text({"interaction.fb.data", "observation.fb.data"});
-  }
-  else if (vm["join"].as<bool>())
-  {
-    std::cout << "Coming soon..." << std::endl;
-  }
-  else
-  {
-    std::cout << desc << std::endl;
-  }
+  else if (vm["print"].as<bool>()) { joiner::convert_to_text({"interaction.fb.data", "observation.fb.data"}); }
+  else if (vm["join"].as<bool>()) { std::cout << "Coming soon..." << std::endl; }
+  else { std::cout << desc << std::endl; }
 }

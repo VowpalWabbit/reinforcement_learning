@@ -62,7 +62,9 @@ struct event_processor<reinforcement_learning::messages::flatbuff::v2::MultiSlot
       data.event_id = slot_event->id() == nullptr ? metadata.id()->str() : slot_event->id()->str();
 
       if (is_ccb && slot_event->id() != nullptr)
-      { ccb_data->slot_id_to_index_map.insert(std::pair<std::string, int>(slot_event->id()->str(), slot_index)); }
+      {
+        ccb_data->slot_id_to_index_map.insert(std::pair<std::string, int>(slot_event->id()->str(), slot_index));
+      }
 
       data.actions.reserve(slot_event->action_ids()->size());
       for (const auto& a : *slot_event->action_ids()) { data.actions.emplace_back(a); }
@@ -247,10 +249,7 @@ bool process_compression(const uint8_t* data, size_t size,
     detached_buffer = flatbuffers::DetachedBuffer(nullptr, false, data_ptr, 0, data_ptr, res);
     payload = flatbuffers::GetRoot<T>(detached_buffer.data());
   }
-  else
-  {
-    payload = flatbuffers::GetRoot<T>(data);
-  }
+  else { payload = flatbuffers::GetRoot<T>(data); }
   return true;
 }
 }  // namespace typed_event

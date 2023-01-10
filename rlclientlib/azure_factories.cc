@@ -80,19 +80,21 @@ int episode_sender_create(i_sender** retval, const u::configuration& cfg, error_
   const auto eh_url = build_eh_url(eh_host, eh_name);
   i_http_client* client = nullptr;
   RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
-  *retval =
-      new http_transport_client<eventhub_http_authorization>(client, cfg.get_int(name::EPISODE_EH_TASKS_LIMIT, 16),
-          cfg.get_int(name::EPISODE_EH_MAX_HTTP_RETRIES, 4), trace_logger, error_cb);
+  *retval = new http_transport_client<eventhub_http_authorization>(client,
+      cfg.get_int(name::EPISODE_EH_TASKS_LIMIT, 16), cfg.get_int(name::EPISODE_EH_MAX_HTTP_RETRIES, 4),
+      std::chrono::milliseconds(cfg.get_int(name::EPISODE_EH_MAX_HTTP_RETRY_DURATION_MS, 3600000)), trace_logger,
+      error_cb);
   return error_code::success;
 }
 
 int create_apim_http_api_sender(i_sender** retval, const u::configuration& cfg, const char* api_host, int tasks_limit,
-    int max_http_retries, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
+    int max_http_retries, std::chrono::milliseconds max_http_retry_duration, error_callback_fn* error_cb,
+    i_trace* trace_logger, api_status* status)
 {
   i_http_client* client = nullptr;
   RETURN_IF_FAIL(create_http_client(api_host, cfg, &client, status));
-  *retval =
-      new http_transport_client<header_authorization>(client, tasks_limit, max_http_retries, trace_logger, error_cb);
+  *retval = new http_transport_client<header_authorization>(
+      client, tasks_limit, max_http_retries, max_http_retry_duration, trace_logger, error_cb);
   return error_code::success;
 }
 
@@ -102,7 +104,9 @@ int observation_api_sender_create(i_sender** retval, const u::configuration& cfg
 {
   const auto* const api_host = cfg.get(name::OBSERVATION_HTTP_API_HOST, "localhost:8080");
   return create_apim_http_api_sender(retval, cfg, api_host, cfg.get_int(name::OBSERVATION_APIM_TASKS_LIMIT, 16),
-      cfg.get_int(name::OBSERVATION_APIM_MAX_HTTP_RETRIES, 4), error_cb, trace_logger, status);
+      cfg.get_int(name::OBSERVATION_APIM_MAX_HTTP_RETRIES, 4),
+      std::chrono::milliseconds(cfg.get_int(name::OBSERVATION_APIM_MAX_HTTP_RETRY_DURATION_MS, 3600000)), error_cb,
+      trace_logger, status);
 }
 
 // Creates i_sender object for sending interactions data to the apim endpoint.
@@ -111,7 +115,9 @@ int interaction_api_sender_create(i_sender** retval, const u::configuration& cfg
 {
   const auto* const api_host = cfg.get(name::INTERACTION_HTTP_API_HOST, "localhost:8080");
   return create_apim_http_api_sender(retval, cfg, api_host, cfg.get_int(name::INTERACTION_APIM_TASKS_LIMIT, 16),
-      cfg.get_int(name::INTERACTION_APIM_MAX_HTTP_RETRIES, 4), error_cb, trace_logger, status);
+      cfg.get_int(name::INTERACTION_APIM_MAX_HTTP_RETRIES, 4),
+      std::chrono::milliseconds(cfg.get_int(name::INTERACTION_APIM_MAX_HTTP_RETRY_DURATION_MS, 3600000)), error_cb,
+      trace_logger, status);
 }
 
 // Creates i_sender object for sending observations data to the event hub.
@@ -123,9 +129,10 @@ int observation_sender_create(i_sender** retval, const u::configuration& cfg, er
   const auto eh_url = build_eh_url(eh_host, eh_name);
   i_http_client* client = nullptr;
   RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
-  *retval =
-      new http_transport_client<eventhub_http_authorization>(client, cfg.get_int(name::OBSERVATION_EH_TASKS_LIMIT, 16),
-          cfg.get_int(name::OBSERVATION_EH_MAX_HTTP_RETRIES, 4), trace_logger, error_cb);
+  *retval = new http_transport_client<eventhub_http_authorization>(client,
+      cfg.get_int(name::OBSERVATION_EH_TASKS_LIMIT, 16), cfg.get_int(name::OBSERVATION_EH_MAX_HTTP_RETRIES, 4),
+      std::chrono::milliseconds(cfg.get_int(name::OBSERVATION_EH_MAX_HTTP_RETRY_DURATION_MS, 3600000)), trace_logger,
+      error_cb);
   return error_code::success;
 }
 
@@ -138,9 +145,10 @@ int interaction_sender_create(i_sender** retval, const u::configuration& cfg, er
   const auto eh_url = build_eh_url(eh_host, eh_name);
   i_http_client* client = nullptr;
   RETURN_IF_FAIL(create_http_client(eh_url.c_str(), cfg, &client, status));
-  *retval =
-      new http_transport_client<eventhub_http_authorization>(client, cfg.get_int(name::INTERACTION_EH_TASKS_LIMIT, 16),
-          cfg.get_int(name::INTERACTION_EH_MAX_HTTP_RETRIES, 4), trace_logger, error_cb);
+  *retval = new http_transport_client<eventhub_http_authorization>(client,
+      cfg.get_int(name::INTERACTION_EH_TASKS_LIMIT, 16), cfg.get_int(name::INTERACTION_EH_MAX_HTTP_RETRIES, 4),
+      std::chrono::milliseconds(cfg.get_int(name::INTERACTION_EH_MAX_HTTP_RETRY_DURATION_MS, 3600000)), trace_logger,
+      error_cb);
   return error_code::success;
 }
 }  // namespace reinforcement_learning

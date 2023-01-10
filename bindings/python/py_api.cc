@@ -77,12 +77,13 @@ static PyGetSetDef RLException_getsetters[] = {
 
 static PyObject* PyRLException;
 
-#define THROW_IF_FAIL(x)                                                     \
-  do                                                                         \
-  {                                                                          \
-    int retval__LINE__ = (x);                                                \
-    if (retval__LINE__ != rl::error_code::success)                           \
-    { throw rl_exception(status.get_error_msg(), status.get_error_code()); } \
+#define THROW_IF_FAIL(x)                                                   \
+  do {                                                                     \
+    int retval__LINE__ = (x);                                              \
+    if (retval__LINE__ != rl::error_code::success)                         \
+    {                                                                      \
+      throw rl_exception(status.get_error_msg(), status.get_error_code()); \
+    }                                                                      \
   } while (0)
 
 struct error_callback_context
@@ -130,19 +131,21 @@ PYBIND11_MODULE(rl_client, m)
     m.add_object("RLException", py::handle(PyRLException));
   }
 
-  py::register_exception_translator([](std::exception_ptr p) {
-    try
-    {
-      if (p) { std::rethrow_exception(p); }
-    }
-    catch (rl_exception& e)
-    {
-      py::tuple args(2);
-      args[0] = e.what();
-      args[1] = e.error_code();
-      PyErr_SetObject(PyRLException, args.ptr());
-    }
-  });
+  py::register_exception_translator(
+      [](std::exception_ptr p)
+      {
+        try
+        {
+          if (p) { std::rethrow_exception(p); }
+        }
+        catch (rl_exception& e)
+        {
+          py::tuple args(2);
+          args[0] = e.what();
+          args[1] = e.error_code();
+          PyErr_SetObject(PyRLException, args.ptr());
+        }
+      });
 
   py::class_<rl::utility::configuration>(m, "Configuration", R"pbdoc(
         Container class for all configuration values. Generally is constructed from client.json file read from disk
@@ -159,24 +162,29 @@ PYBIND11_MODULE(rl_client, m)
       .def("set", &rl::utility::configuration::set);
 
   py::class_<rl::live_model>(m, "LiveModel")
-      .def(py::init([](const rl::utility::configuration& config) {
-        auto live_model = std::unique_ptr<rl::live_model>(new rl::live_model(config));
-        rl::api_status status;
-        THROW_IF_FAIL(live_model->init(&status));
-        return live_model;
-      }),
+      .def(py::init(
+               [](const rl::utility::configuration& config)
+               {
+                 auto live_model = std::unique_ptr<rl::live_model>(new rl::live_model(config));
+                 rl::api_status status;
+                 THROW_IF_FAIL(live_model->init(&status));
+                 return live_model;
+               }),
           py::arg("config"))
-      .def(
-          py::init([](const rl::utility::configuration& config, std::function<void(int, const std::string&)> callback) {
-            auto live_model = std::unique_ptr<live_model_with_callback>(new live_model_with_callback(config, callback));
-            rl::api_status status;
-            THROW_IF_FAIL(live_model->init(&status));
-            return live_model;
-          }),
+      .def(py::init(
+               [](const rl::utility::configuration& config, std::function<void(int, const std::string&)> callback)
+               {
+                 auto live_model =
+                     std::unique_ptr<live_model_with_callback>(new live_model_with_callback(config, callback));
+                 rl::api_status status;
+                 THROW_IF_FAIL(live_model->init(&status));
+                 return live_model;
+               }),
           py::arg("config"), py::arg("callback"))
       .def(
           "choose_rank",
-          [](rl::live_model& lm, const char* context, const char* event_id, bool deferred) {
+          [](rl::live_model& lm, const char* context, const char* event_id, bool deferred)
+          {
             rl::ranking_response response;
             rl::api_status status;
             unsigned int flags = deferred ? rl::action_flags::DEFERRED : rl::action_flags::DEFAULT;
@@ -191,7 +199,8 @@ PYBIND11_MODULE(rl_client, m)
     )pbdoc")
       .def(
           "choose_rank",
-          [](rl::live_model& lm, const char* context, bool deferred) {
+          [](rl::live_model& lm, const char* context, bool deferred)
+          {
             rl::ranking_response response;
             rl::api_status status;
             unsigned int flags = deferred ? rl::action_flags::DEFERRED : rl::action_flags::DEFAULT;
@@ -207,7 +216,8 @@ PYBIND11_MODULE(rl_client, m)
       .def(
           "request_episodic_decision",
           [](rl::live_model& lm, const char* event_id, const char* previous_id, const char* context,
-              rl::episode_state& episode) {
+              rl::episode_state& episode)
+          {
             rl::ranking_response response;
             rl::api_status status;
             THROW_IF_FAIL(lm.request_episodic_decision(
@@ -217,36 +227,42 @@ PYBIND11_MODULE(rl_client, m)
           py::arg("event_id"), py::arg("previous_id"), py::arg("context"), py::arg("episode"))
       .def(
           "report_action_taken",
-          [](rl::live_model& lm, const char* event_id) {
+          [](rl::live_model& lm, const char* event_id)
+          {
             rl::api_status status;
             THROW_IF_FAIL(lm.report_action_taken(event_id, &status));
           },
           py::arg("event_id"))
       .def(
           "report_outcome",
-          [](rl::live_model& lm, const char* event_id, const char* outcome) {
+          [](rl::live_model& lm, const char* event_id, const char* outcome)
+          {
             rl::api_status status;
             THROW_IF_FAIL(lm.report_outcome(event_id, outcome, &status));
           },
           py::arg("event_id"), py::arg("outcome"))
       .def(
           "report_outcome",
-          [](rl::live_model& lm, const char* event_id, float outcome) {
+          [](rl::live_model& lm, const char* event_id, float outcome)
+          {
             rl::api_status status;
             THROW_IF_FAIL(lm.report_outcome(event_id, outcome, &status));
           },
           py::arg("event_id"), py::arg("outcome"))
       .def(
           "report_outcome",
-          [](rl::live_model& lm, const char* episode_id, const char* event_id, float outcome) {
+          [](rl::live_model& lm, const char* episode_id, const char* event_id, float outcome)
+          {
             rl::api_status status;
             THROW_IF_FAIL(lm.report_outcome(episode_id, event_id, outcome, &status));
           },
           py::arg("episode_id"), py::arg("event_id"), py::arg("outcome"))
-      .def("refresh_model", [](rl::live_model& lm) {
-        rl::api_status status;
-        THROW_IF_FAIL(lm.refresh_model(&status));
-      });
+      .def("refresh_model",
+          [](rl::live_model& lm)
+          {
+            rl::api_status status;
+            THROW_IF_FAIL(lm.refresh_model(&status));
+          });
 
   py::class_<rl::ranking_response>(m, "RankingResponse")
       .def_property_readonly(
@@ -258,7 +274,8 @@ PYBIND11_MODULE(rl_client, m)
     )pbdoc")
       .def_property_readonly(
           "chosen_action_id",
-          [](const rl::ranking_response& a) {
+          [](const rl::ranking_response& a)
+          {
             size_t chosen_action;
             // todo handle failure
             a.get_chosen_action_id(chosen_action);
@@ -278,10 +295,13 @@ PYBIND11_MODULE(rl_client, m)
     )pbdoc")
       .def_property_readonly(
           "actions_probabilities",
-          [](const rl::ranking_response& a) {
+          [](const rl::ranking_response& a)
+          {
             py::list return_values;
             for (const auto& action_prob : a)
-            { return_values.append(py::make_tuple(action_prob.action_id, action_prob.probability)); }
+            {
+              return_values.append(py::make_tuple(action_prob.action_id, action_prob.probability));
+            }
             return return_values;
           },
           R"pbdoc(
@@ -297,7 +317,8 @@ PYBIND11_MODULE(rl_client, m)
 
   m.def(
       "create_config_from_json",
-      [](const std::string& config_json) {
+      [](const std::string& config_json)
+      {
         rl::utility::configuration config;
         rl::api_status status;
         THROW_IF_FAIL(rl::utility::config::create_from_json(config_json, config, nullptr, &status));

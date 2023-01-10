@@ -51,8 +51,8 @@ static void bench_cb(benchmark::State& state, ExtraArgs&&... extra_args)
   config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
   config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
   config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
-  config.set(r::name::INTERACTION_FILE_NAME, "/dev/null");
-  config.set(r::name::OBSERVATION_FILE_NAME, "/dev/null");
+  config.set(r::name::INTERACTION_FILE_NAME, r::DEV_NULL);
+  config.set(r::name::OBSERVATION_FILE_NAME, r::DEV_NULL);
   config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
   // config.set(r::name::MODEL_IMPLEMENTATION, r::value::PASSTHROUGH_PDF_MODEL);
   config.set(r::name::VW_POOL_INIT_SIZE, "1");
@@ -91,7 +91,10 @@ static void bench_cb(benchmark::State& state, ExtraArgs&&... extra_args)
 // x number of total examples so x number of total rank calls to benchmark
 // compression (on/off)
 // dedup (on/off)
-BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload, 20, 10, 50, 2000, 500, false, false);
-BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload_compression, 20, 10, 50, 2000, 500, true, false);
-BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload_dedup, 20, 10, 50, 2000, 500, false, true);
-BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload_compression_dedup, 20, 10, 50, 2000, 500, true, true);
+BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload, 20, 10, 50, 2000, 500, false, false)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload_compression, 20, 10, 50, 2000, 500, true, false)
+    ->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload_dedup, 20, 10, 50, 2000, 500, false, true)
+    ->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(bench_cb, non_dedupable_payload_compression_dedup, 20, 10, 50, 2000, 500, true, true)
+    ->Unit(benchmark::kMillisecond);

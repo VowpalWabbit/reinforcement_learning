@@ -133,10 +133,7 @@ void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<f
     _vw->audit_buffer->clear();
     VW::read_line_json_s<true>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
   }
-  else
-  {
-    VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
-  }
+  else { VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this); }
 
   // finalize example
   VW::setup_examples(*_vw, examples);
@@ -177,10 +174,7 @@ void safe_vw::choose_continuous_action(string_view context, float& action, float
     _vw->audit_buffer->clear();
     VW::read_line_json_s<true>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
   }
-  else
-  {
-    VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
-  }
+  else { VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this); }
 
   // finalize example
   VW::setup_examples(*_vw, examples);
@@ -211,10 +205,7 @@ void safe_vw::rank_decisions(const std::vector<const char*>& event_ids, string_v
     _vw->audit_buffer->clear();
     VW::read_line_json_s<true>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
   }
-  else
-  {
-    VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
-  }
+  else { VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this); }
 
   // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the
   // example tag.
@@ -268,10 +259,7 @@ void safe_vw::rank_multi_slot_decisions(const char* event_id, const std::vector<
     _vw->audit_buffer->clear();
     VW::read_line_json_s<true>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
   }
-  else
-  {
-    VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
-  }
+  else { VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this); }
 
   // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the
   // example tag.
@@ -354,7 +342,9 @@ bool safe_vw::is_compatible(const std::string& args) const
 
   // This really is an error but errors cant be reported here...
   if (local_model_type == mm::model_type_t::UNKNOWN || inbound_model_type == mm::model_type_t::UNKNOWN)
-  { return false; }
+  {
+    return false;
+  }
 
   return local_model_type == inbound_model_type;
 }
@@ -370,10 +360,7 @@ bool safe_vw::is_CB_to_CCB_model_upgrade(const std::string& args) const
 string_view safe_vw::get_audit_data() const
 {
   if (_vw->audit) { return string_view(_vw->audit_buffer->data(), _vw->audit_buffer->size()); }
-  else
-  {
-    return string_view();
-  }
+  else { return string_view(); }
 }
 
 void safe_vw::init()
