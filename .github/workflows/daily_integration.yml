@@ -54,7 +54,6 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
           -DFMT_SYS_DEP=ON
           -DSPDLOG_SYS_DEP=ON
-          -Drlclientlib_BUILD_ONNXRUNTIME_EXTENSION=ON
       - name: Build
         run: |
           cmake --build build
