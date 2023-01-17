@@ -7,7 +7,6 @@
  */
 #pragma once
 #include "live_model.h"
-#include "local_loop.h"
 #include "person.h"
 #include "robot_joint.h"
 
@@ -163,7 +162,6 @@ private:
 
   boost::program_options::variables_map _options;
   std::unique_ptr<reinforcement_learning::live_model> _rl;
-  std::unique_ptr<local_model> _local_model;
   std::vector<person> _people;
   std::vector<std::string> _topics;
   std::vector<std::string> _slot_sizes;
