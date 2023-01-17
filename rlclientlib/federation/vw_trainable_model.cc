@@ -190,6 +190,7 @@ int trainable_vw_model::get_data(model_management::model_data& data, api_status*
     }
     auto* destination_buffer = data.alloc(backing_buffer->size());
     std::memcpy(destination_buffer, backing_buffer->data(), backing_buffer->size());
+    data.increment_refresh_count();
 
     TRACE_INFO(_trace_logger,
         utility::concat("trainable_vw_model::get_data() returning model trained on ", example_count, " examples"));
