@@ -388,10 +388,7 @@ int rl_sim::init_rl()
     config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
   }
 
-  if (!_options["get_model"].as<bool>())
-  {
-    config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
-  }
+  if (!_options["get_model"].as<bool>()) { config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA); }
 
   if (_options["log_timestamp"].as<bool>())
   {
