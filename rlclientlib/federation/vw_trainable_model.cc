@@ -6,6 +6,7 @@
 #include "joiners/multistep_example_joiner.h"
 #include "parse_example_binary.h"
 #include "str_util.h"
+#include "utility/vw_logger_adapter.h"
 #include "vw/config/options_cli.h"
 #include "vw/core/learner.h"
 #include "vw/core/parse_primitives.h"
@@ -55,34 +56,6 @@ void finish_examples(VW::workspace& vw, VW::multi_ex& examples)
   examples.clear();
 }
 
-void vw_log_to_trace_logger(void* trace_logger, VW::io::log_level log_level, const std::string& msg)
-{
-  if (trace_logger == nullptr) { return; }
-  auto i_trace_ptr = static_cast<reinforcement_learning::i_trace*>(trace_logger);
-  switch (log_level)
-  {
-    case VW::io::log_level::TRACE_LEVEL:
-    case VW::io::log_level::DEBUG_LEVEL:
-      TRACE_DEBUG(i_trace_ptr, msg);
-      break;
-
-    case VW::io::log_level::INFO_LEVEL:
-      TRACE_INFO(i_trace_ptr, msg);
-      break;
-
-    case VW::io::log_level::WARN_LEVEL:
-      TRACE_WARN(i_trace_ptr, msg);
-      break;
-
-    case VW::io::log_level::ERROR_LEVEL:
-    case VW::io::log_level::CRITICAL_LEVEL:
-      TRACE_ERROR(i_trace_ptr, msg);
-      break;
-
-    default:
-      break;
-  }
-}
 }  // namespace
 
 namespace reinforcement_learning
@@ -126,7 +99,8 @@ trainable_vw_model::trainable_vw_model(std::string command_line, std::string pro
     , _trace_logger(trace_logger)
 {
   auto options = VW::make_unique<VW::config::options_cli>(VW::split_command_line(_command_line));
-  _model = VW::initialize_experimental(std::move(options));
+  auto logger = utility::make_vw_trace_logger(_trace_logger);
+  _model = VW::initialize_experimental(std::move(options), nullptr, nullptr, nullptr, &logger);
   copy_current_model_to_starting();
 }
 
@@ -159,7 +133,9 @@ int trainable_vw_model::set_data(const model_management::model_data& data, api_s
         std::unique_ptr<VW::config::options_i>(new VW::config::options_cli(VW::split_command_line(_command_line)));
     {
       std::lock_guard<std::mutex> lock(_mutex);
-      _model = VW::initialize_experimental(std::move(opts), VW::io::create_buffer_view(data.data(), data.data_sz()));
+      auto logger = utility::make_vw_trace_logger(_trace_logger);
+      _model = VW::initialize_experimental(
+          std::move(opts), VW::io::create_buffer_view(data.data(), data.data_sz()), nullptr, nullptr, &logger);
     }
     copy_current_model_to_starting();
   }
@@ -232,8 +208,7 @@ int trainable_vw_model::learn(std::unique_ptr<VW::io::reader>&& binary_log, api_
     // Set the default joiner options if no checkpoint message is present in the binary log
     configure_joiner(joiner);
 
-    VW::external::binary_parser binary_parser(
-        std::move(joiner), VW::io::create_custom_sink_logger(_trace_logger, vw_log_to_trace_logger));
+    VW::external::binary_parser binary_parser(std::move(joiner), utility::make_vw_trace_logger(_trace_logger));
 
     int example_count = 0;
     bool example_was_parsed = false;
@@ -242,7 +217,18 @@ int trainable_vw_model::learn(std::unique_ptr<VW::io::reader>&& binary_log, api_
       example_out.push_back(VW::new_unused_example(*_model));
       example_was_parsed = binary_parser.parse_examples(_model.get(), io_reader, example_out);
 
-      if (example_was_parsed) { example_count += learn_and_finish_examples(*_model, example_out); }
+      if (example_was_parsed)
+      {
+        auto has_newline = example_out.back()->is_newline;
+        if (has_newline)
+        {
+          auto last = example_out.back();
+          VW::finish_example(*_model, *last);
+          example_out.pop_back();
+        }
+
+        example_count += learn_and_finish_examples(*_model, example_out);
+      }
       else
       {
         // cleanup the unused example that the parser was called with
@@ -375,8 +361,9 @@ void trainable_vw_model::copy_current_model_to_starting()
 
   {
     std::lock_guard<std::mutex> lock(_mutex);
+    auto logger = utility::make_vw_trace_logger(_trace_logger);
     _starting_model = VW::initialize_experimental(std::move(options),
-        VW::io::create_buffer_view(backing_vector->data(), backing_vector->size()), nullptr, nullptr, nullptr);
+        VW::io::create_buffer_view(backing_vector->data(), backing_vector->size()), nullptr, nullptr, &logger);
   }
 }
 
