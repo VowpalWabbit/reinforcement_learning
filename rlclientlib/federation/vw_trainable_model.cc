@@ -233,7 +233,8 @@ int trainable_vw_model::learn(std::unique_ptr<VW::io::reader>&& binary_log, api_
       {
         // cleanup the unused example that the parser was called with
         assert(example_out.size() == 1);
-        finish_examples(*_model, example_out);
+        VW::finish_example(*_model, example_out);
+        example_out.clear();
       }
     } while (example_was_parsed);
 
