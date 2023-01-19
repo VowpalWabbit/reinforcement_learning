@@ -177,4 +177,5 @@ private:
   int64_t _delay = 2000;
   bool _quiet = false;
   bool _random_ids = true;
+  uint64_t _model_refresh_period = 0;
 };

@@ -83,9 +83,22 @@ int rl_sim::cb_loop()
     if (!_quiet)
     {
       std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", outcome, "
-                << outcome << ", dist, " << get_dist_str(response) << ", " << stats.get_stats(p.id(), chosen_action)
+                << outcome << ", dist, " << get_dist_str(response) << ", " << stats.get_stats(p.id(), chosen_action) << ", ctr: " << stats.get_ctr()
                 << std::endl;
     }
+
+    // refresh model every _model_refresh_period events
+    std::cerr << "Current events: " << _current_events << std::endl;
+    if (_model_refresh_period != 0 && (_current_events % _model_refresh_period) == 0)
+    {
+      r::api_status status;
+      if (_rl->refresh_model(&status) != err::success)
+      {
+        std::cout << status.get_error_msg() << std::endl;
+        continue;
+      }
+    }
+
     std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
 
@@ -163,6 +176,18 @@ int rl_sim::multistep_loop()
       continue;
     }
 
+    // refresh model every _model_refresh_period events
+    // Treat each episode as a single event
+    if (_model_refresh_period != 0 && (_current_events / episode_length) % _model_refresh_period == 0)
+    {
+      r::api_status status;
+      if (_rl->refresh_model(&status) != err::success)
+      {
+        std::cout << status.get_error_msg() << std::endl;
+        continue;
+      }
+    }
+
     std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
   return 0;
@@ -201,6 +226,17 @@ int rl_sim::ca_loop()
       std::cout << " " << stats.count() << " - ctxt: " << joint.id() << ", action: " << chosen_action
                 << ", outcome: " << outcome << ", dist: " << response.get_chosen_action_pdf_value() << ", "
                 << stats.get_stats(joint.id(), chosen_action) << std::endl;
+    }
+
+    // refresh model every _model_refresh_period events
+    if (_model_refresh_period != 0 && _current_events % _model_refresh_period == 0)
+    {
+      r::api_status status;
+      if (_rl->refresh_model(&status) != err::success)
+      {
+        std::cout << status.get_error_msg() << std::endl;
+        continue;
+      }
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
@@ -255,6 +291,17 @@ int rl_sim::ccb_loop()
                   << stats.get_stats(p.id(), chosen_action) << std::endl;
       }
       index++;
+    }
+
+    // refresh model every _model_refresh_period events
+    if (_model_refresh_period != 0 && _current_events % _model_refresh_period == 0)
+    {
+      r::api_status status;
+      if (_rl->refresh_model(&status) != err::success)
+      {
+        std::cout << status.get_error_msg() << std::endl;
+        continue;
+      }
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
@@ -325,6 +372,17 @@ int rl_sim::slates_loop()
     {
       std::cout << status.get_error_msg() << std::endl;
       continue;
+    }
+
+    // refresh model every _model_refresh_period events
+    if (_model_refresh_period != 0 && _current_events % _model_refresh_period == 0)
+    {
+      r::api_status status;
+      if (_rl->refresh_model(&status) != err::success)
+      {
+        std::cout << status.get_error_msg() << std::endl;
+        continue;
+      }
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
@@ -536,7 +594,7 @@ std::string rl_sim::create_context_json(const std::string& cntxt, const std::str
 
 std::string rl_sim::create_event_id()
 {
-  if (_num_events > 0 && ++_current_events >= _num_events) { _run_loop = false; }
+  if (++_current_events >= _num_events && _num_events > 0) { _run_loop = false; }
 
   if (_random_ids) { return boost::uuids::to_string(boost::uuids::random_generator()()); }
 
@@ -557,6 +615,7 @@ rl_sim::rl_sim(const boost::program_options::variables_map& vm) : _options(vm), 
   _delay = _options["delay"].as<int64_t>();
   _quiet = _options["quiet"].as<bool>();
   _random_ids = _options["random_ids"].as<bool>();
+  _model_refresh_period = _options["refresh_model_period"].as<uint64_t>();
 }
 
 std::string get_dist_str(const reinforcement_learning::ranking_response& response)
