@@ -83,8 +83,8 @@ int rl_sim::cb_loop()
     if (!_quiet)
     {
       std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", outcome, "
-                << outcome << ", dist, " << get_dist_str(response) << ", " << stats.get_stats(p.id(), chosen_action) << ", ctr: " << stats.get_ctr()
-                << std::endl;
+                << outcome << ", dist, " << get_dist_str(response) << ", " << stats.get_stats(p.id(), chosen_action)
+                << ", ctr: " << stats.get_ctr() << std::endl;
     }
 
     // refresh model every _model_refresh_period events
