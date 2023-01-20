@@ -550,7 +550,8 @@ int live_model_impl::init_loggers(api_status* status)
   RETURN_IF_FAIL(_outcome_logger->init(status));
 
   if (_configuration.get(name::EPISODE_EH_HOST, nullptr) != nullptr ||
-      _configuration.get(name::EPISODE_FILE_NAME, nullptr) != nullptr)
+      _configuration.get(name::EPISODE_FILE_NAME, nullptr) != nullptr || 
+	  _configuration.get(name::EPISODE_HTTP_API_HOST, nullptr) != nullptr)
   {
     // Get the name of raw data (as opposed to message) sender for episodes.
     const auto* const episode_sender_impl =

@@ -26,6 +26,8 @@ int interaction_sender_create(i_sender** retval, const u::configuration& /*cfg*/
     i_trace* trace_logger, api_status* status);
 int decision_sender_create(
     i_sender** retval, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status);
+int episode_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb,
+    i_trace* trace_logger, api_status* status);
 int observation_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb,
     i_trace* trace_logger, api_status* status);
 int interaction_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb,
@@ -40,6 +42,7 @@ void register_azure_factories()
   sender_factory.register_type(value::EPISODE_EH_SENDER, episode_sender_create);
   sender_factory.register_type(value::OBSERVATION_HTTP_API_SENDER, observation_api_sender_create);
   sender_factory.register_type(value::INTERACTION_HTTP_API_SENDER, interaction_api_sender_create);
+  sender_factory.register_type(value::EPISODE_HTTP_API_SENDER, episode_api_sender_create);
 }
 
 int restapi_data_transport_create(
@@ -96,6 +99,17 @@ int create_apim_http_api_sender(i_sender** retval, const u::configuration& cfg, 
   *retval = new http_transport_client<header_authorization>(
       client, tasks_limit, max_http_retries, max_http_retry_duration, trace_logger, error_cb);
   return error_code::success;
+}
+
+// Creates i_sender object for sending episode data to the apim endpoint.
+int episode_api_sender_create(i_sender** retval, const u::configuration& cfg, error_callback_fn* error_cb,
+    i_trace* trace_logger, api_status* status)
+{
+  const auto* const api_host = cfg.get(name::EPISODE_HTTP_API_HOST, "localhost:8080");
+  return create_apim_http_api_sender(retval, cfg, api_host, cfg.get_int(name::EPISODE_EH_MAX_HTTP_RETRIES, 4),
+      cfg.get_int(name::EPISODE_EH_TASKS_LIMIT, 4),
+      std::chrono::milliseconds(cfg.get_int(name::EPISODE_EH_MAX_HTTP_RETRY_DURATION_MS, 3600000)), error_cb,
+      trace_logger, status);
 }
 
 // Creates i_sender object for sending observations data to the apim endpoint.
