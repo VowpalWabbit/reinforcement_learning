@@ -106,9 +106,9 @@ int episode_api_sender_create(i_sender** retval, const u::configuration& cfg, er
     i_trace* trace_logger, api_status* status)
 {
   const auto* const api_host = cfg.get(name::EPISODE_HTTP_API_HOST, "localhost:8080");
-  return create_apim_http_api_sender(retval, cfg, api_host, cfg.get_int(name::EPISODE_EH_MAX_HTTP_RETRIES, 4),
-      cfg.get_int(name::EPISODE_EH_TASKS_LIMIT, 4),
-      std::chrono::milliseconds(cfg.get_int(name::EPISODE_EH_MAX_HTTP_RETRY_DURATION_MS, 3600000)), error_cb,
+  return create_apim_http_api_sender(retval, cfg, api_host, cfg.get_int(name::EPISODE_APIM_MAX_HTTP_RETRIES, 4),
+      cfg.get_int(name::EPISODE_APIM_TASKS_LIMIT, 4),
+      std::chrono::milliseconds(cfg.get_int(name::EPISODE_APIM_MAX_HTTP_RETRY_DURATION_MS, 3600000)), error_cb,
       trace_logger, status);
 }
 
