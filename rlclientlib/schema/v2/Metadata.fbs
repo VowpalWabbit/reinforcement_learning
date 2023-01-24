@@ -1,6 +1,6 @@
 namespace reinforcement_learning.messages.flatbuff.v2;
 
-enum PayloadType : ubyte { CB, CCB, Slates, Outcome, CA, DedupInfo, MultiStep, Episode }
+enum PayloadType : ubyte { CB, CCB, Slates, Outcome, CA, DedupInfo, MultiStep, Episode, ModelUpdate }
 enum EventEncoding: ubyte { Identity, Zstd }
 
 struct TimeStamp {
@@ -15,7 +15,7 @@ struct TimeStamp {
 
 table Metadata {
     id:string;
-    client_time_utc:TimeStamp;      
+    client_time_utc:TimeStamp;
     app_id:string;
     payload_type:PayloadType;
     pass_probability:float;          // Probability of event surviving throttling operation
