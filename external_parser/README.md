@@ -14,6 +14,10 @@ The general format of each message is shown in this table. Details for each mess
 | `payload_size` | payload content (required if not inline payload) |
 | `payload_size % 8` | padding (required if not inline payload) |
 
+### Byte ordering
+
+The byte order for message type identifier and payload size must be little-endian. The payload itself can be message type defined, but since all messages are either empty or flatbuffers (which are themselves little-endian) in practice this means the payload is also little-endian.
+
 ### Message type
 The first 4 bytes in each message is an unique indentifier:
 - `MSG_TYPE_FILEMAGIC = 0x42465756` (in ASCII this is `VWFB`)
