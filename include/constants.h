@@ -38,6 +38,10 @@ const char* const EPISODE_EH_TASKS_LIMIT = "episode.eventhub.tasks_limit";
 const char* const EPISODE_EH_MAX_HTTP_RETRIES = "episode.eventhub.max_http_retries";
 const char* const EPISODE_EH_MAX_HTTP_RETRY_DURATION_MS = "episode.eventhub.max_http_retry_duration_ms";
 const char* const EPISODE_SENDER_IMPLEMENTATION = "episode.sender.implementation";
+const char* const EPISODE_HTTP_API_HOST = "episode.http.api.host";
+const char* const EPISODE_APIM_TASKS_LIMIT = "episode.apim.tasks_limit";
+const char* const EPISODE_APIM_MAX_HTTP_RETRIES = "episode.apim.max_http_retries";
+const char* const EPISODE_APIM_MAX_HTTP_RETRY_DURATION_MS = "episode.apim.max_http_retry_duration_ms";
 
 // Interaction
 const char* const INTERACTION_EH_HOST = "interaction.eventhub.host";
@@ -121,6 +125,7 @@ const char* const INTERACTION_EH_SENDER = "INTERACTION_EH_SENDER";
 const char* const EPISODE_FILE_SENDER = "EPISODE_FILE_SENDER";
 const char* const OBSERVATION_FILE_SENDER = "OBSERVATION_FILE_SENDER";
 const char* const INTERACTION_FILE_SENDER = "INTERACTION_FILE_SENDER";
+const char* const EPISODE_HTTP_API_SENDER = "EPISODE_HTTP_API_SENDER";
 const char* const OBSERVATION_HTTP_API_SENDER = "OBSERVATION_HTTP_API_SENDER";
 const char* const INTERACTION_HTTP_API_SENDER = "INTERACTION_HTTP_API_SENDER";
 const char* const NULL_TRACE_LOGGER = "NULL_TRACE_LOGGER";
