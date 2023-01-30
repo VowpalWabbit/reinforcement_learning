@@ -1,10 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Rl.Net.Native;
 using System.Runtime.InteropServices;
@@ -41,6 +38,7 @@ namespace Rl.Net.Cli.Test
     ""model.source"": ""NO_MODEL_DATA"",
     ""model.implementation"": ""PASSTHROUGH_PDF"",
     ""model.backgroundrefresh"": false,
+    ""episode.sender.implementation"": ""EPISODE_FILE_SENDER"",
     ""observation.sender.implementation"": ""OBSERVATION_FILE_SENDER"",
     ""interaction.sender.implementation"": ""INTERACTION_FILE_SENDER""
 }
@@ -66,7 +64,7 @@ namespace Rl.Net.Cli.Test
 }
 ";
 
-        static float [] ExpectedPdf = { 0.4f, 0.6f };
+        static float[] ExpectedPdf = { 0.4f, 0.6f };
         const float Epsilon = float.Epsilon;
 
         const string PseudoLocMultiSlotContextWithPdf =
@@ -323,12 +321,21 @@ namespace Rl.Net.Cli.Test
         public void Test_LiveModel_ChooseRankE2E()
         {
             LiveModel liveModel = this.ConfigureLiveModel();
-
             RankingResponse rankingResponse1 = liveModel.ChooseRank(PseudoLocEventId, PseudoLocContextJsonWithPdf);
             ValidatePdf(rankingResponse1);
 
             RankingResponse rankingResponse2 = liveModel.ChooseRank(PseudoLocEventId, PseudoLocContextJsonWithPdf, ActionFlags.Deferred);
             ValidatePdf(rankingResponse2);
+        }
+
+        [TestMethod]
+        public void Test_LiveModel_RequestEpisodicE2E()
+        {
+            LiveModel liveModel = this.ConfigureLiveModel();
+            EpisodeState state = new EpisodeState("episode 0");
+
+            var response = liveModel.RequestEpisodicDecision("event 0", PseudoLocEventId, PseudoLocContextJsonWithPdf, ActionFlags.Default, state);
+            ValidatePdf(response);
         }
 
         private void Run_LiveModelChooseRank_Test(LiveModel liveModel, string eventId, string contextJson)
@@ -505,6 +512,45 @@ namespace Rl.Net.Cli.Test
             LiveModel liveModel = this.ConfigureLiveModel();
 
             Run_LiveModelRequestContinuousAction_Test(liveModel, PseudoLocContextJsonWithPdf);
+        }
+
+        private void Run_LiveModelRequestEpisodicDecisionWithFlags_Test(LiveModel liveModel, string eventId, string previousEventId, string contextJson, ActionFlags flags, EpisodeState episodes)
+        {
+            NativeMethods.LiveModelRequestEpisodicDecisionWithFlagsOverride =
+                (IntPtr liveModelPtr, IntPtr previousEventIdPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, uint flags, IntPtr rankingResponse, IntPtr episodeHistory, IntPtr ApiStatus) =>
+                {
+                    string contextJsonMarshalledBack = NativeMethods.StringMarshallingFunc(contextJsonPtr);
+                    Assert.AreEqual(contextJson, contextJsonMarshalledBack, "Marshalling contextJson does not work properly in LiveModelRequestDecisionWithFlags");
+
+                    return NativeMethods.SuccessStatus;
+                };
+
+            liveModel.RequestEpisodicDecision(eventId, previousEventId, contextJson, flags, episodes);
+        }
+
+        private void Run_LiveModelRequestEpisodicDecision_Test(LiveModel liveModel, string eventId, string previousEventId, string contextJson, EpisodeState episodes)
+        {
+            NativeMethods.LiveModelRequestEpisodicDecisionWithFlagsOverride =
+                (IntPtr liveModelPtr, IntPtr previousEventIdPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, uint flags, IntPtr rankingResponse, IntPtr episodeHistory, IntPtr ApiStatus) =>
+                {
+                    string contextJsonMarshalledBack = NativeMethods.StringMarshallingFunc(contextJsonPtr);
+                    Assert.AreEqual(contextJson, contextJsonMarshalledBack, "Marshalling contextJson does not work properly in LiveModelRequestDecisionWithFlags");
+
+                    return NativeMethods.SuccessStatus;
+                };
+
+            liveModel.RequestEpisodicDecision(eventId, previousEventId, contextJson, ActionFlags.Default, episodes);
+        }
+
+        [TestMethod]
+        public void Test_LiveModel_RequestEpisodicDecision()
+        {
+            string episodeId = "episode0";
+            LiveModel liveModel = this.ConfigureLiveModel();
+            EpisodeState episodes = new EpisodeState(episodeId);
+
+            Run_LiveModelRequestEpisodicDecision_Test(liveModel, "event 0", PseudoLocEventId, PseudoLocContextJsonWithPdf, episodes);
+            Run_LiveModelRequestEpisodicDecisionWithFlags_Test(liveModel, "event 0", PseudoLocEventId, PseudoLocContextJsonWithPdf, ActionFlags.Deferred, episodes);
         }
 
         // TODO: Create a real CCB context json and add an E2E test (pending CCB E2E and
