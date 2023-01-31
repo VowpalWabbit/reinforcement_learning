@@ -1125,7 +1125,7 @@ namespace Rl.Net
 
         public bool TryRequestEpisodicDecision(string eventId, string previousEventId, string contextJson, ActionFlags flags, EpisodeState states, RankingResponse resp, ApiStatus apiStatus)
         {
-            int result = LiveModelRequestEpisodicDecisionWithFlags(this.DangerousGetHandle(), eventId, previousEventId, contextJson, (uint)flags, states.DangerousGetHandle(), resp.DangerousGetHandle(), apiStatus.DangerousGetHandle());
+            int result = LiveModelRequestEpisodicDecisionWithFlags(this.DangerousGetHandle(), eventId, previousEventId, contextJson, (uint)flags, resp.DangerousGetHandle(), states.DangerousGetHandle(), apiStatus.DangerousGetHandle());
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
