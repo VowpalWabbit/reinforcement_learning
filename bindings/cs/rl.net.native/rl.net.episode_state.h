@@ -1,8 +1,9 @@
 #pragma once
 
 #include "rl.net.native.h"
-#include <ranking_response.h>
+
 #include <api_status.h>
+#include <ranking_response.h>
 
 // Global exports
 extern "C"
@@ -12,6 +13,6 @@ extern "C"
   API void DeleteEpisodeState(reinforcement_learning::episode_state* episode_state);
 
   API const char* GetEpisodeId(reinforcement_learning::episode_state* episode_state);
-  API int UpdateEpisodeHistory(reinforcement_learning::episode_state* episode_state, const char* event_id, const char* previous_event_id, const char* context,
-      reinforcement_learning::ranking_response& response, reinforcement_learning::api_status* error = nullptr);
+  API int UpdateEpisodeHistory(reinforcement_learning::episode_state* episode_state, const char* event_id,
+      const char* previous_event_id, const char* context, reinforcement_learning::api_status* error = nullptr);
 }

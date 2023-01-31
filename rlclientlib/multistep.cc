@@ -5,7 +5,7 @@
 namespace reinforcement_learning
 {
 void episode_history::update(
-    const char* event_id, const char* previous_event_id, string_view context, const ranking_response& resp)
+    const char* event_id, const char* previous_event_id, string_view context)
 {
   _depths[event_id] = this->get_depth(previous_event_id) + 1;
 }
@@ -33,10 +33,10 @@ const episode_history& episode_state::get_history() const { return _history; }
 
 size_t episode_state::size() const { return _history.size(); }
 
-int episode_state::update(const char* event_id, const char* previous_event_id, string_view context,
-    const ranking_response& response, api_status* status)
+int episode_state::update(const char* event_id, const char* previous_event_id, string_view context, 
+    api_status* status)
 {
-  _history.update(event_id, previous_event_id, context, response);
+  _history.update(event_id, previous_event_id, context);
   return error_code::success;
 }
 }  // namespace reinforcement_learning

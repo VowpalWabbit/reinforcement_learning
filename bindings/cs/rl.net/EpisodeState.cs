@@ -19,8 +19,7 @@ namespace Rl.Net
             public static extern IntPtr GetEpisodeId(IntPtr episodeState);
 
             [DllImport("rlnetnative")]
-            public static extern int UpdateEpisodeHistory(IntPtr episodeState, string event_id, string previous_event_id, string context,
-            RankingResponse response, ApiStatus error = null);
+            public static extern int UpdateEpisodeHistory(IntPtr episodeState, IntPtr eventId, IntPtr previousEventId, IntPtr context, IntPtr apiStatus);
         }
     }
 
@@ -51,9 +50,33 @@ namespace Rl.Net
             });
         }
 
-        public int Update(string eventId, string previousEventId, string context, RankingResponse response, ApiStatus status = null)
+        public int Update(string eventId, string previousEventId, string context, ApiStatus status = null)
         {
-            return NativeMethods.UpdateEpisodeHistory(this.DangerousGetHandle(), eventId, previousEventId, context, response, status);
+            if (string.IsNullOrEmpty(eventId))
+            {
+                throw new ArgumentException("EventId cannot be null or empty", "eventId");
+            }
+
+            unsafe
+            {
+                fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(context))
+                fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+                {
+                    if (previousEventId == null)
+                    {
+                        return NativeMethods.UpdateEpisodeHistory(this.DangerousGetHandle(), new IntPtr(eventIdUtf8Bytes), IntPtr.Zero, new IntPtr(contextJsonUtf8Bytes),
+                                status == null ? IntPtr.Zero : status.DangerousGetHandle());
+                    }
+                    else
+                    {
+                        fixed (byte* previousEventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(previousEventId))
+                        {
+                            return NativeMethods.UpdateEpisodeHistory(this.DangerousGetHandle(), new IntPtr(eventIdUtf8Bytes), new IntPtr(previousEventIdUtf8Bytes), new IntPtr(contextJsonUtf8Bytes),
+                                status == null ? IntPtr.Zero : status.DangerousGetHandle());
+                        }
+                    }
+                }
+            }
         }
 
         public string EpisodeId

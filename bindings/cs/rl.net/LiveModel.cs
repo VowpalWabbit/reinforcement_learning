@@ -199,21 +199,6 @@ namespace Rl.Net
                 return LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlagsNative(liveModel, eventId, contextJson, contextJsonSize, flags, multiSlotResponseDetailed, baselineActions, baselineActionsSize, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "LiveModelRequestEpisodicDecision")]
-            private static extern int LiveModelRequestEpisodicDecisionNative(IntPtr liveModel, IntPtr eventId, IntPtr previousEventId, IntPtr contextJson, IntPtr rankingResponse, IntPtr episodes, IntPtr apiStatus);
-
-            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelRequestEpisodicDecisionOverride { get; set; }
-
-            public static int LiveModelRequestEpisodicDecision(IntPtr liveModel, IntPtr eventId, IntPtr previousEventId, IntPtr contextJson, IntPtr rankingResponse, IntPtr episodes, IntPtr apiStatus)
-            {
-                if (LiveModelRequestEpisodicDecisionOverride != null)
-                {
-                    return LiveModelRequestEpisodicDecisionOverride(liveModel, eventId, previousEventId, contextJson, rankingResponse, episodes, apiStatus);
-                }
-
-                return LiveModelRequestEpisodicDecisionNative(liveModel, eventId, previousEventId, contextJson, rankingResponse, episodes, apiStatus);
-            }
-
             [DllImport("rlnetnative", EntryPoint = "LiveModelRequestEpisodicDecisionWithFlags")]
             private static extern int LiveModelRequestEpisodicDecisionWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr previousEventId, IntPtr contextJson, uint flags, IntPtr rankingResponse, IntPtr episodes, IntPtr apiStatus);
 
@@ -628,72 +613,23 @@ namespace Rl.Net
         unsafe private static int LiveModelRequestEpisodicDecisionWithFlags(IntPtr liveModel, string eventId, string previousEventId, string contextJson, uint flags, IntPtr rankingResponse, IntPtr episodeState, IntPtr apiStatus)
         {
             CheckJsonString(contextJson);
-
-            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            if (string.IsNullOrEmpty(eventId))
             {
-                if (eventId == null)
-                {
-                    if (previousEventId != null)
-                    {
-                        throw new ArgumentException($"eventId is null but previousEventId is not null.");
-                    }
-                    else
-                    {
-                        return NativeMethods.LiveModelRequestEpisodicDecisionWithFlags(liveModel, IntPtr.Zero, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, flags, rankingResponse, episodeState, apiStatus);
-                    }
-                }
-                else
-                {
-                    fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
-                    {
-                        if (previousEventId == null)
-                        {
-                            return NativeMethods.LiveModelRequestEpisodicDecisionWithFlags(liveModel, (IntPtr)eventIdUtf8Bytes, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, flags, rankingResponse, episodeState, apiStatus);
-                        }
-                        else
-                        {
-                            fixed (byte* previousEventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
-                            {
-                                return NativeMethods.LiveModelRequestEpisodicDecisionWithFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)previousEventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, flags, rankingResponse, episodeState, apiStatus);
-                            }
-                        }
-                    }
-                }
+                throw new ArgumentException("eventId cannot be null or empty", "eventId");
             }
-        }
-
-        unsafe private static int LiveModelRequestEpisodicDecision(IntPtr liveModel, string eventId, string previousEventId, string contextJson, IntPtr rankingResponse, IntPtr episodeState, IntPtr apiStatus)
-        {
-            CheckJsonString(contextJson);
 
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
             {
-                if (eventId == null)
+                if (previousEventId == null)
                 {
-                    if (previousEventId != null)
-                    {
-                        throw new ArgumentException($"eventId is null but previousEventId is not null.");
-                    }
-                    else
-                    {
-                        return NativeMethods.LiveModelRequestEpisodicDecision(liveModel, IntPtr.Zero, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, rankingResponse, episodeState, apiStatus);
-                    }
+                    return NativeMethods.LiveModelRequestEpisodicDecisionWithFlags(liveModel, new IntPtr(eventIdUtf8Bytes), IntPtr.Zero, new IntPtr(contextJsonUtf8Bytes), flags, rankingResponse, episodeState, apiStatus);
                 }
                 else
                 {
-                    fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+                    fixed (byte* previousEventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(previousEventId))
                     {
-                        if (previousEventId == null)
-                        {
-                            return NativeMethods.LiveModelRequestEpisodicDecision(liveModel, (IntPtr)eventIdUtf8Bytes, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, rankingResponse, episodeState, apiStatus);
-                        }
-                        else
-                        {
-                            fixed (byte* previousEventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
-                            {
-                                return NativeMethods.LiveModelRequestEpisodicDecision(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)previousEventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, rankingResponse, episodeState, apiStatus);
-                            }
-                        }
+                        return NativeMethods.LiveModelRequestEpisodicDecisionWithFlags(liveModel, new IntPtr(eventIdUtf8Bytes), new IntPtr(previousEventIdUtf8Bytes), new IntPtr(contextJsonUtf8Bytes), flags, rankingResponse, episodeState, apiStatus);
                     }
                 }
             }
@@ -1187,19 +1123,19 @@ namespace Rl.Net
             return result;
         }
 
-        public bool TryRequestEpisodicDecision(string eventId, string previousEventId, string contextJson, ActionFlags flags, EpisodeState episodes, RankingResponse resp, ApiStatus apiStatus)
+        public bool TryRequestEpisodicDecision(string eventId, string previousEventId, string contextJson, ActionFlags flags, EpisodeState states, RankingResponse resp, ApiStatus apiStatus)
         {
-            int result = LiveModelRequestEpisodicDecisionWithFlags(this.DangerousGetHandle(), eventId, previousEventId, contextJson, (uint)flags, episodes.DangerousGetHandle(), resp.DangerousGetHandle(), apiStatus.DangerousGetHandle());
+            int result = LiveModelRequestEpisodicDecisionWithFlags(this.DangerousGetHandle(), eventId, previousEventId, contextJson, (uint)flags, states.DangerousGetHandle(), resp.DangerousGetHandle(), apiStatus.DangerousGetHandle());
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
-        public RankingResponse RequestEpisodicDecision(string eventId, string previousEventId, string contextJson, ActionFlags flags, EpisodeState episodes)
+        public RankingResponse RequestEpisodicDecision(string eventId, string previousEventId, string contextJson, ActionFlags flags, EpisodeState states)
         {
             RankingResponse resp = new RankingResponse();
 
             using (ApiStatus apiStatus = new ApiStatus())
-                if (!this.TryRequestEpisodicDecision(eventId, previousEventId, contextJson, flags, episodes, resp, apiStatus))
+                if (!this.TryRequestEpisodicDecision(eventId, previousEventId, contextJson, flags, states, resp, apiStatus))
                 {
                     throw new RLException(apiStatus);
                 }
