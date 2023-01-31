@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nonstd/string_view.h"
+#include "vw/common/string_view.h"
 
 namespace reinforcement_learning
 {

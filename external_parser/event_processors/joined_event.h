@@ -2,14 +2,13 @@
 
 #include "reward.h"
 // VW headers
-// vw.h has to come before json_utils.h
 // clang-format off
 #include "vw/core/ccb_label.h"
 #include "vw/core/vw.h"
-#include "vw/core/json_utils.h"
 #include "vw/core/example.h"
 #include "vw/io/logger.h"
 // clang-format on
+#include "vw/json_parser/parse_example_json.h"
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
@@ -17,14 +16,14 @@ namespace joined_event
 {
 struct MultiSlotInteraction
 {
-  std::vector<VW::details::decision_service_interaction> interaction_data;
+  std::vector<VW::parsers::json::decision_service_interaction> interaction_data;
   std::vector<unsigned> baseline_actions;
   bool skip_learn;
   float probability_of_drop{0.f};
 };
 
 inline void calculate_multislot_interaction_metrics(
-    dsjson_metrics* metrics, MultiSlotInteraction multi_slot_interaction, float first_slot_original_reward_neg)
+    VW::details::dsjson_metrics* metrics, MultiSlotInteraction multi_slot_interaction, float first_slot_original_reward_neg)
 {
   if (metrics != nullptr)
   {
@@ -58,13 +57,13 @@ struct typed_joined_event
       // we currently need it for ccb calculation
       std::vector<reward::outcome_event>& outcome_events, VW::io::logger& logger) = 0;
 
-  virtual void calculate_metrics(dsjson_metrics*) {}
+  virtual void calculate_metrics(VW::details::dsjson_metrics*) {}
   virtual float get_sum_original_reward() const = 0;
 };
 
 struct cb_joined_event : public typed_joined_event
 {
-  VW::details::decision_service_interaction interaction_data;
+  VW::parsers::json::decision_service_interaction interaction_data;
   // Default Baseline Action for CB is 1 (rl client recommended actions are 1
   // indexed in the CB case)
   static const unsigned CB_BASELINE_ACTION = 1;
@@ -137,7 +136,7 @@ struct cb_joined_event : public typed_joined_event
     else { reward = original_reward; }
   }
 
-  void calculate_metrics(dsjson_metrics* metrics) override
+  void calculate_metrics(VW::details::dsjson_metrics* metrics) override
   {
     if (metrics != nullptr)
     {
@@ -283,7 +282,7 @@ struct ccb_joined_event : public typed_joined_event
     else { rewards.assign(original_rewards.begin(), original_rewards.end()); }
   }
 
-  void calculate_metrics(dsjson_metrics* metrics) override
+  void calculate_metrics(VW::details::dsjson_metrics* metrics) override
   {
     if (metrics != nullptr)
     {
@@ -370,7 +369,7 @@ struct slates_joined_event : public typed_joined_event
     else { reward = original_reward; }
   }
 
-  void calculate_metrics(dsjson_metrics* metrics) override
+  void calculate_metrics(VW::details::dsjson_metrics* metrics) override
   {
     if (metrics != nullptr)
     {
@@ -455,7 +454,7 @@ struct ca_joined_event : public typed_joined_event
     else { reward = original_reward; }
   }
 
-  void calculate_metrics(dsjson_metrics* metrics) override
+  void calculate_metrics(VW::details::dsjson_metrics* metrics) override
   {
     if ((metrics != nullptr) && std::isnan(interaction_data.action)) { metrics->number_of_events_zero_actions++; }
   }
@@ -517,7 +516,7 @@ struct joined_event
     typed_data->calc_cost(default_reward, reward_function, interaction_metadata, outcome_events, logger);
   }
 
-  void calculate_metrics(dsjson_metrics* metrics) { return typed_data->calculate_metrics(metrics); }
+  void calculate_metrics(VW::details::dsjson_metrics* metrics) { return typed_data->calculate_metrics(metrics); }
 
   float get_sum_original_reward() const { return typed_data->get_sum_original_reward(); }
 };
