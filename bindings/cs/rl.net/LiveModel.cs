@@ -1126,6 +1126,7 @@ namespace Rl.Net
         public bool TryRequestEpisodicDecision(string eventId, string previousEventId, string contextJson, ActionFlags flags, EpisodeState states, RankingResponse resp, ApiStatus apiStatus)
         {
             int result = LiveModelRequestEpisodicDecisionWithFlags(this.DangerousGetHandle(), eventId, previousEventId, contextJson, (uint)flags, resp.DangerousGetHandle(), states.DangerousGetHandle(), apiStatus.DangerousGetHandle());
+            Console.WriteLine("TryRequestEpisodicDecision result " + result);
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
@@ -1137,6 +1138,7 @@ namespace Rl.Net
             using (ApiStatus apiStatus = new ApiStatus())
                 if (!this.TryRequestEpisodicDecision(eventId, previousEventId, contextJson, flags, states, resp, apiStatus))
                 {
+                    Console.WriteLine("api error" + apiStatus.ErrorMessage + apiStatus.ErrorCode);
                     throw new RLException(apiStatus);
                 }
             return resp;
