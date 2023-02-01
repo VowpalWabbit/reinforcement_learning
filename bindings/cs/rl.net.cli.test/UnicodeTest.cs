@@ -1,10 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Rl.Net.Native;
 using System.Runtime.InteropServices;
@@ -33,7 +30,7 @@ namespace Rl.Net.Cli.Test
         const string PseudoLocJsonKey4 = "ℓôřú₥ ïƥƨú₥ δôℓôř";
         const string PseudoLocJsonValue4 = "áβç { δèƒ: ϱλï }";
 
-        const string PseudoLocConfigJson =
+        const string PseudoLocConfigJsonPdfModel =
 @"{
     ""ApplicationID"": ""ßïϱTèƨƭÂƥƥℓïçáƭïôñNá₥è-ℓôř"",
     ""IsExplorationEnabled"": true,
@@ -41,8 +38,24 @@ namespace Rl.Net.Cli.Test
     ""model.source"": ""NO_MODEL_DATA"",
     ""model.implementation"": ""PASSTHROUGH_PDF"",
     ""model.backgroundrefresh"": false,
+    ""episode.sender.implementation"": ""EPISODE_FILE_SENDER"",
     ""observation.sender.implementation"": ""OBSERVATION_FILE_SENDER"",
-    ""interaction.sender.implementation"": ""INTERACTION_FILE_SENDER""
+    ""interaction.sender.implementation"": ""INTERACTION_FILE_SENDER"",
+    ""protocol.version"": 2
+}
+";
+        const string PseudoLocConfigJsonVwModel =
+@"{
+    ""ApplicationID"": ""ßïϱTèƨƭÂƥƥℓïçáƭïôñNá₥è-ℓôř"",
+    ""IsExplorationEnabled"": true,
+    ""InitialExplorationEpsilon"": 1.0,
+    ""model.source"": ""NO_MODEL_DATA"",
+    ""model.implementation"": ""VW"",
+    ""model.backgroundrefresh"": false,
+    ""episode.sender.implementation"": ""EPISODE_FILE_SENDER"",
+    ""observation.sender.implementation"": ""OBSERVATION_FILE_SENDER"",
+    ""interaction.sender.implementation"": ""INTERACTION_FILE_SENDER"",
+    ""protocol.version"": 2
 }
 ";
 
@@ -66,7 +79,7 @@ namespace Rl.Net.Cli.Test
 }
 ";
 
-        static float [] ExpectedPdf = { 0.4f, 0.6f };
+        static float[] ExpectedPdf = { 0.4f, 0.6f };
         const float Epsilon = float.Epsilon;
 
         const string PseudoLocMultiSlotContextWithPdf =
@@ -105,6 +118,8 @@ namespace Rl.Net.Cli.Test
     ]
 }
 ";
+        const string ContextJson =
+            @"{ ""GUser"":{""id"":""mk"",""major"":""psychology"",""hobby"":""kids"",""favorite_character"":""7of9""}, ""_multi"": [ { ""TAction"":{""topic"":""SkiConditions-VT""} }, { ""TAction"":{""topic"":""HerbGarden""} }, { ""TAction"":{""topic"":""BeyBlades""} }, { ""TAction"":{""topic"":""NYCLiving""} }, { ""TAction"":{""topic"":""MachineLearning""} } ] }";
 
         private void Run_PtrToStringUtf8_RoundtripTest(string str, string message)
         {
@@ -281,11 +296,11 @@ namespace Rl.Net.Cli.Test
             Run_ConfigurationGet_Test(PseudoLocJsonKey3, valueToReturn: String.Empty);
         }
 
-        private LiveModel ConfigureLiveModel()
+        private LiveModel ConfigureLiveModel(string configuration)
         {
             Configuration config;
             ApiStatus apiStatus = new ApiStatus();
-            if (!Configuration.TryLoadConfigurationFromJson(PseudoLocConfigJson, out config, apiStatus))
+            if (!Configuration.TryLoadConfigurationFromJson(configuration, out config, apiStatus))
             {
                 Assert.Fail("Failed to parse pseudolocalized configuration JSON: " + apiStatus.ErrorMessage);
             }
@@ -296,6 +311,10 @@ namespace Rl.Net.Cli.Test
             TempFileDisposable observationDisposable = new TempFileDisposable();
             this.TestCleanup.Add(observationDisposable);
 
+            TempFileDisposable episodeDisposable = new TempFileDisposable();
+            this.TestCleanup.Add(episodeDisposable);
+
+            config["episode.file.name"] = episodeDisposable.Path;
             config["interaction.file.name"] = interactionDisposable.Path;
             config["observation.file.name"] = observationDisposable.Path;
 
@@ -322,13 +341,25 @@ namespace Rl.Net.Cli.Test
         [TestMethod]
         public void Test_LiveModel_ChooseRankE2E()
         {
-            LiveModel liveModel = this.ConfigureLiveModel();
-
+            LiveModel liveModel = this.ConfigureLiveModel(PseudoLocConfigJsonPdfModel);
             RankingResponse rankingResponse1 = liveModel.ChooseRank(PseudoLocEventId, PseudoLocContextJsonWithPdf);
             ValidatePdf(rankingResponse1);
 
             RankingResponse rankingResponse2 = liveModel.ChooseRank(PseudoLocEventId, PseudoLocContextJsonWithPdf, ActionFlags.Deferred);
             ValidatePdf(rankingResponse2);
+        }
+
+        [TestMethod]
+        public void Test_LiveModel_RequestEpisodicE2E()
+        {
+            LiveModel liveModel = this.ConfigureLiveModel(PseudoLocConfigJsonVwModel);
+            EpisodeState state = new EpisodeState("episode-0");
+            RankingResponse resp = new RankingResponse();
+
+            state.Update("event1", "event0", ContextJson, resp);
+
+            var response = liveModel.RequestEpisodicDecision("event1", "event0", ContextJson, ActionFlags.Default, state);
+            Assert.AreEqual(0, response.ChosenAction);
         }
 
         private void Run_LiveModelChooseRank_Test(LiveModel liveModel, string eventId, string contextJson)
@@ -368,7 +399,7 @@ namespace Rl.Net.Cli.Test
         [TestMethod]
         public void Test_LiveModel_ChooseRank()
         {
-            LiveModel liveModel = this.ConfigureLiveModel();
+            LiveModel liveModel = this.ConfigureLiveModel(PseudoLocConfigJsonPdfModel);
 
             Run_LiveModelChooseRank_Test(liveModel, PseudoLocEventId, PseudoLocContextJsonWithPdf);
             Run_LiveModelChooseRankWithFlags_Test(liveModel, PseudoLocEventId, PseudoLocContextJsonWithPdf);
@@ -405,7 +436,7 @@ namespace Rl.Net.Cli.Test
         [TestMethod]
         public void Test_LiveModel_RequestDecision()
         {
-            LiveModel liveModel = this.ConfigureLiveModel();
+            LiveModel liveModel = this.ConfigureLiveModel(PseudoLocConfigJsonPdfModel);
 
             Run_LiveModelRequestDecision_Test(liveModel, PseudoLocContextJsonWithPdf);
             Run_LiveModelRequestDecisionWithFlags_Test(liveModel, PseudoLocContextJsonWithPdf);
@@ -442,7 +473,7 @@ namespace Rl.Net.Cli.Test
         [TestMethod]
         public void Test_LiveModel_RequestMultiSlotDecisionDetailed()
         {
-            LiveModel liveModel = this.ConfigureLiveModel();
+            LiveModel liveModel = this.ConfigureLiveModel(PseudoLocConfigJsonPdfModel);
 
             Run_LiveModelRequestMultiSlotDetailed_Test(liveModel, PseudoLocMultiSlotContextWithPdf, PseudoLocEventId);
             Run_LiveModelRequestMultiSlotDetailedWithFlags_Test(liveModel, PseudoLocMultiSlotContextWithPdf, PseudoLocEventId);
@@ -479,7 +510,7 @@ namespace Rl.Net.Cli.Test
         [TestMethod]
         public void Test_LiveModel_RequestMultiSlotDecision()
         {
-            LiveModel liveModel = this.ConfigureLiveModel();
+            LiveModel liveModel = this.ConfigureLiveModel(PseudoLocConfigJsonPdfModel);
 
             Run_LiveModelRequestMultiSlot_Test(liveModel, PseudoLocMultiSlotContextWithPdf, PseudoLocEventId);
             Run_LiveModelRequestMultiSlotWithFlags_Test(liveModel, PseudoLocMultiSlotContextWithPdf, PseudoLocEventId);
@@ -502,9 +533,48 @@ namespace Rl.Net.Cli.Test
         [TestMethod]
         public void Test_LiveModel_RequestContinuousAction()
         {
-            LiveModel liveModel = this.ConfigureLiveModel();
+            LiveModel liveModel = this.ConfigureLiveModel(PseudoLocConfigJsonPdfModel);
 
             Run_LiveModelRequestContinuousAction_Test(liveModel, PseudoLocContextJsonWithPdf);
+        }
+
+        private void Run_LiveModelRequestEpisodicDecisionWithFlags_Test(LiveModel liveModel, string eventId, string previousEventId, string contextJson, ActionFlags flags, EpisodeState episode)
+        {
+            NativeMethods.LiveModelRequestEpisodicDecisionWithFlagsOverride =
+                (IntPtr liveModelPtr, IntPtr previousEventIdPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, uint flags, IntPtr rankingResponse, IntPtr episodeHistory, IntPtr ApiStatus) =>
+                {
+                    string contextJsonMarshalledBack = NativeMethods.StringMarshallingFunc(contextJsonPtr);
+                    Assert.AreEqual(contextJson, contextJsonMarshalledBack, "Marshalling contextJson does not work properly in LiveModelRequestDecisionWithFlags");
+
+                    return NativeMethods.SuccessStatus;
+                };
+
+            liveModel.RequestEpisodicDecision(eventId, previousEventId, contextJson, flags, episode);
+        }
+
+        private void Run_LiveModelRequestEpisodicDecision_Test(LiveModel liveModel, string eventId, string previousEventId, string contextJson, EpisodeState episodes)
+        {
+            NativeMethods.LiveModelRequestEpisodicDecisionWithFlagsOverride =
+                (IntPtr liveModelPtr, IntPtr previousEventIdPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, uint flags, IntPtr rankingResponse, IntPtr episodeHistory, IntPtr ApiStatus) =>
+                {
+                    string contextJsonMarshalledBack = NativeMethods.StringMarshallingFunc(contextJsonPtr);
+                    Assert.AreEqual(contextJson, contextJsonMarshalledBack, "Marshalling contextJson does not work properly in LiveModelRequestDecisionWithFlags");
+
+                    return NativeMethods.SuccessStatus;
+                };
+
+            liveModel.RequestEpisodicDecision(eventId, previousEventId, contextJson, ActionFlags.Default, episodes);
+        }
+
+        [TestMethod]
+        public void Test_LiveModel_RequestEpisodicDecision()
+        {
+            string episodeId = "episode0";
+            LiveModel liveModel = this.ConfigureLiveModel(PseudoLocConfigJsonPdfModel);
+            EpisodeState episodes = new EpisodeState(episodeId);
+
+            Run_LiveModelRequestEpisodicDecision_Test(liveModel, "event 0", PseudoLocEventId, PseudoLocContextJsonWithPdf, episodes);
+            Run_LiveModelRequestEpisodicDecisionWithFlags_Test(liveModel, "event 0", PseudoLocEventId, PseudoLocContextJsonWithPdf, ActionFlags.Deferred, episodes);
         }
 
         // TODO: Create a real CCB context json and add an E2E test (pending CCB E2E and
@@ -527,7 +597,7 @@ namespace Rl.Net.Cli.Test
         [TestMethod]
         public void Test_LiveModel_ReportActionTaken()
         {
-            LiveModel liveModel = this.ConfigureLiveModel();
+            LiveModel liveModel = this.ConfigureLiveModel(PseudoLocConfigJsonPdfModel);
 
             Run_LiveModelReportActionTaken_Test(liveModel, PseudoLocEventId);
         }
@@ -634,7 +704,7 @@ namespace Rl.Net.Cli.Test
         [TestMethod]
         public void Test_LiveModel_ReportOutcome()
         {
-            LiveModel liveModel = this.ConfigureLiveModel();
+            LiveModel liveModel = this.ConfigureLiveModel(PseudoLocConfigJsonPdfModel);
 
             Run_LiveModelReportOutcomeF_Test(liveModel, PseudoLocEventId, 1.0f);
             Run_LiveModelReportOutcomeJson_Test(liveModel, PseudoLocEventId, PseudoLocOutcomeJson);

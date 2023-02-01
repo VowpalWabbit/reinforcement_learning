@@ -211,6 +211,25 @@ API int LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(livemodel_
   RL_IGNORE_DEPRECATED_USAGE_END
 }
 
+API int LiveModelRequestEpisodicDecisionWithFlags(livemodel_context_t* context, const char* event_id, const char* previous_id,
+    const char* context_json, unsigned int flags, reinforcement_learning::ranking_response& resp,
+    reinforcement_learning:: episode_state& episode,
+    reinforcement_learning::api_status* status)
+{
+  RL_IGNORE_DEPRECATED_USAGE_START
+  return context->livemodel->request_episodic_decision(event_id, previous_id, context_json, flags, resp, episode, status);
+  RL_IGNORE_DEPRECATED_USAGE_END
+}
+
+API int LiveModelRequestEpisodicDecision(livemodel_context_t* context, const char* event_id, const char* previous_id,
+    const char* context_json, reinforcement_learning::ranking_response& resp,
+    reinforcement_learning::episode_state& episode, reinforcement_learning:: api_status* status)
+{
+  RL_IGNORE_DEPRECATED_USAGE_START
+  return context->livemodel->request_episodic_decision(event_id, previous_id, context_json, resp, episode, status);
+  RL_IGNORE_DEPRECATED_USAGE_END
+}
+
 API int LiveModelReportActionTaken(
     livemodel_context_t* context, const char* event_id, reinforcement_learning::api_status* status)
 {
