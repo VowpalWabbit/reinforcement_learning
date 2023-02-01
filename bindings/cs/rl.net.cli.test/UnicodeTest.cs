@@ -311,10 +311,10 @@ namespace Rl.Net.Cli.Test
             TempFileDisposable observationDisposable = new TempFileDisposable();
             this.TestCleanup.Add(observationDisposable);
 
-            TempFileDisposable episodenDisposable = new TempFileDisposable();
-            this.TestCleanup.Add(episodenDisposable);
+            TempFileDisposable episodeDisposable = new TempFileDisposable();
+            this.TestCleanup.Add(episodeDisposable);
 
-            config["episode.file.name"] = episodenDisposable.Path;
+            config["episode.file.name"] = episodeDisposable.Path;
             config["interaction.file.name"] = interactionDisposable.Path;
             config["observation.file.name"] = observationDisposable.Path;
 
@@ -537,7 +537,7 @@ namespace Rl.Net.Cli.Test
             Run_LiveModelRequestContinuousAction_Test(liveModel, PseudoLocContextJsonWithPdf);
         }
 
-        private void Run_LiveModelRequestEpisodicDecisionWithFlags_Test(LiveModel liveModel, string eventId, string previousEventId, string contextJson, ActionFlags flags, EpisodeState episodes)
+        private void Run_LiveModelRequestEpisodicDecisionWithFlags_Test(LiveModel liveModel, string eventId, string previousEventId, string contextJson, ActionFlags flags, EpisodeState episode)
         {
             NativeMethods.LiveModelRequestEpisodicDecisionWithFlagsOverride =
                 (IntPtr liveModelPtr, IntPtr previousEventIdPtr, IntPtr eventIdPtr, IntPtr contextJsonPtr, uint flags, IntPtr rankingResponse, IntPtr episodeHistory, IntPtr ApiStatus) =>
@@ -548,7 +548,7 @@ namespace Rl.Net.Cli.Test
                     return NativeMethods.SuccessStatus;
                 };
 
-            liveModel.RequestEpisodicDecision(eventId, previousEventId, contextJson, flags, episodes);
+            liveModel.RequestEpisodicDecision(eventId, previousEventId, contextJson, flags, episode);
         }
 
         private void Run_LiveModelRequestEpisodicDecision_Test(LiveModel liveModel, string eventId, string previousEventId, string contextJson, EpisodeState episodes)
