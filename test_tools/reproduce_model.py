@@ -132,7 +132,6 @@ def replay_logs(
 def run_test_model_reproducibility(
     initial_model, final_model, log_files, vw_bins, output_dir
 ):
-
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
