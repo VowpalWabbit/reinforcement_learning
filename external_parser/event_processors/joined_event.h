@@ -22,8 +22,8 @@ struct MultiSlotInteraction
   float probability_of_drop{0.f};
 };
 
-inline void calculate_multislot_interaction_metrics(
-    VW::details::dsjson_metrics* metrics, MultiSlotInteraction multi_slot_interaction, float first_slot_original_reward_neg)
+inline void calculate_multislot_interaction_metrics(VW::details::dsjson_metrics* metrics,
+    MultiSlotInteraction multi_slot_interaction, float first_slot_original_reward_neg)
 {
   if (metrics != nullptr)
   {
