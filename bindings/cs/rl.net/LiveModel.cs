@@ -170,7 +170,7 @@ namespace Rl.Net
             }
 
             [DllImport("rlnetnative", EntryPoint = "LiveModelRequestMultiSlotDecisionDetailedWithFlags")]
-            private static extern int LiveModelRequestMultiSlotDecisionDetailedWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson,  int contextJsonSize, uint flags, IntPtr multiSlotResponseDetailed, IntPtr apiStatus);
+            private static extern int LiveModelRequestMultiSlotDecisionDetailedWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr multiSlotResponseDetailed, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> LiveModelRequestMultiSlotDecisionDetailedWithFlagsOverride { get; set; }
 
@@ -197,6 +197,21 @@ namespace Rl.Net
                 }
 
                 return LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlagsNative(liveModel, eventId, contextJson, contextJsonSize, flags, multiSlotResponseDetailed, baselineActions, baselineActionsSize, apiStatus);
+            }
+
+            [DllImport("rlnetnative", EntryPoint = "LiveModelRequestEpisodicDecisionWithFlags")]
+            private static extern int LiveModelRequestEpisodicDecisionWithFlagsNative(IntPtr liveModel, IntPtr eventId, IntPtr previousEventId, IntPtr contextJson, uint flags, IntPtr rankingResponse, IntPtr episodes, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, uint, IntPtr, IntPtr, IntPtr, int> LiveModelRequestEpisodicDecisionWithFlagsOverride { get; set; }
+
+            public static int LiveModelRequestEpisodicDecisionWithFlags(IntPtr liveModel, IntPtr eventId, IntPtr previousEventId, IntPtr contextJson, uint flags, IntPtr rankingResponse, IntPtr episodes, IntPtr apiStatus)
+            {
+                if (LiveModelRequestEpisodicDecisionWithFlagsOverride != null)
+                {
+                    return LiveModelRequestEpisodicDecisionWithFlagsOverride(liveModel, eventId, previousEventId, contextJson, flags, rankingResponse, episodes, apiStatus);
+                }
+
+                return LiveModelRequestEpisodicDecisionWithFlagsNative(liveModel, eventId, previousEventId, contextJson, flags, rankingResponse, episodes, apiStatus);
             }
 
             [DllImport("rlnetnative", EntryPoint = "LiveModelReportActionTaken")]
@@ -343,7 +358,7 @@ namespace Rl.Net
         }
 
         public LiveModel(Configuration config) : this(config, null)
-        {}
+        { }
 
         public LiveModel(Configuration config, FactoryContext factoryContext) : base(BindConstructorArguments(config, factoryContext), new Delete<LiveModel>(NativeMethods.DeleteLiveModel))
         {
@@ -491,7 +506,7 @@ namespace Rl.Net
                     return NativeMethods.LiveModelRequestMultiSlotDecision(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, multiSlotResponse, apiStatus);
                 }
 
-                fixed(byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+                fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
                     return NativeMethods.LiveModelRequestMultiSlotDecision(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, multiSlotResponse, apiStatus);
                 }
@@ -510,7 +525,7 @@ namespace Rl.Net
                     return NativeMethods.LiveModelRequestMultiSlotDecisionWithFlags(liveModel, IntPtr.Zero, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponse, apiStatus);
                 }
 
-                fixed(byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+                fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
                     return NativeMethods.LiveModelRequestMultiSlotDecisionWithFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponse, apiStatus);
                 }
@@ -580,7 +595,7 @@ namespace Rl.Net
             CheckJsonString(contextJson);
 
             fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
-            fixed(int* baselineActionsFixed = baselineActions)
+            fixed (int* baselineActionsFixed = baselineActions)
             {
                 int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
                 if (eventId == null)
@@ -591,6 +606,31 @@ namespace Rl.Net
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
                     return NativeMethods.LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(liveModel, (IntPtr)eventIdUtf8Bytes, (IntPtr)contextJsonUtf8Bytes, contextJsonSize, flags, multiSlotResponseDetailed, (IntPtr)baselineActionsFixed, (IntPtr)baselineActions.Length, apiStatus);
+                }
+            }
+        }
+
+        unsafe private static int LiveModelRequestEpisodicDecisionWithFlags(IntPtr liveModel, string eventId, string previousEventId, string contextJson, uint flags, IntPtr rankingResponse, IntPtr episodeState, IntPtr apiStatus)
+        {
+            CheckJsonString(contextJson);
+            if (string.IsNullOrEmpty(eventId))
+            {
+                throw new ArgumentException("eventId cannot be null or empty", "eventId");
+            }
+
+            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+            fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+            {
+                if (previousEventId == null)
+                {
+                    return NativeMethods.LiveModelRequestEpisodicDecisionWithFlags(liveModel, new IntPtr(eventIdUtf8Bytes), IntPtr.Zero, new IntPtr(contextJsonUtf8Bytes), flags, rankingResponse, episodeState, apiStatus);
+                }
+                else
+                {
+                    fixed (byte* previousEventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(previousEventId))
+                    {
+                        return NativeMethods.LiveModelRequestEpisodicDecisionWithFlags(liveModel, new IntPtr(eventIdUtf8Bytes), new IntPtr(previousEventIdUtf8Bytes), new IntPtr(contextJsonUtf8Bytes), flags, rankingResponse, episodeState, apiStatus);
+                    }
                 }
             }
         }
@@ -754,10 +794,10 @@ namespace Rl.Net
         public void Init()
         {
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryInit(apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryInit(apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
         }
 
         public bool TryChooseRank(string eventId, string contextJson, out RankingResponse response, ApiStatus apiStatus = null)
@@ -779,10 +819,10 @@ namespace Rl.Net
             RankingResponse result = new RankingResponse();
 
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryChooseRank(eventId, contextJson, result, apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryChooseRank(eventId, contextJson, result, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
 
             return result;
         }
@@ -806,10 +846,10 @@ namespace Rl.Net
             RankingResponse result = new RankingResponse();
 
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryChooseRank(eventId, contextJson, flags, result, apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryChooseRank(eventId, contextJson, flags, result, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
 
             return result;
         }
@@ -833,10 +873,10 @@ namespace Rl.Net
             ContinuousActionResponse result = new ContinuousActionResponse();
 
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryRequestContinuousAction(eventId, contextJson, result, apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryRequestContinuousAction(eventId, contextJson, result, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
 
             return result;
         }
@@ -860,10 +900,10 @@ namespace Rl.Net
             ContinuousActionResponse result = new ContinuousActionResponse();
 
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryRequestContinuousAction(eventId, contextJson, flags, result, apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryRequestContinuousAction(eventId, contextJson, flags, result, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
 
             return result;
         }
@@ -887,10 +927,10 @@ namespace Rl.Net
             DecisionResponse result = new DecisionResponse();
 
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryRequestDecision(contextJson, result, apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryRequestDecision(contextJson, result, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
 
             return result;
         }
@@ -914,10 +954,10 @@ namespace Rl.Net
             DecisionResponse result = new DecisionResponse();
 
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryRequestDecision(contextJson, flags, result, apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryRequestDecision(contextJson, flags, result, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
 
             return result;
         }
@@ -941,10 +981,10 @@ namespace Rl.Net
             MultiSlotResponse result = new MultiSlotResponse();
 
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryRequestMultiSlotDecision(eventId, contextJson, result, apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryRequestMultiSlotDecision(eventId, contextJson, result, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
 
             return result;
         }
@@ -968,10 +1008,10 @@ namespace Rl.Net
             MultiSlotResponse result = new MultiSlotResponse();
 
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryRequestMultiSlotDecision(eventId, contextJson, flags, result, apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryRequestMultiSlotDecision(eventId, contextJson, flags, result, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
 
             return result;
         }
@@ -1083,6 +1123,27 @@ namespace Rl.Net
             return result;
         }
 
+        public bool TryRequestEpisodicDecision(string eventId, string previousEventId, string contextJson, ActionFlags flags, EpisodeState states, RankingResponse resp, ApiStatus apiStatus)
+        {
+            int result = LiveModelRequestEpisodicDecisionWithFlags(this.DangerousGetHandle(), eventId, previousEventId, contextJson, (uint)flags, resp.DangerousGetHandle(), states.DangerousGetHandle(), apiStatus.DangerousGetHandle());
+            Console.WriteLine("TryRequestEpisodicDecision result " + result);
+            GC.KeepAlive(this);
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public RankingResponse RequestEpisodicDecision(string eventId, string previousEventId, string contextJson, ActionFlags flags, EpisodeState states)
+        {
+            RankingResponse resp = new RankingResponse();
+
+            using (ApiStatus apiStatus = new ApiStatus())
+                if (!this.TryRequestEpisodicDecision(eventId, previousEventId, contextJson, flags, states, resp, apiStatus))
+                {
+                    Console.WriteLine("api error" + apiStatus.ErrorMessage + apiStatus.ErrorCode);
+                    throw new RLException(apiStatus);
+                }
+            return resp;
+        }
+
         [Obsolete("Use TryQueueActionTakenEvent instead.")]
         public bool TryReportActionTaken(string eventId, ApiStatus apiStatus = null)
         => this.TryQueueActionTakenEvent(eventId, apiStatus);
@@ -1103,10 +1164,10 @@ namespace Rl.Net
         public void QueueActionTakenEvent(string eventId)
         {
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryQueueActionTakenEvent(eventId, apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryQueueActionTakenEvent(eventId, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
         }
 
         [Obsolete("Use TryQueueOutcomeEvent instead.")]
@@ -1129,10 +1190,10 @@ namespace Rl.Net
         public void QueueOutcomeEvent(string eventId, float outcome)
         {
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryQueueOutcomeEvent(eventId, outcome, apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryQueueOutcomeEvent(eventId, outcome, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
         }
 
         [Obsolete("Use TryQueueOutcomeEvent instead.")]
@@ -1155,10 +1216,10 @@ namespace Rl.Net
         public void QueueOutcomeEvent(string eventId, string outcomeJson)
         {
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryQueueOutcomeEvent(eventId, outcomeJson, apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryQueueOutcomeEvent(eventId, outcomeJson, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
         }
 
         public bool TryQueueOutcomeEvent(string eventId, uint slotIndex, float outcome, ApiStatus apiStatus = null)
@@ -1173,10 +1234,10 @@ namespace Rl.Net
         public void QueueOutcomeEvent(string eventId, uint slotIndex, float outcome)
         {
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryQueueOutcomeEvent(eventId, slotIndex, outcome, apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryQueueOutcomeEvent(eventId, slotIndex, outcome, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
         }
 
         public bool TryQueueOutcomeEvent(string eventId, uint slotIndex, string outcomeJson, ApiStatus apiStatus = null)
@@ -1191,10 +1252,10 @@ namespace Rl.Net
         public void QueueOutcomeEvent(string eventId, uint slotIndex, string outcomeJson)
         {
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryQueueOutcomeEvent(eventId, slotIndex, outcomeJson, apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryQueueOutcomeEvent(eventId, slotIndex, outcomeJson, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
         }
 
         public bool TryQueueOutcomeEvent(string eventId, string slotId, float outcome, ApiStatus apiStatus = null)
@@ -1209,10 +1270,10 @@ namespace Rl.Net
         public void QueueOutcomeEvent(string eventId, string slotId, float outcome)
         {
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryQueueOutcomeEvent(eventId, slotId, outcome, apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryQueueOutcomeEvent(eventId, slotId, outcome, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
         }
 
         public bool TryQueueOutcomeEvent(string eventId, string slotId, string outcomeJson, ApiStatus apiStatus = null)
@@ -1227,19 +1288,19 @@ namespace Rl.Net
         public void QueueOutcomeEvent(string eventId, string slotId, string outcomeJson)
         {
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryQueueOutcomeEvent(eventId, slotId, outcomeJson, apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryQueueOutcomeEvent(eventId, slotId, outcomeJson, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
         }
 
         public void RefreshModel()
         {
             using (ApiStatus apiStatus = new ApiStatus())
-            if (!this.TryRefreshModel(apiStatus))
-            {
-                throw new RLException(apiStatus);
-            }
+                if (!this.TryRefreshModel(apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
         }
 
         public bool TryRefreshModel(ApiStatus apiStatus = null)
