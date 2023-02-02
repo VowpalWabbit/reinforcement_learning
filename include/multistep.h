@@ -26,7 +26,7 @@ public:
   episode_history(episode_history&& other) = default;
   episode_history& operator=(episode_history&& other) = default;
 
-  void update(const char* event_id, const char* previous_event_id, string_view context);
+  void update(const char* event_id, const char* previous_event_id, string_view context, const ranking_response& resp);
   std::string get_context(const char* previous_event_id, string_view context) const;
 
   size_t size() const;
@@ -53,7 +53,7 @@ public:
   const episode_history& get_history() const;
   size_t size() const;
 
-  int update(const char* event_id, const char* previous_event_id, string_view context,
+  int update(const char* event_id, const char* previous_event_id, string_view context, const ranking_response& response,
       api_status* error = nullptr);
 
 private:

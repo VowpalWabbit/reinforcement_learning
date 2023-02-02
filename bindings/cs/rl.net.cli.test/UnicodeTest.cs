@@ -354,8 +354,9 @@ namespace Rl.Net.Cli.Test
         {
             LiveModel liveModel = this.ConfigureLiveModel(PseudoLocConfigJsonVwModel);
             EpisodeState state = new EpisodeState("episode-0");
+            RankingResponse resp = new RankingResponse();
 
-            state.Update("event1", "event0", ContextJson);
+            state.Update("event1", "event0", ContextJson, resp);
 
             var response = liveModel.RequestEpisodicDecision("event1", "event0", ContextJson, ActionFlags.Default, state);
             Assert.AreEqual(0, response.ChosenAction);

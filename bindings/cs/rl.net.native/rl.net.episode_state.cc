@@ -13,7 +13,8 @@ API const char* GetEpisodeId(reinforcement_learning::episode_state* episode_stat
 }
 
 API int UpdateEpisodeHistory(reinforcement_learning::episode_state* episode_state, const char* event_id,
-    const char* previous_event_id, const char* context, reinforcement_learning::api_status* error)
+    const char* previous_event_id, const char* context, const reinforcement_learning::ranking_response& resp,
+    reinforcement_learning::api_status* error)
 {
-  return episode_state->update(event_id, previous_event_id, context, error);
+  return episode_state->update(event_id, previous_event_id, context, resp, error);
 }

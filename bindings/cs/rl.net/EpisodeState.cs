@@ -19,7 +19,7 @@ namespace Rl.Net
             public static extern IntPtr GetEpisodeId(IntPtr episodeState);
 
             [DllImport("rlnetnative")]
-            public static extern int UpdateEpisodeHistory(IntPtr episodeState, IntPtr eventId, IntPtr previousEventId, IntPtr context, IntPtr apiStatus);
+            public static extern int UpdateEpisodeHistory(IntPtr episodeState, IntPtr eventId, IntPtr previousEventId, IntPtr context, IntPtr rankingResponse, IntPtr apiStatus);
         }
     }
 
@@ -50,7 +50,7 @@ namespace Rl.Net
             });
         }
 
-        public int Update(string eventId, string previousEventId, string context, ApiStatus status = null)
+        public int Update(string eventId, string previousEventId, string context, RankingResponse resp, ApiStatus status = null)
         {
             if (string.IsNullOrEmpty(eventId))
             {
@@ -64,14 +64,14 @@ namespace Rl.Net
                 {
                     if (previousEventId == null)
                     {
-                        return NativeMethods.UpdateEpisodeHistory(this.DangerousGetHandle(), new IntPtr(eventIdUtf8Bytes), IntPtr.Zero, new IntPtr(contextJsonUtf8Bytes),
+                        return NativeMethods.UpdateEpisodeHistory(this.DangerousGetHandle(), new IntPtr(eventIdUtf8Bytes), IntPtr.Zero, new IntPtr(contextJsonUtf8Bytes), resp.DangerousGetHandle(),
                                 status == null ? IntPtr.Zero : status.DangerousGetHandle());
                     }
                     else
                     {
                         fixed (byte* previousEventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(previousEventId))
                         {
-                            return NativeMethods.UpdateEpisodeHistory(this.DangerousGetHandle(), new IntPtr(eventIdUtf8Bytes), new IntPtr(previousEventIdUtf8Bytes), new IntPtr(contextJsonUtf8Bytes),
+                            return NativeMethods.UpdateEpisodeHistory(this.DangerousGetHandle(), new IntPtr(eventIdUtf8Bytes), new IntPtr(previousEventIdUtf8Bytes), new IntPtr(contextJsonUtf8Bytes), resp.DangerousGetHandle(),
                                 status == null ? IntPtr.Zero : status.DangerousGetHandle());
                         }
                     }

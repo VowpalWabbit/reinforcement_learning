@@ -731,7 +731,7 @@ int live_model_impl::request_episodic_decision(const char* event_id, const char*
 
   resp.set_event_id(event_id);
 
-  RETURN_IF_FAIL(episode.update(event_id, previous_id, context_json, status));
+  RETURN_IF_FAIL(episode.update(event_id, previous_id, context_json, resp, status));
 
   if (episode.size() == 1)
   {
