@@ -81,6 +81,9 @@ extern "C"
       const char* previous_id, const char* context_json, unsigned int flags,
       reinforcement_learning::ranking_response& resp, reinforcement_learning::episode_state& episode,
       reinforcement_learning::api_status* status);
+  API int LiveModelRequestEpisodicDecision(livemodel_context_t* context, const char* event_id, const char* previous_id,
+      const char* context_json, reinforcement_learning::ranking_response& resp,
+      reinforcement_learning::episode_state& episode, reinforcement_learning::api_status* status);
 
   API int LiveModelReportActionTaken(
       livemodel_context_t* livemodel, const char* event_id, reinforcement_learning::api_status* status = nullptr);
