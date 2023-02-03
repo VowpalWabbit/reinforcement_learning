@@ -51,7 +51,8 @@ enum options
   SLATES_LOOP
 };
 
-void load_config_from_json(int action, u::configuration& config, bool enable_apprentice_mode, std::string dir, float epsilon = 0.0f)
+void load_config_from_json(
+    int action, u::configuration& config, bool enable_apprentice_mode, std::string dir, float epsilon = 0.0f)
 {
   std::string file_name(options[action]);
   if (dir != "") { file_name = dir + "/" + file_name; }
@@ -740,8 +741,7 @@ int main(int argc, char* argv[])
       "json config file for rlclinetlib")("apprentice", "Enable apprentice mode")("deferred_action_count",
       po::value<int>(),
       "Number of deferred action for interaction events. Set the deferred_action flag to true for first "
-      "deferred_action_count number of actions")("dir",
-      po::value<std::string>(),
+      "deferred_action_count number of actions")("dir", po::value<std::string>(),
       "Directory to store the generated examples. If not specified, examples will generated to current directory");
 
   po::positional_options_description pd;
@@ -821,6 +821,6 @@ int main(int argc, char* argv[])
     return -1;
   }
 
-  return run_config(
-      action, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file, rng, dir, epsilon);
+  return run_config(action, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file,
+      rng, dir, epsilon);
 }
