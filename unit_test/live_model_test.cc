@@ -432,6 +432,9 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_check_response_pdf_explore_only)
   u::configuration config;
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
+  config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
   config.set(
       r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--cb_explore_adf --json --quiet --epsilon 0.3 --first_only --id N/A");
 
@@ -473,6 +476,8 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_w_las_request_check_response_pdf_explore
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::EH_TEST, "true");
   config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
+  config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
   config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE,
       "--cb_explore_adf --json --quiet --epsilon 0.3 --first_only --id N/A --large_action_space --max_actions 2");
 
