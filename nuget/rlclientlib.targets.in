@@ -7,18 +7,18 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug' And ('$(Platform)'=='x64')">
     <Link>
-      <AdditionalDependencies>rlclientlibd.lib;cpprestd.lib;libssld.lib;libcryptod.lib;zstd_staticd.lib;vw_configd.lib;vw_allreduced.lib;fmtd.lib;spdlogd.lib;vw_iod.lib;vw_cored.lib;zlibstaticd.lib;ws2_32.lib;winhttp.lib;bcrypt.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>rlclientlibd.lib;cpprestd.lib;libssld.lib;libcryptod.lib;zstd_staticd.lib;vw_configd.lib;vw_json_parserd.lib;vw_allreduced.lib;fmtd.lib;spdlogd.lib;vw_iod.lib;vw_cored.lib;zlibstaticd.lib;ws2_32.lib;winhttp.lib;bcrypt.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Lib>
-      <AdditionalDependencies>rlclientlibd.lib;cpprestd.lib;libssld.lib;libcryptod.lib;zstd_staticd.lib;vw_configd.lib;vw_allreduced.lib;fmtd.lib;spdlogd.lib;vw_iod.lib;vw_cored.lib;zlibstaticd.lib;ws2_32.lib;winhttp.lib;bcrypt.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>rlclientlibd.lib;cpprestd.lib;libssld.lib;libcryptod.lib;zstd_staticd.lib;vw_configd.lib;vw_json_parserd.lib;vw_allreduced.lib;fmtd.lib;spdlogd.lib;vw_iod.lib;vw_cored.lib;zlibstaticd.lib;ws2_32.lib;winhttp.lib;bcrypt.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release' And ('$(Platform)'=='x64')">
     <Link>
-      <AdditionalDependencies>rlclientlib.lib;cpprest.lib;libssl.lib;libcrypto.lib;zstd_static.lib;vw_config.lib;vw_allreduce.lib;fmt.lib;spdlog.lib;vw_io.lib;vw_core.lib;zlibstatic.lib;ws2_32.lib;winhttp.lib;bcrypt.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>rlclientlib.lib;cpprest.lib;libssl.lib;libcrypto.lib;zstd_static.lib;vw_config.lib;vw_json_parser.lib;vw_allreduce.lib;fmt.lib;spdlog.lib;vw_io.lib;vw_core.lib;zlibstatic.lib;ws2_32.lib;winhttp.lib;bcrypt.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Lib>
-      <AdditionalDependencies>rlclientlib.lib;cpprest.lib;libssl.lib;libcrypto.lib;zstd_static.lib;vw_config.lib;vw_allreduce.lib;fmt.lib;spdlog.lib;vw_io.lib;vw_core.lib;zlibstatic.lib;ws2_32.lib;winhttp.lib;bcrypt.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>rlclientlib.lib;cpprest.lib;libssl.lib;libcrypto.lib;zstd_static.lib;vw_config.lib;vw_json_parser.lib;vw_allreduce.lib;fmt.lib;spdlog.lib;vw_io.lib;vw_core.lib;zlibstatic.lib;ws2_32.lib;winhttp.lib;bcrypt.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
