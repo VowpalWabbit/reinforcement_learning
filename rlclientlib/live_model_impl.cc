@@ -83,12 +83,18 @@ int live_model_impl::choose_rank(
 
   // check arguments
   RETURN_IF_FAIL(check_null_or_empty(event_id, context, _trace_logger.get(), status));
-  if (!_model_ready)
-  {
-    RETURN_IF_FAIL(explore_only(event_id, context, response, status));
-    response.set_model_id("N/A");
-  }
-  else { RETURN_IF_FAIL(explore_exploit(event_id, context, response, status)); }
+
+  // The seed used is composed of uniform_hash(app_id) + uniform_hash(event_id)
+  const uint64_t seed = VW::uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
+
+  std::vector<int> action_ids;
+  std::vector<float> action_pdf;
+  std::string model_version;
+
+  _model->choose_rank(event_id, seed, context, action_ids, action_pdf, model_version, status);
+
+  RETURN_IF_FAIL(sample_and_populate_response(seed, action_ids, action_pdf, std::move(model_version), response, _trace_logger.get(), status));
+
   response.set_event_id(event_id);
 
   if (_learning_mode == LOGGINGONLY)
@@ -606,85 +612,6 @@ void live_model_impl::handle_model_update(const model_management::model_data& da
     return;
   }
   _model_ready = model_ready;
-}
-
-int live_model_impl::explore_only(
-    const char* event_id, string_view context, ranking_response& response, api_status* status) const
-{
-  // Generate egreedy pdf
-  utility::ContextInfo context_info;
-  RETURN_IF_FAIL(utility::get_context_info(context, context_info, _trace_logger.get(), status));
-
-  size_t action_count = context_info.actions.size();
-  if (action_count < 1)
-  {
-    RETURN_ERROR_LS(_trace_logger.get(), status, json_no_actions_found) << "Context must have at least one action";
-  }
-
-  vector<float> pdf(action_count);
-  // Generate a pdf with epsilon distributed between all action.
-  // The top action gets the remaining (1 - epsilon)
-  // Assume that the user's top choice for action is at index 0
-  const auto top_action_id = 0;
-  auto scode = e::generate_epsilon_greedy(_initial_epsilon, top_action_id, begin(pdf), end(pdf));
-  if (S_EXPLORATION_OK != scode)
-  {
-    RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration error code: " << scode;
-  }
-
-  // The seed used is composed of uniform_hash(app_id) + uniform_hash(event_id)
-  const uint64_t seed = VW::uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
-
-  // Pick a slot using the pdf. NOTE: sample_after_normalizing() can change the pdf
-  uint32_t chosen_index = 0;
-  scode = e::sample_after_normalizing(seed, begin(pdf), end(pdf), chosen_index);
-
-  if (S_EXPLORATION_OK != scode)
-  {
-    RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration error code: " << scode;
-  }
-
-  // NOTE: When there is no model, the rank
-  // step was done by the user.  i.e. Actions are already in ranked order
-  // If there were an action list it would be [0,1,2,3,4..].  The index
-  // of the list matches the action_id.  There is no need to generate this
-  // list of actions we can use the index into this list as a proxy for the
-  // actual action_id.
-  // i.e  chosen_index == action[chosen_index]
-  // Why is this documented?  Because explore_exploit uses a model and we
-  // cannot make the same assumption there.  (Bug was fixed)
-
-  // Setup response with pdf from prediction and chosen action
-  // Chosen action goes first.  First action gets swapped with chosen action
-  for (size_t idx = 0; idx < pdf.size(); ++idx) { response.push_back(idx, pdf[idx]); }
-
-  // Swap values in first position with values in chosen index
-  scode = e::swap_chosen(begin(response), end(response), chosen_index);
-
-  if (S_EXPLORATION_OK != scode)
-  {
-    RETURN_ERROR_LS(_trace_logger.get(), status, exploration_error) << "Exploration (Swap) error code: " << scode;
-  }
-
-  RETURN_IF_FAIL(response.set_chosen_action_id(chosen_index));
-
-  return error_code::success;
-}
-
-int live_model_impl::explore_exploit(
-    const char* event_id, string_view context, ranking_response& response, api_status* status) const
-{
-  // The seed used is composed of uniform_hash(app_id) + uniform_hash(event_id)
-  const uint64_t seed = VW::uniform_hash(event_id, strlen(event_id), 0) + _seed_shift;
-
-  std::vector<int> action_ids;
-  std::vector<float> action_pdf;
-  std::string model_version;
-
-  RETURN_IF_FAIL(_model->choose_rank(event_id, seed, context, action_ids, action_pdf, model_version, status));
-
-  return sample_and_populate_response(
-      seed, action_ids, action_pdf, std::move(model_version), response, _trace_logger.get(), status);
 }
 
 int live_model_impl::init_model_mgmt(api_status* status)
