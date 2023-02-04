@@ -49,7 +49,7 @@ std::string cb_decision_gen::mk_feature_vector(int count, uint32_t max_idx)
     auto idx = next_uint() % max_idx;
     if (added_idx.find(idx) == added_idx.end())
     {
-      if (added > 0) str << ",";
+      if (added > 0) { str << ","; }
       std::string ft_string(ft_string_size, 'f');
       str << "\"" << idx << "_" << ft_string << "\":1";
 
@@ -88,7 +88,7 @@ std::string cb_decision_gen::gen_example()
     auto idx = next_uint() % actions_set.size();
     if (added_actions.find(idx) == added_actions.end())
     {
-      if (added > 0) str << ",";
+      if (added > 0) { str << ","; }
       added_actions.insert(idx);
 
       str << R"({"action":)";
