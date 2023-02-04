@@ -69,8 +69,8 @@ std::unique_ptr<fakeit::Mock<m::i_model>> get_mock_model(m::model_type_t model_t
 {
   auto mock = std::unique_ptr<Mock<m::i_model>>(new fakeit::Mock<m::i_model>());
 
-  const auto choose_rank_fn = [](const char*, uint64_t, r::string_view, std::vector<int>& actions, std::vector<float>& scores,
-                                  std::string& model_version, r::api_status*)
+  const auto choose_rank_fn = [](const char*, uint64_t, r::string_view, std::vector<int>& actions,
+                                  std::vector<float>& scores, std::string& model_version, r::api_status*)
   {
     model_version = "model_id";
     actions.resize(2);

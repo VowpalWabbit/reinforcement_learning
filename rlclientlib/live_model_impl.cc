@@ -93,7 +93,8 @@ int live_model_impl::choose_rank(
 
   _model->choose_rank(event_id, seed, context, action_ids, action_pdf, model_version, status);
 
-  RETURN_IF_FAIL(sample_and_populate_response(seed, action_ids, action_pdf, std::move(model_version), response, _trace_logger.get(), status));
+  RETURN_IF_FAIL(sample_and_populate_response(
+      seed, action_ids, action_pdf, std::move(model_version), response, _trace_logger.get(), status));
 
   response.set_event_id(event_id);
 

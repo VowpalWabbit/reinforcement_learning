@@ -446,7 +446,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_check_response_pdf_explore_only)
   r::ranking_response response;
 
   const auto JSON_CB_CONTEXT_3ACTIONS =
-    R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}},{"TAction":{"a3":"f3"}}]})";
+      R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}},{"TAction":{"a3":"f3"}}]})";
 
   // request ranking
   BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CB_CONTEXT_3ACTIONS, response), err::success);
@@ -473,8 +473,8 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_w_las_request_check_response_pdf_explore
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::EH_TEST, "true");
   config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
-  config.set(
-      r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--cb_explore_adf --json --quiet --epsilon 0.3 --first_only --id N/A --large_action_space --max_actions 2");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE,
+      "--cb_explore_adf --json --quiet --epsilon 0.3 --first_only --id N/A --large_action_space --max_actions 2");
 
   r::api_status status;
 
@@ -487,7 +487,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_w_las_request_check_response_pdf_explore
   r::ranking_response response;
 
   const auto JSON_CB_CONTEXT_3ACTIONS =
-    R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}},{"TAction":{"a3":"f3"}}]})";
+      R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}},{"TAction":{"a3":"f3"}}]})";
 
   // request ranking
   BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CB_CONTEXT_3ACTIONS, response), err::success);
