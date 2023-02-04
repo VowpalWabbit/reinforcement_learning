@@ -839,10 +839,10 @@ int main(int argc, char* argv[])
   int deferred_action_count = 0;
   float epsilon = 0.f;
 
-  desc.add_options()("help", "Produce help message")("all", "use all args")("dedup", "Enable dedup")("compress",
-      "Enable zstd")("count", po::value<int>(), "Number of events to produce")(
-      "num_actions", po::value<int>(), "number of actions to use when generating a cb example")(
-      "ft_string_size", po::value<int>(), "to be used with num_actions, determines the size of the feature string when generating a cb example")(
+  desc.add_options()("help", "Produce help message")("all", "use all args")("dedup", "Enable dedup")(
+      "compress", "Enable zstd")("count", po::value<int>(), "Number of events to produce")("num_actions",
+      po::value<int>(), "number of actions to use when generating a cb example")("ft_string_size", po::value<int>(),
+      "to be used with num_actions, determines the size of the feature string when generating a cb example")(
       "seed", po::value<int>(), "Initial seed used to produce event ids")(
       "epsilon", po::value<float>(), "epsilon to be used in command line args for VW")("kind", po::value<std::string>(),
       "which kind of example to generate "
@@ -876,7 +876,7 @@ int main(int argc, char* argv[])
     if (vm.count("num_actions") > 0) { num_actions = vm["num_actions"].as<int>(); }
     if (vm.count("ft_string_size") > 0)
     {
-      if (num_actions == 0) { throw std::runtime_error("num_actions must be set with ft_string_size");}
+      if (num_actions == 0) { throw std::runtime_error("num_actions must be set with ft_string_size"); }
       ft_string_size = vm["ft_string_size"].as<int>();
     }
     if (vm.count("seed") > 0) { seed = vm["seed"].as<int>(); }
