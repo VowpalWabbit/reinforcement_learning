@@ -14,20 +14,11 @@
 #include <string>
 #include <vector>
 
-class prng
-{
-  uint64_t val;
-
-public:
-  prng(uint64_t initial_seed);
-  uint64_t next_uint();
-};
-
 class cb_decision_gen
 {
   int shared_features, action_features, actions_per_decision, ft_string_size;
   std::vector<std::string> actions_set;
-  prng rand;
+  uint64_t rand_val;
   std::string temp_str;
 
   std::string mk_feature_vector(int count, uint32_t max_idx);
@@ -39,14 +30,6 @@ public:
   std::string gen_example();
 };
 
-prng::prng(uint64_t initial_seed) : val(VW::details::merand48(initial_seed)) {}
-
-uint64_t prng::next_uint()
-{
-  VW::details::merand48(val);
-  return val;
-}
-
 std::string cb_decision_gen::mk_feature_vector(int count, uint32_t max_idx)
 {
   std::ostringstream str;
@@ -55,7 +38,7 @@ std::string cb_decision_gen::mk_feature_vector(int count, uint32_t max_idx)
   int added = 0;
   while (added < count)
   {
-    auto idx = rand.next_uint() % max_idx;
+    auto idx = VW::details::merand48(rand_val) % max_idx;
     if (added_idx.find(idx) == added_idx.end())
     {
       if (added > 0) str << ",";
@@ -76,7 +59,7 @@ cb_decision_gen::cb_decision_gen(int shared_features, int action_features, int a
     , action_features(action_features)
     , actions_per_decision(actions_per_decision)
     , ft_string_size(ft_string_size)
-    , rand(initial_seed)
+    , rand_val(initial_seed)
 {
   for (int i = 0; i < total_actions; ++i)
   {
