@@ -28,7 +28,15 @@ public:
       int initial_seed, int ft_string_size);
 
   std::string gen_example();
+
+  uint64_t next_uint();
 };
+
+uint64_t cb_decision_gen::next_uint()
+{
+  VW::details::merand48(rand_val);
+  return rand_val;
+}
 
 std::string cb_decision_gen::mk_feature_vector(int count, uint32_t max_idx)
 {
@@ -38,7 +46,7 @@ std::string cb_decision_gen::mk_feature_vector(int count, uint32_t max_idx)
   int added = 0;
   while (added < count)
   {
-    auto idx = VW::details::merand48(rand_val) % max_idx;
+    auto idx = next_uint() % max_idx;
     if (added_idx.find(idx) == added_idx.end())
     {
       if (added > 0) str << ",";
@@ -77,7 +85,7 @@ std::string cb_decision_gen::gen_example()
   int added = 0;
   while (added < actions_per_decision)
   {
-    auto idx = rand.next_uint() % actions_set.size();
+    auto idx = next_uint() % actions_set.size();
     if (added_actions.find(idx) == added_actions.end())
     {
       if (added > 0) str << ",";
