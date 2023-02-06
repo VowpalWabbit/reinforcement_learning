@@ -1,32 +1,32 @@
-#%%
+# %%
 
 from mnist.loader import MNIST
 import base64
 import struct
 
 
-#%%
+# %%
 mndata = MNIST("./data")
 images, labels = mndata.load_testing()
 
 num_images = len(images)
 print(num_images)
 
-#%%
+# %%
 
 
 def map_pixel_float(p):
     return float(p) / 256.0
 
 
-#%%
+# %%
 
 
 def image_to_float(image):
     return map(map_pixel_float, image)
 
 
-#%%
+# %%
 
 
 def image_to_bytes(mnist_image):
@@ -36,7 +36,7 @@ def image_to_bytes(mnist_image):
     return struct.pack("%sf" % pixel_count, *image_float)
 
 
-#%%
+# %%
 
 dims = [1, 1, 28, 28]
 prefix = '"' + base64.b64encode(struct.pack("4Q", *dims)).decode() + ";"
@@ -46,7 +46,7 @@ def image_to_tensor_notation(mnist_image):
     return prefix + base64.b64encode(image_to_bytes(mnist_image)).decode() + '"'
 
 
-#%%
+# %%
 
 
 def encode_mnist(file, images, labels):
@@ -59,7 +59,7 @@ def encode_mnist(file, images, labels):
         file.write("\n")
 
 
-#%%
+# %%
 
 tensor_notation_file = open("mnist_test_data.txt", "wt")
 
