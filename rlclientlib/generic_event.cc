@@ -62,7 +62,7 @@ float generic_event::prg(int drop_pass) const
 {
   const auto seed_str = _id + std::to_string(drop_pass);
   const auto seed = VW::uniform_hash(seed_str.c_str(), seed_str.length(), 0);
-  return exploration::uniform_random_merand48(seed);
+  return VW::details::merand48_noadvance(seed);
 }
 
 generic_event::payload_type_t generic_event::get_payload_type() const { return _payload_type; }

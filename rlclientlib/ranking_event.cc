@@ -30,7 +30,7 @@ float event::prg(int drop_pass) const
 {
   const auto seed_str = _seed_id + std::to_string(drop_pass);
   const auto seed = VW::uniform_hash(seed_str.c_str(), seed_str.length(), 0);
-  return exploration::uniform_random_merand48(seed);
+  return VW::details::merand48_noadvance(seed);
 }
 
 ranking_event::ranking_event(const char* event_id, bool deferred_action, float pass_prob, string_view context,
