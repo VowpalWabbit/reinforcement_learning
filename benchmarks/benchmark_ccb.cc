@@ -65,8 +65,9 @@ static void bench_ccb(benchmark::State& state, ExtraArgs&&... extra_args)
   config.set(r::name::INTERACTION_USE_DEDUP, dedup ? "true" : "false");
   config.set("queue.mode", "BLOCK");
 
-  std::string model_output_filename = std::tmpnam(nullptr);
-  config.set(r::name::MODEL_FILE_NAME, model_output_filename.c_str());
+  char templ[] = "/tmp/fileXXXXXX";
+  mkstemp(templ);
+  config.set(r::name::MODEL_FILE_NAME, templ);
 
   // train a VW model and save to file
   {
@@ -96,7 +97,7 @@ static void bench_ccb(benchmark::State& state, ExtraArgs&&... extra_args)
     auto backing_buffer = std::make_shared<std::vector<char>>();
     io_buffer.add_file(VW::io::create_vector_writer(backing_buffer));
     VW::save_predictor(*vw, io_buffer);
-    std::fstream out_file(model_output_filename, std::ios::out | std::ios::binary);
+    std::fstream out_file(templ, std::ios::out | std::ios::binary);
     out_file.write(backing_buffer->data(), backing_buffer->size());
   }
 
@@ -122,7 +123,7 @@ static void bench_ccb(benchmark::State& state, ExtraArgs&&... extra_args)
   }
 
   // delete model file
-  std::remove(model_output_filename.c_str());
+  std::remove(templ);
 }
 
 BENCHMARK_CAPTURE(bench_ccb, ccb_adf_diff_char_interactions_predict,
