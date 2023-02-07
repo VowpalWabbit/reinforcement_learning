@@ -108,6 +108,7 @@ jobs:
     strategy:
       matrix:
         os: ["windows-2019"]
+        build_type: ["Debug", "Release"]
         toolset: ["v141", "v142"]
     steps:
       - uses: actions/checkout@v2
