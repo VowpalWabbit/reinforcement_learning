@@ -73,14 +73,17 @@ factory_initializer::~factory_initializer()
 }
 
 template <typename model_t>
-int model_create(std::unique_ptr<m::i_model>& retval, const u::configuration& c, i_trace* trace_logger, api_status* status)
+int model_create(
+    std::unique_ptr<m::i_model>& retval, const u::configuration& c, i_trace* trace_logger, api_status* status)
 {
   retval.reset(new model_t(trace_logger, c));
   return error_code::success;
 }
 
-int null_tracer_create(std::unique_ptr<i_trace>& retval, const u::configuration& /*cfg*/, i_trace* trace_logger, api_status* status);
-int console_tracer_create(std::unique_ptr<i_trace>& retval, const u::configuration& /*cfg*/, i_trace* trace_logger, api_status* status);
+int null_tracer_create(
+    std::unique_ptr<i_trace>& retval, const u::configuration& /*cfg*/, i_trace* trace_logger, api_status* status);
+int console_tracer_create(
+    std::unique_ptr<i_trace>& retval, const u::configuration& /*cfg*/, i_trace* trace_logger, api_status* status);
 
 int file_sender_create(std::unique_ptr<i_sender>& retval, const u::configuration& cfg, const char* file_name,
     error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
@@ -89,16 +92,16 @@ int file_sender_create(std::unique_ptr<i_sender>& retval, const u::configuration
   return error_code::success;
 }
 
-int empty_data_transport_create(
-    std::unique_ptr<m::i_data_transport>& retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
+int empty_data_transport_create(std::unique_ptr<m::i_data_transport>& retval, const u::configuration& config,
+    i_trace* trace_logger, api_status* status)
 {
   TRACE_INFO(trace_logger, "Empty data transport created.");
   retval.reset(new model_management::empty_data_transport());
   return error_code::success;
 }
 
-int file_model_loader_create(
-    std::unique_ptr<m::i_data_transport>& retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
+int file_model_loader_create(std::unique_ptr<m::i_data_transport>& retval, const u::configuration& config,
+    i_trace* trace_logger, api_status* status)
 {
   TRACE_INFO(trace_logger, "File model loader created.");
   const char* file_name = config.get(name::MODEL_FILE_NAME, "current");
@@ -153,32 +156,37 @@ void factory_initializer::register_default_factories()
 
   // Register File loggers
   sender_factory.register_type(value::EPISODE_FILE_SENDER,
-      [](std::unique_ptr<i_sender>& retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status)
+      [](std::unique_ptr<i_sender>& retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger,
+          api_status* status)
       {
         const char* file_name = c.get(name::EPISODE_FILE_NAME, "episode.fb.data");
         return file_sender_create(retval, c, file_name, cb, trace_logger, status);
       });
   sender_factory.register_type(value::OBSERVATION_FILE_SENDER,
-      [](std::unique_ptr<i_sender>& retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status)
+      [](std::unique_ptr<i_sender>& retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger,
+          api_status* status)
       {
         const char* file_name = c.get(name::OBSERVATION_FILE_NAME, "observation.fb.data");
         return file_sender_create(retval, c, file_name, cb, trace_logger, status);
       });
   sender_factory.register_type(value::INTERACTION_FILE_SENDER,
-      [](std::unique_ptr<i_sender>& retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status)
+      [](std::unique_ptr<i_sender>& retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger,
+          api_status* status)
       {
         const char* file_name = c.get(name::INTERACTION_FILE_NAME, "interaction.fb.data");
         return file_sender_create(retval, c, file_name, cb, trace_logger, status);
       });
 }
 
-int null_tracer_create(std::unique_ptr<i_trace>& retval, const u::configuration& cfg, i_trace* trace_logger, api_status* status)
+int null_tracer_create(
+    std::unique_ptr<i_trace>& retval, const u::configuration& cfg, i_trace* trace_logger, api_status* status)
 {
   retval.reset();
   return error_code::success;
 }
 
-int console_tracer_create(std::unique_ptr<i_trace>& retval, const u::configuration& cfg, i_trace* trace_logger, api_status* status)
+int console_tracer_create(
+    std::unique_ptr<i_trace>& retval, const u::configuration& cfg, i_trace* trace_logger, api_status* status)
 {
   retval.reset(new console_tracer());
   return error_code::success;

@@ -8,10 +8,7 @@ namespace reinforcement_learning
 {
 namespace utility
 {
-void configuration::set(const char* name, const char* value)
-{
-  _pmap[name] = value;
-}
+void configuration::set(const char* name, const char* value) { _pmap[name] = value; }
 
 const char* configuration::get(const char* name, const char* defval) const
 {

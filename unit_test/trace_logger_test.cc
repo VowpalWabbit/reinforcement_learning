@@ -57,7 +57,8 @@ struct vector_tracer : r::i_trace
   std::mutex mutex;
 };
 
-int vector_trace_create(std::unique_ptr<r::i_trace>& retval, const u::configuration&, r::i_trace* trace_logger, r::api_status* status)
+int vector_trace_create(
+    std::unique_ptr<r::i_trace>& retval, const u::configuration&, r::i_trace* trace_logger, r::api_status* status)
 {
   retval.reset(new vector_tracer());
   return err::success;

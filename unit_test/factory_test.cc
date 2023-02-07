@@ -32,13 +32,15 @@ BOOST_AUTO_TEST_CASE(factory_tempate_usage)
   auto b = 5;  // arbitrary variable to illustrate a point
   u::object_factory<an_interface, const u::configuration&> factory;
 
-  auto create_A_fn = [](std::unique_ptr<an_interface>& pret, const u::configuration&, r::i_trace* trace, r::api_status*) -> int
+  auto create_A_fn = [](std::unique_ptr<an_interface>& pret, const u::configuration&, r::i_trace* trace,
+                         r::api_status*) -> int
   {
     pret.reset(new impl_A());
     return r::error_code::success;
   };
 
-  auto create_B_fn = [b](std::unique_ptr<an_interface>& pret, const u::configuration&, r::i_trace* trace, r::api_status*) -> int
+  auto create_B_fn = [b](std::unique_ptr<an_interface>& pret, const u::configuration&, r::i_trace* trace,
+                         r::api_status*) -> int
   {
     pret.reset(new impl_B(b));
     return r::error_code::success;

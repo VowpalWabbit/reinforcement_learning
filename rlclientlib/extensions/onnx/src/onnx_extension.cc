@@ -15,7 +15,8 @@ namespace reinforcement_learning
 {
 namespace onnx
 {
-int create_onnx_model(std::unique_ptr<m::i_model>& retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
+int create_onnx_model(
+    std::unique_ptr<m::i_model>& retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
 {
   const char* app_id = config.get(name::APP_ID, "");
   const char* output_name = config.get(name::ONNX_OUTPUT_NAME, nullptr);

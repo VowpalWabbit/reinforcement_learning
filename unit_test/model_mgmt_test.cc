@@ -209,8 +209,8 @@ class dummy_data_transport : public m::i_data_transport
   }
 };
 
-int dummy_data_tranport_create(
-    std::unique_ptr<m::i_data_transport>& retval, const u::configuration& config, r::i_trace* trace, r::api_status* status)
+int dummy_data_tranport_create(std::unique_ptr<m::i_data_transport>& retval, const u::configuration& config,
+    r::i_trace* trace, r::api_status* status)
 {
   retval.reset(new dummy_data_transport());
   return r::error_code::success;

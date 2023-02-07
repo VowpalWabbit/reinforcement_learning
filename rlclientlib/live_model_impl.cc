@@ -502,7 +502,8 @@ int live_model_impl::init_loggers(api_status* status)
 
   // Create a message sender that will prepend the message with a preamble and send the raw data using the
   // factory created raw data sender
-  std::unique_ptr<l::i_message_sender> ranking_msg_sender(new l::preamble_message_sender(ranking_data_sender.release()));
+  std::unique_ptr<l::i_message_sender> ranking_msg_sender(
+      new l::preamble_message_sender(ranking_data_sender.release()));
   RETURN_IF_FAIL(ranking_msg_sender->init(status));
 
   // Get time provider factory and implementation
@@ -516,7 +517,7 @@ int live_model_impl::init_loggers(api_status* status)
   // Create the logger extension
   // TODO: fix potential leak by propagating unique_ptrs everywhere
   _logger_extensions.reset(
-      logger::i_logger_extensions::get_extensions(_configuration, logger_extensions_time_provider.release())); 
+      logger::i_logger_extensions::get_extensions(_configuration, logger_extensions_time_provider.release()));
 
   std::unique_ptr<i_time_provider> ranking_time_provider;
   RETURN_IF_FAIL(_time_provider_factory->create(

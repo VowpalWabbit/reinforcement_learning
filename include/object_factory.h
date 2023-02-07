@@ -14,7 +14,8 @@ namespace utility
 template <class I, typename... Args>
 struct object_factory
 {
-  using create_fn = std::function<int(std::unique_ptr<I>& retval, Args&&... args, i_trace* trace_logger, api_status* status)>;
+  using create_fn =
+      std::function<int(std::unique_ptr<I>& retval, Args&&... args, i_trace* trace_logger, api_status* status)>;
 
   void register_type(const std::string& name, create_fn fptr) { _creators[name] = fptr; }
 
