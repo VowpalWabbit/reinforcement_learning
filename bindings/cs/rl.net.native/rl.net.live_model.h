@@ -87,6 +87,8 @@ extern "C"
 
   API int LiveModelReportActionTaken(
       livemodel_context_t* livemodel, const char* event_id, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelReportEpisodicActionTaken(livemodel_context_t* livemodel, const char* episode_id,
+      const char* event_id, reinforcement_learning::api_status* status = nullptr);
 
   API int LiveModelReportOutcomeF(livemodel_context_t* livemodel, const char* event_id, float outcome,
       reinforcement_learning::api_status* status = nullptr);

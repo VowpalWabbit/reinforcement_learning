@@ -229,6 +229,36 @@ namespace Rl.Net
                 return LiveModelReportActionTakenNative(liveModel, eventId, apiStatus);
             }
 
+            [DllImport("rlnetnative", EntryPoint = "LiveModelReportEpisodicActionTaken")]
+            private static extern int LiveModelReportEpisodicActionTakenNative(IntPtr liveModel, IntPtr episodeId, IntPtr eventId, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelReportEpisodicActionTakenOverride { get; set; }
+
+            public static int LiveModelReportEpisodicActionTaken(IntPtr liveModel, IntPtr episodeId, IntPtr eventId, IntPtr apiStatus)
+            {
+                if (LiveModelReportActionTakenOverride != null)
+                {
+                    return LiveModelReportEpisodicActionTakenOverride(liveModel, episodeId, eventId, apiStatus);
+                }
+
+                return LiveModelReportEpisodicActionTakenNative(liveModel, episodeId, eventId, apiStatus);
+            }
+
+            [DllImport("rlnetnative", EntryPoint = "LiveModelReportEpisodicOutcomeF")]
+            private static extern int LiveModelReportEpisodicOutcomeFNative(IntPtr liveModel, IntPtr episodeId, IntPtr eventId, float outcome, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, float, IntPtr, int> LiveModelReportEpisodicOutcomeFOverride { get; set; }
+
+            public static int LiveModelEpisodicReportOutcomeF(IntPtr liveModel, IntPtr episodeId, IntPtr eventId, float outcome, IntPtr apiStatus)
+            {
+                if (LiveModelReportEpisodicOutcomeFOverride != null)
+                {
+                    return LiveModelReportEpisodicOutcomeFOverride(liveModel, episodeId, eventId, outcome, apiStatus);
+                }
+
+                return LiveModelReportEpisodicOutcomeFNative(liveModel, episodeId, eventId, outcome, apiStatus);
+            }
+
             [DllImport("rlnetnative", EntryPoint = "LiveModelReportOutcomeF")]
             private static extern int LiveModelReportOutcomeFNative(IntPtr liveModel, IntPtr eventId, float outcome, IntPtr apiStatus);
 
@@ -648,6 +678,25 @@ namespace Rl.Net
             }
         }
 
+        unsafe private static int LiveModelReportEpisodicActionTaken(IntPtr liveModel, string episodeId, string eventId, IntPtr apiStatus)
+        {
+            if (episodeId == null)
+            {
+                throw new ArgumentNullException("episodeId");
+            }
+
+            if (eventId == null)
+            {
+                throw new ArgumentNullException("eventId");
+            }
+
+            fixed (byte* episodeIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(episodeId))
+            fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+            {
+                return NativeMethods.LiveModelReportEpisodicActionTaken(liveModel, new IntPtr(episodeIdUtf8Bytes), new IntPtr(eventIdUtf8Bytes), apiStatus);
+            }
+        }
+
         unsafe private static int LiveModelReportOutcomeF(IntPtr liveModel, string eventId, float outcome, IntPtr apiStatus)
         {
             if (eventId == null)
@@ -745,6 +794,25 @@ namespace Rl.Net
             fixed (byte* outcomeJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(outcomeJson))
             {
                 return NativeMethods.LiveModelReportOutcomeSlotStringIdJson(liveModel, new IntPtr(eventIdUtf8Bytes), new IntPtr(slotIdUtf8Bytes), new IntPtr(outcomeJsonUtf8Bytes), apiStatus);
+            }
+        }
+
+        unsafe private static int LiveModelReportEpisodicOutcomeFNative(IntPtr liveModel, string episodeId, string eventId, float outcome, IntPtr apiStatus)
+        {
+            if (episodeId == null)
+            {
+                throw new ArgumentNullException("episodeId");
+            }
+
+            if (eventId == null)
+            {
+                throw new ArgumentNullException("eventId");
+            }
+
+            fixed (byte* episodeIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(episodeId))
+            fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+            {
+                return NativeMethods.LiveModelEpisodicReportOutcomeF(liveModel, new IntPtr(episodeIdUtf8Bytes), new IntPtr(eventIdUtf8Bytes), outcome, apiStatus);
             }
         }
 
@@ -1157,6 +1225,15 @@ namespace Rl.Net
             return result == NativeMethods.SuccessStatus;
         }
 
+        public bool TryQueueEpisodicActionTakenEvent(string episodeId, string eventId, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelReportEpisodicActionTaken(this.DangerousGetHandle(), episodeId, eventId, apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(apiStatus);
+            GC.KeepAlive(this);
+            return result == NativeMethods.SuccessStatus;
+        }
+
         [Obsolete("Use QueueActionTakenEvent instead.")]
         public void ReportActionTaken(string eventId)
             => this.QueueActionTakenEvent(eventId);
@@ -1170,9 +1247,18 @@ namespace Rl.Net
                 }
         }
 
+        public void QueueEpisodicActionTakenEvent(string episodeId, string eventId)
+        {
+            using (ApiStatus apiStatus = new ApiStatus())
+                if (!this.TryQueueEpisodicActionTakenEvent(episodeId, eventId, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
+        }
+
         [Obsolete("Use TryQueueOutcomeEvent instead.")]
         public bool TryReportOutcome(string eventId, float outcome, ApiStatus apiStatus = null)
-            => this.TryQueueOutcomeEvent(eventId, outcome, apiStatus);
+                   => this.TryQueueOutcomeEvent(eventId, outcome, apiStatus);
 
         public bool TryQueueOutcomeEvent(string eventId, float outcome, ApiStatus apiStatus = null)
         {
