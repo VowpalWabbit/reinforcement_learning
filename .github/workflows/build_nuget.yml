@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   build_nuget_windows:
-    name: nuget.${{ matrix.toolset }}
+    name: nuget.${{ matrix.toolset }}-${{ matrix.build_type }}
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
@@ -81,11 +81,9 @@ jobs:
           -DVCPKG_TARGET_TRIPLET=x64-windows
           -Drlclientlib_BUILD_DOTNET=Off
       - name: Compile
-        run: cmake --build ./build --config ${{matrix.build_type}} -v
+        run: cmake --build ./build --config ${{ matrix.build_type }} -v
       - name: Create Nuget package
-        run: cmake --install ./build --config ${{matrix.build_type}} --prefix ./nuget_staging -v
-      - name: Clean
-        run: cmake --build ./build --target clean
+        run: cmake --install ./build --config ${{ matrix.build_type }} --prefix ./nuget_staging -v
 
       # Upload the package
       - name: Get file name
@@ -100,12 +98,12 @@ jobs:
       - name: Upload package
         uses: actions/upload-artifact@v1
         with:
-          name: RLClientLibNativeStatic-${{ matrix.toolset }}-x64.${{ steps.get_version.outputs.version }}.nupkg
+          name: RLClientLibNativeStatic-${{ matrix.toolset }}-${{ matrix.build_type }}-x64.${{ steps.get_version.outputs.version }}.nupkg
           path: nuget_staging/${{ steps.nuget_name.outputs.NugetFileName }}
 
   test_nuget_windows:
     needs: [build_nuget_windows]
-    name: nuget-test.${{ matrix.toolset }}
+    name: nuget-test.${{ matrix.toolset }}-${{ matrix.build_type }}
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
@@ -134,7 +132,7 @@ jobs:
       # Download and install nuget
       - uses: actions/download-artifact@v1
         with:
-          name: RLClientLibNativeStatic-${{ matrix.toolset }}-x64.${{ steps.get_version.outputs.version }}.nupkg
+          name: RLClientLibNativeStatic-${{ matrix.toolset }}-${{ matrix.build_type }}-x64.${{ steps.get_version.outputs.version }}.nupkg
           path: downloaded_nugets
       - name: List downloaded files
         run: ls downloaded_nugets
@@ -146,15 +144,15 @@ jobs:
           -Version "${{ steps.get_version.outputs.version }}"
           -Verbosity detailed
           -NonInteractive
-          RLClientLibNativeStatic-${{ matrix.toolset }}-x64
+          RLClientLibNativeStatic-${{ matrix.toolset }}-${{ matrix.build_type }}-x64
       - name: Rename package install directory to omit version number
         run: |
           cd nuget\test\packages
-          mv * RLClientLibNativeStatic-${{ matrix.toolset }}-x64
+          mv * RLClientLibNativeStatic-${{ matrix.toolset }}-${{ matrix.build_type }}-x64
       
       # Compile and run
       - name: Build test
         run: |
           cd nuget\test
-          msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=Release;Platform=x64"
-          .\bin\x64\Release\test-${{matrix.toolset}}.exe
+          msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=${{ matrix.build_type }};Platform=x64"
+          .\bin\x64\${{ matrix.build_type }}\test-${{matrix.toolset}}.exe
