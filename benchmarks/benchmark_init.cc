@@ -68,10 +68,7 @@ static void bench_init(benchmark::State& state, ExtraArgs&&... extra_args)
     config.set(r::name::MODEL_SRC, "FILE_MODEL_DATA");
     config.set(r::name::MODEL_FILE_NAME, model_path.c_str());
   }
-  else
-  {
-    config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
-  }
+  else { config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA); }
 
   r::api_status status;
   r::live_model model(config);
@@ -85,9 +82,9 @@ static void bench_init(benchmark::State& state, ExtraArgs&&... extra_args)
     model.init(&status);
     if (status.get_error_code() != err::success)
     {
-        std::cout << "there was an error so something went wrong during "
-                        "benchmarking: "
-                    << status.get_error_msg() << std::endl;
+      std::cout << "there was an error so something went wrong during "
+                   "benchmarking: "
+                << status.get_error_msg() << std::endl;
     }
     benchmark::ClobberMemory();
   }
@@ -101,4 +98,3 @@ BENCHMARK_CAPTURE(bench_init, no_model, false, 0)->Unit(benchmark::kMillisecond)
 BENCHMARK_CAPTURE(bench_init, small_model, true, 0)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(bench_init, half_model, true, 1)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(bench_init, large_model, true, 2)->Unit(benchmark::kMillisecond);
-
