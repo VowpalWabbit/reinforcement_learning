@@ -97,6 +97,7 @@
     <ClCompile Include="rl.net.buffer.cc" />
     <ClCompile Include="rl.net.config.cc" />
     <ClCompile Include="rl.net.continuous_action_response.cc" />
+    <ClCompile Include="rl.net.episode_state.cc" />
     <ClCompile Include="rl.net.decision_response.cc" />
     <ClCompile Include="rl.net.factory_context.cc" />
     <ClCompile Include="rl.net.live_model.cc" />
@@ -114,6 +115,7 @@
     <ClInclude Include="rl.net.config.h" />
     <ClInclude Include="rl.net.continuous_action_response.h" />
     <ClInclude Include="rl.net.decision_response.h" />
+    <ClInclude Include="rl.net.episode_state.h" />
     <ClInclude Include="rl.net.factory_context.h" />
     <ClInclude Include="rl.net.live_model.h" />
     <ClInclude Include="rl.net.multi_slot_response_detailed.h" />

@@ -80,7 +80,8 @@ static void bench_ccb(benchmark::State& state, ExtraArgs&&... extra_args)
     {
       VW::multi_ex ex;
       ex.push_back(VW::new_unused_example(*vw));
-      line_to_examples_json<false>(vw.get(), str.c_str(), str.size(), ex);
+      VW::string_view sv = {str.c_str(), str.size()};
+      line_to_examples_json<false>(vw.get(), sv, ex);
       examples_vec.push_back(ex);
     }
 

@@ -6,6 +6,7 @@ set(rl_net_native_SOURCES
   rl.net.config.cc
   rl.net.continuous_action_response.cc
   rl.net.decision_response.cc
+  rl.net.episode_state.cc
   rl.net.factory_context.cc
   rl.net.live_model.cc
   rl.net.native.cc
@@ -23,6 +24,7 @@ set(rl_net_native_HEADERS
   rl.net.config.h
   rl.net.continuous_action_response.h
   rl.net.decision_response.h
+  rl.net.episode_state.h
   rl.net.factory_context.h
   rl.net.live_model.h
   rl.net.native.h
