@@ -75,6 +75,7 @@ jobs:
           -DVCPKG_MANIFEST_MODE=Off
           -DRL_BUILD_NUGET=On
           -DRL_NUGET_PACKAGE_NAME=RLClientLibNativeStatic
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DRL_NUGET_PACKAGE_VERSION="${{ steps.get_version.outputs.version }}"
           -DNATIVE_NUGET_PLATFORM_TAG=x64
           -DCMAKE_TOOLCHAIN_FILE="${env:VCPKG_INSTALLATION_ROOT}\scripts\buildsystems\vcpkg.cmake"
