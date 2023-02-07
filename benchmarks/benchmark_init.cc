@@ -34,19 +34,21 @@ static void bench_init(benchmark::State& state, ExtraArgs&&... extra_args)
   auto load_model = res[0];
   auto model_id = res[1];
 
-  std::string model_path = "benchmarks/models/";
+  std::ostringstream model_path;
+  model_path << "benchmarks/models/";
   switch (model_id)
   {
     case 0:
-      model_path += "cb_small.m";
+      model_path << "cb_small.m";
       break;
     case 1:
-      model_path += "cb_half.m";
+      model_path << "cb_half.m";
       break;
     case 2:
-      model_path += "cb_large.m";
+      model_path << "cb_large.m";
       break;
     default:
+      std::cout << "invalid model id" << std::endl;
       break;
   }
 
@@ -63,17 +65,13 @@ static void bench_init(benchmark::State& state, ExtraArgs&&... extra_args)
   config.set(r::name::INTERACTION_USE_COMPRESSION, "false");
   config.set(r::name::INTERACTION_USE_DEDUP, "false");
   config.set("queue.mode", "BLOCK");
+
   if (load_model)
   {
     config.set(r::name::MODEL_SRC, "FILE_MODEL_DATA");
-    config.set(r::name::MODEL_FILE_NAME, model_path.c_str());
+    config.set(r::name::MODEL_FILE_NAME, model_path.str().c_str());
   }
   else { config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA); }
-
-  r::api_status status;
-  r::live_model model(config);
-  model.init(&status);
-  const auto event_id = "event_id";
 
   for (auto _ : state)
   {
@@ -91,9 +89,9 @@ static void bench_init(benchmark::State& state, ExtraArgs&&... extra_args)
 }
 
 // characteristics of the benchmark examples that will be generated are:
-
 // x load model (on/off)
 // x model path
+
 BENCHMARK_CAPTURE(bench_init, no_model, false, 0)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(bench_init, small_model, true, 0)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(bench_init, half_model, true, 1)->Unit(benchmark::kMillisecond);
