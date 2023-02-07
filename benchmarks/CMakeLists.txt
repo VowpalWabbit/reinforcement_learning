@@ -2,6 +2,7 @@ set(all_sources
   benchmark_cb_v2.cc
   benchmark_ccb.cc
   benchmark_common.cc
+  benchmark_init.cc
   benchmark_main.cc
 )
 
