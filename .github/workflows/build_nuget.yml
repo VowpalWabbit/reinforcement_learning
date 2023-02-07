@@ -22,6 +22,7 @@ jobs:
     strategy:
       matrix:
         os: ["windows-2019"]
+        build_type: ["Debug", "Release"]
         toolset: ["v141", "v142"]
   
     steps:
@@ -79,18 +80,12 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE="${env:VCPKG_INSTALLATION_ROOT}\scripts\buildsystems\vcpkg.cmake"
           -DVCPKG_TARGET_TRIPLET=x64-windows
           -Drlclientlib_BUILD_DOTNET=Off
-      - name: Compile - debug build
-        run: cmake --build ./build --config Debug -v
-      - name: Create Nuget package - debug build
-        # this copies over files to nuget_staging and creates a package with only debug libraries
-        run: cmake --install ./build --config Debug --prefix ./nuget_staging -v
+      - name: Compile
+        run: cmake --build ./build --config ${{matrix.build_type}} -v
+      - name: Create Nuget package
+        run: cmake --install ./build --config ${{matrix.build_type}} --prefix ./nuget_staging -v
       - name: Clean
         run: cmake --build ./build --target clean
-      - name: Compile - release build
-        run: cmake --build ./build --config Release -v
-      - name: Create Nuget package - release build
-        # this overwrites the previous package with one containing both debug and release libraries
-        run: cmake --install ./build --config Release --prefix ./nuget_staging -v
 
       # Upload the package
       - name: Get file name
