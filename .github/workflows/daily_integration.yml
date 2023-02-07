@@ -1,13 +1,6 @@
 name: Integration with latest VW
 
 on:
-  push:
-    branches:
-      - master
-      - 'releases/**'
-  pull_request:
-    branches:
-      - '*'
   schedule:
     - cron: "0 8 * * *"
 
