@@ -682,7 +682,8 @@ int pseudo_random(int seed)
 }
 
 int run_config(int action, int count, int initial_seed, bool gen_random_reward, bool enable_apprentice_mode,
-    int deferred_action_count, const std::string& config_file, std::mt19937& rng, const std::string& dir, float epsilon = 0.0f)
+    int deferred_action_count, const std::string& config_file, std::mt19937& rng, const std::string& dir,
+    float epsilon = 0.0f)
 {
   u::configuration config;
 
