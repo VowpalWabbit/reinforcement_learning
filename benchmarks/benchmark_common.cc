@@ -1,6 +1,6 @@
 #include "benchmark_common.h"
 
-#include "vw/core/rand48.h"
+#include "vw/common/random.h"
 
 #include <set>
 
@@ -52,11 +52,11 @@ std::string make_actions_vector(int count, const std::vector<std::string>& actio
 }
 }  // namespace
 
-prng::prng(uint64_t initial_seed) : val(merand48(initial_seed)) {}
+prng::prng(uint64_t initial_seed) : val(VW::details::merand48(initial_seed)) {}
 
 uint64_t prng::next_uint()
 {
-  merand48(val);
+  VW::details::merand48(val);
   return val;
 }
 

@@ -55,7 +55,7 @@ safe_vw::~safe_vw()
   for (auto&& ex : _example_pool) { VW::dealloc_examples(ex, 1); }
 
   // cleanup VW instance
-  reset_source(*_vw, _vw->num_bits);
+  VW::details::reset_source(*_vw, _vw->num_bits);
 
   VW::finish(*_vw);
 }
@@ -85,7 +85,7 @@ VW::example& safe_vw::get_or_create_example_f(void* vw) { return *(((safe_vw*)vw
 
 void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& actions, std::vector<float>& scores)
 {
-  VW::details::decision_service_interaction interaction;
+  VW::parsers::json::decision_service_interaction interaction;
 
   VW::multi_ex examples;
   examples.push_back(get_or_create_example());
