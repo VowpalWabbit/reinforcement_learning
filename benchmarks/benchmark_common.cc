@@ -1,4 +1,4 @@
-#include "benchmarks_common.h"
+#include "benchmark_common.h"
 
 #include "vw/core/rand48.h"
 
