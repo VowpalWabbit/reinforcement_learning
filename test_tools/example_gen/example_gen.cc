@@ -52,7 +52,7 @@ enum options
 };
 
 void load_config_from_json(
-    int action, u::configuration& config, bool enable_apprentice_mode, std::string dir, float epsilon = 0.0f)
+    int action, u::configuration& config, bool enable_apprentice_mode, const std::string& dir, float epsilon = 0.0f)
 {
   std::string file_name(options[action]);
   if (dir != "") { file_name = dir + "/" + file_name; }
@@ -682,7 +682,7 @@ int pseudo_random(int seed)
 }
 
 int run_config(int action, int count, int initial_seed, bool gen_random_reward, bool enable_apprentice_mode,
-    int deferred_action_count, const std::string& config_file, std::mt19937& rng, std::string dir, float epsilon = 0.0f)
+    int deferred_action_count, const std::string& config_file, std::mt19937& rng, const std::string& dir, float epsilon = 0.0f)
 {
   u::configuration config;
 
