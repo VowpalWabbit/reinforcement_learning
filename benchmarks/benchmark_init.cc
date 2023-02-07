@@ -32,16 +32,17 @@ static void bench_init(benchmark::State& state, ExtraArgs&&... extra_args)
 
   std::ostringstream model_path;
   model_path << "benchmarks/models/";
+  // Note: models generated using '--cb_explore_adf -b 18'
   switch (model_id)
   {
     case 0:
-      model_path << "cb_small.m";
+      model_path << "cb_explore_adf_small.m";
       break;
     case 1:
-      model_path << "cb_half.m";
+      model_path << "cb_explore_adf_half.m";
       break;
     case 2:
-      model_path << "cb_large.m";
+      model_path << "cb_explore_adf_large.m";
       break;
     default:
       std::cout << "invalid model id" << std::endl;
