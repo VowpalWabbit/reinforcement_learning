@@ -6,7 +6,6 @@
 #include "generated/v2/MultiSlotEvent_generated.h"
 #include "joined_event.h"
 #include "loop.h"
-#include "vw/core/json_utils.h"
 #include "zstd.h"
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
@@ -53,7 +52,7 @@ struct event_processor<v2::MultiSlotEvent>
     size_t slot_index = 0;
     for (auto* slot_event : *evt.slots())
     {
-      VW::details::decision_service_interaction data;
+      VW::parsers::json::decision_service_interaction data;
       data.event_id = slot_event->id() == nullptr ? metadata.id()->str() : slot_event->id()->str();
 
       if (is_ccb && slot_event->id() != nullptr)
