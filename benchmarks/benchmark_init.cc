@@ -1,12 +1,9 @@
-#include "api_status.h"
 #include "benchmark_common.h"
 #include "config_utility.h"
 #include "constants.h"
 #include "err_constants.h"
-#include "factory_resolver.h"
 #include "live_model.h"
 #include "model_mgmt.h"
-#include "ranking_response.h"
 
 #include <benchmark/benchmark.h>
 
