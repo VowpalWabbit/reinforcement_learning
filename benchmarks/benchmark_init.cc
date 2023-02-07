@@ -12,7 +12,6 @@
 
 namespace r = reinforcement_learning;
 namespace u = reinforcement_learning::utility;
-namespace m = reinforcement_learning::model_management;
 namespace err = reinforcement_learning::error_code;
 namespace cfg = reinforcement_learning::utility::config;
 
