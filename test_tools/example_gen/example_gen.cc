@@ -51,11 +51,9 @@ enum options
   SLATES_LOOP
 };
 
-void load_config_from_json(
-    int action, u::configuration& config, bool enable_apprentice_mode, std::string dir, float epsilon = 0.0f)
+void load_config_from_json(int action, u::configuration& config, bool enable_apprentice_mode, float epsilon = 0.0f)
 {
   std::string file_name(options[action]);
-  if (dir != "") { file_name = dir + "/" + file_name; }
 
   config.set("ApplicationID", "<appid>");
   config.set("interaction.sender.implementation", "INTERACTION_FILE_SENDER");
@@ -682,11 +680,11 @@ int pseudo_random(int seed)
 }
 
 int run_config(int action, int count, int initial_seed, bool gen_random_reward, bool enable_apprentice_mode,
-    int deferred_action_count, const std::string& config_file, std::mt19937& rng, std::string dir, float epsilon = 0.0f)
+    int deferred_action_count, const std::string& config_file, std::mt19937& rng, float epsilon = 0.0f)
 {
   u::configuration config;
 
-  if (config_file.empty()) { load_config_from_json(action, config, enable_apprentice_mode, dir, epsilon); }
+  if (config_file.empty()) { load_config_from_json(action, config, enable_apprentice_mode, epsilon); }
   else
   {
     if (!load_config_from_provided_json(config_file, config)) { return -1; }
@@ -727,7 +725,6 @@ int main(int argc, char* argv[])
   bool gen_random_reward = false;
   bool enable_apprentice_mode = false;
   int deferred_action_count = 0;
-  std::string dir = "";
   float epsilon = 0.f;
 
   desc.add_options()("help", "Produce help message")("all", "use all args")("dedup", "Enable dedup/zstd")("count",
@@ -741,8 +738,7 @@ int main(int argc, char* argv[])
       "json config file for rlclinetlib")("apprentice", "Enable apprentice mode")("deferred_action_count",
       po::value<int>(),
       "Number of deferred action for interaction events. Set the deferred_action flag to true for first "
-      "deferred_action_count number of actions")("dir", po::value<std::string>(),
-      "Directory to store the generated examples. If not specified, examples will generated to current directory");
+      "deferred_action_count number of actions");
 
   po::positional_options_description pd;
   pd.add("kind", 1);
@@ -766,7 +762,6 @@ int main(int argc, char* argv[])
     if (vm.count("epsilon") > 0) { epsilon = vm["epsilon"].as<float>(); }
     if (vm.count("config_file") > 0) { config_file = vm["config_file"].as<std::string>(); }
     if (vm.count("deferred_action_count") > 0) { deferred_action_count = vm["deferred_action_count"].as<int>(); }
-    if (vm.count("dir") > 0) { dir = vm["dir"].as<std::string>(); }
 
     if (vm.count("deferred_action_count") > 0 &&
         !std::any_of(deferrable_interactions.begin(), deferrable_interactions.end(),
@@ -796,7 +791,7 @@ int main(int argc, char* argv[])
     for (int i = 0; options[i] != nullptr; ++i)
     {
       if (run_config(i, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file, rng,
-              dir, epsilon) != 0)
+              epsilon) != 0)
       {
         return -1;
       }
@@ -821,6 +816,6 @@ int main(int argc, char* argv[])
     return -1;
   }
 
-  return run_config(action, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file,
-      rng, dir, epsilon);
+  return run_config(
+      action, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file, rng, epsilon);
 }
