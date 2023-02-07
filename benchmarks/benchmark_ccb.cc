@@ -1,5 +1,5 @@
 #include "api_status.h"
-#include "benchmarks_common.h"
+#include "benchmark_common.h"
 #include "config_utility.h"
 #include "constants.h"
 #include "err_constants.h"
