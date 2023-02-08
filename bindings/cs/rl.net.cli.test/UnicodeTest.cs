@@ -367,9 +367,9 @@ namespace Rl.Net.Cli.Test
             // Report reward on whole episode
             liveModel.QueueOutcomeEvent(episodeId, 0.5f);
             // Report reward on one step
-            liveModel.QueueEpisodicOutcomeEvent(episodeId, eventId, 0.5f);
+            liveModel.QueueOutcomeEvent(episodeId, eventId, 0.5f);
             // Action Taken events
-            liveModel.QueueEpisodicActionTakenEvent(episodeId, eventId);
+            liveModel.QueueActionTakenEvent(episodeId, eventId);
         }
 
         private void Run_LiveModelChooseRank_Test(LiveModel liveModel, string eventId, string contextJson)
@@ -612,21 +612,21 @@ namespace Rl.Net.Cli.Test
             Run_LiveModelReportActionTaken_Test(liveModel, PseudoLocEventId);
         }
 
-        private void Run_LiveModelReportEpisodicActionTaken_Test(LiveModel liveModel, string episodeId, string eventId)
+        private void Run_LiveModelReportActionTakenMultiId_Test(LiveModel liveModel, string episodeId, string eventId)
         {
-            NativeMethods.LiveModelReportEpisodicActionTakenOverride =
+            NativeMethods.LiveModelReportActionTakenMultiIdOverride =
                 (IntPtr liveModelPtr, IntPtr episodeIdPtr, IntPtr eventIdPtr, IntPtr apiStatus) =>
                 {
                     string episodeIdPtrMarshalledBack = NativeMethods.StringMarshallingFunc(episodeIdPtr);
-                    Assert.AreEqual(eventId, episodeIdPtrMarshalledBack, "Marshalling episodeId does not work properly in Run_LiveModelReportEpisodicActionTaken");
+                    Assert.AreEqual(episodeId, episodeIdPtrMarshalledBack, "Marshalling episodeId does not work properly in Run_LiveModelReportActionTakenMultiId");
 
                     string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
-                    Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in Run_LiveModelReportEpisodicActionTaken");
+                    Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in Run_LiveModelReportActionTakenMultiId");
 
                     return NativeMethods.SuccessStatus;
                 };
 
-            liveModel.TryQueueEpisodicActionTakenEvent(episodeId, eventId);
+            liveModel.TryQueueActionTakenEvent(episodeId, eventId);
         }
 
         [TestMethod]
@@ -636,7 +636,7 @@ namespace Rl.Net.Cli.Test
             string eventId = "event0";
             LiveModel liveModel = this.ConfigureLiveModel(PseudoLocConfigJsonPdfModel);
 
-            Run_LiveModelReportEpisodicActionTaken_Test(liveModel, episodeId, eventId);
+            Run_LiveModelReportActionTakenMultiId_Test(liveModel, episodeId, eventId);
         }
 
         private void Run_LiveModelReportOutcomeF_Test(LiveModel liveModel, string eventId, float outcome)
@@ -750,28 +750,28 @@ namespace Rl.Net.Cli.Test
             Run_LiveModelReportOutcomeSlotStringIdF_Test(liveModel, PseudoLocEventId, "SlotId", 1.0f);
             Run_LiveModelReportOutcomeSlotStringIdJson_Test(liveModel, PseudoLocEventId, "SlotId", PseudoLocOutcomeJson);
         }
-        private void Run_LiveModelReportEpisodicOutcome_Test(LiveModel liveModel, string episodeId, string eventId, float outcome)
+        private void Run_LiveModelReportOutcomeMultiId_Test(LiveModel liveModel, string episodeId, string eventId, float outcome)
         {
-            NativeMethods.LiveModelReportEpisodicOutcomeFOverride =
+            NativeMethods.LiveModelReportOutcomeSlotStringIdFOverride =
                 (IntPtr liveModelPtr, IntPtr episodeIdPtr, IntPtr eventIdPtr, float outcomeF, IntPtr apiStatus) =>
                 {
                     string episodeIdMarshalledBack = NativeMethods.StringMarshallingFunc(episodeIdPtr);
-                    Assert.AreEqual(episodeId, episodeIdMarshalledBack, "Marshalling episodeId does not work properly in Run_LiveModelReportEpisodicOutcome");
+                    Assert.AreEqual(episodeId, episodeIdMarshalledBack, "Marshalling episodeId does not work properly in Run_LiveModelReportOutcomeMultiId");
 
                     string eventIdMarshalledBack = NativeMethods.StringMarshallingFunc(eventIdPtr);
-                    Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in Run_LiveModelReportEpisodicOutcome");
+                    Assert.AreEqual(eventId, eventIdMarshalledBack, "Marshalling eventId does not work properly in Run_LiveModelReportOutcomeMultiId");
                     Assert.AreEqual(outcome, outcomeF, 1e-6);
                     return NativeMethods.SuccessStatus;
                 };
 
-            liveModel.QueueEpisodicOutcomeEvent(episodeId, eventId, outcome);
+            liveModel.QueueOutcomeEvent(episodeId, eventId, outcome);
         }
 
         [TestMethod]
-        public void Test_LiveModel_ReportEpisodicOutcome()
+        public void Test_LiveModel_ReportOutcomeMultiId()
         {
             LiveModel liveModel = this.ConfigureLiveModel(PseudoLocConfigJsonPdfModel);
-            Run_LiveModelReportEpisodicOutcome_Test(liveModel, "episode0", "event0", 0.5f);
+            Run_LiveModelReportOutcomeMultiId_Test(liveModel, "episode0", "event0", 0.5f);
         }
 
         private void Run_StringReturnMarshallingTest<TNativeObject>(string valueToReturn, Action<Func<IntPtr, IntPtr>> registerNativeOverride, Func<TNativeObject, string> targetInvocation, string targetInvocationName)

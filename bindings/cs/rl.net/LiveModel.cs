@@ -229,34 +229,19 @@ namespace Rl.Net
                 return LiveModelReportActionTakenNative(liveModel, eventId, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "LiveModelReportEpisodicActionTaken")]
-            private static extern int LiveModelReportEpisodicActionTakenNative(IntPtr liveModel, IntPtr episodeId, IntPtr eventId, IntPtr apiStatus);
+            [DllImport("rlnetnative", EntryPoint = "LiveModelReportActionMultiIdTaken")]
+            private static extern int LiveModelReportActionTakenMultiIdNative(IntPtr liveModel, IntPtr primaryId, IntPtr secondaryId, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelReportEpisodicActionTakenOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelReportActionTakenMultiIdOverride { get; set; }
 
-            public static int LiveModelReportEpisodicActionTaken(IntPtr liveModel, IntPtr episodeId, IntPtr eventId, IntPtr apiStatus)
+            public static int LiveModelReportActionMultiIdTaken(IntPtr liveModel, IntPtr primaryId, IntPtr secondaryId, IntPtr apiStatus)
             {
-                if (LiveModelReportActionTakenOverride != null)
+                if (LiveModelReportActionTakenMultiIdOverride != null)
                 {
-                    return LiveModelReportEpisodicActionTakenOverride(liveModel, episodeId, eventId, apiStatus);
+                    return LiveModelReportActionTakenMultiIdOverride(liveModel, primaryId, secondaryId, apiStatus);
                 }
 
-                return LiveModelReportEpisodicActionTakenNative(liveModel, episodeId, eventId, apiStatus);
-            }
-
-            [DllImport("rlnetnative", EntryPoint = "LiveModelReportEpisodicOutcomeF")]
-            private static extern int LiveModelReportEpisodicOutcomeFNative(IntPtr liveModel, IntPtr episodeId, IntPtr eventId, float outcome, IntPtr apiStatus);
-
-            internal static Func<IntPtr, IntPtr, IntPtr, float, IntPtr, int> LiveModelReportEpisodicOutcomeFOverride { get; set; }
-
-            public static int LiveModelEpisodicReportOutcomeF(IntPtr liveModel, IntPtr episodeId, IntPtr eventId, float outcome, IntPtr apiStatus)
-            {
-                if (LiveModelReportEpisodicOutcomeFOverride != null)
-                {
-                    return LiveModelReportEpisodicOutcomeFOverride(liveModel, episodeId, eventId, outcome, apiStatus);
-                }
-
-                return LiveModelReportEpisodicOutcomeFNative(liveModel, episodeId, eventId, outcome, apiStatus);
+                return LiveModelReportActionTakenMultiIdNative(liveModel, primaryId, secondaryId, apiStatus);
             }
 
             [DllImport("rlnetnative", EntryPoint = "LiveModelReportOutcomeF")]
@@ -678,22 +663,22 @@ namespace Rl.Net
             }
         }
 
-        unsafe private static int LiveModelReportEpisodicActionTaken(IntPtr liveModel, string episodeId, string eventId, IntPtr apiStatus)
+        unsafe private static int LiveModelReportActionMultiIdTaken(IntPtr liveModel, string primaryId, string secondaryId, IntPtr apiStatus)
         {
-            if (episodeId == null)
+            if (primaryId == null)
             {
-                throw new ArgumentNullException("episodeId");
+                throw new ArgumentNullException("primaryId");
             }
 
-            if (eventId == null)
+            if (secondaryId == null)
             {
-                throw new ArgumentNullException("eventId");
+                throw new ArgumentNullException("secondaryId");
             }
 
-            fixed (byte* episodeIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(episodeId))
-            fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+            fixed (byte* episodeIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(primaryId))
+            fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(secondaryId))
             {
-                return NativeMethods.LiveModelReportEpisodicActionTaken(liveModel, new IntPtr(episodeIdUtf8Bytes), new IntPtr(eventIdUtf8Bytes), apiStatus);
+                return NativeMethods.LiveModelReportActionMultiIdTaken(liveModel, new IntPtr(episodeIdUtf8Bytes), new IntPtr(eventIdUtf8Bytes), apiStatus);
             }
         }
 
@@ -794,25 +779,6 @@ namespace Rl.Net
             fixed (byte* outcomeJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(outcomeJson))
             {
                 return NativeMethods.LiveModelReportOutcomeSlotStringIdJson(liveModel, new IntPtr(eventIdUtf8Bytes), new IntPtr(slotIdUtf8Bytes), new IntPtr(outcomeJsonUtf8Bytes), apiStatus);
-            }
-        }
-
-        unsafe private static int LiveModelReportEpisodicOutcomeFNative(IntPtr liveModel, string episodeId, string eventId, float outcome, IntPtr apiStatus)
-        {
-            if (episodeId == null)
-            {
-                throw new ArgumentNullException("episodeId");
-            }
-
-            if (eventId == null)
-            {
-                throw new ArgumentNullException("eventId");
-            }
-
-            fixed (byte* episodeIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(episodeId))
-            fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
-            {
-                return NativeMethods.LiveModelEpisodicReportOutcomeF(liveModel, new IntPtr(episodeIdUtf8Bytes), new IntPtr(eventIdUtf8Bytes), outcome, apiStatus);
             }
         }
 
@@ -1225,9 +1191,9 @@ namespace Rl.Net
             return result == NativeMethods.SuccessStatus;
         }
 
-        public bool TryQueueEpisodicActionTakenEvent(string episodeId, string eventId, ApiStatus apiStatus = null)
+        public bool TryQueueActionTakenEvent(string primaryId, string secondaryId, ApiStatus apiStatus = null)
         {
-            int result = LiveModelReportEpisodicActionTaken(this.DangerousGetHandle(), episodeId, eventId, apiStatus.ToNativeHandleOrNullptrDangerous());
+            int result = LiveModelReportActionMultiIdTaken(this.DangerousGetHandle(), primaryId, secondaryId, apiStatus.ToNativeHandleOrNullptrDangerous());
 
             GC.KeepAlive(apiStatus);
             GC.KeepAlive(this);
@@ -1247,10 +1213,10 @@ namespace Rl.Net
                 }
         }
 
-        public void QueueEpisodicActionTakenEvent(string episodeId, string eventId)
+        public void QueueActionTakenEvent(string primaryId, string secondaryId)
         {
             using (ApiStatus apiStatus = new ApiStatus())
-                if (!this.TryQueueEpisodicActionTakenEvent(episodeId, eventId, apiStatus))
+                if (!this.TryQueueActionTakenEvent(primaryId, secondaryId, apiStatus))
                 {
                     throw new RLException(apiStatus);
                 }
@@ -1353,10 +1319,10 @@ namespace Rl.Net
             return result == NativeMethods.SuccessStatus;
         }
 
-        public void QueueOutcomeEvent(string eventId, string slotId, float outcome)
+        public void QueueOutcomeEvent(string secondaryId, string slotId, float outcome)
         {
             using (ApiStatus apiStatus = new ApiStatus())
-                if (!this.TryQueueOutcomeEvent(eventId, slotId, outcome, apiStatus))
+                if (!this.TryQueueOutcomeEvent(secondaryId, slotId, outcome, apiStatus))
                 {
                     throw new RLException(apiStatus);
                 }
@@ -1375,24 +1341,6 @@ namespace Rl.Net
         {
             using (ApiStatus apiStatus = new ApiStatus())
                 if (!this.TryQueueOutcomeEvent(eventId, slotId, outcomeJson, apiStatus))
-                {
-                    throw new RLException(apiStatus);
-                }
-        }
-
-        public bool TryQueueEpisodicOutcomeEvent(string episodeId, string eventId, float outcome, ApiStatus apiStatus = null)
-        {
-            int result = LiveModelReportEpisodicOutcomeFNative(this.DangerousGetHandle(), episodeId, eventId, outcome, apiStatus.ToNativeHandleOrNullptrDangerous());
-
-            GC.KeepAlive(apiStatus);
-            GC.KeepAlive(this);
-            return result == NativeMethods.SuccessStatus;
-        }
-
-        public void QueueEpisodicOutcomeEvent(string episodeId, string eventId, float outcome)
-        {
-            using (ApiStatus apiStatus = new ApiStatus())
-                if (!this.TryQueueEpisodicOutcomeEvent(episodeId, eventId, outcome, apiStatus))
                 {
                     throw new RLException(apiStatus);
                 }

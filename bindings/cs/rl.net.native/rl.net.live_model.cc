@@ -238,10 +238,11 @@ API int LiveModelReportActionTaken(
   return context->livemodel->report_action_taken(event_id, status);
 }
 
-API int LiveModelReportEpisodicActionTaken(livemodel_context_t* context, const char* episode_id, const char* event_id,
+API int LiveModelReportActionMultiIdTaken(livemodel_context_t* context, const char* primary_id,
+    const char* secondary_id,
     reinforcement_learning::api_status* status)
 {
-  return context->livemodel->report_action_taken(episode_id, event_id, status);
+  return context->livemodel->report_action_taken(primary_id, secondary_id, status);
 }
 
 API int LiveModelReportOutcomeF(
@@ -278,12 +279,6 @@ API int LiveModelReportOutcomeSlotStringIdJson(livemodel_context_t* context, con
     const char* outcome_json, reinforcement_learning::api_status* status)
 {
   return context->livemodel->report_outcome(event_id, slot_id, outcome_json, status);
-}
-
-API int LiveModelReportEpisodicOutcomeF(livemodel_context_t* context, const char* episode_id, const char* event_id,
-    float outcome, reinforcement_learning::api_status* status)
-{
-  return context->livemodel->report_outcome(episode_id, event_id, outcome, status);
 }
 
 API int LiveModelRefreshModel(livemodel_context_t* context, reinforcement_learning::api_status* status)
