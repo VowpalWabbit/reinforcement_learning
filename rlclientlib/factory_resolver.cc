@@ -106,13 +106,12 @@ int file_model_loader_create(std::unique_ptr<m::i_data_transport>& retval, const
   TRACE_INFO(trace_logger, "File model loader created.");
   const char* file_name = config.get(name::MODEL_FILE_NAME, "current");
   const bool file_must_exist = config.get_bool(name::MODEL_FILE_MUST_EXIST, false);
-  auto* file_loader = new model_management::file_model_loader(file_name, file_must_exist, trace_logger);
+  std::unique_ptr<model_management::file_model_loader> file_loader(new model_management::file_model_loader(file_name, file_must_exist, trace_logger));
 
   const auto success = file_loader->init(status);
 
   if (success != error_code::success)
   {
-    delete file_loader;
     return success;
   }
 
