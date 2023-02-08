@@ -21,7 +21,7 @@ jobs:
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        os: ["windows-2019"]
+        os: ["windows-latest"]
         build_type: ["Debug", "Release"]
         toolset: ["v141", "v142"]
   
@@ -108,7 +108,7 @@ jobs:
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        os: ["windows-2019"]
+        os: ["windows-latest"]
         build_type: ["Debug", "Release"]
         toolset: ["v141", "v142"]
     steps:
@@ -156,5 +156,5 @@ jobs:
       - name: Build test
         run: |
           cd nuget\test
-          msbuild test-${{ matrix.toolset }}.vcxproj -t:rebuild "-property:Configuration=${{ matrix.build_type }};Platform=x64"
-          .\bin\x64\${{ matrix.build_type }}\test-${{matrix.toolset}}.exe
+          msbuild test_rl_nuget.vcxproj -t:rebuild "-property:Configuration=${{ matrix.build_type }};Platform=x64;PlatformToolset=${{ matrix.toolset }}"
+          .\bin\x64\${{ matrix.build_type }}\test_rl_nuget.exe

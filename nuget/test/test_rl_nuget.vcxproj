@@ -18,18 +18,32 @@
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(PlatformToolset)'=='Debug|v141'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <OutDir>bin\x64\Debug\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(PlatformToolset)'=='Release|v141'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <OutDir>bin\x64\Release\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(PlatformToolset)'=='Debug|v142'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <OutDir>bin\x64\Debug\</OutDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(PlatformToolset)'=='Release|v142'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <OutDir>bin\x64\Release\</OutDir>
   </PropertyGroup>
@@ -83,13 +97,13 @@
     <ClCompile Include="main.cc" />
   </ItemGroup>
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(ProjectDir)packages\RLClientLibNativeStatic-v142-$(Configuration)-x64\build\RLClientLibNativeStatic-v142-$(Configuration)-x64.targets" Condition="Exists('$(ProjectDir)packages\RLClientLibNativeStatic-v142-$(Configuration)-x64\build\RLClientLibNativeStatic-v142-$(Configuration)-x64.targets')" />
+    <Import Project="$(ProjectDir)packages\RLClientLibNativeStatic-$(PlatformToolset)-$(Configuration)-x64\build\RLClientLibNativeStatic-$(PlatformToolset)-$(Configuration)-x64.targets" Condition="Exists('$(ProjectDir)packages\RLClientLibNativeStatic-$(PlatformToolset)-$(Configuration)-x64\build\RLClientLibNativeStatic-$(PlatformToolset)-$(Configuration)-x64.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('$(ProjectDir)packages\RLClientLibNativeStatic-v142-$(Configuration)-x64\build\RLClientLibNativeStatic-v142-$(Configuration)-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(ProjectDir)packages\RLClientLibNativeStatic-v142-$(Configuration)-x64\build\RLClientLibNativeStatic-v142-$(Configuration)-x64.targets'))" />
+    <Error Condition="!Exists('$(ProjectDir)packages\RLClientLibNativeStatic-$(PlatformToolset)-$(Configuration)-x64\build\RLClientLibNativeStatic-$(PlatformToolset)-$(Configuration)-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(ProjectDir)packages\RLClientLibNativeStatic-$(PlatformToolset)-$(Configuration)-x64\build\RLClientLibNativeStatic-$(PlatformToolset)-$(Configuration)-x64.targets'))" />
   </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
