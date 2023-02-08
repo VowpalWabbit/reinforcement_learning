@@ -1945,8 +1945,6 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_uri)
   BOOST_CHECK_EQUAL(_rl->init(&status), r::error_code::http_model_uri_not_provided);
 }
 
-#ifdef _WIN32
-#  ifdef USE_AZURE_FACTORIES
 BOOST_AUTO_TEST_CASE(live_model_using_endpoint_success)
 {
   u::configuration config;
@@ -1971,5 +1969,3 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_apikey)
 
   BOOST_CHECK_EQUAL(_rl->init(&status), r::error_code::http_api_key_not_provided);
 }
-#  endif
-#endif
