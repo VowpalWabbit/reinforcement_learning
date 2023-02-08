@@ -1258,7 +1258,7 @@ namespace Rl.Net
 
         [Obsolete("Use TryQueueOutcomeEvent instead.")]
         public bool TryReportOutcome(string eventId, float outcome, ApiStatus apiStatus = null)
-                   => this.TryQueueOutcomeEvent(eventId, outcome, apiStatus);
+            => this.TryQueueOutcomeEvent(eventId, outcome, apiStatus);
 
         public bool TryQueueOutcomeEvent(string eventId, float outcome, ApiStatus apiStatus = null)
         {
