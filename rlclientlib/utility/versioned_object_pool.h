@@ -62,10 +62,7 @@ public:
   void return_to_pool(TObject* obj, int obj_version)
   {
     std::unique_ptr<TObject> pobj(obj);
-    if (_version == obj_version)
-    {
-      _pool.push_back(std::move(pobj));
-    }
+    if (_version == obj_version) { _pool.push_back(std::move(pobj)); }
     // else unique_ptr will delete obj
   }
 

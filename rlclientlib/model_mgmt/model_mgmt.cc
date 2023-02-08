@@ -23,10 +23,7 @@ char* model_data::alloc(const size_t desired)
   return _data.data();
 }
 
-void model_data::free()
-{
-  _data.clear();
-}
+void model_data::free() { _data.clear(); }
 
 }  // namespace model_management
 }  // namespace reinforcement_learning
