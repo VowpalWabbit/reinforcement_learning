@@ -44,6 +44,8 @@ const auto JSON_CFG = R"(
   )";
 const auto JSON_CONTEXT = R"({"_multi":[{},{}]})";
 
+std::vector<std::string> tracer_data;
+
 struct vector_tracer : r::i_trace
 {
   void log(int log_level, const std::string& msg) override
@@ -51,14 +53,14 @@ struct vector_tracer : r::i_trace
     std::unique_lock<std::mutex> mlock(mutex);
     data.emplace_back(msg);
   }
-  std::vector<std::string> data;
+  std::vector<std::string>& data = tracer_data;
   std::mutex mutex;
 };
 
-vector_tracer* the_tracer = new vector_tracer();
-int vector_trace_create(r::i_trace** retval, const u::configuration&, r::i_trace* trace_logger, r::api_status* status)
+int vector_trace_create(
+    std::unique_ptr<r::i_trace>& retval, const u::configuration&, r::i_trace* trace_logger, r::api_status* status)
 {
-  *retval = the_tracer;
+  retval.reset(new vector_tracer());
   return err::success;
 }
 
@@ -86,7 +88,7 @@ BOOST_AUTO_TEST_CASE(test_trace_logging)
   r::live_model ds(config, nullptr, nullptr, &r::trace_logger_factory, data_transport_factory.get(),
       model_factory.get(), logger_factory.get());
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
-  BOOST_CHECK_EQUAL(the_tracer->data[0], "API Tracing initialized");
+  BOOST_CHECK_EQUAL(tracer_data[0], "API Tracing initialized");
 }
 
 BOOST_AUTO_TEST_CASE(test_console_logging)
