@@ -102,8 +102,8 @@ extern "C"
       float outcome, reinforcement_learning::api_status* status = nullptr);
   API int LiveModelReportOutcomeSlotStringIdJson(livemodel_context_t* context, const char* event_id,
       const char* slot_id, const char* outcome_json, reinforcement_learning::api_status* status = nullptr);
-  API int LiveModelReportEpisodicOutcomeF(livemodel_context_t* livemodel, const char* episode_id,
-      const char* event_id, float outcome, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelReportEpisodicOutcomeF(livemodel_context_t* livemodel, const char* episode_id, const char* event_id,
+      float outcome, reinforcement_learning::api_status* status = nullptr);
 
   API int LiveModelRefreshModel(livemodel_context_t* context, reinforcement_learning::api_status* status = nullptr);
 

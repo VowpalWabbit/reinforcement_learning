@@ -279,8 +279,8 @@ API int LiveModelReportOutcomeSlotStringIdJson(livemodel_context_t* context, con
   return context->livemodel->report_outcome(event_id, slot_id, outcome_json, status);
 }
 
-API int LiveModelReportEpisodicOutcomeF(livemodel_context_t* context, const char* episode_id,
-    const char* event_id, float outcome, reinforcement_learning::api_status* status)
+API int LiveModelReportEpisodicOutcomeF(livemodel_context_t* context, const char* episode_id, const char* event_id,
+    float outcome, reinforcement_learning::api_status* status)
 {
   return context->livemodel->report_outcome(episode_id, event_id, outcome, status);
 }
