@@ -1,8 +1,7 @@
 #pragma once
 #include "multistep.h"
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <cstddef>
 #include <string>
 #include <utility>
@@ -23,7 +22,8 @@ class model_data
 {
 public:
   // Get data
-  char* data() const;
+  char* data();
+  const char* data() const;
   size_t data_sz() const;
   uint32_t refresh_count() const;
 
@@ -34,16 +34,16 @@ public:
   char* alloc(size_t desired);
   void free();
 
-  model_data();
-  ~model_data();
+  model_data() = default;
+  ~model_data() = default;
 
-  model_data(model_data const& other);
-  model_data(model_data&& other) noexcept;
-  model_data& operator=(model_data other) noexcept;
+  model_data(const model_data& other) = default;
+  model_data(model_data&& other) noexcept = default;
+  model_data& operator=(const model_data& other) noexcept = default;
+  model_data& operator=(model_data&& other) noexcept = default;
 
 private:
-  char* _data = nullptr;
-  size_t _data_sz = 0;
+  std::vector<char> _data;
   uint32_t _refresh_count = 0;
 };
 
