@@ -467,9 +467,7 @@ live_model_impl::live_model_impl(const utility::configuration& config, std::func
 int live_model_impl::init_trace(api_status* status)
 {
   const auto* const trace_impl = _configuration.get(name::TRACE_LOG_IMPLEMENTATION, value::NULL_TRACE_LOGGER);
-  i_trace* plogger = nullptr;
-  RETURN_IF_FAIL(_trace_factory->create(&plogger, trace_impl, _configuration, nullptr, status));
-  _trace_logger.reset(plogger);
+  RETURN_IF_FAIL(_trace_factory->create(_trace_logger, trace_impl, _configuration, nullptr, status));
   TRACE_INFO(_trace_logger, "API Tracing initialized");
   _watchdog.set_trace_log(_trace_logger.get());
   return error_code::success;
@@ -478,9 +476,7 @@ int live_model_impl::init_trace(api_status* status)
 int live_model_impl::init_model(api_status* status)
 {
   const auto* const model_impl = _configuration.get(name::MODEL_IMPLEMENTATION, value::VW);
-  m::i_model* pmodel = nullptr;
-  RETURN_IF_FAIL(_m_factory->create(&pmodel, model_impl, _configuration, _trace_logger.get(), status));
-  _model.reset(pmodel);
+  RETURN_IF_FAIL(_m_factory->create(_model, model_impl, _configuration, _trace_logger.get(), status));
   return error_code::success;
 }
 
@@ -489,64 +485,65 @@ int live_model_impl::init_loggers(api_status* status)
   // Get the name of raw data (as opposed to message) sender for interactions.
   const auto* const ranking_sender_impl =
       _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::get_default_interaction_sender());
-  i_sender* ranking_data_sender = nullptr;
+  std::unique_ptr<i_sender> ranking_data_sender;
 
   // Use the name to create an instance of raw data sender for interactions
   _configuration.set(config_constants::CONFIG_SECTION, config_constants::INTERACTION);
   RETURN_IF_FAIL(_sender_factory->create(
-      &ranking_data_sender, ranking_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
+      ranking_data_sender, ranking_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
   RETURN_IF_FAIL(ranking_data_sender->init(_configuration, status));
 
   // Create a message sender that will prepend the message with a preamble and send the raw data using the
   // factory created raw data sender
-  l::i_message_sender* ranking_msg_sender = new l::preamble_message_sender(ranking_data_sender);
+  std::unique_ptr<l::i_message_sender> ranking_msg_sender(new l::preamble_message_sender(ranking_data_sender.release()));
   RETURN_IF_FAIL(ranking_msg_sender->init(status));
 
   // Get time provider factory and implementation
   const auto* const time_provider_impl =
       _configuration.get(name::TIME_PROVIDER_IMPLEMENTATION, value::get_default_time_provider());
 
-  i_time_provider* logger_extensions_time_provider = nullptr;
+  std::unique_ptr<i_time_provider> logger_extensions_time_provider;
   RETURN_IF_FAIL(_time_provider_factory->create(
-      &logger_extensions_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
+      logger_extensions_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
   // Create the logger extension
+  // TODO: fix potential leak by propagating unique_ptrs everywhere
   _logger_extensions.reset(
-      logger::i_logger_extensions::get_extensions(_configuration, logger_extensions_time_provider));
+      logger::i_logger_extensions::get_extensions(_configuration, logger_extensions_time_provider.release())); 
 
-  i_time_provider* ranking_time_provider = nullptr;
+  std::unique_ptr<i_time_provider> ranking_time_provider;
   RETURN_IF_FAIL(_time_provider_factory->create(
-      &ranking_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
+      ranking_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
   // Create a logger for interactions that will use msg sender to send interaction messages
   _interaction_logger.reset(new logger::interaction_logger_facade(_model->model_type(), _configuration,
-      ranking_msg_sender, _watchdog, ranking_time_provider, _logger_extensions.get(), &_error_cb));
+      ranking_msg_sender.release(), _watchdog, ranking_time_provider.release(), _logger_extensions.get(), &_error_cb));
   RETURN_IF_FAIL(_interaction_logger->init(status));
 
   // Get the name of raw data (as opposed to message) sender for observations.
   const auto* const outcome_sender_impl =
       _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::get_default_observation_sender());
-  i_sender* outcome_sender = nullptr;
+  std::unique_ptr<i_sender> outcome_sender;
 
   // Use the name to create an instance of raw data sender for observations
   _configuration.set(config_constants::CONFIG_SECTION, config_constants::OBSERVATION);
   RETURN_IF_FAIL(_sender_factory->create(
-      &outcome_sender, outcome_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
+      outcome_sender, outcome_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
   RETURN_IF_FAIL(outcome_sender->init(_configuration, status));
 
   // Create a message sender that will prepend the message with a preamble and send the raw data using the
   // factory created raw data sender
-  l::i_message_sender* outcome_msg_sender = new l::preamble_message_sender(outcome_sender);
+  std::unique_ptr<l::i_message_sender> outcome_msg_sender(new l::preamble_message_sender(outcome_sender.release()));
   RETURN_IF_FAIL(outcome_msg_sender->init(status));
 
   // Get time provider implementation
-  i_time_provider* observation_time_provider = nullptr;
+  std::unique_ptr<i_time_provider> observation_time_provider;
   RETURN_IF_FAIL(_time_provider_factory->create(
-      &observation_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
+      observation_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
   // Create a logger for observations that will use msg sender to send observation messages
   _outcome_logger.reset(new logger::observation_logger_facade(
-      _configuration, outcome_msg_sender, _watchdog, observation_time_provider, &_error_cb));
+      _configuration, outcome_msg_sender.release(), _watchdog, observation_time_provider.release(), &_error_cb));
   RETURN_IF_FAIL(_outcome_logger->init(status));
 
   if (_configuration.get(name::EPISODE_EH_HOST, nullptr) != nullptr ||
@@ -556,27 +553,27 @@ int live_model_impl::init_loggers(api_status* status)
     // Get the name of raw data (as opposed to message) sender for episodes.
     const auto* const episode_sender_impl =
         _configuration.get(name::EPISODE_SENDER_IMPLEMENTATION, value::get_default_episode_sender());
-    i_sender* episode_sender = nullptr;
+    std::unique_ptr<i_sender> episode_sender;
 
     // Use the name to create an instance of raw data sender for episodes
     _configuration.set(config_constants::CONFIG_SECTION, config_constants::EPISODE);
     RETURN_IF_FAIL(_sender_factory->create(
-        &episode_sender, episode_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
+        episode_sender, episode_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
     RETURN_IF_FAIL(episode_sender->init(_configuration, status));
 
     // Create a message sender that will prepend the message with a preamble and send the raw data using the
     // factory created raw data sender
-    l::i_message_sender* episode_msg_sender = new l::preamble_message_sender(episode_sender);
+    std::unique_ptr<l::i_message_sender> episode_msg_sender(new l::preamble_message_sender(episode_sender.release()));
     RETURN_IF_FAIL(episode_msg_sender->init(status));
 
     // Get time provider implementation
-    i_time_provider* episode_time_provider = nullptr;
+    std::unique_ptr<i_time_provider> episode_time_provider;
     RETURN_IF_FAIL(_time_provider_factory->create(
-        &episode_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
+        episode_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
     // Create a logger for episodes that will use msg sender to send episode messages
     _episode_logger.reset(new logger::episode_logger_facade(
-        _configuration, episode_msg_sender, _watchdog, episode_time_provider, &_error_cb));
+        _configuration, episode_msg_sender.release(), _watchdog, episode_time_provider.release(), &_error_cb));
     RETURN_IF_FAIL(_episode_logger->init(status));
   }
 
@@ -691,15 +688,12 @@ int live_model_impl::init_model_mgmt(api_status* status)
 {
   // Initialize transport for the model using transport factory
   const auto* const tranport_impl = _configuration.get(name::MODEL_SRC, value::get_default_data_transport());
-  m::i_data_transport* ptransport = nullptr;
-  RETURN_IF_FAIL(_t_factory->create(&ptransport, tranport_impl, _configuration, status));
-  // This class manages lifetime of transport
-  this->_transport.reset(ptransport);
+  RETURN_IF_FAIL(_t_factory->create(_transport, tranport_impl, _configuration, status));
 
   if (_bg_model_proc)
   {
     // Initialize background process and start downloading models
-    this->_model_download.reset(new m::model_downloader(ptransport, &_data_cb, _trace_logger.get()));
+    _model_download.reset(new m::model_downloader(_transport.get(), &_data_cb, _trace_logger.get()));
     return _bg_model_proc->init(_model_download.get(), status);
   }
 
