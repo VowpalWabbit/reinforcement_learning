@@ -1380,6 +1380,24 @@ namespace Rl.Net
                 }
         }
 
+        public bool TryQueueEpisodicOutcomeEvent(string episodeId, string eventId, float outcome, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelReportEpisodicOutcomeFNative(this.DangerousGetHandle(), episodeId, eventId, outcome, apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(apiStatus);
+            GC.KeepAlive(this);
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public void QueueEpisodicOutcomeEvent(string episodeId, string eventId, float outcome)
+        {
+            using (ApiStatus apiStatus = new ApiStatus())
+                if (!this.TryQueueEpisodicOutcomeEvent(episodeId, eventId, outcome, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
+        }
+
         public void RefreshModel()
         {
             using (ApiStatus apiStatus = new ApiStatus())

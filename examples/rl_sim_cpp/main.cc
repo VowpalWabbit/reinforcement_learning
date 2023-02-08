@@ -27,13 +27,13 @@ po::variables_map process_cmd_line(const int argc, char** argv)
 {
   po::options_description desc("Options");
   desc.add_options()("help", "produce help message")("json_config,j",
-      po::value<std::string>()->default_value("E:\\Repo\\reinforcement_learning\\examples\\rl_sim_cpp\\client.json"), "JSON file with config information for hosted RL loop")(
+      po::value<std::string>()->default_value("client.json"), "JSON file with config information for hosted RL loop")(
       "log_to_file,l", po::value<bool>()->default_value(false), "Log interactions and observations to local files")(
       "get_model,m", po::value<bool>()->default_value(true), "Download model from model source")(
       "log_timestamp,t", po::value<bool>()->default_value(true), "Apply timestamp to all logged message")("ccb",
       po::value<bool>()->default_value(false), "Run in ccb mode")("slates", po::value<bool>()->default_value(false),
       "Run in slates mode")("ca", po::value<bool>()->default_value(false), "Run in continuous actions mode")(
-      "multistep", po::value<bool>()->default_value(true), "Run in multistep mode")(
+      "multistep", po::value<bool>()->default_value(false), "Run in multistep mode")(
       "num_events", po::value<int>()->default_value(0), "Number of event series' to be sent. 0 is infinite.")(
       "random_seed", po::value<uint64_t>()->default_value(rand()), "Random seed. Default is random")("delay",
       po::value<int64_t>()->default_value(2000),
