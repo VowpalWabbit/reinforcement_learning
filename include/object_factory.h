@@ -5,6 +5,7 @@
 #include "trace_logger.h"
 
 #include <functional>
+#include <memory>
 
 namespace reinforcement_learning
 {
