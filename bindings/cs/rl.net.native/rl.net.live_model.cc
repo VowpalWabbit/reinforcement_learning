@@ -239,8 +239,7 @@ API int LiveModelReportActionTaken(
 }
 
 API int LiveModelReportActionMultiIdTaken(livemodel_context_t* context, const char* primary_id,
-    const char* secondary_id,
-    reinforcement_learning::api_status* status)
+    const char* secondary_id, reinforcement_learning::api_status* status)
 {
   return context->livemodel->report_action_taken(primary_id, secondary_id, status);
 }
