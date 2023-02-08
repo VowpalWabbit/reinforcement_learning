@@ -630,7 +630,7 @@ namespace Rl.Net.Cli.Test
         }
 
         [TestMethod]
-        public void Test_LiveModel_ReportEpisodicActionTaken()
+        public void Test_LiveModel_ReportActionTakenMultiId()
         {
             string episodeId = "episode0";
             string eventId = "event0";
