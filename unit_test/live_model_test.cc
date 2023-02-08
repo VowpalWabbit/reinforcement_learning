@@ -1595,7 +1595,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_with_baseline_custom_eventid)
 const auto JSON_SLATES_CONTEXT =
     R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"},"_slot_id":0},{"TAction":{"a2":"f2"},"_slot_id":0},{"TAction":{"a3":"f3"},"_slot_id":1},{"TAction":{"a4":"f4"},"_slot_id":1},{"TAction":{"a5":"f5"},"_slot_id":1}],"_slots":[{"Slot":{"a1":"f1"}},{"Slot":{"a2":"f2"}}]})";
 
-/*BOOST_AUTO_TEST_CASE(slates_explore_only_mode)
+BOOST_AUTO_TEST_CASE(slates_explore_only_mode)
 {
   u::configuration config;
   cfg::create_from_json(JSON_CFG, config);
@@ -1637,7 +1637,7 @@ const auto JSON_SLATES_CONTEXT =
   ++it;
 
   BOOST_CHECK(it == response.end());
-}*/
+}
 
 BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2)
 {
