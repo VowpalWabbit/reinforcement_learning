@@ -69,10 +69,17 @@ std::unique_ptr<fakeit::Mock<m::i_model>> get_mock_model(m::model_type_t model_t
 {
   auto mock = std::unique_ptr<Mock<m::i_model>>(new fakeit::Mock<m::i_model>());
 
-  const auto choose_rank_fn = [](const char*, uint64_t, r::string_view, std::vector<int>&, std::vector<float>&,
-                                  std::string& model_version, r::api_status*)
+  const auto choose_rank_fn = [](const char*, uint64_t, r::string_view, std::vector<int>& actions,
+                                  std::vector<float>& scores, std::string& model_version, r::api_status*)
   {
     model_version = "model_id";
+    actions.resize(2);
+    scores.resize(2);
+    for (size_t i = 0; i < 2; ++i)
+    {
+      actions[i] = i;
+      scores[i] = 0.5f;
+    }
     return r::error_code::success;
   };
 
@@ -127,17 +134,17 @@ std::unique_ptr<r::sender_factory_t> get_mock_sender_factory(
 {
   auto factory = std::unique_ptr<r::sender_factory_t>(new r::sender_factory_t());
   factory->register_type(r::value::get_default_observation_sender(),
-      [mock_observation_sender](r::i_sender** retval, const u::configuration&, r::error_callback_fn* error_callback,
-          r::i_trace*, r::api_status*)
+      [mock_observation_sender](std::unique_ptr<r::i_sender>& retval, const u::configuration&,
+          r::error_callback_fn* error_callback, r::i_trace*, r::api_status*)
       {
-        *retval = &mock_observation_sender->get();
+        retval.reset(&mock_observation_sender->get());
         return r::error_code::success;
       });
   factory->register_type(r::value::get_default_interaction_sender(),
-      [mock_interaction_sender](r::i_sender** retval, const u::configuration&, r::error_callback_fn* error_callback,
-          r::i_trace*, r::api_status*)
+      [mock_interaction_sender](std::unique_ptr<r::i_sender>& retval, const u::configuration&,
+          r::error_callback_fn* error_callback, r::i_trace*, r::api_status*)
       {
-        *retval = &mock_interaction_sender->get();
+        retval.reset(&mock_interaction_sender->get());
         return r::error_code::success;
       });
   return factory;
@@ -148,9 +155,10 @@ std::unique_ptr<r::data_transport_factory_t> get_mock_data_transport_factory(
 {
   auto factory = std::unique_ptr<r::data_transport_factory_t>(new r::data_transport_factory_t());
   factory->register_type(r::value::get_default_data_transport(),
-      [mock_data_transport](m::i_data_transport** retval, const u::configuration&, r::i_trace* trace, r::api_status*)
+      [mock_data_transport](
+          std::unique_ptr<m::i_data_transport>& retval, const u::configuration&, r::i_trace* trace, r::api_status*)
       {
-        *retval = &mock_data_transport->get();
+        retval.reset(&mock_data_transport->get());
         return r::error_code::success;
       });
   return factory;
@@ -160,9 +168,9 @@ std::unique_ptr<r::model_factory_t> get_mock_model_factory(fakeit::Mock<m::i_mod
 {
   auto factory = std::unique_ptr<r::model_factory_t>(new r::model_factory_t());
   factory->register_type(r::value::VW,
-      [mock_model](m::i_model** retval, const u::configuration&, r::i_trace* trace, r::api_status*)
+      [mock_model](std::unique_ptr<m::i_model>& retval, const u::configuration&, r::i_trace* trace, r::api_status*)
       {
-        *retval = &mock_model->get();
+        retval.reset(&mock_model->get());
         return r::error_code::success;
       });
   return factory;

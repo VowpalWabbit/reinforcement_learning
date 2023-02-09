@@ -32,15 +32,17 @@ BOOST_AUTO_TEST_CASE(factory_tempate_usage)
   auto b = 5;  // arbitrary variable to illustrate a point
   u::object_factory<an_interface, const u::configuration&> factory;
 
-  auto create_A_fn = [](an_interface** pret, const u::configuration&, r::i_trace* trace, r::api_status*) -> int
+  auto create_A_fn = [](std::unique_ptr<an_interface>& pret, const u::configuration&, r::i_trace* trace,
+                         r::api_status*) -> int
   {
-    *pret = new impl_A();
+    pret.reset(new impl_A());
     return r::error_code::success;
   };
 
-  auto create_B_fn = [b](an_interface** pret, const u::configuration&, r::i_trace* trace, r::api_status*) -> int
+  auto create_B_fn = [b](std::unique_ptr<an_interface>& pret, const u::configuration&, r::i_trace* trace,
+                         r::api_status*) -> int
   {
-    *pret = new impl_B(b);
+    pret.reset(new impl_B(b));
     return r::error_code::success;
   };
 
@@ -50,9 +52,8 @@ BOOST_AUTO_TEST_CASE(factory_tempate_usage)
   u::configuration cc;
   cc.set(r::name::MODEL_SRC, r::value::AZURE_STORAGE_BLOB);
 
-  an_interface* p_impl;
-  auto scode = factory.create(&p_impl, std::string("A"), cc);
+  std::unique_ptr<an_interface> p_impl;
+  auto scode = factory.create(p_impl, std::string("A"), cc);
   BOOST_CHECK_EQUAL(scode, r::error_code::success);
   p_impl->do_something();
-  delete p_impl;
 }

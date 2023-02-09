@@ -14,6 +14,6 @@
       <file src="@RL_NUGET_PACKAGE_NAME@-v@MSVC_TOOLSET_VERSION@-@NATIVE_NUGET_PLATFORM_TAG@.targets" target="build" />
       <file src="lib\*.lib" target="lib" />
       <file src="include\rlclientlib\*.h" target="include" />
-      <file src="include\nonstd\*.h" target="include\nonstd" />
+      <file src="include\nonstd\*.hpp" target="include\nonstd" />
   </files>
 </package>

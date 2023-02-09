@@ -262,10 +262,10 @@ int trainable_vw_model::learn(VW::workspace& example_ws, VW::multi_ex& examples,
     for (auto example : examples)
     {
       io_buf io_writer;
-      VW::details::cache_temp_buffer temp_buffer;
+      VW::parsers::cache::details::cache_temp_buffer temp_buffer;
       auto example_buffer = std::make_shared<std::vector<char>>();
       io_writer.add_file(VW::io::create_vector_writer(example_buffer));
-      VW::write_example_to_cache(
+      VW::parsers::cache::write_example_to_cache(
           io_writer, example, example_ws.example_parser->lbl_parser, example_ws.parse_mask, temp_buffer);
       io_writer.flush();
 
@@ -273,7 +273,7 @@ int trainable_vw_model::learn(VW::workspace& example_ws, VW::multi_ex& examples,
       io_reader.add_file(VW::io::create_buffer_view(example_buffer->data(), example_buffer->size()));
       VW::multi_ex example_out;
       example_out.push_back(VW::new_unused_example(*_model));
-      VW::read_example_from_cache(_model.get(), io_reader, example_out);
+      VW::parsers::cache::read_example_from_cache(_model.get(), io_reader, example_out);
       examples_copied.insert(examples_copied.end(), example_out.begin(), example_out.end());
     }
 

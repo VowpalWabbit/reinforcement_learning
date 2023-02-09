@@ -78,32 +78,35 @@ factory_initializer::~factory_initializer()
 }
 
 template <typename model_t>
-int model_create(m::i_model** retval, const u::configuration& c, i_trace* trace_logger, api_status* status)
+int model_create(
+    std::unique_ptr<m::i_model>& retval, const u::configuration& c, i_trace* trace_logger, api_status* status)
 {
-  *retval = new model_t(trace_logger, c);
+  retval.reset(new model_t(trace_logger, c));
   return error_code::success;
 }
 
-int null_tracer_create(i_trace** retval, const u::configuration& /*cfg*/, i_trace* trace_logger, api_status* status);
-int console_tracer_create(i_trace** retval, const u::configuration& /*cfg*/, i_trace* trace_logger, api_status* status);
+int null_tracer_create(
+    std::unique_ptr<i_trace>& retval, const u::configuration& /*cfg*/, i_trace* trace_logger, api_status* status);
+int console_tracer_create(
+    std::unique_ptr<i_trace>& retval, const u::configuration& /*cfg*/, i_trace* trace_logger, api_status* status);
 
-int file_sender_create(i_sender** retval, const u::configuration& cfg, const char* file_name,
+int file_sender_create(std::unique_ptr<i_sender>& retval, const u::configuration& cfg, const char* file_name,
     error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
 {
-  *retval = new logger::file::file_logger(file_name, trace_logger);
+  retval.reset(new logger::file::file_logger(file_name, trace_logger));
   return error_code::success;
 }
 
-int empty_data_transport_create(
-    m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
+int empty_data_transport_create(std::unique_ptr<m::i_data_transport>& retval, const u::configuration& config,
+    i_trace* trace_logger, api_status* status)
 {
   TRACE_INFO(trace_logger, "Empty data transport created.");
-  *retval = new model_management::empty_data_transport();
+  retval.reset(new model_management::empty_data_transport());
   return error_code::success;
 }
 
-int file_model_loader_create(
-    m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
+int file_model_loader_create(std::unique_ptr<m::i_data_transport>& retval, const u::configuration& config,
+    i_trace* trace_logger, api_status* status)
 {
   TRACE_INFO(trace_logger, "File model loader created.");
   const char* file_name = config.get(name::MODEL_FILE_NAME, "current");
@@ -118,35 +121,35 @@ int file_model_loader_create(
     return success;
   }
 
-  *retval = file_loader;
+  retval.reset(file_loader);
   return error_code::success;
 }
 
 #ifdef RL_BUILD_FEDERATION
-int local_loop_controller_create(
-    m::i_data_transport** retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
+int local_loop_controller_create(std::unique_ptr<m::i_data_transport>& retval, const u::configuration& config,
+    i_trace* trace_logger, api_status* status)
 {
   TRACE_INFO(trace_logger, "Local loop controller i_data_transport created.");
   std::unique_ptr<local_loop_controller> output;
   RETURN_IF_FAIL(local_loop_controller::create(output, config, trace_logger, status));
-  *retval = output.release();
+  retval = std::move(output);
   return error_code::success;
 }
 #endif
 
 int null_time_provider_create(
-    i_time_provider** retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
+    std::unique_ptr<i_time_provider>& retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
 {
   TRACE_INFO(trace_logger, "Null time provider created.");
-  *retval = nullptr;
+  retval.reset();
   return error_code::success;
 }
 
 int clock_time_provider_create(
-    i_time_provider** retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
+    std::unique_ptr<i_time_provider>& retval, const u::configuration& config, i_trace* trace_logger, api_status* status)
 {
   TRACE_INFO(trace_logger, "Clock time provider created.");
-  *retval = new clock_time_provider();
+  retval.reset(new clock_time_provider());
   return error_code::success;
 }
 
@@ -163,7 +166,7 @@ void factory_initializer::register_default_factories()
   data_transport_factory.register_type(value::LOCAL_LOOP_MODEL_DATA, local_loop_controller_create);
 #else
   data_transport_factory.register_type(value::LOCAL_LOOP_MODEL_DATA,
-      [](m::i_data_transport**, const u::configuration&, i_trace* trace_logger, api_status* status)
+      [](std::unique_ptr<m::i_data_transport>&, const u::configuration&, i_trace* trace_logger, api_status* status)
       {
         RETURN_ERROR_ARG(trace_logger, status, create_fn_exception,
             "Cannot use LOCAL_LOOP_MODEL_DATA because rlclientlib was not compiled with federated learning enabled");
@@ -181,19 +184,22 @@ void factory_initializer::register_default_factories()
 
   // Register File loggers
   sender_factory.register_type(value::EPISODE_FILE_SENDER,
-      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status)
+      [](std::unique_ptr<i_sender>& retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger,
+          api_status* status)
       {
         const char* file_name = c.get(name::EPISODE_FILE_NAME, "episode.fb.data");
         return file_sender_create(retval, c, file_name, cb, trace_logger, status);
       });
   sender_factory.register_type(value::OBSERVATION_FILE_SENDER,
-      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status)
+      [](std::unique_ptr<i_sender>& retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger,
+          api_status* status)
       {
         const char* file_name = c.get(name::OBSERVATION_FILE_NAME, "observation.fb.data");
         return file_sender_create(retval, c, file_name, cb, trace_logger, status);
       });
   sender_factory.register_type(value::INTERACTION_FILE_SENDER,
-      [](i_sender** retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger, api_status* status)
+      [](std::unique_ptr<i_sender>& retval, const u::configuration& c, error_callback_fn* cb, i_trace* trace_logger,
+          api_status* status)
       {
         const char* file_name = c.get(name::INTERACTION_FILE_NAME, "interaction.fb.data");
         return file_sender_create(retval, c, file_name, cb, trace_logger, status);
@@ -201,22 +207,25 @@ void factory_initializer::register_default_factories()
 
   // Register a default factory for LOCAL_LOOP_SENDER that returns an error
   sender_factory.register_type(value::LOCAL_LOOP_SENDER,
-      [](i_sender**, const u::configuration&, error_callback_fn*, i_trace* trace_logger, api_status* status)
+      [](std::unique_ptr<i_sender>&, const u::configuration&, error_callback_fn*, i_trace* trace_logger,
+          api_status* status)
       {
         RETURN_ERROR_ARG(trace_logger, status, create_fn_exception,
             "LOCAL_LOOP_SENDER must be used with model source set to LOCAL_LOOP_MODEL_DATA");
       });
 }
 
-int null_tracer_create(i_trace** retval, const u::configuration& cfg, i_trace* trace_logger, api_status* status)
+int null_tracer_create(
+    std::unique_ptr<i_trace>& retval, const u::configuration& cfg, i_trace* trace_logger, api_status* status)
 {
-  *retval = nullptr;
+  retval.reset();
   return error_code::success;
 }
 
-int console_tracer_create(i_trace** retval, const u::configuration& cfg, i_trace* trace_logger, api_status* status)
+int console_tracer_create(
+    std::unique_ptr<i_trace>& retval, const u::configuration& cfg, i_trace* trace_logger, api_status* status)
 {
-  *retval = new console_tracer();
+  retval.reset(new console_tracer());
   return error_code::success;
 }
 }  // namespace reinforcement_learning
