@@ -113,7 +113,7 @@ int file_model_loader_create(std::unique_ptr<m::i_data_transport>& retval, const
 
   if (success != error_code::success) { return success; }
 
-  retval.reset(file_loader);
+  retval = std::move(file_loader);
   return error_code::success;
 }
 
