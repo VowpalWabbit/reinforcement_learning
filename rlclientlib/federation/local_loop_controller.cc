@@ -48,19 +48,6 @@ local_loop_controller::local_loop_controller(std::string app_id, std::unique_ptr
 
 int local_loop_controller::update_global(api_status* status)
 {
-  if (_need_to_send_model_delta)
-  {
-    // get and send the model delta
-    auto buffer = std::make_shared<std::vector<char>>();
-    auto writer = VW::io::create_vector_writer(buffer);
-    RETURN_IF_FAIL(_trainable_model->get_model_delta(*writer, status));
-
-    char* data_ptr = buffer->data();
-    RETURN_IF_FAIL(_federated_client->report_result(reinterpret_cast<uint8_t*>(data_ptr), buffer->size(), status));
-
-    _need_to_send_model_delta = false;
-  }
-
   // ask for a new global model
   model_management::model_data data;
   bool model_received = false;
@@ -68,8 +55,17 @@ int local_loop_controller::update_global(api_status* status)
 
   if (model_received)
   {
+    // load the new model and immediately train it with accumulated data
     RETURN_IF_FAIL(_trainable_model->set_data(data, status));
-    _need_to_send_model_delta = true;
+    update_local();
+
+    // get and send the model delta
+    auto buffer = std::make_shared<std::vector<char>>();
+    auto writer = VW::io::create_vector_writer(buffer);
+    RETURN_IF_FAIL(_trainable_model->get_model_delta(*writer, status));
+
+    char* data_ptr = buffer->data();
+    RETURN_IF_FAIL(_federated_client->report_result(reinterpret_cast<uint8_t*>(data_ptr), buffer->size(), status));
   }
   return error_code::success;
 }
@@ -84,7 +80,6 @@ int local_loop_controller::update_local(api_status* status)
 
 int local_loop_controller::get_data(model_management::model_data& data, api_status* status)
 {
-  RETURN_IF_FAIL(update_local(status));
   RETURN_IF_FAIL(update_global(status));
   RETURN_IF_FAIL(_trainable_model->get_data(data, status));
   return error_code::success;
