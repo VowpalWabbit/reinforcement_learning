@@ -88,7 +88,7 @@ private:
   queue_mode_enum _queue_mode;
   std::condition_variable _cv;
   std::mutex _m;
-  utility::object_pool<utility::data_buffer> _buffer_pool;
+  std::shared_ptr<utility::object_pool<utility::data_buffer>> _buffer_pool;
   const char* _batch_content_encoding;
   float _subsample_rate;
   events_counter_status _events_counter_status;
@@ -195,7 +195,7 @@ void async_batcher<TEvent, TSerializer>::flush()
   {
     api_status status;
 
-    auto buffer = _buffer_pool.acquire();
+    auto buffer = _buffer_pool->acquire();
     if (fill_buffer(buffer, remaining, &status) != error_code::success) { ERROR_CALLBACK(_perror_cb, status); }
     if (_sender->send(TSerializer<TEvent>::message_id(), buffer, &status) != error_code::success)
     {
@@ -221,6 +221,7 @@ async_batcher<TEvent, TSerializer>::async_batcher(i_message_sender* sender, util
     , _subsample_rate(config.subsample_rate)
     , _events_counter_status(config.event_counter_status)
 {
+  _buffer_pool = utility::object_pool<utility::data_buffer>::create();
 }
 
 template <typename TEvent, template <typename> class TSerializer>
