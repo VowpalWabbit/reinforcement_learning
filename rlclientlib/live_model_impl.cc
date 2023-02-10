@@ -523,9 +523,8 @@ int live_model_impl::init_loggers(api_status* status)
       ranking_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
   // Create a logger for interactions that will use msg sender to send interaction messages
-  _interaction_logger.reset(
-      new logger::interaction_logger_facade(_model->model_type(), _configuration, std::move(ranking_msg_sender),
-          _watchdog, std::move(ranking_time_provider), _logger_extensions.get(), &_error_cb));
+  _interaction_logger.reset(new logger::interaction_logger_facade(_model->model_type(), _configuration,
+      std::move(ranking_msg_sender), _watchdog, std::move(ranking_time_provider), *_logger_extensions, &_error_cb));
   RETURN_IF_FAIL(_interaction_logger->init(status));
 
   // Get the name of raw data (as opposed to message) sender for observations.

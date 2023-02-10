@@ -26,7 +26,8 @@ class interaction_logger_facade
 public:
   interaction_logger_facade(reinforcement_learning::model_management::model_type_t model_type,
       const utility::configuration& c, std::unique_ptr<i_message_sender> sender, utility::watchdog& watchdog,
-      std::unique_ptr<i_time_provider> time_provider, i_logger_extensions* ext, error_callback_fn* perror_cb = nullptr);
+      std::unique_ptr<i_time_provider> time_provider, i_logger_extensions& logger_extensions,
+      error_callback_fn* perror_cb = nullptr);
 
   interaction_logger_facade(const interaction_logger_facade& other) = delete;
   interaction_logger_facade& operator=(const interaction_logger_facade& other) = delete;
@@ -63,8 +64,8 @@ private:
   const reinforcement_learning::model_management::model_type_t _model_type;
   const int _version;
   int _serializer_shared_state;
-  // _ext_p is owned by live_model_impl
-  i_logger_extensions* _ext_p;
+  // _logger_extensions is owned by live_model_impl
+  i_logger_extensions& _logger_extensions;
 
   const std::unique_ptr<interaction_logger> _v1_cb;
   const std::unique_ptr<ccb_logger> _v1_ccb;
