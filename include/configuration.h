@@ -30,16 +30,16 @@ namespace utility
 class configuration
 {
 public:
-  configuration();
-  ~configuration();
+  configuration() = default;
+  ~configuration() = default;
   //! Copy constructor
-  configuration(const configuration&);
+  configuration(const configuration&) = default;
   //! Assignment operator
-  configuration& operator=(const configuration&);
+  configuration& operator=(const configuration&) = default;
   //! Move constructor
-  configuration& operator=(configuration&&) noexcept;
+  configuration& operator=(configuration&&) = default;
   //! Move assignment operator
-  configuration(configuration&&) noexcept;
+  configuration(configuration&&) = default;
 
   //! Sets the value for a given name.  It overrides any existing values for that name
   void set(const char* name, const char* value);
@@ -60,7 +60,7 @@ public:
 
 private:
   using map_type = std::unordered_map<std::string, std::string>;  //! Collection type that holds the (name,value) pairs
-  map_type* _pmap;                                                //! Collection that holds the (name,value) pairs
+  map_type _pmap;                                                 //! Collection that holds the (name,value) pairs
 };
 }  // namespace utility
 }  // namespace reinforcement_learning

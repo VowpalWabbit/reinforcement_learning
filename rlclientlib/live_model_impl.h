@@ -84,8 +84,6 @@ private:
   int init_trace(api_status* status);
   static void _handle_model_update(const model_management::model_data& data, live_model_impl* ctxt);
   void handle_model_update(const model_management::model_data& data);
-  int explore_only(const char* event_id, string_view context, ranking_response& response, api_status* status) const;
-  int explore_exploit(const char* event_id, string_view context, ranking_response& response, api_status* status) const;
   template <typename D>
   int report_outcome_internal(const char* event_id, D outcome, api_status* status);
   template <typename D, typename I>

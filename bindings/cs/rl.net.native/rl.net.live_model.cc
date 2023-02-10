@@ -24,11 +24,12 @@ API livemodel_context_t* CreateLiveModel(
   context->trace_logger_factory = nullptr;
 
   // Create a trace log factory by passing in below creator. It allows LiveModel to use trace_logger provided by user.
-  const auto binding_tracer_create =
-      [context](reinforcement_learning::i_trace** retval, const reinforcement_learning::utility::configuration& cfg,
-          reinforcement_learning::i_trace* trace_logger, reinforcement_learning::api_status* status)
+  const auto binding_tracer_create = [context](std::unique_ptr<reinforcement_learning::i_trace>& retval,
+                                         const reinforcement_learning::utility::configuration& cfg,
+                                         reinforcement_learning::i_trace* trace_logger,
+                                         reinforcement_learning::api_status* status)
   {
-    *retval = new rl_net_native::binding_tracer(*context);
+    retval.reset(new rl_net_native::binding_tracer(*context));
     return reinforcement_learning::error_code::success;
   };
 
@@ -211,19 +212,20 @@ API int LiveModelRequestMultiSlotDecisionDetailedWithBaselineAndFlags(livemodel_
   RL_IGNORE_DEPRECATED_USAGE_END
 }
 
-API int LiveModelRequestEpisodicDecisionWithFlags(livemodel_context_t* context, const char* event_id, const char* previous_id,
-    const char* context_json, unsigned int flags, reinforcement_learning::ranking_response& resp,
-    reinforcement_learning:: episode_state& episode,
+API int LiveModelRequestEpisodicDecisionWithFlags(livemodel_context_t* context, const char* event_id,
+    const char* previous_id, const char* context_json, unsigned int flags,
+    reinforcement_learning::ranking_response& resp, reinforcement_learning::episode_state& episode,
     reinforcement_learning::api_status* status)
 {
   RL_IGNORE_DEPRECATED_USAGE_START
-  return context->livemodel->request_episodic_decision(event_id, previous_id, context_json, flags, resp, episode, status);
+  return context->livemodel->request_episodic_decision(
+      event_id, previous_id, context_json, flags, resp, episode, status);
   RL_IGNORE_DEPRECATED_USAGE_END
 }
 
 API int LiveModelRequestEpisodicDecision(livemodel_context_t* context, const char* event_id, const char* previous_id,
     const char* context_json, reinforcement_learning::ranking_response& resp,
-    reinforcement_learning::episode_state& episode, reinforcement_learning:: api_status* status)
+    reinforcement_learning::episode_state& episode, reinforcement_learning::api_status* status)
 {
   RL_IGNORE_DEPRECATED_USAGE_START
   return context->livemodel->request_episodic_decision(event_id, previous_id, context_json, resp, episode, status);
@@ -234,6 +236,12 @@ API int LiveModelReportActionTaken(
     livemodel_context_t* context, const char* event_id, reinforcement_learning::api_status* status)
 {
   return context->livemodel->report_action_taken(event_id, status);
+}
+
+API int LiveModelReportActionMultiIdTaken(livemodel_context_t* context, const char* primary_id,
+    const char* secondary_id, reinforcement_learning::api_status* status)
+{
+  return context->livemodel->report_action_taken(primary_id, secondary_id, status);
 }
 
 API int LiveModelReportOutcomeF(

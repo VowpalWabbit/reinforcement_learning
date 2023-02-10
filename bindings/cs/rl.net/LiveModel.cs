@@ -229,6 +229,21 @@ namespace Rl.Net
                 return LiveModelReportActionTakenNative(liveModel, eventId, apiStatus);
             }
 
+            [DllImport("rlnetnative", EntryPoint = "LiveModelReportActionMultiIdTaken")]
+            private static extern int LiveModelReportActionTakenMultiIdNative(IntPtr liveModel, IntPtr primaryId, IntPtr secondaryId, IntPtr apiStatus);
+
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> LiveModelReportActionTakenMultiIdOverride { get; set; }
+
+            public static int LiveModelReportActionMultiIdTaken(IntPtr liveModel, IntPtr primaryId, IntPtr secondaryId, IntPtr apiStatus)
+            {
+                if (LiveModelReportActionTakenMultiIdOverride != null)
+                {
+                    return LiveModelReportActionTakenMultiIdOverride(liveModel, primaryId, secondaryId, apiStatus);
+                }
+
+                return LiveModelReportActionTakenMultiIdNative(liveModel, primaryId, secondaryId, apiStatus);
+            }
+
             [DllImport("rlnetnative", EntryPoint = "LiveModelReportOutcomeF")]
             private static extern int LiveModelReportOutcomeFNative(IntPtr liveModel, IntPtr eventId, float outcome, IntPtr apiStatus);
 
@@ -645,6 +660,25 @@ namespace Rl.Net
             fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
             {
                 return NativeMethods.LiveModelReportActionTaken(liveModel, new IntPtr(eventIdUtf8Bytes), apiStatus);
+            }
+        }
+
+        unsafe private static int LiveModelReportActionMultiIdTaken(IntPtr liveModel, string primaryId, string secondaryId, IntPtr apiStatus)
+        {
+            if (primaryId == null)
+            {
+                throw new ArgumentNullException("primaryId");
+            }
+
+            if (secondaryId == null)
+            {
+                throw new ArgumentNullException("secondaryId");
+            }
+
+            fixed (byte* episodeIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(primaryId))
+            fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(secondaryId))
+            {
+                return NativeMethods.LiveModelReportActionMultiIdTaken(liveModel, new IntPtr(episodeIdUtf8Bytes), new IntPtr(eventIdUtf8Bytes), apiStatus);
             }
         }
 
@@ -1157,6 +1191,15 @@ namespace Rl.Net
             return result == NativeMethods.SuccessStatus;
         }
 
+        public bool TryQueueActionTakenEvent(string primaryId, string secondaryId, ApiStatus apiStatus = null)
+        {
+            int result = LiveModelReportActionMultiIdTaken(this.DangerousGetHandle(), primaryId, secondaryId, apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(apiStatus);
+            GC.KeepAlive(this);
+            return result == NativeMethods.SuccessStatus;
+        }
+
         [Obsolete("Use QueueActionTakenEvent instead.")]
         public void ReportActionTaken(string eventId)
             => this.QueueActionTakenEvent(eventId);
@@ -1165,6 +1208,15 @@ namespace Rl.Net
         {
             using (ApiStatus apiStatus = new ApiStatus())
                 if (!this.TryQueueActionTakenEvent(eventId, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
+        }
+
+        public void QueueActionTakenEvent(string primaryId, string secondaryId)
+        {
+            using (ApiStatus apiStatus = new ApiStatus())
+                if (!this.TryQueueActionTakenEvent(primaryId, secondaryId, apiStatus))
                 {
                     throw new RLException(apiStatus);
                 }
@@ -1267,10 +1319,10 @@ namespace Rl.Net
             return result == NativeMethods.SuccessStatus;
         }
 
-        public void QueueOutcomeEvent(string eventId, string slotId, float outcome)
+        public void QueueOutcomeEvent(string secondaryId, string slotId, float outcome)
         {
             using (ApiStatus apiStatus = new ApiStatus())
-                if (!this.TryQueueOutcomeEvent(eventId, slotId, outcome, apiStatus))
+                if (!this.TryQueueOutcomeEvent(secondaryId, slotId, outcome, apiStatus))
                 {
                     throw new RLException(apiStatus);
                 }
