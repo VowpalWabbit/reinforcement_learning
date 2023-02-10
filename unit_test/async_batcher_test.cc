@@ -139,7 +139,7 @@ void expect_no_error(const api_status& s, void* cntxt)
 BOOST_AUTO_TEST_CASE(flush_timeout)
 {
   std::vector<std::string> items;
-  auto s = new message_sender(items);
+  std::unique_ptr<logger::i_message_sender> s(new message_sender(items));
   size_t timeout_ms = 100;  // set a short timeout
   error_callback_fn error_fn(expect_no_error, nullptr);
   utility::watchdog watchdog(nullptr);
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(flush_timeout)
   config.send_batch_interval_ms = static_cast<int>(timeout_ms);
   config.send_queue_max_capacity = 8192;
   int dummy = 0;
-  logger::async_batcher<test_undroppable_event> batcher(s, watchdog, dummy, &error_fn, config);
+  logger::async_batcher<test_undroppable_event> batcher(std::move(s), watchdog, dummy, &error_fn, config);
   batcher.init(nullptr);  // Allow periodic_background_proc inside async_batcher to start waiting
   // on a timer before sending any events to it. Else we risk not
   // triggering the batch mechanism and might get triggered by initial
@@ -187,7 +187,7 @@ BOOST_AUTO_TEST_CASE(flush_timeout)
 BOOST_AUTO_TEST_CASE(flush_batches)
 {
   std::vector<std::string> items;
-  auto s = new message_sender(items);
+  std::unique_ptr<logger::i_message_sender> s(new message_sender(items));
   size_t send_high_water_mark = 10;  // bytes
   error_callback_fn error_fn(expect_no_error, nullptr);
   utility::watchdog watchdog(nullptr);
@@ -195,49 +195,58 @@ BOOST_AUTO_TEST_CASE(flush_batches)
   config.send_high_water_mark = static_cast<int>(send_high_water_mark);
   config.send_batch_interval_ms = static_cast<int>(100000);
   int dummy = 0;
-  auto batcher = new logger::async_batcher<test_undroppable_event>(s, watchdog, dummy, &error_fn, config);
-  batcher->init(nullptr);  // Allow periodic_background_proc inside async_batcher to start waiting
-  // on a timer before sending any events to it.   Else we risk not
-  // triggering the batch mechanism and might get triggered by initial
-  // pass in do..while loop
-  std::this_thread::sleep_for(std::chrono::milliseconds(20));  // add 2 items in the current batch
-  std::string foo("foo");
-  std::string bar("bar-yyy");
 
+  std::string expected_batch_0;
+  std::string expected_batch_1;
   {
-    auto foo_evt_sp = std::make_shared<test_undroppable_event>(foo);
-    auto evt_fn = [foo_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
-    {
-      out_evt = std::move(*foo_evt_sp);
-      return error_code::success;
-    };
-    batcher->append(std::move(evt_fn), foo_evt_sp.get(), nullptr);
-  }
-  {
-    auto bar_evt_sp = std::make_shared<test_undroppable_event>(bar);
-    auto evt_fn = [bar_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
-    {
-      out_evt = std::move(*bar_evt_sp);
-      return error_code::success;
-    };
-    batcher->append(std::move(evt_fn), bar_evt_sp.get(), nullptr);
-  }
-  //'send_high_water_mark' will be triggered by previous 2 items.
-  // next item will be added in a new batch
-  std::string hello("hello");
-  {
-    auto hello_evt_sp = std::make_shared<test_undroppable_event>(hello);
-    auto evt_fn = [hello_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
-    {
-      out_evt = std::move(*hello_evt_sp);
-      return error_code::success;
-    };
-    batcher->append(std::move(evt_fn), hello_evt_sp.get(), nullptr);
-  }
+    std::unique_ptr<logger::async_batcher<test_undroppable_event>> batcher(
+        new logger::async_batcher<test_undroppable_event>(std::move(s), watchdog, dummy, &error_fn, config));
 
-  const std::string expected_batch_0 = foo + "\n" + bar + "\n";
-  const std::string expected_batch_1 = hello + "\n";
-  delete batcher;  // flush force
+    batcher->init(nullptr);  // Allow periodic_background_proc inside async_batcher to start waiting
+    // on a timer before sending any events to it.   Else we risk not
+    // triggering the batch mechanism and might get triggered by initial
+    // pass in do..while loop
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));  // add 2 items in the current batch
+    std::string foo("foo");
+    std::string bar("bar-yyy");
+
+    {
+      auto foo_evt_sp = std::make_shared<test_undroppable_event>(foo);
+      auto evt_fn = [foo_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
+      {
+        out_evt = std::move(*foo_evt_sp);
+        return error_code::success;
+      };
+      batcher->append(std::move(evt_fn), foo_evt_sp.get(), nullptr);
+    }
+    {
+      auto bar_evt_sp = std::make_shared<test_undroppable_event>(bar);
+      auto evt_fn = [bar_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
+      {
+        out_evt = std::move(*bar_evt_sp);
+        return error_code::success;
+      };
+      batcher->append(std::move(evt_fn), bar_evt_sp.get(), nullptr);
+    }
+    //'send_high_water_mark' will be triggered by previous 2 items.
+    // next item will be added in a new batch
+    std::string hello("hello");
+    {
+      auto hello_evt_sp = std::make_shared<test_undroppable_event>(hello);
+      auto evt_fn = [hello_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
+      {
+        out_evt = std::move(*hello_evt_sp);
+        return error_code::success;
+      };
+      batcher->append(std::move(evt_fn), hello_evt_sp.get(), nullptr);
+    }
+
+    expected_batch_0 = foo + "\n" + bar + "\n";
+    expected_batch_1 = hello + "\n";
+  }
+  // unique_ptr goes out of scope
+  // batcher should be flushed before destruction
+
   BOOST_REQUIRE_EQUAL(items.size(), 2);
   BOOST_CHECK_EQUAL(items[0], expected_batch_0);
   BOOST_CHECK_EQUAL(items[1], expected_batch_1);
@@ -247,36 +256,43 @@ BOOST_AUTO_TEST_CASE(flush_batches)
 BOOST_AUTO_TEST_CASE(flush_after_deletion)
 {
   std::vector<std::string> items;
-  auto s = new message_sender(items);
+  std::unique_ptr<logger::i_message_sender> s(new message_sender(items));
   utility::watchdog watchdog(nullptr);
   utility::async_batcher_config config;
   int dummy = 0;
-  auto* batcher = new logger::async_batcher<test_undroppable_event>(s, watchdog, dummy, nullptr, config);
-  batcher->init(nullptr);  // Allow periodic_background_proc to start waiting
-  std::this_thread::sleep_for(std::chrono::milliseconds(20));
   std::string foo("foo");
   std::string bar("bar");
+
   {
-    auto foo_evt_sp = std::make_shared<test_undroppable_event>(foo);
-    auto evt_fn = [foo_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
+    std::unique_ptr<logger::async_batcher<test_undroppable_event>> batcher(
+        new logger::async_batcher<test_undroppable_event>(std::move(s), watchdog, dummy, nullptr, config));
+
+    batcher->init(nullptr);  // Allow periodic_background_proc to start waiting
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
     {
-      out_evt = std::move(*foo_evt_sp);
-      return error_code::success;
-    };
-    batcher->append(std::move(evt_fn), foo_evt_sp.get(), nullptr);
-  }
-  {
-    auto bar_evt_sp = std::make_shared<test_undroppable_event>(bar);
-    auto evt_fn = [bar_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
+      auto foo_evt_sp = std::make_shared<test_undroppable_event>(foo);
+      auto evt_fn = [foo_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
+      {
+        out_evt = std::move(*foo_evt_sp);
+        return error_code::success;
+      };
+      batcher->append(std::move(evt_fn), foo_evt_sp.get(), nullptr);
+    }
     {
-      out_evt = std::move(*bar_evt_sp);
-      return error_code::success;
-    };
-    batcher->append(std::move(evt_fn), bar_evt_sp.get(), nullptr);
+      auto bar_evt_sp = std::make_shared<test_undroppable_event>(bar);
+      auto evt_fn = [bar_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
+      {
+        out_evt = std::move(*bar_evt_sp);
+        return error_code::success;
+      };
+      batcher->append(std::move(evt_fn), bar_evt_sp.get(), nullptr);
+    }
+    // batch was not sent yet
+    BOOST_CHECK_EQUAL(items.size(), 0);
   }
-  // batch was not sent yet
-  BOOST_CHECK_EQUAL(items.size(), 0);  // batch flush is triggered on delete
-  delete batcher;                      // check the batch was sent
+  // unique_ptr goes out of scope
+  // batch should be sent before destruction
+
   BOOST_REQUIRE_EQUAL(items.size(), 1);
   std::string expected = foo + "\n" + bar + "\n";
   BOOST_CHECK_EQUAL(items[0], expected);
@@ -286,7 +302,7 @@ BOOST_AUTO_TEST_CASE(flush_after_deletion)
 BOOST_AUTO_TEST_CASE(queue_overflow_do_not_drop_event)
 {
   std::vector<std::string> items;
-  auto s = new message_sender(items);
+  std::unique_ptr<logger::i_message_sender> s(new message_sender(items));
   size_t timeout_ms = 100;
   size_t queue_max_size = 3;
   queue_mode_enum queue_mode = queue_mode_enum::BLOCK;
@@ -298,21 +314,26 @@ BOOST_AUTO_TEST_CASE(queue_overflow_do_not_drop_event)
   config.send_queue_max_capacity = static_cast<int>(queue_max_size);
   config.queue_mode = queue_mode;
   int dummy = 0;
-  auto batcher = new logger::async_batcher<test_droppable_event>(s, watchdog, dummy, &error_fn, config);
-  batcher->init(nullptr);  // Allow periodic_background_proc to start waiting
-  std::this_thread::sleep_for(std::chrono::milliseconds(20));
   int n = 10;
-  for (int i = 0; i < n; ++i)
+
   {
-    auto evt_sp = std::make_shared<test_droppable_event>(std::to_string(i));
-    auto evt_fn = [evt_sp](test_droppable_event& out_evt, api_status* status) -> int
+    std::unique_ptr<logger::async_batcher<test_droppable_event>> batcher(
+        new logger::async_batcher<test_droppable_event>(std::move(s), watchdog, dummy, &error_fn, config));
+
+    batcher->init(nullptr);  // Allow periodic_background_proc to start waiting
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    for (int i = 0; i < n; ++i)
     {
-      out_evt = std::move(*evt_sp);
-      return error_code::success;
-    };
-    batcher->append(std::move(evt_fn), evt_sp.get(), nullptr);
-  }  // triggers a final flush
-  delete batcher;
+      auto evt_sp = std::make_shared<test_droppable_event>(std::to_string(i));
+      auto evt_fn = [evt_sp](test_droppable_event& out_evt, api_status* status) -> int
+      {
+        out_evt = std::move(*evt_sp);
+        return error_code::success;
+      };
+      batcher->append(std::move(evt_fn), evt_sp.get(), nullptr);
+    }
+  }
+
   // all batches were sent. Check that no event was dropped
   std::string expected_output = "0\n";
   for (int i = 1; i < n; ++i)
@@ -329,7 +350,7 @@ BOOST_AUTO_TEST_CASE(queue_overflow_do_not_drop_event)
 BOOST_AUTO_TEST_CASE(queue_config_drop_rate_test)
 {
   std::vector<std::string> items;
-  auto s = new message_sender(items);
+  std::unique_ptr<logger::i_message_sender> s(new message_sender(items));
   size_t timeout_ms = 100;
   size_t queue_max_size = 10;
   queue_mode_enum queue_mode = queue_mode_enum::BLOCK;
@@ -342,23 +363,27 @@ BOOST_AUTO_TEST_CASE(queue_config_drop_rate_test)
   config.queue_mode = queue_mode;
   config.subsample_rate = 0.7f;
   int dummy = 0;
-  auto batcher = new logger::async_batcher<config_drop_event>(s, watchdog, dummy, &error_fn, config);
-  batcher->init(nullptr);
-  // Allow periodic_background_proc to start waiting
-  std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
-  std::vector<std::string> vs = {"0.00", "1.00", "0.69", "0.70", "0.71"};
-  for (int i = 0; i < vs.size(); ++i)
   {
-    auto evt_sp = std::make_shared<config_drop_event>(vs[i]);
-    auto evt_fn = [evt_sp](config_drop_event& out_evt, api_status* status) -> int
+    std::unique_ptr<logger::async_batcher<config_drop_event>> batcher(
+        new logger::async_batcher<config_drop_event>(std::move(s), watchdog, dummy, &error_fn, config));
+
+    batcher->init(nullptr);
+    // Allow periodic_background_proc to start waiting
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+    std::vector<std::string> vs = {"0.00", "1.00", "0.69", "0.70", "0.71"};
+    for (int i = 0; i < vs.size(); ++i)
     {
-      out_evt = std::move(*evt_sp);
-      return error_code::success;
-    };
-    batcher->append(std::move(evt_fn), evt_sp.get(), nullptr);
+      auto evt_sp = std::make_shared<config_drop_event>(vs[i]);
+      auto evt_fn = [evt_sp](config_drop_event& out_evt, api_status* status) -> int
+      {
+        out_evt = std::move(*evt_sp);
+        return error_code::success;
+      };
+      batcher->append(std::move(evt_fn), evt_sp.get(), nullptr);
+    }
   }
-  delete batcher;
 
   BOOST_REQUIRE(!items.empty());
   BOOST_CHECK_EQUAL(items[0], "0.00\n0.69\n0.70\n");

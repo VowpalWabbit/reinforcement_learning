@@ -15,6 +15,7 @@
 #include "utility/watchdog.h"
 
 #include <functional>
+#include <memory>
 
 namespace reinforcement_learning
 {
@@ -24,8 +25,8 @@ class interaction_logger_facade
 {
 public:
   interaction_logger_facade(reinforcement_learning::model_management::model_type_t model_type,
-      const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog,
-      i_time_provider* time_provider, i_logger_extensions* ext, error_callback_fn* perror_cb = nullptr);
+      const utility::configuration& c, std::unique_ptr<i_message_sender> sender, utility::watchdog& watchdog,
+      std::unique_ptr<i_time_provider> time_provider, i_logger_extensions* ext, error_callback_fn* perror_cb = nullptr);
 
   interaction_logger_facade(const interaction_logger_facade& other) = delete;
   interaction_logger_facade& operator=(const interaction_logger_facade& other) = delete;
@@ -80,8 +81,9 @@ private:
 class observation_logger_facade
 {
 public:
-  observation_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog,
-      i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
+  observation_logger_facade(const utility::configuration& c, std::unique_ptr<i_message_sender> sender,
+      utility::watchdog& watchdog, std::unique_ptr<i_time_provider> time_provider,
+      error_callback_fn* perror_cb = nullptr);
 
   observation_logger_facade(const observation_logger_facade& other) = delete;
   observation_logger_facade& operator=(const observation_logger_facade& other) = delete;
@@ -114,8 +116,9 @@ private:
 class episode_logger_facade
 {
 public:
-  episode_logger_facade(const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog,
-      i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
+  episode_logger_facade(const utility::configuration& c, std::unique_ptr<i_message_sender> sender,
+      utility::watchdog& watchdog, std::unique_ptr<i_time_provider> time_provider,
+      error_callback_fn* perror_cb = nullptr);
 
   episode_logger_facade(const episode_logger_facade& other) = delete;
   episode_logger_facade& operator=(const episode_logger_facade& other) = delete;

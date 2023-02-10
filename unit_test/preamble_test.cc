@@ -31,8 +31,9 @@ struct dummy_sender : i_sender
 BOOST_AUTO_TEST_CASE(simple_preamble_usage)
 {
   std::shared_ptr<data_buffer> db(new data_buffer());
-  dummy_sender* raw_data = new dummy_sender();
-  preamble_message_sender f_sender(raw_data);
+  dummy_sender* raw_dummy_sender = new dummy_sender();
+  std::unique_ptr<i_sender> unique_dummy_sender(raw_dummy_sender);
+  preamble_message_sender f_sender(std::move(unique_dummy_sender));
   i_message_sender& sender = f_sender;
   db->set_body_endoffset(db->preamble_size() + db->body_capacity());
   const auto send_msg_sz = db->body_filled_size();
@@ -40,7 +41,7 @@ BOOST_AUTO_TEST_CASE(simple_preamble_usage)
 
   sender.send(send_msg_type, db);
   preamble pre;
-  pre.read_from_bytes(raw_data->v_data->preamble_begin(), raw_data->v_data->preamble_size());
+  pre.read_from_bytes(raw_dummy_sender->v_data->preamble_begin(), raw_dummy_sender->v_data->preamble_size());
 
   BOOST_CHECK_EQUAL(pre.msg_size, send_msg_sz);
   BOOST_CHECK_EQUAL(pre.msg_type, send_msg_type);
