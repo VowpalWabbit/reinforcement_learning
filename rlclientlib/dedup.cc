@@ -122,10 +122,10 @@ int zstd_compressor::decompress(generic_event::payload_buffer_t& buf, api_status
   return error_code::success;
 }
 
-dedup_state::dedup_state(
-    const utility::configuration& c, bool use_compression, bool use_dedup, i_time_provider* time_provider)
+dedup_state::dedup_state(const utility::configuration& c, bool use_compression, bool use_dedup,
+    std::unique_ptr<i_time_provider> time_provider)
     : _compressor(c.get_int(name::ZSTD_COMPRESSION_LEVEL, zstd_compressor::ZSTD_DEFAULT_COMPRESSION_LEVEL))
-    , _time_provider(time_provider)
+    , _time_provider(std::move(time_provider))
     , _use_compression(use_compression)
     , _use_dedup(use_dedup)
 {
@@ -265,28 +265,31 @@ struct dedup_collection_serializer
 class dedup_extensions : public logger::i_logger_extensions
 {
 public:
-  dedup_extensions(
-      const utility::configuration& c, bool use_compression, bool use_dedup, i_time_provider* time_provider)
+  dedup_extensions(const utility::configuration& c, bool use_compression, bool use_dedup,
+      std::unique_ptr<i_time_provider> time_provider)
       : logger::i_logger_extensions(c)
-      , _dedup_state(c, use_compression, use_dedup, time_provider)
+      , _dedup_state(c, use_compression, use_dedup, std::move(time_provider))
       , _use_dedup(use_dedup)
       , _use_compression(use_compression)
   {
   }
 
-  logger::i_async_batcher<generic_event>* create_batcher(logger::i_message_sender* sender, utility::watchdog& watchdog,
-      error_callback_fn* perror_cb, const char* section) override
+  std::unique_ptr<logger::i_async_batcher<generic_event>> create_batcher(
+      std::unique_ptr<logger::i_message_sender> sender, utility::watchdog& watchdog, error_callback_fn* perror_cb,
+      const char* section) override
   {
     auto config = utility::get_batcher_config(_config, section);
 
     if (_use_dedup)
     {
-      return new logger::async_batcher<generic_event, dedup_collection_serializer>(
-          sender, watchdog, _dedup_state, perror_cb, config);
+      return std::unique_ptr<logger::i_async_batcher<generic_event>>(
+          new logger::async_batcher<generic_event, dedup_collection_serializer>(
+              std::move(sender), watchdog, _dedup_state, perror_cb, config));
     }
 
-    return new logger::async_batcher<generic_event, logger::fb_collection_serializer>(
-        sender, watchdog, _dummy_state, perror_cb, config);
+    return std::unique_ptr<logger::i_async_batcher<generic_event>>(
+        new logger::async_batcher<generic_event, logger::fb_collection_serializer>(
+            std::move(sender), watchdog, _dummy_state, perror_cb, config));
   }
 
   bool is_object_extraction_enabled() const override { return _use_dedup; }
@@ -311,16 +314,28 @@ private:
   bool _use_dedup;
 };
 
-logger::i_logger_extensions* create_dedup_logger_extension(
-    const utility::configuration& config, const char* section, i_time_provider* time_provider)
+bool should_use_dedup_logger_extension(const utility::configuration& config, const char* section)
 {
-  if (config.get_int(name::PROTOCOL_VERSION, 1) != 2) { return nullptr; }
+  if (config.get_int(name::PROTOCOL_VERSION, 1) != 2) { return false; }
+
   const bool use_compression = config.get_bool(section, name::USE_COMPRESSION, false);
   const bool use_dedup = config.get_bool(section, name::USE_DEDUP, false);
+  if (!use_compression && !use_dedup) { return false; }
 
+  return true;
+}
+
+std::unique_ptr<logger::i_logger_extensions> create_dedup_logger_extension(
+    const utility::configuration& config, const char* section, std::unique_ptr<i_time_provider> time_provider)
+{
+  if (config.get_int(name::PROTOCOL_VERSION, 1) != 2) { return nullptr; }
+
+  const bool use_compression = config.get_bool(section, name::USE_COMPRESSION, false);
+  const bool use_dedup = config.get_bool(section, name::USE_DEDUP, false);
   if (!use_compression && !use_dedup) { return nullptr; }
 
-  return new dedup_extensions(config, use_compression, use_dedup, time_provider);
+  return std::unique_ptr<logger::i_logger_extensions>(
+      new dedup_extensions(config, use_compression, use_dedup, std::move(time_provider)));
 }
 
 }  // namespace reinforcement_learning
