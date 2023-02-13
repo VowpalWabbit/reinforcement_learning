@@ -19,7 +19,10 @@
 // float comparisons
 #include "vw/core/vw_math.h"
 
+#include <condition_variable>
 #include <functional>
+#include <memory>
+#include <mutex>
 
 namespace reinforcement_learning
 {
@@ -71,7 +74,7 @@ private:
   void flush();  // flush all batches
 
 public:
-  async_batcher(i_message_sender* sender, utility::watchdog& watchdog, shared_state_t& shared_state,
+  async_batcher(std::unique_ptr<i_message_sender> sender, utility::watchdog& watchdog, shared_state_t& shared_state,
       error_callback_fn* perror_cb, const utility::async_batcher_config& config);
   ~async_batcher();
 
@@ -205,10 +208,10 @@ void async_batcher<TEvent, TSerializer>::flush()
 }
 
 template <typename TEvent, template <typename> class TSerializer>
-async_batcher<TEvent, TSerializer>::async_batcher(i_message_sender* sender, utility::watchdog& watchdog,
+async_batcher<TEvent, TSerializer>::async_batcher(std::unique_ptr<i_message_sender> sender, utility::watchdog& watchdog,
     typename TSerializer<TEvent>::shared_state_t& shared_state, error_callback_fn* perror_cb,
     const utility::async_batcher_config& config)
-    : _sender(sender)
+    : _sender(std::move(sender))
     , _queue(config.send_queue_max_capacity, config.event_counter_status, config.subsample_rate)
     , _send_high_water_mark(config.send_high_water_mark)
     , _perror_cb(perror_cb)

@@ -3,12 +3,15 @@
 
 #include <memory>
 #include <mutex>
+#include <type_traits>
 #include <vector>
 
 namespace reinforcement_learning
 {
 namespace utility
 {
+// Object data type must have a .reset() member function that resets
+// the state of the object as if it was newly constructed
 template <typename Object>
 class object_pool : public std::enable_shared_from_this<object_pool<Object>>
 {
@@ -19,62 +22,59 @@ public:
     return std::shared_ptr<object_pool<Object>>(new object_pool<Object>(initial_size));
   }
 
-  // Get an object from the pool, or allocate a new object if pool is empty
-  // The shared_ptr will have a custom deleter that returns the object back into pool
+  // Get object from pool
+  // Deleter of shared_ptr will return the object back into the pool
   std::shared_ptr<Object> acquire();
 
 private:
   // Private constructor because std::enable_shared_from_this requires objects to be inside shared_ptr
   // Use the factory function to create object_pool
-  object_pool(size_t initial_size) : _pool(initial_size) {}
+  object_pool(size_t initial_size) : _pool(initial_size)
+  {
+    static_assert(std::is_member_function_pointer<decltype(&Object::reset)>::value,
+        "Object type for object_pool must implement .reset() function");
+  }
 
-  void return_to_pool(std::unique_ptr<Object>);
+  void release(std::unique_ptr<Object>);
 
   std::vector<std::unique_ptr<Object>> _pool;
   std::mutex _mutex;
-
-  struct return_to_pool_deleter
-  {
-    return_to_pool_deleter(std::weak_ptr<object_pool<Object>> pool) : _pool(pool) {}
-
-    void operator()(Object* pobject)
-    {
-      // wrap in unique_ptr so it's destroyed upon exception
-      std::unique_ptr<Object> obj(pobject);
-
-      // if pool is still valid, return the object to pool
-      if (auto pool = _pool.lock())
-      {
-        try
-        {
-          pool->return_to_pool(std::move(obj));
-        }
-        catch (...)
-        {
-        }
-      }
-      // else pool has been deleted, obj will be destroyed by unique_ptr
-    }
-
-    std::weak_ptr<object_pool<Object>> _pool;
-  };
 };
 
 template <typename Object>
 std::shared_ptr<Object> object_pool<Object>::acquire()
 {
   std::lock_guard<std::mutex> lock(_mutex);
+  std::unique_ptr<Object> ptr;
 
-  if (_pool.empty()) { return std::shared_ptr<Object>(new Object(), return_to_pool_deleter(this->shared_from_this())); }
+  // Get object from pool or create new object
+  if (_pool.empty()) { ptr.reset(new Object()); }
+  else
+  {
+    ptr = std::move(_pool.back());
+    _pool.pop_back();
+    ptr->reset();
+  }
 
-  std::unique_ptr<Object> obj = std::move(_pool.back());
-  _pool.pop_back();
-  obj->reset();
-  return std::shared_ptr<Object>(obj.release(), return_to_pool_deleter(this->shared_from_this()));
+  // Wrap in shared_ptr with custom deleter
+  std::weak_ptr<object_pool<Object>> pool_weak_ptr = this->shared_from_this();
+  return std::shared_ptr<Object>(ptr.release(),
+      [pool_weak_ptr](Object* pobject)
+      {
+        // Store raw pointer in unique_ptr for exception safety
+        std::unique_ptr<Object> obj(pobject);
+        if (auto pool_ptr = pool_weak_ptr.lock())
+        {
+          // pool is valid, we can return the object
+          pool_ptr->release(std::move(obj));
+        }
+        // else couldn't lock weak_ptr because pool has been destroyed already
+        // obj will be destroyed by unique_ptr
+      });
 }
 
 template <typename Object>
-void object_pool<Object>::return_to_pool(std::unique_ptr<Object> obj)
+void object_pool<Object>::release(std::unique_ptr<Object> obj)
 {
   std::lock_guard<std::mutex> lock(_mutex);
   _pool.push_back(std::move(obj));

@@ -572,7 +572,7 @@ int live_model_impl::init_loggers_common(
   // Create a message sender that will prepend the message with a preamble and send the raw data using the
   // factory created raw data sender
   std::unique_ptr<l::i_message_sender> ranking_msg_sender(
-      new l::preamble_message_sender(ranking_data_sender.release()));
+      new l::preamble_message_sender(std::move(ranking_data_sender)));
   RETURN_IF_FAIL(ranking_msg_sender->init(status));
 
   // Get time provider factory and implementation
@@ -584,9 +584,8 @@ int live_model_impl::init_loggers_common(
       logger_extensions_time_provider, time_provider_impl, _configuration, _trace_logger.get(), status));
 
   // Create the logger extension
-  // TODO: fix potential leak by propagating unique_ptrs everywhere
-  _logger_extensions.reset(
-      logger::i_logger_extensions::get_extensions(_configuration, logger_extensions_time_provider.release()));
+  _logger_extensions =
+      logger::i_logger_extensions::get_extensions(_configuration, std::move(logger_extensions_time_provider));
 
   std::unique_ptr<i_time_provider> ranking_time_provider;
   RETURN_IF_FAIL(_time_provider_factory->create(
@@ -594,12 +593,12 @@ int live_model_impl::init_loggers_common(
 
   // Create a logger for interactions that will use msg sender to send interaction messages
   _interaction_logger.reset(new logger::interaction_logger_facade(_model->model_type(), _configuration,
-      ranking_msg_sender.release(), _watchdog, ranking_time_provider.release(), _logger_extensions.get(), &_error_cb));
+      std::move(ranking_msg_sender), _watchdog, std::move(ranking_time_provider), *_logger_extensions, &_error_cb));
   RETURN_IF_FAIL(_interaction_logger->init(status));
 
   // Create a message sender that will prepend the message with a preamble and send the raw data using the
   // factory created raw data sender
-  std::unique_ptr<l::i_message_sender> outcome_msg_sender(new l::preamble_message_sender(outcome_sender.release()));
+  std::unique_ptr<l::i_message_sender> outcome_msg_sender(new l::preamble_message_sender(std::move(outcome_sender)));
   RETURN_IF_FAIL(outcome_msg_sender->init(status));
 
   // Get time provider implementation
@@ -609,7 +608,7 @@ int live_model_impl::init_loggers_common(
 
   // Create a logger for observations that will use msg sender to send observation messages
   _outcome_logger.reset(new logger::observation_logger_facade(
-      _configuration, outcome_msg_sender.release(), _watchdog, observation_time_provider.release(), &_error_cb));
+      _configuration, std::move(outcome_msg_sender), _watchdog, std::move(observation_time_provider), &_error_cb));
   RETURN_IF_FAIL(_outcome_logger->init(status));
 
   if (_configuration.get(name::EPISODE_EH_HOST, nullptr) != nullptr ||
@@ -629,7 +628,7 @@ int live_model_impl::init_loggers_common(
 
     // Create a message sender that will prepend the message with a preamble and send the raw data using the
     // factory created raw data sender
-    std::unique_ptr<l::i_message_sender> episode_msg_sender(new l::preamble_message_sender(episode_sender.release()));
+    std::unique_ptr<l::i_message_sender> episode_msg_sender(new l::preamble_message_sender(std::move(episode_sender)));
     RETURN_IF_FAIL(episode_msg_sender->init(status));
 
     // Get time provider implementation
@@ -639,7 +638,7 @@ int live_model_impl::init_loggers_common(
 
     // Create a logger for episodes that will use msg sender to send episode messages
     _episode_logger.reset(new logger::episode_logger_facade(
-        _configuration, episode_msg_sender.release(), _watchdog, episode_time_provider.release(), &_error_cb));
+        _configuration, std::move(episode_msg_sender), _watchdog, std::move(episode_time_provider), &_error_cb));
     RETURN_IF_FAIL(_episode_logger->init(status));
   }
 

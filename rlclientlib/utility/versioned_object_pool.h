@@ -18,9 +18,9 @@ class versioned_object_pool_unsafe
   using TFactory = std::function<TObject*(void)>;
 
   int _version;
-  std::vector<TObject*> _pool;
   TFactory _factory;
   int _objects_count;
+  std::vector<std::unique_ptr<TObject>> _pool;
 
 public:
   // Construct object pool given a factory function that allocates new objects when called
@@ -28,25 +28,15 @@ public:
   versioned_object_pool_unsafe(TFactory factory, int objects_count = 0, int version = 0)
       : _version(version), _factory(std::move(factory)), _objects_count(objects_count)
   {
+    _pool.reserve(_objects_count);
     for (int i = 0; i < _objects_count; ++i) { _pool.emplace_back(_factory()); }
   }
+
+  ~versioned_object_pool_unsafe() = default;
 
   versioned_object_pool_unsafe(const versioned_object_pool_unsafe&) = delete;
   versioned_object_pool_unsafe& operator=(const versioned_object_pool_unsafe& other) = delete;
   versioned_object_pool_unsafe(versioned_object_pool_unsafe&& other) = delete;
-
-  ~versioned_object_pool_unsafe()
-  {
-    // delete each pool object
-    for (auto&& obj : _pool)
-    {
-      delete obj;
-      obj = nullptr;
-    }
-
-    // clear the pool vector itself
-    _pool.clear();
-  }
 
   // Retreive an object in the pool, or nullptr if pool is empty
   // The object must be returned to the pool along with its version, or else allocated memory will not be freed
@@ -54,9 +44,9 @@ public:
   {
     if (_pool.empty()) { return nullptr; }
 
-    auto obj = _pool.back();
+    auto obj = std::move(_pool.back());
     _pool.pop_back();
-    return obj;
+    return obj.release();
   }
 
   // Create a new object with the pool's factory function
@@ -71,12 +61,9 @@ public:
   // Otherwise, we deallocate it
   void return_to_pool(TObject* obj, int obj_version)
   {
-    if (_version == obj_version) { _pool.emplace_back(obj); }
-    else
-    {
-      delete obj;
-      obj = nullptr;
-    }
+    std::unique_ptr<TObject> pobj(obj);
+    if (_version == obj_version) { _pool.push_back(std::move(pobj)); }
+    // else unique_ptr will delete obj
   }
 
   int size() const { return _objects_count; }
