@@ -1,3 +1,15 @@
+// Windows may define a preprocessor macro named GetObject, which conflicts with RapidJSON
+// Undefine it if it's defined, then include the RapidJSON header
+// This step should come first before all other includes
+// clang-format off
+#ifdef GetObject
+#  define RL_WINDOWS_GETOBJECT_MACRO_UNDEF
+#  pragma push_macro("GetObject")
+#  undef GetObject
+#endif
+#include <rapidjson/document.h>
+// clang-format on
+
 #include "joiners/example_joiner.h"
 
 #include "event_processors/typed_events.h"
@@ -23,7 +35,7 @@ example_joiner::example_joiner(VW::workspace* vw)
 {
 }
 
-example_joiner::example_joiner(VW::workspace* vw, bool binary_to_json, std::string outfile_name)
+example_joiner::example_joiner(VW::workspace* vw, bool binary_to_json, const std::string& outfile_name)
     : i_joiner(vw->logger), _vw(vw), _reward_calculation(&reward::earliest), _binary_to_json(binary_to_json)
 {
   _outfile.open(outfile_name, std::ofstream::out);
@@ -37,19 +49,19 @@ example_joiner::~example_joiner()
   if (_binary_to_json) { _outfile.close(); }
 }
 
-example* example_joiner::get_or_create_example()
+VW::example* example_joiner::get_or_create_example()
 {
   // alloc new element if we don't have any left
-  if (_example_pool.size() == 0)
+  if (_example_pool.empty())
   {
-    auto ex = VW::alloc_examples(1);
+    auto* ex = VW::alloc_examples(1);
     _vw->example_parser->lbl_parser.default_label(ex->l);
 
     return ex;
   }
 
   // get last element
-  example* ex = _example_pool.back();
+  VW::example* ex = _example_pool.back();
   _example_pool.pop_back();
 
   _vw->example_parser->lbl_parser.default_label(ex->l);
@@ -58,11 +70,14 @@ example* example_joiner::get_or_create_example()
   return ex;
 }
 
-void example_joiner::return_example(example* ex) { _example_pool.push_back(ex); }
+void example_joiner::return_example(VW::example* ex) { _example_pool.push_back(ex); }
 
-example& example_joiner::get_or_create_example_f(void* vw) { return *(((example_joiner*)vw)->get_or_create_example()); }
+VW::example& example_joiner::get_or_create_example_f(void* vw)
+{
+  return *(((example_joiner*)vw)->get_or_create_example());
+}
 
-void example_joiner::return_example_f(void* vw, example* ex) { ((example_joiner*)vw)->return_example(ex); }
+void example_joiner::return_example_f(void* vw, VW::example* ex) { ((example_joiner*)vw)->return_example(ex); }
 
 bool example_joiner::process_event(const v2::JoinedEvent& joined_event)
 {
@@ -93,8 +108,15 @@ bool example_joiner::process_event(const v2::JoinedEvent& joined_event)
     }
     return true;
   }
+  else if (event->meta()->payload_type() == v2::PayloadType_Episode)
+  {
+    logger.out_error("Episode type events require multistep");
+    return false;
+  }
   if (_batch_grouped_events.find(id) != _batch_grouped_events.end())
-  { _batch_grouped_events[id].push_back(&joined_event); }
+  {
+    _batch_grouped_events[id].push_back(&joined_event);
+  }
   else
   {
     _batch_grouped_events.insert({id, {&joined_event}});
@@ -157,7 +179,7 @@ void example_joiner::set_reward_function(const v2::RewardFunctionType type, bool
       break;
   }
 
-  if (reward_calculation) { _reward_calculation.set(reward_calculation, sticky); }
+  if (reward_calculation != nullptr) { _reward_calculation.set(reward_calculation, sticky); }
 }
 
 void example_joiner::clear_batch_info()
@@ -223,7 +245,9 @@ bool example_joiner::process_interaction(
     if (!typed_event::process_compression<v2::CbEvent>(
             event.payload()->data(), event.payload()->size(), metadata, cb, _detached_buffer, logger) ||
         cb == nullptr)
-    { return false; }
+    {
+      return false;
+    }
 
     if (!typed_event::event_processor<v2::CbEvent>::is_valid(*cb, _loop_info, logger))
     {
@@ -243,7 +267,9 @@ bool example_joiner::process_interaction(
     if (!typed_event::process_compression<v2::MultiSlotEvent>(
             event.payload()->data(), event.payload()->size(), metadata, multislot, _detached_buffer, logger) ||
         multislot == nullptr)
-    { return false; }
+    {
+      return false;
+    }
 
     if (!typed_event::event_processor<v2::MultiSlotEvent>::is_valid(*multislot, _loop_info, logger))
     {
@@ -263,7 +289,9 @@ bool example_joiner::process_interaction(
     if (!typed_event::process_compression<v2::CaEvent>(
             event.payload()->data(), event.payload()->size(), metadata, ca, _detached_buffer, logger) ||
         ca == nullptr)
-    { return false; }
+    {
+      return false;
+    }
 
     if (!typed_event::event_processor<v2::CaEvent>::is_valid(*ca, _loop_info, logger))
     {
@@ -295,12 +323,12 @@ bool example_joiner::process_interaction(
     {
       if (_vw->audit || _vw->hash_inv)
       {
-        VW::template read_line_json_s<true>(*_vw, examples, const_cast<char*>(context.c_str()), context.size(),
+        VW::read_line_json_s<true>(*_vw, examples, const_cast<char*>(context.c_str()), context.size(),
             reinterpret_cast<VW::example_factory_t>(VW::new_unused_example), _vw, &_dedup_cache.dedup_examples);
       }
       else
       {
-        VW::template read_line_json_s<false>(*_vw, examples, const_cast<char*>(context.c_str()), context.size(),
+        VW::read_line_json_s<false>(*_vw, examples, const_cast<char*>(context.c_str()), context.size(),
             reinterpret_cast<VW::example_factory_t>(VW::new_unused_example), _vw, &_dedup_cache.dedup_examples);
       }
     }
@@ -323,7 +351,7 @@ bool example_joiner::process_outcome(
     const v2::Event& event, const v2::Metadata& metadata, const TimePoint& enqueued_time_utc)
 {
   reward::outcome_event o_event;
-  o_event.metadata = {metadata.app_id() ? metadata.app_id()->str() : "", metadata.payload_type(),
+  o_event.metadata = {metadata.app_id() != nullptr ? metadata.app_id()->str() : "", metadata.payload_type(),
       metadata.pass_probability(), metadata.encoding(), metadata.id()->str(), v2::LearningModeType_Online};
 
   o_event.enqueued_time_utc = enqueued_time_utc;
@@ -339,18 +367,12 @@ bool example_joiner::process_outcome(
   }
 
   if (outcome->value_type() == v2::OutcomeValue_literal) { o_event.s_value = outcome->value_as_literal()->c_str(); }
-  else if (outcome->value_type() == v2::OutcomeValue_numeric)
-  {
-    o_event.value = outcome->value_as_numeric()->value();
-  }
+  else if (outcome->value_type() == v2::OutcomeValue_numeric) { o_event.value = outcome->value_as_numeric()->value(); }
 
   o_event.index_type = outcome->index_type();
 
   if (outcome->index_type() == v2::IndexValue_literal) { o_event.s_index = outcome->index_as_literal()->c_str(); }
-  else if (outcome->index_type() == v2::IndexValue_numeric)
-  {
-    o_event.index = outcome->index_as_numeric()->index();
-  }
+  else if (outcome->index_type() == v2::IndexValue_numeric) { o_event.index = outcome->index_as_numeric()->index(); }
 
   o_event.action_taken = outcome->action_taken();
 
@@ -369,7 +391,9 @@ bool example_joiner::process_dedup(const v2::Event& event, const v2::Metadata& m
   if (!typed_event::process_compression<v2::DedupInfo>(
           event.payload()->data(), event.payload()->size(), metadata, dedup, _detached_buffer, logger) ||
       dedup == nullptr)
-  { return false; }
+  {
+    return false;
+  }
 
   if (dedup->ids()->size() != dedup->values()->size())
   {
@@ -411,10 +435,7 @@ bool example_joiner::process_dedup(const v2::Event& event, const v2::Metadata& m
       _dedup_cache.add(dedup_id, examples[0]);
       examples.clear();
     }
-    else
-    {
-      _dedup_cache.update(dedup_id);
-    }
+    else { _dedup_cache.update(dedup_id); }
   }
 
   if (dedup->ids()->size() > 0)
@@ -438,8 +459,8 @@ bool example_joiner::process_joined(VW::multi_ex& examples)
 
   for (auto& joined_event : _batch_grouped_events[id])
   {
-    auto event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
-    auto metadata = event->meta();
+    const auto* event = flatbuffers::GetRoot<v2::Event>(joined_event->event()->data());
+    const auto* metadata = event->meta();
     auto enqueued_time_utc =
         get_enqueued_time(joined_event->timestamp(), metadata->client_time_utc(), _loop_info.use_client_time, logger);
     const auto& payload_type = metadata->payload_type();
@@ -458,35 +479,37 @@ bool example_joiner::process_joined(VW::multi_ex& examples)
   // that way we can guarantee clean-up no matter where the return happens
   // without having to duplicate the cleanup code
   bool clear_examples = false;
-  auto clear_event_id_on_exit = VW::scope_exit([&] {
-    if (je)
-    {
-      if (_vw->example_parser->metrics)
+  auto clear_event_id_on_exit = VW::scope_exit(
+      [&]
       {
-        if (!je->is_joined_event_learnable()) { _joiner_metrics.number_of_skipped_events++; }
-        else
+        if (je != nullptr)
         {
-          je->calculate_metrics(_vw->example_parser->metrics.get());
-          _joiner_metrics.sum_cost_original += -1.f * je->get_sum_original_reward();
-          if (_joiner_metrics.first_event_id.empty())
+          if (_vw->example_parser->metrics)
           {
-            _joiner_metrics.first_event_id = std::move(je->interaction_metadata.event_id);
-            _joiner_metrics.first_event_timestamp = std::move(je->joined_event_timestamp);
+            if (!je->is_joined_event_learnable()) { _joiner_metrics.number_of_skipped_events++; }
+            else
+            {
+              je->calculate_metrics(_vw->example_parser->metrics.get());
+              _joiner_metrics.sum_cost_original += -1.f * je->get_sum_original_reward();
+              if (_joiner_metrics.first_event_id.empty())
+              {
+                _joiner_metrics.first_event_id = std::move(je->interaction_metadata.event_id);
+                _joiner_metrics.first_event_timestamp = std::move(je->joined_event_timestamp);
+              }
+              else
+              {
+                _joiner_metrics.last_event_id = std::move(je->interaction_metadata.event_id);
+                _joiner_metrics.last_event_timestamp = std::move(je->joined_event_timestamp);
+              }
+            }
           }
-          else
-          {
-            _joiner_metrics.last_event_id = std::move(je->interaction_metadata.event_id);
-            _joiner_metrics.last_event_timestamp = std::move(je->joined_event_timestamp);
-          }
+
+          if (_binary_to_json) { log_converter::build_json(_outfile, *je, logger); }
         }
-      }
 
-      if (_binary_to_json) { log_converter::build_json(_outfile, *je, logger); }
-    }
-
-    clear_event_id_batch_info(id);
-    if (clear_examples) { clear_vw_examples(examples); }
-  });
+        clear_event_id_batch_info(id);
+        if (clear_examples) { clear_vw_examples(examples); }
+      });
 
   if (_batch_grouped_examples.find(id) == _batch_grouped_examples.end())
   {
@@ -547,22 +570,22 @@ void example_joiner::persist_metrics()
 {
   if (_vw->example_parser->metrics)
   {
-    _vw->example_parser->metrics->NumberOfSkippedEvents = _joiner_metrics.number_of_skipped_events;
+    _vw->example_parser->metrics->number_of_skipped_events = _joiner_metrics.number_of_skipped_events;
 
-    _vw->example_parser->metrics->DsjsonSumCostOriginal = _joiner_metrics.sum_cost_original;
+    _vw->example_parser->metrics->dsjson_sum_cost_original = _joiner_metrics.sum_cost_original;
 
     if (!_joiner_metrics.first_event_id.empty())
     {
-      _vw->example_parser->metrics->FirstEventId = std::move(_joiner_metrics.first_event_id);
+      _vw->example_parser->metrics->first_event_id = std::move(_joiner_metrics.first_event_id);
 
-      _vw->example_parser->metrics->FirstEventTime = std::move(
+      _vw->example_parser->metrics->first_event_time = std::move(
           date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.first_event_timestamp)));
     }
     if (!_joiner_metrics.last_event_id.empty())
     {
-      _vw->example_parser->metrics->LastEventId = std::move(_joiner_metrics.last_event_id);
+      _vw->example_parser->metrics->last_event_id = std::move(_joiner_metrics.last_event_id);
 
-      _vw->example_parser->metrics->LastEventTime = std::move(
+      _vw->example_parser->metrics->last_event_time = std::move(
           date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.last_event_timestamp)));
     }
   }
@@ -576,3 +599,8 @@ void example_joiner::on_batch_read() {}
 metrics::joiner_metrics example_joiner::get_metrics() { return _joiner_metrics; }
 
 void example_joiner::apply_cli_overrides(VW::workspace*, const VW::external::parser_options&) {}
+
+#ifdef RL_WINDOWS_GETOBJECT_MACRO_UNDEF
+#  undef RL_WINDOWS_GETOBJECT_MACRO_UNDEF
+#  pragma pop_macro("GetObject")
+#endif

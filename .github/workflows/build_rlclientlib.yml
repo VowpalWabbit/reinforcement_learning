@@ -9,68 +9,149 @@ on:
     branches:
       - '*'
 
+env:
+  VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
 jobs:
-  build-linux:
-    name: rlclientlib.ubuntu18.04
-    container:
-      image: vowpalwabbit/rl-ubuntu-1804:latest
+  build-ubuntu:
+    # Ubuntu build has ONNX extension and Valgrind test
+    name: rlclientlib-${{ matrix.build_type }}-ubuntu-latest
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [debug, release]
     steps:
-      # v1 must be used because newer versions require a node.js version that will not run on this old image.
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
         with:
-          submodules: 'true'
-      - run: ./.scripts/linux/build.sh
-      - run: ./.scripts/linux/test.sh
-  build-linux-valgrind:
-    name: rlclientlib-valgrind.ubuntu18.04
-    container:
-      image: vowpalwabbit/rl-ubuntu-1804:latest
-    runs-on: ubuntu-latest
-    steps:
-      # v1 must be used because newer versions require a node.js version that will not run on this old image.
-      - uses: actions/checkout@v1
+          submodules: recursive
+      - uses: lukka/get-cmake@latest
+      - name: Install ONNX
+        run: |
+          ONNX_FILENAME="onnxruntime-linux-x64-1.13.1"
+          wget "https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/$ONNX_FILENAME.tgz"
+          tar xvf "$ONNX_FILENAME.tgz"
+          echo "ONNXRUNTIME_ROOT=$ONNX_FILENAME" >> $GITHUB_ENV
+      - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
+      - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+      - uses: actions/cache@v3
+        env:
+          cache-name: vcpkg-cache
         with:
-          submodules: 'true'
-      - run: ./.scripts/linux/build-valgrind.sh
-      - run: ./.scripts/linux/unit-tests-valgrind.sh
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
+          key: ubuntu-latest-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
+      - uses: lukka/run-vcpkg@main
+        with:
+          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
+          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
+      - name: Configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          -DFMT_SYS_DEP=ON
+          -DSPDLOG_SYS_DEP=ON
+          -Drlclientlib_BUILD_ONNXRUNTIME_EXTENSION=ON
+          -DONNXRUNTIME_ROOT="${{ github.workspace }}/${{ env.ONNXRUNTIME_ROOT }}"
+      - name: Build
+        run: |
+          cmake --build build
+      - name: Test
+        run: |
+          cd build
+          ctest --verbose --output-on-failure
+      - name: Test with Valgrind
+        run: |
+          cd build
+          sudo apt install -y valgrind
+          valgrind --quiet --error-exitcode=100 --undef-value-errors=no --leak-check=full ./unit_test/rltest -- valgrind
+
   build-macos:
-    name: rlclientlib.macos-10.15
-    runs-on: macos-10.15
+    # Mac build doesn't have any additional features enabled
+    name: rlclientlib-${{ matrix.build_type }}-macos-latest
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [debug, release]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
-          submodules: 'recursive'
-      - run: ./.scripts/macos/restore.sh
-      - run: ./.scripts/macos/build.sh
-      - run: ./.scripts/macos/test.sh
+          submodules: recursive
+      - uses: lukka/get-cmake@latest
+      - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
+        shell: bash
+      - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+      - uses: actions/cache@v3
+        env:
+          cache-name: vcpkg-cache
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
+          key: macos-latest-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
+      - uses: lukka/run-vcpkg@main
+        with:
+          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
+          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
+      - name: Configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          -DFMT_SYS_DEP=ON
+          -DSPDLOG_SYS_DEP=ON
+      - name: Build
+        run: |
+          cmake --build build
+      - name: Test
+        run: |
+          cd build
+          ctest --verbose --output-on-failure
+
   build-windows:
-    name: rlclientlib.windows-2019
-    runs-on: windows-2019
-    env:
-      SOURCE_DIR: ${{ github.workspace }}/reinforcement_learning
-      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-      # 2022.03.10
-      VCPKG_REF: af2287382b1991dbdcb7e5112d236f3323b9dd7a
+    # Windows build has C# bindings
+    name: rlclientlib-${{ matrix.build_type }}-windows-latest
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [debug, release]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
-          path: 'reinforcement_learning'
-          submodules: true
-      - uses: actions/checkout@v2
+          submodules: recursive
+      - name: Setup MSVC Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1
+      - uses: lukka/get-cmake@latest
+      - name: Install dotnet t4
+        run: dotnet tool install --global dotnet-t4
+      - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
+        shell: bash
+      - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+      - uses: actions/cache@v3
+        env:
+          cache-name: vcpkg-cache
         with:
-          path: 'vcpkg'
-          repository: 'microsoft/vcpkg'
-          ref: ${{ env.VCPKG_REF }}
-      - name: Restore vcpkg and build artifacts
-        uses: actions/cache@v2
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
+          key: windows-latest-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
+      - uses: lukka/run-vcpkg@main
         with:
-          path: |
-            ${{ env.VCPKG_ROOT }}/installed/
-          key: |
-            rl-${{ env.VCPKG_REF }}-windows-2019-vcpkg-cache-invalidate-0
-      - uses: ilammy/msvc-dev-cmd@v1
-      - run: ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
-      - run: ${{ env.SOURCE_DIR }}/.scripts/restore-cmake.cmd
-      - run: ${{ env.SOURCE_DIR }}/.scripts/build-cmake.cmd
-      - run: ${{ env.SOURCE_DIR }}/.scripts/test-cmake.cmd
+          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
+          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
+      - name: Configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          -DFMT_SYS_DEP=ON
+          -DSPDLOG_SYS_DEP=ON
+      - name: Build
+        run: |
+          cmake --build build
+      - name: Test
+        run: |
+          cd build
+          ctest --verbose --output-on-failure

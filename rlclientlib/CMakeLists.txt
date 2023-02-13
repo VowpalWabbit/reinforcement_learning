@@ -1,12 +1,15 @@
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/../cmake/Modules/")
+
 # First try to find the config version. Newer, used by vcpkg etc
-find_package(Flatbuffers CONFIG QUIET)
-if(FLATBUFFERS_FOUND)
+find_package(Flatbuffers CONFIG)
+if(TARGET flatbuffers::flatbuffers AND TARGET flatbuffers::flatc)
   get_property(flatc_location TARGET flatbuffers::flatc PROPERTY LOCATION)
+  message(STATUS "Found Flatbuffers with CONFIG, flatc located at: ${flatc_location}")
 else()
   # Fallback to the old version
   find_package(Flatbuffers MODULE REQUIRED)
   set(flatc_location ${FLATBUFFERS_FLATC_EXECUTABLE})
+  message(STATUS "Found Flatbuffers with MODULE, flatc located at: ${flatc_location}")
 endif()
 
 include(FlatbufferUtils)
@@ -139,6 +142,8 @@ set(PROJECT_PUBLIC_HEADERS
 set(PROJECT_PRIVATE_HEADERS
   console_tracer.h
   dedup.h
+  federation/federated_client.h
+  federation/joined_log_provider.h
   generic_event.h
   live_model_impl.h
   logger/async_batcher.h
@@ -201,15 +206,23 @@ endif()
 
 target_compile_definitions(rlclientlib PRIVATE FLATBUFFERS_SPAN_MINIMAL)
 
-target_include_directories( rlclientlib
-                            PUBLIC
-                            ${CMAKE_CURRENT_SOURCE_DIR}/../include
-                            PRIVATE
-                            ${CMAKE_CURRENT_SOURCE_DIR}
-                            ${FLATBUFFERS_INCLUDE_DIR}
-                            ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date
-                            )
+target_include_directories(rlclientlib
+  PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date
+)
+
 target_link_libraries(rlclientlib PUBLIC Boost::system vw_common vw_core PRIVATE RapidJSON)
+
+# If flatbuffers found via CONFIG, add its target as a library dependency
+# Otherwise, the flatbuffers MODULE defines FLATBUFFERS_INCLUDE_DIR to add to the include path
+if(TARGET flatbuffers::flatbuffers)
+  target_link_libraries(rlclientlib PRIVATE flatbuffers::flatbuffers)
+else()
+  target_include_directories(rlclientlib PRIVATE ${FLATBUFFERS_INCLUDE_DIR})
+endif()
 
 if (vw_USE_AZURE_FACTORIES)
   target_link_libraries(rlclientlib PUBLIC cpprestsdk::cpprest OpenSSL::SSL OpenSSL::Crypto)

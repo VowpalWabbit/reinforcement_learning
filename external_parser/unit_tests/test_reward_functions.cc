@@ -3,13 +3,14 @@
 #include "joiners/example_joiner.h"
 #include "test_common.h"
 #include "vw/config/options_cli.h"
+#include "vw/core/ccb_reduction_features.h"
 #include "vw/core/parse_primitives.h"
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 const int DEFAULT_REWARD = -1000;
 const int DEFAULT_REWARD_APPRENTICE = 0;
 
-std::vector<float> get_float_rewards(std::string int_file_name, std::string obs_file_name,
+std::vector<float> get_float_rewards(const std::string& int_file_name, const std::string& obs_file_name,
     v2::RewardFunctionType reward_function_type, v2::LearningModeType learning_mode = v2::LearningModeType_Online,
     v2::ProblemType problem_type = v2::ProblemType_CB, float default_reward = DEFAULT_REWARD)
 {
@@ -29,6 +30,9 @@ std::vector<float> get_float_rewards(std::string int_file_name, std::string obs_
       break;
     case v2::ProblemType_SLATES:
       command = "--quiet --binary_parser --ccb_explore_adf --slates";
+      break;
+    default:
+      assert(false);
       break;
   }
 
@@ -74,7 +78,9 @@ std::vector<float> get_float_rewards(std::string int_file_name, std::string obs_
       for (auto* example : examples)
       {
         if (!CB::ec_is_example_header(*example) && example->l.cb.costs.size() > 0)
-        { rewards.push_back(-1.f * example->l.cb.costs[0].cost); }
+        {
+          rewards.push_back(-1.f * example->l.cb.costs[0].cost);
+        }
       }
     }
     break;
@@ -87,8 +93,10 @@ std::vector<float> get_float_rewards(std::string int_file_name, std::string obs_
 
       for (auto* example : examples)
       {
-        if (example->l.conditional_contextual_bandit.type == CCB::example_type::slot)
-        { rewards.push_back(-1.f * example->l.conditional_contextual_bandit.outcome->cost); }
+        if (example->l.conditional_contextual_bandit.type == VW::ccb_example_type::SLOT)
+        {
+          rewards.push_back(-1.f * example->l.conditional_contextual_bandit.outcome->cost);
+        }
       }
     }
     break;
@@ -103,11 +111,16 @@ std::vector<float> get_float_rewards(std::string int_file_name, std::string obs_
 
       for (auto* example : examples)
       {
-        if (example->l.slates.type == VW::slates::example_type::shared)
-        { rewards.push_back(-1.f * example->l.slates.cost); }
+        if (example->l.slates.type == VW::slates::example_type::SHARED)
+        {
+          rewards.push_back(-1.f * example->l.slates.cost);
+        }
       }
     }
     break;
+    default:
+      assert(false);
+      break;
   }
 
   clear_examples(examples, vw.get());

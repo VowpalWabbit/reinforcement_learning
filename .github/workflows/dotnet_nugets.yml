@@ -1,0 +1,196 @@
+# Changing this name will cause github.run_number to be reset and affect the
+# versioning strategy of this file. Therefore, if we change this name major or
+# minor must also be changed to ensure a correct lineage of versions.
+name: .NET Nugets
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*'
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
+
+env:
+  VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  build-nuget-dotnet:
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - { os: "windows-latest", runtime_id: "win-x64", vcpkg_target_triplet: "x64-windows-static" }
+          - { os: "ubuntu-latest", runtime_id: "linux-x64", vcpkg_target_triplet: "x64-linux" }
+          - { os: "macos-latest", runtime_id: "osx-x64", vcpkg_target_triplet: "x64-osx" }
+    runs-on: ${{matrix.config.os}}
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          git submodule update --init ext_libs/vcpkg ext_libs/vowpal_wabbit ext_libs/zstd
+          cd ext_libs/vowpal_wabbit
+          git submodule update --init ext_libs/eigen
+      - name: Setup MSVC Developer Command Prompt
+        if: ${{ startsWith(matrix.config.os, 'windows') }}
+        uses: ilammy/msvc-dev-cmd@v1
+      - uses: lukka/get-cmake@latest
+      - name: Install dotnet t4
+        if: ${{ startsWith(matrix.config.os, 'windows') }}
+        run: dotnet tool install --global dotnet-t4
+
+      - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
+        shell: bash
+      - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+      - name: Cache vcpkg binary cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
+          key: ${{ matrix.config.os }}-build-${{ matrix.config.vcpkg_target_triplet }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}
+
+      - name: Configure .NET Core
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
+          -DVCPKG_HOST_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
+          -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+          -Drlclientlib_BUILD_DOTNET=On
+          -Drlclientlib_DOTNET_USE_MSPROJECT=Off
+          -DBUILD_FLATBUFFERS=Off
+          -DRAPIDJSON_SYS_DEP=ON
+          -DFMT_SYS_DEP=ON
+          -DSPDLOG_SYS_DEP=ON
+          -DVW_ZLIB_SYS_DEP=ON
+          -DVW_BOOST_MATH_SYS_DEP=ON
+          -DVW_BUILD_VW_C_WRAPPER=Off
+          -DBUILD_TESTING=Off
+          -DRL_OPENSSL_SYS_DEP=On
+          -DRL_CPPRESTSDK_SYS_DEP=On
+
+      - run: cmake --build build --config RelWithDebInfo -t rlnetnative
+      - if: ${{ startsWith(matrix.config.os, 'windows') }}
+        run: cmake --build build --config RelWithDebInfo -t rl.net
+
+      - if: ${{ startsWith(matrix.config.os, 'windows') }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: build/binaries/*.dll
+
+      - if: ${{ startsWith(matrix.config.os, 'windows') }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: symbols
+          path: build/binaries/*.pdb
+
+      - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
+        run: |
+          mkdir -p symbols
+          objcopy --only-keep-debug build/bindings/cs/rl.net.native/librlnetnative.so symbols/librlnetnative.debug
+          strip --strip-debug --strip-unneeded build/bindings/cs/rl.net.native/librlnetnative.so
+
+      - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: build/bindings/cs/rl.net.native/librlnetnative.so
+
+      - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: symbols
+          path: symbols/librlnetnative.debug
+
+      - if: ${{ startsWith(matrix.config.os, 'macos') }}
+        run: |
+          mkdir -p symbols
+          dsymutil build/bindings/cs/rl.net.native/librlnetnative.dylib --flat -o symbols/librlnetnative.dSYM
+          strip -S build/bindings/cs/rl.net.native/librlnetnative.dylib
+
+      - if: ${{ startsWith(matrix.config.os, 'macos') }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: build/bindings/cs/rl.net.native/librlnetnative.dylib
+
+      - if: ${{ startsWith(matrix.config.os, 'macos') }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: symbols
+          path: symbols/librlnetnative.dSYM
+
+  package-nuget:
+    needs: build-nuget-dotnet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Update git tags
+        # Needed because actions/checkout performs a shallow checkout without tags
+        run: git fetch --unshallow --tags --recurse-submodules=no
+
+      - name: Get version number
+        shell: bash
+        run: |
+          GENERATED_VERSION=$(./.scripts/version_number.py)
+          echo "Generated version number: $version"
+          echo "RL_NUGET_VERSION=$GENERATED_VERSION" >> $GITHUB_ENV
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: artifacts
+          path: artifacts
+      - uses: NuGet/setup-nuget@v1.1.1
+      - run: nuget pack nuget/dotnet/rl.net.nuspec -Properties RL_NUGET_PACKAGE_VERSION=$RL_NUGET_VERSION -BasePath artifacts -OutputDirectory nuget_output
+      - uses: actions/upload-artifact@v1
+        with:
+          name: dist
+          path: nuget_output/
+
+  test-nuget:
+    needs: package-nuget
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - { os: "windows-latest", runtime_id: "win-x64" }
+          - { os: "ubuntu-latest", runtime_id: "linux-x64" }
+          - { os: "macos-latest", runtime_id: "osx-x64" }
+    runs-on: ${{matrix.config.os}}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Update git tags
+        # Needed because actions/checkout performs a shallow checkout without tags
+        run: git fetch --unshallow --tags --recurse-submodules=no
+
+      - name: Get version number
+        shell: bash
+        run: |
+          GENERATED_VERSION=$(./.scripts/version_number.py)
+          echo "Generated version number: $version"
+          echo "RL_NUGET_VERSION=$GENERATED_VERSION" >> $GITHUB_ENV
+      - uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist
+      - uses: actions/setup-dotnet@v3
+      - name: Install package
+        # enable error ignoring state with +e because we need to restore from two sources
+        run: |
+          set +e
+          cd nuget/dotnet/test
+          dotnet add dotnetcore_nuget_test.csproj package RL.Net --version ${{ env.RL_NUGET_VERSION }} --source "${{github.workspace}}/dist" --no-restore
+          dotnet restore dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}} --source "${{github.workspace}}/dist"
+          dotnet restore dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}}
+      - name: Build and run test
+        run: |
+          cd nuget/dotnet/test
+          dotnet build dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}} --output build --no-restore --self-contained
+          ./build/dotnetcore_nuget_test

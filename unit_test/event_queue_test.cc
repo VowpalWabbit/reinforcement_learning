@@ -173,10 +173,7 @@ BOOST_AUTO_TEST_CASE(queue_push_pop_subsample)
   {
     std::string id;
     if (i % 2 == 0) { id = "drop_" + std::to_string(i + 1); }
-    else
-    {
-      id = "no_drop_" + std::to_string(i + 1);
-    }
+    else { id = "no_drop_" + std::to_string(i + 1); }
 
     auto evt_sp = std::make_shared<test_event>(id);
     queue.push(std::bind(passthru, _1, _2, evt_sp), 10, evt_sp.get());
@@ -208,10 +205,12 @@ BOOST_AUTO_TEST_CASE(queue_push_pop_threads)
   int n = 10;
   for (int i = 0; i < n; ++i)
   {
-    _threads.push_back(thread([&] {
-      auto evt_sp = std::make_shared<test_event>(std::to_string(i + 1));
-      queue.push(std::bind(passthru, _1, _2, evt_sp), 10, evt_sp.get());
-    }));
+    _threads.push_back(thread(
+        [&queue, i]
+        {
+          auto evt_sp = std::make_shared<test_event>(std::to_string(i + 1));
+          queue.push(std::bind(passthru, _1, _2, evt_sp), 10, evt_sp.get());
+        }));
     std::this_thread::sleep_for(std::chrono::milliseconds(5));  // safe timeout
   }
 
@@ -240,17 +239,21 @@ BOOST_AUTO_TEST_CASE(queue_push_pop_threads_subsampling)
   {
     if (i % 2 == 0)
     {
-      _threads.push_back(thread([&] {
-        auto evt_sp = std::make_shared<test_event>("drop_" + std::to_string(i + 1));
-        queue.push(std::bind(passthru, _1, _2, evt_sp), 10, evt_sp.get());
-      }));
+      _threads.push_back(thread(
+          [&queue, i]
+          {
+            auto evt_sp = std::make_shared<test_event>("drop_" + std::to_string(i + 1));
+            queue.push(std::bind(passthru, _1, _2, evt_sp), 10, evt_sp.get());
+          }));
     }
     else
     {
-      _threads.push_back(thread([&] {
-        auto evt_sp = std::make_shared<test_event>("no_drop_" + std::to_string(i + 1));
-        queue.push(std::bind(passthru, _1, _2, evt_sp), 10, evt_sp.get());
-      }));
+      _threads.push_back(thread(
+          [&queue, i]
+          {
+            auto evt_sp = std::make_shared<test_event>("no_drop_" + std::to_string(i + 1));
+            queue.push(std::bind(passthru, _1, _2, evt_sp), 10, evt_sp.get());
+          }));
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(5));  // safe timeout
   }

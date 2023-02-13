@@ -11,6 +11,7 @@
 #include "utility/watchdog.h"
 
 #include <atomic>
+#include <functional>
 #include <memory>
 
 namespace reinforcement_learning
@@ -66,6 +67,10 @@ public:
       trace_logger_factory_t* trace_factory, data_transport_factory_t* t_factory, model_factory_t* m_factory,
       sender_factory_t* sender_factory, time_provider_factory_t* time_provider_factory);
 
+  explicit live_model_impl(const utility::configuration& config, std::function<void(const api_status&)> error_cb,
+      trace_logger_factory_t* trace_factory, data_transport_factory_t* t_factory, model_factory_t* m_factory,
+      sender_factory_t* sender_factory, time_provider_factory_t* time_provider_factory);
+
   live_model_impl(const live_model_impl&) = delete;
   live_model_impl(live_model_impl&&) = delete;
   live_model_impl& operator=(const live_model_impl&) = delete;
@@ -79,8 +84,6 @@ private:
   int init_trace(api_status* status);
   static void _handle_model_update(const model_management::model_data& data, live_model_impl* ctxt);
   void handle_model_update(const model_management::model_data& data);
-  int explore_only(const char* event_id, string_view context, ranking_response& response, api_status* status) const;
-  int explore_exploit(const char* event_id, string_view context, ranking_response& response, api_status* status) const;
   template <typename D>
   int report_outcome_internal(const char* event_id, D outcome, api_status* status);
   template <typename D, typename I>
@@ -116,7 +119,7 @@ private:
   std::unique_ptr<logger::i_logger_extensions> _logger_extensions{nullptr};
   std::unique_ptr<logger::interaction_logger_facade> _interaction_logger{nullptr};
   std::unique_ptr<logger::observation_logger_facade> _outcome_logger{nullptr};
-  std::unique_ptr<logger::observation_logger_facade> _episode_logger{nullptr};
+  std::unique_ptr<logger::episode_logger_facade> _episode_logger{nullptr};
 
   std::unique_ptr<model_management::model_downloader> _model_download{nullptr};
   std::unique_ptr<i_trace> _trace_logger{nullptr};
@@ -136,7 +139,9 @@ int live_model_impl::report_outcome_internal(const char* event_id, D outcome, ap
 
   // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
   if (_watchdog.has_background_error_been_reported())
-  { RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred); }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+  }
 
   return error_code::success;
 }
@@ -152,7 +157,9 @@ int live_model_impl::report_outcome_internal(const char* primary_id, I secondary
 
   // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
   if (_watchdog.has_background_error_been_reported())
-  { RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred); }
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+  }
 
   return error_code::success;
 }

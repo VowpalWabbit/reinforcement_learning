@@ -13,7 +13,7 @@ model_data::model_data() = default;
 model_data::model_data(model_data const& other)
     : _data(new char[other._data_sz]), _data_sz(other._data_sz), _refresh_count(other._refresh_count)
 {
-  std::memcpy(_data, other._data, _data_sz);
+  if (_data_sz > 0) { std::memcpy(_data, other._data, _data_sz); }
 }
 
 // move constructor: take other's data pointer and set original pointer to null

@@ -1,9 +1,8 @@
 #pragma once
 
-#include "nonstd/string_view.h"
+#include "nonstd/string_view.hpp"
 
 namespace reinforcement_learning
 {
-using nonstd::string_view;
-
+using string_view = nonstd::string_view;
 }

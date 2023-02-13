@@ -220,10 +220,11 @@ def dump_event(event_payload, idx, timestamp=None, verbose=False):
         print("unknown payload type")
 
 
-def dump_event_csv(event_payload, idx, timestamp=None, verbose=False):
+def dump_event_csv(event_payload, idx, timestamp=None, verbose=False, batch_idx=0):
     evt = Event.GetRootAsEvent(event_payload, 0)
     m = evt.Meta()
     message = {
+        "batch": batch_idx,
         "id": m.Id().decode("utf-8"),
         "payload-size": evt.PayloadLength(),
         "encoding": event_encoding_name(m.Encoding()),
@@ -293,7 +294,9 @@ class JoinedLogStreamReader:
         if len(self.buf) <= self.offset:
             return None
         kind = struct.unpack("I", self.read(4))[0]
-        length = struct.unpack("I", self.read(4))[0]
+        length = 0
+        if kind != MSG_TYPE_EOF:
+            length = struct.unpack("I", self.read(4))[0]
         # FILEMAGIC has inline payload, special case it here
         if kind == MSG_TYPE_FILEMAGIC:
             return (kind, length)
@@ -313,7 +316,10 @@ class JoinedLogStreamReader:
             elif msg[0] == MSG_TYPE_CHECKPOINT:
                 yield (msg[0], CheckpointInfo.GetRootAsCheckpointInfo(msg[1], 0))
             elif msg[0] == MSG_TYPE_HEADER:
-                yield (msg[0], FileHeader.GetRootAsFileHeader(msg[1], 0))
+                if len(msg[1]) > 0:
+                    yield (msg[0], FileHeader.GetRootAsFileHeader(msg[1], 0))
+                else:
+                    continue
             else:
                 yield (msg[0], msg[1])
 
@@ -356,13 +362,16 @@ def get_records(file_name):
     buf = bytearray(open(file_name, "rb").read())
 
     reader = JoinedLogStreamReader(buf)
-    for msg in reader.messages():
+    for batch_idx, msg in enumerate(reader.messages()):
         if msg[0] == MSG_TYPE_REGULAR:
             msg = msg[1]
             for i in range(msg.EventsLength()):
                 joined_event = msg.Events(i)
                 yield dump_event_csv(
-                    joined_event.EventAsNumpy(), i, joined_event.Timestamp()
+                    joined_event.EventAsNumpy(),
+                    i,
+                    joined_event.Timestamp(),
+                    batch_idx=batch_idx,
                 )
         elif msg[0] == MSG_TYPE_CHECKPOINT:
             checkpoint_info = msg[1]

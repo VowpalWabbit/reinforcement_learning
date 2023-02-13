@@ -4,6 +4,7 @@
 #include "rapidjson/document.h"
 #include "test_common.h"
 #include "vw/config/options_cli.h"
+#include "vw/core/learner.h"
 #include "vw/core/parse_primitives.h"
 #include "vw/io/logger.h"
 
@@ -190,7 +191,7 @@ BOOST_AUTO_TEST_CASE(check_metrics_ca_mixed_deferred_action_events)
   std::string infile_name = "valid_joined_logs/ca_mixed_deferred_action_events_20.log";
   std::string outfile_name = "ca_mixed_deferred_action_events.json";
 
-  std::map<std::string, int> expected_int_metrics = {{"total_predict_calls", 0}, {"total_learn_calls", 10},
+  std::map<std::string, int> expected_int_metrics = {{"total_predict_calls", 10}, {"total_learn_calls", 10},
       {"number_skipped_events", 10}, {"number_events_zero_actions", 0}, {"line_parse_error", 0}};
 
   std::map<std::string, float> expected_float_metrics = {

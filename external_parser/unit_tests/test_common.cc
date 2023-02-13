@@ -1,5 +1,6 @@
 #include "test_common.h"
 
+#include "vw/core/learner.h"
 #include "vw/core/parser.h"
 #include "vw/io/io_adapter.h"
 
@@ -43,7 +44,7 @@ void clear_examples(VW::multi_ex& examples, VW::workspace* vw)
 {
   if (vw->l->is_multiline())
   {
-    multi_ex multi_exs;
+    VW::multi_ex multi_exs;
     for (auto* ex : examples) { multi_exs.push_back(ex); }
     vw->finish_example(multi_exs);
     multi_exs.clear();
@@ -61,7 +62,7 @@ void set_buffer_as_vw_input(const std::vector<char>& buffer, VW::workspace* vw)
   vw->example_parser->input.add_file(VW::io::create_buffer_view(buffer.data(), buffer.size()));
 }
 
-std::vector<char> read_file(std::string file_name)
+std::vector<char> read_file(const std::string& file_name)
 {
   std::ifstream file;
   file.open(file_name, std::ios::binary | std::ios::ate);

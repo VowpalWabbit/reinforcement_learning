@@ -52,11 +52,13 @@ struct event_processor<v2::MultiSlotEvent>
     size_t slot_index = 0;
     for (auto* slot_event : *evt.slots())
     {
-      DecisionServiceInteraction data;
-      data.eventId = slot_event->id() == nullptr ? metadata.id()->str() : slot_event->id()->str();
+      VW::parsers::json::decision_service_interaction data;
+      data.event_id = slot_event->id() == nullptr ? metadata.id()->str() : slot_event->id()->str();
 
       if (is_ccb && slot_event->id() != nullptr)
-      { ccb_data->slot_id_to_index_map.insert(std::pair<std::string, int>(slot_event->id()->str(), slot_index)); }
+      {
+        ccb_data->slot_id_to_index_map.insert(std::pair<std::string, int>(slot_event->id()->str(), slot_index));
+      }
 
       data.actions.reserve(slot_event->action_ids()->size());
       for (const auto& a : *slot_event->action_ids()) { data.actions.emplace_back(a); }
@@ -123,15 +125,15 @@ struct event_processor<v2::CbEvent>
   {
     auto cb_data = VW::make_unique<joined_event::cb_joined_event>();
 
-    cb_data->interaction_data.eventId = metadata.id()->str();
+    cb_data->interaction_data.event_id = metadata.id()->str();
     cb_data->interaction_data.actions.reserve(evt.action_ids()->size());
     for (const auto& a : *evt.action_ids()) { cb_data->interaction_data.actions.emplace_back(a); }
 
     cb_data->interaction_data.probabilities.reserve(evt.probabilities()->size());
     for (const auto& prob : *evt.probabilities()) { cb_data->interaction_data.probabilities.emplace_back(prob); }
 
-    cb_data->interaction_data.probabilityOfDrop = 1.f - metadata.pass_probability();
-    cb_data->interaction_data.skipLearn = evt.deferred_action();
+    cb_data->interaction_data.probability_of_drop = 1.f - metadata.pass_probability();
+    cb_data->interaction_data.skip_learn = evt.deferred_action();
 
     return {TimePoint(enqueued_time_utc),
         {metadata.app_id() ? metadata.app_id()->str() : "", metadata.payload_type(), metadata.pass_probability(),
@@ -170,11 +172,11 @@ struct event_processor<v2::CaEvent>
       const v2::CaEvent& evt, const v2::Metadata& metadata, const TimePoint& enqueued_time_utc, std::string&& line_vec)
   {
     auto ca_data = VW::make_unique<joined_event::ca_joined_event>();
-    ca_data->interaction_data.eventId = metadata.id()->str();
+    ca_data->interaction_data.event_id = metadata.id()->str();
     ca_data->interaction_data.action = evt.action();
     ca_data->interaction_data.pdf_value = evt.pdf_value();
-    ca_data->interaction_data.probabilityOfDrop = 1.f - metadata.pass_probability();
-    ca_data->interaction_data.skipLearn = evt.deferred_action();
+    ca_data->interaction_data.probability_of_drop = 1.f - metadata.pass_probability();
+    ca_data->interaction_data.skip_learn = evt.deferred_action();
 
     return {TimePoint(enqueued_time_utc),
         {metadata.app_id() ? metadata.app_id()->str() : "", metadata.payload_type(), metadata.pass_probability(),
@@ -226,10 +228,7 @@ bool process_compression(const uint8_t* data, size_t size, const v2::Metadata& m
     detached_buffer = flatbuffers::DetachedBuffer(nullptr, false, data_ptr, 0, data_ptr, res);
     payload = flatbuffers::GetRoot<T>(detached_buffer.data());
   }
-  else
-  {
-    payload = flatbuffers::GetRoot<T>(data);
-  }
+  else { payload = flatbuffers::GetRoot<T>(data); }
   return true;
 }
 }  // namespace typed_event

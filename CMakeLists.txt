@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 if(POLICY CMP0074)
     cmake_policy(SET CMP0074 NEW)
 endif()
+if(POLICY CMP0091)
+    cmake_policy(SET CMP0091 NEW)
+endif()
 
 if(WIN32)
   # Due to needing to configure the CMAKE platform, this needs to be included before the
@@ -10,17 +13,28 @@ if(WIN32)
   message(STATUS "WinSDK Version: ${CMAKE_SYSTEM_VERSION}")
 endif()
 
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG")
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING INTERNAL FORCE)
+if(NOT WIN32)
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG")
+  set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG")
+endif()
+
 if (NOT CMAKE_BUILD_TYPE AND NOT GENERATOR_IS_MULTI_CONFIG)
   message(STATUS "No build type selected, defaulting to Release")
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+# Set this to on so that tooling can make use of the outputted compile commands (such as clang-tidy)
+set(CMAKE_EXPORT_COMPILE_COMMANDS On)
+
+# Options that add Vcpkg package requirements
+# All additions to VCPKG_MANIFEST_FEATURES list must come before project()
+option(RL_BUILD_BENCHMARKS "Build benchmarks" OFF)
+if(RL_BUILD_BENCHMARKS)
+  list(APPEND VCPKG_MANIFEST_FEATURES "benchmarks")
+endif()
+
 project(reinforcement_learning)
 
-#set(CMAKE_CXX_STANDARD 11)
 # Add support for building library with latest version of C++ supported by your compiler
 # Copied from VW
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake/")
@@ -38,11 +52,46 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(RL_BUILD_PYTHON "Build the Python bindings" OFF)
 option(RL_USE_ZSTD "Whether to enable usage of zstandard compression" ON)
 option(RL_STATIC_DEPS "Only use static dependencies" OFF)
-option(RL_BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(vw_USE_AZURE_FACTORIES "Whether to compile with the azure factories components" ON)
 option(RL_OPENSSL_SYS_DEP "Use system-wide openssl library" ON)
 option(RL_CPPRESTSDK_SYS_DEP "Use system-wide cpprestsdk library" ON)
 option(RL_BUILD_NUGET "Build the Nuget package" OFF)
+option(RL_BUILD_EXTERNAL_PARSER "Build external parser version of VW" OFF)
+option(RL_USE_ASAN "Compile with AddressSanitizer" OFF)
+option(RL_USE_UBSAN "Compile with UndefinedBehaviorSanitizer" OFF)
+option(rlclientlib_BUILD_ONNXRUNTIME_EXTENSION "Build OnnxRuntime Inference Extension" OFF)
+
+if(RL_USE_ASAN)
+  add_compile_definitions(RL_USE_ASAN VW_USE_ASAN)
+  if(MSVC)
+    add_compile_options(/fsanitize=address /GS- /wd5072)
+    add_link_options(/InferASanLibs /incremental:no /debug)
+    # Workaround for MSVC ASan issue here: https://developercommunity.visualstudio.com/t/VS2022---Address-sanitizer-on-x86-Debug-/10116361
+    add_compile_definitions(_DISABLE_STRING_ANNOTATION)
+  else()
+    add_compile_options(-fsanitize=address -fno-omit-frame-pointer -g3)
+    add_link_options(-fsanitize=address -fno-omit-frame-pointer -g3)
+  endif()
+endif()
+
+if(RL_USE_UBSAN)
+  add_compile_definitions(RL_USE_UBSAN VW_USE_UBSAN)
+  if(MSVC)
+    message(FATAL_ERROR "UBSan not supported on MSVC")
+  else()
+    add_compile_options(-fsanitize=undefined -fno-sanitize-recover -fno-omit-frame-pointer -g3)
+    add_link_options(-fsanitize=undefined -fno-sanitize-recover -fno-omit-frame-pointer -g3)
+  endif()
+endif()
+
+if(UNIX AND NOT APPLE)
+  # Temporary workaround for VW 9.6 missing size_t on Linux builds
+  # TODO remove when VW submodule is updated
+  # This must be stddef.h and not cstddef because it also applies to C code
+  add_compile_options(-include stddef.h)
+  # Enable C++17 math functions in C++11
+  add_compile_definitions(__STDCPP_WANT_MATH_SPEC_FUNCS__)
+endif()
 
 # For Nuget package don't use system libraries, use vendored ones in ext_libs instead
 if(RL_BUILD_NUGET)
@@ -95,6 +144,10 @@ add_subdirectory(examples)
 add_subdirectory(test_tools/joiner)
 add_subdirectory(test_tools/sender_test)
 add_subdirectory(test_tools/example_gen)
+
+if(RL_BUILD_EXTERNAL_PARSER)
+  add_subdirectory(external_parser)
+endif()
 
 # enable_testing should be run after ext_libs so that the vw unit tests arent turned on.
 enable_testing()

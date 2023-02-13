@@ -2,7 +2,7 @@
 #include "err_constants.h"
 #include "model_mgmt.h"
 
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 
 #include <string>
 
@@ -20,8 +20,8 @@ class onnx_model : public model_management::i_model
 public:
   onnx_model(i_trace* trace_logger, const char* app_id, const char* output_name, bool use_unstructured_input);
   int update(const model_management::model_data& data, bool& model_ready, api_status* status = nullptr) override;
-  int choose_rank(uint64_t rnd_seed, string_view features, std::vector<int>& action_ids, std::vector<float>& action_pdf,
-      std::string& model_version, api_status* status = nullptr) override;
+  int choose_rank(const char* event_id, uint64_t rnd_seed, string_view features, std::vector<int>& action_ids,
+      std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) override;
 
   int choose_continuous_action(string_view features, float& action, float& pdf_value, std::string& model_version,
       api_status* status = nullptr) override
@@ -43,9 +43,9 @@ public:
     return error_code::not_supported;
   }
 
-  int choose_rank_multistep(uint64_t rnd_seed, string_view features, const episode_history& history,
-      std::vector<int>& action_ids, std::vector<float>& action_pdf, std::string& model_version,
-      api_status* status = nullptr) override
+  int choose_rank_multistep(const char* event_id, uint64_t rnd_seed, string_view features,
+      const episode_history& history, std::vector<int>& action_ids, std::vector<float>& action_pdf,
+      std::string& model_version, api_status* status = nullptr) override
   {
     return error_code::not_supported;
   }

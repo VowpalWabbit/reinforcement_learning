@@ -1,5 +1,22 @@
 #! /usr/bin/env python3 -W ignore::DeprecationWarning
 
+# Generate FB serializers if they are not available
+try:
+    import reinforcement_learning.messages.flatbuff.v2.EventBatch
+except Exception as e:
+    import pathlib
+    import subprocess
+
+    script_dir = pathlib.Path(__file__).parent.absolute()
+    input_dir = (
+        pathlib.Path(script_dir).parents[1].joinpath("rlclientlib", "schema", "v2")
+    )
+
+    input_files = " ".join([str(x) for x in input_dir.glob("*.fbs")])
+    subprocess.run(
+        f"flatc --python {input_files}", cwd=script_dir, shell=True, check=True
+    )
+
 from reinforcement_learning.messages.flatbuff.v2.EventBatch import *
 from reinforcement_learning.messages.flatbuff.v2.BatchMetadata import *
 from reinforcement_learning.messages.flatbuff.v2.EventBatch import *
@@ -29,7 +46,7 @@ from reinforcement_learning.messages.flatbuff.v2.RewardFunctionType import *
 from reinforcement_learning.messages.flatbuff.v2.ProblemType import *
 
 import flatbuffers
-import zstandard as zstd
+import zstd
 import sys
 import json
 import struct
@@ -82,7 +99,7 @@ arg_parser.add_argument(
     help="use client time utc when joining/calculating reward, defaults to off",
 )
 arg_parser.add_argument(
-    "--observations", type=str, help="observations file (defaults to observatins.fb "
+    "--observations", type=str, help="observations file (defaults to observations.fb "
 )
 arg_parser.add_argument(
     "--interactions", type=str, help="interaction file (defaults to interactions.fb)"
@@ -354,13 +371,14 @@ for msg in interactions_file.messages():
         events_to_serialize.append(ser_evt.PayloadAsNumpy())
         evt_id = get_event_id(ser_evt)
         if evt_id in observations:
-            for obs in observations[evt_id]:
-                events_to_serialize.append(obs)
+            events_to_serialize.extend(observations[evt_id])
 
-    if verbose:
-        print(f"batch with {len(events_to_serialize)} events")
-        print(f"joining iters with {batch.Metadata().ContentEncoding()}")
-    bin_f.write_join_msg(events_to_serialize)
+            if verbose:
+                print(f"batch with {len(events_to_serialize)} events")
+                print(f"joining iters with {batch.Metadata().ContentEncoding()}")
+            bin_f.write_join_msg(events_to_serialize)
+
+            events_to_serialize = []
 
 bin_f.write_eof()
 

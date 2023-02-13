@@ -19,6 +19,7 @@
 #include "sender.h"
 #include "str_util.h"
 
+#include <fstream>
 #include <thread>
 #include <vector>
 
@@ -323,7 +324,9 @@ BOOST_AUTO_TEST_CASE(live_model_request_continuous_action)
 
   r::continuous_action_response response;
 
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(ds.request_continuous_action(JSON_CONTEXT_CONTINUOUS_ACTIONS, response, &status), err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
   // expected to fall in first unit range if no model exists
   BOOST_CHECK_GE(response.get_chosen_action(), min_value);
   BOOST_CHECK_LE(response.get_chosen_action(), min_value + unit_range);
@@ -362,8 +365,10 @@ BOOST_AUTO_TEST_CASE(live_model_request_continuous_action_invalid_ctx)
   r::continuous_action_response response;
 
   const auto invalid_context = "";
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(
       ds.request_continuous_action(invalid_context, response, &status), err::invalid_argument);  // invalid context
+  RL_IGNORE_DEPRECATED_USAGE_END
   BOOST_CHECK_EQUAL(status.get_error_code(), err::invalid_argument);
 }
 
@@ -385,19 +390,25 @@ BOOST_AUTO_TEST_CASE(live_model_request_decision)
   r::decision_response response;
 
   // request ranking
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(ds.request_decision(JSON_CONTEXT_WITH_SLOTS, response, &status), err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
   BOOST_CHECK_EQUAL(response.size(), 1);
   BOOST_CHECK_EQUAL((*response.begin()).get_action_id(), 0);
   BOOST_CHECK_EQUAL(status.get_error_code(), 0);
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
 
   const auto invalid_context = "";
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(ds.request_decision(invalid_context, response, &status), err::invalid_argument);  // invalid context
+  RL_IGNORE_DEPRECATED_USAGE_END
   BOOST_CHECK_EQUAL(status.get_error_code(), err::invalid_argument);
 
   const auto context_with_ids =
       R"({"GUser":{"hobby":"hiking","id":"a","major":"eng"},"_multi":[{"TAction":{"a1":"f1"}},{"TAction":{"a2":"f2"}}],"_slots":[{"TSlot":{"s1":"f1"},"_id":"817985e8-74ac-415c-bb69-735099c94d4d"},{"TSlot":{"s2":"f2"},"_id":"afb1da57-d4cd-4691-97d8-2b24bfb4e07f"}]})";
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(ds.request_decision(context_with_ids, response, &status), err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
   BOOST_CHECK_EQUAL(status.get_error_code(), 0);
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
   BOOST_CHECK_EQUAL(response.get_model_id(), "N/A");
@@ -413,6 +424,92 @@ BOOST_AUTO_TEST_CASE(live_model_request_decision)
   auto& resp1 = *it;
   BOOST_CHECK_EQUAL(resp1.get_slot_id(), "afb1da57-d4cd-4691-97d8-2b24bfb4e07f");
   BOOST_CHECK_EQUAL(resp1.get_action_id(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(live_model_ranking_request_check_response_pdf_explore_only)
+{
+  // create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
+  config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
+  config.set(
+      r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--cb_explore_adf --json --quiet --epsilon 0.3 --first_only --id N/A");
+
+  r::api_status status;
+
+  // create the ds live_model, and initialize it with the config
+  r::live_model model(config);
+
+  BOOST_CHECK_EQUAL(model.init(&status), err::success);
+  const auto event_id = "event_id";
+
+  r::ranking_response response;
+
+  const auto JSON_CB_CONTEXT_3ACTIONS =
+      R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}},{"TAction":{"a3":"f3"}}]})";
+
+  // request ranking
+  BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CB_CONTEXT_3ACTIONS, response), err::success);
+
+  size_t num_actions = response.size();
+  BOOST_CHECK_EQUAL(num_actions, 3);
+
+  const float EXPECTED_PROBS[3] = {0.8f, 0.1f, 0.1f};
+
+  // check that our PDF is what we expected
+  r::ranking_response::iterator it = response.begin();
+
+  for (uint32_t i = 0; i < num_actions; i++)
+  {
+    auto action_probability = *(it + i);
+    BOOST_CHECK_CLOSE(action_probability.probability, EXPECTED_PROBS[action_probability.action_id], FLOAT_TOL);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(live_model_ranking_w_las_request_check_response_pdf_explore_only)
+{
+  // create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
+  config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE,
+      "--cb_explore_adf --json --quiet --epsilon 0.3 --first_only --id N/A --large_action_space --max_actions 2");
+
+  r::api_status status;
+
+  // create the ds live_model, and initialize it with the config
+  r::live_model model(config);
+
+  BOOST_CHECK_EQUAL(model.init(&status), err::success);
+  const auto event_id = "event_id";
+
+  r::ranking_response response;
+
+  const auto JSON_CB_CONTEXT_3ACTIONS =
+      R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}},{"TAction":{"a3":"f3"}}]})";
+
+  // request ranking
+  BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CB_CONTEXT_3ACTIONS, response), err::success);
+
+  size_t num_actions = response.size();
+  BOOST_CHECK_EQUAL(num_actions, 3);
+
+  const float EXPECTED_PROBS[3] = {0.85f, 0.0f, 0.15f};
+
+  // check that our PDF is what we expected
+  r::ranking_response::iterator it = response.begin();
+
+  for (uint32_t i = 0; i < num_actions; i++)
+  {
+    auto action_probability = *(it + i);
+    BOOST_CHECK_CLOSE(action_probability.probability, EXPECTED_PROBS[action_probability.action_id], FLOAT_TOL);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough)
@@ -978,7 +1075,9 @@ BOOST_AUTO_TEST_CASE(ccb_explore_only_mode)
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::decision_response response;
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(model.request_decision(JSON_CCB_CONTEXT, response), err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1017,7 +1116,9 @@ BOOST_AUTO_TEST_CASE(multi_slot_response)
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(JSON_CCB_CONTEXT, response), err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1056,7 +1157,9 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_apprentice_mode_no_baseline)
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(JSON_CCB_CONTEXT, response), err::baseline_actions_not_defined);
+  RL_IGNORE_DEPRECATED_USAGE_END
 }
 
 BOOST_AUTO_TEST_CASE(multi_slot_response_apprentice_mode_with_baseline)
@@ -1080,9 +1183,11 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_apprentice_mode_with_baseline)
 
   r::multi_slot_response response;
   int baseline_actions[2] = {3, 1};
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(
                         nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2),
       err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1126,9 +1231,11 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_logging_only_with_baseline)
   // baseline actions are not valid action indicies, this is for testing purposes to make sure the action id is
   // overriden in apprentice / logginonly mode.
   int baseline_actions[2] = {3, 1};
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(
                         nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2),
       err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1168,9 +1275,11 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_logging_only_no_baseline)
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(
       model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, nullptr, 0),
       err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1211,9 +1320,11 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_with_baseline_null_eventId)
 
   r::multi_slot_response response;
   int baseline_actions[2] = {3, 1};
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(
                         nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2),
       err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1252,9 +1363,11 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_with_baseline_custom_eventId)
 
   r::multi_slot_response response;
   int baseline_actions[2] = {3, 1};
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(
                         "testEventId", JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2),
       err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1293,7 +1406,9 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed)
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(JSON_CCB_CONTEXT, response), err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1333,7 +1448,9 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_apprentice_mode_no_baseline)
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(JSON_CCB_CONTEXT, response), err::baseline_actions_not_defined);
+  RL_IGNORE_DEPRECATED_USAGE_END
 }
 
 BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_apprentice_mode_with_baseline)
@@ -1357,9 +1474,11 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_apprentice_mode_with_baseline)
 
   r::multi_slot_response_detailed response;
   int baseline_actions[2] = {3, 1};
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(
                         nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2),
       err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1401,9 +1520,11 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_logging_only_with_baseline)
 
   r::multi_slot_response_detailed response;
   int baseline_actions[2] = {3, 1};
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(
                         nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2),
       err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1443,9 +1564,11 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_logging_only_no_baseline)
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(
       model.request_multi_slot_decision(nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, nullptr, 0),
       err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1486,9 +1609,11 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_with_baseline_null_eventid)
 
   r::multi_slot_response_detailed response;
   int baseline_actions[2] = {3, 1};
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(
                         nullptr, JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2),
       err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1528,9 +1653,11 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_with_baseline_custom_eventid)
 
   r::multi_slot_response_detailed response;
   int baseline_actions[2] = {3, 1};
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(
                         "testEventId", JSON_CCB_CONTEXT, r::action_flags::DEFAULT, response, baseline_actions, 2),
       err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1572,7 +1699,9 @@ BOOST_AUTO_TEST_CASE(slates_explore_only_mode)
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(model.request_multi_slot_decision(JSON_SLATES_CONTEXT, response), err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
 
   BOOST_CHECK(strcmp(response.get_model_id(), "N/A") == 0);
   BOOST_CHECK_EQUAL(response.size(), 2);
@@ -1616,8 +1745,10 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2)
   r::decision_response ccb_response;
 
   // slates API doesn't work for ccb under v1 protocol
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(ds.request_multi_slot_decision("event_id", JSON_CONTEXT_WITH_SLOTS, slates_response, &status),
       err::protocol_not_supported);
+  RL_IGNORE_DEPRECATED_USAGE_END
 
   config.set(r::name::PROTOCOL_VERSION, "2");
   r::live_model ds2 = create_mock_live_model(
@@ -1625,12 +1756,16 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2)
   BOOST_CHECK_EQUAL(ds2.init(&status), err::success);
 
   // slates API work for ccb with v2
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(
       ds2.request_multi_slot_decision("event_id", JSON_CONTEXT_WITH_SLOTS, slates_response, &status), err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
 
   // old ccb api doesn't work under v2
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(ds2.request_decision(JSON_CONTEXT_WITH_SLOTS, ccb_response, &status), err::protocol_not_supported);
+  RL_IGNORE_DEPRECATED_USAGE_END
 }
 
 BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids)
@@ -1652,9 +1787,11 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids)
 
   r::multi_slot_response response;
 
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(
       ds.request_multi_slot_decision("event_id", JSON_CONTEXT_WITH_SLOTS_WITH_SLOT_IDS, response, &status),
       err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
 
   auto it = response.begin();
@@ -1688,9 +1825,11 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids_and_slot_ns)
 
   r::multi_slot_response response;
 
+  RL_IGNORE_DEPRECATED_USAGE_START
   BOOST_CHECK_EQUAL(
       ds.request_multi_slot_decision("event_id", JSON_CONTEXT_WITH_SLOTS_W_SLOT_IDS_AND_SLOT_NS, response, &status),
       err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
   BOOST_CHECK_EQUAL(status.get_error_msg(), "");
 
   auto it = response.begin();
@@ -1714,6 +1853,85 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids_and_slot_ns)
   BOOST_CHECK(it == response.end());
 }
 
+struct AuditCleanup
+{
+  AuditCleanup() : event_id("eventId1") { remove(event_id.c_str()); }
+  ~AuditCleanup() { remove(event_id.c_str()); }
+
+  std::string event_id;
+};
+
+BOOST_FIXTURE_TEST_CASE(live_model_ccb_and_v2_w_audit, AuditCleanup)
+{
+  // create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE,
+      "--ccb_explore_adf --chain_hash --json --quiet --epsilon 0.0 --first_only --id N/A");
+  config.set(r::name::PROTOCOL_VERSION, "2");
+  config.set(r::name::AUDIT_ENABLED, "true");
+  config.set(r::name::AUDIT_OUTPUT_PATH, ".");
+
+  r::api_status status;
+
+  // Create the ds live_model, and initialize it with the config
+  r::live_model ds = create_mock_live_model(
+      config, nullptr, &reinforcement_learning::model_factory, nullptr, r::model_management::model_type_t::CCB);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  r::multi_slot_response response;
+
+  // Add invalid path separators to the event_id
+  std::string dirty_event_id = "../.." + event_id + "//\\..**";
+  RL_IGNORE_DEPRECATED_USAGE_START
+  BOOST_CHECK_EQUAL(ds.request_multi_slot_decision(
+                        dirty_event_id.c_str(), JSON_CONTEXT_WITH_SLOTS_W_SLOT_IDS_AND_SLOT_NS, response, &status),
+      err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  std::ifstream audit_file;
+
+  audit_file.open(event_id.c_str());
+  BOOST_CHECK(audit_file.is_open());
+}
+
+BOOST_FIXTURE_TEST_CASE(live_model_ccb_and_v2_w_audit_bad_path, AuditCleanup)
+{
+  // create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE,
+      "--ccb_explore_adf --chain_hash --json --quiet --epsilon 0.0 --first_only --id N/A");
+  config.set(r::name::PROTOCOL_VERSION, "2");
+  config.set(r::name::AUDIT_ENABLED, "true");
+  config.set(r::name::AUDIT_OUTPUT_PATH, "invalid_directory");
+
+  r::api_status status;
+
+  // Create the ds live_model, and initialize it with the config
+  r::live_model ds = create_mock_live_model(
+      config, nullptr, &reinforcement_learning::model_factory, nullptr, r::model_management::model_type_t::CCB);
+  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+
+  r::multi_slot_response response;
+
+  // Add invalid path separators to the event_id
+  std::string dirty_event_id = "../.." + event_id + "//\\..**";
+  RL_IGNORE_DEPRECATED_USAGE_START
+  BOOST_CHECK_EQUAL(ds.request_multi_slot_decision(
+                        dirty_event_id.c_str(), JSON_CONTEXT_WITH_SLOTS_W_SLOT_IDS_AND_SLOT_NS, response, &status),
+      err::success);
+  RL_IGNORE_DEPRECATED_USAGE_END
+  BOOST_CHECK_EQUAL(status.get_error_msg(), "");
+
+  std::ifstream audit_file;
+  audit_file.open(event_id.c_str());
+  BOOST_CHECK(!audit_file.is_open());
+}
+
 BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_uri)
 {
   u::configuration config;
@@ -1727,8 +1945,6 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_uri)
   BOOST_CHECK_EQUAL(_rl->init(&status), r::error_code::http_model_uri_not_provided);
 }
 
-#ifdef _WIN32
-#  ifdef USE_AZURE_FACTORIES
 BOOST_AUTO_TEST_CASE(live_model_using_endpoint_success)
 {
   u::configuration config;
@@ -1753,5 +1969,3 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_apikey)
 
   BOOST_CHECK_EQUAL(_rl->init(&status), r::error_code::http_api_key_not_provided);
 }
-#  endif
-#endif

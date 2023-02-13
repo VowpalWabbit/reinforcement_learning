@@ -17,3 +17,6 @@
 [submodule "ext_libs/openssl"]
 	path = ext_libs/openssl
 	url = https://github.com/openssl/openssl.git
+[submodule "ext_libs/vcpkg"]
+	path = ext_libs/vcpkg
+	url = https://github.com/microsoft/vcpkg.git

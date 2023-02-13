@@ -2,6 +2,14 @@
 
 namespace reinforcement_learning
 {
+#ifdef _WIN32
+const char* const PATH_DELIMITER = "\\";
+const char* const DEV_NULL = "nul";
+#else
+const char* const PATH_DELIMITER = "/";
+const char* const DEV_NULL = "/dev/null";
+#endif
+
 namespace name
 {
 const char* const APP_ID = "appid";
@@ -18,6 +26,8 @@ const char* const LEARNING_MODE = "rank.learning.mode";
 const char* const PROTOCOL_VERSION = "protocol.version";
 const char* const HTTP_API_KEY = "http.api.key";
 const char* const HTTP_API_HEADER_KEY_NAME = "http.api.header.key.name";
+const char* const AUDIT_ENABLED = "audit.enabled";
+const char* const AUDIT_OUTPUT_PATH = "audit.output.path";
 
 // Episode
 const char* const EPISODE_EH_HOST = "episode.eventhub.host";
@@ -26,7 +36,12 @@ const char* const EPISODE_EH_KEY_NAME = "episode.eventhub.keyname";
 const char* const EPISODE_EH_KEY = "episode.eventhub.key";
 const char* const EPISODE_EH_TASKS_LIMIT = "episode.eventhub.tasks_limit";
 const char* const EPISODE_EH_MAX_HTTP_RETRIES = "episode.eventhub.max_http_retries";
+const char* const EPISODE_EH_MAX_HTTP_RETRY_DURATION_MS = "episode.eventhub.max_http_retry_duration_ms";
 const char* const EPISODE_SENDER_IMPLEMENTATION = "episode.sender.implementation";
+const char* const EPISODE_HTTP_API_HOST = "episode.http.api.host";
+const char* const EPISODE_APIM_TASKS_LIMIT = "episode.apim.tasks_limit";
+const char* const EPISODE_APIM_MAX_HTTP_RETRIES = "episode.apim.max_http_retries";
+const char* const EPISODE_APIM_MAX_HTTP_RETRY_DURATION_MS = "episode.apim.max_http_retry_duration_ms";
 
 // Interaction
 const char* const INTERACTION_EH_HOST = "interaction.eventhub.host";
@@ -35,6 +50,7 @@ const char* const INTERACTION_EH_KEY_NAME = "interaction.eventhub.keyname";
 const char* const INTERACTION_EH_KEY = "interaction.eventhub.key";
 const char* const INTERACTION_EH_TASKS_LIMIT = "interaction.eventhub.tasks_limit";
 const char* const INTERACTION_EH_MAX_HTTP_RETRIES = "interaction.eventhub.max_http_retries";
+const char* const INTERACTION_EH_MAX_HTTP_RETRY_DURATION_MS = "interaction.eventhub.max_http_retry_duration_ms";
 const char* const INTERACTION_SEND_HIGH_WATER_MARK = "interaction.send.highwatermark";
 const char* const INTERACTION_SEND_QUEUE_MAX_CAPACITY_KB = "interaction.send.queue.maxcapacity.kb";
 const char* const INTERACTION_SEND_BATCH_INTERVAL_MS = "interaction.send.batchintervalms";
@@ -45,6 +61,7 @@ const char* const INTERACTION_QUEUE_MODE = "interaction.queue.mode";
 const char* const INTERACTION_HTTP_API_HOST = "interaction.http.api.host";
 const char* const INTERACTION_APIM_TASKS_LIMIT = "interaction.apim.tasks_limit";
 const char* const INTERACTION_APIM_MAX_HTTP_RETRIES = "interaction.apim.max_http_retries";
+const char* const INTERACTION_APIM_MAX_HTTP_RETRY_DURATION_MS = "interaction.apim.max_http_retry_duration_ms";
 const char* const INTERACTION_SUBSAMPLE_RATE = "interaction.subsample.rate";
 
 // Observation
@@ -54,6 +71,7 @@ const char* const OBSERVATION_EH_KEY_NAME = "observation.eventhub.keyname";
 const char* const OBSERVATION_EH_KEY = "observation.eventhub.key";
 const char* const OBSERVATION_EH_TASKS_LIMIT = "observation.eventhub.tasks_limit";
 const char* const OBSERVATION_EH_MAX_HTTP_RETRIES = "observation.eventhub.max_http_retries";
+const char* const OBSERVATION_EH_MAX_HTTP_RETRY_DURATION_MS = "observation.eventhub.max_http_retry_duration_ms";
 const char* const OBSERVATION_SEND_HIGH_WATER_MARK = "observation.send.highwatermark";
 const char* const OBSERVATION_SEND_QUEUE_MAX_CAPACITY_KB = "observation.send.queue.maxcapacity.kb";
 const char* const OBSERVATION_SEND_BATCH_INTERVAL_MS = "observation.send.batchintervalms";
@@ -63,6 +81,7 @@ const char* const OBSERVATION_QUEUE_MODE = "observation.queue.mode";
 const char* const OBSERVATION_HTTP_API_HOST = "observation.http.api.host";
 const char* const OBSERVATION_APIM_TASKS_LIMIT = "observation.apim.tasks_limit";
 const char* const OBSERVATION_APIM_MAX_HTTP_RETRIES = "observation.apim.max_http_retries";
+const char* const OBSERVATION_APIM_MAX_HTTP_RETRY_DURATION_MS = "observation.apim.max_http_retry_duration_ms";
 const char* const OBSERVATION_SUBSAMPLE_RATE = "observation.subsample.rate";
 
 // global sender properties
@@ -106,6 +125,7 @@ const char* const INTERACTION_EH_SENDER = "INTERACTION_EH_SENDER";
 const char* const EPISODE_FILE_SENDER = "EPISODE_FILE_SENDER";
 const char* const OBSERVATION_FILE_SENDER = "OBSERVATION_FILE_SENDER";
 const char* const INTERACTION_FILE_SENDER = "INTERACTION_FILE_SENDER";
+const char* const EPISODE_HTTP_API_SENDER = "EPISODE_HTTP_API_SENDER";
 const char* const OBSERVATION_HTTP_API_SENDER = "OBSERVATION_HTTP_API_SENDER";
 const char* const INTERACTION_HTTP_API_SENDER = "INTERACTION_HTTP_API_SENDER";
 const char* const NULL_TRACE_LOGGER = "NULL_TRACE_LOGGER";
@@ -125,6 +145,7 @@ const char* const QUEUE_MODE_BLOCK = "BLOCK";
 const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
 const int DEFAULT_VW_POOL_INIT_SIZE = 4;
 const int DEFAULT_PROTOCOL_VERSION = 1;
+const char* const DEFAULT_AUDIT_OUTPUT_PATH = "audit";
 
 const char* get_default_episode_sender();
 const char* get_default_observation_sender();

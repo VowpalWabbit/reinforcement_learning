@@ -4,23 +4,16 @@ using namespace std;
 
 namespace reinforcement_learning
 {
-void error_callback_fn::set(error_fn fn, void* context)
-{
-  lock_guard<mutex> lock(_mutex);
-  _fn = fn;
-  _context = context;
-}
-
 void error_callback_fn::report_error(api_status& s)
 {
-  if (_fn == nullptr) { return; }
+  if (!_fn) { return; }
 
   lock_guard<mutex> lock(_mutex);
-  if (_fn != nullptr)
+  if (_fn)
   {
     try
     {
-      _fn(s, _context);
+      _fn(s);
     }
     catch (...)
     {
@@ -29,5 +22,4 @@ void error_callback_fn::report_error(api_status& s)
   }
 }
 
-error_callback_fn::error_callback_fn(error_fn fn, void* cntxt) : _fn(fn), _context(cntxt) {}
 }  // namespace reinforcement_learning

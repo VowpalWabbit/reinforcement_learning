@@ -159,7 +159,8 @@ BOOST_AUTO_TEST_CASE(flush_timeout)
 
   {
     auto foo_evt_sp = std::make_shared<test_undroppable_event>(foo);
-    auto evt_fn = [foo_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int {
+    auto evt_fn = [foo_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
+    {
       out_evt = std::move(*foo_evt_sp);
       return error_code::success;
     };
@@ -167,14 +168,15 @@ BOOST_AUTO_TEST_CASE(flush_timeout)
   }
   {
     auto bar_evt_sp = std::make_shared<test_undroppable_event>(bar);
-    auto evt_fn = [bar_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int {
+    auto evt_fn = [bar_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
+    {
       out_evt = std::move(*bar_evt_sp);
       return error_code::success;
     };
     batcher.append(std::move(evt_fn), bar_evt_sp.get(), nullptr);
   }
   std::string expected = foo + "\n" + bar + "\n";
-  std::this_thread::sleep_for(std::chrono::milliseconds(150));
+  std::this_thread::sleep_for(std::chrono::milliseconds(250));
   BOOST_REQUIRE_EQUAL(items.size(), 1);
   std::string result;
   for (auto item : items) { result.append(item.begin(), item.end()); }
@@ -204,7 +206,8 @@ BOOST_AUTO_TEST_CASE(flush_batches)
 
   {
     auto foo_evt_sp = std::make_shared<test_undroppable_event>(foo);
-    auto evt_fn = [foo_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int {
+    auto evt_fn = [foo_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
+    {
       out_evt = std::move(*foo_evt_sp);
       return error_code::success;
     };
@@ -212,7 +215,8 @@ BOOST_AUTO_TEST_CASE(flush_batches)
   }
   {
     auto bar_evt_sp = std::make_shared<test_undroppable_event>(bar);
-    auto evt_fn = [bar_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int {
+    auto evt_fn = [bar_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
+    {
       out_evt = std::move(*bar_evt_sp);
       return error_code::success;
     };
@@ -223,7 +227,8 @@ BOOST_AUTO_TEST_CASE(flush_batches)
   std::string hello("hello");
   {
     auto hello_evt_sp = std::make_shared<test_undroppable_event>(hello);
-    auto evt_fn = [hello_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int {
+    auto evt_fn = [hello_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
+    {
       out_evt = std::move(*hello_evt_sp);
       return error_code::success;
     };
@@ -253,7 +258,8 @@ BOOST_AUTO_TEST_CASE(flush_after_deletion)
   std::string bar("bar");
   {
     auto foo_evt_sp = std::make_shared<test_undroppable_event>(foo);
-    auto evt_fn = [foo_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int {
+    auto evt_fn = [foo_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
+    {
       out_evt = std::move(*foo_evt_sp);
       return error_code::success;
     };
@@ -261,7 +267,8 @@ BOOST_AUTO_TEST_CASE(flush_after_deletion)
   }
   {
     auto bar_evt_sp = std::make_shared<test_undroppable_event>(bar);
-    auto evt_fn = [bar_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int {
+    auto evt_fn = [bar_evt_sp](test_undroppable_event& out_evt, api_status* status) -> int
+    {
       out_evt = std::move(*bar_evt_sp);
       return error_code::success;
     };
@@ -298,7 +305,8 @@ BOOST_AUTO_TEST_CASE(queue_overflow_do_not_drop_event)
   for (int i = 0; i < n; ++i)
   {
     auto evt_sp = std::make_shared<test_droppable_event>(std::to_string(i));
-    auto evt_fn = [evt_sp](test_droppable_event& out_evt, api_status* status) -> int {
+    auto evt_fn = [evt_sp](test_droppable_event& out_evt, api_status* status) -> int
+    {
       out_evt = std::move(*evt_sp);
       return error_code::success;
     };
@@ -343,7 +351,8 @@ BOOST_AUTO_TEST_CASE(queue_config_drop_rate_test)
   for (int i = 0; i < vs.size(); ++i)
   {
     auto evt_sp = std::make_shared<config_drop_event>(vs[i]);
-    auto evt_fn = [evt_sp](config_drop_event& out_evt, api_status* status) -> int {
+    auto evt_fn = [evt_sp](config_drop_event& out_evt, api_status* status) -> int
+    {
       out_evt = std::move(*evt_sp);
       return error_code::success;
     };

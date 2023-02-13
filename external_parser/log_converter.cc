@@ -98,7 +98,7 @@ void build_cb_json(std::ofstream& outfile, joined_event::joined_event& je, VW::i
 
     writer.Key("EventId", static_cast<rapidjson::SizeType>(strlen("EventId")), true);
     writer.String(
-        interaction_data.eventId.c_str(), static_cast<rapidjson::SizeType>(interaction_data.eventId.length()), true);
+        interaction_data.event_id.c_str(), static_cast<rapidjson::SizeType>(interaction_data.event_id.length()), true);
 
     writer.Key("a", static_cast<rapidjson::SizeType>(strlen("a")), true);
     writer.StartArray();
@@ -123,10 +123,10 @@ void build_cb_json(std::ofstream& outfile, joined_event::joined_event& je, VW::i
     writer.String(je.model_id.c_str(), static_cast<rapidjson::SizeType>(je.model_id.length()), true);
     writer.EndObject();
 
-    if (interaction_data.probabilityOfDrop != 0.f)
+    if (interaction_data.probability_of_drop != 0.f)
     {
       writer.Key("pdrop");
-      writer.Double(interaction_data.probabilityOfDrop);
+      writer.Double(interaction_data.probability_of_drop);
     }
 
     writer.Key("_original_label_cost", static_cast<rapidjson::SizeType>(strlen("_original_label_cost")), true);
@@ -139,7 +139,7 @@ void build_cb_json(std::ofstream& outfile, joined_event::joined_event& je, VW::i
   catch (const std::exception& e)
   {
     logger.out_error(
-        "convert event: [{}] from binary to json format failed: [{}].", interaction_data.eventId, e.what());
+        "convert event: [{}] from binary to json format failed: [{}].", interaction_data.event_id, e.what());
   }
 }
 
@@ -196,8 +196,8 @@ void build_ccb_json(std::ofstream& outfile, joined_event::joined_event& je, VW::
       writer.Double(-1.f * rewards[i]);
 
       writer.Key("_id");  // slot id
-      writer.String(interaction_data[i].eventId.c_str(),
-          static_cast<rapidjson::SizeType>(interaction_data[i].eventId.length()), true);
+      writer.String(interaction_data[i].event_id.c_str(),
+          static_cast<rapidjson::SizeType>(interaction_data[i].event_id.length()), true);
 
       writer.Key("_a");
       writer.StartArray();
@@ -232,7 +232,9 @@ void build_ccb_json(std::ofstream& outfile, joined_event::joined_event& je, VW::
           writer.Key("Index");
 
           if (o.index_type == v2::IndexValue_literal)
-          { writer.String(o.s_index.c_str(), static_cast<rapidjson::SizeType>(o.s_index.length()), true); }
+          {
+            writer.String(o.s_index.c_str(), static_cast<rapidjson::SizeType>(o.s_index.length()), true);
+          }
           else
           {
             writer.String(std::to_string(o.index).c_str(),
@@ -316,7 +318,7 @@ void build_ca_json(std::ofstream& outfile, joined_event::joined_event& je, VW::i
 
     writer.Key("EventId", static_cast<rapidjson::SizeType>(strlen("EventId")), true);
     writer.String(
-        interaction_data.eventId.c_str(), static_cast<rapidjson::SizeType>(interaction_data.eventId.length()), true);
+        interaction_data.event_id.c_str(), static_cast<rapidjson::SizeType>(interaction_data.event_id.length()), true);
 
     writer.Key("c", static_cast<rapidjson::SizeType>(strlen("c")), true);
     std::replace(je.context.begin(), je.context.end(), '\n', ' ');
@@ -328,10 +330,10 @@ void build_ca_json(std::ofstream& outfile, joined_event::joined_event& je, VW::i
     writer.String(je.model_id.c_str(), static_cast<rapidjson::SizeType>(je.model_id.length()), true);
     writer.EndObject();
 
-    if (interaction_data.probabilityOfDrop != 0.f)
+    if (interaction_data.probability_of_drop != 0.f)
     {
       writer.Key("pdrop", static_cast<rapidjson::SizeType>(strlen("pdrop")), true);
-      writer.Double(interaction_data.probabilityOfDrop);
+      writer.Double(interaction_data.probability_of_drop);
     }
 
     bool skip_learn = !je.is_joined_event_learnable();
@@ -348,7 +350,7 @@ void build_ca_json(std::ofstream& outfile, joined_event::joined_event& je, VW::i
   catch (const std::exception& e)
   {
     logger.out_error(
-        "convert event: [{}] from binary to json format failed: [{}].", interaction_data.eventId, e.what());
+        "convert event: [{}] from binary to json format failed: [{}].", interaction_data.event_id, e.what());
   }
 }
 

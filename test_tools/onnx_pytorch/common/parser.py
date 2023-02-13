@@ -80,6 +80,8 @@ MSG_TYPE_HEADER = 0x55555555
 MSG_TYPE_CHECKPOINT = 0x11111111
 MSG_TYPE_REGULAR = 0xFFFFFFFF
 MSG_TYPE_EOF = 0xAAAAAAAA
+
+
 # mostly ripped from the flatbuf parser
 class JoinedLogStreamReader:
     def __init__(self, buf):

@@ -77,9 +77,18 @@ extern "C"
       const char* event_id, const char* context_json, int context_json_size, unsigned int flags,
       reinforcement_learning::multi_slot_response_detailed* resp, const int* baseline_actions,
       size_t baseline_actions_size, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelRequestEpisodicDecisionWithFlags(livemodel_context_t* context, const char* event_id,
+      const char* previous_id, const char* context_json, unsigned int flags,
+      reinforcement_learning::ranking_response& resp, reinforcement_learning::episode_state& episode,
+      reinforcement_learning::api_status* status);
+  API int LiveModelRequestEpisodicDecision(livemodel_context_t* context, const char* event_id, const char* previous_id,
+      const char* context_json, reinforcement_learning::ranking_response& resp,
+      reinforcement_learning::episode_state& episode, reinforcement_learning::api_status* status);
 
   API int LiveModelReportActionTaken(
       livemodel_context_t* livemodel, const char* event_id, reinforcement_learning::api_status* status = nullptr);
+  API int LiveModelReportActionMultiIdTaken(livemodel_context_t* livemodel, const char* primary_id,
+      const char* secondary_id, reinforcement_learning::api_status* status = nullptr);
 
   API int LiveModelReportOutcomeF(livemodel_context_t* livemodel, const char* event_id, float outcome,
       reinforcement_learning::api_status* status = nullptr);

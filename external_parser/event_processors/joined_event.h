@@ -2,13 +2,13 @@
 
 #include "reward.h"
 // VW headers
-// vw.h has to come before json_utils.h
 // clang-format off
+#include "vw/core/ccb_label.h"
 #include "vw/core/vw.h"
-#include "vw/core/json_utils.h"
 #include "vw/core/example.h"
 #include "vw/io/logger.h"
 // clang-format on
+#include "vw/json_parser/parse_example_json.h"
 
 namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
@@ -16,31 +16,28 @@ namespace joined_event
 {
 struct MultiSlotInteraction
 {
-  std::vector<DecisionServiceInteraction> interaction_data;
+  std::vector<VW::parsers::json::decision_service_interaction> interaction_data;
   std::vector<unsigned> baseline_actions;
   bool skip_learn;
   float probability_of_drop{0.f};
 };
 
-inline void calculate_multislot_interaction_metrics(
-    dsjson_metrics* metrics, MultiSlotInteraction multi_slot_interaction, float first_slot_original_reward_neg)
+inline void calculate_multislot_interaction_metrics(VW::details::dsjson_metrics* metrics,
+    MultiSlotInteraction multi_slot_interaction, float first_slot_original_reward_neg)
 {
-  if (metrics)
+  if (metrics != nullptr)
   {
-    metrics->DsjsonSumCostOriginalFirstSlot += first_slot_original_reward_neg;
+    metrics->dsjson_sum_cost_original_first_slot += first_slot_original_reward_neg;
 
     if (!multi_slot_interaction.interaction_data.empty() &&
         !multi_slot_interaction.interaction_data[0].actions.empty() && !multi_slot_interaction.baseline_actions.empty())
     {
       if (multi_slot_interaction.interaction_data[0].actions[0] == multi_slot_interaction.baseline_actions[0])
       {
-        metrics->DsjsonNumberOfLabelEqualBaselineFirstSlot++;
-        metrics->DsjsonSumCostOriginalLabelEqualBaselineFirstSlot += first_slot_original_reward_neg;
+        metrics->dsjson_number_of_label_equal_baseline_first_slot++;
+        metrics->dsjson_sum_cost_original_label_equal_baseline_first_slot += first_slot_original_reward_neg;
       }
-      else
-      {
-        metrics->DsjsonNumberOfLabelNotEqualBaselineFirstSlot++;
-      }
+      else { metrics->dsjson_number_of_label_not_equal_baseline_first_slot++; }
     }
   }
 }
@@ -60,13 +57,13 @@ struct typed_joined_event
       // we currently need it for ccb calculation
       std::vector<reward::outcome_event>& outcome_events, VW::io::logger& logger) = 0;
 
-  virtual void calculate_metrics(dsjson_metrics*) {}
+  virtual void calculate_metrics(VW::details::dsjson_metrics*) {}
   virtual float get_sum_original_reward() const = 0;
 };
 
 struct cb_joined_event : public typed_joined_event
 {
-  DecisionServiceInteraction interaction_data;
+  VW::parsers::json::decision_service_interaction interaction_data;
   // Default Baseline Action for CB is 1 (rl client recommended actions are 1
   // indexed in the CB case)
   static const unsigned CB_BASELINE_ACTION = 1;
@@ -75,9 +72,9 @@ struct cb_joined_event : public typed_joined_event
 
   ~cb_joined_event() = default;
 
-  bool is_skip_learn() const override { return interaction_data.skipLearn; }
+  bool is_skip_learn() const override { return interaction_data.skip_learn; }
 
-  void set_skip_learn(bool sl) override { interaction_data.skipLearn = sl; }
+  void set_skip_learn(bool sl) override { interaction_data.skip_learn = sl; }
 
   void set_apprentice_reward() override
   {
@@ -87,41 +84,40 @@ struct cb_joined_event : public typed_joined_event
       // Reward of 1 when we are match baseline and 0 otherwise
       reward = apprentice_matching_reward;
     }
-    else
-    {
-      reward = apprentice_not_matching_reward;
-    }
+    else { reward = apprentice_not_matching_reward; }
   }
 
   bool fill_in_label(VW::multi_ex& examples, VW::io::logger& logger) const override
   {
     if (interaction_data.actions.empty())
     {
-      logger.out_warn("missing actions for event [{}]", interaction_data.eventId);
+      logger.out_warn("missing actions for event [{}]", interaction_data.event_id);
       return false;
     }
 
     if (interaction_data.probabilities.empty())
     {
-      logger.out_warn("missing probabilities for event [{}]", interaction_data.eventId);
+      logger.out_warn("missing probabilities for event [{}]", interaction_data.event_id);
       return false;
     }
 
     if (std::any_of(interaction_data.probabilities.begin(), interaction_data.probabilities.end(),
             [](float p) { return std::isnan(p); }))
-    { logger.out_warn("distribution for event [{}] contains invalid probabilities", interaction_data.eventId); }
+    {
+      logger.out_warn("distribution for event [{}] contains invalid probabilities", interaction_data.event_id);
+    }
 
     int index = interaction_data.actions[0];
     auto action = interaction_data.actions[0];
     auto probability = interaction_data.probabilities[0];
-    if (interaction_data.probabilityOfDrop >= 1.f || interaction_data.probabilityOfDrop < 0)
+    if (interaction_data.probability_of_drop >= 1.f || interaction_data.probability_of_drop < 0)
     {
-      logger.out_warn("Probability of drop should be within [0, 1): [{}]", interaction_data.eventId);
+      logger.out_warn("Probability of drop should be within [0, 1): [{}]", interaction_data.event_id);
       return false;
     }
 
     examples[index]->l.cb.costs.push_back({-1.f * reward, action, probability});
-    auto weight = 1.f / (1.f - interaction_data.probabilityOfDrop);
+    auto weight = 1.f / (1.f - interaction_data.probability_of_drop);
 
     for (auto* e : examples) { e->l.cb.weight = weight; }
 
@@ -137,20 +133,17 @@ struct cb_joined_event : public typed_joined_event
     original_reward = reward_function(outcome_events, default_reward);
 
     if (interaction_metadata.learning_mode == v2::LearningModeType_Apprentice) { set_apprentice_reward(); }
-    else
-    {
-      reward = original_reward;
-    }
+    else { reward = original_reward; }
   }
 
-  void calculate_metrics(dsjson_metrics* metrics) override
+  void calculate_metrics(VW::details::dsjson_metrics* metrics) override
   {
-    if (metrics)
+    if (metrics != nullptr)
     {
-      if (interaction_data.actions.size() == 0) { metrics->NumberOfEventsZeroActions++; }
+      if (interaction_data.actions.empty()) { metrics->number_of_events_zero_actions++; }
       else if (interaction_data.actions[0] == CB_BASELINE_ACTION)
       {
-        metrics->DsjsonSumCostOriginalBaseline += -1.f * original_reward;
+        metrics->dsjson_sum_cost_original_baseline += -1.f * original_reward;
       }
     }
   }
@@ -166,7 +159,7 @@ struct ccb_joined_event : public typed_joined_event
   std::vector<float> original_rewards;
   std::map<int, std::vector<reward::outcome_event>> outcomes_map;
 
-  ~ccb_joined_event() = default;
+  ~ccb_joined_event() override = default;
   bool is_skip_learn() const override { return multi_slot_interaction.skip_learn; }
   void set_skip_learn(bool sl) override { multi_slot_interaction.skip_learn = sl; }
 
@@ -178,11 +171,10 @@ struct ccb_joined_event : public typed_joined_event
       // Reward of 1 when we are match baseline and 0 otherwise
       if (!multi_slot_interaction.interaction_data[i].actions.empty() &&
           multi_slot_interaction.interaction_data[i].actions[0] == multi_slot_interaction.baseline_actions[i])
-      { rewards[i] = apprentice_matching_reward; }
-      else
       {
-        rewards[i] = apprentice_not_matching_reward;
+        rewards[i] = apprentice_matching_reward;
       }
+      else { rewards[i] = apprentice_not_matching_reward; }
     }
   }
 
@@ -196,27 +188,29 @@ struct ccb_joined_event : public typed_joined_event
     {
       ex->l.conditional_contextual_bandit.weight = weight;
 
-      if (ex->l.conditional_contextual_bandit.type == CCB::example_type::slot)
+      if (ex->l.conditional_contextual_bandit.type == VW::ccb_example_type::SLOT)
       {
         auto& slot_label = ex->l.conditional_contextual_bandit;
         if (multi_slot_interaction.interaction_data.size() > slot_index)
         {
           const auto& slot_data = multi_slot_interaction.interaction_data[slot_index];
-          if ((slot_data.actions.size() != 0) && (slot_data.probabilities.size() != 0))
+          if (!slot_data.actions.empty() && !slot_data.probabilities.empty())
           {
-            auto outcome = new CCB::conditional_contextual_bandit_outcome();
+            auto* outcome = new VW::ccb_outcome();
 
             if (slot_data.actions.size() != slot_data.probabilities.size())
             {
               logger.out_warn(
                   "actions and probabilities for event [{}] don't have the "
                   "same size. Actions [{}], probabilities [{}]",
-                  slot_data.eventId, slot_data.actions.size(), slot_data.probabilities.size());
+                  slot_data.event_id, slot_data.actions.size(), slot_data.probabilities.size());
               continue;
             }
 
             for (size_t i = 0; i < slot_data.actions.size(); i++)
-            { outcome->probabilities.push_back({slot_data.actions[i], slot_data.probabilities[i]}); }
+            {
+              outcome->probabilities.push_back({slot_data.actions[i], slot_data.probabilities[i]});
+            }
             outcome->cost = -1.f * rewards[slot_index];
             slot_label.outcome = outcome;
           }
@@ -244,7 +238,7 @@ struct ccb_joined_event : public typed_joined_event
       return;
     }
 
-    if (slot_id_to_index_map.size() > 0)
+    if (!slot_id_to_index_map.empty())
     {
       for (auto& outcome : outcome_events)
       {
@@ -279,19 +273,18 @@ struct ccb_joined_event : public typed_joined_event
     for (int i = 0; i < static_cast<int>(num_of_slots); i++)
     {
       if (outcomes_map.find(i) != outcomes_map.end())
-      { original_rewards[i] = reward_function(outcomes_map[i], default_reward); }
+      {
+        original_rewards[i] = reward_function(outcomes_map[i], default_reward);
+      }
     }
 
     if (metadata_info.learning_mode == v2::LearningModeType_Apprentice) { set_apprentice_reward(); }
-    else
-    {
-      rewards.assign(original_rewards.begin(), original_rewards.end());
-    }
+    else { rewards.assign(original_rewards.begin(), original_rewards.end()); }
   }
 
-  void calculate_metrics(dsjson_metrics* metrics) override
+  void calculate_metrics(VW::details::dsjson_metrics* metrics) override
   {
-    if (metrics)
+    if (metrics != nullptr)
     {
       float first_slot_original_reward_neg = 0.f;
       if (!original_rewards.empty()) { first_slot_original_reward_neg = -1.f * original_rewards[0]; }
@@ -313,7 +306,7 @@ struct slates_joined_event : public typed_joined_event
   float reward;
   float original_reward;
 
-  ~slates_joined_event() = default;
+  ~slates_joined_event() override = default;
 
   bool is_skip_learn() const override { return multi_slot_interaction.skip_learn; }
   void set_skip_learn(bool sl) override { multi_slot_interaction.skip_learn = sl; }
@@ -330,9 +323,9 @@ struct slates_joined_event : public typed_joined_event
       ex->l.slates.labeled = true;
       ex->l.slates.weight = weight;
 
-      if (ex->l.slates.type == VW::slates::example_type::shared) { ex->l.slates.cost = -1.f * reward; }
+      if (ex->l.slates.type == VW::slates::example_type::SHARED) { ex->l.slates.cost = -1.f * reward; }
 
-      if (ex->l.slates.type == VW::slates::example_type::slot)
+      if (ex->l.slates.type == VW::slates::example_type::SLOT)
       {
         auto& slot_label = ex->l.slates;
         if (multi_slot_interaction.interaction_data.size() > slot_index)
@@ -345,12 +338,14 @@ struct slates_joined_event : public typed_joined_event
               logger.out_warn(
                   "actions and probabilities for event [{}] don't have the "
                   "same size. Actions [{}], probabilities [{}]",
-                  slot_data.eventId, slot_data.actions.size(), slot_data.probabilities.size());
+                  slot_data.event_id, slot_data.actions.size(), slot_data.probabilities.size());
               continue;
             }
 
             for (size_t i = 0; i < slot_data.actions.size(); i++)
-            { slot_label.probabilities.push_back({slot_data.actions[i], slot_data.probabilities[i]}); }
+            {
+              slot_label.probabilities.push_back({slot_data.actions[i], slot_data.probabilities[i]});
+            }
           }
         }
         // process next slot from interaction_data vector
@@ -368,16 +363,15 @@ struct slates_joined_event : public typed_joined_event
     original_reward = reward_function(outcome_events, default_reward);
 
     if (metadata_info.learning_mode == v2::LearningModeType_Apprentice)
-    { logger.out_warn("Apprentice mode is not implmeneted for slates."); }
-    else
     {
-      reward = original_reward;
+      logger.out_warn("Apprentice mode is not implmeneted for slates.");
     }
+    else { reward = original_reward; }
   }
 
-  void calculate_metrics(dsjson_metrics* metrics) override
+  void calculate_metrics(VW::details::dsjson_metrics* metrics) override
   {
-    if (metrics)
+    if (metrics != nullptr)
     {
       float original_reward_neg = -1.f * original_reward;
       calculate_multislot_interaction_metrics(metrics, multi_slot_interaction, original_reward_neg);
@@ -387,27 +381,27 @@ struct slates_joined_event : public typed_joined_event
   float get_sum_original_reward() const override { return original_reward; }
 };  // slates_joined_event
 
-struct DecisionServiceInteractionCats
+struct decision_service_interaction_cats
 {
-  std::string eventId;
+  std::string event_id;
   std::string timestamp;
   float action;
   float pdf_value;
-  float probabilityOfDrop = 0.f;
-  bool skipLearn{false};
+  float probability_of_drop = 0.f;
+  bool skip_learn{false};
 };
 
 struct ca_joined_event : public typed_joined_event
 {
-  DecisionServiceInteractionCats interaction_data;
+  decision_service_interaction_cats interaction_data;
   float reward = 0.0f;
   float original_reward = 0.0f;
 
-  ~ca_joined_event() = default;
+  ~ca_joined_event() override = default;
 
-  bool is_skip_learn() const override { return interaction_data.skipLearn; }
+  bool is_skip_learn() const override { return interaction_data.skip_learn; }
 
-  void set_skip_learn(bool sl) override { interaction_data.skipLearn = sl; }
+  void set_skip_learn(bool sl) override { interaction_data.skip_learn = sl; }
 
   void set_apprentice_reward() override
   {
@@ -423,24 +417,24 @@ struct ca_joined_event : public typed_joined_event
   {
     if (std::isnan(interaction_data.action))
     {
-      logger.out_warn("missing action for event [{}]", interaction_data.eventId);
+      logger.out_warn("missing action for event [{}]", interaction_data.event_id);
       return false;
     }
 
     if (std::isnan(interaction_data.pdf_value))
     {
-      logger.out_warn("missing pdf_value for event [{}]", interaction_data.eventId);
+      logger.out_warn("missing pdf_value for event [{}]", interaction_data.event_id);
       return false;
     }
 
     if (examples.size() != 1)
     {
       logger.out_warn(
-          "example size must be 1, instead got [{}] for event [{}]", examples.size(), interaction_data.eventId);
+          "example size must be 1, instead got [{}] for event [{}]", examples.size(), interaction_data.event_id);
       return false;
     }
 
-    example* ex = examples[0];
+    VW::example* ex = examples[0];
     ex->l.cb_cont.costs.push_back({interaction_data.action, -1.f * reward, interaction_data.pdf_value});
     return true;
   }
@@ -454,16 +448,15 @@ struct ca_joined_event : public typed_joined_event
     original_reward = reward_function(outcome_events, default_reward);
 
     if (interaction_metadata.learning_mode == v2::LearningModeType_Apprentice)
-    { logger.out_warn("Apprentice mode is not implmeneted for cats."); }
-    else
     {
-      reward = original_reward;
+      logger.out_warn("Apprentice mode is not implmeneted for cats.");
     }
+    else { reward = original_reward; }
   }
 
-  void calculate_metrics(dsjson_metrics* metrics) override
+  void calculate_metrics(VW::details::dsjson_metrics* metrics) override
   {
-    if (metrics && std::isnan(interaction_data.action)) { metrics->NumberOfEventsZeroActions++; }
+    if ((metrics != nullptr) && std::isnan(interaction_data.action)) { metrics->number_of_events_zero_actions++; }
   }
 
   float get_sum_original_reward() const override { return original_reward; }
@@ -515,10 +508,7 @@ struct joined_event
       typed_data->set_skip_learn(false);
       return true;
     }
-    else
-    {
-      return false;
-    }
+    else { return false; }
   }
 
   void calc_reward(float default_reward, reward::RewardFunctionType reward_function, VW::io::logger& logger)
@@ -526,7 +516,7 @@ struct joined_event
     typed_data->calc_cost(default_reward, reward_function, interaction_metadata, outcome_events, logger);
   }
 
-  void calculate_metrics(dsjson_metrics* metrics) { return typed_data->calculate_metrics(metrics); }
+  void calculate_metrics(VW::details::dsjson_metrics* metrics) { return typed_data->calculate_metrics(metrics); }
 
   float get_sum_original_reward() const { return typed_data->get_sum_original_reward(); }
 };
@@ -537,7 +527,7 @@ struct multistep_joined_event
       : interaction_metadata(std::move(mi)), cb_data(std::move(data)), outcome_events({})
   {
   }
-  multistep_joined_event() {}
+  multistep_joined_event() = default;
 
   metadata::event_metadata_info interaction_metadata;
   std::unique_ptr<cb_joined_event> cb_data;
@@ -562,10 +552,7 @@ struct multistep_joined_event
       cb_data->set_skip_learn(false);
       return true;
     }
-    else
-    {
-      return false;
-    }
+    else { return false; }
   }
 
   void calc_reward(float default_reward, reward::RewardFunctionType reward_function, VW::io::logger& logger)
