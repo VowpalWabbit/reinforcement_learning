@@ -16,39 +16,42 @@ int protocol_not_supported(api_status* status)
 }
 
 template <typename T>
-i_async_batcher<T>* create_legacy_async_batcher(const utility::configuration& c, i_message_sender* sender,
-    utility::watchdog& watchdog, error_callback_fn* perror_cb, const char* section,
-    typename async_batcher<T, fb_collection_serializer>::shared_state_t& shared_state)
+std::unique_ptr<i_async_batcher<T>> create_legacy_async_batcher(const utility::configuration& c,
+    std::unique_ptr<i_message_sender> sender, utility::watchdog& watchdog, error_callback_fn* perror_cb,
+    const char* section, typename async_batcher<T, fb_collection_serializer>::shared_state_t& shared_state)
 {
   auto config = utility::get_batcher_config(c, section);
-  return new async_batcher<T, fb_collection_serializer>(sender, watchdog, shared_state, perror_cb, config);
+  return std::unique_ptr<async_batcher<T, fb_collection_serializer>>(
+      new async_batcher<T, fb_collection_serializer>(std::move(sender), watchdog, shared_state, perror_cb, config));
 }
 
 interaction_logger_facade::interaction_logger_facade(model_type_t model_type, const utility::configuration& c,
-    i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, i_logger_extensions* ext,
+    std::unique_ptr<i_message_sender> sender, utility::watchdog& watchdog,
+    std::unique_ptr<i_time_provider> time_provider, i_logger_extensions& logger_extensions,
     error_callback_fn* perror_cb)
     : _model_type(model_type)
     , _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
     , _serializer_shared_state(0)
-    , _ext_p(ext)
+    , _logger_extensions(logger_extensions)
     , _v1_cb(_version == 1 && _model_type == model_type_t::CB
-              ? new interaction_logger(time_provider,
+              ? new interaction_logger(std::move(time_provider),
                     create_legacy_async_batcher<ranking_event>(
-                        c, sender, watchdog, perror_cb, INTERACTION_SECTION, _serializer_shared_state))
+                        c, std::move(sender), watchdog, perror_cb, INTERACTION_SECTION, _serializer_shared_state))
               : nullptr)
     , _v1_ccb(_version == 1 && _model_type == model_type_t::CCB
-              ? new ccb_logger(time_provider,
+              ? new ccb_logger(std::move(time_provider),
                     create_legacy_async_batcher<decision_ranking_event>(
-                        c, sender, watchdog, perror_cb, INTERACTION_SECTION, _serializer_shared_state))
+                        c, std::move(sender), watchdog, perror_cb, INTERACTION_SECTION, _serializer_shared_state))
               : nullptr)
     , _v1_multislot(_version == 1 && _model_type == model_type_t::SLATES
-              ? new multi_slot_logger(time_provider,
+              ? new multi_slot_logger(std::move(time_provider),
                     create_legacy_async_batcher<multi_slot_decision_event>(
-                        c, sender, watchdog, perror_cb, INTERACTION_SECTION, _serializer_shared_state))
+                        c, std::move(sender), watchdog, perror_cb, INTERACTION_SECTION, _serializer_shared_state))
               : nullptr)
     , _v2(_version == 2
-              ? new generic_event_logger(time_provider,
-                    ext->create_batcher(sender, watchdog, perror_cb, INTERACTION_SECTION), c.get(name::APP_ID, ""))
+              ? new generic_event_logger(std::move(time_provider),
+                    _logger_extensions.create_batcher(std::move(sender), watchdog, perror_cb, INTERACTION_SECTION),
+                    c.get(name::APP_ID, ""))
               : nullptr)
 {
 }
@@ -98,8 +101,8 @@ int interaction_logger_facade::log(string_view context, unsigned int flags, cons
         probabilities.push_back(r.probability);
       }
 
-      return _v2->log(response.get_event_id(), context, _serializer_cb.type, _ext_p, _serializer_cb, status, flags, lmt,
-          action_ids, probabilities, model_id);
+      return _v2->log(response.get_event_id(), context, _serializer_cb.type, &_logger_extensions, _serializer_cb,
+          status, flags, lmt, action_ids, probabilities, model_id);
     }
     default:
       return protocol_not_supported(status);
@@ -126,8 +129,8 @@ int interaction_logger_facade::log(const char* episode_id, const char* previous_
       std::string model_id(response.get_model_id());
       std::string previous_id_str(previous_id ? previous_id : "");
 
-      return _v2->log(episode_id, context, _multistep_serializer.type, _ext_p, _multistep_serializer, status,
-          previous_id_str, flags, action_ids, probabilities, event_id, model_id);
+      return _v2->log(episode_id, context, _multistep_serializer.type, &_logger_extensions, _multistep_serializer,
+          status, previous_id_str, flags, action_ids, probabilities, event_id, model_id);
     }
     default:
       return protocol_not_supported(status);
@@ -193,8 +196,8 @@ int interaction_logger_facade::log_decision(const std::string& event_id, string_
       generic_event::payload_type_t payload_type;
       RETURN_IF_FAIL(multi_slot_model_type_to_payload_type(_model_type, payload_type, status));
 
-      return _v2->log(event_id.c_str(), context, payload_type, _ext_p, _serializer_multislot, status, flags, action_ids,
-          pdfs, model_version, slot_ids, baseline_actions, lmt);
+      return _v2->log(event_id.c_str(), context, payload_type, &_logger_extensions, _serializer_multislot, status,
+          flags, action_ids, pdfs, model_version, slot_ids, baseline_actions, lmt);
     }
     default:
       return protocol_not_supported(status);
@@ -211,25 +214,26 @@ int interaction_logger_facade::log_continuous_action(
       // Create a string out of char* returned by get_model_id()
       // so that it can be copied by value and persist after char* goes out of scope
       auto model_id = std::string(response.get_model_id());
-      return _v2->log(response.get_event_id(), context, _serializer_ca.type, _ext_p, _serializer_ca, status, flags,
-          response.get_chosen_action(), response.get_chosen_action_pdf_value(), model_id);
+      return _v2->log(response.get_event_id(), context, _serializer_ca.type, &_logger_extensions, _serializer_ca,
+          status, flags, response.get_chosen_action(), response.get_chosen_action_pdf_value(), model_id);
     }
     default:
       return protocol_not_supported(status);
   }
 }
 
-observation_logger_facade::observation_logger_facade(const utility::configuration& c, i_message_sender* sender,
-    utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
+observation_logger_facade::observation_logger_facade(const utility::configuration& c,
+    std::unique_ptr<i_message_sender> sender, utility::watchdog& watchdog,
+    std::unique_ptr<i_time_provider> time_provider, error_callback_fn* perror_cb)
     : _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
     , _serializer_shared_state(0)
-    , _v1(_version == 1 ? new observation_logger(time_provider,
-                              create_legacy_async_batcher<outcome_event>(
-                                  c, sender, watchdog, perror_cb, OBSERVATION_SECTION, _serializer_shared_state))
+    , _v1(_version == 1 ? new observation_logger(std::move(time_provider),
+                              create_legacy_async_batcher<outcome_event>(c, std::move(sender), watchdog, perror_cb,
+                                  OBSERVATION_SECTION, _serializer_shared_state))
                         : nullptr)
-    , _v2(_version == 2 ? new generic_event_logger(time_provider,
-                              create_legacy_async_batcher<generic_event>(
-                                  c, sender, watchdog, perror_cb, OBSERVATION_SECTION, _serializer_shared_state),
+    , _v2(_version == 2 ? new generic_event_logger(std::move(time_provider),
+                              create_legacy_async_batcher<generic_event>(c, std::move(sender), watchdog, perror_cb,
+                                  OBSERVATION_SECTION, _serializer_shared_state),
                               c.get(name::APP_ID, ""))
                         : nullptr)
 {
@@ -356,13 +360,13 @@ int observation_logger_facade::report_action_taken(const char* primary_id, const
 }
 
 // TODO: Do we need an EPISODE_SECTION for the config? Just use OBSERVATION_SECTION for now
-episode_logger_facade::episode_logger_facade(const utility::configuration& c, i_message_sender* sender,
-    utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb)
+episode_logger_facade::episode_logger_facade(const utility::configuration& c, std::unique_ptr<i_message_sender> sender,
+    utility::watchdog& watchdog, std::unique_ptr<i_time_provider> time_provider, error_callback_fn* perror_cb)
     : _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
     , _serializer_shared_state(0)
-    , _v2(_version == 2 ? new generic_event_logger(time_provider,
-                              create_legacy_async_batcher<generic_event>(
-                                  c, sender, watchdog, perror_cb, OBSERVATION_SECTION, _serializer_shared_state),
+    , _v2(_version == 2 ? new generic_event_logger(std::move(time_provider),
+                              create_legacy_async_batcher<generic_event>(c, std::move(sender), watchdog, perror_cb,
+                                  OBSERVATION_SECTION, _serializer_shared_state),
                               c.get(name::APP_ID, ""))
                         : nullptr)
 {

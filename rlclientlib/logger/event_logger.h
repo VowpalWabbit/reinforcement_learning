@@ -35,9 +35,10 @@ public:
   using TFunc = std::function<int(TEvent&, api_status*)>;
 
 public:
-  event_logger(i_time_provider* time_provider, i_async_batcher<TEvent>* batcher);
+  event_logger(std::unique_ptr<i_time_provider> time_provider, std::unique_ptr<i_async_batcher<TEvent>> batcher);
 
-  event_logger(i_time_provider* time_provider, i_async_batcher<TEvent>* batcher, const char* app_id);
+  event_logger(std::unique_ptr<i_time_provider> time_provider, std::unique_ptr<i_async_batcher<TEvent>> batcher,
+      const char* app_id);
 
   int init(api_status* status);
 
@@ -56,14 +57,16 @@ protected:
 };
 
 template <typename TEvent>
-event_logger<TEvent>::event_logger(i_time_provider* time_provider, i_async_batcher<TEvent>* batcher)
-    : event_logger(time_provider, batcher, "")
+event_logger<TEvent>::event_logger(
+    std::unique_ptr<i_time_provider> time_provider, std::unique_ptr<i_async_batcher<TEvent>> batcher)
+    : event_logger(std::move(time_provider), std::move(batcher), "")
 {
 }
 
 template <typename TEvent>
-event_logger<TEvent>::event_logger(i_time_provider* time_provider, i_async_batcher<TEvent>* batcher, const char* app_id)
-    : _time_provider(time_provider), _batcher(batcher), _app_id(app_id)
+event_logger<TEvent>::event_logger(std::unique_ptr<i_time_provider> time_provider,
+    std::unique_ptr<i_async_batcher<TEvent>> batcher, const char* app_id)
+    : _time_provider(std::move(time_provider)), _batcher(std::move(batcher)), _app_id(app_id)
 {
 }
 
@@ -97,8 +100,9 @@ int event_logger<TEvent>::append(TFunc& func, TEvent* event, api_status* status)
 class interaction_logger : public event_logger<ranking_event>
 {
 public:
-  interaction_logger(i_time_provider* time_provider, i_async_batcher<ranking_event>* batcher)
-      : event_logger(time_provider, batcher)
+  interaction_logger(
+      std::unique_ptr<i_time_provider> time_provider, std::unique_ptr<i_async_batcher<ranking_event>> batcher)
+      : event_logger(std::move(time_provider), std::move(batcher))
   {
   }
 
@@ -109,8 +113,9 @@ public:
 class ccb_logger : public event_logger<decision_ranking_event>
 {
 public:
-  ccb_logger(i_time_provider* time_provider, i_async_batcher<decision_ranking_event>* batcher)
-      : event_logger(time_provider, batcher)
+  ccb_logger(
+      std::unique_ptr<i_time_provider> time_provider, std::unique_ptr<i_async_batcher<decision_ranking_event>> batcher)
+      : event_logger(std::move(time_provider), std::move(batcher))
   {
   }
 
@@ -122,8 +127,9 @@ public:
 class multi_slot_logger : public event_logger<multi_slot_decision_event>
 {
 public:
-  multi_slot_logger(i_time_provider* time_provider, i_async_batcher<multi_slot_decision_event>* batcher)
-      : event_logger(time_provider, batcher)
+  multi_slot_logger(std::unique_ptr<i_time_provider> time_provider,
+      std::unique_ptr<i_async_batcher<multi_slot_decision_event>> batcher)
+      : event_logger(std::move(time_provider), std::move(batcher))
   {
   }
 
@@ -135,8 +141,9 @@ public:
 class observation_logger : public event_logger<outcome_event>
 {
 public:
-  observation_logger(i_time_provider* time_provider, i_async_batcher<outcome_event>* batcher)
-      : event_logger(time_provider, batcher)
+  observation_logger(
+      std::unique_ptr<i_time_provider> time_provider, std::unique_ptr<i_async_batcher<outcome_event>> batcher)
+      : event_logger(std::move(time_provider), std::move(batcher))
   {
   }
 
@@ -162,8 +169,9 @@ public:
 class generic_event_logger : public event_logger<generic_event>
 {
 public:
-  generic_event_logger(i_time_provider* time_provider, i_async_batcher<generic_event>* batcher, const char* app_id)
-      : event_logger(time_provider, batcher, app_id)
+  generic_event_logger(std::unique_ptr<i_time_provider> time_provider,
+      std::unique_ptr<i_async_batcher<generic_event>> batcher, const char* app_id)
+      : event_logger(std::move(time_provider), std::move(batcher), app_id)
   {
   }
 

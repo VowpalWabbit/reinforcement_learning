@@ -75,7 +75,8 @@ private:
 class dedup_state
 {
 public:
-  dedup_state(const utility::configuration& c, bool use_compression, bool use_dedup, i_time_provider* time_provider);
+  dedup_state(const utility::configuration& c, bool use_compression, bool use_dedup,
+      std::unique_ptr<i_time_provider> time_provider);
 
   string_view get_object(generic_event::object_id_t aid);
   float get_ewma_value() const;

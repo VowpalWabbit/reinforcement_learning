@@ -1,8 +1,9 @@
 #pragma once
 
 #include "rl.net.native.h"
-#include <ranking_response.h>
+
 #include <api_status.h>
+#include <ranking_response.h>
 
 // Global exports
 extern "C"
