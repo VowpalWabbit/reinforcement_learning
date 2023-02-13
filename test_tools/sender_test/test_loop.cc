@@ -43,13 +43,11 @@ bool test_loop::init()
   config.set(r::name::INTERACTION_EH_TASKS_LIMIT, std::to_string(_threads).c_str());
   const auto* const sender_impl =
       config.get(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_EH_SENDER);
-  r::i_sender* sender = nullptr;
-  if (r::sender_factory.create(&sender, sender_impl, config, &error_callback, &status) != r::error_code::success)
+  if (r::sender_factory.create(_sender, sender_impl, config, &error_callback, &status) != r::error_code::success)
   {
     std::cout << status.get_error_msg() << std::endl;
     return false;
   }
-  _sender.reset(sender);
 
   if (_sender->init(config, &status) != r::error_code::success)
   {

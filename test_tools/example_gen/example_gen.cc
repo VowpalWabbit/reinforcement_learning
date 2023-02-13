@@ -2,12 +2,107 @@
 #include "config_utility.h"
 #include "constants.h"
 #include "live_model.h"
+#include "vw/common/random.h"
 
 #include <boost/program_options.hpp>
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <random>
+#include <set>
+#include <sstream>
+#include <string>
+#include <vector>
+
+class cb_decision_gen
+{
+  int shared_features, action_features, actions_per_decision, ft_string_size;
+  std::vector<std::string> actions_set;
+  uint64_t rand_val;
+  std::string temp_str;
+
+  std::string mk_feature_vector(int count, uint32_t max_idx);
+
+public:
+  cb_decision_gen(int shared_features, int action_features, int actions_per_decision, int total_actions,
+      int initial_seed, int ft_string_size);
+
+  std::string gen_example();
+
+  uint64_t next_uint();
+};
+
+uint64_t cb_decision_gen::next_uint()
+{
+  VW::details::merand48(rand_val);
+  return rand_val;
+}
+
+std::string cb_decision_gen::mk_feature_vector(int count, uint32_t max_idx)
+{
+  std::ostringstream str;
+  str << "{";
+  std::set<uint32_t> added_idx;
+  int added = 0;
+  while (added < count)
+  {
+    auto idx = next_uint() % max_idx;
+    if (added_idx.find(idx) == added_idx.end())
+    {
+      if (added > 0) { str << ","; }
+      std::string ft_string(ft_string_size, 'f');
+      str << "\"" << idx << "_" << ft_string << "\":1";
+
+      ++added;
+      added_idx.insert(idx);
+    }
+  }
+  str << "}";
+  return str.str();
+}
+
+cb_decision_gen::cb_decision_gen(int shared_features, int action_features, int actions_per_decision, int total_actions,
+    int initial_seed, int ft_string_size = 1)
+    : shared_features(shared_features)
+    , action_features(action_features)
+    , actions_per_decision(actions_per_decision)
+    , ft_string_size(ft_string_size)
+    , rand_val(initial_seed)
+{
+  for (int i = 0; i < total_actions; ++i)
+  {
+    actions_set.push_back(mk_feature_vector(action_features, action_features * 3));
+  }
+}
+
+std::string cb_decision_gen::gen_example()
+{
+  std::ostringstream str;
+  str << R"({"shared":)";
+  str << mk_feature_vector(shared_features, shared_features * 3) << ",";
+  str << R"("_multi":[)";
+  std::set<size_t> added_actions;
+  int added = 0;
+  while (added < actions_per_decision)
+  {
+    auto idx = next_uint() % actions_set.size();
+    if (added_actions.find(idx) == added_actions.end())
+    {
+      if (added > 0) { str << ","; }
+      added_actions.insert(idx);
+
+      str << R"({"action":)";
+      str << actions_set[idx];
+      str << "}";
+      ++added;
+    }
+  }
+
+  str << R"(]})";
+  temp_str = str.str();
+
+  return temp_str;
+}
 
 namespace r = reinforcement_learning;
 namespace u = reinforcement_learning::utility;
@@ -20,6 +115,9 @@ namespace po = boost::program_options;
 
 // global var, yeah ugg
 bool enable_dedup = false;
+bool enable_compress = false;
+int num_actions = 0;
+int ft_string_size = 0;
 
 static const char* options[] = {"cb", "invalid-cb", "ccb", "ccb-with-slot-id", "ccb-baseline", "slates", "ca",
     "f-reward", "fi-reward", "fi-out-of-bound-reward", "fs-reward", "fmix-reward", "s-reward", "si-reward", "ss-reward",
@@ -51,9 +149,11 @@ enum options
   SLATES_LOOP
 };
 
-void load_config_from_json(int action, u::configuration& config, bool enable_apprentice_mode, float epsilon = 0.0f)
+void load_config_from_json(
+    int action, u::configuration& config, bool enable_apprentice_mode, const std::string& dir, float epsilon = 0.0f)
 {
   std::string file_name(options[action]);
+  if (dir != "") { file_name = dir + "/" + file_name; }
 
   config.set("ApplicationID", "<appid>");
   config.set("interaction.sender.implementation", "INTERACTION_FILE_SENDER");
@@ -73,6 +173,9 @@ void load_config_from_json(int action, u::configuration& config, bool enable_app
   }
   else
   {
+    if (enable_dedup) { file_name += "_dedup"; }
+    if (enable_compress) { file_name += "_compress"; }
+
     file_name += "_v2.fb";
     bool is_observation = action >= F_REWARD;
     if (is_observation)
@@ -89,11 +192,9 @@ void load_config_from_json(int action, u::configuration& config, bool enable_app
   config.set("protocol.version", "2");
   config.set("InitialExplorationEpsilon", "1.0");
 
-  if (enable_dedup)
-  {
-    config.set(nm::INTERACTION_USE_DEDUP, "true");
-    config.set(nm::INTERACTION_USE_COMPRESSION, "true");
-  }
+  if (enable_dedup) { config.set(nm::INTERACTION_USE_DEDUP, "true"); }
+
+  if (enable_compress) { config.set(nm::INTERACTION_USE_COMPRESSION, "true"); }
 
   if (action == CCB_ACTION || action == CCB_BASELINE_ACTION || action == CCB_WITH_SLOT_ID_ACTION ||
       action == CCB_LOOP || action == CCB_BASELINE_ACTION_LOOP)
@@ -141,6 +242,11 @@ bool load_config_from_provided_json(const std::string& config_file, u::configura
   {
     std::cout << "enabling dedup" << std::endl;
     config.set(nm::INTERACTION_USE_DEDUP, "true");
+  }
+
+  if (enable_compress)
+  {
+    std::cout << "enabling compression" << std::endl;
     config.set(nm::INTERACTION_USE_COMPRESSION, "true");
   }
 
@@ -282,7 +388,15 @@ int take_action(r::live_model& rl, const char* event_id, int action, unsigned in
     case CB_ACTION:
     {  // "cb",
       r::ranking_response response;
-      if (rl.choose_rank(event_id, JSON_CB_CONTEXT, action_flag, response, &status) != 0)
+      std::string example = JSON_CB_CONTEXT;
+      if (num_actions > 0)
+      {
+        auto fss = ft_string_size > 0 ? ft_string_size : 1;
+        cb_decision_gen cb_gen(50, 50, num_actions, num_actions + 1, 0, fss);
+        example = cb_gen.gen_example();
+      }
+
+      if (rl.choose_rank(event_id, example.c_str(), action_flag, response, &status) != 0)
       {
         std::cout << status.get_error_msg() << std::endl;
       }
@@ -680,11 +794,12 @@ int pseudo_random(int seed)
 }
 
 int run_config(int action, int count, int initial_seed, bool gen_random_reward, bool enable_apprentice_mode,
-    int deferred_action_count, const std::string& config_file, std::mt19937& rng, float epsilon = 0.0f)
+    int deferred_action_count, const std::string& config_file, std::mt19937& rng, const std::string& dir,
+    float epsilon = 0.0f)
 {
   u::configuration config;
 
-  if (config_file.empty()) { load_config_from_json(action, config, enable_apprentice_mode, epsilon); }
+  if (config_file.empty()) { load_config_from_json(action, config, enable_apprentice_mode, dir, epsilon); }
   else
   {
     if (!load_config_from_provided_json(config_file, config)) { return -1; }
@@ -725,11 +840,14 @@ int main(int argc, char* argv[])
   bool gen_random_reward = false;
   bool enable_apprentice_mode = false;
   int deferred_action_count = 0;
+  std::string dir = "";
   float epsilon = 0.f;
 
-  desc.add_options()("help", "Produce help message")("all", "use all args")("dedup", "Enable dedup/zstd")("count",
-      po::value<int>(),
-      "Number of events to produce")("seed", po::value<int>(), "Initial seed used to produce event ids")(
+  desc.add_options()("help", "Produce help message")("all", "use all args")("dedup", "Enable dedup")(
+      "compress", "Enable zstd")("count", po::value<int>(), "Number of events to produce")("num_actions",
+      po::value<int>(), "number of actions to use when generating a cb example")("ft_string_size", po::value<int>(),
+      "to be used with num_actions, determines the size of the feature string when generating a cb example")(
+      "seed", po::value<int>(), "Initial seed used to produce event ids")(
       "epsilon", po::value<float>(), "epsilon to be used in command line args for VW")("kind", po::value<std::string>(),
       "which kind of example to generate "
       "(cb,invalid-cb,ccb,ccb-with-slot-id,ccb-baseline,slates,ca,cb-loop,ca-loop,ccb-loop,ccb-baseline-loop,slates-"
@@ -738,7 +856,8 @@ int main(int argc, char* argv[])
       "json config file for rlclinetlib")("apprentice", "Enable apprentice mode")("deferred_action_count",
       po::value<int>(),
       "Number of deferred action for interaction events. Set the deferred_action flag to true for first "
-      "deferred_action_count number of actions");
+      "deferred_action_count number of actions")("dir", po::value<std::string>(),
+      "Directory to store the generated examples. If not specified, examples will generated to current directory");
 
   po::positional_options_description pd;
   pd.add("kind", 1);
@@ -752,16 +871,24 @@ int main(int argc, char* argv[])
     gen_random_reward = (vm.count("random_reward") != 0u);
     enable_apprentice_mode = (vm.count("apprentice") != 0u);
     enable_dedup = (vm.count("dedup") != 0u);
+    enable_compress = (vm.count("compress") != 0u);
 
     std::vector<std::string> deferrable_interactions{"cb", "invalid-cb", "ccb", "ccb-baseline", "slates", "ca",
         "cb-loop", "ca-loop", "ccb-with-slot-id", "ccb-loop", "ccb-baseline-loop", "slates-loop"};
 
     if (vm.count("kind") > 0) { action_name = vm["kind"].as<std::string>(); }
     if (vm.count("count") > 0) { count = vm["count"].as<int>(); }
+    if (vm.count("num_actions") > 0) { num_actions = vm["num_actions"].as<int>(); }
+    if (vm.count("ft_string_size") > 0)
+    {
+      if (num_actions == 0) { throw std::runtime_error("num_actions must be set with ft_string_size"); }
+      ft_string_size = vm["ft_string_size"].as<int>();
+    }
     if (vm.count("seed") > 0) { seed = vm["seed"].as<int>(); }
     if (vm.count("epsilon") > 0) { epsilon = vm["epsilon"].as<float>(); }
     if (vm.count("config_file") > 0) { config_file = vm["config_file"].as<std::string>(); }
     if (vm.count("deferred_action_count") > 0) { deferred_action_count = vm["deferred_action_count"].as<int>(); }
+    if (vm.count("dir") > 0) { dir = vm["dir"].as<std::string>(); }
 
     if (vm.count("deferred_action_count") > 0 &&
         !std::any_of(deferrable_interactions.begin(), deferrable_interactions.end(),
@@ -791,7 +918,7 @@ int main(int argc, char* argv[])
     for (int i = 0; options[i] != nullptr; ++i)
     {
       if (run_config(i, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file, rng,
-              epsilon) != 0)
+              dir, epsilon) != 0)
       {
         return -1;
       }
@@ -816,6 +943,6 @@ int main(int argc, char* argv[])
     return -1;
   }
 
-  return run_config(
-      action, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file, rng, epsilon);
+  return run_config(action, count, seed, gen_random_reward, enable_apprentice_mode, deferred_action_count, config_file,
+      rng, dir, epsilon);
 }

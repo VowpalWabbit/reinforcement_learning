@@ -77,10 +77,10 @@ int main()
   std::mutex cout_mutex;
 
   // Define a create function to be used in the factory.
-  auto const create_ostream_sender_fn = [&](r::i_sender** retval, const u::configuration&,
+  auto const create_ostream_sender_fn = [&](std::unique_ptr<r::i_sender>& retval, const u::configuration&,
                                             r::error_callback_fn* error_callback, r::i_trace* trace, r::api_status*)
   {
-    *retval = new ostream_sender(std::cout, cout_mutex);
+    retval.reset(new ostream_sender(std::cout, cout_mutex));
     return err::success;
   };
 

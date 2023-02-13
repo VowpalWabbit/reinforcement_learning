@@ -9,7 +9,7 @@ namespace logger
 {
 struct preamble;
 
-preamble_message_sender::preamble_message_sender(i_sender* sender) : _sender{sender} {}
+preamble_message_sender::preamble_message_sender(std::unique_ptr<i_sender> sender) : _sender(std::move(sender)) {}
 
 int preamble_message_sender::send(const uint16_t msg_type, const buffer& db, api_status* status)
 {

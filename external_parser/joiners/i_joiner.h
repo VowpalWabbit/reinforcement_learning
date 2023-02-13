@@ -19,7 +19,6 @@
 // vw.h has to come before json_utils.h
 // clang-format off
 #include "vw/core/vw.h"
-#include "vw/core/json_utils.h"
 // clang-format on
 
 class i_joiner

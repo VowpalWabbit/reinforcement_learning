@@ -1,4 +1,3 @@
-#define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
 #  define BOOST_TEST_MODULE Main
 #endif
@@ -107,7 +106,7 @@ BOOST_AUTO_TEST_CASE(configuration_parse_eventhub_connection_string)
   BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::INTERACTION_EH_KEY, "DefaultValue"), "<SAKey>");
 }
 
-BOOST_AUTO_TEST_CASE(configuration_parse_interaction_observation_config)
+BOOST_AUTO_TEST_CASE(configuration_parse_episode_interaction_observation_config)
 {
   const auto json = R"({
     "http.api.key": "api_key",
@@ -117,6 +116,10 @@ BOOST_AUTO_TEST_CASE(configuration_parse_interaction_observation_config)
     "observation.http.api.host": "http://localhost:8080",
     "observation.apim.tasks_limit": 6,
     "observation.apim.max_http_retries": 4,
+    "episode.http.api.host": "http://localhost:8080",
+    "episode.apim.tasks_limit": 7,
+    "episode.apim.max_http_retries": 5,
+    "episode.sender.implementation": "EPISODE_HTTP_API_SENDER",
     "interaction.sender.implementation": "INTERACTION_HTTP_API_SENDER",
     "observation.sender.implementation": "OBSERVATION_HTTP_API_SENDER"
   })";
@@ -132,6 +135,12 @@ BOOST_AUTO_TEST_CASE(configuration_parse_interaction_observation_config)
       config.get(reinforcement_learning::name::OBSERVATION_HTTP_API_HOST, "DefaultValue"), "http://localhost:8080");
   BOOST_CHECK_EQUAL(config.get_int(reinforcement_learning::name::OBSERVATION_APIM_TASKS_LIMIT, 0), 6);
   BOOST_CHECK_EQUAL(config.get_int(reinforcement_learning::name::OBSERVATION_APIM_MAX_HTTP_RETRIES, 0), 4);
+  BOOST_CHECK_EQUAL(
+      config.get(reinforcement_learning::name::EPISODE_HTTP_API_HOST, "DefaultValue"), "http://localhost:8080");
+  BOOST_CHECK_EQUAL(config.get_int(reinforcement_learning::name::EPISODE_APIM_TASKS_LIMIT, 0), 7);
+  BOOST_CHECK_EQUAL(config.get_int(reinforcement_learning::name::EPISODE_APIM_MAX_HTTP_RETRIES, 0), 5);
+  BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::EPISODE_SENDER_IMPLEMENTATION, "DefaultValue"),
+      "EPISODE_HTTP_API_SENDER");
   BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::INTERACTION_SENDER_IMPLEMENTATION, "DefaultValue"),
       "INTERACTION_HTTP_API_SENDER");
   BOOST_CHECK_EQUAL(config.get(reinforcement_learning::name::OBSERVATION_SENDER_IMPLEMENTATION, "DefaultValue"),

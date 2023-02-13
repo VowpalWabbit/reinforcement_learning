@@ -1,5 +1,4 @@
 #include "multi_slot_response.h"
-#define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
 #  define BOOST_TEST_MODULE Main
 #endif
@@ -424,6 +423,92 @@ BOOST_AUTO_TEST_CASE(live_model_request_decision)
   auto& resp1 = *it;
   BOOST_CHECK_EQUAL(resp1.get_slot_id(), "afb1da57-d4cd-4691-97d8-2b24bfb4e07f");
   BOOST_CHECK_EQUAL(resp1.get_action_id(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(live_model_ranking_request_check_response_pdf_explore_only)
+{
+  // create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
+  config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
+  config.set(
+      r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--cb_explore_adf --json --quiet --epsilon 0.3 --first_only --id N/A");
+
+  r::api_status status;
+
+  // create the ds live_model, and initialize it with the config
+  r::live_model model(config);
+
+  BOOST_CHECK_EQUAL(model.init(&status), err::success);
+  const auto event_id = "event_id";
+
+  r::ranking_response response;
+
+  const auto JSON_CB_CONTEXT_3ACTIONS =
+      R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}},{"TAction":{"a3":"f3"}}]})";
+
+  // request ranking
+  BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CB_CONTEXT_3ACTIONS, response), err::success);
+
+  size_t num_actions = response.size();
+  BOOST_CHECK_EQUAL(num_actions, 3);
+
+  const float EXPECTED_PROBS[3] = {0.8f, 0.1f, 0.1f};
+
+  // check that our PDF is what we expected
+  r::ranking_response::iterator it = response.begin();
+
+  for (uint32_t i = 0; i < num_actions; i++)
+  {
+    auto action_probability = *(it + i);
+    BOOST_CHECK_CLOSE(action_probability.probability, EXPECTED_PROBS[action_probability.action_id], FLOAT_TOL);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(live_model_ranking_w_las_request_check_response_pdf_explore_only)
+{
+  // create a simple ds configuration
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
+  config.set(r::name::INTERACTION_SENDER_IMPLEMENTATION, r::value::INTERACTION_FILE_SENDER);
+  config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE,
+      "--cb_explore_adf --json --quiet --epsilon 0.3 --first_only --id N/A --large_action_space --max_actions 2");
+
+  r::api_status status;
+
+  // create the ds live_model, and initialize it with the config
+  r::live_model model(config);
+
+  BOOST_CHECK_EQUAL(model.init(&status), err::success);
+  const auto event_id = "event_id";
+
+  r::ranking_response response;
+
+  const auto JSON_CB_CONTEXT_3ACTIONS =
+      R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"TAction":{"a1":"f1"} },{"TAction":{"a2":"f2"}},{"TAction":{"a3":"f3"}}]})";
+
+  // request ranking
+  BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CB_CONTEXT_3ACTIONS, response), err::success);
+
+  size_t num_actions = response.size();
+  BOOST_CHECK_EQUAL(num_actions, 3);
+
+  const float EXPECTED_PROBS[3] = {0.85f, 0.0f, 0.15f};
+
+  // check that our PDF is what we expected
+  r::ranking_response::iterator it = response.begin();
+
+  for (uint32_t i = 0; i < num_actions; i++)
+  {
+    auto action_probability = *(it + i);
+    BOOST_CHECK_CLOSE(action_probability.probability, EXPECTED_PROBS[action_probability.action_id], FLOAT_TOL);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough)
@@ -1859,8 +1944,6 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_uri)
   BOOST_CHECK_EQUAL(_rl->init(&status), r::error_code::http_model_uri_not_provided);
 }
 
-#ifdef _WIN32
-#  ifdef USE_AZURE_FACTORIES
 BOOST_AUTO_TEST_CASE(live_model_using_endpoint_success)
 {
   u::configuration config;
@@ -1885,5 +1968,3 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_apikey)
 
   BOOST_CHECK_EQUAL(_rl->init(&status), r::error_code::http_api_key_not_provided);
 }
-#  endif
-#endif
