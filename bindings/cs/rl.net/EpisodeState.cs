@@ -41,8 +41,8 @@ namespace Rl.Net
                 {
                     fixed (byte* episodeIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(episodeId))
                     {
-                        IntPtr contextJsonUtf8Ptr = new IntPtr(episodeIdUtf8Bytes);
-                        IntPtr result = NativeMethods.CreateEpisodeState(contextJsonUtf8Ptr);
+                        IntPtr episodeIdUtf8Ptr = new IntPtr(episodeIdUtf8Bytes);
+                        IntPtr result = NativeMethods.CreateEpisodeState(episodeIdUtf8Ptr);
                         GC.KeepAlive(episodeId);
                         return result;
                     }
