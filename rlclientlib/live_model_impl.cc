@@ -76,7 +76,7 @@ int live_model_impl::init(api_status* status)
 
 int live_model_impl::add_lru_dedup_cache(uint64_t hash, std::string action_str, api_status* status)
 {
-  return _model->add_lru_dedup_cache(hash, action_str, status);
+  return _model->add_lru_dedup_cache(hash, std::move(action_str), status);
 }
 
 int live_model_impl::choose_rank(
