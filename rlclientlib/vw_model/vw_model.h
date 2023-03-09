@@ -6,6 +6,8 @@
 #include "safe_vw.h"
 #include "trace_logger.h"
 
+#include <mutex>
+
 namespace reinforcement_learning
 {
 namespace utility
@@ -51,6 +53,7 @@ private:
   const std::string _upgrade_to_CCB_vw_commandline_options{"--ccb_explore_adf --json --quiet"};
   utility::versioned_object_pool<safe_vw> _vw_pool;
   lru_dedup_cache* _dedup_cache = nullptr;
+  std::mutex _mutex;
   i_trace* _trace_logger;
 };
 }  // namespace model_management
