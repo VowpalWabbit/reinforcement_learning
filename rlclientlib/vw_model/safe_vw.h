@@ -1,7 +1,7 @@
 #pragma once
 
-#include "model_mgmt.h"
 #include "lru_dedup_cache.h"
+#include "model_mgmt.h"
 #include "vw/core/vw.h"
 
 #include <memory>
@@ -67,8 +67,10 @@ public:
   safe_vw_factory(std::string command_line, lru_dedup_cache* dedup_cache);
   safe_vw_factory(const model_management::model_data& master_data, lru_dedup_cache* dedup_cache);
   safe_vw_factory(const model_management::model_data&& master_data, lru_dedup_cache* dedup_cache);
-  safe_vw_factory(const model_management::model_data& master_data, std::string command_line, lru_dedup_cache* dedup_cache);
-  safe_vw_factory(const model_management::model_data&& master_data, std::string command_line, lru_dedup_cache* dedup_cache);
+  safe_vw_factory(
+      const model_management::model_data& master_data, std::string command_line, lru_dedup_cache* dedup_cache);
+  safe_vw_factory(
+      const model_management::model_data&& master_data, std::string command_line, lru_dedup_cache* dedup_cache);
 
   safe_vw* operator()();
 };
