@@ -122,7 +122,7 @@ void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& acti
   for (auto&& ex : examples) { _example_pool.emplace_back(ex); }
 }
 
-void safe_vw::add_lru_dedup_cache(uint64_t hash, std::string action_str)
+void safe_vw::load_action(uint64_t action_id, std::string action_str)
 {
   if (_dedup_cache == nullptr) { _dedup_cache = new lru_dedup_cache(); }
   VW::multi_ex examples;
@@ -137,7 +137,7 @@ void safe_vw::add_lru_dedup_cache(uint64_t hash, std::string action_str)
   {
     VW::read_line_json_s<false>(*_vw, examples, &action_str[0], action_str.size(), get_or_create_example_f, this);
   }
-  _dedup_cache->add(hash, examples[0]);
+  _dedup_cache->add(action_id, examples[0]);
 }
 
 void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<float>& scores)

@@ -67,11 +67,11 @@ int vw_model::update(const model_data& data, bool& model_ready, api_status* stat
   return error_code::success;
 }
 
-int vw_model::add_lru_dedup_cache(uint64_t hash, std::string action_str, api_status* status)
+int vw_model::load_action(uint64_t action_id, std::string action_str, api_status* status)
 {
   std::lock_guard<std::mutex> lock(_mutex);
   auto vw = _vw_pool.get_or_create();
-  vw->add_lru_dedup_cache(hash, action_str);
+  vw->load_action(action_id, action_str);
   return error_code::success;
 }
 

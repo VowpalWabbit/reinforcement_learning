@@ -139,10 +139,7 @@ int onnx_model::update(const model_management::model_data& data, bool& model_rea
 }
 
 // TODO: Implement LRU cache for ONNX models.
-int onnx_model::add_lru_dedup_cache(uint64_t hash, std::string action_str, api_status* status)
-{
-  return error_code::not_supported;
-}
+int onnx_model::load_action(uint64_t, std::string, api_status*) { return error_code::not_supported; }
 
 int onnx_model::choose_rank(const char* event_id, uint64_t rnd_seed, string_view features, std::vector<int>& action_ids,
     std::vector<float>& action_pdf, std::string& model_version, api_status* status)

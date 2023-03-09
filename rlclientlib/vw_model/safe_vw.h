@@ -29,7 +29,7 @@ public:
   ~safe_vw();
 
   void parse_context_with_pdf(string_view context, std::vector<int>& actions, std::vector<float>& scores);
-  void add_lru_dedup_cache(uint64_t hash, std::string action_str);
+  void load_action(uint64_t action_id, std::string action_str);
   void rank(string_view context, std::vector<int>& actions, std::vector<float>& scores);
   void choose_continuous_action(string_view context, float& action, float& pdf_value);
   // Used for CCB

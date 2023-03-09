@@ -494,9 +494,9 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_check_response_pdf_explore_only_
       R"({"GUser":{"id":"a","major":"eng","hobby":"hiking"},"_multi":[{"__aid":1},{"__aid":2},{"__aid":3}]})";
 
   // add dedup
-  BOOST_CHECK_EQUAL(model.add_lru_dedup_cache(1, "{\"TAction\":{\"a1\":\"f1\"}}", &status), err::success);
-  BOOST_CHECK_EQUAL(model.add_lru_dedup_cache(2, "{\"TAction\":{\"a2\":\"f2\"}}", &status), err::success);
-  BOOST_CHECK_EQUAL(model.add_lru_dedup_cache(3, "{\"TAction\":{\"a3\":\"f3\"}}", &status), err::success);
+  BOOST_CHECK_EQUAL(model.load_action(1, "{\"TAction\":{\"a1\":\"f1\"}}", &status), err::success);
+  BOOST_CHECK_EQUAL(model.load_action(2, "{\"TAction\":{\"a2\":\"f2\"}}", &status), err::success);
+  BOOST_CHECK_EQUAL(model.load_action(3, "{\"TAction\":{\"a3\":\"f3\"}}", &status), err::success);
 
   // request ranking
   BOOST_CHECK_EQUAL(model.choose_rank(event_id, JSON_CB_CONTEXT_3ACTIONS_DEDUP, response), err::success);
