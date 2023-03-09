@@ -74,6 +74,7 @@ class i_model
 {
 public:
   virtual int update(const model_data& data, bool& model_ready, api_status* status = nullptr) = 0;
+  virtual int add_lru_dedup_cache(uint64_t hash, std::string action_str, api_status* status = nullptr) = 0;
   virtual int choose_rank(const char* event_id, uint64_t rnd_seed, string_view features, std::vector<int>& action_ids,
       std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) = 0;
   virtual int choose_continuous_action(string_view features, float& action, float& pdf_value,

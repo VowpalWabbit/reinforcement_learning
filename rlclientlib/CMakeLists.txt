@@ -68,6 +68,7 @@ set(PROJECT_SOURCES
   logger/logger_facade.cc
   logger/preamble.cc
   logger/preamble_sender.cc
+  lru_dedup_cache.cc
   model_mgmt/data_callback_fn.cc
   model_mgmt/empty_data_transport.cc
   model_mgmt/file_model_loader.cc
@@ -149,6 +150,7 @@ set(PROJECT_PRIVATE_HEADERS
   logger/async_batcher.h
   logger/event_logger.h
   logger/logger_facade.h
+  lru_dedup_cache.h
   model_mgmt/data_callback_fn.h
   model_mgmt/empty_data_transport.h
   model_mgmt/file_model_loader.h

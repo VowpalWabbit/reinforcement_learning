@@ -4,7 +4,7 @@
 #include "generated/v2/CbEvent_generated.h"
 #include "generated/v2/FileFormat_generated.h"
 #include "generated/v2/Metadata_generated.h"
-#include "lru_dedup_cache.h"
+#include "../rlclientlib/lru_dedup_cache.h"
 #include "metrics/metrics.h"
 #include "parse_example_external.h"
 #include "vw/core/error_constants.h"

@@ -61,6 +61,12 @@ std::vector<int> live_model::c_array_to_vector(const int* c_array, size_t array_
   return std::vector<int>(c_array, c_array + array_size);
 }
 
+int live_model::add_lru_dedup_cache(uint64_t hash, std::string action_str, api_status* status)
+{
+  INIT_CHECK();
+  return _pimpl->add_lru_dedup_cache(hash, action_str, status);
+}
+
 int live_model::choose_rank(
     const char* event_id, string_view context_json, ranking_response& response, api_status* status)
 {

@@ -20,7 +20,7 @@ void get_model_data_from_raw(const char* data, unsigned int len, model_managemen
 
 BOOST_AUTO_TEST_CASE(safe_vw_1)
 {
-  safe_vw vw((const char*)cb_data_5_model, cb_data_5_model_len);
+  safe_vw vw((const char*)cb_data_5_model, cb_data_5_model_len, nullptr);
   const auto json = R"({"a":{"0":1,"5":2},"_multi":[{"b":{"0":1}},{"b":{"0":2}},{"b":{"0":3}}]})";
 
   std::vector<int> actions;
@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(safe_vw_1)
 
 BOOST_AUTO_TEST_CASE(safe_vw_audit_logs)
 {
-  safe_vw vw((const char*)cb_data_5_model, cb_data_5_model_len, "--json --quiet");
+  safe_vw vw((const char*)cb_data_5_model, cb_data_5_model_len, "--json --quiet", nullptr);
   const auto json = R"({"a":{"0":1,"5":2},"_multi":[{"b":{"0":1}},{"b":{"0":2}},{"b":{"0":3}}]})";
 
   std::vector<int> actions;
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(safe_vw_audit_logs)
 
   BOOST_CHECK_EQUAL(0, vw.get_audit_data().size());
 
-  safe_vw vw_w_audit((const char*)cb_data_5_model, cb_data_5_model_len, "--json --audit");
+  safe_vw vw_w_audit((const char*)cb_data_5_model, cb_data_5_model_len, "--json --audit", nullptr);
   vw_w_audit.rank(json, actions, ranking);
 
   BOOST_CHECK_LT(0, vw_w_audit.get_audit_data().size());
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(factory_with_cb_model_and_ccb_arguments)
   model_management::model_data model_data;
   get_model_data_from_raw((const char*)cb_data_5_model, cb_data_5_model_len, &model_data);
 
-  const safe_vw_factory factory(model_data, vw_commandLine);
+  const safe_vw_factory factory(model_data, vw_commandLine, nullptr);
   versioned_object_pool<safe_vw> pool(factory);
 
   {
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(factory_with_initial_model)
   model_management::model_data model_data;
   get_model_data_from_raw((const char*)cb_data_5_model, cb_data_5_model_len, &model_data);
 
-  const safe_vw_factory factory(model_data);
+  const safe_vw_factory factory(model_data, nullptr);
   versioned_object_pool<safe_vw> pool(factory);
 
   {
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(factory_with_initial_model)
     // Update factory while an object is floating around
     model_management::model_data updated_model;
     get_model_data_from_raw((const char*)cb_data_5_model, cb_data_5_model_len, &updated_model);
-    pool.update_factory(safe_vw_factory(updated_model));
+    pool.update_factory(safe_vw_factory(updated_model, nullptr));
 
     std::vector<int> actions;
     std::vector<float> ranking;
@@ -127,14 +127,14 @@ BOOST_AUTO_TEST_CASE(factory_with_empty_model)
 
   // Start with empty model data
   model_management::model_data empty_data;
-  const safe_vw_factory factory(empty_data);
+  const safe_vw_factory factory(empty_data, nullptr);
   versioned_object_pool<safe_vw> pool(factory);
 
   // Initial model & rank call
   {
     model_management::model_data new_model;
     get_model_data_from_raw((const char*)cb_data_5_model, cb_data_5_model_len, &new_model);
-    pool.update_factory(safe_vw_factory(new_model));
+    pool.update_factory(safe_vw_factory(new_model, nullptr));
     auto vw = pool.get_or_create();
 
     std::vector<int> actions;
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(factory_with_empty_model)
   {
     model_management::model_data new_model;
     get_model_data_from_raw((const char*)cb_data_5_model, cb_data_5_model_len, &new_model);
-    pool.update_factory(safe_vw_factory(new_model));
+    pool.update_factory(safe_vw_factory(new_model, nullptr));
     auto vw = pool.get_or_create();
 
     std::vector<int> actions;

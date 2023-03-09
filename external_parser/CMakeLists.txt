@@ -135,7 +135,7 @@ set(binary_parser_headers
   ${CMAKE_CURRENT_LIST_DIR}/joiners/i_joiner.h
   ${CMAKE_CURRENT_LIST_DIR}/joiners/multistep_example_joiner.h
   ${CMAKE_CURRENT_LIST_DIR}/log_converter.h
-  ${CMAKE_CURRENT_LIST_DIR}/lru_dedup_cache.h
+  ${CMAKE_CURRENT_LIST_DIR}/../rlclientlib/lru_dedup_cache.h
   ${CMAKE_CURRENT_LIST_DIR}/parse_example_binary.h
   ${CMAKE_CURRENT_LIST_DIR}/parse_example_converter.h
   ${CMAKE_CURRENT_LIST_DIR}/parse_example_external.h
@@ -146,7 +146,7 @@ set(binary_parser_sources
   ${CMAKE_CURRENT_LIST_DIR}/joiners/example_joiner.cc
   ${CMAKE_CURRENT_LIST_DIR}/joiners/multistep_example_joiner.cc
   ${CMAKE_CURRENT_LIST_DIR}/log_converter.cc
-  ${CMAKE_CURRENT_LIST_DIR}/lru_dedup_cache.cc
+  ${CMAKE_CURRENT_LIST_DIR}/../rlclientlib/lru_dedup_cache.cc
   ${CMAKE_CURRENT_LIST_DIR}/parse_example_binary.cc
   ${CMAKE_CURRENT_LIST_DIR}/parse_example_converter.cc
   ${CMAKE_CURRENT_LIST_DIR}/parse_example_external.cc

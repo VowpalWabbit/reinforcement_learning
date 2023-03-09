@@ -13,7 +13,7 @@ namespace model_management
 // We construct a VW object here to use the example parser to parse joined dsjson-style examples
 // to extract the PDF.
 pdf_model::pdf_model(i_trace* trace_logger, const utility::configuration& /*unused*/)
-    : _trace_logger(trace_logger), _vw(new safe_vw("--json --quiet --cb_adf"))
+    : _trace_logger(trace_logger), _vw(new safe_vw("--json --quiet --cb_adf", nullptr))
 {
 }
 
@@ -21,6 +21,12 @@ int pdf_model::update(const model_data& data, bool& model_ready, api_status* sta
 {
   model_ready = true;
   return error_code::success;
+}
+
+// TODO: Implement LRU cache for PDF models.
+int pdf_model::add_lru_dedup_cache(uint64_t hash, std::string action_str, api_status* status)
+{
+  return error_code::not_supported;
 }
 
 int pdf_model::choose_rank(const char* event_id, uint64_t rnd_seed, string_view features, std::vector<int>& action_ids,

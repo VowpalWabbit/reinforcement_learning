@@ -1,6 +1,7 @@
 #pragma once
 
 #include "model_mgmt.h"
+#include "lru_dedup_cache.h"
 #include "vw/core/vw.h"
 
 #include <memory>
@@ -14,19 +15,21 @@ class safe_vw
   std::shared_ptr<safe_vw> _master;
   VW::workspace* _vw;
   std::vector<VW::example*> _example_pool;
+  lru_dedup_cache* _dedup_cache;
 
   VW::example* get_or_create_example();
   static VW::example& get_or_create_example_f(void* vw);
 
 public:
-  safe_vw(std::shared_ptr<safe_vw> master);
-  safe_vw(const char* model_data, size_t len, const std::string& vw_commandline);
-  safe_vw(const char* model_data, size_t len);
-  safe_vw(const std::string& vw_commandline);
+  safe_vw(std::shared_ptr<safe_vw> master, lru_dedup_cache* dedup_cache);
+  safe_vw(const char* model_data, size_t len, const std::string& vw_commandline, lru_dedup_cache* dedup_cache);
+  safe_vw(const char* model_data, size_t len, lru_dedup_cache* dedup_cache);
+  safe_vw(const std::string& vw_commandline, lru_dedup_cache* dedup_cache);
 
   ~safe_vw();
 
   void parse_context_with_pdf(string_view context, std::vector<int>& actions, std::vector<float>& scores);
+  void add_lru_dedup_cache(uint64_t hash, std::string action_str);
   void rank(string_view context, std::vector<int>& actions, std::vector<float>& scores);
   void choose_continuous_action(string_view context, float& action, float& pdf_value);
   // Used for CCB
@@ -57,14 +60,15 @@ class safe_vw_factory
 {
   model_management::model_data _master_data;
   std::string _command_line;
+  lru_dedup_cache* _dedup_cache;
 
 public:
   // model_data is copied and stored in the factory object.
-  safe_vw_factory(std::string command_line);
-  safe_vw_factory(const model_management::model_data& master_data);
-  safe_vw_factory(const model_management::model_data&& master_data);
-  safe_vw_factory(const model_management::model_data& master_data, std::string command_line);
-  safe_vw_factory(const model_management::model_data&& master_data, std::string command_line);
+  safe_vw_factory(std::string command_line, lru_dedup_cache* dedup_cache);
+  safe_vw_factory(const model_management::model_data& master_data, lru_dedup_cache* dedup_cache);
+  safe_vw_factory(const model_management::model_data&& master_data, lru_dedup_cache* dedup_cache);
+  safe_vw_factory(const model_management::model_data& master_data, std::string command_line, lru_dedup_cache* dedup_cache);
+  safe_vw_factory(const model_management::model_data&& master_data, std::string command_line, lru_dedup_cache* dedup_cache);
 
   safe_vw* operator()();
 };

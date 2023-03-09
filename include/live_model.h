@@ -108,6 +108,16 @@ public:
   int init(api_status* status = nullptr);
 
   /**
+   * @brief Load dedup cache.
+   * Load the dedup cache from the specified file.  This cache is used to
+   * prevent duplicate actions from being sent to the online trainer.
+   * @param hash Hash of the dedup cache
+   * @param action_str Action string
+   * @return int Return error code.  This will also be returned in the api_status object
+   */
+  int add_lru_dedup_cache(uint64_t hash, std::string action_str, api_status* status);
+
+  /**
    * @brief Choose an action, given a list of actions, action features and context features. The
    * inference library chooses an action by creating a probability distribution over the actions
    * and then sampling from it.

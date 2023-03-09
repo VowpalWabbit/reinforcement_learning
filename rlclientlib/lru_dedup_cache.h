@@ -35,6 +35,7 @@ public:
       void* context = nullptr);
   bool exists(uint64_t dedup_id);
   void clear(release_example_f release_example = lru_dedup_cache::noop_release_example_f, void* context = nullptr);
+  std::unordered_map<uint64_t, VW::example*>* get_dict() { return &dedup_examples; }
 
   lru_dedup_cache() = default;
   ~lru_dedup_cache() = default;
