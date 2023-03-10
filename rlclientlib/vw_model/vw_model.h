@@ -52,7 +52,7 @@ private:
   const std::string _quiet_commandline_options{"--json --quiet"};
   const std::string _upgrade_to_CCB_vw_commandline_options{"--ccb_explore_adf --json --quiet"};
   utility::versioned_object_pool<safe_vw> _vw_pool;
-  lru_dedup_cache* _dedup_cache = nullptr;
+  lru_dedup_cache _action_cache;
   std::mutex _mutex;
   i_trace* _trace_logger;
 };

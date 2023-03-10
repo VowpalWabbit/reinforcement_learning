@@ -13,7 +13,7 @@ namespace model_management
 // We construct a VW object here to use the example parser to parse joined dsjson-style examples
 // to extract the PDF.
 pdf_model::pdf_model(i_trace* trace_logger, const utility::configuration& /*unused*/)
-    : _trace_logger(trace_logger), _vw(new safe_vw("--json --quiet --cb_adf", nullptr))
+    : _trace_logger(trace_logger), _vw(new safe_vw("--json --quiet --cb_adf"))
 {
 }
 

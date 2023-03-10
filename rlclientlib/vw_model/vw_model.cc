@@ -18,7 +18,7 @@ vw_model::vw_model(i_trace* trace_logger, const utility::configuration& config)
     , _initial_command_line(std::string(config.get(name::MODEL_VW_INITIAL_COMMAND_LINE,
                                 "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A")) +
           (_audit ? " --audit" : ""))
-    , _vw_pool(safe_vw_factory(_initial_command_line, _dedup_cache),
+    , _vw_pool(safe_vw_factory(_initial_command_line),
           config.get_int(name::VW_POOL_INIT_SIZE, value::DEFAULT_VW_POOL_INIT_SIZE), trace_logger)
     , _trace_logger(trace_logger)
 {
@@ -34,13 +34,13 @@ int vw_model::update(const model_data& data, bool& model_ready, api_status* stat
     {
       std::string cmd_line = add_optional_audit_flag(_quiet_commandline_options);
 
-      std::unique_ptr<safe_vw> init_vw(new safe_vw(data.data(), data.data_sz(), cmd_line, _dedup_cache));
+      std::unique_ptr<safe_vw> init_vw(new safe_vw(data.data(), data.data_sz(), cmd_line));
       if (init_vw->is_CB_to_CCB_model_upgrade(_initial_command_line))
       {
         cmd_line = add_optional_audit_flag(_upgrade_to_CCB_vw_commandline_options);
       }
 
-      safe_vw_factory factory(data, cmd_line, _dedup_cache);
+      safe_vw_factory factory(data, cmd_line);
       std::unique_ptr<safe_vw> test_vw(factory());
       if (test_vw->is_compatible(_initial_command_line))
       {
@@ -71,7 +71,7 @@ int vw_model::load_action(uint64_t action_id, std::string action_str, api_status
 {
   std::lock_guard<std::mutex> lock(_mutex);
   auto vw = _vw_pool.get_or_create();
-  vw->load_action(action_id, action_str);
+  vw->load_action(action_id, action_str, &_action_cache);
   return error_code::success;
 }
 
@@ -84,7 +84,7 @@ int vw_model::choose_rank(const char* event_id, uint64_t rnd_seed, string_view f
 
     // Get a ranked list of action_ids and corresponding pdf
     std::lock_guard<std::mutex> lock(_mutex);
-    vw->rank(features, action_ids, action_pdf);
+    vw->rank(features, action_ids, action_pdf, &_action_cache);
 
     if (_audit) { write_audit_log(event_id, vw->get_audit_data()); }
 
@@ -142,6 +142,7 @@ int vw_model::request_decision(const std::vector<const char*>& event_ids, string
     auto vw = _vw_pool.get_or_create();
 
     // Get a ranked list of action_ids and corresponding pdf
+    std::lock_guard<std::mutex> lock(_mutex);
     vw->rank_decisions(event_ids, features, actions_ids, action_pdfs);
 
     model_version = vw->id();

@@ -135,7 +135,7 @@ set(binary_parser_headers
   ${CMAKE_CURRENT_LIST_DIR}/joiners/i_joiner.h
   ${CMAKE_CURRENT_LIST_DIR}/joiners/multistep_example_joiner.h
   ${CMAKE_CURRENT_LIST_DIR}/log_converter.h
-  ${CMAKE_CURRENT_LIST_DIR}/../rlclientlib/lru_dedup_cache.h
+  ${CMAKE_CURRENT_LIST_DIR}/../rlclientlib/example_cache/lru_dedup_cache.h
   ${CMAKE_CURRENT_LIST_DIR}/parse_example_binary.h
   ${CMAKE_CURRENT_LIST_DIR}/parse_example_converter.h
   ${CMAKE_CURRENT_LIST_DIR}/parse_example_external.h
@@ -146,7 +146,7 @@ set(binary_parser_sources
   ${CMAKE_CURRENT_LIST_DIR}/joiners/example_joiner.cc
   ${CMAKE_CURRENT_LIST_DIR}/joiners/multistep_example_joiner.cc
   ${CMAKE_CURRENT_LIST_DIR}/log_converter.cc
-  ${CMAKE_CURRENT_LIST_DIR}/../rlclientlib/lru_dedup_cache.cc
+  ${CMAKE_CURRENT_LIST_DIR}/../rlclientlib/example_cache/lru_dedup_cache.cc
   ${CMAKE_CURRENT_LIST_DIR}/parse_example_binary.cc
   ${CMAKE_CURRENT_LIST_DIR}/parse_example_converter.cc
   ${CMAKE_CURRENT_LIST_DIR}/parse_example_external.cc
@@ -161,6 +161,7 @@ target_include_directories(rl_binary_parser
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/zstd/lib/
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/date/
 )
+target_include_directories(rl_binary_parser PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../rlclientlib/example_cache/)
 
 # If flatbuffers found via CONFIG, add its target as a library dependency
 # Otherwise, the flatbuffers MODULE defines FLATBUFFERS_INCLUDE_DIR to add to the include path

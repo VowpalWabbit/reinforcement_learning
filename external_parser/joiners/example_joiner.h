@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../rlclientlib/lru_dedup_cache.h"
+#include "../rlclientlib/example_cache/lru_dedup_cache.h"
 #include "event_processors/joined_event.h"
 #include "event_processors/loop.h"
 #include "joiners/i_joiner.h"

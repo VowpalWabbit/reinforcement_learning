@@ -19,14 +19,14 @@ namespace reinforcement_learning
 {
 static const std::string SEED_TAG = "seed=";
 
-safe_vw::safe_vw(std::shared_ptr<safe_vw> master, lru_dedup_cache* dedup_cache)
-    : _master(std::move(master)), _dedup_cache(dedup_cache)
+safe_vw::safe_vw(std::shared_ptr<safe_vw> master)
+    : _master(std::move(master))
 {
   _vw = VW::seed_vw_model(_master->_vw, "", nullptr, nullptr);
   init();
 }
 
-safe_vw::safe_vw(const char* model_data, size_t len, lru_dedup_cache* dedup_cache) : _dedup_cache(dedup_cache)
+safe_vw::safe_vw(const char* model_data, size_t len)
 {
   io_buf buf;
   buf.add_file(VW::io::create_buffer_view(model_data, len));
@@ -35,8 +35,7 @@ safe_vw::safe_vw(const char* model_data, size_t len, lru_dedup_cache* dedup_cach
   init();
 }
 
-safe_vw::safe_vw(const char* model_data, size_t len, const std::string& vw_commandline, lru_dedup_cache* dedup_cache)
-    : _dedup_cache(dedup_cache)
+safe_vw::safe_vw(const char* model_data, size_t len, const std::string& vw_commandline)
 {
   io_buf buf;
   buf.add_file(VW::io::create_buffer_view(model_data, len));
@@ -45,7 +44,7 @@ safe_vw::safe_vw(const char* model_data, size_t len, const std::string& vw_comma
   init();
 }
 
-safe_vw::safe_vw(const std::string& vw_commandline, lru_dedup_cache* dedup_cache) : _dedup_cache(dedup_cache)
+safe_vw::safe_vw(const std::string& vw_commandline)
 {
   _vw = VW::initialize(vw_commandline);
   init();
@@ -122,9 +121,8 @@ void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& acti
   for (auto&& ex : examples) { _example_pool.emplace_back(ex); }
 }
 
-void safe_vw::load_action(uint64_t action_id, std::string action_str)
+void safe_vw::load_action(uint64_t action_id, std::string action_str, lru_dedup_cache* action_cache)
 {
-  if (_dedup_cache == nullptr) { _dedup_cache = new lru_dedup_cache(); }
   VW::multi_ex examples;
   examples.push_back(get_or_create_example());
 
@@ -137,10 +135,10 @@ void safe_vw::load_action(uint64_t action_id, std::string action_str)
   {
     VW::read_line_json_s<false>(*_vw, examples, &action_str[0], action_str.size(), get_or_create_example_f, this);
   }
-  _dedup_cache->add(action_id, examples[0]);
+  action_cache->add(action_id, examples[0]);
 }
 
-void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<float>& scores)
+void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<float>& scores, lru_dedup_cache* action_cache)
 {
   VW::multi_ex examples;
   examples.push_back(get_or_create_example());
@@ -148,16 +146,18 @@ void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<f
   // copy due to destructive parsing by rapidjson
   std::string line_vec(context);
 
+  auto* action_dict = (action_cache == nullptr) ? nullptr : &action_cache->dedup_examples;
+  // check for null
   if (_vw->audit)
   {
     _vw->audit_buffer->clear();
     VW::read_line_json_s<true>(
-        *_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this, _dedup_cache->get_dict());
+        *_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this, action_dict);
   }
   else
   {
     VW::read_line_json_s<false>(
-        *_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this, _dedup_cache->get_dict());
+        *_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this, action_dict);
   }
 
   // finalize example
@@ -397,30 +397,30 @@ void safe_vw::init()
   }
 }
 
-safe_vw_factory::safe_vw_factory(std::string command_line, lru_dedup_cache* dedup_cache)
-    : _command_line(std::move(command_line)), _dedup_cache(dedup_cache)
+safe_vw_factory::safe_vw_factory(std::string command_line)
+    : _command_line(std::move(command_line))
 {
 }
 
-safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data, lru_dedup_cache* dedup_cache)
-    : _master_data(master_data), _dedup_cache(dedup_cache)
+safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data)
+    : _master_data(master_data)
 {
 }
 
-safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_data, lru_dedup_cache* dedup_cache)
-    : _master_data(master_data), _dedup_cache(dedup_cache)
-{
-}
-
-safe_vw_factory::safe_vw_factory(
-    const model_management::model_data& master_data, std::string command_line, lru_dedup_cache* dedup_cache)
-    : _master_data(master_data), _command_line(std::move(command_line)), _dedup_cache(dedup_cache)
+safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_data)
+    : _master_data(master_data)
 {
 }
 
 safe_vw_factory::safe_vw_factory(
-    const model_management::model_data&& master_data, std::string command_line, lru_dedup_cache* dedup_cache)
-    : _master_data(master_data), _command_line(std::move(command_line)), _dedup_cache(dedup_cache)
+    const model_management::model_data& master_data, std::string command_line)
+    : _master_data(master_data), _command_line(std::move(command_line))
+{
+}
+
+safe_vw_factory::safe_vw_factory(
+    const model_management::model_data&& master_data, std::string command_line)
+    : _master_data(master_data), _command_line(std::move(command_line))
 {
 }
 
@@ -429,13 +429,13 @@ safe_vw* safe_vw_factory::operator()()
   if ((_master_data.data() != nullptr) && !_command_line.empty())
   {
     // Construct new vw object from raw model data and command line argument
-    return new safe_vw(_master_data.data(), _master_data.data_sz(), _command_line, _dedup_cache);
+    return new safe_vw(_master_data.data(), _master_data.data_sz(), _command_line);
   }
   if (_master_data.data() != nullptr)
   {
     // Construct new vw object from raw model data.
-    return new safe_vw(_master_data.data(), _master_data.data_sz(), _dedup_cache);
+    return new safe_vw(_master_data.data(), _master_data.data_sz());
   }
-  return new safe_vw(_command_line, _dedup_cache);
+  return new safe_vw(_command_line);
 }
 }  // namespace reinforcement_learning

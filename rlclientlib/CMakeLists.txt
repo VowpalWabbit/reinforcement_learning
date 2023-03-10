@@ -55,6 +55,7 @@ set(PROJECT_SOURCES
   decision_response.cc
   dedup.cc
   error_callback_fn.cc
+  example_cache/lru_dedup_cache.cc
   factory_resolver.cc
   generic_event.cc
   learning_mode.cc
@@ -68,7 +69,6 @@ set(PROJECT_SOURCES
   logger/logger_facade.cc
   logger/preamble.cc
   logger/preamble_sender.cc
-  lru_dedup_cache.cc
   model_mgmt/data_callback_fn.cc
   model_mgmt/empty_data_transport.cc
   model_mgmt/file_model_loader.cc
@@ -143,6 +143,7 @@ set(PROJECT_PUBLIC_HEADERS
 set(PROJECT_PRIVATE_HEADERS
   console_tracer.h
   dedup.h
+  example_cache/lru_dedup_cache.h
   federation/federated_client.h
   federation/joined_log_provider.h
   generic_event.h
@@ -150,7 +151,6 @@ set(PROJECT_PRIVATE_HEADERS
   logger/async_batcher.h
   logger/event_logger.h
   logger/logger_facade.h
-  lru_dedup_cache.h
   model_mgmt/data_callback_fn.h
   model_mgmt/empty_data_transport.h
   model_mgmt/file_model_loader.h
@@ -213,6 +213,7 @@ target_include_directories(rlclientlib
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/example_cache
     ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date
 )
 
