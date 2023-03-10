@@ -135,6 +135,9 @@ void safe_vw::load_action(uint64_t action_id, std::string action_str, lru_dedup_
     VW::read_line_json_s<false>(*_vw, examples, &action_str[0], action_str.size(), get_or_create_example_f, this);
   }
   action_cache->add(action_id, examples[0]);
+
+  // clean up examples and push examples back into pool for re-use
+  for (auto&& ex : examples) { _example_pool.emplace_back(ex); }
 }
 
 void safe_vw::rank(
