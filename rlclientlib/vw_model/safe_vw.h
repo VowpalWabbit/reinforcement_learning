@@ -29,7 +29,8 @@ public:
 
   void parse_context_with_pdf(string_view context, std::vector<int>& actions, std::vector<float>& scores);
   void load_action(uint64_t action_id, std::string action_str, lru_dedup_cache* action_cache);
-  void rank(string_view context, std::vector<int>& actions, std::vector<float>& scores, lru_dedup_cache* action_cache = nullptr);
+  void rank(string_view context, std::vector<int>& actions, std::vector<float>& scores,
+      lru_dedup_cache* action_cache = nullptr);
   void choose_continuous_action(string_view context, float& action, float& pdf_value);
   // Used for CCB
   void rank_decisions(const std::vector<const char*>& event_ids, string_view context,
@@ -65,10 +66,8 @@ public:
   safe_vw_factory(std::string command_line);
   safe_vw_factory(const model_management::model_data& master_data);
   safe_vw_factory(const model_management::model_data&& master_data);
-  safe_vw_factory(
-      const model_management::model_data& master_data, std::string command_line);
-  safe_vw_factory(
-      const model_management::model_data&& master_data, std::string command_line);
+  safe_vw_factory(const model_management::model_data& master_data, std::string command_line);
+  safe_vw_factory(const model_management::model_data&& master_data, std::string command_line);
 
   safe_vw* operator()();
 };

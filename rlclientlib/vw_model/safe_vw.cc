@@ -19,8 +19,7 @@ namespace reinforcement_learning
 {
 static const std::string SEED_TAG = "seed=";
 
-safe_vw::safe_vw(std::shared_ptr<safe_vw> master)
-    : _master(std::move(master))
+safe_vw::safe_vw(std::shared_ptr<safe_vw> master) : _master(std::move(master))
 {
   _vw = VW::seed_vw_model(_master->_vw, "", nullptr, nullptr);
   init();
@@ -138,7 +137,8 @@ void safe_vw::load_action(uint64_t action_id, std::string action_str, lru_dedup_
   action_cache->add(action_id, examples[0]);
 }
 
-void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<float>& scores, lru_dedup_cache* action_cache)
+void safe_vw::rank(
+    string_view context, std::vector<int>& actions, std::vector<float>& scores, lru_dedup_cache* action_cache)
 {
   VW::multi_ex examples;
   examples.push_back(get_or_create_example());
@@ -397,29 +397,18 @@ void safe_vw::init()
   }
 }
 
-safe_vw_factory::safe_vw_factory(std::string command_line)
-    : _command_line(std::move(command_line))
-{
-}
+safe_vw_factory::safe_vw_factory(std::string command_line) : _command_line(std::move(command_line)) {}
 
-safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data)
-    : _master_data(master_data)
-{
-}
+safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data) : _master_data(master_data) {}
 
-safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_data)
-    : _master_data(master_data)
-{
-}
+safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_data) : _master_data(master_data) {}
 
-safe_vw_factory::safe_vw_factory(
-    const model_management::model_data& master_data, std::string command_line)
+safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data, std::string command_line)
     : _master_data(master_data), _command_line(std::move(command_line))
 {
 }
 
-safe_vw_factory::safe_vw_factory(
-    const model_management::model_data&& master_data, std::string command_line)
+safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_data, std::string command_line)
     : _master_data(master_data), _command_line(std::move(command_line))
 {
 }
