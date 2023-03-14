@@ -240,16 +240,17 @@ joined_event::multistep_joined_event multistep_example_joiner::process_interacti
   cb_data->interaction_data.skip_learn = event.deferred_action();
 
   std::string line_vec(reinterpret_cast<char const*>(event.context()->data()), event.context()->size());
+  VW::example_factory_t ex_fac = [this]() -> VW::example& { return *(VW::new_unused_example(*this->_vw)); };
 
   if (_vw->audit || _vw->hash_inv)
   {
-    VW::template read_line_json_s<true>(*_vw, examples, const_cast<char*>(line_vec.c_str()), line_vec.size(),
-        reinterpret_cast<VW::example_factory_t>(VW::new_unused_example), _vw);
+    VW::parsers::json::read_line_json<true>(*_vw, examples, const_cast<char*>(line_vec.c_str()), line_vec.size(),
+        ex_fac);
   }
   else
   {
-    VW::template read_line_json_s<false>(*_vw, examples, const_cast<char*>(line_vec.c_str()), line_vec.size(),
-        reinterpret_cast<VW::example_factory_t>(VW::new_unused_example), _vw);
+    VW::parsers::json::read_line_json<false>(*_vw, examples, const_cast<char*>(line_vec.c_str()), line_vec.size(),
+        ex_fac);
   }
 
   return joined_event::multistep_joined_event(std::move(meta), std::move(cb_data));

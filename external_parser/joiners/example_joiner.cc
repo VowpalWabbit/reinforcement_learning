@@ -321,15 +321,16 @@ bool example_joiner::process_interaction(
     std::string context(je.context);
     try
     {
+      VW::example_factory_t ex_fac = [this]() -> VW::example& { return *(VW::new_unused_example(*this->_vw)); };
       if (_vw->audit || _vw->hash_inv)
       {
-        VW::read_line_json_s<true>(*_vw, examples, const_cast<char*>(context.c_str()), context.size(),
-            reinterpret_cast<VW::example_factory_t>(VW::new_unused_example), _vw, &_dedup_cache.dedup_examples);
+        VW::parsers::json::read_line_json<true>(*_vw, examples, const_cast<char*>(context.c_str()), context.size(),
+            ex_fac, &_dedup_cache.dedup_examples);
       }
       else
       {
-        VW::read_line_json_s<false>(*_vw, examples, const_cast<char*>(context.c_str()), context.size(),
-            reinterpret_cast<VW::example_factory_t>(VW::new_unused_example), _vw, &_dedup_cache.dedup_examples);
+        VW::parsers::json::read_line_json<false>(*_vw, examples, const_cast<char*>(context.c_str()), context.size(),
+            ex_fac, &_dedup_cache.dedup_examples);
       }
     }
     catch (VW::vw_exception& e)
@@ -409,18 +410,18 @@ bool example_joiner::process_dedup(const v2::Event& event, const v2::Metadata& m
     if (!_dedup_cache.exists(dedup_id))
     {
       examples.push_back(get_or_create_example());
-
+      VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
       try
       {
         if (_vw->audit || _vw->hash_inv)
         {
-          VW::template read_line_json_s<true>(*_vw, examples, const_cast<char*>(dedup->values()->Get(i)->c_str()),
-              dedup->values()->Get(i)->size(), get_or_create_example_f, this);
+          VW::parsers::json::template read_line_json<true>(*_vw, examples, const_cast<char*>(dedup->values()->Get(i)->c_str()),
+              dedup->values()->Get(i)->size(), ex_fac);
         }
         else
         {
-          VW::template read_line_json_s<false>(*_vw, examples, const_cast<char*>(dedup->values()->Get(i)->c_str()),
-              dedup->values()->Get(i)->size(), get_or_create_example_f, this);
+          VW::parsers::json::template read_line_json<false>(*_vw, examples, const_cast<char*>(dedup->values()->Get(i)->c_str()),
+              dedup->values()->Get(i)->size(), ex_fac);
         }
       }
       catch (VW::vw_exception& e)
