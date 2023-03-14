@@ -67,6 +67,14 @@ int vw_model::update(const model_data& data, bool& model_ready, api_status* stat
   return error_code::success;
 }
 
+int vw_model::load_action(uint64_t action_id, std::string action_str, api_status* status)
+{
+  std::lock_guard<std::mutex> lock(_mutex);
+  auto vw = _vw_pool.get_or_create();
+  vw->load_action(action_id, action_str, &_action_cache);
+  return error_code::success;
+}
+
 int vw_model::choose_rank(const char* event_id, uint64_t rnd_seed, string_view features, std::vector<int>& action_ids,
     std::vector<float>& action_pdf, std::string& model_version, api_status* status)
 {
@@ -75,7 +83,8 @@ int vw_model::choose_rank(const char* event_id, uint64_t rnd_seed, string_view f
     auto vw = _vw_pool.get_or_create();
 
     // Get a ranked list of action_ids and corresponding pdf
-    vw->rank(features, action_ids, action_pdf);
+    std::lock_guard<std::mutex> lock(_mutex);
+    vw->rank(features, action_ids, action_pdf, &_action_cache);
 
     if (_audit) { write_audit_log(event_id, vw->get_audit_data()); }
 
@@ -97,6 +106,7 @@ int vw_model::choose_rank_multistep(const char* event_id, uint64_t rnd_seed, str
     const episode_history& history, std::vector<int>& action_ids, std::vector<float>& action_pdf,
     std::string& model_version, api_status* status)
 {
+  std::lock_guard<std::mutex> lock(_mutex);
   return choose_rank(event_id, rnd_seed, features, action_ids, action_pdf, model_version, status);
 }
 
@@ -132,6 +142,7 @@ int vw_model::request_decision(const std::vector<const char*>& event_ids, string
     auto vw = _vw_pool.get_or_create();
 
     // Get a ranked list of action_ids and corresponding pdf
+    std::lock_guard<std::mutex> lock(_mutex);
     vw->rank_decisions(event_ids, features, actions_ids, action_pdfs);
 
     model_version = vw->id();

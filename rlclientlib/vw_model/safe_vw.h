@@ -1,5 +1,6 @@
 #pragma once
 
+#include "lru_dedup_cache.h"
 #include "model_mgmt.h"
 #include "vw/core/vw.h"
 
@@ -27,7 +28,9 @@ public:
   ~safe_vw();
 
   void parse_context_with_pdf(string_view context, std::vector<int>& actions, std::vector<float>& scores);
-  void rank(string_view context, std::vector<int>& actions, std::vector<float>& scores);
+  void load_action(uint64_t action_id, std::string action_str, lru_dedup_cache* action_cache);
+  void rank(string_view context, std::vector<int>& actions, std::vector<float>& scores,
+      lru_dedup_cache* action_cache = nullptr);
   void choose_continuous_action(string_view context, float& action, float& pdf_value);
   // Used for CCB
   void rank_decisions(const std::vector<const char*>& event_ids, string_view context,

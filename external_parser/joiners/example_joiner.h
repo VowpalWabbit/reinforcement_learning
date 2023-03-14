@@ -1,9 +1,9 @@
 #pragma once
 
+#include "../rlclientlib/example_cache/lru_dedup_cache.h"
 #include "event_processors/joined_event.h"
 #include "event_processors/loop.h"
 #include "joiners/i_joiner.h"
-#include "lru_dedup_cache.h"
 #include "metrics/metrics.h"
 #include "parse_example_external.h"
 #include "vw/core/error_constants.h"

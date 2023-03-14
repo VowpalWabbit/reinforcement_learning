@@ -1,9 +1,12 @@
 #pragma once
 #include "../utility/versioned_object_pool.h"
+#include "lru_dedup_cache.h"
 #include "model_mgmt.h"
 #include "multistep.h"
 #include "safe_vw.h"
 #include "trace_logger.h"
+
+#include <mutex>
 
 namespace reinforcement_learning
 {
@@ -26,6 +29,7 @@ public:
   vw_model(i_trace* trace_logger, const utility::configuration& config);
 
   int update(const model_data& data, bool& model_ready, api_status* status = nullptr) override;
+  int load_action(uint64_t action_id, std::string action_str, api_status* status = nullptr) override;
   int choose_rank(const char* event_id, uint64_t rnd_seed, string_view features, std::vector<int>& action_ids,
       std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) override;
   int choose_continuous_action(string_view features, float& action, float& pdf_value, std::string& model_version,
@@ -48,6 +52,8 @@ private:
   const std::string _quiet_commandline_options{"--json --quiet"};
   const std::string _upgrade_to_CCB_vw_commandline_options{"--ccb_explore_adf --json --quiet"};
   utility::versioned_object_pool<safe_vw> _vw_pool;
+  lru_dedup_cache _action_cache;
+  std::mutex _mutex;
   i_trace* _trace_logger;
 };
 }  // namespace model_management

@@ -20,6 +20,7 @@ class pdf_model : public i_model
 public:
   pdf_model(i_trace* trace_logger, const utility::configuration& config);
   int update(const model_data& data, bool& model_ready, api_status* status = nullptr) override;
+  int load_action(uint64_t action_id, std::string action_str, api_status* status = nullptr) override;
   int choose_rank(const char* event_id, uint64_t rnd_seed, string_view features, std::vector<int>& action_ids,
       std::vector<float>& action_pdf, std::string& model_version, api_status* status = nullptr) override;
   int choose_continuous_action(string_view features, float& action, float& pdf_value, std::string& model_version,

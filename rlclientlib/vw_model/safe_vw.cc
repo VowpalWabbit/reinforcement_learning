@@ -120,7 +120,28 @@ void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& acti
   for (auto&& ex : examples) { _example_pool.emplace_back(ex); }
 }
 
-void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<float>& scores)
+void safe_vw::load_action(uint64_t action_id, std::string action_str, lru_dedup_cache* action_cache)
+{
+  VW::multi_ex examples;
+  examples.push_back(get_or_create_example());
+
+  if (_vw->audit)
+  {
+    _vw->audit_buffer->clear();
+    VW::read_line_json_s<true>(*_vw, examples, &action_str[0], action_str.size(), get_or_create_example_f, this);
+  }
+  else
+  {
+    VW::read_line_json_s<false>(*_vw, examples, &action_str[0], action_str.size(), get_or_create_example_f, this);
+  }
+  action_cache->add(action_id, examples[0]);
+
+  // clean up examples and push examples back into pool for re-use
+  for (auto&& ex : examples) { _example_pool.emplace_back(ex); }
+}
+
+void safe_vw::rank(
+    string_view context, std::vector<int>& actions, std::vector<float>& scores, lru_dedup_cache* action_cache)
 {
   VW::multi_ex examples;
   examples.push_back(get_or_create_example());
@@ -128,12 +149,19 @@ void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<f
   // copy due to destructive parsing by rapidjson
   std::string line_vec(context);
 
+  auto* action_dict = (action_cache == nullptr) ? nullptr : &action_cache->dedup_examples;
+  // check for null
   if (_vw->audit)
   {
     _vw->audit_buffer->clear();
-    VW::read_line_json_s<true>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+    VW::read_line_json_s<true>(
+        *_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this, action_dict);
   }
-  else { VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this); }
+  else
+  {
+    VW::read_line_json_s<false>(
+        *_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this, action_dict);
+  }
 
   // finalize example
   VW::setup_examples(*_vw, examples);

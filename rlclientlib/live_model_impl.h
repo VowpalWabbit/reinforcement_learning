@@ -28,6 +28,7 @@ public:
 
   int init(api_status* status);
 
+  int load_action(uint64_t action_id, std::string action_str, api_status* status);
   int choose_rank(
       const char* event_id, string_view context, unsigned int flags, ranking_response& response, api_status* status);
   // here the event_id is auto-generated

@@ -55,6 +55,7 @@ set(PROJECT_SOURCES
   decision_response.cc
   dedup.cc
   error_callback_fn.cc
+  example_cache/lru_dedup_cache.cc
   factory_resolver.cc
   generic_event.cc
   learning_mode.cc
@@ -142,6 +143,7 @@ set(PROJECT_PUBLIC_HEADERS
 set(PROJECT_PRIVATE_HEADERS
   console_tracer.h
   dedup.h
+  example_cache/lru_dedup_cache.h
   federation/federated_client.h
   federation/joined_log_provider.h
   generic_event.h
@@ -211,6 +213,7 @@ target_include_directories(rlclientlib
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/example_cache
     ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date
 )
 

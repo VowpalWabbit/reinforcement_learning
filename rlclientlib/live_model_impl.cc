@@ -74,6 +74,11 @@ int live_model_impl::init(api_status* status)
   return error_code::success;
 }
 
+int live_model_impl::load_action(uint64_t action_id, std::string action_str, api_status* status)
+{
+  return _model->load_action(action_id, std::move(action_str), status);
+}
+
 int live_model_impl::choose_rank(
     const char* event_id, string_view context, unsigned int flags, ranking_response& response, api_status* status)
 {
