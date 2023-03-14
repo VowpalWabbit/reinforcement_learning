@@ -324,13 +324,13 @@ bool example_joiner::process_interaction(
       VW::example_factory_t ex_fac = [this]() -> VW::example& { return *(VW::new_unused_example(*this->_vw)); };
       if (_vw->audit || _vw->hash_inv)
       {
-        VW::parsers::json::read_line_json<true>(*_vw, examples, const_cast<char*>(context.c_str()), context.size(),
-            ex_fac, &_dedup_cache.dedup_examples);
+        VW::parsers::json::read_line_json<true>(
+            *_vw, examples, const_cast<char*>(context.c_str()), context.size(), ex_fac, &_dedup_cache.dedup_examples);
       }
       else
       {
-        VW::parsers::json::read_line_json<false>(*_vw, examples, const_cast<char*>(context.c_str()), context.size(),
-            ex_fac, &_dedup_cache.dedup_examples);
+        VW::parsers::json::read_line_json<false>(
+            *_vw, examples, const_cast<char*>(context.c_str()), context.size(), ex_fac, &_dedup_cache.dedup_examples);
       }
     }
     catch (VW::vw_exception& e)
@@ -415,13 +415,13 @@ bool example_joiner::process_dedup(const v2::Event& event, const v2::Metadata& m
       {
         if (_vw->audit || _vw->hash_inv)
         {
-          VW::parsers::json::template read_line_json<true>(*_vw, examples, const_cast<char*>(dedup->values()->Get(i)->c_str()),
-              dedup->values()->Get(i)->size(), ex_fac);
+          VW::parsers::json::template read_line_json<true>(*_vw, examples,
+              const_cast<char*>(dedup->values()->Get(i)->c_str()), dedup->values()->Get(i)->size(), ex_fac);
         }
         else
         {
-          VW::parsers::json::template read_line_json<false>(*_vw, examples, const_cast<char*>(dedup->values()->Get(i)->c_str()),
-              dedup->values()->Get(i)->size(), ex_fac);
+          VW::parsers::json::template read_line_json<false>(*_vw, examples,
+              const_cast<char*>(dedup->values()->Get(i)->c_str()), dedup->values()->Get(i)->size(), ex_fac);
         }
       }
       catch (VW::vw_exception& e)

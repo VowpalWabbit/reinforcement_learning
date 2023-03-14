@@ -244,13 +244,13 @@ joined_event::multistep_joined_event multistep_example_joiner::process_interacti
 
   if (_vw->audit || _vw->hash_inv)
   {
-    VW::parsers::json::read_line_json<true>(*_vw, examples, const_cast<char*>(line_vec.c_str()), line_vec.size(),
-        ex_fac);
+    VW::parsers::json::read_line_json<true>(
+        *_vw, examples, const_cast<char*>(line_vec.c_str()), line_vec.size(), ex_fac);
   }
   else
   {
-    VW::parsers::json::read_line_json<false>(*_vw, examples, const_cast<char*>(line_vec.c_str()), line_vec.size(),
-        ex_fac);
+    VW::parsers::json::read_line_json<false>(
+        *_vw, examples, const_cast<char*>(line_vec.c_str()), line_vec.size(), ex_fac);
   }
 
   return joined_event::multistep_joined_event(std::move(meta), std::move(cb_data));
