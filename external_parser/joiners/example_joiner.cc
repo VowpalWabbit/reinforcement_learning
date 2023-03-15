@@ -567,7 +567,7 @@ bool example_joiner::process_joined(VW::multi_ex& examples)
   return true;
 }
 
-void example_joiner::persist_metrics()
+void example_joiner::setup_metrics()
 {
   if (_vw->example_parser->metrics)
   {

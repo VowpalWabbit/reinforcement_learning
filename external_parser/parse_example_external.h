@@ -37,6 +37,7 @@ public:
   static void set_parse_args(VW::config::option_group_definition& in_options, parser_options& parsed_options);
   virtual ~parser() = default;
   virtual bool parse_examples(VW::workspace* all, io_buf& io_buf, VW::multi_ex& examples) = 0;
+  virtual void setup_metrics();
   virtual void persist_metrics(metric_sink& metrics);
 
   bool next(VW::workspace& workspace_instance, io_buf& buffer, VW::multi_ex& output_examples) override

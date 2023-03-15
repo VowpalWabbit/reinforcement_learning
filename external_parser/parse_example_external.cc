@@ -147,6 +147,8 @@ void parser::set_parse_args(VW::config::option_group_definition& in_options, par
                .help("Override the learning mode from the file, valid values: Online, Apprentice, LoggingOnly"));
 }
 
+void parser::setup_metrics() { }
+
 void parser::persist_metrics(metric_sink& metric_sink) { metric_sink.set_uint("external_parser", 1); }
 
 int parse_examples(VW::workspace* all, io_buf& io_buf, VW::multi_ex& examples)
@@ -173,8 +175,7 @@ std::unique_ptr<VW::workspace> initialize_with_binary_parser(std::unique_ptr<con
     // The metric hook will only get called if the workspace is still alive,
     // and the lifetime of the custom parser object is tied to the lifetime
     // of the workspace.
-    all->global_metrics.register_metrics_callback(
-        [external_parser_ptr](VW::metric_sink& metric_list) { external_parser_ptr->persist_metrics(metric_list); });
+    external_parser_ptr->setup_metrics();
     all->custom_parser = std::unique_ptr<VW::details::input_parser>(external_parser.release());
     all->example_parser->reader = VW::external::parse_examples;
   }
