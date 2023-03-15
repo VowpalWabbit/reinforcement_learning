@@ -28,11 +28,6 @@ bool binary_json_converter::parse_examples(VW::workspace* all, io_buf& io_buf, V
   return false;
 }
 
-void binary_json_converter::setup_metrics()
-{
-  // do we want metrics here?
-}
-
 void binary_json_converter::persist_metrics(metric_sink&)
 {
   // do we want metrics here?

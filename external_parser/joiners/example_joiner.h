@@ -87,7 +87,7 @@ public:
 
   metrics::joiner_metrics get_metrics() override;
 
-  void setup_metrics() override;
+  void persist_metrics(VW::metric_sink& sink) override;
 
 private:
   bool process_dedup(const v2::Event& event, const v2::Metadata& metadata);

@@ -18,7 +18,6 @@ public:
   binary_json_converter(std::unique_ptr<i_joiner>&& joiner, VW::io::logger logger);  // taking ownership of joiner
   ~binary_json_converter();
   bool parse_examples(VW::workspace* all, io_buf& io_buf, VW::multi_ex& examples) override;
-  void setup_metrics() override;
   void persist_metrics(metric_sink& metrics_sink) override;
 
 private:

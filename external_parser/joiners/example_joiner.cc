@@ -567,27 +567,34 @@ bool example_joiner::process_joined(VW::multi_ex& examples)
   return true;
 }
 
-void example_joiner::setup_metrics()
+void example_joiner::persist_metrics(VW::metric_sink& metrics)
 {
   if (_vw->example_parser->metrics)
   {
     _vw->example_parser->metrics->number_of_skipped_events = _joiner_metrics.number_of_skipped_events;
+    metrics.set_uint("number_skipped_events", _vw->example_parser->metrics->number_of_skipped_events, true);
 
     _vw->example_parser->metrics->dsjson_sum_cost_original = _joiner_metrics.sum_cost_original;
+    metrics.set_float("dsjson_sum_cost_original", _vw->example_parser->metrics->dsjson_sum_cost_original, true);
 
     if (!_joiner_metrics.first_event_id.empty())
     {
       _vw->example_parser->metrics->first_event_id = std::move(_joiner_metrics.first_event_id);
+      metrics.set_string("first_event_id", _vw->example_parser->metrics->first_event_id, true);
 
       _vw->example_parser->metrics->first_event_time = std::move(
           date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.first_event_timestamp)));
+      metrics.set_string("first_event_time", _vw->example_parser->metrics->first_event_time, true);
+
     }
     if (!_joiner_metrics.last_event_id.empty())
     {
       _vw->example_parser->metrics->last_event_id = std::move(_joiner_metrics.last_event_id);
+      metrics.set_string("last_event_id", _vw->example_parser->metrics->last_event_id, true);
 
       _vw->example_parser->metrics->last_event_time = std::move(
           date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.last_event_timestamp)));
+      metrics.set_string("last_event_time", _vw->example_parser->metrics->last_event_time, true);
     }
   }
 }
