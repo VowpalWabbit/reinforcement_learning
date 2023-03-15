@@ -92,17 +92,18 @@ void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& acti
 
   // copy due to destructive parsing by rapidjson
   std::string line_vec(context);
+  VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
 
   if (_vw->audit)
   {
     _vw->audit_buffer->clear();
     VW::read_line_decision_service_json<true>(
-        *_vw, examples, &line_vec[0], line_vec.size(), false, get_or_create_example_f, this, &interaction);
+        *_vw, examples, &line_vec[0], line_vec.size(), false, ex_fac, &interaction);
   }
   else
   {
     VW::read_line_decision_service_json<false>(
-        *_vw, examples, &line_vec[0], line_vec.size(), false, get_or_create_example_f, this, &interaction);
+        *_vw, examples, &line_vec[0], line_vec.size(), false, ex_fac, &interaction);
   }
 
   // finalize example
@@ -127,18 +128,19 @@ void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<f
 
   // copy due to destructive parsing by rapidjson
   std::string line_vec(context);
+  VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
 
   if (_vw->audit)
   {
     _vw->audit_buffer->clear();
-    VW::read_line_json_s<true>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+    VW::parsers::json::read_line_json<true>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac);
   }
-  else { VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this); }
+  else { VW::parsers::json::read_line_json<false>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac); }
 
   // finalize example
   VW::setup_examples(*_vw, examples);
 
-  // TODO: refactor setup_examples/read_line_json_s to take in multi_ex
+  // TODO: refactor setup_examples to take in multi_ex
   VW::multi_ex examples2(examples.begin(), examples.end());
 
   _vw->predict(examples2);
@@ -168,13 +170,14 @@ void safe_vw::choose_continuous_action(string_view context, float& action, float
 
   // copy due to destructive parsing by rapidjson
   std::string line_vec(context);
+  VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
 
   if (_vw->audit)
   {
     _vw->audit_buffer->clear();
-    VW::read_line_json_s<true>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+    VW::parsers::json::read_line_json<true>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac);
   }
-  else { VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this); }
+  else { VW::parsers::json::read_line_json<false>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac); }
 
   // finalize example
   VW::setup_examples(*_vw, examples);
@@ -199,13 +202,14 @@ void safe_vw::rank_decisions(const std::vector<const char*>& event_ids, string_v
 
   // copy due to destructive parsing by rapidjson
   std::string line_vec(context);
+  VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
 
   if (_vw->audit)
   {
     _vw->audit_buffer->clear();
-    VW::read_line_json_s<true>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+    VW::parsers::json::read_line_json<true>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac);
   }
-  else { VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this); }
+  else { VW::parsers::json::read_line_json<false>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac); }
 
   // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the
   // example tag.
@@ -220,7 +224,7 @@ void safe_vw::rank_decisions(const std::vector<const char*>& event_ids, string_v
   // finalize example
   VW::setup_examples(*_vw, examples);
 
-  // TODO: refactor setup_examples/read_line_json_s to take in multi_ex
+  // TODO: refactor setup_examples to take in multi_ex
   VW::multi_ex examples2(examples.begin(), examples.end());
 
   _vw->predict(examples2);
@@ -253,13 +257,14 @@ void safe_vw::rank_multi_slot_decisions(const char* event_id, const std::vector<
 
   // copy due to destructive parsing by rapidjson
   std::string line_vec(context);
+  VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
 
   if (_vw->audit)
   {
     _vw->audit_buffer->clear();
-    VW::read_line_json_s<true>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this);
+    VW::parsers::json::read_line_json<true>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac);
   }
-  else { VW::read_line_json_s<false>(*_vw, examples, &line_vec[0], line_vec.size(), get_or_create_example_f, this); }
+  else { VW::parsers::json::read_line_json<false>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac); }
 
   // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the
   // example tag.
@@ -275,7 +280,7 @@ void safe_vw::rank_multi_slot_decisions(const char* event_id, const std::vector<
   // finalize example
   VW::setup_examples(*_vw, examples);
 
-  // TODO: refactor setup_examples/read_line_json_s to take in multi_ex
+  // TODO: refactor setup_examples to take in multi_ex
   VW::multi_ex examples2(examples.begin(), examples.end());
 
   _vw->predict(examples2);

@@ -321,15 +321,16 @@ bool example_joiner::process_interaction(
     std::string context(je.context);
     try
     {
+      VW::example_factory_t ex_fac = [this]() -> VW::example& { return *(VW::new_unused_example(*this->_vw)); };
       if (_vw->audit || _vw->hash_inv)
       {
-        VW::read_line_json_s<true>(*_vw, examples, const_cast<char*>(context.c_str()), context.size(),
-            reinterpret_cast<VW::example_factory_t>(VW::new_unused_example), _vw, &_dedup_cache.dedup_examples);
+        VW::parsers::json::read_line_json<true>(
+            *_vw, examples, const_cast<char*>(context.c_str()), context.size(), ex_fac, &_dedup_cache.dedup_examples);
       }
       else
       {
-        VW::read_line_json_s<false>(*_vw, examples, const_cast<char*>(context.c_str()), context.size(),
-            reinterpret_cast<VW::example_factory_t>(VW::new_unused_example), _vw, &_dedup_cache.dedup_examples);
+        VW::parsers::json::read_line_json<false>(
+            *_vw, examples, const_cast<char*>(context.c_str()), context.size(), ex_fac, &_dedup_cache.dedup_examples);
       }
     }
     catch (VW::vw_exception& e)
@@ -409,18 +410,18 @@ bool example_joiner::process_dedup(const v2::Event& event, const v2::Metadata& m
     if (!_dedup_cache.exists(dedup_id))
     {
       examples.push_back(get_or_create_example());
-
+      VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
       try
       {
         if (_vw->audit || _vw->hash_inv)
         {
-          VW::template read_line_json_s<true>(*_vw, examples, const_cast<char*>(dedup->values()->Get(i)->c_str()),
-              dedup->values()->Get(i)->size(), get_or_create_example_f, this);
+          VW::parsers::json::template read_line_json<true>(*_vw, examples,
+              const_cast<char*>(dedup->values()->Get(i)->c_str()), dedup->values()->Get(i)->size(), ex_fac);
         }
         else
         {
-          VW::template read_line_json_s<false>(*_vw, examples, const_cast<char*>(dedup->values()->Get(i)->c_str()),
-              dedup->values()->Get(i)->size(), get_or_create_example_f, this);
+          VW::parsers::json::template read_line_json<false>(*_vw, examples,
+              const_cast<char*>(dedup->values()->Get(i)->c_str()), dedup->values()->Get(i)->size(), ex_fac);
         }
       }
       catch (VW::vw_exception& e)
@@ -566,27 +567,28 @@ bool example_joiner::process_joined(VW::multi_ex& examples)
   return true;
 }
 
-void example_joiner::persist_metrics()
+void example_joiner::persist_metrics(VW::metric_sink& metrics)
 {
   if (_vw->example_parser->metrics)
   {
-    _vw->example_parser->metrics->number_of_skipped_events = _joiner_metrics.number_of_skipped_events;
-
-    _vw->example_parser->metrics->dsjson_sum_cost_original = _joiner_metrics.sum_cost_original;
+    metrics.set_uint("number_skipped_events", _joiner_metrics.number_of_skipped_events, true);
+    metrics.set_float("dsjson_sum_cost_original", _joiner_metrics.sum_cost_original, true);
 
     if (!_joiner_metrics.first_event_id.empty())
     {
-      _vw->example_parser->metrics->first_event_id = std::move(_joiner_metrics.first_event_id);
-
-      _vw->example_parser->metrics->first_event_time = std::move(
-          date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.first_event_timestamp)));
+      metrics.set_string("first_event_id", std::move(_joiner_metrics.first_event_id), true);
+      metrics.set_string("first_event_time",
+          std::move(
+              date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.first_event_timestamp))),
+          true);
     }
     if (!_joiner_metrics.last_event_id.empty())
     {
-      _vw->example_parser->metrics->last_event_id = std::move(_joiner_metrics.last_event_id);
-
-      _vw->example_parser->metrics->last_event_time = std::move(
-          date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.last_event_timestamp)));
+      metrics.set_string("last_event_id", std::move(_joiner_metrics.last_event_id), true);
+      metrics.set_string("last_event_time",
+          std::move(
+              date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.last_event_timestamp))),
+          true);
     }
   }
 }
