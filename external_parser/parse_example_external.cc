@@ -172,9 +172,6 @@ std::unique_ptr<VW::workspace> initialize_with_binary_parser(std::unique_ptr<con
   {
     auto external_parser = VW::external::parser::get_external_parser(all.get(), parsed_options);
     auto* external_parser_ptr = external_parser.get();
-    // The metric hook will only get called if the workspace is still alive,
-    // and the lifetime of the custom parser object is tied to the lifetime
-    // of the workspace.
     external_parser_ptr->setup_metrics();
     all->custom_parser = std::unique_ptr<VW::details::input_parser>(external_parser.release());
     all->example_parser->reader = VW::external::parse_examples;
