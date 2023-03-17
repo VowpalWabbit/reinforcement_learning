@@ -12,6 +12,7 @@
 #include "vw/core/learner.h"
 #include "vw/core/memory.h"
 #include "vw/core/metric_sink.h"
+#include "vw/core/scope_exit.h"
 #include "vw/core/vw.h"
 
 #include <iostream>
@@ -64,8 +65,9 @@ int main(int argc, char* argv[])
     else
     {
       VW::start_parser(*all);
+      auto scope_guard = VW::scope_exit([&all] { VW::end_parser(*all); });
+
       VW::LEARNER::generic_driver(*all);
-      VW::end_parser(*all);
     }
 
     if (all->example_parser->exc_ptr) { std::rethrow_exception(all->example_parser->exc_ptr); }
