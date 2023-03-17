@@ -13,6 +13,7 @@
 #include "vw/core/v_array.h"
 
 #include <deque>
+#include <fstream>
 #include <list>
 #include <queue>
 #include <unordered_map>
@@ -56,6 +57,7 @@ class multistep_example_joiner : public i_joiner
 {
 public:
   multistep_example_joiner(VW::workspace* vw);  // TODO rule of 5
+  multistep_example_joiner(VW::workspace* vw, bool binary_to_json, const std::string& outfile_name);
 
   ~multistep_example_joiner() override;
 
@@ -91,8 +93,8 @@ private:
   bool populate_order();
   reward::outcome_event process_outcome(
       const TimePoint& timestamp, const v2::Metadata& metadata, const v2::OutcomeEvent& event);
-  joined_event::multistep_joined_event process_interaction(
-      const Parsed<v2::MultiStepEvent>& event_meta, VW::multi_ex& examples);
+  joined_event::joined_event process_interaction(
+      const Parsed<v2::MultiStepEvent>& event_meta, VW::multi_ex& examples, float reward);
   void populate_episodic_rewards();
 
 private:
@@ -117,4 +119,7 @@ private:
   metrics::joiner_metrics _joiner_metrics;
 
   bool _current_je_is_skip_learn;
+
+  bool _binary_to_json = false;
+  std::ofstream _outfile;
 };

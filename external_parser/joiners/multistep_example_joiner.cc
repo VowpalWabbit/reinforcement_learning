@@ -5,9 +5,9 @@
 #include "generated/v2/Event_generated.h"
 #include "generated/v2/Metadata_generated.h"
 #include "generated/v2/OutcomeEvent_generated.h"
+#include "log_converter.h"
 #include "parse_example_external.h"
 #include "utils.h"
-#include "vw/io/logger.h"
 
 #include <climits>
 #include <ctime>
@@ -29,13 +29,25 @@ multistep_example_joiner::multistep_example_joiner(VW::workspace* vw)
     , _vw(vw)
     , _reward_calculation(&reward::earliest)
     , _multistep_reward_calculation(&multistep_reward_suffix_mean)
+    , _binary_to_json(false)
 {
+}
+
+multistep_example_joiner::multistep_example_joiner(VW::workspace* vw, bool binary_to_json, const std::string& outfile_name)
+    : i_joiner(vw->logger)
+    , _vw(vw)
+    , _reward_calculation(&reward::earliest)
+    , _multistep_reward_calculation(&multistep_reward_suffix_mean)
+    , _binary_to_json(binary_to_json)
+{
+  if(_binary_to_json) { _outfile.open(outfile_name, std::ofstream::out); }
 }
 
 multistep_example_joiner::~multistep_example_joiner()
 {
   // cleanup examples
   for (auto* ex : _example_pool) { VW::dealloc_examples(ex, 1); }
+  if(_binary_to_json) { _outfile.close(); }
 }
 
 bool multistep_example_joiner::process_event(const v2::JoinedEvent& joined_event)
@@ -220,8 +232,8 @@ reward::outcome_event multistep_example_joiner::process_outcome(
   return o_event;
 }
 
-joined_event::multistep_joined_event multistep_example_joiner::process_interaction(
-    const multistep_example_joiner::Parsed<v2::MultiStepEvent>& event_meta, VW::multi_ex& examples)
+joined_event::joined_event multistep_example_joiner::process_interaction(
+    const multistep_example_joiner::Parsed<v2::MultiStepEvent>& event_meta, VW::multi_ex& examples, float reward)
 {
   const auto& metadata = event_meta.meta;
   const auto& event = event_meta.event;
@@ -238,9 +250,15 @@ joined_event::multistep_joined_event multistep_example_joiner::process_interacti
       event.probabilities()->data(), event.probabilities()->data() + event.probabilities()->size()};
   cb_data->interaction_data.probability_of_drop = 1.f - metadata.pass_probability();
   cb_data->interaction_data.skip_learn = event.deferred_action();
+  cb_data->reward = reward;
 
   std::string line_vec(reinterpret_cast<char const*>(event.context()->data()), event.context()->size());
   VW::example_factory_t ex_fac = [this]() -> VW::example& { return *(VW::new_unused_example(*this->_vw)); };
+  
+  // needed when converting to dsjson.
+  // ctx copy needs to happen before json parsing since its destructive.
+  std::string ctx(line_vec);
+  TimePoint tp(event_meta.timestamp);
 
   if (_vw->audit || _vw->hash_inv)
   {
@@ -253,7 +271,8 @@ joined_event::multistep_joined_event multistep_example_joiner::process_interacti
         *_vw, examples, const_cast<char*>(line_vec.c_str()), line_vec.size(), ex_fac);
   }
 
-  return joined_event::multistep_joined_event(std::move(meta), std::move(cb_data));
+  return joined_event::joined_event(std::move(tp), std::move(meta), std::move(ctx),
+    std::move(std::string(event.model_id() ? event.model_id()->c_str() : "N/A")), std::move(cb_data));
 }
 
 bool multistep_example_joiner::process_joined(VW::multi_ex& examples)
@@ -269,9 +288,10 @@ bool multistep_example_joiner::process_joined(VW::multi_ex& examples)
   const auto& interactions = _interactions[id];
   if (interactions.size() != 1) { return false; }
   const auto& interaction = interactions[0];
-  auto joined = process_interaction(interaction, examples);
+  // process_interaction produces cb joined events to facilitate binary->json conversion
+  auto joined = process_interaction(interaction, examples, reward);
 
-  const auto outcomes = _outcomes[id];
+  const auto& outcomes = _outcomes[id];
 
   for (const auto& o : outcomes) { joined.outcome_events.push_back(o); }
   for (const auto& o : _episodic_outcomes) { joined.outcome_events.push_back(o); }
@@ -282,6 +302,10 @@ bool multistep_example_joiner::process_joined(VW::multi_ex& examples)
       {
         _order.pop_front();
         _rewards.pop_front();
+        if (_binary_to_json)
+        {
+          log_converter::build_cb_json(_outfile, joined, logger);
+        }
         if (clear_examples)
         {
           VW::return_multiple_example(*_vw, examples);
@@ -296,7 +320,6 @@ bool multistep_example_joiner::process_joined(VW::multi_ex& examples)
     return false;
   }
 
-  joined.cb_data->reward = reward;
   joined.fill_in_label(examples, logger);
 
   // add an empty example to signal end-of-multiline
@@ -304,6 +327,9 @@ bool multistep_example_joiner::process_joined(VW::multi_ex& examples)
   _vw->example_parser->lbl_parser.default_label(examples.back()->l);
   examples.back()->is_newline = true;
 
+  if (_binary_to_json){
+    clear_examples = true;
+  }
   return true;
 }
 
