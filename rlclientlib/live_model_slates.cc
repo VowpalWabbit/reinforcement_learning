@@ -22,9 +22,10 @@ live_model_slates::live_model_slates(const utility::configuration& config, error
       new live_model_impl(config, fn, err_context, trace_factory, t_factory, m_factory, s_factory, time_prov_factory));
 }
 
-live_model_slates::live_model_slates(const utility::configuration& config, std::function<void(const api_status&)> error_cb,
-    trace_logger_factory_t* trace_factory, data_transport_factory_t* t_factory, model_factory_t* m_factory,
-    sender_factory_t* s_factory, time_provider_factory_t* time_prov_factory)
+live_model_slates::live_model_slates(const utility::configuration& config,
+    std::function<void(const api_status&)> error_cb, trace_logger_factory_t* trace_factory,
+    data_transport_factory_t* t_factory, model_factory_t* m_factory, sender_factory_t* s_factory,
+    time_provider_factory_t* time_prov_factory)
 {
   _pimpl = std::unique_ptr<live_model_impl>(new live_model_impl(
       config, std::move(error_cb), trace_factory, t_factory, m_factory, s_factory, time_prov_factory));
@@ -79,10 +80,12 @@ int live_model_slates::request_multi_slot_decision(
     string_view context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
 {
   INIT_CHECK();
-  return _pimpl->request_multi_slot_decision(context_json, flags, resp, live_model_slates::default_baseline_vector, status);
+  return _pimpl->request_multi_slot_decision(
+      context_json, flags, resp, live_model_slates::default_baseline_vector, status);
 }
 
-int live_model_slates::request_multi_slot_decision(string_view context_json, multi_slot_response& resp, api_status* status)
+int live_model_slates::request_multi_slot_decision(
+    string_view context_json, multi_slot_response& resp, api_status* status)
 {
   return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, status);
 }
@@ -117,7 +120,8 @@ int live_model_slates::request_multi_slot_decision(
     string_view context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
 {
   INIT_CHECK();
-  return _pimpl->request_multi_slot_decision(context_json, flags, resp, live_model_slates::default_baseline_vector, status);
+  return _pimpl->request_multi_slot_decision(
+      context_json, flags, resp, live_model_slates::default_baseline_vector, status);
 }
 
 int live_model_slates::request_multi_slot_decision(

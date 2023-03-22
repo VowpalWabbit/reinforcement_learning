@@ -1813,8 +1813,7 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_ccb ds =
-      create_mock_live_model_ccb(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::live_model_ccb ds = create_mock_live_model_ccb(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response slates_response;
@@ -1827,8 +1826,7 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2)
   RL_IGNORE_DEPRECATED_USAGE_END
 
   config.set(r::name::PROTOCOL_VERSION, "2");
-  r::live_model_ccb ds2 =
-      create_mock_live_model_ccb(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::live_model_ccb ds2 = create_mock_live_model_ccb(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds2.init(&status), err::success);
 
   // slates API work for ccb with v2
@@ -1857,8 +1855,7 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_ccb ds =
-      create_mock_live_model_ccb(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::live_model_ccb ds = create_mock_live_model_ccb(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1895,8 +1892,7 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids_and_slot_ns)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_ccb ds =
-      create_mock_live_model_ccb(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::live_model_ccb ds = create_mock_live_model_ccb(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1952,8 +1948,7 @@ BOOST_FIXTURE_TEST_CASE(live_model_ccb_and_v2_w_audit, AuditCleanup)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_ccb ds =
-      create_mock_live_model_ccb(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::live_model_ccb ds = create_mock_live_model_ccb(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1988,8 +1983,7 @@ BOOST_FIXTURE_TEST_CASE(live_model_ccb_and_v2_w_audit_bad_path, AuditCleanup)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_ccb ds =
-      create_mock_live_model_ccb(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::live_model_ccb ds = create_mock_live_model_ccb(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response response;

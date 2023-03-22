@@ -22,10 +22,9 @@ live_model_ccb::live_model_ccb(const utility::configuration& config, error_fn fn
       new live_model_impl(config, fn, err_context, trace_factory, t_factory, m_factory, s_factory, time_prov_factory));
 }
 
-live_model_ccb::live_model_ccb(const utility::configuration& config,
-    std::function<void(const api_status&)> error_cb, trace_logger_factory_t* trace_factory,
-    data_transport_factory_t* t_factory, model_factory_t* m_factory, sender_factory_t* s_factory,
-    time_provider_factory_t* time_prov_factory)
+live_model_ccb::live_model_ccb(const utility::configuration& config, std::function<void(const api_status&)> error_cb,
+    trace_logger_factory_t* trace_factory, data_transport_factory_t* t_factory, model_factory_t* m_factory,
+    sender_factory_t* s_factory, time_provider_factory_t* time_prov_factory)
 {
   _pimpl = std::unique_ptr<live_model_impl>(new live_model_impl(
       config, std::move(error_cb), trace_factory, t_factory, m_factory, s_factory, time_prov_factory));
@@ -97,15 +96,13 @@ int live_model_ccb::request_multi_slot_decision(
       context_json, flags, resp, live_model_ccb::default_baseline_vector, status);
 }
 
-int live_model_ccb::request_multi_slot_decision(
-    string_view context_json, multi_slot_response& resp, api_status* status)
+int live_model_ccb::request_multi_slot_decision(string_view context_json, multi_slot_response& resp, api_status* status)
 {
   return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, status);
 }
 
-int live_model_ccb::request_multi_slot_decision(const char* event_id, string_view context_json,
-    unsigned int flags, multi_slot_response& resp, const int* baseline_actions, size_t baseline_actions_size,
-    api_status* status)
+int live_model_ccb::request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags,
+    multi_slot_response& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
 {
   INIT_CHECK();
   std::vector<int> baseline_vector = c_array_to_vector(baseline_actions, baseline_actions_size);
@@ -116,8 +113,8 @@ int live_model_ccb::request_multi_slot_decision(const char* event_id, string_vie
   return _pimpl->request_multi_slot_decision(event_id, context_json, flags, resp, baseline_vector, status);
 }
 
-int live_model_ccb::request_multi_slot_decision(const char* event_id, string_view context_json,
-    unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
+int live_model_ccb::request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags,
+    multi_slot_response_detailed& resp, api_status* status)
 {
   INIT_CHECK();
   return _pimpl->request_multi_slot_decision(
@@ -144,9 +141,8 @@ int live_model_ccb::request_multi_slot_decision(
   return request_multi_slot_decision(context_json, action_flags::DEFAULT, resp, status);
 }
 
-int live_model_ccb::request_multi_slot_decision(const char* event_id, string_view context_json,
-    unsigned int flags, multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size,
-    api_status* status)
+int live_model_ccb::request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags,
+    multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size, api_status* status)
 {
   INIT_CHECK();
   std::vector<int> baseline_vector = c_array_to_vector(baseline_actions, baseline_actions_size);
@@ -157,8 +153,7 @@ int live_model_ccb::request_multi_slot_decision(const char* event_id, string_vie
   return _pimpl->request_multi_slot_decision(event_id, context_json, flags, resp, baseline_vector, status);
 }
 
-int live_model_ccb::report_outcome(
-    const char* primary_id, int secondary_id, const char* outcome, api_status* status)
+int live_model_ccb::report_outcome(const char* primary_id, int secondary_id, const char* outcome, api_status* status)
 {
   INIT_CHECK();
   return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);
@@ -177,8 +172,7 @@ int live_model_ccb::report_outcome(
   return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);
 }
 
-int live_model_ccb::report_outcome(
-    const char* primary_id, const char* secondary_id, float outcome, api_status* status)
+int live_model_ccb::report_outcome(const char* primary_id, const char* secondary_id, float outcome, api_status* status)
 {
   INIT_CHECK();
   return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);
