@@ -829,8 +829,7 @@ BOOST_AUTO_TEST_CASE(live_model_background_refresh)
 
   config.set(r::name::EH_TEST, "true");
 
-  r::live_model_cb model =
-      create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
+  r::live_model_cb model = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
 
   r::api_status status;
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
@@ -845,8 +844,7 @@ BOOST_AUTO_TEST_CASE(live_model_no_background_refresh)
   config.set(r::name::EH_TEST, "true");
   config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
 
-  r::live_model_cb model =
-      create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
+  r::live_model_cb model = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
 
   r::api_status status;
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
