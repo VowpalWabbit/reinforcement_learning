@@ -11,6 +11,7 @@
 #include "err_constants.h"
 #include "factory_resolver.h"
 #include "live_model.h"
+#include "live_model_cb.h"
 #include "mock_util.h"
 #include "model_mgmt.h"
 #include "ranking_response.h"
@@ -106,6 +107,29 @@ r::live_model create_mock_live_model(const u::configuration& config,
   return model;
 }
 
+r::live_model_cb create_mock_live_model_cb(const u::configuration& config,
+    r::data_transport_factory_t* data_transport_factory = nullptr, r::model_factory_t* model_factory = nullptr,
+    r::sender_factory_t* sender_factory = nullptr)
+{
+  static auto mock_sender = get_mock_sender(r::error_code::success);
+  static auto mock_data_transport = get_mock_data_transport();
+  static auto mock_model = get_mock_model(r::model_management::model_type_t::CB);
+
+  static auto default_sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
+  static auto default_data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
+  static auto default_model_factory = get_mock_model_factory(mock_model.get());
+
+  if (!data_transport_factory) { data_transport_factory = default_data_transport_factory.get(); }
+
+  if (!model_factory) { model_factory = default_model_factory.get(); }
+
+  if (!sender_factory) { sender_factory = default_sender_factory.get(); }
+
+  r::live_model_cb model(
+      config, nullptr, nullptr, &r::trace_logger_factory, data_transport_factory, model_factory, sender_factory);
+  return model;
+}
+
 }  // namespace
 
 BOOST_AUTO_TEST_CASE(schema_v1_with_bad_use_dedup)
@@ -114,7 +138,7 @@ BOOST_AUTO_TEST_CASE(schema_v1_with_bad_use_dedup)
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::INTERACTION_USE_DEDUP, "true");
   r::api_status status;
-  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  r::live_model_cb ds = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::content_encoding_error);
 }
 
@@ -124,7 +148,7 @@ BOOST_AUTO_TEST_CASE(schema_v1_with_use_compression)
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::INTERACTION_USE_COMPRESSION, "true");
   r::api_status status;
-  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  r::live_model_cb ds = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::content_encoding_error);
 }
 
@@ -134,7 +158,7 @@ BOOST_AUTO_TEST_CASE(schema_v1_with_bad_compression_observations)
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::OBSERVATION_USE_COMPRESSION, "true");
   r::api_status status;
-  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  r::live_model_cb ds = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::content_encoding_error);
 }
 
@@ -144,7 +168,7 @@ BOOST_AUTO_TEST_CASE(schema_v1_with_global_use_compression)
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::USE_COMPRESSION, "true");
   r::api_status status;
-  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  r::live_model_cb ds = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::content_encoding_error);
 }
 
@@ -154,7 +178,7 @@ BOOST_AUTO_TEST_CASE(schema_v1_with_global_use_dedup)
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::USE_DEDUP, "true");
   r::api_status status;
-  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  r::live_model_cb ds = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::content_encoding_error);
 }
 
@@ -166,7 +190,7 @@ BOOST_AUTO_TEST_CASE(schema_v2_with_zstd_and_dedup_content_encoding)
   config.set(r::name::INTERACTION_USE_COMPRESSION, "true");
   config.set(r::name::INTERACTION_USE_DEDUP, "true");
   r::api_status status;
-  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  r::live_model_cb ds = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 }
 
@@ -180,7 +204,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request)
   r::api_status status;
 
   // create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  r::live_model_cb ds = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto event_id = "event_id";
@@ -223,7 +247,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_online_mode)
   r::api_status status;
 
   // create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  r::live_model_cb ds = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto event_id = "event_id";
@@ -244,7 +268,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_apprentice_mode)
   r::api_status status;
 
   // create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  r::live_model_cb ds = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto event_id = "event_id";
@@ -276,7 +300,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_loggingonly_mode)
   r::api_status status;
 
   // create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  r::live_model_cb ds = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto event_id = "event_id";
@@ -603,7 +627,7 @@ BOOST_AUTO_TEST_CASE(live_model_outcome)
   config.set(r::name::EH_TEST, "true");
 
   // create a ds live_model, and initialize with configuration
-  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  r::live_model_cb ds = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
 
   // check api_status content when errors are returned
   r::api_status status;
@@ -649,7 +673,7 @@ BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v1)
   config.set(r::name::EH_TEST, "true");
 
   // create a ds live_model, and initialize with configuration
-  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  r::live_model_cb ds = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
 
   // check api_status content when errors are returned
   r::api_status status;
@@ -677,7 +701,7 @@ BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v2)
   config.set(r::name::PROTOCOL_VERSION, "2");
 
   // create a ds live_model, and initialize with configuration
-  r::live_model ds = create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  r::live_model_cb ds = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
 
   // check api_status content when errors are returned
   r::api_status status;
@@ -805,8 +829,8 @@ BOOST_AUTO_TEST_CASE(live_model_background_refresh)
 
   config.set(r::name::EH_TEST, "true");
 
-  r::live_model model =
-      create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  r::live_model_cb model =
+      create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
 
   r::api_status status;
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
@@ -821,8 +845,8 @@ BOOST_AUTO_TEST_CASE(live_model_no_background_refresh)
   config.set(r::name::EH_TEST, "true");
   config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
 
-  r::live_model model =
-      create_mock_live_model(config, nullptr, nullptr, nullptr, r::model_management::model_type_t::CB);
+  r::live_model_cb model =
+      create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
 
   r::api_status status;
   BOOST_CHECK_EQUAL(model.init(&status), err::success);

@@ -44,7 +44,7 @@ int basic_usage_cb()
   r::api_status status;
 
   //! [(1) Instantiate Inference API using config]
-  r::live_model rl(config);
+  r::live_model_cb rl(config);
   //! [(1) Instantiate Inference API using config]
 
   //! [(2) Initialize the API]
