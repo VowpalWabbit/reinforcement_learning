@@ -11,7 +11,8 @@
 #include "live_model.h"
 #include "live_model_ca.h"
 #include "live_model_cb.h"
-#include "live_model_multi_slot.h"
+#include "live_model_ccb.h"
+#include "live_model_slates.h"
 
 #include <fstream>
 #include <iostream>

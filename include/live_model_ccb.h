@@ -1,7 +1,7 @@
 /**
  * @brief RL Inference API definition.
  *
- * @file live_model_multi_slot.h
+ * @file live_model_ccb.h
  * @author Rajan Chari et al
  * @date 2018-07-18
  */
@@ -48,12 +48,12 @@ class configuration;  //
  * - (2) choose_rank() to choose an action from a list of actions
  * - (3) report_outcome() to provide feedback on chosen action
  */
-class live_model_multi_slot
+class live_model_ccb
 {
 public:
   /**
    * @brief Error callback function.
-   * When live_model_multi_slot is constructed, a background error callback and a
+   * When live_model_ccb is constructed, a background error callback and a
    * context (void*) is registered. If there is an error in the background thread,
    * error callback will get invoked with api_status and the context (void*).
    *
@@ -74,7 +74,7 @@ public:
    * @param sender_factory Sender factory.  The default factory provides two senders, one for
    *                       interaction and the other for observation which logs to Event Hub.
    */
-  explicit live_model_multi_slot(const utility::configuration& config, error_fn fn = nullptr,
+  explicit live_model_ccb(const utility::configuration& config, error_fn fn = nullptr,
       void* err_context = nullptr, trace_logger_factory_t* trace_factory = &trace_logger_factory,
       data_transport_factory_t* t_factory = &data_transport_factory, model_factory_t* m_factory = &model_factory,
       sender_factory_t* s_factory = &sender_factory,
@@ -92,7 +92,7 @@ public:
    * @param sender_factory Sender factory.  The default factory provides two senders, one for
    *                       interaction and the other for observation which logs to Event Hub.
    */
-  explicit live_model_multi_slot(const utility::configuration& config, std::function<void(const api_status&)> error_cb,
+  explicit live_model_ccb(const utility::configuration& config, std::function<void(const api_status&)> error_cb,
       trace_logger_factory_t* trace_factory = &trace_logger_factory,
       data_transport_factory_t* t_factory = &data_transport_factory, model_factory_t* m_factory = &model_factory,
       sender_factory_t* s_factory = &sender_factory,
@@ -256,7 +256,7 @@ public:
 
   /**
    * @brief Error callback function.
-   * When live_model_multi_slot is constructed, a background error callback and a
+   * When live_model_ccb is constructed, a background error callback and a
    * context (void*) is registered. If there is an error in the background thread,
    * error callback will get invoked with api_status and the context (void*).
    * This error callback is typed by the context used in the callback.
@@ -282,7 +282,7 @@ public:
    *                       interaction and the other for observation which logs to Event Hub.
    */
   template <typename ErrCntxt>
-  explicit live_model_multi_slot(const utility::configuration& config, error_fn_t<ErrCntxt> fn,
+  explicit live_model_ccb(const utility::configuration& config, error_fn_t<ErrCntxt> fn,
       ErrCntxt* err_context = nullptr, trace_logger_factory_t* trace_factory = &trace_logger_factory,
       data_transport_factory_t* t_factory = &data_transport_factory, model_factory_t* m_factory = &model_factory,
       sender_factory_t* s_factory = &sender_factory,
@@ -291,24 +291,24 @@ public:
   /**
    * @brief Move constructor for live model object.
    */
-  live_model_multi_slot(live_model_multi_slot&& other) noexcept;
+  live_model_ccb(live_model_ccb&& other) noexcept;
 
   /**
    * @brief Move assignment operator swaps implementation.
    */
-  live_model_multi_slot& operator=(live_model_multi_slot&& other) noexcept;
+  live_model_ccb& operator=(live_model_ccb&& other) noexcept;
 
-  live_model_multi_slot(const live_model_multi_slot&) =
+  live_model_ccb(const live_model_ccb&) =
       delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
-  live_model_multi_slot& operator=(live_model_multi_slot&) =
+  live_model_ccb& operator=(live_model_ccb&) =
       delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
 
-  ~live_model_multi_slot();
+  ~live_model_ccb();
 
 private:
   std::unique_ptr<live_model_impl>
       _pimpl;                 //! The actual implementation details are forwarded to this object (PIMPL pattern)
-  bool _initialized = false;  //! Guard to ensure that live_model_multi_slot is properly initialized. i.e. init() was
+  bool _initialized = false;  //! Guard to ensure that live_model_ccb is properly initialized. i.e. init() was
                               //! called and successfully initialized.
   const std::vector<int> default_baseline_vector = std::vector<int>();
   static std::vector<int> c_array_to_vector(
@@ -330,10 +330,10 @@ private:
  *                       interaction and the other for observations which logs to Event Hub.
  */
 template <typename ErrCntxt>
-live_model_multi_slot::live_model_multi_slot(const utility::configuration& config, error_fn_t<ErrCntxt> fn,
+live_model_ccb::live_model_ccb(const utility::configuration& config, error_fn_t<ErrCntxt> fn,
     ErrCntxt* err_context, trace_logger_factory_t* trace_factory, data_transport_factory_t* t_factory,
     model_factory_t* m_factory, sender_factory_t* s_factory, time_provider_factory_t* time_prov_factory)
-    : live_model_multi_slot(config, std::bind(fn, std::placeholders::_1, err_context), trace_factory, t_factory,
+    : live_model_ccb(config, std::bind(fn, std::placeholders::_1, err_context), trace_factory, t_factory,
           m_factory, s_factory, time_prov_factory)
 {
 }

@@ -175,7 +175,7 @@ int basic_usage_ccb()
   r::api_status status;
 
   //! [(1) Instantiate Inference API using config]
-  r::live_model_multi_slot rl(config);
+  r::live_model_ccb rl(config);
   //! [(1) Instantiate Inference API using config]
 
   //! [(2) Initialize the API]
@@ -233,7 +233,7 @@ int basic_usage_slates()
   r::api_status status;
 
   //! [(1) Instantiate Inference API using config]
-  r::live_model rl(config);
+  r::live_model_slates rl(config);
   //! [(1) Instantiate Inference API using config]
 
   //! [(2) Initialize the API]
