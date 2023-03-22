@@ -724,8 +724,7 @@ BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v1)
   auto model_factory = get_mock_model_factory(mock_model.get());
 
   // create a ds live_model, and initialize with configuration
-  r::live_model_multi_slot ds =
-      create_mock_live_model_multi_slot(config, nullptr, model_factory.get(), nullptr);
+  r::live_model_multi_slot ds = create_mock_live_model_multi_slot(config, nullptr, model_factory.get(), nullptr);
 
   // check api_status content when errors are returned
   r::api_status status;
@@ -756,8 +755,7 @@ BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v2)
   auto model_factory = get_mock_model_factory(mock_model.get());
 
   // create a ds live_model, and initialize with configuration
-  r::live_model_multi_slot ds =
-      create_mock_live_model_multi_slot(config, nullptr, model_factory.get(), nullptr);
+  r::live_model_multi_slot ds = create_mock_live_model_multi_slot(config, nullptr, model_factory.get(), nullptr);
 
   // check api_status content when errors are returned
   r::api_status status;
@@ -1814,8 +1812,8 @@ BOOST_AUTO_TEST_CASE(live_model_multi_slot_and_v2)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_multi_slot ds = create_mock_live_model_multi_slot(
-      config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::live_model_multi_slot ds =
+      create_mock_live_model_multi_slot(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response slates_response;
@@ -1828,8 +1826,8 @@ BOOST_AUTO_TEST_CASE(live_model_multi_slot_and_v2)
   RL_IGNORE_DEPRECATED_USAGE_END
 
   config.set(r::name::PROTOCOL_VERSION, "2");
-  r::live_model_multi_slot ds2 = create_mock_live_model_multi_slot(
-      config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::live_model_multi_slot ds2 =
+      create_mock_live_model_multi_slot(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds2.init(&status), err::success);
 
   // slates API work for ccb with v2
@@ -1858,8 +1856,8 @@ BOOST_AUTO_TEST_CASE(live_model_multi_slot_and_v2_w_slot_ids)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_multi_slot ds = create_mock_live_model_multi_slot(
-      config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::live_model_multi_slot ds =
+      create_mock_live_model_multi_slot(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1896,8 +1894,8 @@ BOOST_AUTO_TEST_CASE(live_model_multi_slot_and_v2_w_slot_ids_and_slot_ns)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_multi_slot ds = create_mock_live_model_multi_slot(
-      config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::live_model_multi_slot ds =
+      create_mock_live_model_multi_slot(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1953,8 +1951,8 @@ BOOST_FIXTURE_TEST_CASE(live_model_multi_slot_and_v2_w_audit, AuditCleanup)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_multi_slot ds = create_mock_live_model_multi_slot(
-      config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::live_model_multi_slot ds =
+      create_mock_live_model_multi_slot(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1989,8 +1987,8 @@ BOOST_FIXTURE_TEST_CASE(live_model_multi_slot_and_v2_w_audit_bad_path, AuditClea
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_multi_slot ds = create_mock_live_model_multi_slot(
-      config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::live_model_multi_slot ds =
+      create_mock_live_model_multi_slot(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response response;
