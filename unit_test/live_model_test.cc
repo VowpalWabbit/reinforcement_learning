@@ -11,6 +11,7 @@
 #include "err_constants.h"
 #include "factory_resolver.h"
 #include "live_model.h"
+#include "live_model_ca.h"
 #include "live_model_cb.h"
 #include "mock_util.h"
 #include "model_mgmt.h"
@@ -103,6 +104,29 @@ r::live_model create_mock_live_model(const u::configuration& config,
   if (!sender_factory) { sender_factory = default_sender_factory.get(); }
 
   r::live_model model(
+      config, nullptr, nullptr, &r::trace_logger_factory, data_transport_factory, model_factory, sender_factory);
+  return model;
+}
+
+r::live_model_ca create_mock_live_model_ca(const u::configuration& config,
+    r::data_transport_factory_t* data_transport_factory = nullptr, r::model_factory_t* model_factory = nullptr,
+    r::sender_factory_t* sender_factory = nullptr)
+{
+  static auto mock_sender = get_mock_sender(r::error_code::success);
+  static auto mock_data_transport = get_mock_data_transport();
+  static auto mock_model = get_mock_model(r::model_management::model_type_t::CA);
+
+  static auto default_sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
+  static auto default_data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
+  static auto default_model_factory = get_mock_model_factory(mock_model.get());
+
+  if (!data_transport_factory) { data_transport_factory = default_data_transport_factory.get(); }
+
+  if (!model_factory) { model_factory = default_model_factory.get(); }
+
+  if (!sender_factory) { sender_factory = default_sender_factory.get(); }
+
+  r::live_model_ca model(
       config, nullptr, nullptr, &r::trace_logger_factory, data_transport_factory, model_factory, sender_factory);
   return model;
 }
@@ -342,7 +366,7 @@ BOOST_AUTO_TEST_CASE(live_model_request_continuous_action)
 
   r::api_status status;
 
-  r::live_model ds = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::live_model_ca ds = create_mock_live_model_ca(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::continuous_action_response response;
@@ -382,7 +406,7 @@ BOOST_AUTO_TEST_CASE(live_model_request_continuous_action_invalid_ctx)
 
   r::api_status status;
 
-  r::live_model ds = create_mock_live_model(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::live_model_ca ds = create_mock_live_model_ca(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::continuous_action_response response;

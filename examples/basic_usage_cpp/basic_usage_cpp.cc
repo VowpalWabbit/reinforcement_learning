@@ -111,7 +111,7 @@ int basic_usage_ca()
   r::api_status status;
 
   //! [(1) Instantiate Inference API using config]
-  r::live_model rl(config);
+  r::live_model_ca rl(config);
   //! [(1) Instantiate Inference API using config]
 
   //! [(2) Initialize the API]

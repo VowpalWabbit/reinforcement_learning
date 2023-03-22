@@ -55,12 +55,6 @@ int live_model_cb::init(api_status* status)
   return err_code;
 }
 
-std::vector<int> live_model_cb::c_array_to_vector(const int* c_array, size_t array_size)
-{
-  if (c_array == nullptr) { return {}; }
-  return std::vector<int>(c_array, c_array + array_size);
-}
-
 int live_model_cb::choose_rank(
     const char* event_id, string_view context_json, ranking_response& response, api_status* status)
 {

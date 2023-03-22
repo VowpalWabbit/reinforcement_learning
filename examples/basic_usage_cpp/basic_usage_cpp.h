@@ -9,6 +9,7 @@
 
 #include "config_utility.h"
 #include "live_model.h"
+#include "live_model_ca.h"
 #include "live_model_cb.h"
 
 #include <fstream>

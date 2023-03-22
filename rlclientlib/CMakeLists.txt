@@ -59,6 +59,7 @@ set(PROJECT_SOURCES
   generic_event.cc
   learning_mode.cc
   live_model.cc
+  live_model_ca.cc
   live_model_cb.cc
   live_model_impl.cc
   logger/endian.cc
@@ -126,6 +127,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/future_compat.h
   ../include/internal_constants.h
   ../include/live_model.h
+  ../include/live_model_ca.h
   ../include/live_model_cb.h
   ../include/model_mgmt.h
   ../include/multi_slot_response.h
