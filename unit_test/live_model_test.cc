@@ -13,6 +13,7 @@
 #include "live_model.h"
 #include "live_model_ca.h"
 #include "live_model_cb.h"
+#include "live_model_multi_slot.h"
 #include "mock_util.h"
 #include "model_mgmt.h"
 #include "ranking_response.h"
@@ -150,6 +151,29 @@ r::live_model_cb create_mock_live_model_cb(const u::configuration& config,
   if (!sender_factory) { sender_factory = default_sender_factory.get(); }
 
   r::live_model_cb model(
+      config, nullptr, nullptr, &r::trace_logger_factory, data_transport_factory, model_factory, sender_factory);
+  return model;
+}
+
+r::live_model_multi_slot create_mock_live_model_multi_slot(const u::configuration& config,
+    r::data_transport_factory_t* data_transport_factory = nullptr, r::model_factory_t* model_factory = nullptr,
+    r::sender_factory_t* sender_factory = nullptr)
+{
+  static auto mock_sender = get_mock_sender(r::error_code::success);
+  static auto mock_data_transport = get_mock_data_transport();
+  static auto mock_model = get_mock_model(r::model_management::model_type_t::CB);
+
+  static auto default_sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
+  static auto default_data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
+  static auto default_model_factory = get_mock_model_factory(mock_model.get());
+
+  if (!data_transport_factory) { data_transport_factory = default_data_transport_factory.get(); }
+
+  if (!model_factory) { model_factory = default_model_factory.get(); }
+
+  if (!sender_factory) { sender_factory = default_sender_factory.get(); }
+
+  r::live_model_multi_slot model(
       config, nullptr, nullptr, &r::trace_logger_factory, data_transport_factory, model_factory, sender_factory);
   return model;
 }
@@ -700,8 +724,8 @@ BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v1)
   auto model_factory = get_mock_model_factory(mock_model.get());
 
   // create a ds live_model, and initialize with configuration
-  r::live_model ds =
-      create_mock_live_model(config, nullptr, model_factory.get(), nullptr, r::model_management::model_type_t::CCB);
+  r::live_model_multi_slot ds =
+      create_mock_live_model_multi_slot(config, nullptr, model_factory.get(), nullptr);
 
   // check api_status content when errors are returned
   r::api_status status;
@@ -732,8 +756,8 @@ BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v2)
   auto model_factory = get_mock_model_factory(mock_model.get());
 
   // create a ds live_model, and initialize with configuration
-  r::live_model ds =
-      create_mock_live_model(config, nullptr, model_factory.get(), nullptr, r::model_management::model_type_t::CCB);
+  r::live_model_multi_slot ds =
+      create_mock_live_model_multi_slot(config, nullptr, model_factory.get(), nullptr);
 
   // check api_status content when errors are returned
   r::api_status status;
@@ -1124,7 +1148,7 @@ BOOST_AUTO_TEST_CASE(ccb_explore_only_mode)
       r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
-  r::live_model model(config);
+  r::live_model_multi_slot model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::decision_response response;
@@ -1165,7 +1189,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response)
       r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
-  r::live_model model(config);
+  r::live_model_multi_slot model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1206,7 +1230,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_apprentice_mode_no_baseline)
   config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_APPRENTICE);
 
   r::api_status status;
-  r::live_model model(config);
+  r::live_model_multi_slot model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1231,7 +1255,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_apprentice_mode_with_baseline)
   config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_APPRENTICE);
 
   r::api_status status;
-  r::live_model model(config);
+  r::live_model_multi_slot model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1277,7 +1301,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_logging_only_with_baseline)
   config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_LOGGINGONLY);
 
   r::api_status status;
-  r::live_model model(config);
+  r::live_model_multi_slot model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1324,7 +1348,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_logging_only_no_baseline)
   config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_LOGGINGONLY);
 
   r::api_status status;
-  r::live_model model(config);
+  r::live_model_multi_slot model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1368,7 +1392,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_with_baseline_null_eventId)
       r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
-  r::live_model model(config);
+  r::live_model_multi_slot model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1411,7 +1435,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_with_baseline_custom_eventId)
       r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
-  r::live_model model(config);
+  r::live_model_multi_slot model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1455,7 +1479,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed)
       r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
-  r::live_model model(config);
+  r::live_model_multi_slot model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
@@ -1497,7 +1521,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_apprentice_mode_no_baseline)
   config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_APPRENTICE);
 
   r::api_status status;
-  r::live_model model(config);
+  r::live_model_multi_slot model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
@@ -1568,7 +1592,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_logging_only_with_baseline)
   config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_LOGGINGONLY);
 
   r::api_status status;
-  r::live_model model(config);
+  r::live_model_multi_slot model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
@@ -1613,7 +1637,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_logging_only_no_baseline)
   config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_LOGGINGONLY);
 
   r::api_status status;
-  r::live_model model(config);
+  r::live_model_multi_slot model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
@@ -1657,7 +1681,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_with_baseline_null_eventid)
       r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
-  r::live_model model(config);
+  r::live_model_multi_slot model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
@@ -1701,7 +1725,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_with_baseline_custom_eventid)
       r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
-  r::live_model model(config);
+  r::live_model_multi_slot model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
@@ -1748,7 +1772,7 @@ BOOST_AUTO_TEST_CASE(slates_explore_only_mode)
       "--slates --ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
-  r::live_model model(config);
+  r::live_model_multi_slot model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1778,7 +1802,7 @@ BOOST_AUTO_TEST_CASE(slates_explore_only_mode)
   BOOST_CHECK(it == response.end());
 }
 
-BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2)
+BOOST_AUTO_TEST_CASE(live_model_multi_slot_and_v2)
 {
   // create a simple ds configuration
   u::configuration config;
@@ -1790,8 +1814,8 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(
-      config, nullptr, &reinforcement_learning::model_factory, nullptr, r::model_management::model_type_t::CCB);
+  r::live_model_multi_slot ds = create_mock_live_model_multi_slot(
+      config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response slates_response;
@@ -1804,8 +1828,8 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2)
   RL_IGNORE_DEPRECATED_USAGE_END
 
   config.set(r::name::PROTOCOL_VERSION, "2");
-  r::live_model ds2 = create_mock_live_model(
-      config, nullptr, &reinforcement_learning::model_factory, nullptr, r::model_management::model_type_t::CCB);
+  r::live_model_multi_slot ds2 = create_mock_live_model_multi_slot(
+      config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds2.init(&status), err::success);
 
   // slates API work for ccb with v2
@@ -1821,7 +1845,7 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2)
   RL_IGNORE_DEPRECATED_USAGE_END
 }
 
-BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids)
+BOOST_AUTO_TEST_CASE(live_model_multi_slot_and_v2_w_slot_ids)
 {
   // create a simple ds configuration
   u::configuration config;
@@ -1834,8 +1858,8 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(
-      config, nullptr, &reinforcement_learning::model_factory, nullptr, r::model_management::model_type_t::CCB);
+  r::live_model_multi_slot ds = create_mock_live_model_multi_slot(
+      config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1859,7 +1883,7 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids)
   BOOST_CHECK(it == response.end());
 }
 
-BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids_and_slot_ns)
+BOOST_AUTO_TEST_CASE(live_model_multi_slot_and_v2_w_slot_ids_and_slot_ns)
 {
   // create a simple ds configuration
   u::configuration config;
@@ -1872,8 +1896,8 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids_and_slot_ns)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(
-      config, nullptr, &reinforcement_learning::model_factory, nullptr, r::model_management::model_type_t::CCB);
+  r::live_model_multi_slot ds = create_mock_live_model_multi_slot(
+      config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1914,7 +1938,7 @@ struct AuditCleanup
   std::string event_id;
 };
 
-BOOST_FIXTURE_TEST_CASE(live_model_ccb_and_v2_w_audit, AuditCleanup)
+BOOST_FIXTURE_TEST_CASE(live_model_multi_slot_and_v2_w_audit, AuditCleanup)
 {
   // create a simple ds configuration
   u::configuration config;
@@ -1929,8 +1953,8 @@ BOOST_FIXTURE_TEST_CASE(live_model_ccb_and_v2_w_audit, AuditCleanup)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(
-      config, nullptr, &reinforcement_learning::model_factory, nullptr, r::model_management::model_type_t::CCB);
+  r::live_model_multi_slot ds = create_mock_live_model_multi_slot(
+      config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1950,7 +1974,7 @@ BOOST_FIXTURE_TEST_CASE(live_model_ccb_and_v2_w_audit, AuditCleanup)
   BOOST_CHECK(audit_file.is_open());
 }
 
-BOOST_FIXTURE_TEST_CASE(live_model_ccb_and_v2_w_audit_bad_path, AuditCleanup)
+BOOST_FIXTURE_TEST_CASE(live_model_multi_slot_and_v2_w_audit_bad_path, AuditCleanup)
 {
   // create a simple ds configuration
   u::configuration config;
@@ -1965,8 +1989,8 @@ BOOST_FIXTURE_TEST_CASE(live_model_ccb_and_v2_w_audit_bad_path, AuditCleanup)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model ds = create_mock_live_model(
-      config, nullptr, &reinforcement_learning::model_factory, nullptr, r::model_management::model_type_t::CCB);
+  r::live_model_multi_slot ds = create_mock_live_model_multi_slot(
+      config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response response;

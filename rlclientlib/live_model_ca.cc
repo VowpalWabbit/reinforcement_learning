@@ -102,41 +102,10 @@ int live_model_ca::report_outcome(const char* event_id, float outcome, api_statu
   return _pimpl->report_outcome(event_id, outcome, status);
 }
 
-int live_model_ca::report_outcome(const char* primary_id, int secondary_id, const char* outcome, api_status* status)
-{
-  INIT_CHECK();
-  return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);
-}
-
-int live_model_ca::report_outcome(const char* primary_id, int secondary_id, float outcome, api_status* status)
-{
-  INIT_CHECK();
-  return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);
-}
-
-int live_model_ca::report_outcome(
-    const char* primary_id, const char* secondary_id, const char* outcome, api_status* status)
-{
-  INIT_CHECK();
-  return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);
-}
-
-int live_model_ca::report_outcome(const char* primary_id, const char* secondary_id, float outcome, api_status* status)
-{
-  INIT_CHECK();
-  return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);
-}
-
 int live_model_ca::refresh_model(api_status* status)
 {
   INIT_CHECK();
   return _pimpl->refresh_model(status);
-}
-
-int live_model_ca::report_action_taken(const char* primary_id, const char* secondary_id, api_status* status)
-{
-  INIT_CHECK();
-  return _pimpl->report_action_taken(primary_id, secondary_id, status);
 }
 
 }  // namespace reinforcement_learning

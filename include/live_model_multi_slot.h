@@ -1,7 +1,7 @@
 /**
  * @brief RL Inference API definition.
  *
- * @file live_model_ca.h
+ * @file live_model_multi_slot.h
  * @author Rajan Chari et al
  * @date 2018-07-18
  */
@@ -48,12 +48,12 @@ class configuration;  //
  * - (2) choose_rank() to choose an action from a list of actions
  * - (3) report_outcome() to provide feedback on chosen action
  */
-class live_model_ca
+class live_model_multi_slot
 {
 public:
   /**
    * @brief Error callback function.
-   * When live_model_ca is constructed, a background error callback and a
+   * When live_model_multi_slot is constructed, a background error callback and a
    * context (void*) is registered. If there is an error in the background thread,
    * error callback will get invoked with api_status and the context (void*).
    *
@@ -74,7 +74,7 @@ public:
    * @param sender_factory Sender factory.  The default factory provides two senders, one for
    *                       interaction and the other for observation which logs to Event Hub.
    */
-  explicit live_model_ca(const utility::configuration& config, error_fn fn = nullptr, void* err_context = nullptr,
+  explicit live_model_multi_slot(const utility::configuration& config, error_fn fn = nullptr, void* err_context = nullptr,
       trace_logger_factory_t* trace_factory = &trace_logger_factory,
       data_transport_factory_t* t_factory = &data_transport_factory, model_factory_t* m_factory = &model_factory,
       sender_factory_t* s_factory = &sender_factory,
@@ -92,7 +92,7 @@ public:
    * @param sender_factory Sender factory.  The default factory provides two senders, one for
    *                       interaction and the other for observation which logs to Event Hub.
    */
-  explicit live_model_ca(const utility::configuration& config, std::function<void(const api_status&)> error_cb,
+  explicit live_model_multi_slot(const utility::configuration& config, std::function<void(const api_status&)> error_cb,
       trace_logger_factory_t* trace_factory = &trace_logger_factory,
       data_transport_factory_t* t_factory = &data_transport_factory, model_factory_t* m_factory = &model_factory,
       sender_factory_t* s_factory = &sender_factory,
@@ -108,100 +108,144 @@ public:
   int init(api_status* status = nullptr);
 
   /**
-   * @brief (DEPRECATED) Choose an action from a continuous range, given a list of context features
-   * The inference library chooses an action by sampling the probability density function produced per continuous action
-   * range. The corresponding event_id should be used when reporting the outcome for the continuous action.
-   * @param event_id  The unique identifier for this interaction.  The same event_id should be used when
-   *                  reporting the outcome for this action.
-   * @param context_json Contains context features in json format
+   * @brief (DEPRECATED) Choose an action from the given set for each slot, given a list of actions, slots,
+   * action features, slot feautres and context features. The inference library chooses an action
+   * per slot by sampling the probability distribution produced per slot. A unique event_id can be
+   * supplied for each slot using the `_id` json field. The corresponding event_id should be used
+   * when reporting the outcome for each slot.
+   * @param context_json Contains slots, slot_features, slot ids, actions, action features and context features in json
+   * format
    * @param flags Action flags (see action_flags.h)
-   * @param response Continuous action response contains the chosen action and the probability density value of the
-   * chosen action location from the continuous range.
+   * @param resp Decision response contains the chosen action per slot, probability distribution used for sampling
+   * actions and ranked actions.
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  RL_DEPRECATED("New unified example builder interface is coming")
-  int request_continuous_action(const char* event_id, string_view context_json, unsigned int flags,
-      continuous_action_response& response, api_status* status = nullptr);
+  int request_decision(
+      string_view context_json, unsigned int flags, decision_response& resp, api_status* status = nullptr);
 
   /**
-   * @brief (DEPRECATED) Choose an action from a continuous range, given a list of context features
-   * The inference library chooses an action by sampling the probability density function produced per continuous action
-   * range. The corresponding event_id should be used when reporting the outcome for the continuous action.
-   * @param event_id  The unique identifier for this interaction.  The same event_id should be used when
-   *                  reporting the outcome for this action.
-   * @param context_json Contains context features in json format
-   * @param response Continuous action response contains the chosen action and the probability density value of the
-   * chosen action location from the continuous range.
+   * @brief (DEPRECATED) Choose an action from the given set for each slot, given a list of actions, slots,
+   * action features, slot feautres and context features. The inference library chooses an action
+   * per slot by sampling the probability distribution produced per slot. A unique event_id can be
+   * supplied for each slot using the `_id` json field. The corresponding event_id should be used
+   * when reporting the outcome for each slot.
+   * @param context_json Contains slots, slot_features, slot ids, actions, action features and context features in json
+   * format
+   * @param resp Decision response contains the chosen action per slot, probability distribution used for sampling
+   * actions and ranked actions.
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  RL_DEPRECATED("New unified example builder interface is coming")
-  int request_continuous_action(const char* event_id, string_view context_json, continuous_action_response& response,
+  int request_decision(string_view context_json, decision_response& resp, api_status* status = nullptr);
+
+  /**
+   * @brief (DEPRECATED) Choose an action from the given set for each slot, given a list of actions, slots,
+   * action features, slot features and context features. The inference library chooses an action
+   * per slot by sampling the probability distribution produced per slot. The corresponding event_id should be used when
+   * reporting the outcome for each slot.
+   * @param event_id  The unique identifier for this interaction.  The same event_id should be used when
+   *                  reporting the outcome for this action.
+   * @param context_json Contains slots, slot_features, slot ids, actions, action features and context features in json
+   * format
+   * @param flags Action flags (see action_flags.h)
+   * @param resp Decision response contains the chosen action per slot, probability distribution used for sampling
+   * actions and ranked actions.
+   * @param status  Optional field with detailed string description if there is an error
+   * @return int Return error code.  This will also be returned in the api_status object
+   */
+  int request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags,
+      multi_slot_response& resp, api_status* status = nullptr);
+  int request_multi_slot_decision(
+      const char* event_id, string_view context_json, multi_slot_response& resp, api_status* status = nullptr);
+  int request_multi_slot_decision(
+      string_view context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
+  int request_multi_slot_decision(string_view context_json, multi_slot_response& resp, api_status* status = nullptr);
+
+  int request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags,
+      multi_slot_response& resp, const int* baseline_actions, size_t baseline_actions_size,
       api_status* status = nullptr);
 
-  /**
-   * @brief (DEPRECATED) Choose an action from a continuous range, given a list of context features
-   * The inference library chooses an action by sampling the probability density function produced per continuous action
-   * range. A unique event_id will be generated and returned in the continuous_action_response. The same event_id should
-   * be used when reporting the outcome for this action.
-   * @param context_json Contains context features in json format
-   * @param flags Action flags (see action_flags.h)
-   * @param response Continuous action response contains the chosen action and the probability density value of the
-   * chosen action location from the continuous range.
-   * @param status  Optional field with detailed string description if there is an error
-   * @return int Return error code.  This will also be returned in the api_status object
-   */
-  RL_DEPRECATED("New unified example builder interface is coming")
-  int request_continuous_action(
-      string_view context_json, unsigned int flags, continuous_action_response& response, api_status* status = nullptr);
+  int request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags,
+      multi_slot_response_detailed& resp, api_status* status = nullptr);
+  int request_multi_slot_decision(
+      const char* event_id, string_view context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
+  int request_multi_slot_decision(
+      string_view context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
+  int request_multi_slot_decision(
+      string_view context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
 
-  /**
-   * @brief (DEPRECATED) Choose an action from a continuous range, given a list of context features
-   * The inference library chooses an action by sampling the probability density function produced per continuous action
-   * range. A unique event_id will be generated and returned in the continuous_action_response. The same event_id should
-   * be used when reporting the outcome for this action.
-   * @param context_json Contains context features in json format
-   * @param response Continuous action response contains the chosen action and the probability density value of the
-   * chosen action location from the continuous range.
-   * @param status  Optional field with detailed string description if there is an error
-   * @return int Return error code.  This will also be returned in the api_status object
-   */
-  RL_DEPRECATED("New unified example builder interface is coming")
-  int request_continuous_action(
-      string_view context_json, continuous_action_response& response, api_status* status = nullptr);
+  int request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags,
+      multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size,
+      api_status* status = nullptr);
 
   /**
    * @brief Report that action was taken.
    *
-   * @param event_id  The unique event_id used when choosing an action should be presented here.  This is so that
+   * @param primary_id  The unique primary_id used when choosing an action should be presented here.  This is so that
    *                  the action taken can be matched with feedback received.
+   * @param secondary_id Index of the partial outcome.
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_action_taken(const char* event_id, api_status* status = nullptr);
+  int report_action_taken(const char* primary_id, const char* secondary_id, api_status* status = nullptr);
 
   /**
-   * @brief Report the outcome for the top action.
+   * @brief Report outcome of a decision based on a pair of primary and secondary indentifiers.
+   * This identifier pair is problem specific.
+   * For CCB, the primary is the event id and the secondary is the index of the slot.
    *
-   * @param event_id  The unique event_id used when choosing an action should be presented here.  This is so that
+   * @param primary_id  The unique primary_id used when choosing an action should be presented here.  This is so that
    *                  the action taken can be matched with feedback received.
-   * @param outcome Outcome serialized as a string
+   * @param secondary_id Index of the partial outcome.
+   * @param outcome Outcome as float.
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_outcome(const char* event_id, const char* outcome, api_status* status = nullptr);
+  int report_outcome(const char* primary_id, int secondary_id, float outcome, api_status* status = nullptr);
 
   /**
-   * @brief Report the outcome for the top action.
+   * @brief Report outcome of a decision based on a pair of primary and secondary indentifiers.
+   * This identifier pair is problem specific.
+   * For CCB, the primary is the event id and the secondary is the index of the slot.
    *
-   * @param event_id  The unique event_id used when choosing an action should be presented here.  This is so that
+   * @param primary_id  The unique primary_id used when choosing an action should be presented here.  This is so that
    *                  the action taken can be matched with feedback received.
-   * @param outcome Outcome as float
+   * @param secondary_id Index of the partial outcome.
+   * @param outcome Outcome as float.
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_outcome(const char* event_id, float outcome, api_status* status = nullptr);
+  int report_outcome(const char* primary_id, const char* secondary_id, float outcome, api_status* status = nullptr);
+
+  /**
+   * @brief Report outcome of a decision based on a pair of primary and secondary indentifiers.
+   * This identifier pair is problem specific.
+   * For CCB, the primary is the event id and the secondary is the index of the slot.
+   *
+   * @param primary_id  The unique primary_id used when choosing an action should be presented here.  This is so that
+   *                  the action taken can be matched with feedback received.
+   * @param secondary_id Index of the partial outcome.
+   * @param outcome Outcome as float.
+   * @param status  Optional field with detailed string description if there is an error
+   * @return int Return error code.  This will also be returned in the api_status object
+   */
+  int report_outcome(const char* primary_id, int secondary_id, const char* outcome, api_status* status = nullptr);
+
+  /**
+   * @brief Report outcome of a decision based on a pair of primary and secondary indentifiers.
+   * This identifier pair is problem specific.
+   * For CCB, the primary is the event id and the secondary is the index of the slot.
+   *
+   * @param primary_id  The unique primary_id used when choosing an action should be presented here.  This is so that
+   *                  the action taken can be matched with feedback received.
+   * @param secondary_id Index of the partial outcome.
+   * @param outcome Outcome as float.
+   * @param status  Optional field with detailed string description if there is an error
+   * @return int Return error code.  This will also be returned in the api_status object
+   */
+  int report_outcome(
+      const char* primary_id, const char* secondary_id, const char* outcome, api_status* status = nullptr);
 
   /*
    * @brief Refreshes the model if it has background refresh disabled.
@@ -212,7 +256,7 @@ public:
 
   /**
    * @brief Error callback function.
-   * When live_model_ca is constructed, a background error callback and a
+   * When live_model_multi_slot is constructed, a background error callback and a
    * context (void*) is registered. If there is an error in the background thread,
    * error callback will get invoked with api_status and the context (void*).
    * This error callback is typed by the context used in the callback.
@@ -238,7 +282,7 @@ public:
    *                       interaction and the other for observation which logs to Event Hub.
    */
   template <typename ErrCntxt>
-  explicit live_model_ca(const utility::configuration& config, error_fn_t<ErrCntxt> fn, ErrCntxt* err_context = nullptr,
+  explicit live_model_multi_slot(const utility::configuration& config, error_fn_t<ErrCntxt> fn, ErrCntxt* err_context = nullptr,
       trace_logger_factory_t* trace_factory = &trace_logger_factory,
       data_transport_factory_t* t_factory = &data_transport_factory, model_factory_t* m_factory = &model_factory,
       sender_factory_t* s_factory = &sender_factory,
@@ -247,25 +291,28 @@ public:
   /**
    * @brief Move constructor for live model object.
    */
-  live_model_ca(live_model_ca&& other) noexcept;
+  live_model_multi_slot(live_model_multi_slot&& other) noexcept;
 
   /**
    * @brief Move assignment operator swaps implementation.
    */
-  live_model_ca& operator=(live_model_ca&& other) noexcept;
+  live_model_multi_slot& operator=(live_model_multi_slot&& other) noexcept;
 
-  live_model_ca(
-      const live_model_ca&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
-  live_model_ca& operator=(
-      live_model_ca&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
+  live_model_multi_slot(
+      const live_model_multi_slot&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
+  live_model_multi_slot& operator=(
+      live_model_multi_slot&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
 
-  ~live_model_ca();
+  ~live_model_multi_slot();
 
 private:
   std::unique_ptr<live_model_impl>
       _pimpl;                 //! The actual implementation details are forwarded to this object (PIMPL pattern)
-  bool _initialized = false;  //! Guard to ensure that live_model_ca is properly initialized. i.e. init() was called and
+  bool _initialized = false;  //! Guard to ensure that live_model_multi_slot is properly initialized. i.e. init() was called and
                               //! successfully initialized.
+  const std::vector<int> default_baseline_vector = std::vector<int>();
+  static std::vector<int> c_array_to_vector(
+      const int* c_array, size_t array_size);  //! Convert baseline_actions from c array to std vector.
 };
 
 /**
@@ -283,10 +330,10 @@ private:
  *                       interaction and the other for observations which logs to Event Hub.
  */
 template <typename ErrCntxt>
-live_model_ca::live_model_ca(const utility::configuration& config, error_fn_t<ErrCntxt> fn, ErrCntxt* err_context,
+live_model_multi_slot::live_model_multi_slot(const utility::configuration& config, error_fn_t<ErrCntxt> fn, ErrCntxt* err_context,
     trace_logger_factory_t* trace_factory, data_transport_factory_t* t_factory, model_factory_t* m_factory,
     sender_factory_t* s_factory, time_provider_factory_t* time_prov_factory)
-    : live_model_ca(config, std::bind(fn, std::placeholders::_1, err_context), trace_factory, t_factory, m_factory,
+    : live_model_multi_slot(config, std::bind(fn, std::placeholders::_1, err_context), trace_factory, t_factory, m_factory,
           s_factory, time_prov_factory)
 {
 }

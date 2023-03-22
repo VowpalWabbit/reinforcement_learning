@@ -61,6 +61,7 @@ set(PROJECT_SOURCES
   live_model.cc
   live_model_ca.cc
   live_model_cb.cc
+  live_model_multi_slot.cc
   live_model_impl.cc
   logger/endian.cc
   logger/event_logger.cc
@@ -129,6 +130,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/live_model.h
   ../include/live_model_ca.h
   ../include/live_model_cb.h
+  ../include/live_model_multi_slot.h
   ../include/model_mgmt.h
   ../include/multi_slot_response.h
   ../include/multi_slot_response_detailed.h
