@@ -74,7 +74,6 @@ int live_model_cb::choose_rank(string_view context_json, ranking_response& respo
   return choose_rank(context_json, action_flags::DEFAULT, response, status);
 }
 
-// not implemented yet
 int live_model_cb::choose_rank(
     const char* event_id, string_view context_json, unsigned int flags, ranking_response& response, api_status* status)
 {
@@ -82,7 +81,6 @@ int live_model_cb::choose_rank(
   return _pimpl->choose_rank(event_id, context_json, flags, response, status);
 }
 
-// not implemented yet
 int live_model_cb::choose_rank(
     string_view context_json, unsigned int flags, ranking_response& response, api_status* status)
 {
@@ -90,20 +88,6 @@ int live_model_cb::choose_rank(
   return _pimpl->choose_rank(context_json, flags, response, status);
 }
 
-int live_model_cb::request_decision(
-    string_view context_json, unsigned int flags, decision_response& resp, api_status* status)
-{
-  INIT_CHECK();
-  return _pimpl->request_decision(context_json, flags, resp, status);
-}
-
-int live_model_cb::request_decision(string_view context_json, decision_response& resp, api_status* status)
-{
-  INIT_CHECK();
-  return request_decision(context_json, action_flags::DEFAULT, resp, status);
-}
-
-// not implemented yet
 int live_model_cb::report_action_taken(const char* event_id, api_status* status)
 {
   INIT_CHECK();
