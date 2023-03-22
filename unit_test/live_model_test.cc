@@ -676,7 +676,8 @@ BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v1)
   auto model_factory = get_mock_model_factory(mock_model.get());
 
   // create a ds live_model, and initialize with configuration
-  r::live_model ds = create_mock_live_model(config, nullptr, model_factory.get(), nullptr, r::model_management::model_type_t::CCB);
+  r::live_model ds =
+      create_mock_live_model(config, nullptr, model_factory.get(), nullptr, r::model_management::model_type_t::CCB);
 
   // check api_status content when errors are returned
   r::api_status status;
@@ -707,7 +708,8 @@ BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v2)
   auto model_factory = get_mock_model_factory(mock_model.get());
 
   // create a ds live_model, and initialize with configuration
-  r::live_model ds = create_mock_live_model(config, nullptr, model_factory.get(), nullptr, r::model_management::model_type_t::CCB);
+  r::live_model ds =
+      create_mock_live_model(config, nullptr, model_factory.get(), nullptr, r::model_management::model_type_t::CCB);
 
   // check api_status content when errors are returned
   r::api_status status;
