@@ -672,8 +672,11 @@ BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v1)
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::EH_TEST, "true");
 
+  auto mock_model = get_mock_model(r::model_management::model_type_t::CCB);
+  auto model_factory = get_mock_model_factory(mock_model.get());
+
   // create a ds live_model, and initialize with configuration
-  r::live_model_cb ds = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
+  r::live_model ds = create_mock_live_model(config, nullptr, model_factory.get(), nullptr, r::model_management::model_type_t::CCB);
 
   // check api_status content when errors are returned
   r::api_status status;
@@ -700,8 +703,11 @@ BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v2)
   config.set(r::name::EH_TEST, "true");
   config.set(r::name::PROTOCOL_VERSION, "2");
 
+  auto mock_model = get_mock_model(r::model_management::model_type_t::CCB);
+  auto model_factory = get_mock_model_factory(mock_model.get());
+
   // create a ds live_model, and initialize with configuration
-  r::live_model_cb ds = create_mock_live_model_cb(config, nullptr, nullptr, nullptr);
+  r::live_model ds = create_mock_live_model(config, nullptr, model_factory.get(), nullptr, r::model_management::model_type_t::CCB);
 
   // check api_status content when errors are returned
   r::api_status status;
