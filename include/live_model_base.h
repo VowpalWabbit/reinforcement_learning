@@ -192,8 +192,5 @@ protected:
       _pimpl;                 //! The actual implementation details are forwarded to this object (PIMPL pattern)
   bool _initialized = false;  //! Guard to ensure that live_model_base is properly initialized. i.e. init() was called
                               //! and successfully initialized.
-  const std::vector<int> default_baseline_vector = std::vector<int>();
-  static std::vector<int> c_array_to_vector(
-      const int* c_array, size_t array_size);  //! Convert baseline_actions from c array to std vector.
 };
 }  // namespace reinforcement_learning

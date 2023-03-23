@@ -1,7 +1,4 @@
 #include "live_model_slates.h"
-
-#include "action_flags.h"
-#include "err_constants.h"
 #include "live_model_impl.h"
 
 namespace reinforcement_learning
@@ -96,5 +93,11 @@ int live_model_slates::report_outcome(const char* event_id, float outcome, api_s
 {
   INIT_CHECK();
   return _pimpl->report_outcome(event_id, outcome, status);
+}
+
+std::vector<int> live_model_slates::c_array_to_vector(const int* c_array, size_t array_size)
+{
+  if (c_array == nullptr) { return {}; }
+  return std::vector<int>(c_array, c_array + array_size);
 }
 }  // namespace reinforcement_learning

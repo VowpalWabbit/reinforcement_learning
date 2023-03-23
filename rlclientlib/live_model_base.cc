@@ -56,13 +56,6 @@ int live_model_base::init(api_status* status)
   return err_code;
 }
 
-std::vector<int> live_model_base::c_array_to_vector(const int* c_array, size_t array_size)
-{
-  if (c_array == nullptr) { return {}; }
-  return std::vector<int>(c_array, c_array + array_size);
-}
-
-// not implemented yet
 int live_model_base::report_action_taken(const char* event_id, api_status* status)
 {
   INIT_CHECK();
@@ -73,6 +66,12 @@ int live_model_base::report_action_taken(const char* primary_id, const char* sec
 {
   INIT_CHECK();
   return _pimpl->report_action_taken(primary_id, secondary_id, status);
+}
+
+int live_model_base::refresh_model(api_status* status)
+{
+  INIT_CHECK();
+  return _pimpl->refresh_model(status);
 }
 
 }  // namespace reinforcement_learning

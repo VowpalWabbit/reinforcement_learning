@@ -97,5 +97,10 @@ public:
    * @return int Return error code.  This will also be returned in the api_status object
    */
   int report_outcome(const char* event_id, float outcome, api_status* status = nullptr);
+
+private:
+  const std::vector<int> default_baseline_vector = std::vector<int>();
+  static std::vector<int> c_array_to_vector(
+      const int* c_array, size_t array_size);  //! Convert baseline_actions from c array to std vector.
 };
 }  // namespace reinforcement_learning
