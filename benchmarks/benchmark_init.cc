@@ -2,7 +2,7 @@
 #include "config_utility.h"
 #include "constants.h"
 #include "err_constants.h"
-#include "live_model.h"
+#include "live_model_cb.h"
 #include "model_mgmt.h"
 
 #include <benchmark/benchmark.h>
@@ -73,7 +73,7 @@ static void bench_init(benchmark::State& state, ExtraArgs&&... extra_args)
   for (auto _ : state)
   {
     r::api_status status;
-    r::live_model model(config);
+    r::live_model_cb model(config);
     model.init(&status);
     if (status.get_error_code() != err::success)
     {
