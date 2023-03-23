@@ -1,6 +1,6 @@
 #pragma once
 
-#include "live_model.h"
+#include "live_model_cb.h"
 #include "ranking_response.h"
 
 #include <fstream>
@@ -24,7 +24,7 @@ public:
 
   bool is_rewarded(size_t thread_id, size_t example_id) const;
 
-  int report_outcome(reinforcement_learning::live_model* rl, size_t thread_id, size_t example_id,
+  int report_outcome(reinforcement_learning::live_model_cb* rl, size_t thread_id, size_t example_id,
       reinforcement_learning::api_status* status) const;
 
 private:

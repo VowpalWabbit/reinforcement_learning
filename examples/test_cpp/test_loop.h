@@ -1,7 +1,9 @@
 #pragma once
 
 #include "experiment_controller.h"
-#include "live_model.h"
+#include "live_model_cb.h"
+#include "live_model_ccb.h"
+#include "live_model_episodic.h"
 #include "test_data_provider.h"
 
 #include <boost/program_options.hpp>
@@ -43,5 +45,7 @@ private:
   test_data_provider test_inputs;
   std::vector<std::unique_ptr<experiment_controller>> controllers;
   std::vector<std::shared_ptr<std::ofstream>> loggers;
-  std::unique_ptr<reinforcement_learning::live_model> rl;
+  std::unique_ptr<reinforcement_learning::live_model_cb> rl_cb;
+  std::unique_ptr<reinforcement_learning::live_model_ccb> rl_ccb;
+  std::unique_ptr<reinforcement_learning::live_model_episodic> rl_episodic;
 };

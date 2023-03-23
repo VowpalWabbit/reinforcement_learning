@@ -203,7 +203,7 @@ int basic_usage_ccb()
   for (const auto& r : response)
   {
     const auto chosen_action = r.get_action_id();
-    if (rl.report_outcome(r.get_slot_id(), "event1", 1.0f, &status) != err::success)
+    if (rl.report_outcome(r.get_slot_id(), "slot_id", 1.0f, &status) != err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
       return -1;
@@ -283,7 +283,7 @@ int basic_usage_multistep()
 
   r::api_status status;
 
-  r::live_model rl(config);
+  r::live_model_episodic rl(config);
 
   if (rl.init(&status) != err::success)
   {
