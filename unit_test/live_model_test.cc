@@ -93,7 +93,7 @@ MODEL_TYPE create_mock_live_model(const u::configuration& config,
 {
   static auto mock_sender = get_mock_sender(r::error_code::success);
   static auto mock_data_transport = get_mock_data_transport();
-  static auto mock_model = get_mock_model(r::model_management::model_type_t::CA);
+  static auto mock_model = get_mock_model(r::model_management::model_type_t::CB);
 
   static auto default_sender_factory = get_mock_sender_factory(mock_sender.get(), mock_sender.get());
   static auto default_data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
