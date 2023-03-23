@@ -59,6 +59,7 @@ set(PROJECT_SOURCES
   generic_event.cc
   learning_mode.cc
   live_model.cc
+  live_model_base.cc
   live_model_ca.cc
   live_model_cb.cc
   live_model_ccb.cc
@@ -130,6 +131,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/future_compat.h
   ../include/internal_constants.h
   ../include/live_model.h
+  ../include/live_model_base.h
   ../include/live_model_ca.h
   ../include/live_model_cb.h
   ../include/live_model_ccb.h
