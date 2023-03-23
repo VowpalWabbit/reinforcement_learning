@@ -13,8 +13,8 @@
 #include "live_model_base.h"
 #include "multi_slot_response.h"
 #include "multi_slot_response_detailed.h"
-#include "sender.h"
 #include "rl_string_view.h"
+#include "sender.h"
 
 #include <functional>
 #include <memory>

@@ -164,8 +164,8 @@ public:
    *                       interaction and the other for observation which logs to Event Hub.
    */
   template <typename ErrCntxt>
-  explicit live_model_base(const utility::configuration& config, error_fn_t<ErrCntxt> fn, ErrCntxt* err_context = nullptr,
-      trace_logger_factory_t* trace_factory = &trace_logger_factory,
+  explicit live_model_base(const utility::configuration& config, error_fn_t<ErrCntxt> fn,
+      ErrCntxt* err_context = nullptr, trace_logger_factory_t* trace_factory = &trace_logger_factory,
       data_transport_factory_t* t_factory = &data_transport_factory, model_factory_t* m_factory = &model_factory,
       sender_factory_t* s_factory = &sender_factory,
       time_provider_factory_t* time_prov_factory = &time_provider_factory);
@@ -180,8 +180,8 @@ public:
    */
   live_model_base& operator=(live_model_base&& other) noexcept;
 
-  live_model_base(
-      const live_model_base&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
+  live_model_base(const live_model_base&) =
+      delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
   live_model_base& operator=(
       live_model_base&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
 
@@ -190,8 +190,8 @@ public:
 protected:
   std::unique_ptr<live_model_impl>
       _pimpl;                 //! The actual implementation details are forwarded to this object (PIMPL pattern)
-  bool _initialized = false;  //! Guard to ensure that live_model_base is properly initialized. i.e. init() was called and
-                              //! successfully initialized.
+  bool _initialized = false;  //! Guard to ensure that live_model_base is properly initialized. i.e. init() was called
+                              //! and successfully initialized.
   const std::vector<int> default_baseline_vector = std::vector<int>();
   static std::vector<int> c_array_to_vector(
       const int* c_array, size_t array_size);  //! Convert baseline_actions from c array to std vector.
