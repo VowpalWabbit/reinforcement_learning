@@ -26,7 +26,7 @@ class live_model_ca : public live_model_base
 {
 public:
   using live_model_base::live_model_base;
-  
+
   /**
    * @brief (DEPRECATED) Choose an action from a continuous range, given a list of context features
    * The inference library chooses an action by sampling the probability density function produced per continuous action

@@ -1,4 +1,5 @@
 #include "live_model_cb.h"
+
 #include "live_model_impl.h"
 
 namespace reinforcement_learning
