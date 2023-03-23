@@ -28,15 +28,6 @@ live_model_base::live_model_base(live_model_base&& other) noexcept
   _initialized = other._initialized;
 }
 
-template <typename ErrCntxt>
-live_model_base::live_model_base(const utility::configuration& config, error_fn_t<ErrCntxt> fn, ErrCntxt* err_context,
-    trace_logger_factory_t* trace_factory, data_transport_factory_t* t_factory, model_factory_t* m_factory,
-    sender_factory_t* s_factory, time_provider_factory_t* time_prov_factory)
-    : live_model_base(config, std::bind(fn, std::placeholders::_1, err_context), trace_factory, t_factory, m_factory,
-          s_factory, time_prov_factory)
-{
-}
-
 live_model_base::~live_model_base() = default;
 
 live_model_base& live_model_base::operator=(live_model_base&& other) noexcept
