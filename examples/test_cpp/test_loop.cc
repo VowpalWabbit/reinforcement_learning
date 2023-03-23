@@ -328,7 +328,8 @@ void test_loop::multistep_loop(size_t thread_id) const
       previous_event_id = "";
     }
 
-    if (rl_episodic->request_episodic_decision(event_id.c_str(), previous_event_id.empty() ? nullptr : previous_event_id.c_str(),
+    if (rl_episodic->request_episodic_decision(event_id.c_str(),
+            previous_event_id.empty() ? nullptr : previous_event_id.c_str(),
             test_inputs.get_context(thread_id, example_id), response, *current_episode, &status) != err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
@@ -338,7 +339,8 @@ void test_loop::multistep_loop(size_t thread_id) const
     if (test_inputs.is_rewarded(thread_id, example_id))
     {
       float reward = test_inputs.get_outcome(thread_id, example_id);
-      if (rl_episodic->report_outcome(current_episode->get_episode_id(), event_id.c_str(), reward, &status) != err::success)
+      if (rl_episodic->report_outcome(current_episode->get_episode_id(), event_id.c_str(), reward, &status) !=
+          err::success)
       {
         std::cout << status.get_error_msg() << std::endl;
         continue;
