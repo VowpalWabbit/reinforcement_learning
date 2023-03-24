@@ -1,7 +1,7 @@
 /**
  * @brief RL Inference API definition.
  *
- * @file live_model_episodic.h
+ * @file episodic_loop.h
  * @author Rajan Chari et al
  * @date 2018-07-18
  */
@@ -10,7 +10,7 @@
 #include "err_constants.h"
 #include "factory_resolver.h"
 #include "future_compat.h"
-#include "live_model_base.h"
+#include "base_loop.h"
 #include "multistep.h"
 #include "rl_string_view.h"
 #include "sender.h"
@@ -20,10 +20,10 @@
 
 namespace reinforcement_learning
 {
-class live_model_episodic : public live_model_base
+class episodic_loop : public base_loop
 {
 public:
-  using live_model_base::live_model_base;
+  using base_loop::base_loop;
 
   // multistep
   int request_episodic_decision(const char* event_id, const char* previous_id, string_view context_json,

@@ -1,7 +1,7 @@
 /**
  * @brief RL Inference API definition.
  *
- * @file live_model_base.h
+ * @file base_loop.h
  * @author Rajan Chari et al
  * @date 2018-07-18
  */
@@ -49,12 +49,12 @@ class configuration;  //
  * - (2) choose_rank() to choose an action from a list of actions
  * - (3) report_outcome() to provide feedback on chosen action
  */
-class live_model_base
+class base_loop
 {
 public:
   /**
    * @brief Error callback function.
-   * When live_model_base is constructed, a background error callback and a
+   * When base_loop is constructed, a background error callback and a
    * context (void*) is registered. If there is an error in the background thread,
    * error callback will get invoked with api_status and the context (void*).
    *
@@ -75,7 +75,7 @@ public:
    * @param sender_factory Sender factory.  The default factory provides two senders, one for
    *                       interaction and the other for observation which logs to Event Hub.
    */
-  explicit live_model_base(const utility::configuration& config, error_fn fn = nullptr, void* err_context = nullptr,
+  explicit base_loop(const utility::configuration& config, error_fn fn = nullptr, void* err_context = nullptr,
       trace_logger_factory_t* trace_factory = &trace_logger_factory,
       data_transport_factory_t* t_factory = &data_transport_factory, model_factory_t* m_factory = &model_factory,
       sender_factory_t* s_factory = &sender_factory,
@@ -93,7 +93,7 @@ public:
    * @param sender_factory Sender factory.  The default factory provides two senders, one for
    *                       interaction and the other for observation which logs to Event Hub.
    */
-  explicit live_model_base(const utility::configuration& config, std::function<void(const api_status&)> error_cb,
+  explicit base_loop(const utility::configuration& config, std::function<void(const api_status&)> error_cb,
       trace_logger_factory_t* trace_factory = &trace_logger_factory,
       data_transport_factory_t* t_factory = &data_transport_factory, model_factory_t* m_factory = &model_factory,
       sender_factory_t* s_factory = &sender_factory,
@@ -138,7 +138,7 @@ public:
 
   /**
    * @brief Error callback function.
-   * When live_model_base is constructed, a background error callback and a
+   * When base_loop is constructed, a background error callback and a
    * context (void*) is registered. If there is an error in the background thread,
    * error callback will get invoked with api_status and the context (void*).
    * This error callback is typed by the context used in the callback.
@@ -164,7 +164,7 @@ public:
    *                       interaction and the other for observation which logs to Event Hub.
    */
   template <typename ErrCntxt>
-  explicit live_model_base(const utility::configuration& config, error_fn_t<ErrCntxt> fn,
+  explicit base_loop(const utility::configuration& config, error_fn_t<ErrCntxt> fn,
       ErrCntxt* err_context = nullptr, trace_logger_factory_t* trace_factory = &trace_logger_factory,
       data_transport_factory_t* t_factory = &data_transport_factory, model_factory_t* m_factory = &model_factory,
       sender_factory_t* s_factory = &sender_factory,
@@ -173,32 +173,32 @@ public:
   /**
    * @brief Move constructor for live model object.
    */
-  live_model_base(live_model_base&& other) noexcept;
+  base_loop(base_loop&& other) noexcept;
 
   /**
    * @brief Move assignment operator swaps implementation.
    */
-  live_model_base& operator=(live_model_base&& other) noexcept;
+  base_loop& operator=(base_loop&& other) noexcept;
 
-  live_model_base(const live_model_base&) =
+  base_loop(const base_loop&) =
       delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
-  live_model_base& operator=(
-      live_model_base&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
+  base_loop& operator=(
+      base_loop&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
 
-  ~live_model_base();
+  ~base_loop();
 
 protected:
   std::unique_ptr<live_model_impl>
       _pimpl;                 //! The actual implementation details are forwarded to this object (PIMPL pattern)
-  bool _initialized = false;  //! Guard to ensure that live_model_base is properly initialized. i.e. init() was called
+  bool _initialized = false;  //! Guard to ensure that base_loop is properly initialized. i.e. init() was called
                               //! and successfully initialized.
 };
 
 template <typename ErrCntxt>
-live_model_base::live_model_base(const utility::configuration& config, error_fn_t<ErrCntxt> fn, ErrCntxt* err_context,
+base_loop::base_loop(const utility::configuration& config, error_fn_t<ErrCntxt> fn, ErrCntxt* err_context,
     trace_logger_factory_t* trace_factory, data_transport_factory_t* t_factory, model_factory_t* m_factory,
     sender_factory_t* s_factory, time_provider_factory_t* time_prov_factory)
-    : live_model_base(config, std::bind(fn, std::placeholders::_1, err_context), trace_factory, t_factory, m_factory,
+    : base_loop(config, std::bind(fn, std::placeholders::_1, err_context), trace_factory, t_factory, m_factory,
           s_factory, time_prov_factory)
 {
 }

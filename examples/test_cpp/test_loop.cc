@@ -50,21 +50,21 @@ bool test_loop::init()
     return false;
   }
 
-  rl_cb = std::unique_ptr<r::live_model_cb>(new r::live_model_cb(config, _on_error, nullptr));
+  rl_cb = std::unique_ptr<r::cb_loop>(new r::cb_loop(config, _on_error, nullptr));
   if (rl_cb->init(&status) != err::success)
   {
     std::cout << status.get_error_msg() << std::endl;
     return false;
   }
 
-  rl_ccb = std::unique_ptr<r::live_model_ccb>(new r::live_model_ccb(config, _on_error, nullptr));
+  rl_ccb = std::unique_ptr<r::ccb_loop>(new r::ccb_loop(config, _on_error, nullptr));
   if (rl_ccb->init(&status) != err::success)
   {
     std::cout << status.get_error_msg() << std::endl;
     return false;
   }
 
-  rl_episodic = std::unique_ptr<r::live_model_episodic>(new r::live_model_episodic(config, _on_error, nullptr));
+  rl_episodic = std::unique_ptr<r::episodic_loop>(new r::episodic_loop(config, _on_error, nullptr));
   if (rl_episodic->init(&status) != err::success)
   {
     std::cout << status.get_error_msg() << std::endl;

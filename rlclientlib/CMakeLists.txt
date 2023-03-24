@@ -59,12 +59,12 @@ set(PROJECT_SOURCES
   generic_event.cc
   learning_mode.cc
   live_model.cc
-  live_model_base.cc
-  live_model_ca.cc
-  live_model_cb.cc
-  live_model_ccb.cc
-  live_model_episodic.cc
-  live_model_slates.cc
+  base_loop.cc
+  ca_loop.cc
+  cb_loop.cc
+  ccb_loop.cc
+  episodic_loop.cc
+  slates_loop.cc
   live_model_impl.cc
   logger/endian.cc
   logger/event_logger.cc
@@ -131,12 +131,12 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/future_compat.h
   ../include/internal_constants.h
   ../include/live_model.h
-  ../include/live_model_base.h
-  ../include/live_model_ca.h
-  ../include/live_model_cb.h
-  ../include/live_model_ccb.h
-  ../include/live_model_episodic.h
-  ../include/live_model_slates.h
+  ../include/base_loop.h
+  ../include/ca_loop.h
+  ../include/cb_loop.h
+  ../include/ccb_loop.h
+  ../include/episodic_loop.h
+  ../include/slates_loop.h
   ../include/model_mgmt.h
   ../include/multi_slot_response.h
   ../include/multi_slot_response_detailed.h

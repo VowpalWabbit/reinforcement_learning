@@ -10,11 +10,11 @@
 #include "constants.h"
 #include "err_constants.h"
 #include "factory_resolver.h"
-#include "live_model_ca.h"
-#include "live_model_cb.h"
-#include "live_model_ccb.h"
-#include "live_model_episodic.h"
-#include "live_model_slates.h"
+#include "ca_loop.h"
+#include "cb_loop.h"
+#include "ccb_loop.h"
+#include "episodic_loop.h"
+#include "slates_loop.h"
 #include "mock_util.h"
 #include "model_mgmt.h"
 #include "ranking_response.h"
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(schema_v1_with_bad_use_dedup)
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::INTERACTION_USE_DEDUP, "true");
   r::api_status status;
-  r::live_model_cb ds = create_mock_live_model<r::live_model_cb>(config, nullptr, nullptr, nullptr);
+  r::cb_loop ds = create_mock_live_model<r::cb_loop>(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::content_encoding_error);
 }
 
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(schema_v1_with_use_compression)
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::INTERACTION_USE_COMPRESSION, "true");
   r::api_status status;
-  r::live_model_cb ds = create_mock_live_model<r::live_model_cb>(config, nullptr, nullptr, nullptr);
+  r::cb_loop ds = create_mock_live_model<r::cb_loop>(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::content_encoding_error);
 }
 
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(schema_v1_with_bad_compression_observations)
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::OBSERVATION_USE_COMPRESSION, "true");
   r::api_status status;
-  r::live_model_cb ds = create_mock_live_model<r::live_model_cb>(config, nullptr, nullptr, nullptr);
+  r::cb_loop ds = create_mock_live_model<r::cb_loop>(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::content_encoding_error);
 }
 
@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(schema_v1_with_global_use_compression)
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::USE_COMPRESSION, "true");
   r::api_status status;
-  r::live_model_cb ds = create_mock_live_model<r::live_model_cb>(config, nullptr, nullptr, nullptr);
+  r::cb_loop ds = create_mock_live_model<r::cb_loop>(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::content_encoding_error);
 }
 
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(schema_v1_with_global_use_dedup)
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::USE_DEDUP, "true");
   r::api_status status;
-  r::live_model_cb ds = create_mock_live_model<r::live_model_cb>(config, nullptr, nullptr, nullptr);
+  r::cb_loop ds = create_mock_live_model<r::cb_loop>(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::content_encoding_error);
 }
 
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(schema_v2_with_zstd_and_dedup_content_encoding)
   config.set(r::name::INTERACTION_USE_COMPRESSION, "true");
   config.set(r::name::INTERACTION_USE_DEDUP, "true");
   r::api_status status;
-  r::live_model_cb ds = create_mock_live_model<r::live_model_cb>(config, nullptr, nullptr, nullptr);
+  r::cb_loop ds = create_mock_live_model<r::cb_loop>(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 }
 
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request)
   r::api_status status;
 
   // create the ds live_model, and initialize it with the config
-  r::live_model_cb ds = create_mock_live_model<r::live_model_cb>(config, nullptr, nullptr, nullptr);
+  r::cb_loop ds = create_mock_live_model<r::cb_loop>(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto event_id = "event_id";
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_online_mode)
   r::api_status status;
 
   // create the ds live_model, and initialize it with the config
-  r::live_model_cb ds = create_mock_live_model<r::live_model_cb>(config, nullptr, nullptr, nullptr);
+  r::cb_loop ds = create_mock_live_model<r::cb_loop>(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto event_id = "event_id";
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_apprentice_mode)
   r::api_status status;
 
   // create the ds live_model, and initialize it with the config
-  r::live_model_cb ds = create_mock_live_model<r::live_model_cb>(config, nullptr, nullptr, nullptr);
+  r::cb_loop ds = create_mock_live_model<r::cb_loop>(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto event_id = "event_id";
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_loggingonly_mode)
   r::api_status status;
 
   // create the ds live_model, and initialize it with the config
-  r::live_model_cb ds = create_mock_live_model<r::live_model_cb>(config, nullptr, nullptr, nullptr);
+  r::cb_loop ds = create_mock_live_model<r::cb_loop>(config, nullptr, nullptr, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   const auto event_id = "event_id";
@@ -321,8 +321,8 @@ BOOST_AUTO_TEST_CASE(live_model_request_continuous_action)
 
   r::api_status status;
 
-  r::live_model_ca ds =
-      create_mock_live_model<r::live_model_ca>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::ca_loop ds =
+      create_mock_live_model<r::ca_loop>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::continuous_action_response response;
@@ -362,8 +362,8 @@ BOOST_AUTO_TEST_CASE(live_model_request_continuous_action_invalid_ctx)
 
   r::api_status status;
 
-  r::live_model_ca ds =
-      create_mock_live_model<r::live_model_ca>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::ca_loop ds =
+      create_mock_live_model<r::ca_loop>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::continuous_action_response response;
@@ -388,8 +388,8 @@ BOOST_AUTO_TEST_CASE(live_model_request_decision)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_ccb ds =
-      create_mock_live_model<r::live_model_ccb>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::ccb_loop ds =
+      create_mock_live_model<r::ccb_loop>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::decision_response response;
@@ -446,7 +446,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_check_response_pdf_explore_only)
   r::api_status status;
 
   // create the ds live_model, and initialize it with the config
-  r::live_model_cb model(config);
+  r::cb_loop model(config);
 
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
   const auto event_id = "event_id";
@@ -489,7 +489,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_w_las_request_check_response_pdf_explore
   r::api_status status;
 
   // create the ds live_model, and initialize it with the config
-  r::live_model_cb model(config);
+  r::cb_loop model(config);
 
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
   const auto event_id = "event_id";
@@ -534,8 +534,8 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough)
 
   // create the ds live_model, and initialize it with the config
 
-  r::live_model_cb model =
-      create_mock_live_model<r::live_model_cb>(config, &r::data_transport_factory, &r::model_factory, nullptr);
+  r::cb_loop model =
+      create_mock_live_model<r::cb_loop>(config, &r::data_transport_factory, &r::model_factory, nullptr);
 
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
   const auto event_id = "event_id";
@@ -576,8 +576,8 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough_underscore_p)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_cb model =
-      create_mock_live_model<r::live_model_cb>(config, &r::data_transport_factory, &r::model_factory, nullptr);
+  r::cb_loop model =
+      create_mock_live_model<r::cb_loop>(config, &r::data_transport_factory, &r::model_factory, nullptr);
 
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
   const auto event_id = "event_id";
@@ -611,7 +611,7 @@ BOOST_AUTO_TEST_CASE(live_model_outcome)
   config.set(r::name::EH_TEST, "true");
 
   // create a ds live_model, and initialize with configuration
-  r::live_model_cb ds = create_mock_live_model<r::live_model_cb>(config, nullptr, nullptr, nullptr);
+  r::cb_loop ds = create_mock_live_model<r::cb_loop>(config, nullptr, nullptr, nullptr);
 
   // check api_status content when errors are returned
   r::api_status status;
@@ -660,7 +660,7 @@ BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v1)
   auto model_factory = get_mock_model_factory(mock_model.get());
 
   // create a ds live_model, and initialize with configuration
-  r::live_model_ccb ds = create_mock_live_model<r::live_model_ccb>(config, nullptr, model_factory.get(), nullptr);
+  r::ccb_loop ds = create_mock_live_model<r::ccb_loop>(config, nullptr, model_factory.get(), nullptr);
 
   // check api_status content when errors are returned
   r::api_status status;
@@ -691,7 +691,7 @@ BOOST_AUTO_TEST_CASE(live_model_outcome_with_secondary_id_and_v2)
   auto model_factory = get_mock_model_factory(mock_model.get());
 
   // create a ds live_model, and initialize with configuration
-  r::live_model_ccb ds = create_mock_live_model<r::live_model_ccb>(config, nullptr, model_factory.get(), nullptr);
+  r::ccb_loop ds = create_mock_live_model<r::ccb_loop>(config, nullptr, model_factory.get(), nullptr);
 
   // check api_status content when errors are returned
   r::api_status status;
@@ -764,7 +764,7 @@ BOOST_AUTO_TEST_CASE(typesafe_err_callback)
   // Create live_model in own scope so that destructor can be forced, flushing buffers and queues.
   {
     // create a ds live_model, and initialize with configuration
-    r::live_model_cb ds(config, algo_error_func, &the_server, &r::trace_logger_factory, data_transport_factory.get(),
+    r::cb_loop ds(config, algo_error_func, &the_server, &r::trace_logger_factory, data_transport_factory.get(),
         model_factory.get(), sender_factory.get());
 
     ds.init(nullptr);
@@ -795,7 +795,7 @@ BOOST_AUTO_TEST_CASE(live_model_mocks)
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::EH_TEST, "true");
   {
-    r::live_model_cb model = create_mock_live_model<r::live_model_cb>(
+    r::cb_loop model = create_mock_live_model<r::cb_loop>(
         config, data_transport_factory.get(), model_factory.get(), sender_factory.get());
 
     r::api_status status;
@@ -819,7 +819,7 @@ BOOST_AUTO_TEST_CASE(live_model_background_refresh)
 
   config.set(r::name::EH_TEST, "true");
 
-  r::live_model_cb model = create_mock_live_model<r::live_model_cb>(config, nullptr, nullptr, nullptr);
+  r::cb_loop model = create_mock_live_model<r::cb_loop>(config, nullptr, nullptr, nullptr);
 
   r::api_status status;
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
@@ -834,7 +834,7 @@ BOOST_AUTO_TEST_CASE(live_model_no_background_refresh)
   config.set(r::name::EH_TEST, "true");
   config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
 
-  r::live_model_cb model = create_mock_live_model<r::live_model_cb>(config, nullptr, nullptr, nullptr);
+  r::cb_loop model = create_mock_live_model<r::cb_loop>(config, nullptr, nullptr, nullptr);
 
   r::api_status status;
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
@@ -852,7 +852,7 @@ BOOST_AUTO_TEST_CASE(live_model_no_background_refresh_failure)
   auto mock_data_transport = get_mock_failing_data_transport();
   auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
 
-  r::live_model_cb model = create_mock_live_model<r::live_model_cb>(config, data_transport_factory.get());
+  r::cb_loop model = create_mock_live_model<r::cb_loop>(config, data_transport_factory.get());
 
   r::api_status status;
   BOOST_CHECK_NE(model.init(&status), err::success);
@@ -894,7 +894,7 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data)
   std::string expected_interactions;
   std::string expected_observations;
   {
-    r::live_model_cb model = create_mock_live_model<r::live_model_cb>(
+    r::cb_loop model = create_mock_live_model<r::cb_loop>(
         config, data_transport_factory.get(), model_factory.get(), logger_factory.get());
 
     r::api_status status;
@@ -1082,7 +1082,7 @@ BOOST_AUTO_TEST_CASE(ccb_explore_only_mode)
       r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
-  r::live_model_ccb model(config);
+  r::ccb_loop model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::decision_response response;
@@ -1123,7 +1123,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response)
       r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
-  r::live_model_ccb model(config);
+  r::ccb_loop model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1164,7 +1164,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_apprentice_mode_no_baseline)
   config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_APPRENTICE);
 
   r::api_status status;
-  r::live_model_ccb model(config);
+  r::ccb_loop model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1189,7 +1189,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_apprentice_mode_with_baseline)
   config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_APPRENTICE);
 
   r::api_status status;
-  r::live_model_ccb model(config);
+  r::ccb_loop model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1235,7 +1235,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_logging_only_with_baseline)
   config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_LOGGINGONLY);
 
   r::api_status status;
-  r::live_model_ccb model(config);
+  r::ccb_loop model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1282,7 +1282,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_logging_only_no_baseline)
   config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_LOGGINGONLY);
 
   r::api_status status;
-  r::live_model_ccb model(config);
+  r::ccb_loop model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1326,7 +1326,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_with_baseline_null_eventId)
       r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
-  r::live_model_ccb model(config);
+  r::ccb_loop model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1369,7 +1369,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_with_baseline_custom_eventId)
       r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
-  r::live_model_ccb model(config);
+  r::ccb_loop model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1413,7 +1413,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed)
       r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
-  r::live_model_ccb model(config);
+  r::ccb_loop model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
@@ -1455,7 +1455,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_apprentice_mode_no_baseline)
   config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_APPRENTICE);
 
   r::api_status status;
-  r::live_model_ccb model(config);
+  r::ccb_loop model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
@@ -1480,7 +1480,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_apprentice_mode_with_baseline)
   config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_APPRENTICE);
 
   r::api_status status;
-  r::live_model_ccb model(config);
+  r::ccb_loop model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
@@ -1526,7 +1526,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_logging_only_with_baseline)
   config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_LOGGINGONLY);
 
   r::api_status status;
-  r::live_model_ccb model(config);
+  r::ccb_loop model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
@@ -1571,7 +1571,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_logging_only_no_baseline)
   config.set(r::name::LEARNING_MODE, r::value::LEARNING_MODE_LOGGINGONLY);
 
   r::api_status status;
-  r::live_model_ccb model(config);
+  r::ccb_loop model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
@@ -1615,7 +1615,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_with_baseline_null_eventid)
       r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
-  r::live_model_ccb model(config);
+  r::ccb_loop model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
@@ -1659,7 +1659,7 @@ BOOST_AUTO_TEST_CASE(multi_slot_response_detailed_with_baseline_custom_eventid)
       r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
-  r::live_model_ccb model(config);
+  r::ccb_loop model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response_detailed response;
@@ -1706,7 +1706,7 @@ BOOST_AUTO_TEST_CASE(slates_explore_only_mode)
       "--slates --ccb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A");
 
   r::api_status status;
-  r::live_model_slates model(config);
+  r::slates_loop model(config);
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1736,7 +1736,7 @@ BOOST_AUTO_TEST_CASE(slates_explore_only_mode)
   BOOST_CHECK(it == response.end());
 }
 
-BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2)
+BOOST_AUTO_TEST_CASE(ccb_loop_and_v2)
 {
   // create a simple ds configuration
   u::configuration config;
@@ -1748,8 +1748,8 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_ccb ds =
-      create_mock_live_model<r::live_model_ccb>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::ccb_loop ds =
+      create_mock_live_model<r::ccb_loop>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response slates_response;
@@ -1762,8 +1762,8 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2)
   RL_IGNORE_DEPRECATED_USAGE_END
 
   config.set(r::name::PROTOCOL_VERSION, "2");
-  r::live_model_ccb ds2 =
-      create_mock_live_model<r::live_model_ccb>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::ccb_loop ds2 =
+      create_mock_live_model<r::ccb_loop>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds2.init(&status), err::success);
 
   // slates API work for ccb with v2
@@ -1779,7 +1779,7 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2)
   RL_IGNORE_DEPRECATED_USAGE_END
 }
 
-BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids)
+BOOST_AUTO_TEST_CASE(ccb_loop_and_v2_w_slot_ids)
 {
   // create a simple ds configuration
   u::configuration config;
@@ -1792,8 +1792,8 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_ccb ds =
-      create_mock_live_model<r::live_model_ccb>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::ccb_loop ds =
+      create_mock_live_model<r::ccb_loop>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1817,7 +1817,7 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids)
   BOOST_CHECK(it == response.end());
 }
 
-BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids_and_slot_ns)
+BOOST_AUTO_TEST_CASE(ccb_loop_and_v2_w_slot_ids_and_slot_ns)
 {
   // create a simple ds configuration
   u::configuration config;
@@ -1830,8 +1830,8 @@ BOOST_AUTO_TEST_CASE(live_model_ccb_and_v2_w_slot_ids_and_slot_ns)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_ccb ds =
-      create_mock_live_model<r::live_model_ccb>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::ccb_loop ds =
+      create_mock_live_model<r::ccb_loop>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1872,7 +1872,7 @@ struct AuditCleanup
   std::string event_id;
 };
 
-BOOST_FIXTURE_TEST_CASE(live_model_ccb_and_v2_w_audit, AuditCleanup)
+BOOST_FIXTURE_TEST_CASE(ccb_loop_and_v2_w_audit, AuditCleanup)
 {
   // create a simple ds configuration
   u::configuration config;
@@ -1887,8 +1887,8 @@ BOOST_FIXTURE_TEST_CASE(live_model_ccb_and_v2_w_audit, AuditCleanup)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_ccb ds =
-      create_mock_live_model<r::live_model_ccb>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::ccb_loop ds =
+      create_mock_live_model<r::ccb_loop>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1908,7 +1908,7 @@ BOOST_FIXTURE_TEST_CASE(live_model_ccb_and_v2_w_audit, AuditCleanup)
   BOOST_CHECK(audit_file.is_open());
 }
 
-BOOST_FIXTURE_TEST_CASE(live_model_ccb_and_v2_w_audit_bad_path, AuditCleanup)
+BOOST_FIXTURE_TEST_CASE(ccb_loop_and_v2_w_audit_bad_path, AuditCleanup)
 {
   // create a simple ds configuration
   u::configuration config;
@@ -1923,8 +1923,8 @@ BOOST_FIXTURE_TEST_CASE(live_model_ccb_and_v2_w_audit_bad_path, AuditCleanup)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::live_model_ccb ds =
-      create_mock_live_model<r::live_model_ccb>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::ccb_loop ds =
+      create_mock_live_model<r::ccb_loop>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::multi_slot_response response;
@@ -1950,8 +1950,8 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_uri)
   config.set("http.api.key", "Bearer apiKey1234");
   config.set("http.api.header.key.name", "Authorization");
   r::api_status status;
-  std::unique_ptr<reinforcement_learning::live_model_cb> _rl =
-      std::unique_ptr<r::live_model_cb>(new r::live_model_cb(config, nullptr));
+  std::unique_ptr<reinforcement_learning::cb_loop> _rl =
+      std::unique_ptr<r::cb_loop>(new r::cb_loop(config, nullptr));
 
   BOOST_CHECK_EQUAL(_rl->init(&status), r::error_code::http_model_uri_not_provided);
 }
@@ -1963,8 +1963,8 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_success)
   config.set("http.api.key", "apiKey1234");
   config.set("model.blob.uri", "http://localhost:8080/personalizer/v1.1-preview.1/model");
   r::api_status status;
-  std::unique_ptr<reinforcement_learning::live_model_cb> _rl =
-      std::unique_ptr<r::live_model_cb>(new r::live_model_cb(config, nullptr));
+  std::unique_ptr<reinforcement_learning::cb_loop> _rl =
+      std::unique_ptr<r::cb_loop>(new r::cb_loop(config, nullptr));
 
   BOOST_CHECK_EQUAL(_rl->init(&status), err::success);
 }
@@ -1975,8 +1975,8 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_apikey)
   cfg::create_from_json(JSON_CFG_API, config);
   config.set("model.blob.uri", "http://localhost:8080/personalizer/v1.1-preview.1/model");
   r::api_status status;
-  std::unique_ptr<reinforcement_learning::live_model_cb> _rl =
-      std::unique_ptr<r::live_model_cb>(new r::live_model_cb(config, nullptr));
+  std::unique_ptr<reinforcement_learning::cb_loop> _rl =
+      std::unique_ptr<r::cb_loop>(new r::cb_loop(config, nullptr));
 
   BOOST_CHECK_EQUAL(_rl->init(&status), r::error_code::http_api_key_not_provided);
 }

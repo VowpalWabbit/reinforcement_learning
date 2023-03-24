@@ -8,11 +8,11 @@
 #pragma once
 
 #include "config_utility.h"
-#include "live_model_ca.h"
-#include "live_model_cb.h"
-#include "live_model_ccb.h"
-#include "live_model_episodic.h"
-#include "live_model_slates.h"
+#include "ca_loop.h"
+#include "cb_loop.h"
+#include "ccb_loop.h"
+#include "episodic_loop.h"
+#include "slates_loop.h"
 
 #include <fstream>
 #include <iostream>

@@ -1,7 +1,7 @@
 /**
  * @brief RL Inference API definition.
  *
- * @file live_model_ca.h
+ * @file ca_loop.h
  * @author Rajan Chari et al
  * @date 2018-07-18
  */
@@ -11,7 +11,7 @@
 #include "err_constants.h"
 #include "factory_resolver.h"
 #include "future_compat.h"
-#include "live_model_base.h"
+#include "base_loop.h"
 #include "multi_slot_response.h"
 #include "multi_slot_response_detailed.h"
 #include "rl_string_view.h"
@@ -22,10 +22,10 @@
 
 namespace reinforcement_learning
 {
-class live_model_ca : public live_model_base
+class ca_loop : public base_loop
 {
 public:
-  using live_model_base::live_model_base;
+  using base_loop::base_loop;
 
   /**
    * @brief (DEPRECATED) Choose an action from a continuous range, given a list of context features

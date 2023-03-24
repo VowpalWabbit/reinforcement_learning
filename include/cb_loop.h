@@ -1,7 +1,7 @@
 /**
  * @brief RL Inference API definition.
  *
- * @file live_model_cb.h
+ * @file cb_loop.h
  * @author Rajan Chari et al
  * @date 2018-07-18
  */
@@ -10,7 +10,7 @@
 #include "err_constants.h"
 #include "factory_resolver.h"
 #include "future_compat.h"
-#include "live_model_base.h"
+#include "base_loop.h"
 #include "ranking_response.h"
 #include "rl_string_view.h"
 #include "sender.h"
@@ -20,10 +20,10 @@
 
 namespace reinforcement_learning
 {
-class live_model_cb : public live_model_base
+class cb_loop : public base_loop
 {
 public:
-  using live_model_base::live_model_base;
+  using base_loop::base_loop;
 
   /**
    * @brief Choose an action, given a list of actions, action features and context features. The

@@ -170,7 +170,7 @@ bool test_data_provider::is_rewarded(size_t thread_id, size_t example_id) const
   return reward_period > 0 && example_id % reward_period == 0;
 }
 
-int test_data_provider::report_outcome(reinforcement_learning::live_model_cb* rl, size_t thread_id, size_t example_id,
+int test_data_provider::report_outcome(reinforcement_learning::cb_loop* rl, size_t thread_id, size_t example_id,
     reinforcement_learning::api_status* status) const
 {
   const auto event_id = create_event_id(thread_id, example_id);

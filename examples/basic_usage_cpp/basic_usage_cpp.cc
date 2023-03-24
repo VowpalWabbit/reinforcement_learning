@@ -44,7 +44,7 @@ int basic_usage_cb()
   r::api_status status;
 
   //! [(1) Instantiate Inference API using config]
-  r::live_model_cb rl(config);
+  r::cb_loop rl(config);
   //! [(1) Instantiate Inference API using config]
 
   //! [(2) Initialize the API]
@@ -111,7 +111,7 @@ int basic_usage_ca()
   r::api_status status;
 
   //! [(1) Instantiate Inference API using config]
-  r::live_model_ca rl(config);
+  r::ca_loop rl(config);
   //! [(1) Instantiate Inference API using config]
 
   //! [(2) Initialize the API]
@@ -175,7 +175,7 @@ int basic_usage_ccb()
   r::api_status status;
 
   //! [(1) Instantiate Inference API using config]
-  r::live_model_ccb rl(config);
+  r::ccb_loop rl(config);
   //! [(1) Instantiate Inference API using config]
 
   //! [(2) Initialize the API]
@@ -233,7 +233,7 @@ int basic_usage_slates()
   r::api_status status;
 
   //! [(1) Instantiate Inference API using config]
-  r::live_model_slates rl(config);
+  r::slates_loop rl(config);
   //! [(1) Instantiate Inference API using config]
 
   //! [(2) Initialize the API]
@@ -283,7 +283,7 @@ int basic_usage_multistep()
 
   r::api_status status;
 
-  r::live_model_episodic rl(config);
+  r::episodic_loop rl(config);
 
   if (rl.init(&status) != err::success)
   {
