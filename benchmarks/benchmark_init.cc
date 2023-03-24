@@ -1,8 +1,8 @@
 #include "benchmark_common.h"
+#include "cb_loop.h"
 #include "config_utility.h"
 #include "constants.h"
 #include "err_constants.h"
-#include "cb_loop.h"
 #include "model_mgmt.h"
 
 #include <benchmark/benchmark.h>

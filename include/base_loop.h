@@ -164,8 +164,8 @@ public:
    *                       interaction and the other for observation which logs to Event Hub.
    */
   template <typename ErrCntxt>
-  explicit base_loop(const utility::configuration& config, error_fn_t<ErrCntxt> fn,
-      ErrCntxt* err_context = nullptr, trace_logger_factory_t* trace_factory = &trace_logger_factory,
+  explicit base_loop(const utility::configuration& config, error_fn_t<ErrCntxt> fn, ErrCntxt* err_context = nullptr,
+      trace_logger_factory_t* trace_factory = &trace_logger_factory,
       data_transport_factory_t* t_factory = &data_transport_factory, model_factory_t* m_factory = &model_factory,
       sender_factory_t* s_factory = &sender_factory,
       time_provider_factory_t* time_prov_factory = &time_provider_factory);
@@ -180,8 +180,8 @@ public:
    */
   base_loop& operator=(base_loop&& other) noexcept;
 
-  base_loop(const base_loop&) =
-      delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
+  base_loop(
+      const base_loop&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
   base_loop& operator=(
       base_loop&) = delete;  //! Prevent accidental copy, since destructor will deallocate the implementation
 

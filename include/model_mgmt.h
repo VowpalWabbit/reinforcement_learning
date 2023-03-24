@@ -61,7 +61,8 @@ enum class model_type_t
   CB,
   CCB,
   SLATES,
-  CA
+  CA,
+  EPISODIC
 };
 
 enum class model_source

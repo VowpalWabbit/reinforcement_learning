@@ -6,20 +6,20 @@
 #include <boost/test/unit_test.hpp>
 
 #include "api_status.h"
-#include "config_utility.h"
-#include "constants.h"
-#include "err_constants.h"
-#include "factory_resolver.h"
 #include "ca_loop.h"
 #include "cb_loop.h"
 #include "ccb_loop.h"
+#include "config_utility.h"
+#include "constants.h"
 #include "episodic_loop.h"
-#include "slates_loop.h"
+#include "err_constants.h"
+#include "factory_resolver.h"
 #include "mock_util.h"
 #include "model_mgmt.h"
 #include "ranking_response.h"
 #include "sampling.h"
 #include "sender.h"
+#include "slates_loop.h"
 #include "str_util.h"
 
 #include <fstream>
@@ -321,8 +321,7 @@ BOOST_AUTO_TEST_CASE(live_model_request_continuous_action)
 
   r::api_status status;
 
-  r::ca_loop ds =
-      create_mock_live_model<r::ca_loop>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::ca_loop ds = create_mock_live_model<r::ca_loop>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::continuous_action_response response;
@@ -362,8 +361,7 @@ BOOST_AUTO_TEST_CASE(live_model_request_continuous_action_invalid_ctx)
 
   r::api_status status;
 
-  r::ca_loop ds =
-      create_mock_live_model<r::ca_loop>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
+  r::ca_loop ds = create_mock_live_model<r::ca_loop>(config, nullptr, &reinforcement_learning::model_factory, nullptr);
   BOOST_CHECK_EQUAL(ds.init(&status), err::success);
 
   r::continuous_action_response response;
@@ -534,8 +532,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough)
 
   // create the ds live_model, and initialize it with the config
 
-  r::cb_loop model =
-      create_mock_live_model<r::cb_loop>(config, &r::data_transport_factory, &r::model_factory, nullptr);
+  r::cb_loop model = create_mock_live_model<r::cb_loop>(config, &r::data_transport_factory, &r::model_factory, nullptr);
 
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
   const auto event_id = "event_id";
@@ -576,8 +573,7 @@ BOOST_AUTO_TEST_CASE(live_model_ranking_request_pdf_passthrough_underscore_p)
   r::api_status status;
 
   // Create the ds live_model, and initialize it with the config
-  r::cb_loop model =
-      create_mock_live_model<r::cb_loop>(config, &r::data_transport_factory, &r::model_factory, nullptr);
+  r::cb_loop model = create_mock_live_model<r::cb_loop>(config, &r::data_transport_factory, &r::model_factory, nullptr);
 
   BOOST_CHECK_EQUAL(model.init(&status), err::success);
   const auto event_id = "event_id";
@@ -1950,8 +1946,7 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_uri)
   config.set("http.api.key", "Bearer apiKey1234");
   config.set("http.api.header.key.name", "Authorization");
   r::api_status status;
-  std::unique_ptr<reinforcement_learning::cb_loop> _rl =
-      std::unique_ptr<r::cb_loop>(new r::cb_loop(config, nullptr));
+  std::unique_ptr<reinforcement_learning::cb_loop> _rl = std::unique_ptr<r::cb_loop>(new r::cb_loop(config, nullptr));
 
   BOOST_CHECK_EQUAL(_rl->init(&status), r::error_code::http_model_uri_not_provided);
 }
@@ -1963,8 +1958,7 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_success)
   config.set("http.api.key", "apiKey1234");
   config.set("model.blob.uri", "http://localhost:8080/personalizer/v1.1-preview.1/model");
   r::api_status status;
-  std::unique_ptr<reinforcement_learning::cb_loop> _rl =
-      std::unique_ptr<r::cb_loop>(new r::cb_loop(config, nullptr));
+  std::unique_ptr<reinforcement_learning::cb_loop> _rl = std::unique_ptr<r::cb_loop>(new r::cb_loop(config, nullptr));
 
   BOOST_CHECK_EQUAL(_rl->init(&status), err::success);
 }
@@ -1975,8 +1969,7 @@ BOOST_AUTO_TEST_CASE(live_model_using_endpoint_failure_no_apikey)
   cfg::create_from_json(JSON_CFG_API, config);
   config.set("model.blob.uri", "http://localhost:8080/personalizer/v1.1-preview.1/model");
   r::api_status status;
-  std::unique_ptr<reinforcement_learning::cb_loop> _rl =
-      std::unique_ptr<r::cb_loop>(new r::cb_loop(config, nullptr));
+  std::unique_ptr<reinforcement_learning::cb_loop> _rl = std::unique_ptr<r::cb_loop>(new r::cb_loop(config, nullptr));
 
   BOOST_CHECK_EQUAL(_rl->init(&status), r::error_code::http_api_key_not_provided);
 }

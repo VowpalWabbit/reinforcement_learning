@@ -41,8 +41,7 @@ int ccb_loop::request_multi_slot_decision(
     string_view context_json, unsigned int flags, multi_slot_response& resp, api_status* status)
 {
   INIT_CHECK();
-  return _pimpl->request_multi_slot_decision(
-      context_json, flags, resp, ccb_loop::default_baseline_vector, status);
+  return _pimpl->request_multi_slot_decision(context_json, flags, resp, ccb_loop::default_baseline_vector, status);
 }
 
 int ccb_loop::request_multi_slot_decision(string_view context_json, multi_slot_response& resp, api_status* status)
@@ -80,8 +79,7 @@ int ccb_loop::request_multi_slot_decision(
     string_view context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status)
 {
   INIT_CHECK();
-  return _pimpl->request_multi_slot_decision(
-      context_json, flags, resp, ccb_loop::default_baseline_vector, status);
+  return _pimpl->request_multi_slot_decision(context_json, flags, resp, ccb_loop::default_baseline_vector, status);
 }
 
 int ccb_loop::request_multi_slot_decision(
@@ -114,8 +112,7 @@ int ccb_loop::report_outcome(const char* primary_id, int secondary_id, float out
   return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);
 }
 
-int ccb_loop::report_outcome(
-    const char* primary_id, const char* secondary_id, const char* outcome, api_status* status)
+int ccb_loop::report_outcome(const char* primary_id, const char* secondary_id, const char* outcome, api_status* status)
 {
   INIT_CHECK();
   return _pimpl->report_outcome(primary_id, secondary_id, outcome, status);

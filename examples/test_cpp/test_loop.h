@@ -1,9 +1,9 @@
 #pragma once
 
-#include "experiment_controller.h"
 #include "cb_loop.h"
 #include "ccb_loop.h"
 #include "episodic_loop.h"
+#include "experiment_controller.h"
 #include "test_data_provider.h"
 
 #include <boost/program_options.hpp>

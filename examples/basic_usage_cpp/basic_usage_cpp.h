@@ -7,10 +7,10 @@
  */
 #pragma once
 
-#include "config_utility.h"
 #include "ca_loop.h"
 #include "cb_loop.h"
 #include "ccb_loop.h"
+#include "config_utility.h"
 #include "episodic_loop.h"
 #include "slates_loop.h"
 
