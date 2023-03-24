@@ -49,22 +49,21 @@ add_flatbuffer_schema(
 
 set(PROJECT_SOURCES
   api_status.cc
+  base_loop.cc
+  ca_loop.cc
+  cb_loop.cc
+  ccb_loop.cc
   console_tracer.cc
   constants.cc
   continuous_action_response.cc
   decision_response.cc
   dedup.cc
+  episodic_loop.cc
   error_callback_fn.cc
   factory_resolver.cc
   generic_event.cc
   learning_mode.cc
   live_model.cc
-  base_loop.cc
-  ca_loop.cc
-  cb_loop.cc
-  ccb_loop.cc
-  episodic_loop.cc
-  slates_loop.cc
   live_model_impl.cc
   logger/endian.cc
   logger/event_logger.cc
@@ -86,6 +85,7 @@ set(PROJECT_SOURCES
   ranking_response.cc
   sampling.cc
   serialization/payload_serializer.cc
+  slates_loop.cc
   slot_ranking.cc
   time_helper.cc
   trace_logger.cc
@@ -117,6 +117,10 @@ endif()
 set(PROJECT_PUBLIC_HEADERS
   ../include/action_flags.h
   ../include/api_status.h
+  ../include/base_loop.h
+  ../include/ca_loop.h
+  ../include/cb_loop.h
+  ../include/ccb_loop.h
   ../include/config_utility.h
   ../include/configuration.h
   ../include/constants.h
@@ -124,6 +128,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/continuous_action_response.h
   ../include/data_buffer.h
   ../include/decision_response.h
+  ../include/episodic_loop.h
   ../include/err_constants.h
   ../include/error_callback_fn.h
   ../include/errors_data.h
@@ -131,12 +136,6 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/future_compat.h
   ../include/internal_constants.h
   ../include/live_model.h
-  ../include/base_loop.h
-  ../include/ca_loop.h
-  ../include/cb_loop.h
-  ../include/ccb_loop.h
-  ../include/episodic_loop.h
-  ../include/slates_loop.h
   ../include/model_mgmt.h
   ../include/multi_slot_response.h
   ../include/multi_slot_response_detailed.h
@@ -146,6 +145,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/ranking_response.h
   ../include/rl_string_view.h
   ../include/sender.h
+  ../include/slates_loop.h
   ../include/slot_ranking.h
   ../include/str_util.h
   ../include/trace_logger.h
