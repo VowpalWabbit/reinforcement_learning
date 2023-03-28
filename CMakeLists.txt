@@ -60,6 +60,8 @@ option(RL_BUILD_EXTERNAL_PARSER "Build external parser version of VW" OFF)
 option(RL_USE_ASAN "Compile with AddressSanitizer" OFF)
 option(RL_USE_UBSAN "Compile with UndefinedBehaviorSanitizer" OFF)
 option(rlclientlib_BUILD_ONNXRUNTIME_EXTENSION "Build OnnxRuntime Inference Extension" OFF)
+option(rlclientlib_BUILD_DOTNET "Build .NET bindings" OFF)
+option(rlclientlib_DOTNET_USE_MSPROJECT "[Experimental] Use import_external_msproject to build .NET csproj files." OFF)
 
 if(RL_USE_ASAN)
   add_compile_definitions(RL_USE_ASAN VW_USE_ASAN)
@@ -153,7 +155,12 @@ endif()
 enable_testing()
 
 # Since bindings will add tests, if appropriate, it needs to be included after enable_testing().
-add_subdirectory(bindings)
+if(rlclientlib_BUILD_DOTNET)
+  add_subdirectory(bindings/cs)
+endif()
+if(RL_BUILD_PYTHON)
+  add_subdirectory(bindings/python EXCLUDE_FROM_ALL)
+endif()
 
 add_subdirectory(unit_test)
 add_subdirectory(unit_test/extensions)
