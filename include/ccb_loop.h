@@ -28,7 +28,7 @@ public:
   using base_loop::base_loop;
 
   /**
-   * @brief (DEPRECATED) Choose an action from the given set for each slot, given a list of actions, slots,
+   * @brief Choose an action from the given set for each slot, given a list of actions, slots,
    * action features, slot feautres and context features. The inference library chooses an action
    * per slot by sampling the probability distribution produced per slot. A unique event_id can be
    * supplied for each slot using the `_id` json field. The corresponding event_id should be used
@@ -45,7 +45,7 @@ public:
       string_view context_json, unsigned int flags, decision_response& resp, api_status* status = nullptr);
 
   /**
-   * @brief (DEPRECATED) Choose an action from the given set for each slot, given a list of actions, slots,
+   * @brief Choose an action from the given set for each slot, given a list of actions, slots,
    * action features, slot feautres and context features. The inference library chooses an action
    * per slot by sampling the probability distribution produced per slot. A unique event_id can be
    * supplied for each slot using the `_id` json field. The corresponding event_id should be used
@@ -60,7 +60,7 @@ public:
   int request_decision(string_view context_json, decision_response& resp, api_status* status = nullptr);
 
   /**
-   * @brief (DEPRECATED) Choose an action from the given set for each slot, given a list of actions, slots,
+   * @brief Choose an action from the given set for each slot, given a list of actions, slots,
    * action features, slot features and context features. The inference library chooses an action
    * per slot by sampling the probability distribution produced per slot. The corresponding event_id should be used when
    * reporting the outcome for each slot.

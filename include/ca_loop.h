@@ -28,7 +28,7 @@ public:
   using base_loop::base_loop;
 
   /**
-   * @brief (DEPRECATED) Choose an action from a continuous range, given a list of context features
+   * @brief Choose an action from a continuous range, given a list of context features
    * The inference library chooses an action by sampling the probability density function produced per continuous action
    * range. The corresponding event_id should be used when reporting the outcome for the continuous action.
    * @param event_id  The unique identifier for this interaction.  The same event_id should be used when
@@ -40,12 +40,11 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  RL_DEPRECATED("New unified example builder interface is coming")
   int request_continuous_action(const char* event_id, string_view context_json, unsigned int flags,
       continuous_action_response& response, api_status* status = nullptr);
 
   /**
-   * @brief (DEPRECATED) Choose an action from a continuous range, given a list of context features
+   * @brief Choose an action from a continuous range, given a list of context features
    * The inference library chooses an action by sampling the probability density function produced per continuous action
    * range. The corresponding event_id should be used when reporting the outcome for the continuous action.
    * @param event_id  The unique identifier for this interaction.  The same event_id should be used when
@@ -56,12 +55,11 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  RL_DEPRECATED("New unified example builder interface is coming")
   int request_continuous_action(const char* event_id, string_view context_json, continuous_action_response& response,
       api_status* status = nullptr);
 
   /**
-   * @brief (DEPRECATED) Choose an action from a continuous range, given a list of context features
+   * @brief Choose an action from a continuous range, given a list of context features
    * The inference library chooses an action by sampling the probability density function produced per continuous action
    * range. A unique event_id will be generated and returned in the continuous_action_response. The same event_id should
    * be used when reporting the outcome for this action.
@@ -72,12 +70,11 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  RL_DEPRECATED("New unified example builder interface is coming")
   int request_continuous_action(
       string_view context_json, unsigned int flags, continuous_action_response& response, api_status* status = nullptr);
 
   /**
-   * @brief (DEPRECATED) Choose an action from a continuous range, given a list of context features
+   * @brief Choose an action from a continuous range, given a list of context features
    * The inference library chooses an action by sampling the probability density function produced per continuous action
    * range. A unique event_id will be generated and returned in the continuous_action_response. The same event_id should
    * be used when reporting the outcome for this action.
@@ -87,7 +84,6 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  RL_DEPRECATED("New unified example builder interface is coming")
   int request_continuous_action(
       string_view context_json, continuous_action_response& response, api_status* status = nullptr);
 

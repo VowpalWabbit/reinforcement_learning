@@ -27,7 +27,7 @@ public:
   using base_loop::base_loop;
 
   /**
-   * @brief (DEPRECATED) Choose an action from the given set for each slot, given a list of actions, slots,
+   * @brief Choose an action from the given set for each slot, given a list of actions, slots,
    * action features, slot features and context features. The inference library chooses an action
    * per slot by sampling the probability distribution produced per slot. The corresponding event_id should be used when
    * reporting the outcome for each slot.
@@ -41,37 +41,27 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  RL_DEPRECATED("New unified example builder interface is coming")
   int request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags,
       multi_slot_response& resp, api_status* status = nullptr);
-  RL_DEPRECATED("New unified example builder interface is coming")
   int request_multi_slot_decision(
       const char* event_id, string_view context_json, multi_slot_response& resp, api_status* status = nullptr);
-  RL_DEPRECATED("New unified example builder interface is coming")
   int request_multi_slot_decision(
       string_view context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
-  RL_DEPRECATED("New unified example builder interface is coming")
   int request_multi_slot_decision(string_view context_json, multi_slot_response& resp, api_status* status = nullptr);
 
-  RL_DEPRECATED("New unified example builder interface is coming")
   int request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags,
       multi_slot_response& resp, const int* baseline_actions, size_t baseline_actions_size,
       api_status* status = nullptr);
 
-  RL_DEPRECATED("New unified example builder interface is coming")
   int request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags,
       multi_slot_response_detailed& resp, api_status* status = nullptr);
-  RL_DEPRECATED("New unified example builder interface is coming")
   int request_multi_slot_decision(
       const char* event_id, string_view context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
-  RL_DEPRECATED("New unified example builder interface is coming")
   int request_multi_slot_decision(
       string_view context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
-  RL_DEPRECATED("New unified example builder interface is coming")
   int request_multi_slot_decision(
       string_view context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
 
-  RL_DEPRECATED("New unified example builder interface is coming")
   int request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags,
       multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size,
       api_status* status = nullptr);
