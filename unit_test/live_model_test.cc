@@ -11,7 +11,7 @@
 #include "ccb_loop.h"
 #include "config_utility.h"
 #include "constants.h"
-#include "episodic_loop.h"
+#include "live_model.h"
 #include "err_constants.h"
 #include "factory_resolver.h"
 #include "mock_util.h"

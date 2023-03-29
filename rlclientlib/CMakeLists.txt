@@ -58,7 +58,6 @@ set(PROJECT_SOURCES
   continuous_action_response.cc
   decision_response.cc
   dedup.cc
-  episodic_loop.cc
   error_callback_fn.cc
   factory_resolver.cc
   generic_event.cc
@@ -128,7 +127,6 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/continuous_action_response.h
   ../include/data_buffer.h
   ../include/decision_response.h
-  ../include/episodic_loop.h
   ../include/err_constants.h
   ../include/error_callback_fn.h
   ../include/errors_data.h

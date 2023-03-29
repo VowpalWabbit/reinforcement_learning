@@ -64,7 +64,7 @@ bool test_loop::init()
     return false;
   }
 
-  rl_episodic = std::unique_ptr<r::episodic_loop>(new r::episodic_loop(config, _on_error, nullptr));
+  rl_episodic = std::unique_ptr<r::live_model>(new r::live_model(config, _on_error, nullptr));
   if (rl_episodic->init(&status) != err::success)
   {
     std::cout << status.get_error_msg() << std::endl;

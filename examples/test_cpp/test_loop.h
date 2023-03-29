@@ -2,7 +2,7 @@
 
 #include "cb_loop.h"
 #include "ccb_loop.h"
-#include "episodic_loop.h"
+#include "live_model.h"
 #include "experiment_controller.h"
 #include "test_data_provider.h"
 
@@ -47,5 +47,5 @@ private:
   std::vector<std::shared_ptr<std::ofstream>> loggers;
   std::unique_ptr<reinforcement_learning::cb_loop> rl_cb;
   std::unique_ptr<reinforcement_learning::ccb_loop> rl_ccb;
-  std::unique_ptr<reinforcement_learning::episodic_loop> rl_episodic;
+  std::unique_ptr<reinforcement_learning::live_model> rl_episodic;
 };
