@@ -2,8 +2,8 @@
 
 #include "cb_loop.h"
 #include "ccb_loop.h"
-#include "live_model.h"
 #include "experiment_controller.h"
+#include "live_model.h"
 #include "test_data_provider.h"
 
 #include <boost/program_options.hpp>
