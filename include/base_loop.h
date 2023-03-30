@@ -11,6 +11,7 @@
 #include "future_compat.h"
 #include "sender.h"
 
+#include <cstring>
 #include <functional>
 #include <memory>
 
@@ -40,6 +41,13 @@ namespace utility
 class configuration;  //
 }  // namespace utility
 //////////////////////////////////
+
+struct loop_str
+{
+  loop_str(const char* str) : str(str), size(strlen(str)) {}
+  const char* str;
+  int size;
+};
 
 // Reinforcement learning client
 /**
@@ -116,7 +124,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_action_taken(const char* event_id, api_status* status = nullptr);
+  int report_action_taken(loop_str event_id, api_status* status = nullptr);
 
   /**
    * @brief Report that action was taken.
@@ -127,7 +135,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_action_taken(const char* primary_id, const char* secondary_id, api_status* status = nullptr);
+  int report_action_taken(loop_str primary_id, loop_str secondary_id, api_status* status = nullptr);
 
   /*
    * @brief Refreshes the model if it has background refresh disabled.

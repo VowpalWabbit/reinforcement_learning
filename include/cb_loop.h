@@ -12,7 +12,6 @@
 #include "factory_resolver.h"
 #include "future_compat.h"
 #include "ranking_response.h"
-#include "rl_string_view.h"
 #include "sender.h"
 
 #include <functional>
@@ -37,7 +36,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int choose_rank(const char* event_id, string_view context_json, ranking_response& resp, api_status* status = nullptr);
+  int choose_rank(loop_str event_id, loop_str context_json, ranking_response& resp, api_status* status = nullptr);
 
   /**
    * @brief Choose an action, given a list of actions, action features and context features. The
@@ -52,7 +51,7 @@ public:
    * @return int Return error code.  This will also be returned in the api_status object
    */
   int choose_rank(
-      string_view context_json, ranking_response& resp, api_status* status = nullptr);  // event_id is auto-generated
+      loop_str context_json, ranking_response& resp, api_status* status = nullptr);  // event_id is auto-generated
 
   /**
    * @brief Choose an action, given a list of actions, action features and context features. The
@@ -67,7 +66,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int choose_rank(const char* event_id, string_view context_json, unsigned int flags, ranking_response& resp,
+  int choose_rank(loop_str event_id, loop_str context_json, unsigned int flags, ranking_response& resp,
       api_status* status = nullptr);
 
   /**
@@ -82,7 +81,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int choose_rank(string_view context_json, unsigned int flags, ranking_response& resp,
+  int choose_rank(loop_str context_json, unsigned int flags, ranking_response& resp,
       api_status* status = nullptr);  // event_id is auto-generated
 
   /**
@@ -94,7 +93,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_outcome(const char* event_id, const char* outcome, api_status* status = nullptr);
+  int report_outcome(loop_str event_id, loop_str outcome, api_status* status = nullptr);
 
   /**
    * @brief Report the outcome for the top action.
@@ -105,6 +104,6 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_outcome(const char* event_id, float outcome, api_status* status = nullptr);
+  int report_outcome(loop_str event_id, float outcome, api_status* status = nullptr);
 };
 }  // namespace reinforcement_learning

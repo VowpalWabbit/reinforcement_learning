@@ -13,7 +13,6 @@
 #include "future_compat.h"
 #include "multi_slot_response.h"
 #include "multi_slot_response_detailed.h"
-#include "rl_string_view.h"
 #include "sender.h"
 
 #include <functional>
@@ -41,28 +40,28 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags,
+  int request_multi_slot_decision(loop_str event_id, loop_str context_json, unsigned int flags,
       multi_slot_response& resp, api_status* status = nullptr);
   int request_multi_slot_decision(
-      const char* event_id, string_view context_json, multi_slot_response& resp, api_status* status = nullptr);
+      loop_str event_id, loop_str context_json, multi_slot_response& resp, api_status* status = nullptr);
   int request_multi_slot_decision(
-      string_view context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
-  int request_multi_slot_decision(string_view context_json, multi_slot_response& resp, api_status* status = nullptr);
+      loop_str context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
+  int request_multi_slot_decision(loop_str context_json, multi_slot_response& resp, api_status* status = nullptr);
 
-  int request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags,
+  int request_multi_slot_decision(loop_str event_id, loop_str context_json, unsigned int flags,
       multi_slot_response& resp, const int* baseline_actions, size_t baseline_actions_size,
       api_status* status = nullptr);
 
-  int request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags,
+  int request_multi_slot_decision(loop_str event_id, loop_str context_json, unsigned int flags,
       multi_slot_response_detailed& resp, api_status* status = nullptr);
   int request_multi_slot_decision(
-      const char* event_id, string_view context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
+      loop_str event_id, loop_str context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
   int request_multi_slot_decision(
-      string_view context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
+      loop_str context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
   int request_multi_slot_decision(
-      string_view context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
+      loop_str context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
 
-  int request_multi_slot_decision(const char* event_id, string_view context_json, unsigned int flags,
+  int request_multi_slot_decision(loop_str event_id, loop_str context_json, unsigned int flags,
       multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size,
       api_status* status = nullptr);
 
@@ -75,7 +74,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_outcome(const char* event_id, const char* outcome, api_status* status = nullptr);
+  int report_outcome(loop_str event_id, loop_str outcome, api_status* status = nullptr);
 
   /**
    * @brief Report the outcome for the top action.
@@ -86,7 +85,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_outcome(const char* event_id, float outcome, api_status* status = nullptr);
+  int report_outcome(loop_str event_id, float outcome, api_status* status = nullptr);
 
 private:
   const std::vector<int> default_baseline_vector = std::vector<int>();

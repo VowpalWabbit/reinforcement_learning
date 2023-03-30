@@ -4,43 +4,43 @@
 
 namespace reinforcement_learning
 {
-int ca_loop::request_continuous_action(const char* event_id, string_view context_json, unsigned int flags,
+int ca_loop::request_continuous_action(loop_str event_id, loop_str context_json, unsigned int flags,
     continuous_action_response& response, api_status* status)
 {
   INIT_CHECK();
-  return _pimpl->request_continuous_action(event_id, context_json, flags, response, status);
+  return _pimpl->request_continuous_action(event_id.str, string_view(context_json.str, context_json.size), flags, response, status);
 }
 
 int ca_loop::request_continuous_action(
-    const char* event_id, string_view context_json, continuous_action_response& response, api_status* status)
+    loop_str event_id, loop_str context_json, continuous_action_response& response, api_status* status)
 {
   INIT_CHECK();
-  return _pimpl->request_continuous_action(event_id, context_json, action_flags::DEFAULT, response, status);
+  return _pimpl->request_continuous_action(event_id.str, string_view(context_json.str, context_json.size), action_flags::DEFAULT, response, status);
 }
 
 int ca_loop::request_continuous_action(
-    string_view context_json, unsigned int flags, continuous_action_response& response, api_status* status)
+    loop_str context_json, unsigned int flags, continuous_action_response& response, api_status* status)
 {
   INIT_CHECK();
-  return _pimpl->request_continuous_action(context_json, flags, response, status);
+  return _pimpl->request_continuous_action(string_view(context_json.str, context_json.size), flags, response, status);
 }
 
 int ca_loop::request_continuous_action(
-    string_view context_json, continuous_action_response& response, api_status* status)
+    loop_str context_json, continuous_action_response& response, api_status* status)
 {
   INIT_CHECK();
-  return _pimpl->request_continuous_action(context_json, action_flags::DEFAULT, response, status);
+  return _pimpl->request_continuous_action(string_view(context_json.str, context_json.size), action_flags::DEFAULT, response, status);
 }
 
-int ca_loop::report_outcome(const char* event_id, const char* outcome, api_status* status)
+int ca_loop::report_outcome(loop_str event_id, loop_str outcome, api_status* status)
 {
   INIT_CHECK();
-  return _pimpl->report_outcome(event_id, outcome, status);
+  return _pimpl->report_outcome(event_id.str, outcome.str, status);
 }
 
-int ca_loop::report_outcome(const char* event_id, float outcome, api_status* status)
+int ca_loop::report_outcome(loop_str event_id, float outcome, api_status* status)
 {
   INIT_CHECK();
-  return _pimpl->report_outcome(event_id, outcome, status);
+  return _pimpl->report_outcome(event_id.str, outcome, status);
 }
 }  // namespace reinforcement_learning
