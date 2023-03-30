@@ -54,8 +54,8 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int request_continuous_action(loop_str event_id, loop_str context_json, continuous_action_response& response,
-      api_status* status = nullptr);
+  int request_continuous_action(
+      loop_str event_id, loop_str context_json, continuous_action_response& response, api_status* status = nullptr);
 
   /**
    * @brief Choose an action from a continuous range, given a list of context features

@@ -152,8 +152,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_outcome(
-      loop_str primary_id, loop_str secondary_id, loop_str outcome, api_status* status = nullptr);
+  int report_outcome(loop_str primary_id, loop_str secondary_id, loop_str outcome, api_status* status = nullptr);
 
 private:
   const std::vector<int> default_baseline_vector = std::vector<int>();

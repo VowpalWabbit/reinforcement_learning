@@ -8,14 +8,16 @@ int ca_loop::request_continuous_action(loop_str event_id, loop_str context_json,
     continuous_action_response& response, api_status* status)
 {
   INIT_CHECK();
-  return _pimpl->request_continuous_action(event_id.str, string_view(context_json.str, context_json.size), flags, response, status);
+  return _pimpl->request_continuous_action(
+      event_id.str, string_view(context_json.str, context_json.size), flags, response, status);
 }
 
 int ca_loop::request_continuous_action(
     loop_str event_id, loop_str context_json, continuous_action_response& response, api_status* status)
 {
   INIT_CHECK();
-  return _pimpl->request_continuous_action(event_id.str, string_view(context_json.str, context_json.size), action_flags::DEFAULT, response, status);
+  return _pimpl->request_continuous_action(
+      event_id.str, string_view(context_json.str, context_json.size), action_flags::DEFAULT, response, status);
 }
 
 int ca_loop::request_continuous_action(
@@ -25,11 +27,11 @@ int ca_loop::request_continuous_action(
   return _pimpl->request_continuous_action(string_view(context_json.str, context_json.size), flags, response, status);
 }
 
-int ca_loop::request_continuous_action(
-    loop_str context_json, continuous_action_response& response, api_status* status)
+int ca_loop::request_continuous_action(loop_str context_json, continuous_action_response& response, api_status* status)
 {
   INIT_CHECK();
-  return _pimpl->request_continuous_action(string_view(context_json.str, context_json.size), action_flags::DEFAULT, response, status);
+  return _pimpl->request_continuous_action(
+      string_view(context_json.str, context_json.size), action_flags::DEFAULT, response, status);
 }
 
 int ca_loop::report_outcome(loop_str event_id, loop_str outcome, api_status* status)
