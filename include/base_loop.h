@@ -44,7 +44,7 @@ class configuration;  //
 
 struct loop_str
 {
-  loop_str(const char* str) : str(str), size(strlen(str)) {}
+  loop_str(const char* str) : str(str), size(str == nullptr ? 0 : strlen(str)) {}
   const char* str;
   int size;
 };
