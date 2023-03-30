@@ -39,7 +39,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int request_continuous_action(loop_str event_id, loop_str context_json, unsigned int flags,
+  int request_continuous_action(str_view event_id, str_view context_json, unsigned int flags,
       continuous_action_response& response, api_status* status = nullptr);
 
   /**
@@ -55,7 +55,7 @@ public:
    * @return int Return error code.  This will also be returned in the api_status object
    */
   int request_continuous_action(
-      loop_str event_id, loop_str context_json, continuous_action_response& response, api_status* status = nullptr);
+      str_view event_id, str_view context_json, continuous_action_response& response, api_status* status = nullptr);
 
   /**
    * @brief Choose an action from a continuous range, given a list of context features
@@ -70,7 +70,7 @@ public:
    * @return int Return error code.  This will also be returned in the api_status object
    */
   int request_continuous_action(
-      loop_str context_json, unsigned int flags, continuous_action_response& response, api_status* status = nullptr);
+      str_view context_json, unsigned int flags, continuous_action_response& response, api_status* status = nullptr);
 
   /**
    * @brief Choose an action from a continuous range, given a list of context features
@@ -84,7 +84,7 @@ public:
    * @return int Return error code.  This will also be returned in the api_status object
    */
   int request_continuous_action(
-      loop_str context_json, continuous_action_response& response, api_status* status = nullptr);
+      str_view context_json, continuous_action_response& response, api_status* status = nullptr);
 
   /**
    * @brief Report the outcome for the top action.
@@ -95,7 +95,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_outcome(loop_str event_id, loop_str outcome, api_status* status = nullptr);
+  int report_outcome(str_view event_id, str_view outcome, api_status* status = nullptr);
 
   /**
    * @brief Report the outcome for the top action.
@@ -106,6 +106,6 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_outcome(loop_str event_id, float outcome, api_status* status = nullptr);
+  int report_outcome(str_view event_id, float outcome, api_status* status = nullptr);
 };
 }  // namespace reinforcement_learning

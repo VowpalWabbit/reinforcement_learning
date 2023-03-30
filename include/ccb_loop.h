@@ -41,7 +41,7 @@ public:
    * @return int Return error code.  This will also be returned in the api_status object
    */
   int request_decision(
-      loop_str context_json, unsigned int flags, decision_response& resp, api_status* status = nullptr);
+      str_view context_json, unsigned int flags, decision_response& resp, api_status* status = nullptr);
 
   /**
    * @brief Choose an action from the given set for each slot, given a list of actions, slots,
@@ -56,7 +56,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int request_decision(loop_str context_json, decision_response& resp, api_status* status = nullptr);
+  int request_decision(str_view context_json, decision_response& resp, api_status* status = nullptr);
 
   /**
    * @brief Choose an action from the given set for each slot, given a list of actions, slots,
@@ -73,28 +73,28 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int request_multi_slot_decision(loop_str event_id, loop_str context_json, unsigned int flags,
+  int request_multi_slot_decision(str_view event_id, str_view context_json, unsigned int flags,
       multi_slot_response& resp, api_status* status = nullptr);
   int request_multi_slot_decision(
-      loop_str event_id, loop_str context_json, multi_slot_response& resp, api_status* status = nullptr);
+      str_view event_id, str_view context_json, multi_slot_response& resp, api_status* status = nullptr);
   int request_multi_slot_decision(
-      loop_str context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
-  int request_multi_slot_decision(loop_str context_json, multi_slot_response& resp, api_status* status = nullptr);
+      str_view context_json, unsigned int flags, multi_slot_response& resp, api_status* status = nullptr);
+  int request_multi_slot_decision(str_view context_json, multi_slot_response& resp, api_status* status = nullptr);
 
-  int request_multi_slot_decision(loop_str event_id, loop_str context_json, unsigned int flags,
+  int request_multi_slot_decision(str_view event_id, str_view context_json, unsigned int flags,
       multi_slot_response& resp, const int* baseline_actions, size_t baseline_actions_size,
       api_status* status = nullptr);
 
-  int request_multi_slot_decision(loop_str event_id, loop_str context_json, unsigned int flags,
+  int request_multi_slot_decision(str_view event_id, str_view context_json, unsigned int flags,
       multi_slot_response_detailed& resp, api_status* status = nullptr);
   int request_multi_slot_decision(
-      loop_str event_id, loop_str context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
+      str_view event_id, str_view context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
   int request_multi_slot_decision(
-      loop_str context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
+      str_view context_json, unsigned int flags, multi_slot_response_detailed& resp, api_status* status = nullptr);
   int request_multi_slot_decision(
-      loop_str context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
+      str_view context_json, multi_slot_response_detailed& resp, api_status* status = nullptr);
 
-  int request_multi_slot_decision(loop_str event_id, loop_str context_json, unsigned int flags,
+  int request_multi_slot_decision(str_view event_id, str_view context_json, unsigned int flags,
       multi_slot_response_detailed& resp, const int* baseline_actions, size_t baseline_actions_size,
       api_status* status = nullptr);
 
@@ -110,7 +110,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_outcome(loop_str primary_id, int secondary_id, float outcome, api_status* status = nullptr);
+  int report_outcome(str_view primary_id, int secondary_id, float outcome, api_status* status = nullptr);
 
   /**
    * @brief Report outcome of a decision based on a pair of primary and secondary indentifiers.
@@ -124,7 +124,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_outcome(loop_str primary_id, loop_str secondary_id, float outcome, api_status* status = nullptr);
+  int report_outcome(str_view primary_id, str_view secondary_id, float outcome, api_status* status = nullptr);
 
   /**
    * @brief Report outcome of a decision based on a pair of primary and secondary indentifiers.
@@ -138,7 +138,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_outcome(loop_str primary_id, int secondary_id, loop_str outcome, api_status* status = nullptr);
+  int report_outcome(str_view primary_id, int secondary_id, str_view outcome, api_status* status = nullptr);
 
   /**
    * @brief Report outcome of a decision based on a pair of primary and secondary indentifiers.
@@ -152,7 +152,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_outcome(loop_str primary_id, loop_str secondary_id, loop_str outcome, api_status* status = nullptr);
+  int report_outcome(str_view primary_id, str_view secondary_id, str_view outcome, api_status* status = nullptr);
 
 private:
   const std::vector<int> default_baseline_vector = std::vector<int>();

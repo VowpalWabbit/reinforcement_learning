@@ -47,13 +47,13 @@ int base_loop::init(api_status* status)
   return err_code;
 }
 
-int base_loop::report_action_taken(loop_str event_id, api_status* status)
+int base_loop::report_action_taken(str_view event_id, api_status* status)
 {
   INIT_CHECK();
   return _pimpl->report_action_taken(event_id.str, status);
 }
 
-int base_loop::report_action_taken(loop_str primary_id, loop_str secondary_id, api_status* status)
+int base_loop::report_action_taken(str_view primary_id, str_view secondary_id, api_status* status)
 {
   INIT_CHECK();
   return _pimpl->report_action_taken(primary_id.str, secondary_id.str, status);

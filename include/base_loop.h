@@ -42,9 +42,10 @@ class configuration;  //
 }  // namespace utility
 //////////////////////////////////
 
-struct loop_str
+struct str_view
 {
-  loop_str(const char* str) : str(str), size(str == nullptr ? 0 : strlen(str)) {}
+  str_view(const char* str, int size) : str(str), size(size) {}
+  str_view(const char* str) : str(str), size(str == nullptr ? 0 : strlen(str)) {}
   const char* str;
   int size;
 };
@@ -124,7 +125,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_action_taken(loop_str event_id, api_status* status = nullptr);
+  int report_action_taken(str_view event_id, api_status* status = nullptr);
 
   /**
    * @brief Report that action was taken.
@@ -135,7 +136,7 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int report_action_taken(loop_str primary_id, loop_str secondary_id, api_status* status = nullptr);
+  int report_action_taken(str_view primary_id, str_view secondary_id, api_status* status = nullptr);
 
   /*
    * @brief Refreshes the model if it has background refresh disabled.

@@ -4,7 +4,7 @@
 
 namespace reinforcement_learning
 {
-int ca_loop::request_continuous_action(loop_str event_id, loop_str context_json, unsigned int flags,
+int ca_loop::request_continuous_action(str_view event_id, str_view context_json, unsigned int flags,
     continuous_action_response& response, api_status* status)
 {
   INIT_CHECK();
@@ -13,7 +13,7 @@ int ca_loop::request_continuous_action(loop_str event_id, loop_str context_json,
 }
 
 int ca_loop::request_continuous_action(
-    loop_str event_id, loop_str context_json, continuous_action_response& response, api_status* status)
+    str_view event_id, str_view context_json, continuous_action_response& response, api_status* status)
 {
   INIT_CHECK();
   return _pimpl->request_continuous_action(
@@ -21,26 +21,26 @@ int ca_loop::request_continuous_action(
 }
 
 int ca_loop::request_continuous_action(
-    loop_str context_json, unsigned int flags, continuous_action_response& response, api_status* status)
+    str_view context_json, unsigned int flags, continuous_action_response& response, api_status* status)
 {
   INIT_CHECK();
   return _pimpl->request_continuous_action(string_view(context_json.str, context_json.size), flags, response, status);
 }
 
-int ca_loop::request_continuous_action(loop_str context_json, continuous_action_response& response, api_status* status)
+int ca_loop::request_continuous_action(str_view context_json, continuous_action_response& response, api_status* status)
 {
   INIT_CHECK();
   return _pimpl->request_continuous_action(
       string_view(context_json.str, context_json.size), action_flags::DEFAULT, response, status);
 }
 
-int ca_loop::report_outcome(loop_str event_id, loop_str outcome, api_status* status)
+int ca_loop::report_outcome(str_view event_id, str_view outcome, api_status* status)
 {
   INIT_CHECK();
   return _pimpl->report_outcome(event_id.str, outcome.str, status);
 }
 
-int ca_loop::report_outcome(loop_str event_id, float outcome, api_status* status)
+int ca_loop::report_outcome(str_view event_id, float outcome, api_status* status)
 {
   INIT_CHECK();
   return _pimpl->report_outcome(event_id.str, outcome, status);
