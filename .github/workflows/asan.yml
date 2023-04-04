@@ -40,8 +40,11 @@ jobs:
         with:
           vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
           vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
-      - name: Configure
-        run: whereis cmake; cmake --preset ${{ matrix.preset }} -DRL_BUILD_EXTERNAL_PARSER=On
+      - uses: lukka/run-cmake@v10
+        with:
+          cmakeListsTxtPath: "${{ github.workspace }}/CMakeLists.txt"
+          configurePreset: "${{ matrix.preset }}"
+          RL_BUILD_EXTERNAL_PARSER: "On"
       - name: Build
         run: cmake --build build --target rltest binary_parser_unit_tests
       - name: Run unit tests
