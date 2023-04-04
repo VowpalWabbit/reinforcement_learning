@@ -27,6 +27,7 @@ jobs:
     name: asan.${{ matrix.os }}.${{ matrix.preset }}
     env:
       UBSAN_OPTIONS: "print_stacktrace=1"
+      VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
       RL_BUILD_EXTERNAL_PARSER: "On"
 
     steps:
