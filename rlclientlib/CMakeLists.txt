@@ -116,10 +116,10 @@ endif()
 set(PROJECT_PUBLIC_HEADERS
   ../include/action_flags.h
   ../include/api_status.h
-  ../include/base_loop.h
-  ../include/ca_loop.h
-  ../include/cb_loop.h
-  ../include/ccb_loop.h
+  ../include/loop_apis/base_loop.h
+  ../include/loop_apis/ca_loop.h
+  ../include/loop_apis/cb_loop.h
+  ../include/loop_apis/ccb_loop.h
   ../include/config_utility.h
   ../include/configuration.h
   ../include/constants.h
@@ -143,7 +143,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/ranking_response.h
   ../include/rl_string_view.h
   ../include/sender.h
-  ../include/slates_loop.h
+  ../include/loop_apis/slates_loop.h
   ../include/slot_ranking.h
   ../include/str_util.h
   ../include/trace_logger.h
@@ -219,6 +219,7 @@ target_compile_definitions(rlclientlib PRIVATE FLATBUFFERS_SPAN_MINIMAL)
 target_include_directories(rlclientlib
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include/loop_apis
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date
