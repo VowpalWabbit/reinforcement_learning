@@ -17,6 +17,8 @@ jobs:
   test_with_sanitizers:
     strategy:
       fail-fast: false
+      cc: cl
+      cxx: cl
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
         preset: [vcpkg-asan-debug, vcpkg-ubsan-debug]
