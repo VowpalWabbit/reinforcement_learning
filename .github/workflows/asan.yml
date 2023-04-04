@@ -42,6 +42,12 @@ jobs:
         with:
           vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
           vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
+      - uses: actions/cache@v3
+        env:
+          cache-name: vcpkg-cache
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
+          key: ${{ matrix.os }}-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
       - uses: lukka/run-cmake@v10
         with:
           cmakeListsTxtPath: "${{ github.workspace }}/CMakeLists.txt"
