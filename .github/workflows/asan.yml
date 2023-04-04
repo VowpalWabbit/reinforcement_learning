@@ -35,11 +35,11 @@ jobs:
       - name: Setup MSVC Developer Command Prompt
         if: ${{ startsWith(matrix.os, 'windows') }}
         uses: ilammy/msvc-dev-cmd@v1
+      - uses: lukka/get-cmake@latest
       - uses: lukka/run-vcpkg@v10
         with:
           vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
           vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
-      - uses: lukka/get-cmake@latest
       - name: Configure
         run: cmake --preset ${{ matrix.preset }} -DRL_BUILD_EXTERNAL_PARSER=On
       - name: Build
