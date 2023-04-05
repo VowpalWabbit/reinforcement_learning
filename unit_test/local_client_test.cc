@@ -1,4 +1,3 @@
-#define BOOST_TEST_DYN_LINK
 #ifdef STAND_ALONE
 #  define BOOST_TEST_MODULE Main
 #endif
@@ -23,9 +22,10 @@ using namespace reinforcement_learning;
 VW::multi_ex parse_json(VW::workspace& all, const std::string& line)
 {
   VW::multi_ex examples;
-  examples.push_back(&VW::get_unused_example(&all));
-  VW::read_line_json_s<false>(
-      all, examples, (char*)line.c_str(), line.length(), (VW::example_factory_t)&VW::get_unused_example, (void*)&all);
+  examples.push_back(VW::new_unused_example(all));
+  VW::example_factory_t ex_fac = [&all]() -> VW::example& { return *(VW::new_unused_example(all)); };
+  VW::parsers::json::read_line_json<false>(
+      all, examples, (char*)line.c_str(), line.length(), ex_fac);
   VW::setup_examples(all, examples);
   return examples;
 }

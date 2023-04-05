@@ -97,7 +97,7 @@ public:
 
   metrics::joiner_metrics get_metrics() override;
 
-  void persist_metrics() override;
+  void persist_metrics(VW::metric_sink& sink) override;
 
 private:
   bool process_dedup(const reinforcement_learning::messages::flatbuff::v2::Event& event,

@@ -18,7 +18,6 @@ class episode_history
 {
 public:
   episode_history() = default;
-  episode_history(const episode_history* previous);
 
   episode_history(const episode_history& other) = default;
   episode_history& operator=(const episode_history& other) = default;
@@ -28,8 +27,12 @@ public:
 
   void update(const char* event_id, const char* previous_event_id, string_view context, const ranking_response& resp);
   std::string get_context(const char* previous_event_id, string_view context) const;
-
   size_t size() const;
+
+  std::string dump_to_json() const;
+  int init_from_json(const char* history_json, api_status* status = nullptr);
+
+  const std::map<std::string, int>& _test_only_depths() const { return _depths; }
 
 private:
   int get_depth(const char* id) const;
@@ -53,12 +56,14 @@ public:
   const episode_history& get_history() const;
   size_t size() const;
 
+  std::string dump_history_to_json() const;
+  int init_history_from_json(const char* history_json, api_status* status = nullptr);
+
   int update(const char* event_id, const char* previous_event_id, string_view context, const ranking_response& response,
-      api_status* error = nullptr);
+      api_status* status = nullptr);
 
 private:
   std::string _episode_id;
-
   episode_history _history;
 };
 

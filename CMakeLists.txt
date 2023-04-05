@@ -61,6 +61,8 @@ option(RL_USE_ASAN "Compile with AddressSanitizer" OFF)
 option(RL_USE_UBSAN "Compile with UndefinedBehaviorSanitizer" OFF)
 option(RL_BUILD_FEDERATION "Build code for Federated Learning" ON)
 option(rlclientlib_BUILD_ONNXRUNTIME_EXTENSION "Build OnnxRuntime Inference Extension" OFF)
+option(rlclientlib_BUILD_DOTNET "Build .NET bindings" OFF)
+option(rlclientlib_DOTNET_USE_MSPROJECT "[Experimental] Use import_external_msproject to build .NET csproj files." OFF)
 
 if(RL_BUILD_FEDERATION)
   add_compile_definitions(RL_BUILD_FEDERATION)
@@ -162,7 +164,12 @@ add_subdirectory(test_tools/example_gen)
 enable_testing()
 
 # Since bindings will add tests, if appropriate, it needs to be included after enable_testing().
-add_subdirectory(bindings)
+if(rlclientlib_BUILD_DOTNET)
+  add_subdirectory(bindings/cs)
+endif()
+if(RL_BUILD_PYTHON)
+  add_subdirectory(bindings/python EXCLUDE_FROM_ALL)
+endif()
 
 add_subdirectory(unit_test)
 add_subdirectory(unit_test/extensions)

@@ -242,16 +242,17 @@ joined_event::multistep_joined_event multistep_example_joiner::process_interacti
   cb_data->interaction_data.skip_learn = event.deferred_action();
 
   std::string line_vec(reinterpret_cast<char const*>(event.context()->data()), event.context()->size());
+  VW::example_factory_t ex_fac = [this]() -> VW::example& { return *(VW::new_unused_example(*this->_vw)); };
 
   if (_vw->audit || _vw->hash_inv)
   {
-    VW::template read_line_json_s<true>(*_vw, examples, const_cast<char*>(line_vec.c_str()), line_vec.size(),
-        reinterpret_cast<VW::example_factory_t>(VW::new_unused_example), _vw);
+    VW::parsers::json::read_line_json<true>(
+        *_vw, examples, const_cast<char*>(line_vec.c_str()), line_vec.size(), ex_fac);
   }
   else
   {
-    VW::template read_line_json_s<false>(*_vw, examples, const_cast<char*>(line_vec.c_str()), line_vec.size(),
-        reinterpret_cast<VW::example_factory_t>(VW::new_unused_example), _vw);
+    VW::parsers::json::read_line_json<false>(
+        *_vw, examples, const_cast<char*>(line_vec.c_str()), line_vec.size(), ex_fac);
   }
 
   return joined_event::multistep_joined_event(std::move(meta), std::move(cb_data));
@@ -268,14 +269,6 @@ bool multistep_example_joiner::process_joined(VW::multi_ex& examples)
   const auto& id = _order.front();
   const float reward = _rewards.front();
   const auto& interactions = _interactions[id];
-  if (interactions.size() != 1) { return false; }
-  const auto& interaction = interactions[0];
-  auto joined = process_interaction(interaction, examples);
-
-  const auto outcomes = _outcomes[id];
-
-  for (const auto& o : outcomes) { joined.outcome_events.push_back(o); }
-  for (const auto& o : _episodic_outcomes) { joined.outcome_events.push_back(o); }
 
   bool clear_examples = false;
   auto guard = VW::scope_exit(
@@ -289,6 +282,22 @@ bool multistep_example_joiner::process_joined(VW::multi_ex& examples)
           examples.push_back(VW::new_unused_example(*_vw));
         }
       });
+
+  if (interactions.size() != 1)
+  {
+    logger.out_warn("Multiple interaction events with event id [{}], skipping joined event",
+        interactions[0].event.event_id()->c_str());
+    clear_examples = true;
+    return false;
+  }
+
+  const auto& interaction = interactions[0];
+  auto joined = process_interaction(interaction, examples);
+
+  const auto outcomes = _outcomes[id];
+
+  for (const auto& o : outcomes) { joined.outcome_events.push_back(o); }
+  for (const auto& o : _episodic_outcomes) { joined.outcome_events.push_back(o); }
 
   if (!joined.is_joined_event_learnable())
   {

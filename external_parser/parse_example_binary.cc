@@ -337,7 +337,7 @@ bool binary_parser::advance_to_next_payload_type(io_buf& input, unsigned int& pa
   return true;
 }
 
-void binary_parser::persist_metrics(metric_sink&) { _example_joiner->persist_metrics(); }
+void binary_parser::persist_metrics(metric_sink& sink) { _example_joiner->persist_metrics(sink); }
 
 bool binary_parser::parse_examples(VW::workspace*, io_buf& io_buf, VW::multi_ex& examples)
 {

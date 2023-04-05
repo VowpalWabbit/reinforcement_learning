@@ -66,7 +66,7 @@ public:
 
   virtual void on_batch_read() = 0;
 
-  virtual void persist_metrics() {}
+  virtual void persist_metrics(VW::metric_sink& sink) {}
 
   virtual metrics::joiner_metrics get_metrics() = 0;
 

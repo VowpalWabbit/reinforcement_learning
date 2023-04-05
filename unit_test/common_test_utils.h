@@ -75,8 +75,8 @@ inline model_management::model_data save_vw(VW::workspace& vw)
 
 inline void compare_vw(const VW::workspace& vw1, const VW::workspace& vw2)
 {
-  const auto* sd1 = vw1.sd;
-  const auto* sd2 = vw2.sd;
+  const auto sd1 = vw1.sd;
+  const auto sd2 = vw2.sd;
   BOOST_CHECK_EQUAL(sd1->weighted_labeled_examples, sd2->weighted_labeled_examples);
   BOOST_CHECK_EQUAL(sd1->weighted_labels, sd2->weighted_labels);
   BOOST_CHECK_EQUAL(sd1->sum_loss, sd2->sum_loss);
