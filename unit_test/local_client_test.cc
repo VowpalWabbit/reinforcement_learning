@@ -24,8 +24,7 @@ VW::multi_ex parse_json(VW::workspace& all, const std::string& line)
   VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(all));
   VW::example_factory_t ex_fac = [&all]() -> VW::example& { return *(VW::new_unused_example(all)); };
-  VW::parsers::json::read_line_json<false>(
-      all, examples, (char*)line.c_str(), line.length(), ex_fac);
+  VW::parsers::json::read_line_json<false>(all, examples, (char*)line.c_str(), line.length(), ex_fac);
   VW::setup_examples(all, examples);
   return examples;
 }
