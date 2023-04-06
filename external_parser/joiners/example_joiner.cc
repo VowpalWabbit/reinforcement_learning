@@ -580,15 +580,13 @@ void example_joiner::persist_metrics(VW::metric_sink& metrics)
     {
       metrics.set_string("first_event_id", _joiner_metrics.first_event_id, true);
       metrics.set_string("first_event_time",
-              date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.first_event_timestamp)),
-          true);
+          date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.first_event_timestamp)), true);
     }
     if (!_joiner_metrics.last_event_id.empty())
     {
       metrics.set_string("last_event_id", _joiner_metrics.last_event_id, true);
       metrics.set_string("last_event_time",
-              date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.last_event_timestamp)),
-          true);
+          date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.last_event_timestamp)), true);
     }
   }
 }
