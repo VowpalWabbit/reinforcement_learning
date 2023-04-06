@@ -100,7 +100,7 @@ int local_client::create(std::unique_ptr<i_federated_client>& output, const util
   auto args = VW::make_unique<VW::config::options_cli>(VW::split_command_line(initial_command_line));
   auto logger = utility::make_vw_trace_logger(trace_logger);
   auto workspace = VW::initialize_experimental(std::move(args), nullptr, nullptr, nullptr, &logger);
-  workspace->id += "/0"; // initialize iteration id to 0
+  workspace->id += "/0";  // initialize iteration id to 0
 
   output = std::unique_ptr<i_federated_client>(new local_client(std::move(workspace), trace_logger));
   return error_code::success;
