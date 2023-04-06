@@ -64,7 +64,7 @@ jobs:
         run: |
           version=$(./.scripts/version_number.py)
           echo "Generated version number: $version"
-          run: echo "version=$version" >> $GITHUB_OUTPUT
+          echo "version=$version" >> $GITHUB_OUTPUT
       
       # Compile code and create package
       - name: Configure
@@ -95,7 +95,7 @@ jobs:
           ls
           NugetFileName=(*.nupkg)
           echo "Found nuget package: ${NugetFileName[0]}"
-          run: echo "NugetFileName=${NugetFileName[0]}" >> $GITHUB_OUTPUT
+          echo "NugetFileName=${NugetFileName[0]}" >> $GITHUB_OUTPUT
       - name: Upload package
         uses: actions/upload-artifact@v1
         with:
@@ -129,7 +129,7 @@ jobs:
         run: |
           version=$(./.scripts/version_number.py)
           echo "Generated version number: $version"
-          run: echo "version=$version" >> $GITHUB_OUTPUT
+          echo "version=$version" >> $GITHUB_OUTPUT
       
       # Download and install nuget
       - uses: actions/download-artifact@v1
