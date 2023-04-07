@@ -29,8 +29,8 @@ int local_client::try_get_model(const std::string& app_id,
   {
     case state_t::model_available:
     {
-      std::size_t pos = _current_model->id.find("/");
-      assert(app_id == _current_model->id.substr(0, _current_model->id.find("/")));
+      std::size_t pos = _current_model->id.find('/');
+      assert(app_id == _current_model->id.substr(0, _current_model->id.find('/')));
       io_buf buf;
       auto backing_buffer = std::make_shared<std::vector<char>>();
       buf.add_file(VW::io::create_vector_writer(backing_buffer));
@@ -76,9 +76,9 @@ int local_client::report_result(const uint8_t* payload, size_t size, api_status*
       // Increment iteration id for new workspace
       try
       {
-        int iteration_id = std::stoi(_current_model->id.substr(_current_model->id.find("/") + 1, std::string::npos));
+        int iteration_id = std::stoi(_current_model->id.substr(_current_model->id.find('/') + 1, std::string::npos));
         iteration_id++;
-        new_model->id = _current_model->id.substr(0, _current_model->id.find("/")) + "/" + std::to_string(iteration_id);
+        new_model->id = _current_model->id.substr(0, _current_model->id.find('/')) + "/" + std::to_string(iteration_id);
       }
       catch (const std::exception& e)
       {
