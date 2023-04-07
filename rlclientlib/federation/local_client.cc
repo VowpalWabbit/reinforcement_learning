@@ -74,9 +74,16 @@ int local_client::report_result(const uint8_t* payload, size_t size, api_status*
       auto new_model = *_current_model + *delta;
 
       // Increment iteration id for new workspace
-      int iteration_id = stoi(_current_model->id.substr(_current_model->id.find("/") + 1, std::string::npos));
-      iteration_id++;
-      new_model->id = _current_model->id.substr(0, _current_model->id.find("/")) + "/" + std::to_string(iteration_id);
+      try
+      {
+        int iteration_id = std::stoi(_current_model->id.substr(_current_model->id.find("/") + 1, std::string::npos));
+        iteration_id++;
+        new_model->id = _current_model->id.substr(0, _current_model->id.find("/")) + "/" + std::to_string(iteration_id);
+      }
+      catch (const std::exception& e)
+      {
+        RETURN_ERROR_ARG(_trace_logger, status, model_update_error, e.what());
+      }
 
       // Update current model
       _current_model.reset(new_model.release());
