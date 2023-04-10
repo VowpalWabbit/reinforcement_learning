@@ -99,9 +99,10 @@ int local_client::report_result(const uint8_t* payload, size_t size, api_status*
 int local_client::create(std::unique_ptr<i_federated_client>& output, const utility::configuration& config,
     i_trace* trace_logger, api_status* status)
 {
+  std::string cmd_line = "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id ";
+  cmd_line += config.get("id", "default_id");
   // Create empty model based on ML args on first call
-  std::string initial_command_line(config.get(name::MODEL_VW_INITIAL_COMMAND_LINE,
-      "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id test_app_id"));
+  std::string initial_command_line(config.get(name::MODEL_VW_INITIAL_COMMAND_LINE, cmd_line.c_str()));
 
   // TODO try catch
   auto args = VW::make_unique<VW::config::options_cli>(VW::split_command_line(initial_command_line));
