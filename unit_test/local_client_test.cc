@@ -32,6 +32,7 @@ VW::multi_ex parse_json(VW::workspace& all, const std::string& line)
 BOOST_AUTO_TEST_CASE(get_model_twice_fails)
 {
   utility::configuration config;
+  config.set("id", "test_app_id");
   std::unique_ptr<i_federated_client> client;
   BOOST_CHECK_EQUAL(local_client::create(client, config, nullptr, nullptr), error_code::success);
   model_management::model_data data;
@@ -45,8 +46,8 @@ BOOST_AUTO_TEST_CASE(get_model_twice_fails)
 BOOST_AUTO_TEST_CASE(send_delta_update)
 {
   utility::configuration config;
-  std::unique_ptr<i_federated_client> client;
   config.set("id", "test_app_id");
+  std::unique_ptr<i_federated_client> client;
   BOOST_CHECK_EQUAL(local_client::create(client, config, nullptr, nullptr), error_code::success);
   BOOST_CHECK_NE(client.get(), nullptr);
   model_management::model_data data;
