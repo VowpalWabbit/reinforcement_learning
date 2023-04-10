@@ -29,6 +29,8 @@ int local_client::try_get_model(const std::string& app_id,
   {
     case state_t::model_available:
     {
+      std::size_t pos = _current_model->id.find('/');
+      assert(app_id == _current_model->id.substr(0, _current_model->id.find('/')));
       io_buf buf;
       auto backing_buffer = std::make_shared<std::vector<char>>();
       buf.add_file(VW::io::create_vector_writer(backing_buffer));
@@ -70,6 +72,20 @@ int local_client::report_result(const uint8_t* payload, size_t size, api_status*
       auto view = VW::io::create_buffer_view(reinterpret_cast<const char*>(payload), size);
       auto delta = VW::model_delta::deserialize(*view);
       auto new_model = *_current_model + *delta;
+
+      // Increment iteration id for new workspace
+      try
+      {
+        int iteration_id = std::stoi(_current_model->id.substr(_current_model->id.find('/') + 1, std::string::npos));
+        iteration_id++;
+        new_model->id = _current_model->id.substr(0, _current_model->id.find('/')) + "/" + std::to_string(iteration_id);
+      }
+      catch (const std::exception& e)
+      {
+        RETURN_ERROR_ARG(_trace_logger, status, model_update_error, e.what());
+      }
+
+      // Update current model
       _current_model.reset(new_model.release());
       _state = state_t::model_available;
     }
@@ -83,14 +99,16 @@ int local_client::report_result(const uint8_t* payload, size_t size, api_status*
 int local_client::create(std::unique_ptr<i_federated_client>& output, const utility::configuration& config,
     i_trace* trace_logger, api_status* status)
 {
+  std::string cmd_line = "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id ";
+  cmd_line += config.get("id", "default_id");
   // Create empty model based on ML args on first call
-  std::string initial_command_line(config.get(
-      name::MODEL_VW_INITIAL_COMMAND_LINE, "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A"));
+  std::string initial_command_line(config.get(name::MODEL_VW_INITIAL_COMMAND_LINE, cmd_line.c_str()));
 
   // TODO try catch
   auto args = VW::make_unique<VW::config::options_cli>(VW::split_command_line(initial_command_line));
   auto logger = utility::make_vw_trace_logger(trace_logger);
   auto workspace = VW::initialize_experimental(std::move(args), nullptr, nullptr, nullptr, &logger);
+  workspace->id += "/0";  // initialize iteration id to 0
 
   output = std::unique_ptr<i_federated_client>(new local_client(std::move(workspace), trace_logger));
   return error_code::success;
