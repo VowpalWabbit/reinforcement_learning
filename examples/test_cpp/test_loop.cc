@@ -50,8 +50,22 @@ bool test_loop::init()
     return false;
   }
 
-  rl = std::unique_ptr<r::live_model>(new r::live_model(config, _on_error, nullptr));
-  if (rl->init(&status) != err::success)
+  rl_cb = std::unique_ptr<r::cb_loop>(new r::cb_loop(config, _on_error, nullptr));
+  if (rl_cb->init(&status) != err::success)
+  {
+    std::cout << status.get_error_msg() << std::endl;
+    return false;
+  }
+
+  rl_ccb = std::unique_ptr<r::ccb_loop>(new r::ccb_loop(config, _on_error, nullptr));
+  if (rl_ccb->init(&status) != err::success)
+  {
+    std::cout << status.get_error_msg() << std::endl;
+    return false;
+  }
+
+  rl_episodic = std::unique_ptr<r::live_model>(new r::live_model(config, _on_error, nullptr));
+  if (rl_episodic->init(&status) != err::success)
   {
     std::cout << status.get_error_msg() << std::endl;
     return false;
@@ -131,7 +145,7 @@ void test_loop::cb_loop(size_t thread_id) const
   {
     const auto event_id = test_inputs.create_event_id(0, 0);
     const std::string warmup_id = "_warmup_" + std::string(event_id);
-    if (rl->choose_rank(warmup_id.c_str(), test_inputs.get_context(0, 0), response, &status) != err::success)
+    if (rl_cb->choose_rank(warmup_id.c_str(), test_inputs.get_context(0, 0), response, &status) != err::success)
     {
       std::cout << "Warmup has failed. " << status.get_error_msg() << std::endl;
       return;
@@ -160,7 +174,7 @@ void test_loop::cb_loop(size_t thread_id) const
     const auto example_id = controller->get_iteration();
     const auto event_id = test_inputs.create_event_id(thread_id, example_id);
 
-    if (rl->choose_rank(event_id.c_str(), test_inputs.get_context(thread_id, example_id), response, &status) !=
+    if (rl_cb->choose_rank(event_id.c_str(), test_inputs.get_context(thread_id, example_id), response, &status) !=
         err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
@@ -169,7 +183,7 @@ void test_loop::cb_loop(size_t thread_id) const
 
     if (test_inputs.is_rewarded(thread_id, example_id))
     {
-      if (test_inputs.report_outcome(rl.get(), thread_id, example_id, &status) != err::success)
+      if (test_inputs.report_outcome(rl_cb.get(), thread_id, example_id, &status) != err::success)
       {
         std::cout << status.get_error_msg() << std::endl;
         continue;
@@ -206,7 +220,7 @@ void test_loop::ccb_loop(size_t thread_id) const
     const std::string warmup_id = "_warmup_" + std::string(event_ids[0]);
     const auto context = test_inputs.get_context(0, 0, event_ids);
     RL_IGNORE_DEPRECATED_USAGE_START
-    if (rl->request_decision(context.c_str(), response, &status) != err::success)
+    if (rl_ccb->request_decision(context.c_str(), response, &status) != err::success)
     {
       std::cout << "Warmup is failed. " << status.get_error_msg() << std::endl;
       return;
@@ -241,7 +255,7 @@ void test_loop::ccb_loop(size_t thread_id) const
     const auto event_ids_c = to_const_char(event_ids);
     const auto context = test_inputs.get_context(thread_id, example_id, event_ids);
     RL_IGNORE_DEPRECATED_USAGE_START
-    if (rl->request_decision(context.c_str(), response, &status) != err::success)
+    if (rl_ccb->request_decision(context.c_str(), response, &status) != err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
       continue;
@@ -251,7 +265,7 @@ void test_loop::ccb_loop(size_t thread_id) const
     if (test_inputs.is_rewarded(thread_id, example_id))
     {
       // TODO: why a fixed reward is used here (probably it doesn't matter for perf)
-      if (rl->report_outcome(event_ids[0].c_str(), 1, &status) != err::success)
+      if (rl_ccb->report_outcome(event_ids[0].c_str(), "slot_id", 1, &status) != err::success)
       {
         std::cout << status.get_error_msg() << std::endl;
         continue;
@@ -279,7 +293,7 @@ void test_loop::multistep_loop(size_t thread_id) const
     r::episode_state episode("warmup_episode");
     const auto event_id = test_inputs.create_event_id(0, 0);
     const std::string warmup_id = "_warmup_" + std::string(event_id);
-    if (rl->request_episodic_decision(
+    if (rl_episodic->request_episodic_decision(
             warmup_id.c_str(), nullptr, test_inputs.get_context(0, 0), response, episode, &status) != err::success)
     {
       std::cout << "Warmup has failed. " << status.get_error_msg() << std::endl;
@@ -314,7 +328,8 @@ void test_loop::multistep_loop(size_t thread_id) const
       previous_event_id = "";
     }
 
-    if (rl->request_episodic_decision(event_id.c_str(), previous_event_id.empty() ? nullptr : previous_event_id.c_str(),
+    if (rl_episodic->request_episodic_decision(event_id.c_str(),
+            previous_event_id.empty() ? nullptr : previous_event_id.c_str(),
             test_inputs.get_context(thread_id, example_id), response, *current_episode, &status) != err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
@@ -324,7 +339,8 @@ void test_loop::multistep_loop(size_t thread_id) const
     if (test_inputs.is_rewarded(thread_id, example_id))
     {
       float reward = test_inputs.get_outcome(thread_id, example_id);
-      if (rl->report_outcome(current_episode->get_episode_id(), event_id.c_str(), reward, &status) != err::success)
+      if (rl_episodic->report_outcome(current_episode->get_episode_id(), event_id.c_str(), reward, &status) !=
+          err::success)
       {
         std::cout << status.get_error_msg() << std::endl;
         continue;
