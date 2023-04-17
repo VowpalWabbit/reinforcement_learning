@@ -49,6 +49,10 @@ add_flatbuffer_schema(
 
 set(PROJECT_SOURCES
   api_status.cc
+  base_loop.cc
+  ca_loop.cc
+  cb_loop.cc
+  ccb_loop.cc
   console_tracer.cc
   constants.cc
   continuous_action_response.cc
@@ -80,6 +84,7 @@ set(PROJECT_SOURCES
   ranking_response.cc
   sampling.cc
   serialization/payload_serializer.cc
+  slates_loop.cc
   slot_ranking.cc
   time_helper.cc
   trace_logger.cc
@@ -111,6 +116,10 @@ endif()
 set(PROJECT_PUBLIC_HEADERS
   ../include/action_flags.h
   ../include/api_status.h
+  ../include/loop_apis/base_loop.h
+  ../include/loop_apis/ca_loop.h
+  ../include/loop_apis/cb_loop.h
+  ../include/loop_apis/ccb_loop.h
   ../include/config_utility.h
   ../include/configuration.h
   ../include/constants.h
@@ -134,6 +143,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/ranking_response.h
   ../include/rl_string_view.h
   ../include/sender.h
+  ../include/loop_apis/slates_loop.h
   ../include/slot_ranking.h
   ../include/str_util.h
   ../include/trace_logger.h
@@ -209,6 +219,7 @@ target_compile_definitions(rlclientlib PRIVATE FLATBUFFERS_SPAN_MINIMAL)
 target_include_directories(rlclientlib
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include/loop_apis
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date
