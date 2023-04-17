@@ -311,6 +311,22 @@ bool multistep_example_joiner::process_joined(VW::multi_ex& examples)
         }
       });
 
+  if (interactions.size() != 1)
+  {
+    logger.out_warn("Multiple interaction events with event id [{}], skipping joined event",
+        interactions[0].event.event_id()->c_str());
+    clear_examples = true;
+    return false;
+  }
+
+  const auto& interaction = interactions[0];
+  auto joined = process_interaction(interaction, examples);
+
+  const auto outcomes = _outcomes[id];
+
+  for (const auto& o : outcomes) { joined.outcome_events.push_back(o); }
+  for (const auto& o : _episodic_outcomes) { joined.outcome_events.push_back(o); }
+
   if (!joined.is_joined_event_learnable())
   {
     _current_je_is_skip_learn = true;

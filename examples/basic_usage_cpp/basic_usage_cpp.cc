@@ -44,7 +44,7 @@ int basic_usage_cb()
   r::api_status status;
 
   //! [(1) Instantiate Inference API using config]
-  r::live_model rl(config);
+  r::cb_loop rl(config);
   //! [(1) Instantiate Inference API using config]
 
   //! [(2) Initialize the API]
@@ -91,8 +91,8 @@ int basic_usage_cb()
 
 int basic_usage_ca()
 {
-  char const* const event_id = "event_id";
-  std::string context = R"({"f1":1,"f2":1,"f3":1,"f4":1,"f5":1})";
+  const char* event_id = "event_id";
+  const char* context = R"({"f1":1,"f2":1,"f3":1,"f4":1,"f5":1})";
   float outcome = 1.0f;
 
   //! name, value based config object used to initialise the API
@@ -111,7 +111,7 @@ int basic_usage_ca()
   r::api_status status;
 
   //! [(1) Instantiate Inference API using config]
-  r::live_model rl(config);
+  r::ca_loop rl(config);
   //! [(1) Instantiate Inference API using config]
 
   //! [(2) Initialize the API]
@@ -175,7 +175,7 @@ int basic_usage_ccb()
   r::api_status status;
 
   //! [(1) Instantiate Inference API using config]
-  r::live_model rl(config);
+  r::ccb_loop rl(config);
   //! [(1) Instantiate Inference API using config]
 
   //! [(2) Initialize the API]
@@ -203,7 +203,7 @@ int basic_usage_ccb()
   for (const auto& r : response)
   {
     const auto chosen_action = r.get_action_id();
-    if (rl.report_outcome(r.get_slot_id(), 1.0f, &status) != err::success)
+    if (rl.report_outcome(r.get_slot_id(), "slot_id", 1.0f, &status) != err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
       return -1;
@@ -214,7 +214,7 @@ int basic_usage_ccb()
 
 int basic_usage_slates()
 {
-  std::string context =
+  const char* context =
       R"({"shared":{"sf":1},"_multi":[ {"_slot_id":0,"TAction":{"af":1} },{"_slot_id":0,"TAction":{"af":2}},{"_slot_id":1,"TAction":{"af":3}},{"_slot_id":1,"TAction":{"af":4}}],"_slots":[{"f":1}, {"f":2}]})";
 
   //! name, value based config object used to initialise the API
@@ -233,7 +233,7 @@ int basic_usage_slates()
   r::api_status status;
 
   //! [(1) Instantiate Inference API using config]
-  r::live_model rl(config);
+  r::slates_loop rl(config);
   //! [(1) Instantiate Inference API using config]
 
   //! [(2) Initialize the API]
