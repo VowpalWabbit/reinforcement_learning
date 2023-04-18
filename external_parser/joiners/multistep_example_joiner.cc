@@ -287,23 +287,12 @@ bool multistep_example_joiner::process_joined(VW::multi_ex& examples)
   const auto& id = _order.front();
   const float reward = _rewards.front();
   const auto& interactions = _interactions[id];
-  if (interactions.size() != 1) { return false; }
-  const auto& interaction = interactions[0];
-  // process_interaction produces cb joined events to facilitate binary->json conversion
-  auto joined = process_interaction(interaction, examples, reward);
-
-  const auto& outcomes = _outcomes[id];
-
-  for (const auto& o : outcomes) { joined.outcome_events.push_back(o); }
-  for (const auto& o : _episodic_outcomes) { joined.outcome_events.push_back(o); }
-
   bool clear_examples = false;
   auto guard = VW::scope_exit(
       [&]
       {
         _order.pop_front();
         _rewards.pop_front();
-        if (_binary_to_json) { log_converter::build_cb_json(_outfile, joined, logger); }
         if (clear_examples)
         {
           VW::return_multiple_example(*_vw, examples);
@@ -320,9 +309,17 @@ bool multistep_example_joiner::process_joined(VW::multi_ex& examples)
   }
 
   const auto& interaction = interactions[0];
-  auto joined = process_interaction(interaction, examples);
+  auto joined = process_interaction(interaction, examples, reward);
 
-  const auto outcomes = _outcomes[id];
+  // This would only need to get run if there is actually an interaction
+  auto convert_guard = VW::scope_exit(
+    [&]
+    {
+      if (_binary_to_json) { log_converter::build_cb_json(_outfile, joined, logger); }
+    });
+
+
+  const auto& outcomes = _outcomes[id];
 
   for (const auto& o : outcomes) { joined.outcome_events.push_back(o); }
   for (const auto& o : _episodic_outcomes) { joined.outcome_events.push_back(o); }
