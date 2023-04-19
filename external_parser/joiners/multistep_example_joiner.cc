@@ -313,11 +313,9 @@ bool multistep_example_joiner::process_joined(VW::multi_ex& examples)
   auto joined = process_interaction(interaction, examples, reward);
 
   // This would only need to get run if there is actually an interaction
-  auto convert_guard = VW::scope_exit(
-    [&]
-    {
-      if (_binary_to_json) { log_converter::build_cb_json(_outfile, joined, logger); }
-    });
+  auto convert_guard = VW::scope_exit([&] {
+    if (_binary_to_json) { log_converter::build_cb_json(_outfile, joined, logger); }
+  });
 
   if (_binary_to_json) { clear_examples = true; }
 
