@@ -288,6 +288,7 @@ bool multistep_example_joiner::process_joined(VW::multi_ex& examples)
   const float reward = _rewards.front();
   const auto& interactions = _interactions[id];
   bool clear_examples = false;
+
   auto guard = VW::scope_exit(
       [&]
       {
@@ -318,6 +319,7 @@ bool multistep_example_joiner::process_joined(VW::multi_ex& examples)
       if (_binary_to_json) { log_converter::build_cb_json(_outfile, joined, logger); }
     });
 
+  if (_binary_to_json) { clear_examples = true; }
 
   const auto& outcomes = _outcomes[id];
 
@@ -338,7 +340,6 @@ bool multistep_example_joiner::process_joined(VW::multi_ex& examples)
   _vw->example_parser->lbl_parser.default_label(examples.back()->l);
   examples.back()->is_newline = true;
 
-  if (_binary_to_json) { clear_examples = true; }
   return true;
 }
 
