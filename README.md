@@ -2,7 +2,7 @@
 [![MacOS Build Status](https://img.shields.io/azure-devops/build/vowpalwabbit/3934113c-9e2b-4dbc-8972-72ab9b9b4342/22/master?label=MacOS%20build&logo=Azure%20Devops)](https://dev.azure.com/vowpalwabbit/Vowpal%20Wabbit/_build?definitionId=32)
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/57p7o5v34onsqma2/branch/master?svg=true)](https://ci.appveyor.com/project/JohnLangford/reinforcement-learning/branch/master)
 [![Integration with latest VW](https://github.com/VowpalWabbit/reinforcement_learning/actions/workflows/daily_integration.yml/badge.svg?event=schedule)](https://github.com/VowpalWabbit/reinforcement_learning/actions/workflows/daily_integration.yml)
-
+ 
 # RL Client Library
 Interaction-side integration library for Reinforcement Learning loops: Predict, Log, [Learn,] Update
 
