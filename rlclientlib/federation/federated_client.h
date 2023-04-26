@@ -42,10 +42,11 @@ struct i_federated_client
    * try_get_model again until report_result has been called.
    *
    * @param payload payload represents the payload to aggregate. Must be a serialized VW model delta.
+   * @param size payload represents the size of the payload to aggregate. Must be a serialized VW model delta.
    * @param status Contains error information in the event of a failure
    * @returns Status code
    */
-  RL_ATTR(nodiscard) virtual int report_result(const std::vector<uint8_t>& payload, api_status* status = nullptr) = 0;
+  RL_ATTR(nodiscard) virtual int report_result(const uint8_t* payload, size_t size, api_status* status = nullptr) = 0;
 };
 
 }  // namespace reinforcement_learning

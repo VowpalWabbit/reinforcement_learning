@@ -3,8 +3,6 @@
 // FileFormat_generated.h used for the payload type and encoding enum's
 #include "generated/v2/FileFormat_generated.h"
 
-namespace v2 = reinforcement_learning::messages::flatbuff::v2;
-
 namespace loop
 {
 template <typename T>
@@ -39,9 +37,10 @@ public:
 struct loop_info
 {
   sticky_value<float> default_reward = sticky_value<float>(0.f);
-  sticky_value<v2::LearningModeType> learning_mode_config =
-      sticky_value<v2::LearningModeType>(v2::LearningModeType_Online);
-  sticky_value<v2::ProblemType> problem_type_config;
+  sticky_value<reinforcement_learning::messages::flatbuff::v2::LearningModeType> learning_mode_config =
+      sticky_value<reinforcement_learning::messages::flatbuff::v2::LearningModeType>(
+          reinforcement_learning::messages::flatbuff::v2::LearningModeType_Online);
+  sticky_value<reinforcement_learning::messages::flatbuff::v2::ProblemType> problem_type_config;
   sticky_value<bool> use_client_time = sticky_value<bool>(false);
 
   bool is_configured() const

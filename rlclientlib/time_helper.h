@@ -3,12 +3,16 @@
 #include <chrono>
 #include <cstdint>
 #include <iostream>
+#include <ratio>
 #include <tuple>
 
 namespace reinforcement_learning
 {
 struct timestamp
 {
+  using one_hundred_nano = std::ratio<1, 10000000>;
+  using one_hundred_nanoseconds = std::chrono::duration<int64_t, one_hundred_nano>;
+
   uint16_t year = 0;        // year
   uint8_t month = 0;        // month [1-12]
   uint8_t day = 0;          // day [1-31]
@@ -16,11 +20,28 @@ struct timestamp
   uint8_t minute = 0;       // minute [0-60]
   uint8_t second = 0;       // second [0-60]
   uint32_t sub_second = 0;  // 0.1 u_second [0 - 9,999,999]
+
+  // Construct timestamp with all zero values
+  timestamp() = default;
+
+  // Construct timestamp from values for each time component
+  timestamp(uint16_t yr, uint8_t mo, uint8_t dy, uint8_t h, uint8_t m, uint8_t s, uint32_t ss = 0);
+
+  // Convert std::chrono::time_point to reinforcement_learning::timestamp
+  explicit timestamp(const std::chrono::time_point<std::chrono::system_clock, timestamp::one_hundred_nanoseconds>&);
+
+  // Overload that typecasts duration to 100ns
+  template <typename DurationT>
+  explicit timestamp(const std::chrono::time_point<std::chrono::system_clock, DurationT>& tp)
+      : timestamp(std::chrono::time_point_cast<timestamp::one_hundred_nanoseconds>(tp))
+  {
+  }
+
+  // Convert to a std::chrono::time_point with 100ns resolution
+  std::chrono::time_point<std::chrono::system_clock, timestamp::one_hundred_nanoseconds> to_time_point() const;
+
   friend std::ostream& operator<<(std::ostream& os, const timestamp& dt);
 };
-
-timestamp timestamp_from_chrono(const std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>&);
-std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> chrono_from_timestamp(const timestamp&);
 
 inline bool operator==(const timestamp& lhs, const timestamp& rhs)
 {

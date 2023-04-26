@@ -4,8 +4,6 @@
 #include "vw/core/parser.h"
 #include "vw/io/io_adapter.h"
 
-namespace v2 = reinforcement_learning::messages::flatbuff::v2;
-
 namespace endian
 {
 bool is_big_endian(void)

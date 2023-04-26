@@ -22,8 +22,6 @@
 #include "vw/core/vw.h"
 // clang-format on
 
-namespace v2 = reinforcement_learning::messages::flatbuff::v2;
-
 enum multistep_reward_funtion_type
 {
   Identity = 0,
@@ -59,17 +57,20 @@ public:
 
   ~multistep_example_joiner() override;
 
-  void set_reward_function(const v2::RewardFunctionType type, bool sticky) override;
+  void set_reward_function(
+      const reinforcement_learning::messages::flatbuff::v2::RewardFunctionType type, bool sticky) override;
   void set_default_reward(float default_reward, bool sticky) override;
-  void set_learning_mode_config(v2::LearningModeType learning_mode, bool sticky) override;
-  void set_problem_type_config(v2::ProblemType problem_type, bool sticky) override;
+  void set_learning_mode_config(
+      reinforcement_learning::messages::flatbuff::v2::LearningModeType learning_mode, bool sticky) override;
+  void set_problem_type_config(
+      reinforcement_learning::messages::flatbuff::v2::ProblemType problem_type, bool sticky) override;
   void set_use_client_time(bool use_client_time, bool sticky = false) override;
   void apply_cli_overrides(VW::workspace* all, const VW::external::parser_options& parsed_options) override;
   bool joiner_ready() override;
 
   bool current_event_is_skip_learn() override;
 
-  bool process_event(const v2::JoinedEvent& joined_event) override;
+  bool process_event(const reinforcement_learning::messages::flatbuff::v2::JoinedEvent& joined_event) override;
   bool process_joined(VW::multi_ex& examples) override;
   bool processing_batch() override;
 
@@ -82,17 +83,18 @@ private:
   struct Parsed
   {
     const TimePoint timestamp;
-    const v2::Metadata& meta;
+    const reinforcement_learning::messages::flatbuff::v2::Metadata& meta;
     const event_t& event;
   };
   void set_multistep_reward_function(const multistep_reward_funtion_type type, bool sticky);
 
 private:
   bool populate_order();
-  reward::outcome_event process_outcome(
-      const TimePoint& timestamp, const v2::Metadata& metadata, const v2::OutcomeEvent& event);
+  reward::outcome_event process_outcome(const TimePoint& timestamp,
+      const reinforcement_learning::messages::flatbuff::v2::Metadata& metadata,
+      const reinforcement_learning::messages::flatbuff::v2::OutcomeEvent& event);
   joined_event::multistep_joined_event process_interaction(
-      const Parsed<v2::MultiStepEvent>& event_meta, VW::multi_ex& examples);
+      const Parsed<reinforcement_learning::messages::flatbuff::v2::MultiStepEvent>& event_meta, VW::multi_ex& examples);
   void populate_episodic_rewards();
 
 private:
@@ -105,7 +107,8 @@ private:
   loop::sticky_value<MultistepRewardFunctionType> _multistep_reward_calculation;
   loop::loop_info _loop_info;
 
-  std::unordered_map<std::string, std::vector<Parsed<v2::MultiStepEvent>>> _interactions;
+  std::unordered_map<std::string, std::vector<Parsed<reinforcement_learning::messages::flatbuff::v2::MultiStepEvent>>>
+      _interactions;
   std::unordered_map<std::string, std::vector<reward::outcome_event>> _outcomes;
   std::vector<reward::outcome_event> _episodic_outcomes;
 

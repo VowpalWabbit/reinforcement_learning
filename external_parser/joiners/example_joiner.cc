@@ -30,6 +30,8 @@
 #include "vw/core/parser.h"
 #include "vw/core/scope_exit.h"
 
+namespace v2 = reinforcement_learning::messages::flatbuff::v2;
+
 example_joiner::example_joiner(VW::workspace* vw)
     : i_joiner(vw->logger), _vw(vw), _reward_calculation(&reward::earliest), _binary_to_json(false)
 {
@@ -576,19 +578,15 @@ void example_joiner::persist_metrics(VW::metric_sink& metrics)
 
     if (!_joiner_metrics.first_event_id.empty())
     {
-      metrics.set_string("first_event_id", std::move(_joiner_metrics.first_event_id), true);
+      metrics.set_string("first_event_id", _joiner_metrics.first_event_id, true);
       metrics.set_string("first_event_time",
-          std::move(
-              date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.first_event_timestamp))),
-          true);
+          date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.first_event_timestamp)), true);
     }
     if (!_joiner_metrics.last_event_id.empty())
     {
-      metrics.set_string("last_event_id", std::move(_joiner_metrics.last_event_id), true);
+      metrics.set_string("last_event_id", _joiner_metrics.last_event_id, true);
       metrics.set_string("last_event_time",
-          std::move(
-              date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.last_event_timestamp))),
-          true);
+          date::format("%FT%TZ", date::floor<std::chrono::microseconds>(_joiner_metrics.last_event_timestamp)), true);
     }
   }
 }
@@ -599,6 +597,8 @@ void example_joiner::on_new_batch() {}
 void example_joiner::on_batch_read() {}
 
 metrics::joiner_metrics example_joiner::get_metrics() { return _joiner_metrics; }
+
+int example_joiner::events_in_queue() { return _batch_event_order.size(); }
 
 void example_joiner::apply_cli_overrides(VW::workspace*, const VW::external::parser_options&) {}
 

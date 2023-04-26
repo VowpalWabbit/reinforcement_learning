@@ -1,11 +1,12 @@
 #ifdef STAND_ALONE
 #  define BOOST_TEST_MODULE Main
 #endif
-#include "utility/watchdog.h"
+
 #include <boost/test/unit_test.hpp>
 
 #include "common_test_utils.h"
 #include "str_util.h"
+#include "utility/watchdog.h"
 
 #include <atomic>
 #include <iostream>
@@ -49,7 +50,7 @@ BOOST_AUTO_TEST_CASE(watchdog_unregister)
 
 BOOST_AUTO_TEST_CASE(watchdog_fail_after_several_iterations)
 {
-  if (is_invoked_with("valgrind"))
+  if (test_utils::is_invoked_with("valgrind"))
   {
     // this test depends on clock timeouts, can't guarantee test success under valgrind
     std::cout << "skipping watchdog_fail_after_several_iterations test when running in valgrind" << std::endl;
@@ -98,7 +99,7 @@ BOOST_AUTO_TEST_CASE(watchdog_report_with_error_handler)
 
 BOOST_AUTO_TEST_CASE(watchdog_multiple_threads)
 {
-  if (is_invoked_with("valgrind"))
+  if (test_utils::is_invoked_with("valgrind"))
   {
     // this test depends on clock timeouts, can't guarantee test success under valgrind
     std::cout << "skipping watchdog_multiple_threads test when running in valgrind" << std::endl;

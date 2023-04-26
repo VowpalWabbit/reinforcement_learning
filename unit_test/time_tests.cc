@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(time_round_trip)
 {
   r::clock_time_provider ctp;
   auto now = ctp.gmt_now();
-  auto roundtripped = r::timestamp_from_chrono(r::chrono_from_timestamp(now));
+  auto roundtripped = r::timestamp(now.to_time_point());
   BOOST_CHECK_EQUAL(now, roundtripped);
 }
 
@@ -41,13 +41,13 @@ BOOST_AUTO_TEST_CASE(time_ordering)
 {
   r::clock_time_provider ctp;
   auto now = ctp.gmt_now();
-  BOOST_CHECK(r::timestamp_from_chrono(std::chrono::system_clock::now() - std::chrono::seconds(5)) < now);
-  BOOST_CHECK(r::timestamp_from_chrono(std::chrono::system_clock::now() - std::chrono::minutes(5)) < now);
-  BOOST_CHECK(r::timestamp_from_chrono(std::chrono::system_clock::now() - std::chrono::hours(5)) < now);
-  BOOST_CHECK(r::timestamp_from_chrono(std::chrono::system_clock::now() - std::chrono::hours(500)) < now);
-  BOOST_CHECK(r::timestamp_from_chrono(std::chrono::system_clock::now() - date::days(1)) < now);
-  BOOST_CHECK(r::timestamp_from_chrono(std::chrono::system_clock::now() - date::months(1)) < now);
-  BOOST_CHECK(r::timestamp_from_chrono(std::chrono::system_clock::now() - date::years(1)) < now);
+  BOOST_CHECK(r::timestamp(std::chrono::system_clock::now() - std::chrono::seconds(5)) < now);
+  BOOST_CHECK(r::timestamp(std::chrono::system_clock::now() - std::chrono::minutes(5)) < now);
+  BOOST_CHECK(r::timestamp(std::chrono::system_clock::now() - std::chrono::hours(5)) < now);
+  BOOST_CHECK(r::timestamp(std::chrono::system_clock::now() - std::chrono::hours(500)) < now);
+  BOOST_CHECK(r::timestamp(std::chrono::system_clock::now() - date::days(1)) < now);
+  BOOST_CHECK(r::timestamp(std::chrono::system_clock::now() - date::months(1)) < now);
+  BOOST_CHECK(r::timestamp(std::chrono::system_clock::now() - date::years(1)) < now);
 }
 
 // BOOST_AUTO_TEST_CASE(time_loop) {

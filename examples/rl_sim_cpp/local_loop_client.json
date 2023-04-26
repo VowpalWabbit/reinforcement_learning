@@ -1,0 +1,16 @@
+{
+  "model.vw.initial_command_line": "--cb_explore_adf --json --epsilon 0.0 --preserve_performance_counters -q :: --driver_output_off",
+  "ApplicationID": "local_loop",
+  "IsExplorationEnabled": true,
+  "InitialExplorationEpsilon": 0.2,
+  "protocol.version": "2",
+  "model.source": "LOCAL_LOOP_MODEL_DATA",
+  "interaction.sender.implementation": "LOCAL_LOOP_SENDER",
+  "observation.sender.implementation": "LOCAL_LOOP_SENDER",
+  "eud.duration": "0:0:1",
+  "joiner.problem.type": "PROBLEM_TYPE_CB",
+  "joiner.reward.function": "REWARD_FUNCTION_EARLIEST",
+  "joiner.learning.mode": "ONLINE",
+  "model.refreshintervalms": "5000",
+  "time_provider.implementation": "CLOCK_TIME_PROVIDER"
+}

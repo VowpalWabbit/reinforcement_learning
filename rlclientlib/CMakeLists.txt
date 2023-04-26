@@ -19,10 +19,11 @@ set(RL_FLAT_BUFFER_FILES_V1
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/Metadata.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/OutcomeEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/RankingEvent.fbs"
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/SlatesEvent.fbs" )
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/SlatesEvent.fbs"
+)
 
 set(RL_FLAT_BUFFER_FILES_V2
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CaEvent.fbs" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CaEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CbEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/DedupInfo.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Event.fbs"
@@ -31,7 +32,9 @@ set(RL_FLAT_BUFFER_FILES_V2
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Metadata.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiSlotEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/MultiStepEvent.fbs"
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/OutcomeEvent.fbs")
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/OutcomeEvent.fbs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/ProblemType.fbs"
+)
 
 add_flatbuffer_schema(
   TARGET fbgenerator_v1
@@ -94,6 +97,7 @@ set(PROJECT_SOURCES
   utility/context_helper.cc
   utility/data_buffer.cc
   utility/data_buffer_streambuf.cc
+  utility/vw_logger_adapter.cc
   vw_model/pdf_model.cc
   vw_model/safe_vw.cc
   utility/stl_container_adapter.cc
@@ -110,6 +114,15 @@ if(vw_USE_AZURE_FACTORIES)
     utility/header_authorization.cc
     utility/http_client.cc
     utility/http_helper.cc
+  )
+endif()
+
+if(RL_BUILD_FEDERATION)
+  list(APPEND PROJECT_SOURCES
+    federation/local_client.cc
+    federation/local_loop_controller.cc
+    federation/sender_joined_log_provider.cc
+    federation/vw_trainable_model.cc
   )
 endif()
 
@@ -152,8 +165,6 @@ set(PROJECT_PUBLIC_HEADERS
 set(PROJECT_PRIVATE_HEADERS
   console_tracer.h
   dedup.h
-  federation/federated_client.h
-  federation/joined_log_provider.h
   generic_event.h
   live_model_impl.h
   logger/async_batcher.h
@@ -174,6 +185,7 @@ set(PROJECT_PRIVATE_HEADERS
   utility/object_pool.h
   utility/periodic_background_proc.h
   utility/watchdog.h
+  utility/vw_logger_adapter.h
   vw_model/pdf_model.h
   vw_model/safe_vw.h
   vw_model/vw_model.h
@@ -188,6 +200,18 @@ if(vw_USE_AZURE_FACTORIES)
     utility/header_authorization.h
     utility/http_client.h
     utility/http_helper.h
+  )
+endif()
+
+if(RL_BUILD_FEDERATION)
+  list(APPEND PROJECT_PRIVATE_HEADERS
+    federation/event_sink.h
+    federation/federated_client.h
+    federation/joined_log_provider.h
+    federation/local_client.h
+    federation/local_loop_controller.h
+    federation/sender_joined_log_provider.h
+    federation/vw_trainable_model.h
   )
 endif()
 
@@ -247,6 +271,11 @@ endif()
 # On MacOS linking fails unless we explicitly add Boost::thread. It seems like CppRestSDK isn't exporting dependencies properly.
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   target_link_libraries(rlclientlib PUBLIC Boost::thread)
+endif()
+
+# Link to external binary parser for local joining code
+if (RL_BUILD_EXTERNAL_PARSER)
+  target_link_libraries(rlclientlib PUBLIC rl_binary_parser)
 endif()
 
 # Set paths for installing library and header files

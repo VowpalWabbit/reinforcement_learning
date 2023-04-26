@@ -106,6 +106,15 @@ const char* const MODEL_FILE_NAME = "model_file_loader.file_name";
 const char* const MODEL_FILE_MUST_EXIST = "model_file_loader.file_must_exist";
 
 const char* const ZSTD_COMPRESSION_LEVEL = "zstd.compression_level";
+
+#ifdef RL_BUILD_FEDERATION
+// local joiner for federated learning
+const char* const JOINER_EUD_DURATION = "eud.duration";
+const char* const JOINER_PROBLEM_TYPE = "joiner.problem.type";
+const char* const JOINER_REWARD_FUNCTION = "joiner.reward.function";
+const char* const JOINER_LEARNING_MODE = "joiner.learning.mode";
+#endif
+
 }  // namespace name
 }  // namespace reinforcement_learning
 
@@ -146,6 +155,30 @@ const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
 const int DEFAULT_VW_POOL_INIT_SIZE = 4;
 const int DEFAULT_PROTOCOL_VERSION = 1;
 const char* const DEFAULT_AUDIT_OUTPUT_PATH = "audit";
+
+#ifdef RL_BUILD_FEDERATION
+// Configuration values for local joiner
+const char* const PROBLEM_TYPE_UNKNOWN = "PROBLEM_TYPE_UNKNOWN";
+const char* const PROBLEM_TYPE_CB = "PROBLEM_TYPE_CB";
+const char* const PROBLEM_TYPE_CCB = "PROBLEM_TYPE_CCB";
+const char* const PROBLEM_TYPE_SLATES = "PROBLEM_TYPE_SLATES";
+const char* const PROBLEM_TYPE_CA = "PROBLEM_TYPE_CA";
+const char* const PROBLEM_TYPE_MULTISTEP = "PROBLEM_TYPE_MULTISTEP";
+const char* const REWARD_FUNCTION_EARLIEST = "REWARD_FUNCTION_EARLIEST";
+const char* const REWARD_FUNCTION_AVERAGE = "REWARD_FUNCTION_AVERAGE";
+const char* const REWARD_FUNCTION_MEDIAN = "REWARD_FUNCTION_MEDIAN";
+const char* const REWARD_FUNCTION_SUM = "REWARD_FUNCTION_SUM";
+const char* const REWARD_FUNCTION_MIN = "REWARD_FUNCTION_MEAN";
+const char* const REWARD_FUNCTION_MAX = "REWARD_FUNCTION_MAX";
+#endif
+
+// These are outside of #ifdef section so that we can recognize them as invalid
+// configuration options when rlclientlib is compiled without RL_BUILD_FEDERATION
+//
+// Use local_loop_controller for model data
+const char* const LOCAL_LOOP_MODEL_DATA = "LOCAL_LOOP_MODEL_DATA";
+// Send events to local_loop_controller
+const char* const LOCAL_LOOP_SENDER = "LOCAL_LOOP_SENDER";
 
 const char* get_default_episode_sender();
 const char* get_default_observation_sender();

@@ -1,0 +1,10 @@
+namespace reinforcement_learning.messages.flatbuff.v2;
+
+table ModelUpdateEvent {
+    // VW ModelDelta
+    delta: [ubyte];
+    iteration_id: string;
+    client_id: string;
+}
+
+root_type ModelUpdateEvent;

@@ -26,7 +26,7 @@ public:
    *
    * @param vm User defined options
    */
-  explicit rl_sim(boost::program_options::variables_map vm);
+  explicit rl_sim(const boost::program_options::variables_map& vm);
 
   /**
    * @brief Simulation loop
@@ -177,4 +177,5 @@ private:
   int64_t _delay = 2000;
   bool _quiet = false;
   bool _random_ids = true;
+  uint64_t _model_refresh_period = 0;
 };
