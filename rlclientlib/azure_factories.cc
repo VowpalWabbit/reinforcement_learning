@@ -34,8 +34,8 @@ int observation_api_sender_create(std::unique_ptr<i_sender>& retval, const u::co
     error_callback_fn* error_cb, i_trace* trace_logger, api_status* status);
 int interaction_api_sender_create(std::unique_ptr<i_sender>& retval, const u::configuration& cfg,
     error_callback_fn* error_cb, i_trace* trace_logger, api_status* status);
-int delta_api_sender_create(std::unique_ptr<i_sender>& retval, const u::configuration& cfg,
-    error_callback_fn* error_cb, i_trace* trace_logger, api_status* status);
+int delta_api_sender_create(std::unique_ptr<i_sender>& retval, const u::configuration& cfg, error_callback_fn* error_cb,
+    i_trace* trace_logger, api_status* status);
 
 void register_azure_factories()
 {
@@ -185,8 +185,8 @@ int create_apim_delta_http_api_sender(std::unique_ptr<i_sender>& retval, const u
 }
 
 // Creates i_sender object for sending delta data to the apim endpoint.
-int delta_api_sender_create(std::unique_ptr<i_sender>& retval, const u::configuration& cfg,
-    error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
+int delta_api_sender_create(std::unique_ptr<i_sender>& retval, const u::configuration& cfg, error_callback_fn* error_cb,
+    i_trace* trace_logger, api_status* status)
 {
   const auto* const api_host = cfg.get(name::DELTA_HTTP_API_HOST, "localhost:8080");
   return create_apim_delta_http_api_sender(retval, cfg, api_host, cfg.get_int(name::DELTA_APIM_TASKS_LIMIT, 16),
