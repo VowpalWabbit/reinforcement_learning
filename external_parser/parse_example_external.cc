@@ -103,19 +103,15 @@ std::unique_ptr<parser> parser::get_external_parser(VW::workspace* all, const pa
       std::string outfile_name = infile_name + ".dsjson";
 
       if (parsed_options.multistep)
-      { joiner = VW::make_unique<multistep_example_joiner>(all, binary_to_json, outfile_name); }
-      else
       {
-        joiner = VW::make_unique<example_joiner>(all, binary_to_json, outfile_name);
+        joiner = VW::make_unique<multistep_example_joiner>(all, binary_to_json, outfile_name);
       }
+      else { joiner = VW::make_unique<example_joiner>(all, binary_to_json, outfile_name); }
       apply_cli_overrides(joiner, all, parsed_options);
 
       return VW::make_unique<binary_json_converter>(std::move(joiner), all->logger);
     }
-    else if (parsed_options.multistep)
-    {
-      joiner = VW::make_unique<multistep_example_joiner>(all);
-    }
+    else if (parsed_options.multistep) { joiner = VW::make_unique<multistep_example_joiner>(all); }
     else { joiner = VW::make_unique<example_joiner>(all); }
 
     apply_cli_overrides(joiner, all, parsed_options);
