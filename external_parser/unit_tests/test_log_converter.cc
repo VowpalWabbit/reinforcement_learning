@@ -30,8 +30,10 @@ std::string get_json_event(
           "--max_value 100 --bandwidth 1 -d" +
           infile_name;
       break;
-    case reinforcement_learning::messages::flatbuff::v2::ProblemType_UNKNOWN:
     case reinforcement_learning::messages::flatbuff::v2::ProblemType_MULTISTEP:
+      command = "--quiet --binary_to_json --binary_parser --cb_explore_adf --multistep -d " + infile_name;
+      break;
+    case reinforcement_learning::messages::flatbuff::v2::ProblemType_UNKNOWN:
       THROW("unknown problem type");
       break;
   }
@@ -277,3 +279,127 @@ BOOST_AUTO_TEST_CASE(log_converter_slates_format)
 
   BOOST_CHECK_EQUAL(converted_json, expected_json);
 }
+
+BOOST_AUTO_TEST_SUITE(log_converter_multistep_format)
+BOOST_AUTO_TEST_CASE(convert_binary_to_dsjson_multistep)
+{
+  std::string infile_path = "valid_joined_logs/multistep_2_episodes.fb";
+  std::string outfile_path = "valid_joined_logs/multistep_2_episodes.dsjson";
+
+  std::string converted_json = get_json_event(infile_path, outfile_path, v2::ProblemType_MULTISTEP);
+  std::string expected_joined_json =
+      "{\"_label_cost\":-1.0,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"o\":[{\"v\":2.0,"
+      "\"EventId\":\"ep1\",\"ActionTaken\":false}],\"Timestamp\":\"2021-01-01T00:00:00.000000Z\",\"Version\":\"1\","
+      "\"EventId\":\"1\",\"a\":[1,2],\"c\":{\"A\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n"
+      "{\"_label_cost\":-0.0,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"o\":[],\"Timestamp\":"
+      "\"2021-01-01T00:00:00.000000Z\",\"Version\":\"1\",\"EventId\":\"2\",\"a\":[1,2],\"c\":{\"B\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n"
+      "{\"_label_cost\":-3.0,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"o\":[{\"v\":3.0,"
+      "\"EventId\":\"ep2\",\"ActionTaken\":false}],\"Timestamp\":\"2021-01-01T00:00:00.000000Z\",\"Version\":\"1\","
+      "\"EventId\":\"1\",\"a\":[1,2],\"c\":{\"C\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n"
+      "{\"_label_cost\":-3.0,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"o\":[{\"v\":3.0,"
+      "\"EventId\":\"ep2\",\"ActionTaken\":false}],\"Timestamp\":\"2021-01-01T00:00:00.000000Z\",\"Version\":\"1\","
+      "\"EventId\":\"2\",\"a\":[1,2],\"c\":{\"D\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n";
+
+  BOOST_CHECK_EQUAL(converted_json, expected_joined_json);
+}
+
+BOOST_AUTO_TEST_CASE(convert_binary_to_dsjson_multistep_deferred)
+{
+  std::string infile_path = "valid_joined_logs/multistep_3_deferred_episodes.fb";
+  std::string outfile_path = "valid_joined_logs/multistep_3_deferred_episodes.dsjson";
+
+  std::string converted_json = get_json_event(infile_path, outfile_path, v2::ProblemType_MULTISTEP);
+  std::string expected_joined_json =
+      "{\"_label_cost\":-1.0,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"o\":[{\"v\":2.0,"
+      "\"EventId\":\"ep1\",\"ActionTaken\":false},{\"EventId\":\"ep1\",\"ActionTaken\":true}],\"Timestamp\":\"2021-01-"
+      "01T00:00:00.000000Z\",\"Version\":\"1\",\"EventId\":\"1\",\"a\":[1,2],\"c\":{\"A\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n"
+      "{\"_label_cost\":-0.0,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"_skipLearn\":true,"
+      "\"o\":[],\"Timestamp\":\"2021-01-01T00:00:00.000000Z\",\"Version\":\"1\",\"EventId\":\"2\",\"a\":[1,2],\"c\":{"
+      "\"B\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n"
+      "{\"_label_cost\":-3.0,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"o\":[{\"v\":3.0,"
+      "\"EventId\":\"ep2\",\"ActionTaken\":false},{\"EventId\":\"ep2\",\"ActionTaken\":true}],\"Timestamp\":\"2021-01-"
+      "01T00:00:00.000000Z\",\"Version\":\"1\",\"EventId\":\"1\",\"a\":[1,2],\"c\":{\"C\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n"
+      "{\"_label_cost\":-3.0,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"o\":[{\"v\":3.0,"
+      "\"EventId\":\"ep2\",\"ActionTaken\":false},{\"EventId\":\"ep2\",\"ActionTaken\":true}],\"Timestamp\":\"2021-01-"
+      "01T00:00:00.000000Z\",\"Version\":\"1\",\"EventId\":\"2\",\"a\":[1,2],\"c\":{\"D\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n"
+      "{\"_label_cost\":-4.0,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"_skipLearn\":true,"
+      "\"o\":[{\"v\":4.0,\"EventId\":\"ep3\",\"ActionTaken\":false}],\"Timestamp\":\"2021-01-01T00:00:00.000000Z\","
+      "\"Version\":\"1\",\"EventId\":\"1\",\"a\":[1,2],\"c\":{\"E\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n"
+      "{\"_label_cost\":-4.0,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"_skipLearn\":true,"
+      "\"o\":[{\"v\":4.0,\"EventId\":\"ep3\",\"ActionTaken\":false}],\"Timestamp\":\"2021-01-01T00:00:00.000000Z\","
+      "\"Version\":\"1\",\"EventId\":\"2\",\"a\":[1,2],\"c\":{\"F\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n";
+
+  BOOST_CHECK_EQUAL(converted_json, expected_joined_json);
+}
+
+BOOST_AUTO_TEST_CASE(convert_binary_to_dsjson_multistep_unordered)
+{
+  std::string infile_path = "valid_joined_logs/multistep_unordered_episodes.fb";
+  std::string outfile_path = "valid_joined_logs/multistep_unordered_episodes.dsjson";
+
+  std::string converted_json = get_json_event(infile_path, outfile_path, v2::ProblemType_MULTISTEP);
+  std::string expected_joined_json =
+      "{\"_label_cost\":-1.5,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"o\":[{\"v\":1.0,"
+      "\"EventId\":\"ep1\",\"ActionTaken\":false}],\"Timestamp\":\"2021-01-01T00:00:00.000000Z\",\"Version\":\"1\","
+      "\"EventId\":\"1\",\"a\":[1,2],\"c\":{\"A\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n"
+      "{\"_label_cost\":-2.0,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"o\":[{\"v\":2.0,"
+      "\"EventId\":\"ep1\",\"ActionTaken\":false}],\"Timestamp\":\"2021-01-01T00:00:00.000000Z\",\"Version\":\"1\","
+      "\"EventId\":\"2\",\"a\":[1,2],\"c\":{\"B\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n"
+      "{\"_label_cost\":-3.5,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"o\":[{\"v\":1.0,"
+      "\"EventId\":\"ep2\",\"ActionTaken\":false}],\"Timestamp\":\"2021-01-01T00:00:00.000000Z\",\"Version\":\"1\","
+      "\"EventId\":\"1\",\"a\":[1,2],\"c\":{\"C\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n"
+      "{\"_label_cost\":-4.0,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"o\":[{\"v\":2.0,"
+      "\"EventId\":\"ep2\",\"ActionTaken\":false}],\"Timestamp\":\"2021-01-01T01:00:00.000000Z\",\"Version\":\"1\","
+      "\"EventId\":\"2\",\"a\":[1,2],\"c\":{\"D\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n"
+      "{\"_label_cost\":-4.5,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"o\":[{\"v\":3.0,"
+      "\"EventId\":\"ep2\",\"ActionTaken\":false}],\"Timestamp\":\"2021-01-01T00:00:00.000000Z\",\"Version\":\"1\","
+      "\"EventId\":\"3\",\"a\":[1,2],\"c\":{\"E\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n"
+      "{\"_label_cost\":-5.0,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"o\":[{\"v\":4.0,"
+      "\"EventId\":\"ep2\",\"ActionTaken\":false}],\"Timestamp\":\"2021-01-01T01:00:00.000000Z\",\"Version\":\"1\","
+      "\"EventId\":\"4\",\"a\":[1,2],\"c\":{\"F\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n"
+      "{\"_label_cost\":-5.5,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"o\":[{\"v\":5.0,"
+      "\"EventId\":\"ep2\",\"ActionTaken\":false}],\"Timestamp\":\"2021-01-01T00:00:00.000000Z\",\"Version\":\"1\","
+      "\"EventId\":\"5\",\"a\":[1,2],\"c\":{\"G\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n"
+      "{\"_label_cost\":-6.0,\"_label_probability\":0.5,\"_label_Action\":1,\"_labelIndex\":0,\"o\":[{\"v\":6.0,"
+      "\"EventId\":\"ep2\",\"ActionTaken\":false}],\"Timestamp\":\"2021-01-01T01:00:00.000000Z\",\"Version\":\"1\","
+      "\"EventId\":\"6\",\"a\":[1,2],\"c\":{\"H\": {\"f\": 1}, "
+      "\"_multi\":[{\"a1\":\"f1\"},{\"a2\":\"f2\"}]},\"p\":[0.5,0.5],\"VWState\":{\"m\":\"model\"},\"_original_label_"
+      "cost\":-0.0}\n";
+
+  BOOST_CHECK_EQUAL(converted_json, expected_joined_json);
+}
+BOOST_AUTO_TEST_SUITE_END()

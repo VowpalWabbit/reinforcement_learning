@@ -520,44 +520,4 @@ struct joined_event
 
   float get_sum_original_reward() const { return typed_data->get_sum_original_reward(); }
 };
-
-struct multistep_joined_event
-{
-  multistep_joined_event(metadata::event_metadata_info&& mi, std::unique_ptr<cb_joined_event>&& data)
-      : interaction_metadata(std::move(mi)), cb_data(std::move(data)), outcome_events({})
-  {
-  }
-  multistep_joined_event() = default;
-
-  metadata::event_metadata_info interaction_metadata;
-  std::unique_ptr<cb_joined_event> cb_data;
-  std::vector<reward::outcome_event> outcome_events;
-
-  bool fill_in_label(VW::multi_ex& examples, VW::io::logger& logger) const
-  {
-    return cb_data->fill_in_label(examples, logger);
-  }
-
-  bool is_joined_event_learnable() const
-  {
-    bool deferred_action = cb_data->is_skip_learn();
-
-    if (!deferred_action) { return true; }
-
-    bool outcome_activated = std::any_of(outcome_events.begin(), outcome_events.end(),
-        [](const reward::outcome_event& o) { return o.action_taken == true; });
-
-    if (outcome_activated)
-    {
-      cb_data->set_skip_learn(false);
-      return true;
-    }
-    else { return false; }
-  }
-
-  void calc_reward(float default_reward, reward::RewardFunctionType reward_function, VW::io::logger& logger)
-  {
-    cb_data->calc_cost(default_reward, reward_function, interaction_metadata, outcome_events, logger);
-  }
-};
 }  // namespace joined_event
