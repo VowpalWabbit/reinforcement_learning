@@ -283,7 +283,7 @@ int basic_usage_multistep()
 
   r::api_status status;
 
-  r::live_model rl(config);
+  r::multistep_loop rl(config);
 
   if (rl.init(&status) != err::success)
   {

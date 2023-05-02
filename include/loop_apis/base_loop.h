@@ -44,10 +44,10 @@ class configuration;  //
 
 struct str_view
 {
-  str_view(const char* str, int size) : str(str), size(size) {}
+  str_view(const char* str, size_t size) : str(str), size(size) {}
   str_view(const char* str) : str(str), size(str == nullptr ? 0 : strlen(str)) {}
   const char* str;
-  int size;
+  size_t size;
 };
 
 // Reinforcement learning client

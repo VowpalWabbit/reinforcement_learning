@@ -4,6 +4,7 @@
 #include "ccb_loop.h"
 #include "experiment_controller.h"
 #include "live_model.h"
+#include "multistep_loop.h"
 #include "test_data_provider.h"
 
 #include <boost/program_options.hpp>
@@ -47,5 +48,5 @@ private:
   std::vector<std::shared_ptr<std::ofstream>> loggers;
   std::unique_ptr<reinforcement_learning::cb_loop> rl_cb;
   std::unique_ptr<reinforcement_learning::ccb_loop> rl_ccb;
-  std::unique_ptr<reinforcement_learning::live_model> rl_episodic;
+  std::unique_ptr<reinforcement_learning::multistep_loop> rl_episodic;
 };
