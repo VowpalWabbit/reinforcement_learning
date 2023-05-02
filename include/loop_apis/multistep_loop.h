@@ -40,8 +40,8 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int request_episodic_decision(str_view event_id, str_view previous_id, str_view context_json,
-      ranking_response& resp, episode_state& episode, api_status* status = nullptr);
+  int request_episodic_decision(str_view event_id, str_view previous_id, str_view context_json, ranking_response& resp,
+      episode_state& episode, api_status* status = nullptr);
 
   /**
    * @brief Choose an action, given a list of actions, action features and context features. The
@@ -59,8 +59,8 @@ public:
    * @param status  Optional field with detailed string description if there is an error
    * @return int Return error code.  This will also be returned in the api_status object
    */
-  int request_episodic_decision(str_view event_id, str_view previous_id, str_view context_json,
-      unsigned int flags, ranking_response& resp, episode_state& episode, api_status* status = nullptr);
+  int request_episodic_decision(str_view event_id, str_view previous_id, str_view context_json, unsigned int flags,
+      ranking_response& resp, episode_state& episode, api_status* status = nullptr);
 
   /**
    * @brief Report outcome of a decision based on a pair of episode and event identifiers.
