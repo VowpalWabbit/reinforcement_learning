@@ -43,7 +43,6 @@ int apim_federated_client::create(std::unique_ptr<i_federated_client>& output, c
 int apim_federated_client::try_get_model(const std::string& app_id,
     /* inout */ model_management::model_data& data, /* out */ bool& model_received, api_status* status)
 {
-  
   return error_code::success;
 }
 

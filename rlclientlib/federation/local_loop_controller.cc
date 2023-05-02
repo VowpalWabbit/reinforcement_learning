@@ -22,10 +22,7 @@ int local_loop_controller::create(std::unique_ptr<local_loop_controller>& output
   {
     RETURN_IF_FAIL(local_client::create(federated_client, config, trace_logger, status));
   }
-  else
-  {
-    RETURN_IF_FAIL(apim_federated_client::create(federated_client, config, trace_logger, status));
-  }
+  else { RETURN_IF_FAIL(apim_federated_client::create(federated_client, config, trace_logger, status)); }
   RETURN_IF_FAIL(trainable_vw_model::create(trainable_model, config, trace_logger, status));
   RETURN_IF_FAIL(sender_joined_log_provider::create(sender_joiner, config, trace_logger, status));
 
