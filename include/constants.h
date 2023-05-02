@@ -84,12 +84,6 @@ const char* const OBSERVATION_APIM_MAX_HTTP_RETRIES = "observation.apim.max_http
 const char* const OBSERVATION_APIM_MAX_HTTP_RETRY_DURATION_MS = "observation.apim.max_http_retry_duration_ms";
 const char* const OBSERVATION_SUBSAMPLE_RATE = "observation.subsample.rate";
 
-// Delta
-const char* const DELTA_APIM_TASKS_LIMIT = "delta.apim.tasks_limit";
-const char* const DELTA_HTTP_API_HOST = "delta.http.api.host";
-const char* const DELTA_APIM_MAX_HTTP_RETRIES = "delta.apim.max_http_retries";
-const char* const DELTA_APIM_MAX_HTTP_RETRY_DURATION_MS = "delta.apim.max_http_retry_duration_ms";
-
 // global sender properties
 const char* const SEND_HIGH_WATER_MARK = "send.highwatermark";
 const char* const SEND_QUEUE_MAX_CAPACITY_KB = "send.queue.maxcapacity.kb";
@@ -143,7 +137,6 @@ const char* const INTERACTION_FILE_SENDER = "INTERACTION_FILE_SENDER";
 const char* const EPISODE_HTTP_API_SENDER = "EPISODE_HTTP_API_SENDER";
 const char* const OBSERVATION_HTTP_API_SENDER = "OBSERVATION_HTTP_API_SENDER";
 const char* const INTERACTION_HTTP_API_SENDER = "INTERACTION_HTTP_API_SENDER";
-const char* const DELTA_HTTP_API_SENDER = "INTERACTION_HTTP_API_SENDER";
 const char* const NULL_TRACE_LOGGER = "NULL_TRACE_LOGGER";
 const char* const CONSOLE_TRACE_LOGGER = "CONSOLE_TRACE_LOGGER";
 const char* const NULL_TIME_PROVIDER = "NULL_TIME_PROVIDER";

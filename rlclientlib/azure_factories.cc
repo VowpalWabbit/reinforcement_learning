@@ -2,8 +2,6 @@
 
 #include "constants.h"
 #include "factory_resolver.h"
-#include "federation/federated_client.h"
-#include "federation/local_client.h"
 #include "logger/event_logger.h"
 #include "logger/http_transport_client.h"
 #include "model_mgmt/restapi_data_transport.h"
@@ -34,8 +32,6 @@ int observation_api_sender_create(std::unique_ptr<i_sender>& retval, const u::co
     error_callback_fn* error_cb, i_trace* trace_logger, api_status* status);
 int interaction_api_sender_create(std::unique_ptr<i_sender>& retval, const u::configuration& cfg,
     error_callback_fn* error_cb, i_trace* trace_logger, api_status* status);
-int delta_api_sender_create(std::unique_ptr<i_sender>& retval, const u::configuration& cfg, error_callback_fn* error_cb,
-    i_trace* trace_logger, api_status* status);
 
 void register_azure_factories()
 {
@@ -46,7 +42,6 @@ void register_azure_factories()
   sender_factory.register_type(value::EPISODE_EH_SENDER, episode_sender_create);
   sender_factory.register_type(value::OBSERVATION_HTTP_API_SENDER, observation_api_sender_create);
   sender_factory.register_type(value::INTERACTION_HTTP_API_SENDER, interaction_api_sender_create);
-  sender_factory.register_type(value::DELTA_HTTP_API_SENDER, delta_api_sender_create);
   sender_factory.register_type(value::EPISODE_HTTP_API_SENDER, episode_api_sender_create);
 }
 
@@ -170,29 +165,4 @@ int interaction_sender_create(std::unique_ptr<i_sender>& retval, const u::config
       error_cb));
   return error_code::success;
 }
-
-int create_apim_delta_http_api_sender(std::unique_ptr<i_sender>& retval, const u::configuration& cfg,
-    const char* api_host, int tasks_limit, int max_http_retries, std::chrono::milliseconds max_http_retry_duration,
-    error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
-{
-  std::unique_ptr<i_federated_client> client;
-  RETURN_IF_FAIL(local_client::create(client, cfg, trace_logger, status));
-  model_management::model_data delta;
-  bool model_received = false;
-  RETURN_IF_FAIL(client->try_get_model(api_host, delta, model_received));
-  client->report_result(reinterpret_cast<const uint8_t*>(delta.data()), delta.data_sz(), status);
-  return error_code::success;
-}
-
-// Creates i_sender object for sending delta data to the apim endpoint.
-int delta_api_sender_create(std::unique_ptr<i_sender>& retval, const u::configuration& cfg, error_callback_fn* error_cb,
-    i_trace* trace_logger, api_status* status)
-{
-  const auto* const api_host = cfg.get(name::DELTA_HTTP_API_HOST, "localhost:8080");
-  return create_apim_delta_http_api_sender(retval, cfg, api_host, cfg.get_int(name::DELTA_APIM_TASKS_LIMIT, 16),
-      cfg.get_int(name::DELTA_APIM_MAX_HTTP_RETRIES, 4),
-      std::chrono::milliseconds(cfg.get_int(name::DELTA_APIM_MAX_HTTP_RETRY_DURATION_MS, 3600000)), error_cb,
-      trace_logger, status);
-}
-
 }  // namespace reinforcement_learning

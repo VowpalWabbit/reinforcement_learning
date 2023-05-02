@@ -2,6 +2,7 @@
 
 #include "constants.h"
 #include "err_constants.h"
+#include "federation/apim_federated_client.h"
 #include "federation/local_client.h"
 #include "federation/sender_joined_log_provider.h"
 #include "model_mgmt.h"
@@ -17,7 +18,14 @@ int local_loop_controller::create(std::unique_ptr<local_loop_controller>& output
   std::unique_ptr<i_federated_client> federated_client;
   std::unique_ptr<trainable_vw_model> trainable_model;
   std::unique_ptr<sender_joined_log_provider> sender_joiner;
-  RETURN_IF_FAIL(local_client::create(federated_client, config, trace_logger, status));
+  if (config.get("federated_client", "local") == "local")
+  {
+    RETURN_IF_FAIL(local_client::create(federated_client, config, trace_logger, status));
+  }
+  else
+  {
+    RETURN_IF_FAIL(apim_federated_client::create(federated_client, config, trace_logger, status));
+  }
   RETURN_IF_FAIL(trainable_vw_model::create(trainable_model, config, trace_logger, status));
   RETURN_IF_FAIL(sender_joined_log_provider::create(sender_joiner, config, trace_logger, status));
 
