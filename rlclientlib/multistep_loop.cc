@@ -15,8 +15,8 @@ int multistep_loop::request_episodic_decision(str_view event_id, str_view previo
     unsigned int flags, ranking_response& resp, episode_state& episode, api_status* status)
 {
   INIT_CHECK();
-  return _pimpl->request_episodic_decision(event_id.str, previous_id.str,
-      {context_json.str, context_json.size}, flags, resp, episode, status);
+  return _pimpl->request_episodic_decision(
+      event_id.str, previous_id.str, {context_json.str, context_json.size}, flags, resp, episode, status);
 }
 
 int multistep_loop::report_outcome(str_view episode_id, str_view event_id, float outcome, api_status* status)
