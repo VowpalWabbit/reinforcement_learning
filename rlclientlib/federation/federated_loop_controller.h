@@ -16,15 +16,15 @@
 
 namespace reinforcement_learning
 {
-// The local_loop_controller will "plug in" to rlclientlib as an i_data_transport object.
+// The federated_loop_controller will "plug in" to rlclientlib as an i_data_transport object.
 // It exposes a get_local_sender_factory() function that creates i_sender proxy objects.
 // These proxy objects will send events to its internal event sink.
 // The initialization code for live_model_impl must register this factory function correctly.
-class local_loop_controller : public model_management::i_data_transport
+class federated_loop_controller : public model_management::i_data_transport
 {
 public:
   RL_ATTR(nodiscard)
-  static int create(std::unique_ptr<local_loop_controller>& output, const utility::configuration& config,
+  static int create(std::unique_ptr<federated_loop_controller>& output, const utility::configuration& config,
       std::unique_ptr<model_management::i_data_transport> transport = nullptr, i_trace* trace_logger = nullptr,
       api_status* status = nullptr);
 
@@ -36,11 +36,11 @@ public:
   // Returns a i_sender proxy object to be used for sending events to the internal event sink
   std::unique_ptr<i_sender> get_local_sender();
 
-  virtual ~local_loop_controller() = default;
+  virtual ~federated_loop_controller() = default;
 
 protected:
   // Constructor is private because objects should be created using the factory function
-  local_loop_controller(std::string app_id, std::unique_ptr<i_federated_client>&& federated_client,
+  federated_loop_controller(std::string app_id, std::unique_ptr<i_federated_client>&& federated_client,
       std::unique_ptr<trainable_vw_model>&& trainable_model, std::shared_ptr<i_joined_log_provider>&& joiner,
       std::shared_ptr<i_event_sink>&& event_sink);
 

@@ -175,9 +175,9 @@ const char* const REWARD_FUNCTION_MAX = "REWARD_FUNCTION_MAX";
 // These are outside of #ifdef section so that we can recognize them as invalid
 // configuration options when rlclientlib is compiled without RL_BUILD_FEDERATION
 //
-// Use local_loop_controller for model data
+// Use federated_loop_controller for model data
 const char* const LOCAL_LOOP_MODEL_DATA = "LOCAL_LOOP_MODEL_DATA";
-// Send events to local_loop_controller
+// Send events to federated_loop_controller
 const char* const LOCAL_LOOP_SENDER = "LOCAL_LOOP_SENDER";
 
 const char* get_default_episode_sender();

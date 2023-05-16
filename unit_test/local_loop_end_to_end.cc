@@ -2,7 +2,7 @@
 
 #include "common_test_utils.h"
 #include "constants.h"
-#include "federation/local_loop_controller.h"
+#include "federation/federated_loop_controller.h"
 #include "live_model.h"
 #include "ranking_response.h"
 
@@ -96,17 +96,17 @@ BOOST_AUTO_TEST_CASE(local_loop_end_to_end_test)
   auto config = get_test_config();
 
   // create a custom data_transport_factory_t that saves a pointer
-  // to the local_loop_controller that was created
-  local_loop_controller* test_local_loop_controller = nullptr;
+  // to the federated_loop_controller that was created
+  federated_loop_controller* test_federated_loop_controller = nullptr;
   data_transport_factory_t test_data_transport_factory;
   test_data_transport_factory.register_type(value::LOCAL_LOOP_MODEL_DATA,
       [&](std::unique_ptr<model_management::i_data_transport>& retval, const utility::configuration& cfg,
           i_trace* trace_logger, api_status* status)
       {
-        std::unique_ptr<local_loop_controller> output;
+        std::unique_ptr<federated_loop_controller> output;
         std::unique_ptr<model_management::i_data_transport> transport;
-        RETURN_IF_FAIL(local_loop_controller::create(output, cfg, std::move(transport), trace_logger, status));
-        test_local_loop_controller = output.get();
+        RETURN_IF_FAIL(federated_loop_controller::create(output, cfg, std::move(transport), trace_logger, status));
+        test_federated_loop_controller = output.get();
         retval = std::move(output);
         return error_code::success;
       });
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(local_loop_end_to_end_test)
       config, nullptr, nullptr, &reinforcement_learning::trace_logger_factory, &test_data_transport_factory);
   model.init(&status);
   BOOST_TEST(status.get_error_code() == error_code::success, status.get_error_msg());
-  BOOST_CHECK_NE(test_local_loop_controller, nullptr);
+  BOOST_CHECK_NE(test_federated_loop_controller, nullptr);
 
   // do some inference calls and report the outcome
   constexpr int iterations = 100;
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(local_loop_end_to_end_test)
 
   // check that updated model has learned from previous outcomes
   model_management::model_data model_data;
-  test_local_loop_controller->get_data(model_data, &status);
+  test_federated_loop_controller->get_data(model_data, &status);
   BOOST_TEST(status.get_error_code() == error_code::success, status.get_error_msg());
   auto vw = test_utils::create_vw(config.get(name::MODEL_VW_INITIAL_COMMAND_LINE, nullptr), model_data);
   BOOST_CHECK_EQUAL(vw->sd->weighted_labeled_examples, iterations);

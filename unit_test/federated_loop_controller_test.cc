@@ -7,7 +7,7 @@
 #include "federation/event_sink.h"
 #include "federation/federated_client.h"
 #include "federation/local_client.h"
-#include "federation/local_loop_controller.h"
+#include "federation/federated_loop_controller.h"
 #include "federation/sender_joined_log_provider.h"
 #include "vw/core/shared_data.h"
 #include "vw/core/vw.h"
@@ -16,19 +16,19 @@ using namespace reinforcement_learning;
 
 namespace
 {
-// Wrapper around local_loop_controller to allow us to access member variables
-class test_local_loop_controller : public local_loop_controller
+// Wrapper around federated_loop_controller to allow us to access member variables
+class test_federated_loop_controller : public federated_loop_controller
 {
 public:
-  test_local_loop_controller(std::string app_id, std::unique_ptr<i_federated_client>&& federated_client,
+  test_federated_loop_controller(std::string app_id, std::unique_ptr<i_federated_client>&& federated_client,
       std::unique_ptr<trainable_vw_model>&& trainable_model, std::shared_ptr<i_joined_log_provider>&& joiner,
       std::shared_ptr<i_event_sink>&& event_sink)
-      : local_loop_controller(std::move(app_id), std::move(federated_client), std::move(trainable_model),
+      : federated_loop_controller(std::move(app_id), std::move(federated_client), std::move(trainable_model),
             std::move(joiner), std::move(event_sink))
   {
   }
 
-  virtual ~test_local_loop_controller() = default;
+  virtual ~test_federated_loop_controller() = default;
 
   i_federated_client* get_client() { return _federated_client.get(); }
   trainable_vw_model* get_model() { return _trainable_model.get(); }
@@ -121,7 +121,7 @@ utility::configuration get_test_config()
   return config;
 }
 
-std::unique_ptr<local_loop_controller> create_test_local_loop_controller(utility::configuration config)
+std::unique_ptr<federated_loop_controller> create_test_federated_loop_controller(utility::configuration config)
 {
   std::unique_ptr<trainable_vw_model> trainable_model;
   std::unique_ptr<sender_joined_log_provider> sender_joiner;
@@ -132,16 +132,16 @@ std::unique_ptr<local_loop_controller> create_test_local_loop_controller(utility
   std::shared_ptr<i_event_sink> event_sink(new mock_event_sink());
   std::unique_ptr<i_federated_client> federated_client(new mock_federated_client());
 
-  return std::unique_ptr<local_loop_controller>(new test_local_loop_controller("test_app_id",
+  return std::unique_ptr<federated_loop_controller>(new test_federated_loop_controller("test_app_id",
       std::move(federated_client), std::move(trainable_model), std::move(joiner), std::move(event_sink)));
 }
 }  // namespace
 
 BOOST_AUTO_TEST_CASE(sender_factory_test)
 {
-  // create the local_loop_controller
+  // create the federated_loop_controller
   auto config = get_test_config();
-  auto test_llc = create_test_local_loop_controller(config);
+  auto test_llc = create_test_federated_loop_controller(config);
 
   // create a sender and send some data
   std::unique_ptr<i_sender> sender = test_llc->get_local_sender();
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(sender_factory_test)
   sender->send(buffer_in);
 
   // get the data out of event sink
-  auto event_sink_out = dynamic_cast<test_local_loop_controller*>(test_llc.get())->get_event_sink();
+  auto event_sink_out = dynamic_cast<test_federated_loop_controller*>(test_llc.get())->get_event_sink();
   BOOST_CHECK_NE(event_sink_out, nullptr);
   auto buffer_out = dynamic_cast<mock_event_sink*>(event_sink_out)->get_latest_event();
   BOOST_CHECK_NE(buffer_out, nullptr);
@@ -162,10 +162,10 @@ BOOST_AUTO_TEST_CASE(sender_factory_test)
 
 BOOST_AUTO_TEST_CASE(update_get_model_data)
 {
-  // create the local_loop_controller
+  // create the federated_loop_controller
   auto config = get_test_config();
-  auto llc = create_test_local_loop_controller(config);
-  auto test_llc = dynamic_cast<test_local_loop_controller*>(llc.get());
+  auto llc = create_test_federated_loop_controller(config);
+  auto test_llc = dynamic_cast<test_federated_loop_controller*>(llc.get());
   BOOST_CHECK_NE(test_llc, nullptr);
   auto mock_client = dynamic_cast<mock_federated_client*>(test_llc->get_client());
   BOOST_CHECK_NE(mock_client, nullptr);
