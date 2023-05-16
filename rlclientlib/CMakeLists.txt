@@ -119,8 +119,9 @@ endif()
 
 if(RL_BUILD_FEDERATION)
   list(APPEND PROJECT_SOURCES
+    federation/apim_federated_client.cc
     federation/local_client.cc
-    federation/local_loop_controller.cc
+    federation/federated_loop_controller.cc
     federation/sender_joined_log_provider.cc
     federation/vw_trainable_model.cc
   )
@@ -209,7 +210,8 @@ if(RL_BUILD_FEDERATION)
     federation/federated_client.h
     federation/joined_log_provider.h
     federation/local_client.h
-    federation/local_loop_controller.h
+    federation/apim_federated_client.h
+    federation/federated_loop_controller.h
     federation/sender_joined_log_provider.h
     federation/vw_trainable_model.h
   )

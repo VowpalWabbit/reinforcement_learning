@@ -18,7 +18,7 @@
 #include "vw_model/safe_vw.h"
 
 #ifdef RL_BUILD_FEDERATION
-#  include "federation/local_loop_controller.h"
+#  include "federation/federated_loop_controller.h"
 #endif
 
 #include <boost/uuid/random_generator.hpp>
@@ -696,10 +696,10 @@ int live_model_impl::init_local_loop(api_status* status)
   // This function should only be called when the configuration is set to use LOCAL_LOOP_MODEL_DATA
   assert(model_src == value::LOCAL_LOOP_MODEL_DATA);
 
-  // Creating i_data_transport with type LOCAL_LOOP_MODEL_DATA results in local_loop_controller
+  // Creating i_data_transport with type LOCAL_LOOP_MODEL_DATA results in federated_loop_controller
   std::unique_ptr<m::i_data_transport> output;
   RETURN_IF_FAIL(_t_factory->create(output, model_src, _configuration, _trace_logger.get(), status));
-  std::unique_ptr<local_loop_controller> llc(reinterpret_cast<local_loop_controller*>(output.release()));
+  std::unique_ptr<federated_loop_controller> llc(reinterpret_cast<federated_loop_controller*>(output.release()));
 
   // Create senders with default sender implementation set to LOCAL_LOOP_SENDER
   std::string interaction_sender_type =

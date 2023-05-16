@@ -10,7 +10,7 @@
 #include "vw_model/vw_model.h"
 
 #ifdef RL_BUILD_FEDERATION
-#  include "federation/local_loop_controller.h"
+#  include "federation/federated_loop_controller.h"
 #endif
 
 #ifdef USE_AZURE_FACTORIES
@@ -121,12 +121,13 @@ int file_model_loader_create(std::unique_ptr<m::i_data_transport>& retval, const
 }
 
 #ifdef RL_BUILD_FEDERATION
-int local_loop_controller_create(std::unique_ptr<m::i_data_transport>& retval, const u::configuration& config,
+int federated_loop_controller_create(std::unique_ptr<m::i_data_transport>& retval, const u::configuration& config,
     i_trace* trace_logger, api_status* status)
 {
   TRACE_INFO(trace_logger, "Local loop controller i_data_transport created.");
-  std::unique_ptr<local_loop_controller> output;
-  RETURN_IF_FAIL(local_loop_controller::create(output, config, trace_logger, status));
+  std::unique_ptr<federated_loop_controller> output;
+  std::unique_ptr<model_management::i_data_transport> transport;
+  RETURN_IF_FAIL(federated_loop_controller::create(output, config, std::move(transport), trace_logger, status));
   retval = std::move(output);
   return error_code::success;
 }
@@ -158,7 +159,7 @@ void factory_initializer::register_default_factories()
   data_transport_factory.register_type(value::FILE_MODEL_DATA, file_model_loader_create);
 
 #ifdef RL_BUILD_FEDERATION
-  data_transport_factory.register_type(value::LOCAL_LOOP_MODEL_DATA, local_loop_controller_create);
+  data_transport_factory.register_type(value::LOCAL_LOOP_MODEL_DATA, federated_loop_controller_create);
 #else
   data_transport_factory.register_type(value::LOCAL_LOOP_MODEL_DATA,
       [](std::unique_ptr<m::i_data_transport>&, const u::configuration&, i_trace* trace_logger, api_status* status)

@@ -1,7 +1,8 @@
-#include "federation/local_loop_controller.h"
+#include "federation/federated_loop_controller.h"
 
 #include "constants.h"
 #include "err_constants.h"
+#include "federation/apim_federated_client.h"
 #include "federation/local_client.h"
 #include "federation/sender_joined_log_provider.h"
 #include "model_mgmt.h"
@@ -9,15 +10,23 @@
 
 namespace reinforcement_learning
 {
-int local_loop_controller::create(std::unique_ptr<local_loop_controller>& output,
-    const reinforcement_learning::utility::configuration& config, i_trace* trace_logger, api_status* status)
+int federated_loop_controller::create(std::unique_ptr<federated_loop_controller>& output,
+    const reinforcement_learning::utility::configuration& config,
+    std::unique_ptr<model_management::i_data_transport> transport, i_trace* trace_logger, api_status* status)
 {
   std::string app_id = config.get(name::APP_ID, "");
 
   std::unique_ptr<i_federated_client> federated_client;
   std::unique_ptr<trainable_vw_model> trainable_model;
   std::unique_ptr<sender_joined_log_provider> sender_joiner;
-  RETURN_IF_FAIL(local_client::create(federated_client, config, trace_logger, status));
+  if (config.get("federated_client", "local") == "local")
+  {
+    RETURN_IF_FAIL(local_client::create(federated_client, config, trace_logger, status));
+  }
+  else
+  {
+    RETURN_IF_FAIL(apim_federated_client::create(federated_client, config, trace_logger, std::move(transport), status));
+  }
   RETURN_IF_FAIL(trainable_vw_model::create(trainable_model, config, trace_logger, status));
   RETURN_IF_FAIL(sender_joined_log_provider::create(sender_joiner, config, trace_logger, status));
 
@@ -30,14 +39,14 @@ int local_loop_controller::create(std::unique_ptr<local_loop_controller>& output
   joiner = std::static_pointer_cast<i_joined_log_provider>(sender_joiner_shared);
   event_sink = std::static_pointer_cast<i_event_sink>(sender_joiner_shared);
 
-  output = std::unique_ptr<local_loop_controller>(new local_loop_controller(std::move(app_id),
+  output = std::unique_ptr<federated_loop_controller>(new federated_loop_controller(std::move(app_id),
       std::move(federated_client), std::move(trainable_model), std::move(joiner), std::move(event_sink)));
   return error_code::success;
 }
 
-local_loop_controller::local_loop_controller(std::string app_id, std::unique_ptr<i_federated_client>&& federated_client,
-    std::unique_ptr<trainable_vw_model>&& trainable_model, std::shared_ptr<i_joined_log_provider>&& joiner,
-    std::shared_ptr<i_event_sink>&& event_sink)
+federated_loop_controller::federated_loop_controller(std::string app_id,
+    std::unique_ptr<i_federated_client>&& federated_client, std::unique_ptr<trainable_vw_model>&& trainable_model,
+    std::shared_ptr<i_joined_log_provider>&& joiner, std::shared_ptr<i_event_sink>&& event_sink)
     : _app_id(std::move(app_id))
     , _federated_client(std::move(federated_client))
     , _trainable_model(std::move(trainable_model))
@@ -46,7 +55,7 @@ local_loop_controller::local_loop_controller(std::string app_id, std::unique_ptr
 {
 }
 
-int local_loop_controller::update_global(api_status* status)
+int federated_loop_controller::update_global(api_status* status)
 {
   // ask for a new global model
   model_management::model_data data;
@@ -70,7 +79,7 @@ int local_loop_controller::update_global(api_status* status)
   return error_code::success;
 }
 
-int local_loop_controller::update_local(api_status* status)
+int federated_loop_controller::update_local(api_status* status)
 {
   std::unique_ptr<VW::io::reader> binary_log;
   RETURN_IF_FAIL(_joiner->invoke_join(binary_log, status));
@@ -78,13 +87,13 @@ int local_loop_controller::update_local(api_status* status)
   return error_code::success;
 }
 
-int local_loop_controller::get_data(model_management::model_data& data, api_status* status)
+int federated_loop_controller::get_data(model_management::model_data& data, api_status* status)
 {
   RETURN_IF_FAIL(update_global(status));
   RETURN_IF_FAIL(_trainable_model->get_data(data, status));
   return error_code::success;
 }
 
-std::unique_ptr<i_sender> local_loop_controller::get_local_sender() { return _event_sink->get_sender_proxy(); }
+std::unique_ptr<i_sender> federated_loop_controller::get_local_sender() { return _event_sink->get_sender_proxy(); }
 
 }  // namespace reinforcement_learning
