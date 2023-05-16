@@ -15,15 +15,15 @@
 
 namespace reinforcement_learning
 {
-apim_federated_client::apim_federated_client(std::unique_ptr<VW::workspace> initial_model, i_trace* trace_logger)
-    : _current_model(std::move(initial_model)), _state(state_t::model_available), _trace_logger(trace_logger)
+apim_federated_client::apim_federated_client(std::unique_ptr<VW::workspace> initial_model, i_trace* trace_logger, std::unique_ptr<model_management::i_data_transport> transport)
+    : _current_model(std::move(initial_model)), _state(state_t::model_available), _trace_logger(trace_logger), _transport(std::move(transport))
 {
 }
 
 apim_federated_client::~apim_federated_client() = default;
 
 int apim_federated_client::create(std::unique_ptr<i_federated_client>& output, const utility::configuration& config,
-    i_trace* trace_logger, api_status* status)
+    i_trace* trace_logger, std::unique_ptr<model_management::i_data_transport> transport, api_status* status)
 {
   std::string cmd_line = "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id ";
   cmd_line += config.get("id", "default_id");
@@ -36,13 +36,14 @@ int apim_federated_client::create(std::unique_ptr<i_federated_client>& output, c
   auto workspace = VW::initialize_experimental(std::move(args), nullptr, nullptr, nullptr, &logger);
   workspace->id += "/0";  // initialize iteration id to 0
 
-  output = std::unique_ptr<i_federated_client>(new apim_federated_client(std::move(workspace), trace_logger));
+  output = std::unique_ptr<i_federated_client>(new apim_federated_client(std::move(workspace), trace_logger, std::move(transport)));
   return error_code::success;
 }
 
 int apim_federated_client::try_get_model(const std::string& app_id,
     /* inout */ model_management::model_data& data, /* out */ bool& model_received, api_status* status)
 {
+  _transport->get_data(data, status);
   return error_code::success;
 }
 

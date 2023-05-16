@@ -126,7 +126,8 @@ int local_loop_controller_create(std::unique_ptr<m::i_data_transport>& retval, c
 {
   TRACE_INFO(trace_logger, "Local loop controller i_data_transport created.");
   std::unique_ptr<local_loop_controller> output;
-  RETURN_IF_FAIL(local_loop_controller::create(output, config, trace_logger, status));
+  std::unique_ptr<model_management::i_data_transport> transport;
+  RETURN_IF_FAIL(local_loop_controller::create(output, config, std::move(transport), trace_logger, status));
   retval = std::move(output);
   return error_code::success;
 }

@@ -11,7 +11,7 @@
 namespace reinforcement_learning
 {
 int local_loop_controller::create(std::unique_ptr<local_loop_controller>& output,
-    const reinforcement_learning::utility::configuration& config, i_trace* trace_logger, api_status* status)
+    const reinforcement_learning::utility::configuration& config, std::unique_ptr<model_management::i_data_transport> transport, i_trace* trace_logger, api_status* status)
 {
   std::string app_id = config.get(name::APP_ID, "");
 
@@ -22,7 +22,7 @@ int local_loop_controller::create(std::unique_ptr<local_loop_controller>& output
   {
     RETURN_IF_FAIL(local_client::create(federated_client, config, trace_logger, status));
   }
-  else { RETURN_IF_FAIL(apim_federated_client::create(federated_client, config, trace_logger, status)); }
+  else { RETURN_IF_FAIL(apim_federated_client::create(federated_client, config, trace_logger, std::move(transport), status)); }
   RETURN_IF_FAIL(trainable_vw_model::create(trainable_model, config, trace_logger, status));
   RETURN_IF_FAIL(sender_joined_log_provider::create(sender_joiner, config, trace_logger, status));
 

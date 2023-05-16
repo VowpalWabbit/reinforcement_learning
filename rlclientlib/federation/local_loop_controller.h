@@ -25,7 +25,7 @@ class local_loop_controller : public model_management::i_data_transport
 public:
   RL_ATTR(nodiscard)
   static int create(std::unique_ptr<local_loop_controller>& output, const utility::configuration& config,
-      i_trace* trace_logger = nullptr, api_status* status = nullptr);
+      std::unique_ptr<model_management::i_data_transport> transport = nullptr, i_trace* trace_logger = nullptr, api_status* status = nullptr);
 
   // Get model data in binary format
   // This will perform joining and training on any observed events, and then return the updated model

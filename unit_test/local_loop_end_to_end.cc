@@ -104,7 +104,8 @@ BOOST_AUTO_TEST_CASE(local_loop_end_to_end_test)
           i_trace* trace_logger, api_status* status)
       {
         std::unique_ptr<local_loop_controller> output;
-        RETURN_IF_FAIL(local_loop_controller::create(output, cfg, trace_logger, status));
+        std::unique_ptr<model_management::i_data_transport> transport;
+        RETURN_IF_FAIL(local_loop_controller::create(output, cfg, std::move(transport), trace_logger, status));
         test_local_loop_controller = output.get();
         retval = std::move(output);
         return error_code::success;
