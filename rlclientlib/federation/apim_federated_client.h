@@ -1,8 +1,8 @@
 #pragma once
 
 #include "configuration.h"
-#include "model_mgmt.h"
 #include "federation/federated_client.h"
+#include "model_mgmt.h"
 #include "trace_logger.h"
 #include "vw/core/vw_fwd.h"
 
@@ -13,7 +13,8 @@ class apim_federated_client : i_federated_client
 public:
   RL_ATTR(nodiscard)
   static int create(std::unique_ptr<i_federated_client>& output, const utility::configuration& config,
-      i_trace* trace_logger = nullptr, std::unique_ptr<model_management::i_data_transport> transport = nullptr, api_status* status = nullptr);
+      i_trace* trace_logger = nullptr, std::unique_ptr<model_management::i_data_transport> transport = nullptr,
+      api_status* status = nullptr);
 
   RL_ATTR(nodiscard)
   int try_get_model(const std::string& app_id,
@@ -31,7 +32,8 @@ private:
     model_retrieved
   };
 
-  apim_federated_client(std::unique_ptr<VW::workspace> initial_model, i_trace* trace_logger, std::unique_ptr<model_management::i_data_transport> transport);
+  apim_federated_client(std::unique_ptr<VW::workspace> initial_model, i_trace* trace_logger,
+      std::unique_ptr<model_management::i_data_transport> transport);
 
   state_t _state;
   std::unique_ptr<VW::workspace> _current_model;

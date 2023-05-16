@@ -15,8 +15,12 @@
 
 namespace reinforcement_learning
 {
-apim_federated_client::apim_federated_client(std::unique_ptr<VW::workspace> initial_model, i_trace* trace_logger, std::unique_ptr<model_management::i_data_transport> transport)
-    : _current_model(std::move(initial_model)), _state(state_t::model_available), _trace_logger(trace_logger), _transport(std::move(transport))
+apim_federated_client::apim_federated_client(std::unique_ptr<VW::workspace> initial_model, i_trace* trace_logger,
+    std::unique_ptr<model_management::i_data_transport> transport)
+    : _current_model(std::move(initial_model))
+    , _state(state_t::model_available)
+    , _trace_logger(trace_logger)
+    , _transport(std::move(transport))
 {
 }
 
@@ -36,7 +40,8 @@ int apim_federated_client::create(std::unique_ptr<i_federated_client>& output, c
   auto workspace = VW::initialize_experimental(std::move(args), nullptr, nullptr, nullptr, &logger);
   workspace->id += "/0";  // initialize iteration id to 0
 
-  output = std::unique_ptr<i_federated_client>(new apim_federated_client(std::move(workspace), trace_logger, std::move(transport)));
+  output = std::unique_ptr<i_federated_client>(
+      new apim_federated_client(std::move(workspace), trace_logger, std::move(transport)));
   return error_code::success;
 }
 
