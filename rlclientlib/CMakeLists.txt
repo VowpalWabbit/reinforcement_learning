@@ -78,6 +78,7 @@ set(PROJECT_SOURCES
   model_mgmt/model_downloader.cc
   model_mgmt/model_mgmt.cc
   multistep.cc
+  multistep_loop.cc
   multi_slot_response.cc
   multi_slot_response_detailed.cc
   ranking_event.cc
@@ -120,6 +121,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/loop_apis/ca_loop.h
   ../include/loop_apis/cb_loop.h
   ../include/loop_apis/ccb_loop.h
+  ../include/loop_apis/multistep_loop.h
   ../include/config_utility.h
   ../include/configuration.h
   ../include/constants.h
