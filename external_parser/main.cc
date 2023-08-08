@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
     auto options = VW::make_unique<options_cli>(std::vector<std::string>(argv + 1, argv + argc));
     options->add_and_parse(driver_config);
     auto all = VW::external::initialize_with_binary_parser(std::move(options));
-    all->vw_is_main = true;
+    all->runtime_config.vw_is_main = true;
 
     auto skip_driver = all->options->get_typed_option<bool>("dry_run").value();
     if (skip_driver)
