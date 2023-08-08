@@ -118,7 +118,7 @@ std::unique_ptr<parser> parser::get_external_parser(VW::workspace* all, const pa
 
     if (all->options->was_supplied("extra_metrics"))
     {
-      all->example_parser->metrics = VW::make_unique<VW::details::dsjson_metrics>();
+      all->parser_runtime.example_parser->metrics = VW::make_unique<VW::details::dsjson_metrics>();
     }
 
     return VW::make_unique<binary_parser>(std::move(joiner), all->logger);
@@ -181,7 +181,7 @@ std::unique_ptr<VW::workspace> initialize_with_binary_parser(std::unique_ptr<con
     all->global_metrics.register_metrics_callback(
         [external_parser_ptr](VW::metric_sink& metric_list) { external_parser_ptr->persist_metrics(metric_list); });
     all->custom_parser = std::unique_ptr<VW::details::input_parser>(external_parser.release());
-    all->example_parser->reader = VW::external::parse_examples;
+    all->parser_runtime.example_parser->reader = VW::external::parse_examples;
   }
 
   return all;

@@ -39,7 +39,7 @@ void should_not_add_examples(std::string& infile, v2::ProblemType problem_type =
   VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
-  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) { continue; }
+  while (vw->parser_runtime.example_parser->reader(vw.get(), vw->parser_runtime.example_parser->input, examples) > 0) { continue; }
 
   BOOST_CHECK_EQUAL(examples.size(), 1);
   BOOST_CHECK_EQUAL(examples[0]->indices.size(), 0);  // newline example
@@ -77,7 +77,7 @@ void should_add_examples(std::string& infile, v2::ProblemType problem_type = v2:
   VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
-  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0) { continue; }
+  while (vw->parser_runtime.example_parser->reader(vw.get(), vw->parser_runtime.example_parser->input, examples) > 0) { continue; }
 
   switch (problem_type)
   {

@@ -66,7 +66,7 @@ VW::example* safe_vw::get_or_create_example()
   if (_example_pool.empty())
   {
     auto* ex = VW::alloc_examples(1);
-    _vw->example_parser->lbl_parser.default_label(ex->l);
+    _vw->parser_runtime.example_parser->lbl_parser.default_label(ex->l);
 
     return ex;
   }
@@ -76,7 +76,7 @@ VW::example* safe_vw::get_or_create_example()
   _example_pool.pop_back();
 
   VW::empty_example(*_vw, *ex);
-  _vw->example_parser->lbl_parser.default_label(ex->l);
+  _vw->parser_runtime.example_parser->lbl_parser.default_label(ex->l);
 
   return ex;
 }
@@ -94,7 +94,7 @@ void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& acti
   std::string line_vec(context);
   VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
 
-  if (_vw->audit)
+  if (_vw->output_config.audit)
   {
     _vw->audit_buffer->clear();
     VW::read_line_decision_service_json<true>(
@@ -130,7 +130,7 @@ void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<f
   std::string line_vec(context);
   VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
 
-  if (_vw->audit)
+  if (_vw->output_config.audit)
   {
     _vw->audit_buffer->clear();
     VW::parsers::json::read_line_json<true>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac);
@@ -172,7 +172,7 @@ void safe_vw::choose_continuous_action(string_view context, float& action, float
   std::string line_vec(context);
   VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
 
-  if (_vw->audit)
+  if (_vw->output_config.audit)
   {
     _vw->audit_buffer->clear();
     VW::parsers::json::read_line_json<true>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac);
@@ -204,7 +204,7 @@ void safe_vw::rank_decisions(const std::vector<const char*>& event_ids, string_v
   std::string line_vec(context);
   VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
 
-  if (_vw->audit)
+  if (_vw->output_config.audit)
   {
     _vw->audit_buffer->clear();
     VW::parsers::json::read_line_json<true>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac);
@@ -259,7 +259,7 @@ void safe_vw::rank_multi_slot_decisions(const char* event_id, const std::vector<
   std::string line_vec(context);
   VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
 
-  if (_vw->audit)
+  if (_vw->output_config.audit)
   {
     _vw->audit_buffer->clear();
     VW::parsers::json::read_line_json<true>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac);
@@ -364,13 +364,13 @@ bool safe_vw::is_CB_to_CCB_model_upgrade(const std::string& args) const
 
 string_view safe_vw::get_audit_data() const
 {
-  if (_vw->audit) { return string_view(_vw->audit_buffer->data(), _vw->audit_buffer->size()); }
+  if (_vw->output_config.audit) { return string_view(_vw->audit_buffer->data(), _vw->audit_buffer->size()); }
   else { return string_view(); }
 }
 
 void safe_vw::init()
 {
-  if (_vw->audit)
+  if (_vw->output_config.audit)
   {
     _vw->audit_buffer = std::make_shared<std::vector<char>>();
     _vw->audit_writer = VW::io::create_vector_writer(_vw->audit_buffer);

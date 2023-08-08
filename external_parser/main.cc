@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
       VW::LEARNER::generic_driver(*all);
     }
 
-    if (all->example_parser->exc_ptr) { std::rethrow_exception(all->example_parser->exc_ptr); }
+    if (all->parser_runtime.example_parser->exc_ptr) { std::rethrow_exception(all->parser_runtime.example_parser->exc_ptr); }
 
     VW::sync_stats(*all);
     // Leave deletion up to the unique_ptr
