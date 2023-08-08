@@ -20,7 +20,7 @@ namespace model_management
 class vw_model : public i_model
 {
   std::string add_optional_audit_flag(const std::string& command_line) const;
-  void write_audit_log(const char* event_id, string_view audit_buffer) const;
+  void write_audit_log(const char* event_id, string_view output_runtime.audit_buffer) const;
 
 public:
   vw_model(i_trace* trace_logger, const utility::configuration& config);

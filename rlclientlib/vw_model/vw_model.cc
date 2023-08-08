@@ -182,9 +182,9 @@ std::string vw_model::add_optional_audit_flag(const std::string& command_line) c
   return command_line;
 }
 
-void vw_model::write_audit_log(const char* event_id, string_view audit_buffer) const
+void vw_model::write_audit_log(const char* event_id, string_view output_runtime.audit_buffer) const
 {
-  if (event_id != nullptr && !audit_buffer.empty())
+  if (event_id != nullptr && !output_runtime.audit_buffer.empty())
   {
     // remove any non-alphanumeric characters from the output name
     std::string filename(event_id);
@@ -196,7 +196,7 @@ void vw_model::write_audit_log(const char* event_id, string_view audit_buffer) c
 
     std::ofstream auditFile;
     auditFile.open(filepath.str(), std::ofstream::out | std::ofstream::trunc);
-    auditFile.write(audit_buffer.data(), audit_buffer.size());
+    auditFile.write(output_runtime.audit_buffer.data(), output_runtime.audit_buffer.size());
     auditFile.close();
   }
 }
