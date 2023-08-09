@@ -373,7 +373,7 @@ void safe_vw::init()
   if (_vw->output_config.audit)
   {
     _vw->output_runtime.audit_buffer = std::make_shared<std::vector<char>>();
-    _vw->audit_writer = VW::io::create_vector_writer(_vw->output_runtime.audit_buffer);
+    _vw->output_runtime.audit_writer = VW::io::create_vector_writer(_vw->output_runtime.audit_buffer);
   }
 }
 
