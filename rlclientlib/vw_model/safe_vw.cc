@@ -55,7 +55,7 @@ safe_vw::~safe_vw()
   for (auto&& ex : _example_pool) { VW::dealloc_examples(ex, 1); }
 
   // cleanup VW instance
-  VW::details::reset_source(*_vw, _vw->num_bits);
+  VW::details::reset_source(*_vw, _vw->initial_weights_config.num_bits);
 
   VW::finish(*_vw);
 }
