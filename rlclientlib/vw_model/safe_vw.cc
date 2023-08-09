@@ -364,7 +364,10 @@ bool safe_vw::is_CB_to_CCB_model_upgrade(const std::string& args) const
 
 string_view safe_vw::get_audit_data() const
 {
-  if (_vw->output_config.audit) { return string_view(_vw->output_runtime.audit_buffer->data(), _vw->output_runtime.audit_buffer->size()); }
+  if (_vw->output_config.audit)
+  {
+    return string_view(_vw->output_runtime.audit_buffer->data(), _vw->output_runtime.audit_buffer->size());
+  }
   else { return string_view(); }
 }
 
