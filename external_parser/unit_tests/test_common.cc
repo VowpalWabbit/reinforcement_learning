@@ -58,8 +58,8 @@ void clear_examples(VW::multi_ex& examples, VW::workspace* vw)
 
 void set_buffer_as_vw_input(const std::vector<char>& buffer, VW::workspace* vw)
 {
-  vw->example_parser->input.close_files();
-  vw->example_parser->input.add_file(VW::io::create_buffer_view(buffer.data(), buffer.size()));
+  vw->parser_runtime.example_parser->input.close_files();
+  vw->parser_runtime.example_parser->input.add_file(VW::io::create_buffer_view(buffer.data(), buffer.size()));
 }
 
 std::vector<char> read_file(const std::string& file_name)

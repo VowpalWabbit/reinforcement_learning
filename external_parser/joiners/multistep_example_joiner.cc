@@ -261,7 +261,7 @@ joined_event::joined_event multistep_example_joiner::process_interaction(
   std::string ctx(line_vec);
   TimePoint tp(event_meta.timestamp);
 
-  if (_vw->audit || _vw->hash_inv)
+  if (_vw->output_config.audit || _vw->output_config.hash_inv)
   {
     VW::parsers::json::read_line_json<true>(
         *_vw, examples, const_cast<char*>(line_vec.c_str()), line_vec.size(), ex_fac);
@@ -337,7 +337,7 @@ bool multistep_example_joiner::process_joined(VW::multi_ex& examples)
 
   // add an empty example to signal end-of-multiline
   examples.push_back(VW::new_unused_example(*_vw));
-  _vw->example_parser->lbl_parser.default_label(examples.back()->l);
+  _vw->parser_runtime.example_parser->lbl_parser.default_label(examples.back()->l);
   examples.back()->is_newline = true;
 
   return true;

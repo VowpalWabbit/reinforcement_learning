@@ -44,7 +44,7 @@ std::string get_json_event(
   VW::multi_ex examples;
   examples.push_back(VW::new_unused_example(*vw));
 
-  while (vw->example_parser->reader(vw.get(), vw->example_parser->input, examples) > 0)
+  while (vw->parser_runtime.example_parser->reader(vw.get(), vw->parser_runtime.example_parser->input, examples) > 0)
   {
     examples.push_back(VW::new_unused_example(*vw));
   }

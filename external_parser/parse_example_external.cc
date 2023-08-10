@@ -88,7 +88,7 @@ std::unique_ptr<parser> parser::get_external_parser(VW::workspace* all, const pa
     std::unique_ptr<i_joiner> joiner(nullptr);
     if (binary_to_json)
     {
-      const auto& infile_path = all->data_filename;
+      const auto& infile_path = all->parser_runtime.data_filename;
       const auto& infile_name = infile_path.substr(0, infile_path.find_last_of('.'));
       const auto& infile_extension = infile_path.substr(infile_path.find_last_of('.') + 1);
 
@@ -118,7 +118,7 @@ std::unique_ptr<parser> parser::get_external_parser(VW::workspace* all, const pa
 
     if (all->options->was_supplied("extra_metrics"))
     {
-      all->example_parser->metrics = VW::make_unique<VW::details::dsjson_metrics>();
+      all->parser_runtime.example_parser->metrics = VW::make_unique<VW::details::dsjson_metrics>();
     }
 
     return VW::make_unique<binary_parser>(std::move(joiner), all->logger);
@@ -156,7 +156,7 @@ void parser::persist_metrics(metric_sink& metric_sink) { metric_sink.set_uint("e
 
 int parse_examples(VW::workspace* all, io_buf& io_buf, VW::multi_ex& examples)
 {
-  bool keep_reading = all->custom_parser->next(*all, io_buf, examples);
+  bool keep_reading = all->parser_runtime.custom_parser->next(*all, io_buf, examples);
   return keep_reading ? 1 : 0;
 }
 
@@ -178,10 +178,10 @@ std::unique_ptr<VW::workspace> initialize_with_binary_parser(std::unique_ptr<con
     // The metric hook will only get called if the workspace is still alive,
     // and the lifetime of the custom parser object is tied to the lifetime
     // of the workspace.
-    all->global_metrics.register_metrics_callback(
+    all->output_runtime.global_metrics.register_metrics_callback(
         [external_parser_ptr](VW::metric_sink& metric_list) { external_parser_ptr->persist_metrics(metric_list); });
-    all->custom_parser = std::unique_ptr<VW::details::input_parser>(external_parser.release());
-    all->example_parser->reader = VW::external::parse_examples;
+    all->parser_runtime.custom_parser = std::unique_ptr<VW::details::input_parser>(external_parser.release());
+    all->parser_runtime.example_parser->reader = VW::external::parse_examples;
   }
 
   return all;

@@ -128,6 +128,10 @@ jobs:
       - uses: lukka/get-cmake@latest
       - name: Install dotnet t4
         run: dotnet tool install --global dotnet-t4
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
       - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
         shell: bash
       - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}

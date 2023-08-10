@@ -55,7 +55,7 @@ VW::example* example_joiner::get_or_create_example()
   if (_example_pool.empty())
   {
     auto* ex = VW::alloc_examples(1);
-    _vw->example_parser->lbl_parser.default_label(ex->l);
+    _vw->parser_runtime.example_parser->lbl_parser.default_label(ex->l);
 
     return ex;
   }
@@ -64,7 +64,7 @@ VW::example* example_joiner::get_or_create_example()
   VW::example* ex = _example_pool.back();
   _example_pool.pop_back();
 
-  _vw->example_parser->lbl_parser.default_label(ex->l);
+  _vw->parser_runtime.example_parser->lbl_parser.default_label(ex->l);
   VW::empty_example(*_vw, *ex);
 
   return ex;
@@ -322,7 +322,7 @@ bool example_joiner::process_interaction(
     try
     {
       VW::example_factory_t ex_fac = [this]() -> VW::example& { return *(VW::new_unused_example(*this->_vw)); };
-      if (_vw->audit || _vw->hash_inv)
+      if (_vw->output_config.audit || _vw->output_config.hash_inv)
       {
         VW::parsers::json::read_line_json<true>(
             *_vw, examples, const_cast<char*>(context.c_str()), context.size(), ex_fac, &_dedup_cache.dedup_examples);
@@ -413,7 +413,7 @@ bool example_joiner::process_dedup(const v2::Event& event, const v2::Metadata& m
       VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
       try
       {
-        if (_vw->audit || _vw->hash_inv)
+        if (_vw->output_config.audit || _vw->output_config.hash_inv)
         {
           VW::parsers::json::template read_line_json<true>(*_vw, examples,
               const_cast<char*>(dedup->values()->Get(i)->c_str()), dedup->values()->Get(i)->size(), ex_fac);
@@ -485,12 +485,12 @@ bool example_joiner::process_joined(VW::multi_ex& examples)
       {
         if (je != nullptr)
         {
-          if (_vw->example_parser->metrics)
+          if (_vw->parser_runtime.example_parser->metrics)
           {
             if (!je->is_joined_event_learnable()) { _joiner_metrics.number_of_skipped_events++; }
             else
             {
-              je->calculate_metrics(_vw->example_parser->metrics.get());
+              je->calculate_metrics(_vw->parser_runtime.example_parser->metrics.get());
               _joiner_metrics.sum_cost_original += -1.f * je->get_sum_original_reward();
               if (_joiner_metrics.first_event_id.empty())
               {
@@ -560,7 +560,7 @@ bool example_joiner::process_joined(VW::multi_ex& examples)
   {
     // add an empty example to signal end-of-multiline
     examples.push_back(VW::new_unused_example(*_vw));
-    _vw->example_parser->lbl_parser.default_label(examples.back()->l);
+    _vw->parser_runtime.example_parser->lbl_parser.default_label(examples.back()->l);
     examples.back()->is_newline = true;
   }
 
@@ -569,7 +569,7 @@ bool example_joiner::process_joined(VW::multi_ex& examples)
 
 void example_joiner::persist_metrics(VW::metric_sink& metrics)
 {
-  if (_vw->example_parser->metrics)
+  if (_vw->parser_runtime.example_parser->metrics)
   {
     metrics.set_uint("number_skipped_events", _joiner_metrics.number_of_skipped_events, true);
     metrics.set_float("dsjson_sum_cost_original", _joiner_metrics.sum_cost_original, true);
