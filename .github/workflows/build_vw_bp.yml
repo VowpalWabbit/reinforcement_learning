@@ -86,5 +86,6 @@ jobs:
         if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
         run: |
           cd external_parser/build
+          sudo apt-get update -y
           sudo apt install -y valgrind
           valgrind --quiet --error-exitcode=100 --undef-value-errors=no --leak-check=full ./unit_tests/binary_parser_unit_tests
