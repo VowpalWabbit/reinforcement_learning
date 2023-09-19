@@ -18,7 +18,6 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
-#include <cstdio>
 
 namespace r = reinforcement_learning;
 namespace u = reinforcement_learning::utility;
