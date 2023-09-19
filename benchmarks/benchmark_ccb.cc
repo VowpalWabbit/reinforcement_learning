@@ -18,6 +18,7 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <cstdio>
 
 namespace r = reinforcement_learning;
 namespace u = reinforcement_learning::utility;
@@ -65,8 +66,8 @@ static void bench_ccb(benchmark::State& state, ExtraArgs&&... extra_args)
   config.set(r::name::INTERACTION_USE_DEDUP, dedup ? "true" : "false");
   config.set("queue.mode", "BLOCK");
 
-  char templ[] = "/tmp/fileXXXXXX";
-  mkstemp(templ);
+  char templ[L_tmpnam];
+  std::tmpnam(templ);
   config.set(r::name::MODEL_FILE_NAME, templ);
 
   // train a VW model and save to file
