@@ -1,9 +1,9 @@
 #pragma once
 
 #include "constants.h"
+#include "rl.net.base_loop.h"
 #include "rl.net.factory_context.h"
 #include "rl.net.native.h"
-#include "rl.net.base_loop.h"
 
 typedef struct livemodel_context
 {

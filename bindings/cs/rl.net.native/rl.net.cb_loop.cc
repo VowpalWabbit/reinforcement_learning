@@ -7,8 +7,7 @@
 
 #include <iostream>
 
-static void pipe_background_error_callback(
-    const reinforcement_learning::api_status& status, cb_loop_context_t* context)
+static void pipe_background_error_callback(const reinforcement_learning::api_status& status, cb_loop_context_t* context)
 {
   auto managed_backgroud_error_callback_local = context->base_loop_context.background_error_callback;
   if (managed_backgroud_error_callback_local) { managed_backgroud_error_callback_local(status); }
@@ -82,8 +81,7 @@ API int CBLoopChooseRank(cb_loop_context_t* context, const char* event_id, const
     return context->cb_loop->choose_rank({context_json, static_cast<size_t>(context_json_size)}, *resp, status);
   }
 
-  return context->cb_loop->choose_rank(
-      event_id, {context_json, static_cast<size_t>(context_json_size)}, *resp, status);
+  return context->cb_loop->choose_rank(event_id, {context_json, static_cast<size_t>(context_json_size)}, *resp, status);
 }
 
 API int CBLoopChooseRankWithFlags(cb_loop_context_t* context, const char* event_id, const char* context_json,
@@ -100,8 +98,8 @@ API int CBLoopReportActionTaken(
   return context->cb_loop->report_action_taken(event_id, status);
 }
 
-API int CBLoopReportActionMultiIdTaken(cb_loop_context_t* context, const char* primary_id,
-    const char* secondary_id, reinforcement_learning::api_status* status)
+API int CBLoopReportActionMultiIdTaken(cb_loop_context_t* context, const char* primary_id, const char* secondary_id,
+    reinforcement_learning::api_status* status)
 {
   return context->cb_loop->report_action_taken(primary_id, secondary_id, status);
 }

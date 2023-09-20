@@ -1,9 +1,9 @@
 #pragma once
 
 #include "constants.h"
+#include "rl.net.base_loop.h"
 #include "rl.net.factory_context.h"
 #include "rl.net.native.h"
-#include "rl.net.base_loop.h"
 
 typedef struct cb_loop_context
 {
@@ -31,8 +31,8 @@ extern "C"
       reinforcement_learning::api_status* status = nullptr);
   API int CBLoopReportActionTaken(
       cb_loop_context_t* cb_loop, const char* event_id, reinforcement_learning::api_status* status = nullptr);
-  API int CBLoopReportActionMultiIdTaken(cb_loop_context_t* cb_loop, const char* primary_id,
-      const char* secondary_id, reinforcement_learning::api_status* status = nullptr);
+  API int CBLoopReportActionMultiIdTaken(cb_loop_context_t* cb_loop, const char* primary_id, const char* secondary_id,
+      reinforcement_learning::api_status* status = nullptr);
 
   API int CBLoopReportOutcomeF(cb_loop_context_t* cb_loop, const char* event_id, float outcome,
       reinforcement_learning::api_status* status = nullptr);
@@ -41,8 +41,7 @@ extern "C"
 
   API int CBLoopRefreshModel(cb_loop_context_t* context, reinforcement_learning::api_status* status = nullptr);
 
-  API void CBLoopSetCallback(
-      cb_loop_context_t* cb_loop, rl_net_native::background_error_callback_t callback = nullptr);
+  API void CBLoopSetCallback(cb_loop_context_t* cb_loop, rl_net_native::background_error_callback_t callback = nullptr);
   API void CBLoopSetTrace(
       cb_loop_context_t* cb_loop, rl_net_native::trace_logger_callback_t trace_logger_callback = nullptr);
 }
