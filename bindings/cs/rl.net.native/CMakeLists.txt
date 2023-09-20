@@ -3,6 +3,7 @@ set(rl_net_native_SOURCES
   binding_tracer.cc
   rl.net.api_status.cc
   rl.net.buffer.cc
+  rl.net.cb_loop.cc
   rl.net.config.cc
   rl.net.continuous_action_response.cc
   rl.net.decision_response.cc
@@ -20,7 +21,9 @@ set(rl_net_native_HEADERS
   binding_sender.h
   binding_tracer.h
   rl.net.api_status.h
+  rl.net.base_loop.h
   rl.net.buffer.h
+  rl.net.cb_loop.h
   rl.net.config.h
   rl.net.continuous_action_response.h
   rl.net.decision_response.h

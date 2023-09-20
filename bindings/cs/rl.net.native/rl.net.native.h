@@ -2,6 +2,7 @@
 
 #include "config_utility.h"
 #include "live_model.h"
+#include "cb_loop.h"
 
 #include <fstream>
 #include <iostream>

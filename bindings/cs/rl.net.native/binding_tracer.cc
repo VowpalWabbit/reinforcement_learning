@@ -2,7 +2,7 @@
 
 namespace rl_net_native
 {
-binding_tracer::binding_tracer(livemodel_context& _context) : context(_context) {}
+binding_tracer::binding_tracer(base_loop_context& _context) : context(_context) {}
 
 void binding_tracer::log(int log_level, const std::string& msg)
 {

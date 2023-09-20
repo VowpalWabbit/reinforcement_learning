@@ -9,6 +9,8 @@ set(RL_NET_SOURCES
   ActionFlags.cs
   ApiStatus.cs
   AsyncSender.cs
+  BaseLoop.cs
+  CBLoop.cs
   Configuration.cs
   ContinuousActionResponse.cs
   DecisionResponse.cs
