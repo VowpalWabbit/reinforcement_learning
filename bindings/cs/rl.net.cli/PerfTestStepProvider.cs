@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace Rl.Net.Cli
 {
@@ -64,6 +65,10 @@ namespace Rl.Net.Cli
 
         public TimeSpan Duration { get; set; } = TimeSpan.FromSeconds(20);
 
+        public int FileSize { get; set; } = 0;
+
+        public int FileProcessed { get; set; } = 0;
+
         public double DataSize { get; set; } = 0;
 
         public Statistics Stats { get; private set; }
@@ -93,11 +98,36 @@ namespace Rl.Net.Cli
             }
         }
 
+        public PerfTestStepProvider(string filePath)
+        {
+            using (StreamReader sr = new StreamReader(filePath))
+            {
+                string line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    Contexts.Add(line);
+                }
+            }
+            this.FileSize = Contexts.Count;
+        }
+
         public IEnumerator<IStepContext<float>> GetEnumerator()
         {
             this.Stats = new Statistics();
-            while (this.Stats.Bytes < this.DataSize || this.Stats.ElapsedMs < this.Duration.TotalMilliseconds)
+            while (true)
             {
+                if (this.FileSize > 0)
+                {
+                    if (this.FileSize == this.FileProcessed)
+                    {
+                        break;
+                    }
+                    this.FileProcessed++;
+                }
+                else if (!(this.Stats.Bytes < this.DataSize || this.Stats.ElapsedMs < this.Duration.TotalMilliseconds))
+                {
+                    break;
+                }
                 var step = new PerfTestStep
                 {
                     EventId = $"{Tag}-{this.Stats.Messages}",
