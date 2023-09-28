@@ -46,6 +46,36 @@ namespace Rl.Net.Cli
             return liveModel;
         }
 
+        public static CBLoop CreateCBLoopOrExit(string clientJsonPath)
+        {
+            if (!File.Exists(clientJsonPath))
+            {
+                WriteErrorAndExit($"Could not find file with path '{clientJsonPath}'.");
+            }
+
+            string json = File.ReadAllText(clientJsonPath);
+
+            ApiStatus apiStatus = new ApiStatus();
+
+            Configuration config;
+            if (!Configuration.TryLoadConfigurationFromJson(json, out config, apiStatus))
+            {
+                WriteStatusAndExit(apiStatus);
+            }
+
+            CBLoop cb_loop = new CBLoop(config);
+
+            cb_loop.BackgroundError += LiveModel_BackgroundError;
+            cb_loop.TraceLoggerEvent += LiveModel_TraceLogEvent;
+
+            if (!cb_loop.TryInit(apiStatus))
+            {
+                WriteStatusAndExit(apiStatus);
+            }
+
+            return cb_loop;
+        }
+
         public static void LiveModel_BackgroundError(object sender, ApiStatus e)
         {
             Console.Error.WriteLine(e.ErrorMessage);

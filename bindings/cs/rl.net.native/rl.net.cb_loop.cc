@@ -70,6 +70,7 @@ API void DeleteCBLoop(cb_loop_context_t* context)
 
 API int CBLoopInit(cb_loop_context_t* context, reinforcement_learning::api_status* status)
 {
+  if (context == nullptr) { return reinforcement_learning::error_code::not_initialized; }
   return context->cb_loop->init(status);
 }
 
