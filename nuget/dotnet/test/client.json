@@ -8,5 +8,6 @@
     "InitialExplorationEpsilon": 1.0,
     "LearningMode": "Online",
     "model.source": "FILE_MODEL_DATA",
-    "protocol.version":"2"
+    "protocol.version":"2",
+    "model.vw.initial_command_line":"--quiet -b 18 --random_weights --interactions 6234 --interactions 652 --interactions 6B52  --cb_explore_adf --softmax --lambda 9.8316 --cb_adf --cb_type ips --csoaa_ldf multiline --csoaa_rank"
 }
