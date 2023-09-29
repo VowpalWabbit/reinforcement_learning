@@ -65,9 +65,9 @@ namespace Rl.Net.Cli
 
         public TimeSpan Duration { get; set; } = TimeSpan.FromSeconds(20);
 
-        public int FileSize { get; set; } = 0;
+        public int NumLines { get; set; } = 0;
 
-        public int FileProcessed { get; set; } = 0;
+        public int NumLinesProcessed { get; set; } = 0;
 
         public double DataSize { get; set; } = 0;
 
@@ -108,7 +108,7 @@ namespace Rl.Net.Cli
                     Contexts.Add(line);
                 }
             }
-            this.FileSize = Contexts.Count;
+            this.NumLines = Contexts.Count;
         }
 
         public IEnumerator<IStepContext<float>> GetEnumerator()
@@ -116,13 +116,13 @@ namespace Rl.Net.Cli
             this.Stats = new Statistics();
             while (true)
             {
-                if (this.FileSize > 0)
+                if (this.NumLines > 0)
                 {
-                    if (this.FileSize == this.FileProcessed)
+                    if (this.NumLines == this.NumLinesProcessed)
                     {
                         break;
                     }
-                    this.FileProcessed++;
+                    this.NumLinesProcessed++;
                 }
                 else if (!(this.Stats.Bytes < this.DataSize || this.Stats.ElapsedMs < this.Duration.TotalMilliseconds))
                 {
