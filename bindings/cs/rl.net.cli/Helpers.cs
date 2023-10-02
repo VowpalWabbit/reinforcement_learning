@@ -32,11 +32,15 @@ namespace Rl.Net.Cli
             {
                 WriteStatusAndExit(apiStatus);
             }
+            string trace_log = config["trace.logger.implementation"];
 
             LiveModel liveModel = new LiveModel(config);
 
             liveModel.BackgroundError += LiveModel_BackgroundError;
-            liveModel.TraceLoggerEvent += LiveModel_TraceLogEvent;
+            if (trace_log == "CONSOLE_TRACE_LOGGER")
+            {
+                liveModel.TraceLoggerEvent += LiveModel_TraceLogEvent;
+            }
 
             if (!liveModel.TryInit(apiStatus))
             {
