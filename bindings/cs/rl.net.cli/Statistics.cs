@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Rl.Net.Cli
@@ -11,7 +12,9 @@ namespace Rl.Net.Cli
 
         public Stopwatch Timer { get; } = Stopwatch.StartNew();
 
-        public long ElapsedMs { get; private set; }
+        public long ElapsedMicroseconds { get; private set; }
+
+        public List<long> ElapsedMicrosecondsPerExample { get; } = new List<long>();
 
         public static Statistics operator + (Statistics s1, Statistics s2)
         {
@@ -19,7 +22,7 @@ namespace Rl.Net.Cli
             {
                 Bytes = s1.Bytes + s2.Bytes,
                 Messages = s1.Messages + s2.Messages,
-                ElapsedMs = Math.Max(s1.ElapsedMs, s2.ElapsedMs)
+                ElapsedMicroseconds = Math.Max(s1.ElapsedMicroseconds, s2.ElapsedMicroseconds)
             };
         }
 
@@ -27,18 +30,39 @@ namespace Rl.Net.Cli
         {
             Bytes += byteCount;
             Messages++;
-            ElapsedMs = Timer.ElapsedMilliseconds;
+            long currentElapsedMicroseconds = Timer.ElapsedTicks * 1000000L / Stopwatch.Frequency;
+            ElapsedMicrosecondsPerExample.Add(currentElapsedMicroseconds - ElapsedMicroseconds);
+            ElapsedMicroseconds = currentElapsedMicroseconds;
         }
 
         public void Print()
         {
-            Console.WriteLine($"Data sent: {this.Bytes / (1024 * 1024)} MB");
-            Console.WriteLine($"Time taken: {(this.ElapsedMs / 1000.0)} secs");
-            Console.WriteLine($"Throughput: {this.Bytes / ((1024 * 1024) * this.ElapsedMs / 1000)} MB / s");
-            Console.WriteLine($"Messages sent: {this.Messages}");
-            Console.WriteLine($"Avg Message size: {this.Bytes / (1024 * this.Messages)} KB");
-            Console.WriteLine($"Msg/s: {this.Messages / (this.ElapsedMs / 1000.0)}");
-            Console.WriteLine($"Latency: {(this.ElapsedMs / 1000.0) / this.Messages * 1000000} μs");
+            double elapsedSeconds = ElapsedMicroseconds / 1_000_000.0;
+            double mbSent = Bytes / (1024 * 1024);
+            double msgsPerSecond = Messages / elapsedSeconds;
+
+            Console.WriteLine($"Data sent: {mbSent} MB");
+            Console.WriteLine($"Time taken: {elapsedSeconds} secs");
+            Console.WriteLine($"Throughput: {mbSent / elapsedSeconds} MB/s");
+            Console.WriteLine($"Messages sent: {Messages}");
+            Console.WriteLine($"Avg Message size: {Bytes / (1024 * Messages)} KB");
+            Console.WriteLine($"Msg/s: {msgsPerSecond}");
+            Console.WriteLine($"Latency: {elapsedSeconds / Messages * 1_000_000} μs");
+
+            // Print average latency of the top 1% most microsecond examples
+            int top1PercentCount = (int)(0.01 * ElapsedMicrosecondsPerExample.Count);
+            if (top1PercentCount > 0)
+            {
+                List<long> sortedLatencies = new List<long>(ElapsedMicrosecondsPerExample);
+                sortedLatencies.Sort((a, b) => b.CompareTo(a));  // sort in descending order
+                long totalTop1PercentLatency = 0;
+                for (int i = 0; i < top1PercentCount; i++)
+                {
+                    totalTop1PercentLatency += sortedLatencies[i];
+                }
+                double averageTop1PercentLatency = (double)totalTop1PercentLatency / top1PercentCount;
+                Console.WriteLine($"Average latency of top 1% examples: {averageTop1PercentLatency} μs");
+            }
         }
     }
 }
