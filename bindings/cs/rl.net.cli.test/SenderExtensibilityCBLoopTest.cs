@@ -13,9 +13,9 @@ namespace Rl.Net.Cli.Test
 {
     using SenderFactory = Func<IReadOnlyConfiguration, ErrorCallback, ISender>;
     using BackgroundErrorCallback = Action<ApiStatus>;
-    
+
     [TestClass]
-    public class SenderExtensibilityTest : TestBase
+    public class SenderExtensibilityCBLoopTest : TestBase
     {
         const string CustomSenderConfigJson =
 @"{
@@ -45,7 +45,7 @@ namespace Rl.Net.Cli.Test
 }
 ";
 
-        private LiveModel CreateLiveModel(FactoryContext factoryContext = null)
+        private CBLoop CreateCBLoop(FactoryContext factoryContext = null)
         {
             Configuration config;
             ApiStatus apiStatus = new ApiStatus();
@@ -54,9 +54,9 @@ namespace Rl.Net.Cli.Test
                 Assert.Fail("Failed to parse pseudolocalized configuration JSON: " + apiStatus.ErrorMessage);
             }
 
-            LiveModel liveModel = factoryContext == null ? new LiveModel(config) : new LiveModel(config, factoryContext);
+            CBLoop cbLoop = factoryContext == null ? new CBLoop(config) : new CBLoop(config, factoryContext);
 
-            return liveModel;
+            return cbLoop;
         }
 
         [TestMethod]
@@ -65,9 +65,9 @@ namespace Rl.Net.Cli.Test
             const int TypeNotRegisteredError = 10; // see errors_data.h
 
             ApiStatus apiStatus = new ApiStatus();
-            LiveModel liveModel = CreateLiveModel();
+            CBLoop cbLoop = CreateCBLoop();
 
-            Assert.IsFalse(liveModel.TryInit(apiStatus), "Should not be able to configure a model with BINDING_SENDER if custom factory is not set.");
+            Assert.IsFalse(cbLoop.TryInit(apiStatus), "Should not be able to configure a model with BINDING_SENDER if custom factory is not set.");
 
             Assert.AreEqual(TypeNotRegisteredError, apiStatus.ErrorCode);
         }
@@ -105,8 +105,8 @@ namespace Rl.Net.Cli.Test
 
             factoryContext.SetSenderFactory(customFactory);
 
-            LiveModel liveModel = new LiveModel(config, factoryContext);
-            liveModel.Init();
+            CBLoop cbLoop = new CBLoop(config, factoryContext);
+            cbLoop.Init();
 
             Assert.IsFalse(factoryCalled, "Custom factory should not be called unless BINDING_SENDER is selected in configuration.");
         }
@@ -161,8 +161,8 @@ namespace Rl.Net.Cli.Test
                 });
 
             
-            LiveModel liveModel = CreateLiveModel(factoryContext);
-            liveModel.Init();
+            CBLoop cbLoop = CreateCBLoop(factoryContext);
+            cbLoop.Init();
 
             Assert.IsTrue(factoryCalled, "Custom factory must be called when BINDING_SENDER is selected in configuration.");
         }
@@ -178,10 +178,10 @@ namespace Rl.Net.Cli.Test
 
             FactoryContext factoryContext = CreateFactoryContext(initAction: SenderInit);
 
-            LiveModel liveModel = CreateLiveModel(factoryContext);
-            liveModel.Init();
+            CBLoop cbLoop = CreateCBLoop(factoryContext);
+            cbLoop.Init();
 
-            Assert.IsTrue(initCalled, "MockSender.Init should be called and succeed, which means LiveModel.Init should succeed.");
+            Assert.IsTrue(initCalled, "MockSender.Init should be called and succeed, which means CBLoop.Init should succeed.");
         }
 
         const string OpaqueErrorMessage = "Opaque error in external code. §ô₥è Tèжƭ Fřô₥ ÐôƭNèƭ ℓôřè₥";
@@ -191,8 +191,8 @@ namespace Rl.Net.Cli.Test
             FactoryContext factoryContext = CreateFactoryContext(initAction: senderInit);
 
             ApiStatus apiStatus = new ApiStatus();
-            LiveModel liveModel = CreateLiveModel(factoryContext);
-            Assert.IsFalse(liveModel.TryInit(apiStatus), "MockSender.Init should be called and fail, which means LiveModel.Init should fail.");
+            CBLoop cbLoop = CreateCBLoop(factoryContext);
+            Assert.IsFalse(cbLoop.TryInit(apiStatus), "MockSender.Init should be called and fail, which means CBLoop.Init should fail.");
 
             Assert.AreEqual(NativeMethods.OpaqueBindingError, apiStatus.ErrorCode);
 
@@ -279,9 +279,9 @@ namespace Rl.Net.Cli.Test
 
             FactoryContext factoryContext = CreateFactoryContext(sendAction: SenderSend);
 
-            LiveModel liveModel = CreateLiveModel(factoryContext);
-            liveModel.Init();
-            RankingResponse response = liveModel.ChooseRank(EventId, ContextJsonWithPdf);
+            CBLoop cbLoop = CreateCBLoop(factoryContext);
+            cbLoop.Init();
+            RankingResponse response = cbLoop.ChooseRank(EventId, ContextJsonWithPdf);
 
             senderCalledWaiter.Wait(TimeSpan.FromSeconds(1));
 
@@ -304,14 +304,14 @@ namespace Rl.Net.Cli.Test
                 backgroundMessageWaiter.Set();
             }
 
-            LiveModel liveModel = CreateLiveModel(factoryContext);
-            liveModel.BackgroundError += OnBackgroundError;
+            CBLoop cbLoop = CreateCBLoop(factoryContext);
+            cbLoop.BackgroundError += OnBackgroundError;
 
-            liveModel.Init();
+            cbLoop.Init();
 
             ApiStatus apiStatus = new ApiStatus();
             RankingResponse response;
-            Assert.IsTrue(liveModel.TryChooseRank(EventId, ContextJsonWithPdf, out response, apiStatus));
+            Assert.IsTrue(cbLoop.TryChooseRank(EventId, ContextJsonWithPdf, out response, apiStatus));
             Assert.AreEqual(NativeMethods.SuccessStatus, apiStatus.ErrorCode, "Errors from ISender.Send should be background errors.");
 
             backgroundMessageWaiter.Wait(TimeSpan.FromSeconds(1));
@@ -395,9 +395,9 @@ namespace Rl.Net.Cli.Test
 
             FactoryContext factoryContext = CreateFactoryContext(asyncSendFunc: AsyncSenderSend);
 
-            LiveModel liveModel = CreateLiveModel(factoryContext);
-            liveModel.Init();
-            RankingResponse response = liveModel.ChooseRank(EventId, ContextJsonWithPdf);
+            CBLoop cbLoop = CreateCBLoop(factoryContext);
+            cbLoop.Init();
+            RankingResponse response = cbLoop.ChooseRank(EventId, ContextJsonWithPdf);
 
             senderCalledWaiter.Wait(TimeSpan.FromSeconds(1));
 
