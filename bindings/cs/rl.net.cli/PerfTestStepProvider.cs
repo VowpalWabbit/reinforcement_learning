@@ -109,6 +109,7 @@ namespace Rl.Net.Cli
                 }
             }
             this.NumLines = Contexts.Count;
+            this.RingSize = this.NumLines;
         }
 
         public IEnumerator<IStepContext<float>> GetEnumerator()
