@@ -33,6 +33,9 @@ class my_trace_logger : public i_trace
 public:
   std::string _latest_message;
   void log(int log_level, const std::string& msg) { _latest_message = msg; }
+#ifdef ENABLE_LOG_FILTERING
+  void set_level(int log_level) override {}
+#endif
   std::string get_message() { return _latest_message; }
   void reset() { _latest_message.clear(); }
 };

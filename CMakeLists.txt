@@ -62,6 +62,7 @@ option(RL_USE_UBSAN "Compile with UndefinedBehaviorSanitizer" OFF)
 option(rlclientlib_BUILD_ONNXRUNTIME_EXTENSION "Build OnnxRuntime Inference Extension" OFF)
 option(rlclientlib_BUILD_DOTNET "Build .NET bindings" OFF)
 option(rlclientlib_DOTNET_USE_MSPROJECT "[Experimental] Use import_external_msproject to build .NET csproj files." OFF)
+option(vw_ENABLE_LOG_FILTERING "Whether to allow logs to be filtered" ON)
 
 if(RL_USE_ASAN)
   add_compile_definitions(RL_USE_ASAN VW_USE_ASAN)

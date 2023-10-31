@@ -475,6 +475,19 @@ int live_model_impl::init_trace(api_status* status)
 {
   const auto* const trace_impl = _configuration.get(name::TRACE_LOG_IMPLEMENTATION, value::NULL_TRACE_LOGGER);
   RETURN_IF_FAIL(_trace_factory->create(_trace_logger, trace_impl, _configuration, nullptr, status));
+  const auto* const trace_level = _configuration.get(name::TRACE_LOG_LEVEL, value::TRACE_LOG_LEVEL_UNSET);
+#ifdef ENABLE_LOG_FILTERING
+  int level = 0;
+  const auto* const trace_level_with_default = strcmp(trace_level, value::TRACE_LOG_LEVEL_UNSET) == 0 ? value::TRACE_LOG_LEVEL_DEFAULT : trace_level;
+  RETURN_IF_FAIL(details::get_log_level_from_string(trace_level, level, status));
+  _trace_logger->set_level(level);
+#else
+  if (strcmp(trace_level, "UNSET") != 0)
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, invalid_argument)
+        << "Cannot use trace level filtering when the feature is disabled.";
+  }
+#endif
   TRACE_INFO(_trace_logger, "API Tracing initialized");
   _watchdog.set_trace_log(_trace_logger.get());
   return error_code::success;
