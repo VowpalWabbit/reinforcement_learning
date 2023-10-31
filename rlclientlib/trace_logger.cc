@@ -1,5 +1,7 @@
 #include "trace_logger.h"
 
+#include <algorithm>
+
 const char* reinforcement_learning::details::get_log_level_string(int log_level)
 {
   switch (log_level)
