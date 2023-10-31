@@ -10,8 +10,10 @@ public:
   // Inherited via i_trace
   binding_tracer(base_loop_context& _context);
   void log(int log_level, const std::string& msg) override;
+  void set_level(int log_level) override;
 
 private:
   base_loop_context& context;
+  int log_level = 0;
 };
 }  // namespace rl_net_native
