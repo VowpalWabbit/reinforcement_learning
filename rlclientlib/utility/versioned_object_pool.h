@@ -113,7 +113,7 @@ public:
     TObject* pool_obj = _impl->get();
     if (pool_obj != nullptr)
     {
-      TRACE_INFO(_trace_logger,
+      TRACE_DEBUG(_trace_logger,
           utility::concat(
               "versioned_object_pool::get_or_create() called: existing object returned, total pool size is ",
               _impl->size()));
@@ -122,7 +122,7 @@ public:
     {
       // pool was empty, create a new object
       pool_obj = _impl->create();
-      TRACE_INFO(_trace_logger,
+      TRACE_DEBUG(_trace_logger,
           utility::concat(
               "versioned_object_pool::get_or_create() called: new object created, total pool size is ", _impl->size()));
     }
@@ -147,7 +147,7 @@ public:
     objects_count = _impl->size();
     new_version = _impl->version() + 1;
 
-    TRACE_INFO(
+    TRACE_DEBUG(
         _trace_logger, utility::concat("versioned_object_pool::update_factory() called: pool size is ", objects_count));
 
     std::unique_ptr<impl_type> new_impl(new impl_type(std::move(new_factory), objects_count, new_version));
