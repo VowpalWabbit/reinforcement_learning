@@ -475,10 +475,13 @@ int live_model_impl::init_trace(api_status* status)
 {
   const auto* const trace_impl = _configuration.get(name::TRACE_LOG_IMPLEMENTATION, value::NULL_TRACE_LOGGER);
   RETURN_IF_FAIL(_trace_factory->create(_trace_logger, trace_impl, _configuration, nullptr, status));
-  const auto* const trace_level = _configuration.get(name::TRACE_LOG_LEVEL, value::TRACE_LOG_LEVEL_DEFAULT);
-  int level = 0;
-  RETURN_IF_FAIL(details::get_log_level_from_string(trace_level, level, status));
-  _trace_logger->set_level(level);
+  if (_trace_logger != nullptr)
+  {
+    const auto* const trace_level = _configuration.get(name::TRACE_LOG_LEVEL, value::TRACE_LOG_LEVEL_DEFAULT);
+    int level = 0;
+    RETURN_IF_FAIL(details::get_log_level_from_string(trace_level, level, status));
+    _trace_logger->set_level(level);
+  }
   TRACE_INFO(_trace_logger, "API Tracing initialized");
   _watchdog.set_trace_log(_trace_logger.get());
   return error_code::success;
