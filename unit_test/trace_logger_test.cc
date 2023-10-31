@@ -52,6 +52,7 @@ struct vector_tracer : r::i_trace
     std::unique_lock<std::mutex> mlock(mutex);
     data.emplace_back(msg);
   }
+  void set_level(int level) override {}
   std::vector<std::string>& data = tracer_data;
   std::mutex mutex;
 };
