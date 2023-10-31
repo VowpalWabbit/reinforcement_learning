@@ -139,7 +139,6 @@ const char* const LEARNING_MODE_LOGGINGONLY = "LOGGINGONLY";
 const char* const CONTENT_ENCODING_IDENTITY = "IDENTITY";
 const char* const CONTENT_ENCODING_DEDUP = "DEDUP";
 const char* const HTTP_API_DEFAULT_HEADER_KEY_NAME = "Ocp-Apim-Subscription-Key";
-const char* const TRACE_LOG_LEVEL_UNSET = "UNSET";
 const char* const TRACE_LOG_LEVEL_DEFAULT = "info";
 
 const char* const QUEUE_MODE_DROP = "DROP";

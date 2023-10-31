@@ -19,7 +19,8 @@ const char* reinforcement_learning::details::get_log_level_string(int log_level)
   }
 }
 
-int reinforcement_learning::details::get_log_level_from_string(const std::string& level, int& level_value, api_status* status)
+int reinforcement_learning::details::get_log_level_from_string(
+    const std::string& level, int& level_value, api_status* status)
 {
   // Convert level to an uppercase string for comparison
   std::string level_upper = level;
@@ -58,5 +59,4 @@ int reinforcement_learning::details::get_log_level_from_string(const std::string
       RETURN_ERROR_ARG(nullptr, status, invalid_argument, "Provided log level is an invalid string.");
     }
   }
-
 }

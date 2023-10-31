@@ -38,9 +38,7 @@ class i_trace
 {
 public:
   virtual void log(int log_level, const std::string& msg) = 0;
-#ifdef ENABLE_LOG_FILTERING
-  virtual void set_level(int log_level) = 0;
-#endif
+  virtual void set_level(int log_level) = 0
   virtual ~i_trace(){};
 };
 }  // namespace reinforcement_learning

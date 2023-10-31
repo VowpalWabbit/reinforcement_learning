@@ -209,10 +209,6 @@ if(vw_USE_AZURE_FACTORIES)
   target_compile_definitions(rlclientlib PRIVATE USE_AZURE_FACTORIES)
 endif()
 
-if(vw_ENABLE_LOG_FILTERING)
-  target_compile_definitions(rlclientlib PRIVATE ENABLE_LOG_FILTERING)
-endif()
-
 if(RL_USE_ZSTD)
   target_compile_definitions(rlclientlib PRIVATE USE_ZSTD)
   target_link_libraries(rlclientlib PRIVATE libzstd_static)
