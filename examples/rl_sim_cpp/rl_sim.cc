@@ -1,13 +1,17 @@
+#include "api_status.h"
 #include "constants.h"
+#include "factory_resolver.h"
 #include "live_model.h"
 #include "multistep.h"
 #include "person.h"
 #include "rand48.h"
 #include "rl_sim_cpp.h"
 #include "simulation_stats.h"
+#include "trace_logger.h"
 
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <chrono>
 #include <cmath>
 #include <thread>
 
@@ -369,6 +373,68 @@ int rl_sim::load_file(const std::string& file_name, std::string& config_str, r::
 
 void _on_error(const reinforcement_learning::api_status& status, rl_sim* psim) { psim->on_error(status); }
 
+struct throughput_tracking_sender : public reinforcement_learning::i_sender
+{
+  throughput_tracking_sender(std::unique_ptr<reinforcement_learning::i_sender> inner_sender, std::string name,
+      reinforcement_learning::i_trace* trace, int print_interval)
+      : _inner_sender(std::move(inner_sender)), _name(std::move(name)), _trace(trace), _print_interval(print_interval)
+  {
+  }
+
+  int init(
+      const reinforcement_learning::utility::configuration& config, reinforcement_learning::api_status* status) override
+  {
+    _begin_time = std::chrono::steady_clock::now();
+    return _inner_sender->init(config, status);
+  };
+
+protected:
+  int v_send(const buffer& data, reinforcement_learning::api_status* status = nullptr) override
+  {
+    _bytes_sent += data->buffer_filled_size();
+    _messages_sent++;
+    _print_counter++;
+    if (_print_counter >= _print_interval)
+    {
+      auto now = std::chrono::steady_clock::now();
+      auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - _begin_time).count();
+      std::ostringstream oss;
+      oss << _name << " throughput: " << _bytes_sent / elapsed << " bytes/s, " << _messages_sent / elapsed
+          << " messages/s, " << _bytes_sent << " total bytes, " << _messages_sent << " total messages." << std::endl;
+      TRACE_INFO(_trace, oss.str());
+      _print_counter = 0;
+    }
+
+    return _inner_sender->send(data, status);
+  };
+
+private:
+  std::unique_ptr<reinforcement_learning::i_sender> _inner_sender;
+  std::string _name;
+  size_t _bytes_sent = 0;
+  size_t _messages_sent = 0;
+  std::chrono::steady_clock::time_point _begin_time;
+  reinforcement_learning::i_trace* _trace;
+  int _print_interval;
+  int _print_counter = 0;
+};
+
+reinforcement_learning::sender_factory_t::create_fn generate_create_func(const std::string& name)
+{
+  return [=](std::unique_ptr<reinforcement_learning::i_sender>& retval, const u::configuration& cfg,
+             reinforcement_learning::error_callback_fn* error_cb, reinforcement_learning::i_trace* trace_logger,
+             reinforcement_learning::api_status* status) -> int
+  {
+    std::unique_ptr<reinforcement_learning::i_sender> sender;
+    auto res =
+        reinforcement_learning::sender_factory.create(sender, name, cfg, std::move(error_cb), trace_logger, status);
+    RETURN_IF_FAIL(res);
+    auto print_interval = cfg.get_int("thoughputsender.printinterval", 1);
+    retval.reset(new throughput_tracking_sender(std::move(sender), name, trace_logger, print_interval));
+    return 0;
+  };
+}
+
 int rl_sim::init_rl()
 {
   r::api_status status;
@@ -402,8 +468,30 @@ int rl_sim::init_rl()
   // Trace log API calls to the console
   if (!_quiet) { config.set(r::name::TRACE_LOG_IMPLEMENTATION, r::value::CONSOLE_TRACE_LOGGER); }
 
+  reinforcement_learning::sender_factory_t* sender_factory = &reinforcement_learning::sender_factory;
+  reinforcement_learning::sender_factory_t factory;
+  if (_options.count("throughput") != 0u)
+  {
+    factory.register_type(reinforcement_learning::value::OBSERVATION_EH_SENDER,
+        generate_create_func(reinforcement_learning::value::OBSERVATION_EH_SENDER));
+    factory.register_type(reinforcement_learning::value::INTERACTION_EH_SENDER,
+        generate_create_func(reinforcement_learning::value::INTERACTION_EH_SENDER));
+    factory.register_type(reinforcement_learning::value::EPISODE_EH_SENDER,
+        generate_create_func(reinforcement_learning::value::EPISODE_EH_SENDER));
+    factory.register_type(reinforcement_learning::value::OBSERVATION_HTTP_API_SENDER,
+        generate_create_func(reinforcement_learning::value::OBSERVATION_HTTP_API_SENDER));
+    factory.register_type(reinforcement_learning::value::INTERACTION_HTTP_API_SENDER,
+        generate_create_func(reinforcement_learning::value::INTERACTION_HTTP_API_SENDER));
+    factory.register_type(reinforcement_learning::value::EPISODE_HTTP_API_SENDER,
+        generate_create_func(reinforcement_learning::value::EPISODE_HTTP_API_SENDER));
+    sender_factory = &factory;
+  }
+
   // Initialize the API
-  _rl = std::unique_ptr<r::live_model>(new r::live_model(config, _on_error, this));
+  _rl = std::unique_ptr<r::live_model>(new r::live_model(config, _on_error, this,
+      &reinforcement_learning::trace_logger_factory, &reinforcement_learning::data_transport_factory,
+      &reinforcement_learning::model_factory, sender_factory, &reinforcement_learning::time_provider_factory));
+
   if (_rl->init(&status) != err::success)
   {
     std::cout << status.get_error_msg() << std::endl;
