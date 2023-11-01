@@ -1,4 +1,6 @@
 #pragma once
+#include "api_status.h"
+
 #include <string>
 
 namespace reinforcement_learning
@@ -12,9 +14,13 @@ const char* const STR_LEVEL_DEBUG = "DEBUG";
 const char* const STR_LEVEL_INFO = "INFO";
 const char* const STR_LEVEL_WARN = "WARN";
 const char* const STR_LEVEL_ERROR = "ERROR";
-}  // namespace reinforcement_learning
 
+namespace details
+{
 const char* get_log_level_string(int log_level);
+int get_log_level_from_string(const std::string& level, int& level_value, api_status* status);
+}  // namespace details
+}  // namespace reinforcement_learning
 
 #define TRACE_LOG(logger, level, msg)                   \
   do {                                                  \
@@ -32,6 +38,7 @@ class i_trace
 {
 public:
   virtual void log(int log_level, const std::string& msg) = 0;
+  virtual void set_level(int log_level) = 0;
   virtual ~i_trace(){};
 };
 }  // namespace reinforcement_learning

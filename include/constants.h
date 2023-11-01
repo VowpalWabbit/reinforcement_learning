@@ -96,6 +96,7 @@ const char* const SENDER_IMPLEMENTATION = "sender.implementation";
 
 const char* const EH_TEST = "eventhub.mock";
 const char* const TRACE_LOG_IMPLEMENTATION = "trace.logger.implementation";
+const char* const TRACE_LOG_LEVEL = "trace.logger.level";
 const char* const EPISODE_FILE_NAME = "episode.file.name";
 const char* const INTERACTION_FILE_NAME = "interaction.file.name";
 const char* const OBSERVATION_FILE_NAME = "observation.file.name";
@@ -138,6 +139,7 @@ const char* const LEARNING_MODE_LOGGINGONLY = "LOGGINGONLY";
 const char* const CONTENT_ENCODING_IDENTITY = "IDENTITY";
 const char* const CONTENT_ENCODING_DEDUP = "DEDUP";
 const char* const HTTP_API_DEFAULT_HEADER_KEY_NAME = "Ocp-Apim-Subscription-Key";
+const char* const TRACE_LOG_LEVEL_DEFAULT = "info";
 
 const char* const QUEUE_MODE_DROP = "DROP";
 const char* const QUEUE_MODE_BLOCK = "BLOCK";
