@@ -399,8 +399,9 @@ protected:
       auto now = std::chrono::steady_clock::now();
       auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - _begin_time).count();
       std::ostringstream oss;
-      oss << _name << " throughput: " << _bytes_sent / elapsed << " bytes/s, " << _messages_sent / elapsed
-          << " messages/s, " << _bytes_sent << " total bytes, " << _messages_sent << " total messages." << std::endl;
+      oss << _name << " throughput: " << _bytes_sent / elapsed << " bytes/s, "
+          << static_cast<float>(_messages_sent) / elapsed << " messages/s, " << _bytes_sent << " total bytes, "
+          << _messages_sent << " total messages." << std::endl;
       TRACE_INFO(_trace, oss.str());
       _print_counter = 0;
     }
