@@ -120,7 +120,7 @@ set(RL_FLAT_BUFFER_FILES
 )
 
 add_flatbuffer_schema(
-  TARGET fbgen
+  TARGET fbgen_external_parser
   SCHEMAS ${RL_FLAT_BUFFER_FILES}
   OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated/v2/
   FLATC_EXE ${flatc_location}
@@ -154,10 +154,16 @@ set(binary_parser_sources
 )
 
 add_library(rl_binary_parser STATIC ${binary_parser_headers} ${binary_parser_sources})
+set_target_properties(rl_binary_parser PROPERTIES POSITION_INDEPENDENT_CODE ON)
+if(WIN32)
+  set_target_properties(rl_binary_parser PROPERTIES DEBUG_POSTFIX d)
+endif()
+
 target_link_libraries(rl_binary_parser PUBLIC vw_core RapidJSON PRIVATE libzstd_static)
 target_include_directories(rl_binary_parser
   PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/
+    ${CMAKE_CURRENT_LIST_DIR}/generated/v2/
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/zstd/lib/
     ${CMAKE_CURRENT_LIST_DIR}/../ext_libs/date/
 )
@@ -169,11 +175,15 @@ if(TARGET flatbuffers::flatbuffers)
 else()
   target_include_directories(rl_binary_parser PRIVATE ${FLATBUFFERS_INCLUDE_DIR})
 endif()
-add_dependencies(rl_binary_parser fbgen)
+add_dependencies(rl_binary_parser fbgen_external_parser)
 
 add_executable(rl_binary_parser_bin main.cc)
 target_link_libraries(rl_binary_parser_bin PUBLIC rl_binary_parser)
-set_target_properties(rl_binary_parser_bin PROPERTIES OUTPUT_NAME "vw")
+if (NOT rlclientlib_BUILD_DOTNET)
+  # The build for .NET bindings configures all binary output to a single directory
+  # In this case we can't name the binary parser "vw", since this will overwrite the real vw executable
+  set_target_properties(rl_binary_parser_bin PROPERTIES OUTPUT_NAME "vw")
+endif()
 
 if(STATIC_LINK_BINARY_PARSER AND NOT APPLE)
   target_link_libraries(rl_binary_parser_bin PRIVATE -static)

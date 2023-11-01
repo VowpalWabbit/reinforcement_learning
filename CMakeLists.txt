@@ -62,6 +62,13 @@ option(RL_USE_UBSAN "Compile with UndefinedBehaviorSanitizer" OFF)
 option(rlclientlib_BUILD_ONNXRUNTIME_EXTENSION "Build OnnxRuntime Inference Extension" OFF)
 option(rlclientlib_BUILD_DOTNET "Build .NET bindings" OFF)
 option(rlclientlib_DOTNET_USE_MSPROJECT "[Experimental] Use import_external_msproject to build .NET csproj files." OFF)
+option(RL_BUILD_FEDERATION "Build code for Federated Learning" OFF)
+
+if(RL_BUILD_FEDERATION)
+  add_compile_definitions(RL_BUILD_FEDERATION)
+  # Needed for joiner code
+  set(RL_BUILD_EXTERNAL_PARSER ON CACHE BOOL "" FORCE)
+endif()
 
 if(RL_USE_ASAN)
   add_compile_definitions(RL_USE_ASAN VW_USE_ASAN)
@@ -81,8 +88,9 @@ if(RL_USE_UBSAN)
   if(MSVC)
     message(FATAL_ERROR "UBSan not supported on MSVC")
   else()
-    add_compile_options(-fsanitize=undefined -fno-sanitize-recover -fno-omit-frame-pointer -g3)
-    add_link_options(-fsanitize=undefined -fno-sanitize-recover -fno-omit-frame-pointer -g3)
+    # Flatbuffers gives errors with misaligned pointer sanitization, so disable it
+    add_compile_options(-fsanitize=undefined -fno-sanitize=alignment -fno-sanitize-recover -fno-omit-frame-pointer -g3)
+    add_link_options(-fsanitize=undefined -fno-sanitize=alignment -fno-sanitize-recover -fno-omit-frame-pointer -g3)
   endif()
 endif()
 
@@ -140,16 +148,16 @@ include(GNUInstallDirs)
 
 include(ext_libs/ext_libs.cmake)
 
+if(RL_BUILD_EXTERNAL_PARSER)
+  add_subdirectory(external_parser)
+endif()
+
 add_subdirectory(rlclientlib)
 add_subdirectory(rlclientlib/extensions)
 add_subdirectory(examples)
 add_subdirectory(test_tools/joiner)
 add_subdirectory(test_tools/sender_test)
 add_subdirectory(test_tools/example_gen)
-
-if(RL_BUILD_EXTERNAL_PARSER)
-  add_subdirectory(external_parser)
-endif()
 
 # enable_testing should be run after ext_libs so that the vw unit tests arent turned on.
 enable_testing()
@@ -166,6 +174,13 @@ add_subdirectory(unit_test)
 add_subdirectory(unit_test/extensions)
 if(RL_BUILD_BENCHMARKS)
   add_subdirectory(benchmarks)
+endif()
+
+# Add a target to generate all flatbuffer header files, used for clang-tidy
+add_custom_target(fbgen)
+add_dependencies(fbgen fbgenerator_v1 fbgenerator_v2)
+if(TARGET fbgen_external_parser)
+  add_dependencies(fbgen fbgen_external_parser)
 endif()
 
 # Add the nuget subdirectory last
