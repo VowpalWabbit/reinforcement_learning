@@ -419,7 +419,7 @@ private:
   int _print_counter = 0;
 };
 
-reinforcement_learning::sender_factory_t::create_fn generate_create_func(const std::string& name)
+reinforcement_learning::sender_factory_t::create_fn wrap_sender_generate_for_throughput_sender(const std::string& name)
 {
   return [=](std::unique_ptr<reinforcement_learning::i_sender>& retval, const u::configuration& cfg,
              reinforcement_learning::error_callback_fn* error_cb, reinforcement_learning::i_trace* trace_logger,
@@ -473,17 +473,17 @@ int rl_sim::init_rl()
   if (_options.count("throughput") != 0u)
   {
     factory.register_type(reinforcement_learning::value::OBSERVATION_EH_SENDER,
-        generate_create_func(reinforcement_learning::value::OBSERVATION_EH_SENDER));
+        wrap_sender_generate_for_throughput_sender(reinforcement_learning::value::OBSERVATION_EH_SENDER));
     factory.register_type(reinforcement_learning::value::INTERACTION_EH_SENDER,
-        generate_create_func(reinforcement_learning::value::INTERACTION_EH_SENDER));
+        wrap_sender_generate_for_throughput_sender(reinforcement_learning::value::INTERACTION_EH_SENDER));
     factory.register_type(reinforcement_learning::value::EPISODE_EH_SENDER,
-        generate_create_func(reinforcement_learning::value::EPISODE_EH_SENDER));
+        wrap_sender_generate_for_throughput_sender(reinforcement_learning::value::EPISODE_EH_SENDER));
     factory.register_type(reinforcement_learning::value::OBSERVATION_HTTP_API_SENDER,
-        generate_create_func(reinforcement_learning::value::OBSERVATION_HTTP_API_SENDER));
+        wrap_sender_generate_for_throughput_sender(reinforcement_learning::value::OBSERVATION_HTTP_API_SENDER));
     factory.register_type(reinforcement_learning::value::INTERACTION_HTTP_API_SENDER,
-        generate_create_func(reinforcement_learning::value::INTERACTION_HTTP_API_SENDER));
+        wrap_sender_generate_for_throughput_sender(reinforcement_learning::value::INTERACTION_HTTP_API_SENDER));
     factory.register_type(reinforcement_learning::value::EPISODE_HTTP_API_SENDER,
-        generate_create_func(reinforcement_learning::value::EPISODE_HTTP_API_SENDER));
+        wrap_sender_generate_for_throughput_sender(reinforcement_learning::value::EPISODE_HTTP_API_SENDER));
     sender_factory = &factory;
   }
 
