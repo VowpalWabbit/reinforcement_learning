@@ -30,6 +30,8 @@
 #include "vw/core/parser.h"
 #include "vw/core/scope_exit.h"
 
+namespace v2 = reinforcement_learning::messages::flatbuff::v2;
+
 example_joiner::example_joiner(VW::workspace* vw)
     : i_joiner(vw->logger), _vw(vw), _reward_calculation(&reward::earliest), _binary_to_json(false)
 {

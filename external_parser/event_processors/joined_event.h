@@ -10,8 +10,6 @@
 // clang-format on
 #include "vw/json_parser/parse_example_json.h"
 
-namespace v2 = reinforcement_learning::messages::flatbuff::v2;
-
 namespace joined_event
 {
 struct MultiSlotInteraction
@@ -132,8 +130,11 @@ struct cb_joined_event : public typed_joined_event
     // original reward is used to record the observed reward of apprentice mode
     original_reward = reward_function(outcome_events, default_reward);
 
-    if (interaction_metadata.learning_mode == v2::LearningModeType_Apprentice) { set_apprentice_reward(); }
-    else { reward = original_reward; }
+    if (interaction_metadata.learning_mode == reinforcement_learning::messages::flatbuff::v2::LearningModeType_Apprentice) { 
+      set_apprentice_reward();
+    } else { 
+      reward = original_reward;
+    }
   }
 
   void calculate_metrics(VW::details::dsjson_metrics* metrics) override
@@ -228,7 +229,7 @@ struct ccb_joined_event : public typed_joined_event
   {
     size_t num_of_slots = multi_slot_interaction.interaction_data.size();
 
-    if (metadata_info.learning_mode == v2::LearningModeType_Apprentice &&
+    if (metadata_info.learning_mode == reinforcement_learning::messages::flatbuff::v2::LearningModeType_Apprentice &&
         num_of_slots != multi_slot_interaction.baseline_actions.size())
     {
       logger.out_error(
@@ -242,7 +243,7 @@ struct ccb_joined_event : public typed_joined_event
     {
       for (auto& outcome : outcome_events)
       {
-        if (outcome.index_type == v2::IndexValue_literal && !outcome.s_index.empty())
+        if (outcome.index_type == reinforcement_learning::messages::flatbuff::v2::IndexValue_literal && !outcome.s_index.empty())
         {
           auto iterator = slot_id_to_index_map.find(outcome.s_index);
           if (iterator != slot_id_to_index_map.end()) { outcome.index = iterator->second; }
@@ -278,8 +279,12 @@ struct ccb_joined_event : public typed_joined_event
       }
     }
 
-    if (metadata_info.learning_mode == v2::LearningModeType_Apprentice) { set_apprentice_reward(); }
-    else { rewards.assign(original_rewards.begin(), original_rewards.end()); }
+    if (metadata_info.learning_mode == reinforcement_learning::messages::flatbuff::v2::LearningModeType_Apprentice) { 
+      set_apprentice_reward();
+    }
+    else { 
+      rewards.assign(original_rewards.begin(), original_rewards.end());
+    }
   }
 
   void calculate_metrics(VW::details::dsjson_metrics* metrics) override
@@ -362,7 +367,7 @@ struct slates_joined_event : public typed_joined_event
     reward = default_reward;
     original_reward = reward_function(outcome_events, default_reward);
 
-    if (metadata_info.learning_mode == v2::LearningModeType_Apprentice)
+    if (metadata_info.learning_mode == reinforcement_learning::messages::flatbuff::v2::LearningModeType_Apprentice)
     {
       logger.out_warn("Apprentice mode is not implmeneted for slates.");
     }
@@ -447,7 +452,7 @@ struct ca_joined_event : public typed_joined_event
     // original reward is used to record the observed reward of apprentice mode
     original_reward = reward_function(outcome_events, default_reward);
 
-    if (interaction_metadata.learning_mode == v2::LearningModeType_Apprentice)
+    if (interaction_metadata.learning_mode == reinforcement_learning::messages::flatbuff::v2::LearningModeType_Apprentice)
     {
       logger.out_warn("Apprentice mode is not implmeneted for cats.");
     }

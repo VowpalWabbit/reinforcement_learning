@@ -24,6 +24,8 @@
 #include "vw/core/v_array.h"
 #include "vw/io/logger.h"
 
+namespace v2 = reinforcement_learning::messages::flatbuff::v2;
+
 multistep_example_joiner::multistep_example_joiner(VW::workspace* vw)
     : i_joiner(vw->logger)
     , _vw(vw)

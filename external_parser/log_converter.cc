@@ -9,6 +9,7 @@
 namespace log_converter
 {
 namespace rj = rapidjson;
+namespace v2 = reinforcement_learning::messages::flatbuff::v2;
 
 void build_json(std::ofstream& outfile, joined_event::joined_event& je, VW::io::logger& logger)
 {
