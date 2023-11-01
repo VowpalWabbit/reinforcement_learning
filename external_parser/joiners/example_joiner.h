@@ -84,7 +84,8 @@ public:
   // true if there are still event-groups to be processed from a deserialized
   // batch
   bool processing_batch() override;
-
+  int events_in_queue();
+  
   // to be called after process_joined
   // returns true if the event that was just processed is a skip_learn event
   // otherwise returns false
