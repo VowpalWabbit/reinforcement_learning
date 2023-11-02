@@ -17,8 +17,7 @@ cd "$REPO_DIR"
 cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=On
 
 # generate flatbuffers files
-cmake --build build --target fbgenerator_v1
-cmake --build build --target fbgenerator_v2
+cmake --build build --target fbgen
 
 # check that compile_commands.json was generated
 cd build
