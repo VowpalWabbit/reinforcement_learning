@@ -17,6 +17,7 @@ public:
     auto& item_count = _item_stats[id];
     ++item_count;
     ++_total_events;
+    _total_reward += outcome;    
   }
 
   std::string get_stats(const std::string& id, T chosen_action)
@@ -29,8 +30,11 @@ public:
 
   int count() const { return _total_events; }
 
+  float get_ctr() const { return _total_reward / _total_events; }
+
 private:
   std::map<std::pair<std::string, T>, std::pair<int, int>> _action_stats;
   std::map<std::string, int> _item_stats;
   int _total_events = 0;
+  float _total_reward = 0.f;
 };
