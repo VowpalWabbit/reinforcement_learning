@@ -41,7 +41,6 @@ po::variables_map process_cmd_line(const int argc, char** argv)
     "random_seed", po::value<uint64_t>()->default_value(rand()), "Random seed. Default is random")(
     "delay", po::value<int64_t>()->default_value(2000), "Delay between events in ms")(
     "quiet", po::bool_switch(), "Suppress logs")(
-    "random_ids", po::value<bool>()->default_value(true), "Use randomly generated Event IDs. Default is true")(
     "throughput", "print throughput stats")(
     "random_ids", po::value<bool>()->default_value(true), "Use randomly generated Event IDs. Default is true")(
     "refresh_model_period", po::value<uint64_t>()->default_value(0), 
