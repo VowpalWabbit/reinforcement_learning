@@ -6,7 +6,7 @@ namespace Rl.Net.Cli
     [Verb("basicUsage", HelpText = "Basic usage of the API")]
     class BasicUsageCommand : CommandBase
     {
-        [Option(longName: "testType", HelpText = "select from (liveModel, CBLoop, PdfExample) basic usage examples", Required = false, Default = "liveModel")]
+        [Option(longName: "testType", HelpText = "select from (liveModel, cbLoop, ccbLoop, PdfExample) basic usage examples", Required = false, Default = "liveModel")]
         public string testType { get; set; }
 
         public override void Run()
@@ -16,8 +16,11 @@ namespace Rl.Net.Cli
                 case "liveModel":
                     BasicUsage(this.ConfigPath);
                     break;
-                case "CBLoop":
+                case "cbLoop":
                     BasicUsageCBLoop(this.ConfigPath);
+                    break;
+                case "ccbLoop":
+                    BasicUsageCCBLoop(this.ConfigPath);
                     break;
                 case "PdfExample":
                     PdfExample(this.ConfigPath);
@@ -65,7 +68,7 @@ namespace Rl.Net.Cli
             const string eventId = "event_id";
             const string contextJson = "{\"GUser\":{\"id\":\"a\",\"major\":\"eng\",\"hobby\":\"hiking\"},\"_multi\":[ { \"TAction\":{\"a1\":\"f1\"} },{\"TAction\":{\"a2\":\"f2\"}}]}";
 
-            CBLoop cb_loop = Helpers.CreateCBLoopOrExit(configPath);
+            CBLoop cb_loop = Helpers.CreateLoopOrExit<CBLoop>(configPath, config => new CBLoop(config));
 
             ApiStatus apiStatus = new ApiStatus();
 
@@ -88,6 +91,60 @@ namespace Rl.Net.Cli
                 Helpers.WriteStatusAndExit(apiStatus);
             }
             Console.WriteLine("Basice usage cb loop success");
+        }
+
+        public static void BasicUsageCCBLoop(string configPath)
+        {
+            const float outcome = 1.0f;
+            const string eventId = "event_id";
+            const string contextJson = @"
+            {
+            ""GUser"": {
+                ""f1"": 82
+            },
+            ""_multi"": [
+                {
+                ""a1"": {
+                    ""af1"": 82
+                }
+                },
+                {
+                ""a2"": {
+                    ""af1"": 82
+                }
+                }
+            ],
+            ""_slots"": [
+                {
+                ""_id"": ""slot0""
+                },
+                {
+                ""_id"": ""slot1""
+                }
+            ]
+            }";
+
+            CCBLoop ccb_loop = Helpers.CreateLoopOrExit<CCBLoop>(configPath, config => new CCBLoop(config));
+
+            ApiStatus apiStatus = new ApiStatus();
+
+            MultiSlotResponseDetailed rankingResponse = new MultiSlotResponseDetailed();
+            if (!ccb_loop.TryRequestMultiSlotDecisionDetailed(eventId, contextJson, rankingResponse, apiStatus))
+            {
+                Helpers.WriteStatusAndExit(apiStatus);
+            }
+
+            // TODO: Populate actionProbs. Currently GetOutcome() just returns a fixed outcome value, so the values of actionProbs don't matter.
+            ActionProbability[] actionProbs = new ActionProbability[rankingResponse.Count];
+            foreach (var slot in rankingResponse)
+            {
+                if (!ccb_loop.TryQueueOutcomeEvent(eventId, slot.SlotId, outcome, apiStatus))
+                {
+                    Helpers.WriteStatusAndExit(apiStatus);
+                }
+            }
+
+            Console.WriteLine("Basice usage ccb loop success");
         }
 
         public static void PdfExample(string configPath)

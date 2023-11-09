@@ -96,6 +96,7 @@
     <ClCompile Include="rl.net.api_status.cc" />
     <ClCompile Include="rl.net.buffer.cc" />
     <ClCompile Include="rl.net.cb_loop.cc" />
+    <ClCompile Include="rl.net.ccb_loop.cc" />
     <ClCompile Include="rl.net.config.cc" />
     <ClCompile Include="rl.net.continuous_action_response.cc" />
     <ClCompile Include="rl.net.episode_state.cc" />
@@ -112,9 +113,10 @@
     <ClInclude Include="binding_sender.h" />
     <ClInclude Include="binding_tracer.h" />
     <ClInclude Include="rl.net.api_status.h" />
-    <ClInclude Include="rl.net.base_loop.h" />
+    <ClInclude Include="rl.net.loop_context.h" />
     <ClInclude Include="rl.net.buffer.h" />
     <ClInclude Include="rl.net.cb_loop.h" />
+    <ClInclude Include="rl.net.ccb_loop.h" />
     <ClInclude Include="rl.net.config.h" />
     <ClInclude Include="rl.net.continuous_action_response.h" />
     <ClInclude Include="rl.net.decision_response.h" />

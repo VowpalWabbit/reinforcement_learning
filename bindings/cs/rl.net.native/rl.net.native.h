@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cb_loop.h"
+#include "ccb_loop.h"
 #include "config_utility.h"
 #include "live_model.h"
 

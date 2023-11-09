@@ -50,7 +50,7 @@ namespace Rl.Net.Cli
             return liveModel;
         }
 
-        public static CBLoop CreateCBLoopOrExit(string clientJsonPath)
+        public static LoopType CreateLoopOrExit<LoopType>(string clientJsonPath, Func<Configuration, LoopType> createLoop) where LoopType : ILoop
         {
             if (!File.Exists(clientJsonPath))
             {
@@ -66,18 +66,22 @@ namespace Rl.Net.Cli
             {
                 WriteStatusAndExit(apiStatus);
             }
+            string trace_log = config["trace.logger.implementation"];
 
-            CBLoop cb_loop = new CBLoop(config);
+            LoopType loop = createLoop(config);
 
-            cb_loop.BackgroundError += LiveModel_BackgroundError;
-            cb_loop.TraceLoggerEvent += LiveModel_TraceLogEvent;
+            loop.BackgroundError += LiveModel_BackgroundError;
+            if (trace_log == "CONSOLE_TRACE_LOGGER")
+            {
+                loop.TraceLoggerEvent += LiveModel_TraceLogEvent;
+            }
 
-            if (!cb_loop.TryInit(apiStatus))
+            if (!loop.TryInit(apiStatus))
             {
                 WriteStatusAndExit(apiStatus);
             }
 
-            return cb_loop;
+            return loop;
         }
 
         public static void LiveModel_BackgroundError(object sender, ApiStatus e)

@@ -120,7 +120,7 @@ namespace Rl.Net
         }
     }
 
-    public sealed class CBLoop : NativeObject<CBLoop>
+    public sealed class CBLoop : NativeObject<CBLoop>, ILoop
     {
         private readonly NativeMethods.managed_background_error_callback_t managedErrorCallback;
         private readonly NativeMethods.managed_trace_callback_t managedTraceCallback;

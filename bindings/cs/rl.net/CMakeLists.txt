@@ -9,18 +9,20 @@ set(RL_NET_SOURCES
   ActionFlags.cs
   ApiStatus.cs
   AsyncSender.cs
-  BaseLoop.cs
   CBLoop.cs
+  CCBLoop.cs
   Configuration.cs
   ContinuousActionResponse.cs
   DecisionResponse.cs
   FactoryContext.cs
   InternalsVisibleToTest.tt
+  ILoop.cs
   ISender.cs
   LiveModel.cs
   LiveModelThreadSafe.cs
   MultiSlotResponse.cs
   MultiSlotResponseDetailed.cs
+  NativeCallbacks.cs
   RankingResponse.cs
   RLException.cs
   RLLibLogUtils.cs
