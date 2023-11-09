@@ -6,7 +6,7 @@ namespace Rl.Net.Cli
     [Verb("basicUsage", HelpText = "Basic usage of the API")]
     class BasicUsageCommand : CommandBase
     {
-        [Option(longName: "testType", HelpText = "select from (liveModel, cbLoop, ccbLoop, PdfExample) basic usage examples", Required = false, Default = "liveModel")]
+        [Option(longName: "testType", HelpText = "select from (liveModel, caLoop, cbLoop, ccbLoop, PdfExample) basic usage examples", Required = false, Default = "liveModel")]
         public string testType { get; set; }
 
         public override void Run()
@@ -15,6 +15,9 @@ namespace Rl.Net.Cli
             {
                 case "liveModel":
                     BasicUsage(this.ConfigPath);
+                    break;
+                case "caLoop":
+                    BasicUsageCALoop(this.ConfigPath);
                     break;
                 case "cbLoop":
                     BasicUsageCBLoop(this.ConfigPath);
@@ -60,6 +63,32 @@ namespace Rl.Net.Cli
                 Helpers.WriteStatusAndExit(apiStatus);
             }
             Console.WriteLine("Basice usage live model success");
+        }
+
+        public static void BasicUsageCALoop(string configPath)
+        {
+            const float outcome = 1.0f;
+            const string eventId = "event_id";
+            const string contextJson = "{ \"id\":\"j1\", \"20.3\":1, \"102.4\":1, \"-10.2\":1 }";
+
+            CALoop ca_loop = Helpers.CreateLoopOrExit<CALoop>(configPath, config => new CALoop(config));
+
+            ApiStatus apiStatus = new ApiStatus();
+
+            ContinuousActionResponse continuousResponse = new ContinuousActionResponse();
+            if (!ca_loop.TryRequestContinuousAction(eventId, contextJson, continuousResponse, apiStatus))
+            {
+                Helpers.WriteStatusAndExit(apiStatus);
+            }
+
+            Console.WriteLine($"Chosen action id: {continuousResponse.ChosenAction}");
+            Console.WriteLine($"Chosen action pdf value: {continuousResponse.ChosenActionPdfValue}");
+
+            if (!ca_loop.TryQueueOutcomeEvent(eventId, outcome, apiStatus))
+            {
+                Helpers.WriteStatusAndExit(apiStatus);
+            }
+            Console.WriteLine("Basice usage ca loop success");
         }
 
         public static void BasicUsageCBLoop(string configPath)
@@ -128,16 +157,17 @@ namespace Rl.Net.Cli
 
             ApiStatus apiStatus = new ApiStatus();
 
-            MultiSlotResponseDetailed rankingResponse = new MultiSlotResponseDetailed();
-            if (!ccb_loop.TryRequestMultiSlotDecisionDetailed(eventId, contextJson, rankingResponse, apiStatus))
+            MultiSlotResponseDetailed multiResponse = new MultiSlotResponseDetailed();
+            if (!ccb_loop.TryRequestMultiSlotDecisionDetailed(eventId, contextJson, multiResponse, apiStatus))
             {
                 Helpers.WriteStatusAndExit(apiStatus);
             }
 
             // TODO: Populate actionProbs. Currently GetOutcome() just returns a fixed outcome value, so the values of actionProbs don't matter.
-            ActionProbability[] actionProbs = new ActionProbability[rankingResponse.Count];
-            foreach (var slot in rankingResponse)
+            ActionProbability[] actionProbs = new ActionProbability[multiResponse.Count];
+            foreach (var slot in multiResponse)
             {
+                Console.WriteLine($"Slot: {slot.SlotId}, Chosen Action: {slot.ChosenAction}");
                 if (!ccb_loop.TryQueueOutcomeEvent(eventId, slot.SlotId, outcome, apiStatus))
                 {
                     Helpers.WriteStatusAndExit(apiStatus);

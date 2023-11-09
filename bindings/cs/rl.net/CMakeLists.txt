@@ -9,6 +9,7 @@ set(RL_NET_SOURCES
   ActionFlags.cs
   ApiStatus.cs
   AsyncSender.cs
+  CALoop.cs
   CBLoop.cs
   CCBLoop.cs
   Configuration.cs
