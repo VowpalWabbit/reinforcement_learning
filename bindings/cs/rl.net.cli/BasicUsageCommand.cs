@@ -6,7 +6,7 @@ namespace Rl.Net.Cli
     [Verb("basicUsage", HelpText = "Basic usage of the API")]
     class BasicUsageCommand : CommandBase
     {
-        [Option(longName: "testType", HelpText = "select from (liveModel, caLoop, cbLoop, ccbLoop, PdfExample) basic usage examples", Required = false, Default = "liveModel")]
+        [Option(longName: "testType", HelpText = "select from (liveModel, caLoop, cbLoop, ccbLoop, pdfExample, slatesLoop) basic usage examples", Required = false, Default = "liveModel")]
         public string testType { get; set; }
 
         public override void Run()
@@ -25,8 +25,11 @@ namespace Rl.Net.Cli
                 case "ccbLoop":
                     BasicUsageCCBLoop(this.ConfigPath);
                     break;
-                case "PdfExample":
+                case "pdfExample":
                     PdfExample(this.ConfigPath);
+                    break;
+                case "slatesLoop":
+                    BasicUsageSlatesLoop(this.ConfigPath);
                     break;
                 default:
                     Console.WriteLine("Invalid test type");
@@ -206,6 +209,26 @@ namespace Rl.Net.Cli
                 Helpers.WriteStatusAndExit(apiStatus);
             }
             Console.WriteLine("Basice usage pdf example success");
+        }
+
+        public static void BasicUsageSlatesLoop(string configPath)
+        {
+            const float outcome = 1.0f;
+            const string eventId = "event_id";
+            const string contextJson = "{\"shared_feature\":1.0,\"_multi\":[{\"_slot_id\":0,\"feature\":1.0},{\"_slot_id\":0,\"feature\":1.0},{\"_slot_id\":0,\"feature\":1.0},{\"_slot_id\":1,\"feature\":1.0},{\"_slot_id\":1,\"feature\":1.0}],\"_slots\":[{\"feature\":1.0},{\"feature\":1.0}]}";
+
+            SlatesLoop slates_loop = Helpers.CreateLoopOrExit<SlatesLoop>(configPath, config => new SlatesLoop(config));
+
+            ApiStatus apiStatus = new ApiStatus();
+
+            // TODO: Fix VW slates json parser to test usage
+            /*MultiSlotResponseDetailed multiResponse = new MultiSlotResponseDetailed();
+            if (!slates_loop.TryRequestMultiSlotDecisionDetailed(eventId, contextJson, multiResponse, apiStatus))
+            {
+                Helpers.WriteStatusAndExit(apiStatus);
+            }
+
+            Console.WriteLine("Basice usage slates loop success");*/
         }
     }
 }

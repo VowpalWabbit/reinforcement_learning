@@ -5,6 +5,7 @@
 #include "ccb_loop.h"
 #include "config_utility.h"
 #include "live_model.h"
+#include "slates_loop.h"
 
 #include <fstream>
 #include <iostream>

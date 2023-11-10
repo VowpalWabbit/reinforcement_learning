@@ -28,6 +28,7 @@ set(RL_NET_SOURCES
   RLException.cs
   RLLibLogUtils.cs
   SharedBuffer.cs
+  SlatesLoop.cs
   SlotRanking.cs
   TraceLogEventArgs.cs
 )

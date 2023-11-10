@@ -16,6 +16,7 @@ set(rl_net_native_SOURCES
   rl.net.ranking_response.cc
   rl.net.multi_slot_response.cc
   rl.net.multi_slot_response_detailed.cc
+  rl.net.slates_loop.cc
   rl.net.slot_ranking.cc
 )
 
@@ -38,6 +39,7 @@ set(rl_net_native_HEADERS
   rl.net.ranking_response.h
   rl.net.multi_slot_response.h
   rl.net.multi_slot_response_detailed.h
+  rl.net.slates_loop.h
   rl.net.slot_ranking.h
 )
 

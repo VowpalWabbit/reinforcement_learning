@@ -108,6 +108,7 @@
     <ClCompile Include="rl.net.native.cc" />
     <ClCompile Include="rl.net.ranking_response.cc" />
     <ClCompile Include="rl.net.multi_slot_response.cc" />
+    <ClCompile Include="rl.net.slates_loop.cc" />
     <ClCompile Include="rl.net.slot_ranking.cc" />
   </ItemGroup>
   <ItemGroup>
@@ -129,6 +130,7 @@
     <ClInclude Include="rl.net.native.h" />
     <ClInclude Include="rl.net.ranking_response.h" />
     <ClInclude Include="rl.net.multi_slot_response.h" />
+    <ClInclude Include="rl.net.slates_loop.h" />
     <ClInclude Include="rl.net.slot_ranking.h" />
   </ItemGroup>
   <ItemGroup>
