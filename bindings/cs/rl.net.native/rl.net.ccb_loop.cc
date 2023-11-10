@@ -7,7 +7,8 @@
 
 #include <iostream>
 
-static void pipe_background_error_callback(const reinforcement_learning::api_status& status, ccb_loop_context_t* context)
+static void pipe_background_error_callback(
+    const reinforcement_learning::api_status& status, ccb_loop_context_t* context)
 {
   auto managed_backgroud_error_callback_local = context->loop_context.background_error_callback;
   if (managed_backgroud_error_callback_local) { managed_backgroud_error_callback_local(status); }
@@ -158,8 +159,8 @@ API int CCBLoopRequestMultiSlotDecisionDetailedWithFlags(ccb_loop_context_t* con
   RL_IGNORE_DEPRECATED_USAGE_END
 }
 
-API int CCBLoopRequestMultiSlotDecisionDetailedWithBaselineAndFlags(ccb_loop_context_t* context,
-    const char* event_id, const char* context_json, int context_json_size, unsigned int flags,
+API int CCBLoopRequestMultiSlotDecisionDetailedWithBaselineAndFlags(ccb_loop_context_t* context, const char* event_id,
+    const char* context_json, int context_json_size, unsigned int flags,
     reinforcement_learning::multi_slot_response_detailed* resp, const int* baseline_actions,
     size_t baseline_actions_size, reinforcement_learning::api_status* status)
 {
@@ -176,8 +177,8 @@ API int CCBLoopReportActionTaken(
   return context->ccb_loop->report_action_taken(event_id, status);
 }
 
-API int CCBLoopReportActionMultiIdTaken(ccb_loop_context_t* context, const char* primary_id,
-    const char* secondary_id, reinforcement_learning::api_status* status)
+API int CCBLoopReportActionMultiIdTaken(ccb_loop_context_t* context, const char* primary_id, const char* secondary_id,
+    reinforcement_learning::api_status* status)
 {
   return context->ccb_loop->report_action_taken(primary_id, secondary_id, status);
 }

@@ -74,8 +74,8 @@ API int SlatesLoopInit(slates_loop_context_t* context, reinforcement_learning::a
   return context->slates_loop->init(status);
 }
 
-API int SlatesLoopRequestMultiSlotDecision(slates_loop_context_t* context, const char* event_id, const char* context_json,
-    int context_json_size, reinforcement_learning::multi_slot_response* resp,
+API int SlatesLoopRequestMultiSlotDecision(slates_loop_context_t* context, const char* event_id,
+    const char* context_json, int context_json_size, reinforcement_learning::multi_slot_response* resp,
     reinforcement_learning::api_status* status)
 {
   RL_IGNORE_DEPRECATED_USAGE_START

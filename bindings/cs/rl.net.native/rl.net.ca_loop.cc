@@ -7,8 +7,7 @@
 
 #include <iostream>
 
-static void pipe_background_error_callback(
-    const reinforcement_learning::api_status& status, ca_loop_context_t* context)
+static void pipe_background_error_callback(const reinforcement_learning::api_status& status, ca_loop_context_t* context)
 {
   auto managed_backgroud_error_callback_local = context->loop_context.background_error_callback;
   if (managed_backgroud_error_callback_local) { managed_backgroud_error_callback_local(status); }
@@ -100,8 +99,8 @@ API int CALoopReportActionTaken(
   return context->ca_loop->report_action_taken(event_id, status);
 }
 
-API int CALoopReportActionMultiIdTaken(ca_loop_context_t* context, const char* primary_id,
-    const char* secondary_id, reinforcement_learning::api_status* status)
+API int CALoopReportActionMultiIdTaken(ca_loop_context_t* context, const char* primary_id, const char* secondary_id,
+    reinforcement_learning::api_status* status)
 {
   return context->ca_loop->report_action_taken(primary_id, secondary_id, status);
 }

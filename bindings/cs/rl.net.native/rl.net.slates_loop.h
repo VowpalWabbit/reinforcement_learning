@@ -1,8 +1,8 @@
 #pragma once
 
 #include "constants.h"
-#include "rl.net.loop_context.h"
 #include "rl.net.factory_context.h"
+#include "rl.net.loop_context.h"
 #include "rl.net.native.h"
 
 typedef struct slates_loop_context

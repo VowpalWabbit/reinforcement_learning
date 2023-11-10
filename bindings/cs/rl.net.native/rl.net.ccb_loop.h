@@ -1,8 +1,8 @@
 #pragma once
 
 #include "constants.h"
-#include "rl.net.loop_context.h"
 #include "rl.net.factory_context.h"
+#include "rl.net.loop_context.h"
 #include "rl.net.native.h"
 
 typedef struct ccb_loop_context
@@ -25,12 +25,12 @@ extern "C"
 
   API int CCBLoopRequestDecision(ccb_loop_context_t* ccb_loop, const char* context_json, int context_json_size,
       reinforcement_learning::decision_response* resp, reinforcement_learning::api_status* status = nullptr);
-  API int CCBLoopRequestDecisionWithFlags(ccb_loop_context_t* ccb_loop, const char* context_json,
-      int context_json_size, unsigned int flags, reinforcement_learning::decision_response* resp,
+  API int CCBLoopRequestDecisionWithFlags(ccb_loop_context_t* ccb_loop, const char* context_json, int context_json_size,
+      unsigned int flags, reinforcement_learning::decision_response* resp,
       reinforcement_learning::api_status* status = nullptr);
 
-  API int CCBLoopRequestMultiSlotDecision(ccb_loop_context_t* context, const char* event_id,
-      const char* context_json, int context_json_size, reinforcement_learning::multi_slot_response* resp,
+  API int CCBLoopRequestMultiSlotDecision(ccb_loop_context_t* context, const char* event_id, const char* context_json,
+      int context_json_size, reinforcement_learning::multi_slot_response* resp,
       reinforcement_learning::api_status* status = nullptr);
   API int CCBLoopRequestMultiSlotDecisionWithFlags(ccb_loop_context_t* context, const char* event_id,
       const char* context_json, int context_json_size, unsigned int flags,
@@ -46,8 +46,8 @@ extern "C"
   API int CCBLoopRequestMultiSlotDecisionDetailedWithFlags(ccb_loop_context_t* context, const char* event_id,
       const char* context_json, int context_json_size, unsigned int flags,
       reinforcement_learning::multi_slot_response_detailed* resp, reinforcement_learning::api_status* status = nullptr);
-  API int CCBLoopRequestMultiSlotDecisionDetailedWithBaselineAndFlags(ccb_loop_context_t* context,
-      const char* event_id, const char* context_json, int context_json_size, unsigned int flags,
+  API int CCBLoopRequestMultiSlotDecisionDetailedWithBaselineAndFlags(ccb_loop_context_t* context, const char* event_id,
+      const char* context_json, int context_json_size, unsigned int flags,
       reinforcement_learning::multi_slot_response_detailed* resp, const int* baseline_actions,
       size_t baseline_actions_size, reinforcement_learning::api_status* status = nullptr);
 
@@ -62,8 +62,8 @@ extern "C"
       const char* outcome_json, reinforcement_learning::api_status* status = nullptr);
   API int CCBLoopReportOutcomeSlotStringIdF(ccb_loop_context_t* context, const char* event_id, const char* slot_id,
       float outcome, reinforcement_learning::api_status* status = nullptr);
-  API int CCBLoopReportOutcomeSlotStringIdJson(ccb_loop_context_t* context, const char* event_id,
-      const char* slot_id, const char* outcome_json, reinforcement_learning::api_status* status = nullptr);
+  API int CCBLoopReportOutcomeSlotStringIdJson(ccb_loop_context_t* context, const char* event_id, const char* slot_id,
+      const char* outcome_json, reinforcement_learning::api_status* status = nullptr);
 
   API int CCBLoopRefreshModel(ccb_loop_context_t* context, reinforcement_learning::api_status* status = nullptr);
 
