@@ -65,7 +65,7 @@ namespace Rl.Net.Cli
             {
                 Helpers.WriteStatusAndExit(apiStatus);
             }
-            Console.WriteLine("Basice usage live model success");
+            Console.WriteLine("Basic usage live model success");
         }
 
         public static void BasicUsageCALoop(string configPath)
@@ -91,7 +91,7 @@ namespace Rl.Net.Cli
             {
                 Helpers.WriteStatusAndExit(apiStatus);
             }
-            Console.WriteLine("Basice usage ca loop success");
+            Console.WriteLine("Basic usage ca loop success");
         }
 
         public static void BasicUsageCBLoop(string configPath)
@@ -122,7 +122,7 @@ namespace Rl.Net.Cli
             {
                 Helpers.WriteStatusAndExit(apiStatus);
             }
-            Console.WriteLine("Basice usage cb loop success");
+            Console.WriteLine("Basic usage cb loop success");
         }
 
         public static void BasicUsageCCBLoop(string configPath)
@@ -177,7 +177,7 @@ namespace Rl.Net.Cli
                 }
             }
 
-            Console.WriteLine("Basice usage ccb loop success");
+            Console.WriteLine("Basic usage ccb loop success");
         }
 
         public static void PdfExample(string configPath)
@@ -208,7 +208,7 @@ namespace Rl.Net.Cli
             {
                 Helpers.WriteStatusAndExit(apiStatus);
             }
-            Console.WriteLine("Basice usage pdf example success");
+            Console.WriteLine("Basic usage pdf example success");
         }
 
         public static void BasicUsageSlatesLoop(string configPath)
@@ -228,7 +228,7 @@ namespace Rl.Net.Cli
                 Helpers.WriteStatusAndExit(apiStatus);
             }
 
-            Console.WriteLine("Basice usage slates loop success");*/
+            Console.WriteLine("Basic usage slates loop success");*/
         }
     }
 }
