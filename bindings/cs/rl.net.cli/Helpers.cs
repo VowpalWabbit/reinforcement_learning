@@ -50,14 +50,18 @@ namespace Rl.Net.Cli
             return liveModel;
         }
 
-        public static LoopType CreateLoopOrExit<LoopType>(string clientJsonPath, Func<Configuration, LoopType> createLoop) where LoopType : ILoop
+        public static LoopType CreateLoopOrExit<LoopType>(string clientJson, Func<Configuration, LoopType> createLoop, bool jsonStr = false) where LoopType : ILoop
         {
-            if (!File.Exists(clientJsonPath))
+            string json = clientJson;
+            if (!jsonStr)
             {
-                WriteErrorAndExit($"Could not find file with path '{clientJsonPath}'.");
-            }
+                if (!File.Exists(clientJson))
+                {
+                    WriteErrorAndExit($"Could not find file with path '{clientJson}'.");
+                }
 
-            string json = File.ReadAllText(clientJsonPath);
+                json = File.ReadAllText(clientJson);
+            }
 
             ApiStatus apiStatus = new ApiStatus();
 
