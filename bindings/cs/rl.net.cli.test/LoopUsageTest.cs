@@ -80,6 +80,23 @@ namespace Rl.Net.Cli.Test
         ]
         }";
 
+        const string contextJsonSlates = 
+        @"{
+            ""shared_feature"": 1.0,
+            ""_multi"": [
+                {""_slot_id"": 0, ""feature"": 1.0},
+                {""_slot_id"": 0, ""feature"": 1.0},
+                {""_slot_id"": 0, ""feature"": 1.0},
+                {""_slot_id"": 1, ""feature"": 1.0},
+                {""_slot_id"": 1, ""feature"": 1.0}
+            ],
+            ""_slots"": [
+                {""feature"": 1.0},
+                {""feature"": 1.0}
+            ]
+        }";
+
+
         [TestMethod]
         public void Test_CALoop()
         {
@@ -174,13 +191,33 @@ namespace Rl.Net.Cli.Test
                 // Assert the expected values
                 Assert.AreEqual(expectedSlotIds[index], slot.SlotId);
                 Assert.AreEqual(expectedChosenActions[index], slot.ChosenAction);
-                
+
                 if (!ccb_loop.TryQueueOutcomeEvent(eventId, slot.SlotId, outcome, apiStatus))
                 {
                     Helpers.WriteStatusAndExit(apiStatus);
                 }
                 index++;
             }
+        }
+
+        [TestMethod]
+        public void Test_SlatesLoop()
+        {
+            const float outcome = 1.0f;
+            const string eventId = "event_id";
+            string configJsonSlates = configJson.TrimEnd('}', '\r', '\n', ' ', '\t') +
+                                @", ""model.vw.initial_command_line"": ""--quiet --slates"" }";
+
+            SlatesLoop slates_loop = Helpers.CreateLoopOrExit<SlatesLoop>(configJsonSlates, config => new SlatesLoop(config), true);
+
+            ApiStatus apiStatus = new ApiStatus();
+
+            // TODO: Fix VW slates json parser to test usage
+            /*MultiSlotResponseDetailed multiResponse = new MultiSlotResponseDetailed();
+            if (!slates_loop.TryRequestMultiSlotDecisionDetailed(eventId, contextJsonSlates, multiResponse, apiStatus))
+            {
+                Helpers.WriteStatusAndExit(apiStatus);
+            }*/
         }
     }
 }
