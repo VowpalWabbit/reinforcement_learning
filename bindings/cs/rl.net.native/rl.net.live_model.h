@@ -1,8 +1,8 @@
 #pragma once
 
 #include "constants.h"
-#include "rl.net.base_loop.h"
 #include "rl.net.factory_context.h"
+#include "rl.net.loop_context.h"
 #include "rl.net.native.h"
 
 typedef struct livemodel_context
@@ -10,7 +10,7 @@ typedef struct livemodel_context
   // reinforcement learning live_model instance.
   reinforcement_learning::live_model* livemodel;
   // contains base fields for all loops
-  base_loop_context_t base_loop_context;
+  loop_context_t loop_context;
 } livemodel_context_t;
 
 // Global exports

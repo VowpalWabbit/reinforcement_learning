@@ -11,129 +11,129 @@ namespace Rl.Net
         internal static partial class NativeMethods
         {
             [DllImport("rlnetnative")]
-            public static extern IntPtr CreateCBLoop(IntPtr config, IntPtr factoryContext);
+            public static extern IntPtr CreateCALoop(IntPtr config, IntPtr factoryContext);
 
             [DllImport("rlnetnative")]
-            public static extern void DeleteCBLoop(IntPtr cbLoop);
+            public static extern void DeleteCALoop(IntPtr caLoop);
 
             [DllImport("rlnetnative")]
-            public static extern int CBLoopInit(IntPtr cbLoop, IntPtr apiStatus);
+            public static extern int CALoopInit(IntPtr caLoop, IntPtr apiStatus);
 
-            [DllImport("rlnetnative", EntryPoint = "CBLoopChooseRank")]
-            private static extern int CBLoopChooseRankNative(IntPtr cbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr rankingResponse, IntPtr apiStatus);
+            [DllImport("rlnetnative", EntryPoint = "CALoopRequestContinuousAction")]
+            private static extern int CALoopRequestContinuousActionNative(IntPtr caLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr continuousActionResponse, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, int, IntPtr, IntPtr, int> CBLoopChooseRankOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, int, IntPtr, IntPtr, int> CALoopRequestContinuousActionOverride { get; set; }
 
-            public static int CBLoopChooseRank(IntPtr cbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr rankingResponse, IntPtr apiStatus)
+            public static int CALoopRequestContinuousAction(IntPtr caLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr continuousActionResponse, IntPtr apiStatus)
             {
-                if (CBLoopChooseRankOverride != null)
+                if (CALoopRequestContinuousActionOverride != null)
                 {
-                    return CBLoopChooseRankOverride(cbLoop, eventId, contextJson, contextJsonSize, rankingResponse, apiStatus);
+                    return CALoopRequestContinuousActionOverride(caLoop, eventId, contextJson, contextJsonSize, continuousActionResponse, apiStatus);
                 }
 
-                return CBLoopChooseRankNative(cbLoop, eventId, contextJson, contextJsonSize, rankingResponse, apiStatus);
+                return CALoopRequestContinuousActionNative(caLoop, eventId, contextJson, contextJsonSize, continuousActionResponse, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CBLoopChooseRankWithFlags")]
-            private static extern int CBLoopChooseRankWithFlagsNative(IntPtr cbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr rankingResponse, IntPtr apiStatus);
+            [DllImport("rlnetnative", EntryPoint = "CALoopRequestContinuousActionWithFlags")]
+            private static extern int CALoopRequestContinuousActionWithFlagsNative(IntPtr caLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> CBLoopChooseRankWithFlagsOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> CALoopRequestContinuousActionWithFlagsOverride { get; set; }
 
-            public static int CBLoopChooseRankWithFlags(IntPtr cbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr rankingResponse, IntPtr apiStatus)
+            public static int CALoopRequestContinuousActionWithFlags(IntPtr caLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus)
             {
-                if (CBLoopChooseRankWithFlagsOverride != null)
+                if (CALoopRequestContinuousActionWithFlagsOverride != null)
                 {
-                    return CBLoopChooseRankWithFlagsOverride(cbLoop, eventId, contextJson, contextJsonSize, flags, rankingResponse, apiStatus);
+                    return CALoopRequestContinuousActionWithFlagsOverride(caLoop, eventId, contextJson, contextJsonSize, flags, continuousActionResponse, apiStatus);
                 }
 
-                return CBLoopChooseRankWithFlagsNative(cbLoop, eventId, contextJson, contextJsonSize, flags, rankingResponse, apiStatus);
+                return CALoopRequestContinuousActionWithFlagsNative(caLoop, eventId, contextJson, contextJsonSize, flags, continuousActionResponse, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CBLoopReportActionTaken")]
-            private static extern int CBLoopReportActionTakenNative(IntPtr cbLoop, IntPtr eventId, IntPtr apiStatus);
+            [DllImport("rlnetnative", EntryPoint = "CALoopReportActionTaken")]
+            private static extern int CALoopReportActionTakenNative(IntPtr caLoop, IntPtr eventId, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, int> CBLoopReportActionTakenOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, int> CALoopReportActionTakenOverride { get; set; }
 
-            public static int CBLoopReportActionTaken(IntPtr cbLoop, IntPtr eventId, IntPtr apiStatus)
+            public static int CALoopReportActionTaken(IntPtr caLoop, IntPtr eventId, IntPtr apiStatus)
             {
-                if (CBLoopReportActionTakenOverride != null)
+                if (CALoopReportActionTakenOverride != null)
                 {
-                    return CBLoopReportActionTakenOverride(cbLoop, eventId, apiStatus);
+                    return CALoopReportActionTakenOverride(caLoop, eventId, apiStatus);
                 }
 
-                return CBLoopReportActionTakenNative(cbLoop, eventId, apiStatus);
+                return CALoopReportActionTakenNative(caLoop, eventId, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CBLoopReportActionMultiIdTaken")]
-            private static extern int CBLoopReportActionTakenMultiIdNative(IntPtr cbLoop, IntPtr primaryId, IntPtr secondaryId, IntPtr apiStatus);
+            [DllImport("rlnetnative", EntryPoint = "CALoopReportActionMultiIdTaken")]
+            private static extern int CALoopReportActionTakenMultiIdNative(IntPtr caLoop, IntPtr primaryId, IntPtr secondaryId, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> CBLoopReportActionTakenMultiIdOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> CALoopReportActionTakenMultiIdOverride { get; set; }
 
-            public static int CBLoopReportActionMultiIdTaken(IntPtr cbLoop, IntPtr primaryId, IntPtr secondaryId, IntPtr apiStatus)
+            public static int CALoopReportActionMultiIdTaken(IntPtr caLoop, IntPtr primaryId, IntPtr secondaryId, IntPtr apiStatus)
             {
-                if (CBLoopReportActionTakenMultiIdOverride != null)
+                if (CALoopReportActionTakenMultiIdOverride != null)
                 {
-                    return CBLoopReportActionTakenMultiIdOverride(cbLoop, primaryId, secondaryId, apiStatus);
+                    return CALoopReportActionTakenMultiIdOverride(caLoop, primaryId, secondaryId, apiStatus);
                 }
 
-                return CBLoopReportActionTakenMultiIdNative(cbLoop, primaryId, secondaryId, apiStatus);
+                return CALoopReportActionTakenMultiIdNative(caLoop, primaryId, secondaryId, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CBLoopReportOutcomeF")]
-            private static extern int CBLoopReportOutcomeFNative(IntPtr cbLoop, IntPtr eventId, float outcome, IntPtr apiStatus);
+            [DllImport("rlnetnative", EntryPoint = "CALoopReportOutcomeF")]
+            private static extern int CALoopReportOutcomeFNative(IntPtr caLoop, IntPtr eventId, float outcome, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, float, IntPtr, int> CBLoopReportOutcomeFOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, float, IntPtr, int> CALoopReportOutcomeFOverride { get; set; }
 
-            public static int CBLoopReportOutcomeF(IntPtr cbLoop, IntPtr eventId, float outcome, IntPtr apiStatus)
+            public static int CALoopReportOutcomeF(IntPtr caLoop, IntPtr eventId, float outcome, IntPtr apiStatus)
             {
-                if (CBLoopReportOutcomeFOverride != null)
+                if (CALoopReportOutcomeFOverride != null)
                 {
-                    return CBLoopReportOutcomeFOverride(cbLoop, eventId, outcome, apiStatus);
+                    return CALoopReportOutcomeFOverride(caLoop, eventId, outcome, apiStatus);
                 }
 
-                return CBLoopReportOutcomeFNative(cbLoop, eventId, outcome, apiStatus);
+                return CALoopReportOutcomeFNative(caLoop, eventId, outcome, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CBLoopReportOutcomeJson")]
-            private static extern int CBLoopReportOutcomeJsonNative(IntPtr cbLoop, IntPtr eventId, IntPtr outcomeJson, IntPtr apiStatus);
+            [DllImport("rlnetnative", EntryPoint = "CALoopReportOutcomeJson")]
+            private static extern int CALoopReportOutcomeJsonNative(IntPtr caLoop, IntPtr eventId, IntPtr outcomeJson, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> CBLoopReportOutcomeJsonOverride { get; set; }
+            internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> CALoopReportOutcomeJsonOverride { get; set; }
 
-            public static int CBLoopReportOutcomeJson(IntPtr cbLoop, IntPtr eventId, IntPtr outcomeJson, IntPtr apiStatus)
+            public static int CALoopReportOutcomeJson(IntPtr caLoop, IntPtr eventId, IntPtr outcomeJson, IntPtr apiStatus)
             {
-                if (CBLoopReportOutcomeJsonOverride != null)
+                if (CALoopReportOutcomeJsonOverride != null)
                 {
-                    return CBLoopReportOutcomeJsonOverride(cbLoop, eventId, outcomeJson, apiStatus);
+                    return CALoopReportOutcomeJsonOverride(caLoop, eventId, outcomeJson, apiStatus);
                 }
 
-                return CBLoopReportOutcomeJsonNative(cbLoop, eventId, outcomeJson, apiStatus);
+                return CALoopReportOutcomeJsonNative(caLoop, eventId, outcomeJson, apiStatus);
             }
 
             [DllImport("rlnetnative")]
-            public static extern int CBLoopRefreshModel(IntPtr cbLoop, IntPtr apiStatus);
+            public static extern int CALoopRefreshModel(IntPtr caLoop, IntPtr apiStatus);
 
             [DllImport("rlnetnative")]
-            public static extern void CBLoopSetCallback(IntPtr cbLoop, [MarshalAs(UnmanagedType.FunctionPtr)] managed_background_error_callback_t callback = null);
+            public static extern void CALoopSetCallback(IntPtr caLoop, [MarshalAs(UnmanagedType.FunctionPtr)] managed_background_error_callback_t callback = null);
 
             [DllImport("rlnetnative")]
-            public static extern void CBLoopSetTrace(IntPtr cbLoop, [MarshalAs(UnmanagedType.FunctionPtr)] managed_trace_callback_t callback = null);
+            public static extern void CALoopSetTrace(IntPtr caLoop, [MarshalAs(UnmanagedType.FunctionPtr)] managed_trace_callback_t callback = null);
         }
     }
 
-    public sealed class CBLoop : NativeObject<CBLoop>, ILoop
+    public sealed class CALoop : NativeObject<CALoop>, ILoop
     {
         private readonly NativeMethods.managed_background_error_callback_t managedErrorCallback;
         private readonly NativeMethods.managed_trace_callback_t managedTraceCallback;
 
-        private static New<CBLoop> BindConstructorArguments(Configuration config, FactoryContext factoryContext)
+        private static New<CALoop> BindConstructorArguments(Configuration config, FactoryContext factoryContext)
         {
-            return new New<CBLoop>(() =>
+            return new New<CALoop>(() =>
             {
                 factoryContext = factoryContext ?? new FactoryContext();
-                IntPtr result = NativeMethods.CreateCBLoop(config.DangerousGetHandle(), factoryContext.DangerousGetHandle());
+                IntPtr result = NativeMethods.CreateCALoop(config.DangerousGetHandle(), factoryContext.DangerousGetHandle());
 
                 // These references do not live on the heap in this delegate, and could disappear during the invocation
-                // of CreateCBLoop. Thus, we need to ensure GC knows not to release them until after that call
+                // of CreateCALoop. Thus, we need to ensure GC knows not to release them until after that call
                 // returns.
                 GC.KeepAlive(config);
                 GC.KeepAlive(factoryContext);
@@ -143,16 +143,16 @@ namespace Rl.Net
 
         }
 
-        public CBLoop(Configuration config) : this(config, null)
+        public CALoop(Configuration config) : this(config, null)
         { }
 
-        public CBLoop(Configuration config, FactoryContext factoryContext) : base(BindConstructorArguments(config, factoryContext), new Delete<CBLoop>(NativeMethods.DeleteCBLoop))
+        public CALoop(Configuration config, FactoryContext factoryContext) : base(BindConstructorArguments(config, factoryContext), new Delete<CALoop>(NativeMethods.DeleteCALoop))
         {
             this.managedErrorCallback = new NativeMethods.managed_background_error_callback_t(this.WrapStatusAndRaiseBackgroundError);
 
             // DangerousGetHandle here is trivially safe, because .Dispose() cannot be called before the object is
             // constructed.
-            NativeMethods.CBLoopSetCallback(this.DangerousGetHandle(), this.managedErrorCallback);
+            NativeMethods.CALoopSetCallback(this.DangerousGetHandle(), this.managedErrorCallback);
 
             this.managedTraceCallback = new NativeMethods.managed_trace_callback_t(this.SendTrace);
         }
@@ -165,7 +165,7 @@ namespace Rl.Net
             }
         }
 
-        unsafe private static int CBLoopChooseRank(IntPtr cbLoop, string eventId, string contextJson, IntPtr rankingResponse, IntPtr apiStatus)
+        unsafe private static int CALoopRequestContinuousAction(IntPtr caLoop, string eventId, string contextJson, IntPtr continuousActionResponse, IntPtr apiStatus)
         {
             CheckJsonString(contextJson);
 
@@ -178,18 +178,17 @@ namespace Rl.Net
                 // eventId and use supplied eventId at the rl.net.native layer.
                 if (eventId == null)
                 {
-                    return NativeMethods.CBLoopChooseRank(cbLoop, IntPtr.Zero, contextJsonUtf8Ptr, contextJsonSize, rankingResponse, apiStatus);
+                    return NativeMethods.CALoopRequestContinuousAction(caLoop, IntPtr.Zero, contextJsonUtf8Ptr, contextJsonSize, continuousActionResponse, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.CBLoopChooseRank(cbLoop, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, contextJsonSize, rankingResponse, apiStatus);
+                    return NativeMethods.CALoopRequestContinuousAction(caLoop, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, contextJsonSize, continuousActionResponse, apiStatus);
                 }
             }
         }
 
-        // TODO: Should we reduce the rl.net.native interface to only have one of these?
-        unsafe private static int CBLoopChooseRankWithFlags(IntPtr cbLoop, string eventId, string contextJson, uint flags, IntPtr rankingResponse, IntPtr apiStatus)
+        unsafe private static int CALoopRequestContinuousActionWithFlags(IntPtr caLoop, string eventId, string contextJson, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus)
         {
             CheckJsonString(contextJson);
 
@@ -202,17 +201,17 @@ namespace Rl.Net
                 // eventId and use supplied eventId at the rl.net.native layer.
                 if (eventId == null)
                 {
-                    return NativeMethods.CBLoopChooseRankWithFlags(cbLoop, IntPtr.Zero, contextJsonUtf8Ptr, contextJsonSize, flags, rankingResponse, apiStatus);
+                    return NativeMethods.CALoopRequestContinuousActionWithFlags(caLoop, IntPtr.Zero, contextJsonUtf8Ptr, contextJsonSize, flags, continuousActionResponse, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.CBLoopChooseRankWithFlags(cbLoop, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, contextJsonSize, flags, rankingResponse, apiStatus);
+                    return NativeMethods.CALoopRequestContinuousActionWithFlags(caLoop, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, contextJsonSize, flags, continuousActionResponse, apiStatus);
                 }
             }
         }
 
-        unsafe private static int CBLoopReportActionTaken(IntPtr cbLoop, string eventId, IntPtr apiStatus)
+        unsafe private static int CALoopReportActionTaken(IntPtr caLoop, string eventId, IntPtr apiStatus)
         {
             if (eventId == null)
             {
@@ -221,11 +220,11 @@ namespace Rl.Net
 
             fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
             {
-                return NativeMethods.CBLoopReportActionTaken(cbLoop, new IntPtr(eventIdUtf8Bytes), apiStatus);
+                return NativeMethods.CALoopReportActionTaken(caLoop, new IntPtr(eventIdUtf8Bytes), apiStatus);
             }
         }
 
-        unsafe private static int CBLoopReportActionMultiIdTaken(IntPtr cbLoop, string primaryId, string secondaryId, IntPtr apiStatus)
+        unsafe private static int CALoopReportActionMultiIdTaken(IntPtr caLoop, string primaryId, string secondaryId, IntPtr apiStatus)
         {
             if (primaryId == null)
             {
@@ -240,11 +239,11 @@ namespace Rl.Net
             fixed (byte* episodeIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(primaryId))
             fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(secondaryId))
             {
-                return NativeMethods.CBLoopReportActionMultiIdTaken(cbLoop, new IntPtr(episodeIdUtf8Bytes), new IntPtr(eventIdUtf8Bytes), apiStatus);
+                return NativeMethods.CALoopReportActionMultiIdTaken(caLoop, new IntPtr(episodeIdUtf8Bytes), new IntPtr(eventIdUtf8Bytes), apiStatus);
             }
         }
 
-        unsafe private static int CBLoopReportOutcomeF(IntPtr cbLoop, string eventId, float outcome, IntPtr apiStatus)
+        unsafe private static int CALoopReportOutcomeF(IntPtr caLoop, string eventId, float outcome, IntPtr apiStatus)
         {
             if (eventId == null)
             {
@@ -253,11 +252,11 @@ namespace Rl.Net
 
             fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
             {
-                return NativeMethods.CBLoopReportOutcomeF(cbLoop, new IntPtr(eventIdUtf8Bytes), outcome, apiStatus);
+                return NativeMethods.CALoopReportOutcomeF(caLoop, new IntPtr(eventIdUtf8Bytes), outcome, apiStatus);
             }
         }
 
-        unsafe private static int CBLoopReportOutcomeJson(IntPtr cbLoop, string eventId, string outcomeJson, IntPtr apiStatus)
+        unsafe private static int CALoopReportOutcomeJson(IntPtr caLoop, string eventId, string outcomeJson, IntPtr apiStatus)
         {
             if (eventId == null)
             {
@@ -269,7 +268,7 @@ namespace Rl.Net
             fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
             fixed (byte* outcomeJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(outcomeJson))
             {
-                return NativeMethods.CBLoopReportOutcomeJson(cbLoop, new IntPtr(eventIdUtf8Bytes), new IntPtr(outcomeJsonUtf8Bytes), apiStatus);
+                return NativeMethods.CALoopReportOutcomeJson(caLoop, new IntPtr(eventIdUtf8Bytes), new IntPtr(outcomeJsonUtf8Bytes), apiStatus);
             }
         }
 
@@ -310,7 +309,7 @@ namespace Rl.Net
 
         public bool TryInit(ApiStatus apiStatus = null)
         {
-            int result = NativeMethods.CBLoopInit(this.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+            int result = NativeMethods.CALoopInit(this.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
 
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
@@ -325,26 +324,26 @@ namespace Rl.Net
                 }
         }
 
-        public bool TryChooseRank(string eventId, string contextJson, out RankingResponse response, ApiStatus apiStatus = null)
+        public bool TryRequestContinuousAction(string eventId, string contextJson, out ContinuousActionResponse response, ApiStatus apiStatus = null)
         {
-            response = new RankingResponse();
-            return this.TryChooseRank(eventId, contextJson, response, apiStatus);
+            response = new ContinuousActionResponse();
+            return this.TryRequestContinuousAction(eventId, contextJson, response, apiStatus);
         }
 
-        public bool TryChooseRank(string eventId, string contextJson, RankingResponse response, ApiStatus apiStatus = null)
+        public bool TryRequestContinuousAction(string eventId, string contextJson, ContinuousActionResponse response, ApiStatus apiStatus = null)
         {
-            int result = CBLoopChooseRank(this.DangerousGetHandle(), eventId, contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+            int result = CALoopRequestContinuousAction(this.DangerousGetHandle(), eventId, contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
 
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
-        public RankingResponse ChooseRank(string eventId, string contextJson)
+        public ContinuousActionResponse RequestContinuousAction(string eventId, string contextJson)
         {
-            RankingResponse result = new RankingResponse();
+            ContinuousActionResponse result = new ContinuousActionResponse();
 
             using (ApiStatus apiStatus = new ApiStatus())
-                if (!this.TryChooseRank(eventId, contextJson, result, apiStatus))
+                if (!this.TryRequestContinuousAction(eventId, contextJson, result, apiStatus))
                 {
                     throw new RLException(apiStatus);
                 }
@@ -352,26 +351,26 @@ namespace Rl.Net
             return result;
         }
 
-        public bool TryChooseRank(string eventId, string contextJson, ActionFlags flags, out RankingResponse response, ApiStatus apiStatus = null)
+        public bool TryRequestContinuousAction(string eventId, string contextJson, ActionFlags flags, out ContinuousActionResponse response, ApiStatus apiStatus = null)
         {
-            response = new RankingResponse();
-            return this.TryChooseRank(eventId, contextJson, flags, response, apiStatus);
+            response = new ContinuousActionResponse();
+            return this.TryRequestContinuousAction(eventId, contextJson, flags, response, apiStatus);
         }
 
-        public bool TryChooseRank(string eventId, string contextJson, ActionFlags flags, RankingResponse response, ApiStatus apiStatus = null)
+        public bool TryRequestContinuousAction(string eventId, string contextJson, ActionFlags flags, ContinuousActionResponse response, ApiStatus apiStatus = null)
         {
-            int result = CBLoopChooseRankWithFlags(this.DangerousGetHandle(), eventId, contextJson, (uint)flags, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+            int result = CALoopRequestContinuousActionWithFlags(this.DangerousGetHandle(), eventId, contextJson, (uint)flags, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
 
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
         }
 
-        public RankingResponse ChooseRank(string eventId, string contextJson, ActionFlags flags)
+        public ContinuousActionResponse RequestContinuousAction(string eventId, string contextJson, ActionFlags flags)
         {
-            RankingResponse result = new RankingResponse();
+            ContinuousActionResponse result = new ContinuousActionResponse();
 
             using (ApiStatus apiStatus = new ApiStatus())
-                if (!this.TryChooseRank(eventId, contextJson, flags, result, apiStatus))
+                if (!this.TryRequestContinuousAction(eventId, contextJson, flags, result, apiStatus))
                 {
                     throw new RLException(apiStatus);
                 }
@@ -385,7 +384,7 @@ namespace Rl.Net
 
         public bool TryQueueActionTakenEvent(string eventId, ApiStatus apiStatus = null)
         {
-            int result = CBLoopReportActionTaken(this.DangerousGetHandle(), eventId, apiStatus.ToNativeHandleOrNullptrDangerous());
+            int result = CALoopReportActionTaken(this.DangerousGetHandle(), eventId, apiStatus.ToNativeHandleOrNullptrDangerous());
 
             GC.KeepAlive(apiStatus);
             GC.KeepAlive(this);
@@ -394,7 +393,7 @@ namespace Rl.Net
 
         public bool TryQueueActionTakenEvent(string primaryId, string secondaryId, ApiStatus apiStatus = null)
         {
-            int result = CBLoopReportActionMultiIdTaken(this.DangerousGetHandle(), primaryId, secondaryId, apiStatus.ToNativeHandleOrNullptrDangerous());
+            int result = CALoopReportActionMultiIdTaken(this.DangerousGetHandle(), primaryId, secondaryId, apiStatus.ToNativeHandleOrNullptrDangerous());
 
             GC.KeepAlive(apiStatus);
             GC.KeepAlive(this);
@@ -429,7 +428,7 @@ namespace Rl.Net
 
         public bool TryQueueOutcomeEvent(string eventId, float outcome, ApiStatus apiStatus = null)
         {
-            int result = CBLoopReportOutcomeF(this.DangerousGetHandle(), eventId, outcome, apiStatus.ToNativeHandleOrNullptrDangerous());
+            int result = CALoopReportOutcomeF(this.DangerousGetHandle(), eventId, outcome, apiStatus.ToNativeHandleOrNullptrDangerous());
 
             GC.KeepAlive(apiStatus);
             GC.KeepAlive(this);
@@ -455,7 +454,7 @@ namespace Rl.Net
 
         public bool TryQueueOutcomeEvent(string eventId, string outcomeJson, ApiStatus apiStatus = null)
         {
-            int result = CBLoopReportOutcomeJson(this.DangerousGetHandle(), eventId, outcomeJson, apiStatus.ToNativeHandleOrNullptrDangerous());
+            int result = CALoopReportOutcomeJson(this.DangerousGetHandle(), eventId, outcomeJson, apiStatus.ToNativeHandleOrNullptrDangerous());
 
             GC.KeepAlive(apiStatus);
             GC.KeepAlive(this);
@@ -486,7 +485,7 @@ namespace Rl.Net
 
         public bool TryRefreshModel(ApiStatus apiStatus = null)
         {
-            int result = NativeMethods.CBLoopRefreshModel(this.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+            int result = NativeMethods.CALoopRefreshModel(this.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
 
             GC.KeepAlive(apiStatus);
             GC.KeepAlive(this);
@@ -520,7 +519,7 @@ namespace Rl.Net
             {
                 if (this.OnTraceLoggerEventInternal == null)
                 {
-                    NativeMethods.CBLoopSetTrace(this.DangerousGetHandle(), this.managedTraceCallback);
+                    NativeMethods.CALoopSetTrace(this.DangerousGetHandle(), this.managedTraceCallback);
                     GC.KeepAlive(this);
                 }
 
@@ -532,7 +531,7 @@ namespace Rl.Net
 
                 if (this.OnTraceLoggerEventInternal == null)
                 {
-                    NativeMethods.CBLoopSetTrace(this.DangerousGetHandle(), null);
+                    NativeMethods.CALoopSetTrace(this.DangerousGetHandle(), null);
                     GC.KeepAlive(this);
                 }
             }

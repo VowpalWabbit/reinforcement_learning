@@ -9,7 +9,7 @@
 
 static void pipe_background_error_callback(const reinforcement_learning::api_status& status, cb_loop_context_t* context)
 {
-  auto managed_backgroud_error_callback_local = context->base_loop_context.background_error_callback;
+  auto managed_backgroud_error_callback_local = context->loop_context.background_error_callback;
   if (managed_backgroud_error_callback_local) { managed_backgroud_error_callback_local(status); }
 }
 
@@ -17,9 +17,9 @@ API cb_loop_context_t* CreateCBLoop(
     reinforcement_learning::utility::configuration* config, factory_context_t* factory_context)
 {
   cb_loop_context_t* context = new cb_loop_context_t;
-  context->base_loop_context.background_error_callback = nullptr;
-  context->base_loop_context.trace_logger_callback = nullptr;
-  context->base_loop_context.trace_logger_factory = nullptr;
+  context->loop_context.background_error_callback = nullptr;
+  context->loop_context.trace_logger_callback = nullptr;
+  context->loop_context.trace_logger_factory = nullptr;
 
   // Create a trace log factory by passing in below creator. It allows CBLoop to use trace_logger provided by user.
   const auto binding_tracer_create = [context](std::unique_ptr<reinforcement_learning::i_trace>& retval,
@@ -27,7 +27,7 @@ API cb_loop_context_t* CreateCBLoop(
                                          reinforcement_learning::i_trace* trace_logger,
                                          reinforcement_learning::api_status* status)
   {
-    retval.reset(new rl_net_native::binding_tracer(context->base_loop_context));
+    retval.reset(new rl_net_native::binding_tracer(context->loop_context));
     return reinforcement_learning::error_code::success;
   };
 
@@ -60,10 +60,10 @@ API void DeleteCBLoop(cb_loop_context_t* context)
   // Since the cb_loop destructor waits for queues to drain, this can have unhappy consequences,
   // so detach the callback pipe first. This will cause all background callbacks to no-op in the
   // unmanaged side, which maintains expected thread semantics (the user of the bindings)
-  context->base_loop_context.background_error_callback = nullptr;
-  context->base_loop_context.trace_logger_callback = nullptr;
+  context->loop_context.background_error_callback = nullptr;
+  context->loop_context.trace_logger_callback = nullptr;
 
-  delete context->base_loop_context.trace_logger_factory;
+  delete context->loop_context.trace_logger_factory;
   delete context->cb_loop;
   delete context;
 }
@@ -124,10 +124,10 @@ API int CBLoopRefreshModel(cb_loop_context_t* context, reinforcement_learning::a
 
 API void CBLoopSetCallback(cb_loop_context_t* cb_loop, rl_net_native::background_error_callback_t callback)
 {
-  cb_loop->base_loop_context.background_error_callback = callback;
+  cb_loop->loop_context.background_error_callback = callback;
 }
 
 API void CBLoopSetTrace(cb_loop_context_t* cb_loop, rl_net_native::trace_logger_callback_t callback)
 {
-  cb_loop->base_loop_context.trace_logger_callback = callback;
+  cb_loop->loop_context.trace_logger_callback = callback;
 }

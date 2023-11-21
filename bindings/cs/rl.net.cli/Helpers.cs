@@ -50,14 +50,18 @@ namespace Rl.Net.Cli
             return liveModel;
         }
 
-        public static CBLoop CreateCBLoopOrExit(string clientJsonPath)
+        public static LoopType CreateLoopOrExit<LoopType>(string clientJson, Func<Configuration, LoopType> createLoop, bool jsonStr = false) where LoopType : ILoop
         {
-            if (!File.Exists(clientJsonPath))
+            string json = clientJson;
+            if (!jsonStr)
             {
-                WriteErrorAndExit($"Could not find file with path '{clientJsonPath}'.");
-            }
+                if (!File.Exists(clientJson))
+                {
+                    WriteErrorAndExit($"Could not find file with path '{clientJson}'.");
+                }
 
-            string json = File.ReadAllText(clientJsonPath);
+                json = File.ReadAllText(clientJson);
+            }
 
             ApiStatus apiStatus = new ApiStatus();
 
@@ -66,18 +70,22 @@ namespace Rl.Net.Cli
             {
                 WriteStatusAndExit(apiStatus);
             }
+            string trace_log = config["trace.logger.implementation"];
 
-            CBLoop cb_loop = new CBLoop(config);
+            LoopType loop = createLoop(config);
 
-            cb_loop.BackgroundError += LiveModel_BackgroundError;
-            cb_loop.TraceLoggerEvent += LiveModel_TraceLogEvent;
+            loop.BackgroundError += LiveModel_BackgroundError;
+            if (trace_log == "CONSOLE_TRACE_LOGGER")
+            {
+                loop.TraceLoggerEvent += LiveModel_TraceLogEvent;
+            }
 
-            if (!cb_loop.TryInit(apiStatus))
+            if (!loop.TryInit(apiStatus))
             {
                 WriteStatusAndExit(apiStatus);
             }
 
-            return cb_loop;
+            return loop;
         }
 
         public static void LiveModel_BackgroundError(object sender, ApiStatus e)
