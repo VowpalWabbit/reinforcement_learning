@@ -1,5 +1,5 @@
 {
-    "model.vw.initial_command_line": "--cb_explore_adf --json --epsilon 0.0 --preserve_performance_counters -q :: --driver_output_off",
+    "model.vw.initial_command_line": "--cb_explore_adf --json --epsilon 0.2 --preserve_performance_counters -q GT --driver_output_off",
     "ApplicationID": "local_loop",
     "IsExplorationEnabled": true,
     "InitialExplorationEpsilon": 0.2,
