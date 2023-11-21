@@ -17,6 +17,14 @@ queue_mode_enum to_queue_mode_enum(const char* queue_mode)
   return queue_mode_enum::DROP;
 }
 
+#ifdef RL_BUILD_FEDERATION
+model_payload_type_enum to_model_payload_type_enum(const char* model_payload_type)
+{
+  if (_stricmp(model_payload_type, "DELTA") == 0) { return model_payload_type_enum::DELTA; }
+  return model_payload_type_enum::FULL;
+}
+#endif
+
 namespace utility
 {
 static int get_int(const configuration& config, const char* section, const char* property, int defval)

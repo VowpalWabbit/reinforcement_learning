@@ -114,6 +114,7 @@ const char* const JOINER_EUD_DURATION = "eud.duration";
 const char* const JOINER_PROBLEM_TYPE = "joiner.problem.type";
 const char* const JOINER_REWARD_FUNCTION = "joiner.reward.function";
 const char* const JOINER_LEARNING_MODE = "joiner.learning.mode";
+const char* const MODEL_PAYLOAD_TYPE = "model.payload.type";
 #endif
 
 }  // namespace name
@@ -172,6 +173,8 @@ const char* const REWARD_FUNCTION_MEDIAN = "REWARD_FUNCTION_MEDIAN";
 const char* const REWARD_FUNCTION_SUM = "REWARD_FUNCTION_SUM";
 const char* const REWARD_FUNCTION_MIN = "REWARD_FUNCTION_MEAN";
 const char* const REWARD_FUNCTION_MAX = "REWARD_FUNCTION_MAX";
+const char* const MODEL_PAYLOAD_TYPE_DELTA = "DELTA";
+const char* const MODEL_PAYLOAD_TYPE_FULL = "FULL";
 #endif
 
 // These are outside of #ifdef section so that we can recognize them as invalid

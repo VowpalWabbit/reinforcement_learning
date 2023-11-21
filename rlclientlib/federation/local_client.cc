@@ -15,8 +15,12 @@
 
 namespace reinforcement_learning
 {
-local_client::local_client(std::unique_ptr<VW::workspace> initial_model, i_trace* trace_logger)
-    : _current_model(std::move(initial_model)), _state(state_t::model_available), _trace_logger(trace_logger)
+local_client::local_client(
+    std::unique_ptr<VW::workspace> initial_model, i_trace* trace_logger, model_payload_type_enum model_payload_type)
+    : _current_model(std::move(initial_model))
+    , _state(state_t::model_available)
+    , _trace_logger(trace_logger)
+    , _model_payload_type(model_payload_type)
 {
 }
 
@@ -69,9 +73,21 @@ int local_client::report_result(const uint8_t* payload, size_t size, api_status*
     {
       // Payload must be a delta
       // Apply delta to current model and move into model available state.
-      auto view = VW::io::create_buffer_view(reinterpret_cast<const char*>(payload), size);
-      auto delta = VW::model_delta::deserialize(*view);
-      auto new_model = *_current_model + *delta;
+ 
+      auto logger = utility::make_vw_trace_logger(_trace_logger);
+      const std::vector<std::string> empty_cmd;
+      std::unique_ptr<VW::workspace> new_model;
+
+      if (_model_payload_type == model_payload_type_enum::DELTA)
+      {
+        auto view = VW::io::create_buffer_view(reinterpret_cast<const char*>(payload), size);
+        new_model = *_current_model + *VW::model_delta::deserialize(*view);
+      }
+      else
+      {
+        new_model = VW::initialize_experimental(VW::make_unique<VW::config::options_cli>(empty_cmd),
+            VW::io::create_buffer_view(reinterpret_cast<const char*>(payload), size), nullptr, nullptr, &logger);
+      }
 
       // Increment iteration id for new workspace
       try
@@ -97,7 +113,7 @@ int local_client::report_result(const uint8_t* payload, size_t size, api_status*
 }
 
 int local_client::create(std::unique_ptr<i_federated_client>& output, const utility::configuration& config,
-    i_trace* trace_logger, api_status* status)
+    model_payload_type_enum model_payload_type, i_trace* trace_logger, api_status* status)
 {
   std::string cmd_line = "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id ";
   cmd_line += config.get("id", "default_id");
@@ -110,7 +126,7 @@ int local_client::create(std::unique_ptr<i_federated_client>& output, const util
   auto workspace = VW::initialize_experimental(std::move(args), nullptr, nullptr, nullptr, &logger);
   workspace->id += "/0";  // initialize iteration id to 0
 
-  output = std::unique_ptr<i_federated_client>(new local_client(std::move(workspace), trace_logger));
+  output = std::unique_ptr<i_federated_client>(new local_client(std::move(workspace), trace_logger, model_payload_type));
   return error_code::success;
 }
 

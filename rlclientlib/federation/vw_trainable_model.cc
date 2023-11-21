@@ -56,6 +56,17 @@ void finish_examples(VW::workspace& vw, VW::multi_ex& examples)
   examples.clear();
 }
 
+class writer_ref_adapter : public VW::io::writer
+{
+public:
+  writer_ref_adapter(VW::io::writer& ref) : _inner_ref(ref) {}
+  ssize_t write(const char* buffer, size_t num_bytes) override { return _inner_ref.write(buffer, num_bytes); }
+  void flush() override { _inner_ref.flush(); }
+
+private:
+  VW::io::writer& _inner_ref;
+};
+
 }  // namespace
 
 namespace reinforcement_learning
@@ -341,6 +352,26 @@ int trainable_vw_model::get_model_delta(VW::io::writer& output, api_status* stat
   }
   return error_code::success;
 }
+
+int trainable_vw_model::get_model(VW::io::writer& output, api_status* status)
+{
+  try
+  {
+    io_buf buffer;
+    buffer.add_file(VW::make_unique<writer_ref_adapter>(output));
+    VW::save_predictor(*_model, buffer);
+  }
+  catch (const std::exception& e)
+  {
+    RETURN_ERROR_ARG(_trace_logger, status, model_update_error, e.what());
+  }
+  catch (...)
+  {
+    RETURN_ERROR_ARG(_trace_logger, status, model_update_error, "Unknown error");
+  }
+  return error_code::success;
+}
+
 
 void trainable_vw_model::copy_current_model_to_starting()
 {

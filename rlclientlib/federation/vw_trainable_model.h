@@ -49,6 +49,9 @@ public:
   RL_ATTR(nodiscard)
   int get_model_delta(VW::io::writer& output, api_status* status = nullptr);
 
+  RL_ATTR(nodiscard)
+  int trainable_vw_model::get_model(VW::io::writer& output, api_status* status);
+
 private:
   // Private constructor because we should create objects with factory function
   trainable_vw_model(std::string command_line, std::string problem_type, std::string learning_mode,

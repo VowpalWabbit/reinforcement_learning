@@ -17,7 +17,9 @@ int local_loop_controller::create(std::unique_ptr<local_loop_controller>& output
   std::unique_ptr<i_federated_client> federated_client;
   std::unique_ptr<trainable_vw_model> trainable_model;
   std::unique_ptr<sender_joined_log_provider> sender_joiner;
-  RETURN_IF_FAIL(local_client::create(federated_client, config, trace_logger, status));
+  const auto model_payload_type =
+      to_model_payload_type_enum(config.get(name::MODEL_PAYLOAD_TYPE, value::MODEL_PAYLOAD_TYPE_FULL));
+  RETURN_IF_FAIL(local_client::create(federated_client, config, model_payload_type, trace_logger, status));
   RETURN_IF_FAIL(trainable_vw_model::create(trainable_model, config, trace_logger, status));
   RETURN_IF_FAIL(sender_joined_log_provider::create(sender_joiner, config, trace_logger, status));
 
@@ -29,20 +31,20 @@ int local_loop_controller::create(std::unique_ptr<local_loop_controller>& output
   sender_joiner_shared = std::move(sender_joiner);
   joiner = std::static_pointer_cast<i_joined_log_provider>(sender_joiner_shared);
   event_sink = std::static_pointer_cast<i_event_sink>(sender_joiner_shared);
-
-  output = std::unique_ptr<local_loop_controller>(new local_loop_controller(std::move(app_id),
-      std::move(federated_client), std::move(trainable_model), std::move(joiner), std::move(event_sink)));
+  output = std::unique_ptr<local_loop_controller>(new local_loop_controller(std::move(app_id), std::move(federated_client),
+          std::move(trainable_model), std::move(joiner), std::move(event_sink), model_payload_type));
   return error_code::success;
 }
 
 local_loop_controller::local_loop_controller(std::string app_id, std::unique_ptr<i_federated_client>&& federated_client,
     std::unique_ptr<trainable_vw_model>&& trainable_model, std::shared_ptr<i_joined_log_provider>&& joiner,
-    std::shared_ptr<i_event_sink>&& event_sink)
+    std::shared_ptr<i_event_sink>&& event_sink, model_payload_type_enum model_payload_type)
     : _app_id(std::move(app_id))
     , _federated_client(std::move(federated_client))
     , _trainable_model(std::move(trainable_model))
     , _joiner(std::move(joiner))
     , _event_sink(std::move(event_sink))
+    , _model_payload_type(model_payload_type)
 {
 }
 
@@ -62,10 +64,19 @@ int local_loop_controller::update_global(api_status* status)
     // get and send the model delta
     auto buffer = std::make_shared<std::vector<char>>();
     auto writer = VW::io::create_vector_writer(buffer);
-    RETURN_IF_FAIL(_trainable_model->get_model_delta(*writer, status));
+    if (_model_payload_type == model_payload_type_enum::DELTA)
+    {
+      RETURN_IF_FAIL(_trainable_model->get_model_delta(*writer, status));
 
-    char* data_ptr = buffer->data();
-    RETURN_IF_FAIL(_federated_client->report_result(reinterpret_cast<uint8_t*>(data_ptr), buffer->size(), status));
+      char* data_ptr = buffer->data();
+      RETURN_IF_FAIL(_federated_client->report_result(reinterpret_cast<uint8_t*>(data_ptr), buffer->size(), status));
+    }
+    else {
+      RETURN_IF_FAIL(_trainable_model->get_model(*writer, status));
+
+      char* data_ptr = buffer->data();
+      RETURN_IF_FAIL(_federated_client->report_result(reinterpret_cast<uint8_t*>(data_ptr), buffer->size(), status));
+    }
   }
   return error_code::success;
 }

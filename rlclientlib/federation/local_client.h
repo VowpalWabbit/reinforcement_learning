@@ -4,6 +4,7 @@
 #include "federation/federated_client.h"
 #include "trace_logger.h"
 #include "vw/core/vw_fwd.h"
+#include "utility/config_helper.h"
 
 namespace reinforcement_learning
 {
@@ -12,6 +13,7 @@ class local_client : i_federated_client
 public:
   RL_ATTR(nodiscard)
   static int create(std::unique_ptr<i_federated_client>& output, const utility::configuration& config,
+      model_payload_type_enum _model_payload_type,
       i_trace* trace_logger = nullptr, api_status* status = nullptr);
 
   RL_ATTR(nodiscard)
@@ -30,11 +32,12 @@ private:
     model_retrieved
   };
 
-  local_client(std::unique_ptr<VW::workspace> initial_model, i_trace* trace_logger);
+  local_client(std::unique_ptr<VW::workspace> initial_model, i_trace* trace_logger, model_payload_type_enum _model_payload_type);
 
   state_t _state;
   std::unique_ptr<VW::workspace> _current_model;
   i_trace* _trace_logger;
+  model_payload_type_enum _model_payload_type;
 };
 
 // Read MODEL_VW_INITIAL_COMMAND_LINE

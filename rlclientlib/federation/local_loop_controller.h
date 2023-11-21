@@ -2,6 +2,7 @@
 
 #include "api_status.h"
 #include "error_callback_fn.h"
+#include "utility/config_helper.h"
 #include "factory_resolver.h"
 #include "federation/event_sink.h"
 #include "federation/federated_client.h"
@@ -41,7 +42,7 @@ protected:
   // Constructor is private because objects should be created using the factory function
   local_loop_controller(std::string app_id, std::unique_ptr<i_federated_client>&& federated_client,
       std::unique_ptr<trainable_vw_model>&& trainable_model, std::shared_ptr<i_joined_log_provider>&& joiner,
-      std::shared_ptr<i_event_sink>&& event_sink);
+      std::shared_ptr<i_event_sink>&& event_sink, model_payload_type_enum model_payload_type);
 
   // This updates global state with the federated learning server.
   // If applicable, it will first report a model delta from local training.
@@ -64,6 +65,7 @@ protected:
   // If the federated client has received a new global model,
   // we need to train on local events and upload a model delta.
   bool _need_to_send_model_delta = false;
+  model_payload_type_enum _model_payload_type;
 };
 
 }  // namespace reinforcement_learning

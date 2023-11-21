@@ -17,6 +17,16 @@ enum class events_counter_status
   DISABLE  // counter by default is disabled
 };
 
+#ifdef RL_BUILD_FEDERATION
+enum class model_payload_type_enum
+{
+  FULL,  // full model (default)
+  DELTA  // model delta
+};
+
+model_payload_type_enum to_model_payload_type_enum(const char* model_payload_type);
+#endif
+
 // Section constants to be used with get_batcher_config
 const char* const OBSERVATION_SECTION = "observation";
 const char* const INTERACTION_SECTION = "interaction";
