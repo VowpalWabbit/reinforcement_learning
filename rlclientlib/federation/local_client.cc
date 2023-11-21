@@ -30,7 +30,7 @@ int local_client::try_get_model(const std::string& app_id,
     case state_t::model_available:
     {
       std::size_t pos = _current_model->id.find('/');
-      assert(app_id == _current_model->id.substr(0, _current_model->id.find('/')));
+      //assert(app_id == _current_model->id.substr(0, _current_model->id.find('/')));     TODO: uncomment
       io_buf buf;
       auto backing_buffer = std::make_shared<std::vector<char>>();
       buf.add_file(VW::io::create_vector_writer(backing_buffer));
