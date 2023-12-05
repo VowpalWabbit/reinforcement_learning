@@ -50,6 +50,44 @@ namespace Rl.Net.Cli
             return liveModel;
         }
 
+        public static LoopType CreateLoopOrExit<LoopType>(string clientJson, Func<Configuration, LoopType> createLoop, bool jsonStr = false) where LoopType : ILoop
+        {
+            string json = clientJson;
+            if (!jsonStr)
+            {
+                if (!File.Exists(clientJson))
+                {
+                    WriteErrorAndExit($"Could not find file with path '{clientJson}'.");
+                }
+
+                json = File.ReadAllText(clientJson);
+            }
+
+            ApiStatus apiStatus = new ApiStatus();
+
+            Configuration config;
+            if (!Configuration.TryLoadConfigurationFromJson(json, out config, apiStatus))
+            {
+                WriteStatusAndExit(apiStatus);
+            }
+            string trace_log = config["trace.logger.implementation"];
+
+            LoopType loop = createLoop(config);
+
+            loop.BackgroundError += LiveModel_BackgroundError;
+            if (trace_log == "CONSOLE_TRACE_LOGGER")
+            {
+                loop.TraceLoggerEvent += LiveModel_TraceLogEvent;
+            }
+
+            if (!loop.TryInit(apiStatus))
+            {
+                WriteStatusAndExit(apiStatus);
+            }
+
+            return loop;
+        }
+
         public static void LiveModel_BackgroundError(object sender, ApiStatus e)
         {
             Console.Error.WriteLine(e.ErrorMessage);

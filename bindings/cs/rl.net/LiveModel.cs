@@ -337,12 +337,8 @@ namespace Rl.Net
             [DllImport("rlnetnative")]
             public static extern int LiveModelRefreshModel(IntPtr liveModel, IntPtr apiStatus);
 
-            public delegate void managed_background_error_callback_t(IntPtr apiStatus);
-
             [DllImport("rlnetnative")]
             public static extern void LiveModelSetCallback(IntPtr liveModel, [MarshalAs(UnmanagedType.FunctionPtr)] managed_background_error_callback_t callback = null);
-
-            public delegate void managed_trace_callback_t(int logLevel, IntPtr msgUtf8Ptr);
 
             [DllImport("rlnetnative")]
             public static extern void LiveModelSetTrace(IntPtr liveModel, [MarshalAs(UnmanagedType.FunctionPtr)] managed_trace_callback_t callback = null);

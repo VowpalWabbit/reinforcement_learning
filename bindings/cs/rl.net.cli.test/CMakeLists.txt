@@ -1,7 +1,10 @@
 set (RL_NET_CLI_TEST_SOURCES
   CleanupContainer.cs
+  LoopUsageTest.cs
+  MockSender.cs
   ReplayStepProviderTest.cs
   SenderExtensibilityTest.cs
+  SenderExtensibilityCBLoopTest.cs
   TempFileDisposable.cs
   TestBase.cs
   UnicodeTest.cs

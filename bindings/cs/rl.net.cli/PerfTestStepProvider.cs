@@ -109,6 +109,7 @@ namespace Rl.Net.Cli
                 }
             }
             this.NumLines = Contexts.Count;
+            this.RingSize = this.NumLines;
         }
 
         public IEnumerator<IStepContext<float>> GetEnumerator()
@@ -124,7 +125,8 @@ namespace Rl.Net.Cli
                     }
                     this.NumLinesProcessed++;
                 }
-                else if (!(this.Stats.Bytes < this.DataSize || this.Stats.ElapsedMs < this.Duration.TotalMilliseconds))
+                else if (!(this.Stats.Bytes < this.DataSize ||
+                        this.Stats.ElapsedMicroseconds < this.Duration.TotalMilliseconds * 1000))
                 {
                     break;
                 }

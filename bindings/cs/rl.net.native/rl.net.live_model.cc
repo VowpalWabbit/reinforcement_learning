@@ -3,7 +3,6 @@
 #include "binding_tracer.h"
 #include "constants.h"
 #include "err_constants.h"
-#include "rl.net.live_model.h"
 #include "trace_logger.h"
 
 #include <iostream>
@@ -11,7 +10,7 @@
 static void pipe_background_error_callback(
     const reinforcement_learning::api_status& status, livemodel_context_t* context)
 {
-  auto managed_backgroud_error_callback_local = context->background_error_callback;
+  auto managed_backgroud_error_callback_local = context->loop_context.background_error_callback;
   if (managed_backgroud_error_callback_local) { managed_backgroud_error_callback_local(status); }
 }
 
@@ -19,9 +18,9 @@ API livemodel_context_t* CreateLiveModel(
     reinforcement_learning::utility::configuration* config, factory_context_t* factory_context)
 {
   livemodel_context_t* context = new livemodel_context_t;
-  context->background_error_callback = nullptr;
-  context->trace_logger_callback = nullptr;
-  context->trace_logger_factory = nullptr;
+  context->loop_context.background_error_callback = nullptr;
+  context->loop_context.trace_logger_callback = nullptr;
+  context->loop_context.trace_logger_factory = nullptr;
 
   // Create a trace log factory by passing in below creator. It allows LiveModel to use trace_logger provided by user.
   const auto binding_tracer_create = [context](std::unique_ptr<reinforcement_learning::i_trace>& retval,
@@ -29,7 +28,7 @@ API livemodel_context_t* CreateLiveModel(
                                          reinforcement_learning::i_trace* trace_logger,
                                          reinforcement_learning::api_status* status)
   {
-    retval.reset(new rl_net_native::binding_tracer(*context));
+    retval.reset(new rl_net_native::binding_tracer(context->loop_context));
     return reinforcement_learning::error_code::success;
   };
 
@@ -62,10 +61,10 @@ API void DeleteLiveModel(livemodel_context_t* context)
   // Since the livemodel destructor waits for queues to drain, this can have unhappy consequences,
   // so detach the callback pipe first. This will cause all background callbacks to no-op in the
   // unmanaged side, which maintains expected thread semantics (the user of the bindings)
-  context->background_error_callback = nullptr;
-  context->trace_logger_callback = nullptr;
+  context->loop_context.background_error_callback = nullptr;
+  context->loop_context.trace_logger_callback = nullptr;
 
-  delete context->trace_logger_factory;
+  delete context->loop_context.trace_logger_factory;
   delete context->livemodel;
   delete context;
 }
@@ -287,10 +286,10 @@ API int LiveModelRefreshModel(livemodel_context_t* context, reinforcement_learni
 
 API void LiveModelSetCallback(livemodel_context_t* livemodel, rl_net_native::background_error_callback_t callback)
 {
-  livemodel->background_error_callback = callback;
+  livemodel->loop_context.background_error_callback = callback;
 }
 
 API void LiveModelSetTrace(livemodel_context_t* livemodel, rl_net_native::trace_logger_callback_t callback)
 {
-  livemodel->trace_logger_callback = callback;
+  livemodel->loop_context.trace_logger_callback = callback;
 }

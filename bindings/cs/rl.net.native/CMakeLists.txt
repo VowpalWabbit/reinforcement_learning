@@ -3,6 +3,9 @@ set(rl_net_native_SOURCES
   binding_tracer.cc
   rl.net.api_status.cc
   rl.net.buffer.cc
+  rl.net.ca_loop.cc
+  rl.net.cb_loop.cc
+  rl.net.ccb_loop.cc
   rl.net.config.cc
   rl.net.continuous_action_response.cc
   rl.net.decision_response.cc
@@ -13,6 +16,7 @@ set(rl_net_native_SOURCES
   rl.net.ranking_response.cc
   rl.net.multi_slot_response.cc
   rl.net.multi_slot_response_detailed.cc
+  rl.net.slates_loop.cc
   rl.net.slot_ranking.cc
 )
 
@@ -20,7 +24,11 @@ set(rl_net_native_HEADERS
   binding_sender.h
   binding_tracer.h
   rl.net.api_status.h
+  rl.net.loop_context.h
   rl.net.buffer.h
+  rl.net.ca_loop.h
+  rl.net.cb_loop.h
+  rl.net.ccb_loop.h
   rl.net.config.h
   rl.net.continuous_action_response.h
   rl.net.decision_response.h
@@ -31,6 +39,7 @@ set(rl_net_native_HEADERS
   rl.net.ranking_response.h
   rl.net.multi_slot_response.h
   rl.net.multi_slot_response_detailed.h
+  rl.net.slates_loop.h
   rl.net.slot_ranking.h
 )
 

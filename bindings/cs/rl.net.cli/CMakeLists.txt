@@ -1,4 +1,5 @@
 set (RL_NET_CLI_SOURCES
+  BasicUsageCommand.cs
   CommandBase.cs
   EntryPoints.cs
   Helpers.cs
