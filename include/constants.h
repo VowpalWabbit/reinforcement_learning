@@ -28,6 +28,7 @@ const char* const HTTP_API_KEY = "http.api.key";
 const char* const HTTP_API_HEADER_KEY_NAME = "http.api.header.key.name";
 const char* const AUDIT_ENABLED = "audit.enabled";
 const char* const AUDIT_OUTPUT_PATH = "audit.output.path";
+const char* const EVENT_LOGGING_ENABLED = "event.logging.enabled";
 
 // Episode
 const char* const EPISODE_EH_HOST = "episode.eventhub.host";
@@ -146,6 +147,7 @@ const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
 const int DEFAULT_VW_POOL_INIT_SIZE = 4;
 const int DEFAULT_PROTOCOL_VERSION = 1;
 const char* const DEFAULT_AUDIT_OUTPUT_PATH = "audit";
+const bool DEFAULT_EVENT_LOGGING_ENABLED = true;
 
 const char* get_default_episode_sender();
 const char* get_default_observation_sender();

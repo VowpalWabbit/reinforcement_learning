@@ -55,7 +55,10 @@ int live_model_impl::init(api_status* status)
   RETURN_IF_FAIL(init_trace(status));
   RETURN_IF_FAIL(init_model(status));
   RETURN_IF_FAIL(init_model_mgmt(status));
-  RETURN_IF_FAIL(init_loggers(status));
+  if (_configuration.get_bool(name::EVENT_LOGGING_ENABLED, value::DEFAULT_EVENT_LOGGING_ENABLED))
+  {
+    RETURN_IF_FAIL(init_loggers(status));
+  }
 
   if (_protocol_version == 1)
   {
@@ -104,7 +107,10 @@ int live_model_impl::choose_rank(
     RETURN_IF_FAIL(reset_action_order(response));
   }
 
-  RETURN_IF_FAIL(_interaction_logger->log(context, flags, response, status, _learning_mode));
+  if (_interaction_logger)
+  {
+    RETURN_IF_FAIL(_interaction_logger->log(context, flags, response, status, _learning_mode));
+  }
 
   if (_learning_mode == APPRENTICE)
   {
@@ -145,7 +151,10 @@ int live_model_impl::request_continuous_action(const char* event_id, string_view
   RETURN_IF_FAIL(_model->choose_continuous_action(context, action, pdf_value, model_version, status));
   RETURN_IF_FAIL(populate_response(
       action, pdf_value, std::string(event_id), std::string(model_version), response, _trace_logger.get(), status));
-  RETURN_IF_FAIL(_interaction_logger->log_continuous_action(context.data(), flags, response, status));
+  if (_interaction_logger)
+  {
+    RETURN_IF_FAIL(_interaction_logger->log_continuous_action(context.data(), flags, response, status));
+  }
 
   if (_watchdog.has_background_error_been_reported())
   {
@@ -209,8 +218,11 @@ int live_model_impl::request_decision(
   RETURN_IF_FAIL(_model->request_decision(event_ids, context_json, actions_ids, actions_pdfs, model_version, status));
   RETURN_IF_FAIL(populate_response(
       actions_ids, actions_pdfs, event_ids, std::string(model_version), resp, _trace_logger.get(), status));
-  RETURN_IF_FAIL(_interaction_logger->log_decisions(
-      event_ids, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+  if (_interaction_logger)
+  {
+    RETURN_IF_FAIL(_interaction_logger->log_decisions(
+        event_ids, context_json, flags, actions_ids, actions_pdfs, model_version, status));
+  }
 
   // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
   if (_watchdog.has_background_error_been_reported())
@@ -276,8 +288,11 @@ int live_model_impl::request_multi_slot_decision(const char* event_id, string_vi
       event_id, context_json, slot_ids, action_ids, action_pdfs, model_version, status));
   RETURN_IF_FAIL(populate_multi_slot_response(action_ids, action_pdfs, std::string(event_id),
       std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
-  RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs,
-      model_version, slot_ids, status, baseline_actions, _learning_mode));
+  if (_interaction_logger)
+  {
+    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs,
+        model_version, slot_ids, status, baseline_actions, _learning_mode));
+  }
 
   if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY)
   {
@@ -322,8 +337,11 @@ int live_model_impl::request_multi_slot_decision(const char* event_id, string_vi
 
   RETURN_IF_FAIL(populate_multi_slot_response_detailed(action_ids, action_pdfs, std::string(event_id),
       std::string(model_version), slot_ids, resp, _trace_logger.get(), status));
-  RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs,
-      model_version, slot_ids, status, baseline_actions, _learning_mode));
+  if (_interaction_logger)
+  {
+    RETURN_IF_FAIL(_interaction_logger->log_decision(event_id, context_json, flags, action_ids, action_pdfs,
+        model_version, slot_ids, status, baseline_actions, _learning_mode));
+  }
 
   if (_learning_mode == APPRENTICE || _learning_mode == LOGGINGONLY)
   {
@@ -346,7 +364,8 @@ int live_model_impl::report_action_taken(const char* event_id, api_status* statu
   // Clear previous errors if any
   api_status::try_clear(status);
   // Send the outcome event to the backend
-  return _outcome_logger->report_action_taken(event_id, status);
+  if (_outcome_logger) { return _outcome_logger->report_action_taken(event_id, status); }
+  return error_code::success;
 }
 
 int live_model_impl::report_action_taken(const char* primary_id, const char* secondary_id, api_status* status)
@@ -354,7 +373,8 @@ int live_model_impl::report_action_taken(const char* primary_id, const char* sec
   // Clear previous errors if any
   api_status::try_clear(status);
   // Send the outcome event to the backend
-  return _outcome_logger->report_action_taken(primary_id, secondary_id, status);
+  if (_outcome_logger) { return _outcome_logger->report_action_taken(primary_id, secondary_id, status); }
+  return error_code::success;
 }
 
 int live_model_impl::report_outcome(const char* event_id, const char* outcome, api_status* status)
@@ -658,10 +678,13 @@ int live_model_impl::request_episodic_decision(const char* event_id, const char*
   if (episode.size() == 1)
   {
     // Log the episode id when starting a new episode
-    RETURN_IF_FAIL(_episode_logger->log(episode.get_episode_id(), status));
+    if (_episode_logger) { RETURN_IF_FAIL(_episode_logger->log(episode.get_episode_id(), status)); }
   }
-  RETURN_IF_FAIL(
-      _interaction_logger->log(episode.get_episode_id(), previous_id, context_patched.c_str(), flags, resp, status));
+  if (_interaction_logger)
+  {
+    RETURN_IF_FAIL(
+        _interaction_logger->log(episode.get_episode_id(), previous_id, context_patched.c_str(), flags, resp, status));
+  }
 
   return error_code::success;
 }
