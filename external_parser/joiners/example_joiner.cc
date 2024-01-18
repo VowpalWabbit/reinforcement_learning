@@ -308,11 +308,11 @@ bool example_joiner::process_interaction(
   else
   {
     // for now only CB is supported so log and return false
-    //logger.out_error(
-    //    "Interaction event learning mode [{}] not "
-    //    "currently supported, skipping interaction "
-    //    "EventId: [{}]",
-    //    EnumNamePayloadType(metadata.payload_type()), metadata.id()->c_str());
+    logger.out_error(
+        "Interaction event learning mode [{}] not "
+        "currently supported, skipping interaction "
+        "EventId: [{}]",
+        EnumNamePayloadType(metadata.payload_type()), metadata.id()->c_str());
     return false;
   }
 
@@ -335,10 +335,10 @@ bool example_joiner::process_interaction(
     }
     catch (VW::vw_exception& e)
     {
-      //logger.out_warn(
-      //    "JSON parsing during interaction processing failed "
-      //    "with error: [{}] for event with id: [{}]",
-      //    e.what(), metadata.id()->c_str());
+      logger.out_warn(
+          "JSON parsing during interaction processing failed "
+          "with error: [{}] for event with id: [{}]",
+          e.what(), metadata.id()->c_str());
       return false;
     }
   }
