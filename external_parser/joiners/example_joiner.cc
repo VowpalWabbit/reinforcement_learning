@@ -227,13 +227,13 @@ bool example_joiner::process_interaction(
 
   if (!iequals(payload_type, loop_type))
   {
-    //logger.out_warn(
-    //    "Online Trainer mode [{}] "
-    //    "and Interaction event type [{}] "
-    //    "don't match. Skipping interaction from processing. "
-    //    "EventId: [{}]",
-    //    EnumNameProblemType(_loop_info.problem_type_config), EnumNamePayloadType(metadata.payload_type()),
-    //    metadata.id()->c_str());
+    logger.out_warn(
+        "Online Trainer mode [{}] "
+        "and Interaction event type [{}] "
+        "don't match. Skipping interaction from processing. "
+        "EventId: [{}]",
+        loop_type, EnumNamePayloadType(metadata.payload_type()),
+        metadata.id()->c_str());
     return false;
   }
 
