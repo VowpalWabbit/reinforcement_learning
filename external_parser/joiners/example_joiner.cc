@@ -515,10 +515,10 @@ bool example_joiner::process_joined(VW::multi_ex& examples)
   if (_batch_grouped_examples.find(id) == _batch_grouped_examples.end())
   {
     // can't learn from this interaction
-    //logger.out_warn(
-    //    "Events with event id [{}] were processed but "
-    //    "no valid interaction found. Skipping..",
-    //    id);
+    logger.out_warn(
+        "Events with event id [{}] were processed but "
+        "no valid interaction found. Skipping..",
+        id);
     clear_examples = true;
     return false;
   }
@@ -527,10 +527,10 @@ bool example_joiner::process_joined(VW::multi_ex& examples)
   if (!je->ok)
   {
     // don't learn from this interaction
-    //logger.out_warn(
-    //    "Interaction with event id [{}] has been invalidated due to malformed "
-    //    "observation. Skipping...",
-    //    id);
+    logger.out_warn(
+        "Interaction with event id [{}] has been invalidated due to malformed "
+        "observation. Skipping...",
+        id);
     clear_examples = true;
     return false;
   }
