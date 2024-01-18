@@ -312,7 +312,7 @@ bool example_joiner::process_interaction(
         "Interaction event learning mode [{}] not "
         "currently supported, skipping interaction "
         "EventId: [{}]",
-        metadata.payload_type(), metadata.id()->c_str());
+        EnumNamePayloadType(metadata.payload_type()), metadata.id()->c_str());
     return false;
   }
 
