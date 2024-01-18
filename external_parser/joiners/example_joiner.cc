@@ -227,13 +227,13 @@ bool example_joiner::process_interaction(
 
   if (!iequals(payload_type, loop_type))
   {
-    logger.out_warn(
-        "Online Trainer mode [{}] "
-        "and Interaction event type [{}] "
-        "don't match. Skipping interaction from processing. "
-        "EventId: [{}]",
-        EnumNameProblemType(_loop_info.problem_type_config), EnumNamePayloadType(metadata.payload_type()),
-        metadata.id()->c_str());
+    //logger.out_warn(
+    //    "Online Trainer mode [{}] "
+    //    "and Interaction event type [{}] "
+    //    "don't match. Skipping interaction from processing. "
+    //    "EventId: [{}]",
+    //    EnumNameProblemType(_loop_info.problem_type_config), EnumNamePayloadType(metadata.payload_type()),
+    //    metadata.id()->c_str());
     return false;
   }
 
@@ -251,10 +251,10 @@ bool example_joiner::process_interaction(
 
     if (!typed_event::event_processor<v2::CbEvent>::is_valid(*cb, _loop_info, logger))
     {
-      logger.out_warn(
-          "CB payload with event id [{}] is malformed. "
-          "Skipping interaction from processing.",
-          metadata.id()->c_str());
+      //logger.out_warn(
+      //    "CB payload with event id [{}] is malformed. "
+      //    "Skipping interaction from processing.",
+      //    metadata.id()->c_str());
       return false;
     }
 
@@ -273,10 +273,10 @@ bool example_joiner::process_interaction(
 
     if (!typed_event::event_processor<v2::MultiSlotEvent>::is_valid(*multislot, _loop_info, logger))
     {
-      logger.out_warn(
-          "[{}] payload with event id [{}] is malformed. "
-          "Skipping interaction from processing.",
-          EnumNamePayloadType(metadata.payload_type()), metadata.id()->c_str());
+      //logger.out_warn(
+      //    "[{}] payload with event id [{}] is malformed. "
+      //    "Skipping interaction from processing.",
+      //    EnumNamePayloadType(metadata.payload_type()), metadata.id()->c_str());
       return false;
     }
 
@@ -295,10 +295,10 @@ bool example_joiner::process_interaction(
 
     if (!typed_event::event_processor<v2::CaEvent>::is_valid(*ca, _loop_info, logger))
     {
-      logger.out_warn(
-          "CA payload with event id [{}] is malformed. "
-          "Skipping interaction from processing.",
-          metadata.id()->c_str());
+      //logger.out_warn(
+      //    "CA payload with event id [{}] is malformed. "
+      //    "Skipping interaction from processing.",
+      //    metadata.id()->c_str());
       return false;
     }
 
@@ -308,11 +308,11 @@ bool example_joiner::process_interaction(
   else
   {
     // for now only CB is supported so log and return false
-    logger.out_error(
-        "Interaction event learning mode [{}] not "
-        "currently supported, skipping interaction "
-        "EventId: [{}]",
-        EnumNamePayloadType(metadata.payload_type()), metadata.id()->c_str());
+    //logger.out_error(
+    //    "Interaction event learning mode [{}] not "
+    //    "currently supported, skipping interaction "
+    //    "EventId: [{}]",
+    //    EnumNamePayloadType(metadata.payload_type()), metadata.id()->c_str());
     return false;
   }
 
@@ -335,10 +335,10 @@ bool example_joiner::process_interaction(
     }
     catch (VW::vw_exception& e)
     {
-      logger.out_warn(
-          "JSON parsing during interaction processing failed "
-          "with error: [{}] for event with id: [{}]",
-          e.what(), metadata.id()->c_str());
+      //logger.out_warn(
+      //    "JSON parsing during interaction processing failed "
+      //    "with error: [{}] for event with id: [{}]",
+      //    e.what(), metadata.id()->c_str());
       return false;
     }
   }
@@ -426,10 +426,10 @@ bool example_joiner::process_dedup(const v2::Event& event, const v2::Metadata& m
       }
       catch (VW::vw_exception& e)
       {
-        logger.out_error(
-            "JSON parsing during dedup processing failed "
-            "with error: [{}]",
-            e.what());
+        //logger.out_error(
+        //    "JSON parsing during dedup processing failed "
+        //    "with error: [{}]",
+        //    e.what());
         return false;
       }
 
@@ -515,10 +515,10 @@ bool example_joiner::process_joined(VW::multi_ex& examples)
   if (_batch_grouped_examples.find(id) == _batch_grouped_examples.end())
   {
     // can't learn from this interaction
-    logger.out_warn(
-        "Events with event id [{}] were processed but "
-        "no valid interaction found. Skipping..",
-        id);
+    //logger.out_warn(
+    //    "Events with event id [{}] were processed but "
+    //    "no valid interaction found. Skipping..",
+    //    id);
     clear_examples = true;
     return false;
   }
@@ -527,10 +527,10 @@ bool example_joiner::process_joined(VW::multi_ex& examples)
   if (!je->ok)
   {
     // don't learn from this interaction
-    logger.out_warn(
-        "Interaction with event id [{}] has been invalidated due to malformed "
-        "observation. Skipping...",
-        id);
+    //logger.out_warn(
+    //    "Interaction with event id [{}] has been invalidated due to malformed "
+    //    "observation. Skipping...",
+    //    id);
     clear_examples = true;
     return false;
   }
