@@ -251,10 +251,10 @@ bool example_joiner::process_interaction(
 
     if (!typed_event::event_processor<v2::CbEvent>::is_valid(*cb, _loop_info, logger))
     {
-      //logger.out_warn(
-      //    "CB payload with event id [{}] is malformed. "
-      //    "Skipping interaction from processing.",
-      //    metadata.id()->c_str());
+      logger.out_warn(
+          "CB payload with event id [{}] is malformed. "
+          "Skipping interaction from processing.",
+          metadata.id()->c_str());
       return false;
     }
 
@@ -273,10 +273,10 @@ bool example_joiner::process_interaction(
 
     if (!typed_event::event_processor<v2::MultiSlotEvent>::is_valid(*multislot, _loop_info, logger))
     {
-      //logger.out_warn(
-      //    "[{}] payload with event id [{}] is malformed. "
-      //    "Skipping interaction from processing.",
-      //    EnumNamePayloadType(metadata.payload_type()), metadata.id()->c_str());
+      logger.out_warn(
+          "[{}] payload with event id [{}] is malformed. "
+          "Skipping interaction from processing.",
+          EnumNamePayloadType(metadata.payload_type()), metadata.id()->c_str());
       return false;
     }
 
@@ -295,10 +295,10 @@ bool example_joiner::process_interaction(
 
     if (!typed_event::event_processor<v2::CaEvent>::is_valid(*ca, _loop_info, logger))
     {
-      //logger.out_warn(
-      //    "CA payload with event id [{}] is malformed. "
-      //    "Skipping interaction from processing.",
-      //    metadata.id()->c_str());
+      logger.out_warn(
+          "CA payload with event id [{}] is malformed. "
+          "Skipping interaction from processing.",
+          metadata.id()->c_str());
       return false;
     }
 
@@ -426,10 +426,10 @@ bool example_joiner::process_dedup(const v2::Event& event, const v2::Metadata& m
       }
       catch (VW::vw_exception& e)
       {
-        //logger.out_error(
-        //    "JSON parsing during dedup processing failed "
-        //    "with error: [{}]",
-        //    e.what());
+        logger.out_error(
+            "JSON parsing during dedup processing failed "
+            "with error: [{}]",
+            e.what());
         return false;
       }
 
