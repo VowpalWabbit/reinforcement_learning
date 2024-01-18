@@ -232,8 +232,7 @@ bool example_joiner::process_interaction(
         "and Interaction event type [{}] "
         "don't match. Skipping interaction from processing. "
         "EventId: [{}]",
-        loop_type, EnumNamePayloadType(metadata.payload_type()),
-        metadata.id()->c_str());
+        loop_type, EnumNamePayloadType(metadata.payload_type()), metadata.id()->c_str());
     return false;
   }
 
