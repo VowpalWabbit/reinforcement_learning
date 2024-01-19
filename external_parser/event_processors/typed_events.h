@@ -198,7 +198,7 @@ bool process_compression(const uint8_t* data, size_t size, const v2::Metadata& m
           "Received ZSTD_CONTENTSIZE_ERROR while "
           "decompressing event with id: "
           "[{}] of type: [{}]",
-          metadata.id()->c_str(), metadata.payload_type());
+          metadata.id()->c_str(), EnumNamePayloadType(metadata.payload_type()));
       return false;
     }
     if (buff_size == ZSTD_CONTENTSIZE_UNKNOWN)
@@ -207,7 +207,7 @@ bool process_compression(const uint8_t* data, size_t size, const v2::Metadata& m
           "Received ZSTD_CONTENTSIZE_UNKNOWN while "
           "decompressing event with id: "
           "[{}] of type: [{}]",
-          metadata.id()->c_str(), metadata.payload_type());
+          metadata.id()->c_str(), EnumNamePayloadType(metadata.payload_type()));
       return false;
     }
 
@@ -219,7 +219,7 @@ bool process_compression(const uint8_t* data, size_t size, const v2::Metadata& m
       logger.out_warn(
           "Received [{}] error while decompressing event with id: "
           "[{}] of type: [{}]",
-          ZSTD_getErrorName(res), metadata.id()->c_str(), metadata.payload_type());
+          ZSTD_getErrorName(res), metadata.id()->c_str(), EnumNamePayloadType(metadata.payload_type()));
       return false;
     }
 
