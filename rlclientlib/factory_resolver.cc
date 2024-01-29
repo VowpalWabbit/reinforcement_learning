@@ -72,6 +72,13 @@ factory_initializer::~factory_initializer()
   }
 }
 
+void register_default_factories_callback(oauth_callback_t callback)
+{
+#ifdef USE_AZURE_FACTORIES
+  register_azure_oauth_factories(callback);
+#endif
+}
+
 template <typename model_t>
 int model_create(
     std::unique_ptr<m::i_model>& retval, const u::configuration& c, i_trace* trace_logger, api_status* status)

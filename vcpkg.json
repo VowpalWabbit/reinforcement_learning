@@ -2,6 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
   "name": "reinforcement-learning",
   "version": "1.0.0",
+  "builtin-baseline": "f30434939d5516ce764c549ab04e3d23d312180a",
   "dependencies": [
     "boost-align",
     "boost-asio",
@@ -21,7 +22,17 @@
     "openssl",
     "rapidjson",
     "spdlog",
-    "zlib"
+    "zlib",
+    "azure-storage-blobs-cpp",
+    "azure-identity-cpp"
+  ],
+  "overrides": [
+    {"name": "cpprestsdk", "version": "2.10.18"},
+    {"name": "flatbuffers", "version": "23.1.21"},
+    {"name": "fmt", "version": "9.1.0"},
+    {"name": "rapidjson", "version-string": "1.1.0"},
+    {"name": "spdlog", "version": "1.11.0"},
+    {"name": "zlib", "version": "1.2.13"}
   ],
   "features": {
     "benchmarks": {

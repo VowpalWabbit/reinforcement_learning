@@ -9,6 +9,7 @@
 #include "live_model.h"
 #include "person.h"
 #include "robot_joint.h"
+#include "azure_credentials.h"
 
 #include <boost/program_options.hpp>
 
@@ -177,4 +178,5 @@ private:
   int64_t _delay = 2000;
   bool _quiet = false;
   bool _random_ids = true;
+  AzureCredentials _creds;
 };
