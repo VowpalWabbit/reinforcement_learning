@@ -40,7 +40,7 @@ private:
   model_source _model_source = model_source::AZURE;
   method _method_type = methods::HEAD;
   bool _retry_get_data = true;
-  api_header_token_callback _headerimpl;
+  api_header_token_callback<blob_storage_headers> _headerimpl;
 };
 }  // namespace model_management
 }  // namespace reinforcement_learning

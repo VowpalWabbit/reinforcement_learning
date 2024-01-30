@@ -114,7 +114,6 @@ if(vw_USE_AZURE_FACTORIES)
     utility/header_authorization.cc
     utility/http_client.cc
     utility/http_helper.cc
-    utility/api_header_token.cc
   )
 endif()
 

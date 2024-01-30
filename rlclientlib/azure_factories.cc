@@ -139,7 +139,7 @@ int create_apim_http_api_oauth_sender(oauth_callback_t callback, std::unique_ptr
 {
   i_http_client* client = nullptr;
   RETURN_IF_FAIL(create_http_client(api_host, cfg, &client, status));
-  retval.reset(new http_transport_client<api_header_token_callback>(
+  retval.reset(new http_transport_client<api_header_token_callback<eventhub_headers>>(
       client, tasks_limit, max_http_retries, max_http_retry_duration, trace_logger, error_cb, callback, "https://eventhubs.azure.net//.default"));
   return error_code::success;
 }
@@ -219,7 +219,7 @@ int oauth_restapi_data_transport_create(oauth_callback_t callback, std::unique_p
   RETURN_IF_FAIL(create_http_client(model_uri, config, &client, status));
   // TODO: is the scope here correct?
   retval.reset(new m::restapi_data_transport_oauth(
-      std::unique_ptr<i_http_client>(client), config, m::model_source::HTTP_API, trace_logger, callback, "https://blobs.azure.net//.default"));
+      std::unique_ptr<i_http_client>(client), config, m::model_source::HTTP_API, trace_logger, callback, "https://storage.azure.com//.default"));
   return error_code::success;
 }
 
