@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 using Rl.Net.Native;
 
@@ -16,9 +17,13 @@ namespace Rl.Net {
         [DllImport("rlnetnative")]
         private static extern IntPtr SetFactoryContextBindingSenderFactory(IntPtr context, sender_create_fn create_Fn, sender_vtable vtable);
 
-        public FactoryContext() : base(new New<FactoryContext>(CreateFactoryContext), new Delete<FactoryContext>(DeleteFactoryContext))
+        public List<byte> Weights { get; private set; }
+
+        public FactoryContext(List<byte> weights = null) : base(new New<FactoryContext>(CreateFactoryContext), new Delete<FactoryContext>(DeleteFactoryContext))
         {
+            Weights = weights ?? new List<byte>();
         }
+        
 
         private GCHandleLifetime registeredSenderCreateHandle;
 
