@@ -1,3 +1,5 @@
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/../../cmake/Modules/")
+
 if(RL_CXX_STANDARD GREATER_EQUAL 14 AND vw_USE_AZURE_FACTORIES)
   include(AzureVcpkg)
   az_vcpkg_integrate()
