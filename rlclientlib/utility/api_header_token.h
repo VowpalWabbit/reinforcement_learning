@@ -22,7 +22,14 @@ class eventhub_headers
 public:
   void insert_additional_headers(http_headers& headers)
   {
-    headers.add("Content-Type", "application/atom+xml;type=entry;charset=utf-8");
+    http_headers::key_type content_type;
+#ifdef _WIN32
+    content_type = ::utility::conversions::utf8_to_utf16("Content-Type");
+#else
+    content_type = "Content-Type";
+#endif
+
+    headers.add(content_type, "application/atom+xml;type=entry;charset=utf-8");
   }
 };
 class blob_storage_headers
@@ -30,8 +37,15 @@ class blob_storage_headers
 public:
   void insert_additional_headers(http_headers& headers)
   {
+    http_headers::key_type version;
+#ifdef _WIN32
+    version = ::utility::conversions::utf8_to_utf16("x-ms-version");
+#else
+    version = "x-ms-version";
+#endif
+
     // For version, see https://learn.microsoft.com/en-us/rest/api/storageservices/authorize-with-azure-active-directory
-    headers.add("x-ms-version", "2017-11-09");
+    headers.add(version, "2017-11-09");
   }
 };
 
