@@ -112,7 +112,7 @@ private:
     using namespace std::chrono_literals;
     using namespace std::chrono;
     system_clock::time_point tp;
-    RETURN_IF_FAIL(_token_callback(_bearer_token, _token_expiry, _scopes));
+    RETURN_IF_FAIL(_token_callback(_scopes, _bearer_token, _token_expiry));
 
     if (_bearer_token.empty())
     {

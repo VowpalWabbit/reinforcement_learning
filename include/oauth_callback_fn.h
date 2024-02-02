@@ -8,6 +8,5 @@
 namespace reinforcement_learning
 {
 using oauth_callback_t =
-    std::function<int(std::string&, std::chrono::system_clock::time_point&, 
-        const std::vector<std::string>&)>;
+    std::function<int(const std::vector<std::string>&, std::string&, std::chrono::system_clock::time_point&)>;
 }

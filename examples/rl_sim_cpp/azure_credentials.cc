@@ -10,6 +10,7 @@
 
 #include <exception>
 #include <iostream>
+#ifdef HAS_STD14
 
 using namespace reinforcement_learning;
 
@@ -25,8 +26,8 @@ AzureCredentials::AzureCredentials()
 : _creds(create_options())
 {}
 
-int AzureCredentials::get_credentials(std::string& token_out, std::chrono::system_clock::time_point& expiry_out,
-      const std::vector<std::string>& scopes)
+int AzureCredentials::get_credentials(const std::vector<std::string>& scopes,
+    std::string& token_out, std::chrono::system_clock::time_point& expiry_out)
 {
 #ifdef HAS_STD14
   Azure::Core::Credentials::TokenRequestContext request_context;
@@ -61,3 +62,4 @@ int AzureCredentials::get_credentials(std::string& token_out, std::chrono::syste
 #endif
   return error_code::success;
 }
+#endif

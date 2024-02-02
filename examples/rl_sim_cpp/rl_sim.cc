@@ -493,11 +493,13 @@ int rl_sim::init_rl()
   // probably incompatible with the throughput option?
   else if (_options["azure_oauth_factories"].as<bool>())
   {
+#ifdef HAS_STD14
     // Note: This requires C++14 or better
     using namespace std::placeholders;
     reinforcement_learning::oauth_callback_t callback =
         std::bind(&AzureCredentials::get_credentials, &_creds, _1, _2, _3);
     reinforcement_learning::register_default_factories_callback(callback);
+#endif
   }
 
   // Initialize the API
