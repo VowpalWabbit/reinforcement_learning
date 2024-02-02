@@ -22,9 +22,7 @@
     "openssl",
     "rapidjson",
     "spdlog",
-    "zlib",
-    "azure-storage-blobs-cpp",
-    "azure-identity-cpp"
+    "zlib"
   ],
   "overrides": [
     {"name": "cpprestsdk", "version": "2.10.18"},
@@ -38,6 +36,10 @@
     "benchmarks": {
       "description": "Build Benchmarks",
       "dependencies": [{"name":"benchmark", "version>=":"1.7.1"}]
+    },
+    "azurelibs": {
+      "description": "Build Azure-specific code",
+      "dependencies": [{"name":"azure-identity-cpp"}]
     }
   }
 }
