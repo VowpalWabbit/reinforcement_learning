@@ -1,6 +1,4 @@
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/../cmake/Modules/")
-include(AzureVcpkg)
-az_vcpkg_integrate()
 
 # First try to find the config version. Newer, used by vcpkg etc
 find_package(Flatbuffers CONFIG)
