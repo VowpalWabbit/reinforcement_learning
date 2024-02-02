@@ -1,3 +1,4 @@
+#ifdef LINK_AZURE_LIBS
 #include "azure_credentials.h"
 #include "err_constants.h"
 #include "future_compat.h"
@@ -10,7 +11,6 @@
 
 #include <exception>
 #include <iostream>
-#ifdef HAS_STD14
 
 using namespace reinforcement_learning;
 

@@ -1,12 +1,11 @@
 #pragma once
 
-#include "future_compat.h"
-
-#ifdef HAS_STD14
+#ifdef LINK_AZURE_LIBS
 #include <memory>
 
 #include "api_status.h"
 #include "configuration.h"
+#include "future_compat.h"
 
 #include <azure/identity/default_azure_credential.hpp>
 #include <azure/identity/azure_cli_credential.hpp>

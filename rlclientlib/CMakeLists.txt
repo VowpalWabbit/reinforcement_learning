@@ -213,6 +213,9 @@ if(vw_USE_AZURE_FACTORIES)
   target_compile_definitions(rlclientlib PRIVATE USE_AZURE_FACTORIES)
 endif()
 
+if(RL_LINK_AZURE_LIBS)
+  target_compile_definitions(rlclientlib PRIVATE LINK_AZURE_LIBS)
+endif()
 
 if(RL_USE_ZSTD)
   target_compile_definitions(rlclientlib PRIVATE USE_ZSTD)

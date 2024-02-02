@@ -62,6 +62,7 @@ option(RL_USE_UBSAN "Compile with UndefinedBehaviorSanitizer" OFF)
 option(rlclientlib_BUILD_ONNXRUNTIME_EXTENSION "Build OnnxRuntime Inference Extension" OFF)
 option(rlclientlib_BUILD_DOTNET "Build .NET bindings" OFF)
 option(rlclientlib_DOTNET_USE_MSPROJECT "[Experimental] Use import_external_msproject to build .NET csproj files." OFF)
+option(RL_LINK_AZURE_LIBS "Whether to build components requiring the use of Azure libraries. Requires C++14 or greater" OFF)
 
 if(RL_USE_ASAN)
   add_compile_definitions(RL_USE_ASAN VW_USE_ASAN)

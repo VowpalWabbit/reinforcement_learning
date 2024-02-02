@@ -493,7 +493,7 @@ int rl_sim::init_rl()
   // probably incompatible with the throughput option?
   else if (_options["azure_oauth_factories"].as<bool>())
   {
-#ifdef HAS_STD14
+#ifdef LINK_AZURE_LIBS
     // Note: This requires C++14 or better
     using namespace std::placeholders;
     reinforcement_learning::oauth_callback_t callback =

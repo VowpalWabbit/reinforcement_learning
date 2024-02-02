@@ -1,6 +1,6 @@
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/../../cmake/Modules/")
 
-if(RL_CXX_STANDARD GREATER_EQUAL 14 AND vw_USE_AZURE_FACTORIES)
+if(RL_LINK_AZURE_LIBS)
   include(AzureVcpkg)
   az_vcpkg_integrate()
 endif()
@@ -11,7 +11,7 @@ set(RL_SIM_SOURCES
   robot_joint.cc
   rl_sim.cc
 )
-if(RL_CXX_STANDARD GREATER_EQUAL 14 AND vw_USE_AZURE_FACTORIES)
+if(RL_LINK_AZURE_LIBS)
   list(APPEND RL_SIM_SOURCES
     azure_credentials.cc
   )
@@ -23,7 +23,7 @@ add_executable(rl_sim_cpp.out
 
 target_link_libraries(rl_sim_cpp.out PRIVATE Boost::program_options rlclientlib)
 
-if(RL_CXX_STANDARD GREATER_EQUAL 14 AND vw_USE_AZURE_FACTORIES)
+if(RL_LINK_AZURE_LIBS)
   find_package(azure-identity-cpp CONFIG REQUIRED)
   target_link_libraries(rl_sim_cpp.out PRIVATE Azure::azure-identity)
 endif()

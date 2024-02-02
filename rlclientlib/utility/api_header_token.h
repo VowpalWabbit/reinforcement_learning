@@ -85,11 +85,10 @@ public:
       api_status::try_update(status, result, error_code::not_initialized_s);
       return result;
     }
-    using namespace std::chrono_literals;
     using namespace std::chrono;
     system_clock::time_point now = system_clock::now();
     // TODO: make this configurable?
-    system_clock::time_point refresh_time = _token_expiry - 10s;
+    system_clock::time_point refresh_time = _token_expiry - std::chrono::seconds(10);
     if (now >= refresh_time)
     {
       RETURN_IF_FAIL(refresh_auth_token(status, trace));
@@ -109,7 +108,6 @@ public:
 private:
   int refresh_auth_token(api_status* status, i_trace* trace)
   {
-    using namespace std::chrono_literals;
     using namespace std::chrono;
     system_clock::time_point tp;
     RETURN_IF_FAIL(_token_callback(_scopes, _bearer_token, _token_expiry));
