@@ -68,12 +68,10 @@ public:
 #ifdef _WIN32
     _http_api_header_key_name = ::utility::conversions::utf8_to_utf16(
         config.get(name::HTTP_API_HEADER_KEY_NAME, value::HTTP_API_DEFAULT_HEADER_KEY_NAME));
-    _token_type = ::utility::conversions::utf8_to_utf16(
-        config.get(name::HTTP_API_OAUTH_TOKEN_TYPE, value::HTTP_API_DEFAULT_OAUTH_TOKEN_TYPE));
 #else
     _http_api_header_key_name = config.get(name::HTTP_API_HEADER_KEY_NAME, value::HTTP_API_DEFAULT_HEADER_KEY_NAME);
-    _token_type = config.get(name::HTTP_API_OAUTH_TOKEN_TYPE, value::HTTP_API_DEFAULT_OAUTH_TOKEN_TYPE);
 #endif
+    _token_type = config.get(name::HTTP_API_OAUTH_TOKEN_TYPE, value::HTTP_API_DEFAULT_OAUTH_TOKEN_TYPE);
     RETURN_IF_FAIL(refresh_auth_token(status, trace));
     _initialized = true;
     return error_code::success;
