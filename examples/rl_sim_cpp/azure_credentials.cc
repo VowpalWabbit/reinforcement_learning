@@ -55,7 +55,7 @@ int AzureCredentials::get_credentials(const std::vector<std::string>& scopes,
     std::cout << "Error getting auth token: " << e.what();
     return error_code::external_error;
   }
-  catch(std::exception& e){
+  catch(...){
     std::cout << "Unknown error while getting auth token";
     return error_code::external_error;
   }

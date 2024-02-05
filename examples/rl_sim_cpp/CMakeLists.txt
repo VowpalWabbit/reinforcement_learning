@@ -24,6 +24,7 @@ add_executable(rl_sim_cpp.out
 target_link_libraries(rl_sim_cpp.out PRIVATE Boost::program_options rlclientlib)
 
 if(RL_LINK_AZURE_LIBS)
+  target_compile_definitions(rl_sim_cpp.out PRIVATE LINK_AZURE_LIBS)
   find_package(azure-identity-cpp CONFIG REQUIRED)
   target_link_libraries(rl_sim_cpp.out PRIVATE Azure::azure-identity)
 endif()
