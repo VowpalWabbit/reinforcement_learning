@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Rl.Net.Cli
 {
@@ -35,6 +36,55 @@ namespace Rl.Net.Cli
             string trace_log = config["trace.logger.implementation"];
 
             LiveModel liveModel = new LiveModel(config);
+
+            liveModel.BackgroundError += LiveModel_BackgroundError;
+            if (trace_log == "CONSOLE_TRACE_LOGGER")
+            {
+                liveModel.TraceLoggerEvent += LiveModel_TraceLogEvent;
+            }
+
+            if (!liveModel.TryInit(apiStatus))
+            {
+                WriteStatusAndExit(apiStatus);
+            }
+
+            return liveModel;
+        }
+
+        public static LiveModel CreateLiveModelWithStaticModelOrExit(string clientJsonPath, string modelPath)
+        {
+            if (!File.Exists(clientJsonPath))
+            {
+                WriteErrorAndExit($"Could not find file with path '{clientJsonPath}'.");
+            }
+
+            string json = File.ReadAllText(clientJsonPath);
+
+            ApiStatus apiStatus = new ApiStatus();
+
+            Configuration config;
+            if (!Configuration.TryLoadConfigurationFromJson(json, out config, apiStatus))
+            {
+                WriteStatusAndExit(apiStatus);
+            }
+
+            string trace_log = config["trace.logger.implementation"];
+
+            config["model.source"] = "BINDING_DATA_TRANSPORT";
+            List<byte> modelData = null;
+            if (File.Exists(modelPath))
+            {
+                byte[] fileBytes = File.ReadAllBytes(modelPath);
+                modelData = new List<byte>(fileBytes);
+            }
+            else
+            {
+                WriteErrorAndExit($"Could not find model file with path '{modelPath}'.");
+            }
+
+            // Use static model FactoryContext
+            FactoryContext fc = new FactoryContext(modelData);
+            LiveModel liveModel = new LiveModel(config, fc);
 
             liveModel.BackgroundError += LiveModel_BackgroundError;
             if (trace_log == "CONSOLE_TRACE_LOGGER")

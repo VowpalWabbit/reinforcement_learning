@@ -6,7 +6,7 @@ namespace Rl.Net.Cli
     [Verb("basicUsage", HelpText = "Basic usage of the API")]
     class BasicUsageCommand : CommandBase
     {
-        [Option(longName: "testType", HelpText = "select from (liveModel, caLoop, cbLoop, ccbLoop, pdfExample, slatesLoop) basic usage examples", Required = false, Default = "liveModel")]
+        [Option(longName: "testType", HelpText = "select from (liveModel, liveModelStatic, caLoop, cbLoop, ccbLoop, pdfExample, slatesLoop) basic usage examples", Required = false, Default = "liveModel")]
         public string testType { get; set; }
 
         public override void Run()
@@ -15,6 +15,9 @@ namespace Rl.Net.Cli
             {
                 case "liveModel":
                     BasicUsage(this.ConfigPath);
+                    break;
+                case "liveModelStatic":
+                    BasicUsageStaticModel(this.ConfigPath, this.ModelPath);
                     break;
                 case "caLoop":
                     BasicUsageCALoop(this.ConfigPath);
@@ -44,6 +47,37 @@ namespace Rl.Net.Cli
             const string contextJson = "{\"GUser\":{\"id\":\"a\",\"major\":\"eng\",\"hobby\":\"hiking\"},\"_multi\":[ { \"TAction\":{\"a1\":\"f1\"} },{\"TAction\":{\"a2\":\"f2\"}}]}";
 
             LiveModel liveModel = Helpers.CreateLiveModelOrExit(configPath);
+
+            ApiStatus apiStatus = new ApiStatus();
+
+            RankingResponse rankingResponse = new RankingResponse();
+            if (!liveModel.TryChooseRank(eventId, contextJson, rankingResponse, apiStatus))
+            {
+                Helpers.WriteStatusAndExit(apiStatus);
+            }
+
+            long actionId;
+            if (!rankingResponse.TryGetChosenAction(out actionId, apiStatus))
+            {
+                Helpers.WriteStatusAndExit(apiStatus);
+            }
+
+            Console.WriteLine($"Chosen action id: {actionId}");
+
+            if (!liveModel.TryQueueOutcomeEvent(eventId, outcome, apiStatus))
+            {
+                Helpers.WriteStatusAndExit(apiStatus);
+            }
+            Console.WriteLine("Basic usage live model success");
+        }
+
+        public static void BasicUsageStaticModel(string configPath, string modelPath)
+        {
+            const float outcome = 1.0f;
+            const string eventId = "event_id";
+            const string contextJson = "{\"GUser\":{\"id\":\"a\",\"major\":\"eng\",\"hobby\":\"hiking\"},\"_multi\":[ { \"TAction\":{\"a1\":\"f1\"} },{\"TAction\":{\"a2\":\"f2\"}}]}";
+
+            LiveModel liveModel = Helpers.CreateLiveModelWithStaticModelOrExit(configPath, modelPath);
 
             ApiStatus apiStatus = new ApiStatus();
 
