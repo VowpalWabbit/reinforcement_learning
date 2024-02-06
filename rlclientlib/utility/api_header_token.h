@@ -53,7 +53,7 @@ template <typename Resource>
 class api_header_token_callback
 {
 public:
-  api_header_token_callback(oauth_callback_t& token_cb, std::string scope)
+  api_header_token_callback(oauth_callback_t& token_cb, std::string& scope)
       : _token_callback(token_cb), _scopes{std::move(scope)}
   {
   }
