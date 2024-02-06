@@ -1,6 +1,7 @@
 #include "api_status.h"
 #include "constants.h"
 #include "factory_resolver.h"
+#include "future_compat.h"
 #include "live_model.h"
 #include "multistep.h"
 #include "person.h"
@@ -8,8 +9,6 @@
 #include "rl_sim_cpp.h"
 #include "simulation_stats.h"
 #include "trace_logger.h"
-
-#include "future_compat.h"
 
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -652,10 +651,10 @@ std::string rl_sim::create_event_id()
 }
 
 rl_sim::rl_sim(boost::program_options::variables_map vm)
-  : _options(std::move(vm))
-  , _loop_kind(CB)
+    : _options(std::move(vm))
+    , _loop_kind(CB)
 #ifdef LINK_AZURE_LIBS
-  , _creds(_options["azure_tenant_id"].as<std::string>())
+    , _creds(_options["azure_tenant_id"].as<std::string>())
 #endif
 {
   if (_options["ccb"].as<bool>()) { _loop_kind = CCB; }

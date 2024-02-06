@@ -6,10 +6,10 @@
 #include "logger/http_transport_client.h"
 #include "model_mgmt/restapi_data_transport.h"
 #include "model_mgmt/restapi_data_transport_oauth.h"
+#include "utility/api_header_token.h"
 #include "utility/eventhub_http_authorization.h"
 #include "utility/header_authorization.h"
 #include "utility/http_helper.h"
-#include "utility/api_header_token.h"
 
 #include <functional>
 
@@ -52,7 +52,7 @@ void register_azure_factories()
   sender_factory.register_type(value::OBSERVATION_EH_SENDER, observation_sender_create);
   sender_factory.register_type(value::INTERACTION_EH_SENDER, interaction_sender_create);
   sender_factory.register_type(value::EPISODE_EH_SENDER, episode_sender_create);
-  
+
   // These functions need to have 2 nearly identical versions. One will use the standard
   // header_authorization, which uses a hard coded key in the config
   // The other will use the new OAUTH callback interface to generate its keys.
@@ -67,14 +67,14 @@ void register_azure_oauth_factories(oauth_callback_t callback)
 {
   // TODO: bind functions?
   using namespace std::placeholders;
-  data_transport_factory.register_type(value::HTTP_MODEL_DATA_OAUTH,
-      std::bind(oauth_restapi_data_transport_create, callback, _1, _2, _3, _4));
+  data_transport_factory.register_type(
+      value::HTTP_MODEL_DATA_OAUTH, std::bind(oauth_restapi_data_transport_create, callback, _1, _2, _3, _4));
   sender_factory.register_type(value::OBSERVATION_HTTP_API_SENDER_OAUTH,
       std::bind(observation_api_sender_oauth_create, callback, _1, _2, _3, _4, _5));
   sender_factory.register_type(value::INTERACTION_HTTP_API_SENDER_OAUTH,
       std::bind(interaction_api_sender_oauth_create, callback, _1, _2, _3, _4, _5));
-  sender_factory.register_type(value::EPISODE_HTTP_API_SENDER_OAUTH,
-      std::bind(episode_api_sender_oauth_create, callback, _1, _2, _3, _4, _5));
+  sender_factory.register_type(
+      value::EPISODE_HTTP_API_SENDER_OAUTH, std::bind(episode_api_sender_oauth_create, callback, _1, _2, _3, _4, _5));
 }
 
 int restapi_data_transport_create(std::unique_ptr<m::i_data_transport>& retval, const u::configuration& config,
@@ -133,14 +133,16 @@ int create_apim_http_api_sender(std::unique_ptr<i_sender>& retval, const u::conf
   return error_code::success;
 }
 
-int create_apim_http_api_oauth_sender(oauth_callback_t callback, std::unique_ptr<i_sender>& retval, const u::configuration& cfg, const char* api_host,
-    int tasks_limit, int max_http_retries, std::chrono::milliseconds max_http_retry_duration,
-    error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
+int create_apim_http_api_oauth_sender(oauth_callback_t callback, std::unique_ptr<i_sender>& retval,
+    const u::configuration& cfg, const char* api_host, int tasks_limit, int max_http_retries,
+    std::chrono::milliseconds max_http_retry_duration, error_callback_fn* error_cb, i_trace* trace_logger,
+    api_status* status)
 {
   i_http_client* client = nullptr;
   RETURN_IF_FAIL(create_http_client(api_host, cfg, &client, status));
-  retval.reset(new http_transport_client<api_header_token_callback<eventhub_headers>>(
-      client, tasks_limit, max_http_retries, max_http_retry_duration, trace_logger, error_cb, callback, "https://eventhubs.azure.net//.default"));
+  retval.reset(
+      new http_transport_client<api_header_token_callback<eventhub_headers>>(client, tasks_limit, max_http_retries,
+          max_http_retry_duration, trace_logger, error_cb, callback, "https://eventhubs.azure.net//.default"));
   return error_code::success;
 }
 
@@ -209,7 +211,6 @@ int interaction_sender_create(std::unique_ptr<i_sender>& retval, const u::config
   return error_code::success;
 }
 
-
 int oauth_restapi_data_transport_create(oauth_callback_t callback, std::unique_ptr<m::i_data_transport>& retval,
     const u::configuration& config, i_trace* trace_logger, api_status* status)
 {
@@ -218,8 +219,8 @@ int oauth_restapi_data_transport_create(oauth_callback_t callback, std::unique_p
   i_http_client* client = nullptr;
   RETURN_IF_FAIL(create_http_client(model_uri, config, &client, status));
   // TODO: is the scope here correct?
-  retval.reset(new m::restapi_data_transport_oauth(
-      std::unique_ptr<i_http_client>(client), config, m::model_source::HTTP_API, trace_logger, callback, "https://storage.azure.com//.default"));
+  retval.reset(new m::restapi_data_transport_oauth(std::unique_ptr<i_http_client>(client), config,
+      m::model_source::HTTP_API, trace_logger, callback, "https://storage.azure.com//.default"));
   return error_code::success;
 }
 
@@ -227,8 +228,8 @@ int episode_api_sender_oauth_create(oauth_callback_t callback, std::unique_ptr<i
     const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
 {
   const auto* const api_host = cfg.get(name::EPISODE_HTTP_API_HOST, "localhost:8080");
-  return create_apim_http_api_oauth_sender(callback, retval, cfg, api_host, cfg.get_int(name::EPISODE_APIM_MAX_HTTP_RETRIES, 4),
-      cfg.get_int(name::EPISODE_APIM_TASKS_LIMIT, 4),
+  return create_apim_http_api_oauth_sender(callback, retval, cfg, api_host,
+      cfg.get_int(name::EPISODE_APIM_MAX_HTTP_RETRIES, 4), cfg.get_int(name::EPISODE_APIM_TASKS_LIMIT, 4),
       std::chrono::milliseconds(cfg.get_int(name::EPISODE_APIM_MAX_HTTP_RETRY_DURATION_MS, 3600000)), error_cb,
       trace_logger, status);
 }
@@ -237,8 +238,8 @@ int observation_api_sender_oauth_create(oauth_callback_t callback, std::unique_p
     const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
 {
   const auto* const api_host = cfg.get(name::OBSERVATION_HTTP_API_HOST, "localhost:8080");
-  return create_apim_http_api_oauth_sender(callback, retval, cfg, api_host, cfg.get_int(name::OBSERVATION_APIM_TASKS_LIMIT, 16),
-      cfg.get_int(name::OBSERVATION_APIM_MAX_HTTP_RETRIES, 4),
+  return create_apim_http_api_oauth_sender(callback, retval, cfg, api_host,
+      cfg.get_int(name::OBSERVATION_APIM_TASKS_LIMIT, 16), cfg.get_int(name::OBSERVATION_APIM_MAX_HTTP_RETRIES, 4),
       std::chrono::milliseconds(cfg.get_int(name::OBSERVATION_APIM_MAX_HTTP_RETRY_DURATION_MS, 3600000)), error_cb,
       trace_logger, status);
 }
@@ -247,8 +248,8 @@ int interaction_api_sender_oauth_create(oauth_callback_t callback, std::unique_p
     const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
 {
   const auto* const api_host = cfg.get(name::INTERACTION_HTTP_API_HOST, "localhost:8080");
-  return create_apim_http_api_oauth_sender(callback, retval, cfg, api_host, cfg.get_int(name::INTERACTION_APIM_TASKS_LIMIT, 16),
-      cfg.get_int(name::INTERACTION_APIM_MAX_HTTP_RETRIES, 4),
+  return create_apim_http_api_oauth_sender(callback, retval, cfg, api_host,
+      cfg.get_int(name::INTERACTION_APIM_TASKS_LIMIT, 16), cfg.get_int(name::INTERACTION_APIM_MAX_HTTP_RETRIES, 4),
       std::chrono::milliseconds(cfg.get_int(name::INTERACTION_APIM_MAX_HTTP_RETRY_DURATION_MS, 3600000)), error_cb,
       trace_logger, status);
 }

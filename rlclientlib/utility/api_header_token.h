@@ -53,10 +53,10 @@ template <typename Resource>
 class api_header_token_callback
 {
 public:
-  api_header_token_callback(oauth_callback_t token_cb, std::string scope) :
-    _token_callback(token_cb),
-    _scopes{std::move(scope)}
-    {}
+  api_header_token_callback(oauth_callback_t token_cb, std::string scope)
+      : _token_callback(token_cb), _scopes{std::move(scope)}
+  {
+  }
   ~api_header_token_callback() = default;
 
   int init(const utility::configuration& config, api_status* status, i_trace* trace)
@@ -89,10 +89,7 @@ public:
     system_clock::time_point now = system_clock::now();
     // TODO: make this configurable?
     system_clock::time_point refresh_time = _token_expiry - std::chrono::seconds(10);
-    if (now >= refresh_time)
-    {
-      RETURN_IF_FAIL(refresh_auth_token(status, trace));
-    }
+    if (now >= refresh_time) { RETURN_IF_FAIL(refresh_auth_token(status, trace)); }
     std::string header_value = _token_type + " " + _bearer_token;
     headers.add(_http_api_header_key_name, header_value.c_str());
     _additional_headers.insert_additional_headers(headers);
@@ -122,6 +119,7 @@ private:
     if (_bearer_token.empty()) { RETURN_ERROR(trace, status, http_api_key_not_provided); }
     return error_code::success;
   }
+
 private:
   http_headers::key_type _http_api_header_key_name;
   std::string _token_type;

@@ -1,8 +1,8 @@
 #pragma once
 #include "model_mgmt.h"
+#include "oauth_callback_fn.h"
 #include "utility/api_header_token.h"
 #include "utility/http_client.h"
-#include "oauth_callback_fn.h"
 
 #include <cpprest/http_headers.h>
 
@@ -22,9 +22,8 @@ class restapi_data_transport_oauth : public i_data_transport
 public:
   // Takes the ownership of the i_http_client and delete it at the end of lifetime
   restapi_data_transport_oauth(i_http_client* httpcli, i_trace* trace, oauth_callback_t callback, std::string scope);
-  restapi_data_transport_oauth(
-      std::unique_ptr<i_http_client>&& httpcli, utility::configuration cfg, model_source model_source, i_trace* trace,
-      oauth_callback_t callback, std::string scope);
+  restapi_data_transport_oauth(std::unique_ptr<i_http_client>&& httpcli, utility::configuration cfg,
+      model_source model_source, i_trace* trace, oauth_callback_t callback, std::string scope);
 
   int get_data(model_data& ret, api_status* status) override;
 
