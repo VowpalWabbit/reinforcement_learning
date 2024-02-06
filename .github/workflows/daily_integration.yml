@@ -18,6 +18,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      - run: git -C ${{ github.workspace }}/ext_libs/vcpkg fetch --unshallow
       - name: Update VW to latest
         shell: bash
         run: |
