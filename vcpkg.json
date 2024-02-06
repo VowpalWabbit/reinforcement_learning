@@ -28,7 +28,6 @@
     {"name": "cpprestsdk", "version": "2.10.18"},
     {"name": "flatbuffers", "version": "23.1.21"},
     {"name": "fmt", "version": "9.1.0"},
-    {"name": "rapidjson", "version-string": "1.1.0"},
     {"name": "spdlog", "version": "1.11.0"},
     {"name": "zlib", "version": "1.2.13"}
   ],
