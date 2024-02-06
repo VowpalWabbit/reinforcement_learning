@@ -6,5 +6,5 @@ namespace reinforcement_learning
 {
 void register_azure_factories();
 
-void register_azure_oauth_factories(oauth_callback_t callback);
+void register_azure_oauth_factories(oauth_callback_t& callback);
 }

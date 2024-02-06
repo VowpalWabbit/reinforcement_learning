@@ -79,6 +79,6 @@ static factory_initializer _init;
 /**
  * @brief Register default factories with an authentication callback
  */
-void register_default_factories_callback(oauth_callback_t callback);
+void register_default_factories_callback(oauth_callback_t& callback);
 
 }  // namespace reinforcement_learning

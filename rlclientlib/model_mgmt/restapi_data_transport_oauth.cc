@@ -23,12 +23,12 @@ namespace reinforcement_learning
 namespace model_management
 {
 restapi_data_transport_oauth::restapi_data_transport_oauth(
-    i_http_client* httpcli, i_trace* trace, oauth_callback_t callback, std::string scope)
-    : _httpcli(httpcli), _datasz{0}, _trace{trace}, _headerimpl(callback, scope)
+    i_http_client* httpcli, i_trace* trace, oauth_callback_t& callback, std::string scope)
+    : _httpcli(httpcli), _datasz{0}, _trace{trace}, _headerimpl(callback, std::move(scope))
 {
 }
 restapi_data_transport_oauth::restapi_data_transport_oauth(std::unique_ptr<i_http_client>&& httpcli,
-    utility::configuration cfg, model_source model_source, i_trace* trace, oauth_callback_t callback, std::string scope)
+    utility::configuration cfg, model_source model_source, i_trace* trace, oauth_callback_t& callback, std::string scope)
     : _httpcli(std::move(httpcli))
     , _cfg(std::move(cfg))
     , _model_source(model_source)

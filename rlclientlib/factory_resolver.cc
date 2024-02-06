@@ -72,7 +72,7 @@ factory_initializer::~factory_initializer()
   }
 }
 
-void register_default_factories_callback(oauth_callback_t callback)
+void register_default_factories_callback(oauth_callback_t& callback)
 {
 #ifdef USE_AZURE_FACTORIES
   register_azure_oauth_factories(callback);
