@@ -35,7 +35,7 @@ restapi_data_transport_oauth::restapi_data_transport_oauth(std::unique_ptr<i_htt
     , _model_source(model_source)
     , _datasz{0}
     , _trace{trace}
-    , _headerimpl(callback, scope)
+    , _headerimpl(callback, std::move(scope))
 {
 }
 
