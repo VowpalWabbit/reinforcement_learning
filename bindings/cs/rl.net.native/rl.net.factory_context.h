@@ -4,6 +4,8 @@
 #include "binding_sender.h"
 #include "factory_resolver.h"
 #include "rl.net.native.h"
+#include "model_mgmt.h"
+#include "binding_static_model.h"
 
 typedef struct factory_context
 {
@@ -17,9 +19,8 @@ typedef struct factory_context
 extern "C"
 {
   API factory_context_t* CreateFactoryContext();
+  API factory_context_t* CreateFactoryContextWithStaticModel(const char* weights, const size_t len);
   API void DeleteFactoryContext(factory_context_t* context);
-  //API void SetFactoryContextModelWeights(factory_context_t* context, const std::byte* weights, size_t size);
-
   API void SetFactoryContextBindingSenderFactory(
       factory_context_t* context, rl_net_native::sender_create_fn create_fn, rl_net_native::sender_vtable_t vtable);
 }

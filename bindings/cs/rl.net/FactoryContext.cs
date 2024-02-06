@@ -12,6 +12,9 @@ namespace Rl.Net {
         private static extern IntPtr CreateFactoryContext();
 
         [DllImport("rlnetnative")]
+        private static extern IntPtr CreateFactoryContextWithStaticModel(byte[] weights, int length);
+
+        [DllImport("rlnetnative")]
         private static extern void DeleteFactoryContext(IntPtr context);
 
         [DllImport("rlnetnative")]
@@ -19,11 +22,16 @@ namespace Rl.Net {
 
         public List<byte> Weights { get; private set; }
 
-        public FactoryContext(List<byte> weights = null) : base(new New<FactoryContext>(CreateFactoryContext), new Delete<FactoryContext>(DeleteFactoryContext))
+        public FactoryContext() : base(new New<FactoryContext>(CreateFactoryContext), new Delete<FactoryContext>(DeleteFactoryContext))
         {
-            Weights = weights ?? new List<byte>();
         }
-        
+
+        // Constructor for contexts with static model, taking weights as a parameter
+        public FactoryContext(List<byte> weights) : base(
+            new New<FactoryContext>(() => CreateFactoryContextWithStaticModel(weights.ToArray(), weights.Count)),
+            new Delete<FactoryContext>(DeleteFactoryContext))
+        {
+        }     
 
         private GCHandleLifetime registeredSenderCreateHandle;
 

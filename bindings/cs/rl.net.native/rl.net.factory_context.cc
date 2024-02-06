@@ -17,6 +17,34 @@ API factory_context_t* CreateFactoryContext()
   return context;
 }
 
+void cleanup_data_transport_factory(data_transport_factory_t* data_transport_factory)
+{
+  if (data_transport_factory != nullptr && data_transport_factory != &reinforcement_learning::data_transport_factory)
+  {
+    // We overrode the built-in data_transport_factory
+    delete data_transport_factory;
+  }
+}
+
+API factory_context_t* CreateFactoryContextWithStaticModel(const char* weights, const size_t len) {
+  using namespace reinforcement_learning::model_management;
+    auto context = CreateFactoryContext();
+
+  auto data_transport_factory_fn = [weights, len](std::unique_ptr<model_management::i_data_transport>& retval, const utility::configuration& configuration,
+                              i_trace* trace_logger, api_status* status) -> int
+                              {
+                                retval.reset(new rl_net_native::binding_static_model(weights, len));
+                                return error_code::success;
+                              };
+
+    data_transport_factory_t* data_transport_factory = new data_transport_factory_t(reinforcement_learning::data_transport_factory);
+    data_transport_factory->register_type(rl_net_native::constants::BINDING_DATA_TRANSPORT, data_transport_factory_fn);
+
+    std::swap(context->data_transport_factory, data_transport_factory);
+    cleanup_data_transport_factory(data_transport_factory);
+
+    return context;
+}
 void cleanup_trace_logger_factory(trace_logger_factory_t* trace_logger_factory)
 {
   if (trace_logger_factory != nullptr && trace_logger_factory != &reinforcement_learning::trace_logger_factory)
@@ -39,6 +67,7 @@ API void DeleteFactoryContext(factory_context_t* context)
 {
   cleanup_trace_logger_factory(context->trace_logger_factory);
   cleanup_sender_factory(context->sender_factory);
+  cleanup_data_transport_factory(context->data_transport_factory);
 
   // TODO: Once we project the others, we will need to add them to cleanup.
 
