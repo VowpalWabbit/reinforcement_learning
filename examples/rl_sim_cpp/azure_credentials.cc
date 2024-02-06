@@ -14,6 +14,11 @@
 
 using namespace reinforcement_learning;
 
+AzureCredentials::AzureCredentials(const std::string& tenant_id)
+: _tenant_id(tenant_id),
+  _creds(create_options())
+{}
+
 Azure::Identity::AzureCliCredentialOptions AzureCredentials::create_options()
 {
   Azure::Identity::AzureCliCredentialOptions options;
@@ -21,10 +26,6 @@ Azure::Identity::AzureCliCredentialOptions AzureCredentials::create_options()
   options.AdditionallyAllowedTenants.push_back("*");
   return options;
 }
-
-AzureCredentials::AzureCredentials()
-: _creds(create_options())
-{}
 
 int AzureCredentials::get_credentials(const std::vector<std::string>& scopes,
     std::string& token_out, std::chrono::system_clock::time_point& expiry_out)
