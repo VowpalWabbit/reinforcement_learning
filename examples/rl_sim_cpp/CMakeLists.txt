@@ -1,10 +1,5 @@
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/../../cmake/Modules/")
 
-if(RL_LINK_AZURE_LIBS)
-  include(AzureVcpkg)
-  az_vcpkg_integrate()
-endif()
-
 set(RL_SIM_SOURCES
   main.cc
   person.cc
