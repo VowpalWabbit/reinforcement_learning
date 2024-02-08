@@ -13,7 +13,7 @@ namespace Rl.Net {
         private static extern IntPtr CreateFactoryContext();
 
         [DllImport("rlnetnative")]
-        private static extern IntPtr CreateFactoryContextWithStaticModel(IntPtr weights, int length);
+        private static extern IntPtr CreateFactoryContextWithStaticModel(IntPtr vw_model, int len);
 
         [DllImport("rlnetnative")]
         private static extern void DeleteFactoryContext(IntPtr context);
@@ -21,19 +21,17 @@ namespace Rl.Net {
         [DllImport("rlnetnative")]
         private static extern IntPtr SetFactoryContextBindingSenderFactory(IntPtr context, sender_create_fn create_Fn, sender_vtable vtable);
 
-        public List<byte> Weights { get; private set; }
-
         public FactoryContext() : base(new New<FactoryContext>(CreateFactoryContext), new Delete<FactoryContext>(DeleteFactoryContext))
         {
         }
 
-        public FactoryContext(IEnumerable<byte> weightsEnumerable) : base(
+        public FactoryContext(IEnumerable<byte> vwModelEnumerable) : base(
             new New<FactoryContext>(() => {
-                var weightsArray = weightsEnumerable.ToArray();
-                GCHandle handle = GCHandle.Alloc(weightsArray, GCHandleType.Pinned);
+                var vwModelArray = vwModelEnumerable.ToArray();
+                GCHandle handle = GCHandle.Alloc(vwModelArray, GCHandleType.Pinned);
                 try {
                     IntPtr ptr = handle.AddrOfPinnedObject();
-                    return CreateFactoryContextWithStaticModel(ptr, weightsArray.Length);
+                    return CreateFactoryContextWithStaticModel(ptr, vwModelArray.Length);
                 }
                 finally {
                     if (handle.IsAllocated)

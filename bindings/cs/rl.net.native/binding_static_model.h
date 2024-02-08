@@ -1,5 +1,6 @@
 #pragma once
 
+#include "err_constants.h"
 #include "model_mgmt.h"
 
 #include <cstring>
