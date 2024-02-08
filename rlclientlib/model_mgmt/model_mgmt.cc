@@ -27,10 +27,7 @@ void model_data::free() { _data.clear(); }
 
 int model_data::set_data(const char* vw_model, size_t len)
 {
-  if (vw_model == nullptr || len == 0)
-  {
-    return reinforcement_learning::error_code::static_model_load_error;
-  }
+  if (vw_model == nullptr || len == 0) { return reinforcement_learning::error_code::static_model_load_error; }
 
   char* buffer = this->alloc(len);
   if (buffer == nullptr) { return reinforcement_learning::error_code::static_model_load_error; }

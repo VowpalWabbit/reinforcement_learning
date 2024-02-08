@@ -31,11 +31,14 @@ API factory_context_t* CreateFactoryContextWithStaticModel(const char* vw_model,
   using namespace reinforcement_learning::model_management;
   auto context = CreateFactoryContext();
 
-  auto data_transport_factory_fn = [vw_model, len](std::unique_ptr<model_management::i_data_transport>& retval, const utility::configuration& configuration, i_trace* trace_logger, api_status* status) -> int {
-      char* vw_model_copy = new char[len];
-      std::memcpy(vw_model_copy, vw_model, len);
-      retval.reset(new rl_net_native::binding_static_model(vw_model_copy, len));
-      return error_code::success;
+  auto data_transport_factory_fn = [vw_model, len](std::unique_ptr<model_management::i_data_transport>& retval,
+                                       const utility::configuration& configuration, i_trace* trace_logger,
+                                       api_status* status) -> int
+  {
+    char* vw_model_copy = new char[len];
+    std::memcpy(vw_model_copy, vw_model, len);
+    retval.reset(new rl_net_native::binding_static_model(vw_model_copy, len));
+    return error_code::success;
   };
 
   data_transport_factory_t* data_transport_factory =
