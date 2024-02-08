@@ -64,7 +64,7 @@ int restapi_data_transport_oauth::get_data_info(
 {
   // Get request URI and start the request.
   http_request request(_method_type);
-  RETURN_IF_FAIL(add_authentiction_header(request.headers(), status));
+  RETURN_IF_FAIL(add_authentication_header(request.headers(), status));
   // Build request URI and start the request.
   auto request_task = _httpcli->request(request).then(
       [&](http_response response)
@@ -111,7 +111,7 @@ int restapi_data_transport_oauth::get_data_info(
   }
 }
 
-int restapi_data_transport_oauth::add_authentiction_header(http_headers& header, api_status* status)
+int restapi_data_transport_oauth::add_authentication_header(http_headers& header, api_status* status)
 {
   if (_model_source != model_source::AZURE)
   {
@@ -132,7 +132,7 @@ int restapi_data_transport_oauth::get_data(model_data& ret, api_status* status)
   if (curr_last_modified == _last_modified && curr_datasz == _datasz) { return error_code::success; }
   _method_type = methods::GET;
   http_request request(_method_type);
-  RETURN_IF_FAIL(add_authentiction_header(request.headers(), status));
+  RETURN_IF_FAIL(add_authentication_header(request.headers(), status));
   // Build request URI and start the request.
   auto request_task =
       _httpcli

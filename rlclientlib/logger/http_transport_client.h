@@ -164,17 +164,6 @@ pplx::task<http_response> http_transport_client<TAuthorization>::http_request_ta
   utility::stl_container_adapter container(_post_data.get());
   const size_t container_size = container.size();
 
-  /*
-    std::string payload((char*)(container.begin()), container_size);
-    std::string body = "{Body\":\"";
-    body += payload;
-    body += "\"}";
-
-    std::cout << body << std::endl << std::endl;
-
-    const auto stream = concurrency::streams::bytestream::open_istream(body);
-    request.set_body(stream, body.size());
-  */
   const auto stream = concurrency::streams::bytestream::open_istream(container);
   request.set_body(stream, container_size);
 

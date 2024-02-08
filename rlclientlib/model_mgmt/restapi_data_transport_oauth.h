@@ -30,7 +30,7 @@ public:
 private:
   using time_t = std::chrono::time_point<std::chrono::system_clock>;
   int get_data_info(::utility::datetime& last_modified, ::utility::size64_t& sz, api_status* status);
-  int add_authentiction_header(http_headers& header, api_status* status);
+  int add_authentication_header(http_headers& header, api_status* status);
   std::unique_ptr<i_http_client> _httpcli;
   ::utility::datetime _last_modified;
   uint64_t _datasz;

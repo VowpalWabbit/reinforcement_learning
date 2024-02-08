@@ -59,6 +59,8 @@ int AzureCredentials::get_credentials(
     std::cout << "Unknown error while getting auth token";
     return error_code::external_error;
   }
+#  else
+#    error Requires C++14 or greater
 #  endif
   return error_code::success;
 }
