@@ -31,12 +31,11 @@ API factory_context_t* CreateFactoryContextWithStaticModel(const char* weights, 
   using namespace reinforcement_learning::model_management;
   auto context = CreateFactoryContext();
 
-  auto data_transport_factory_fn = [weights, len](std::unique_ptr<model_management::i_data_transport>& retval,
-                                       const utility::configuration& configuration, i_trace* trace_logger,
-                                       api_status* status) -> int
-  {
-    retval.reset(new rl_net_native::binding_static_model(weights, len));
-    return error_code::success;
+  auto data_transport_factory_fn = [weights, len](std::unique_ptr<model_management::i_data_transport>& retval, const utility::configuration& configuration, i_trace* trace_logger, api_status* status) -> int {
+      char* weightsCopy = new char[len];
+      std::memcpy(weightsCopy, weights, len);
+      retval.reset(new rl_net_native::binding_static_model(weightsCopy, len));
+      return error_code::success;
   };
 
   data_transport_factory_t* data_transport_factory =
