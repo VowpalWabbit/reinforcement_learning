@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
+using System.Linq;
 
 using Rl.Net.Native;
 
@@ -12,7 +13,7 @@ namespace Rl.Net {
         private static extern IntPtr CreateFactoryContext();
 
         [DllImport("rlnetnative")]
-        private static extern IntPtr CreateFactoryContextWithStaticModel(byte[] weights, int length);
+        private static extern IntPtr CreateFactoryContextWithStaticModel(IntPtr weights, int length);
 
         [DllImport("rlnetnative")]
         private static extern void DeleteFactoryContext(IntPtr context);
@@ -26,13 +27,23 @@ namespace Rl.Net {
         {
         }
 
-        // Constructor for contexts with static model, taking weights as a parameter
-        public FactoryContext(List<byte> weights) : base(
-            new New<FactoryContext>(() => CreateFactoryContextWithStaticModel(weights.ToArray(), weights.Count)),
+        public FactoryContext(IEnumerable<byte> weightsEnumerable) : base(
+            new New<FactoryContext>(() => {
+                var weightsArray = weightsEnumerable.ToArray();
+                GCHandle handle = GCHandle.Alloc(weightsArray, GCHandleType.Pinned);
+                try {
+                    IntPtr ptr = handle.AddrOfPinnedObject();
+                    return CreateFactoryContextWithStaticModel(ptr, weightsArray.Length);
+                }
+                finally {
+                    if (handle.IsAllocated)
+                        handle.Free();
+                }
+            }),
             new Delete<FactoryContext>(DeleteFactoryContext))
         {
-        }     
-
+        }
+ 
         private GCHandleLifetime registeredSenderCreateHandle;
 
         public void SetSenderFactory<TSender>(Func<IReadOnlyConfiguration, ErrorCallback, TSender> createSender) where TSender : ISender
