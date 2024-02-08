@@ -1,6 +1,7 @@
 #pragma once
 
 #include "model_mgmt.h"
+
 #include <cstring>
 
 namespace rl_net_native
