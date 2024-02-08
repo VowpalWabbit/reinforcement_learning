@@ -26,22 +26,27 @@ void cleanup_data_transport_factory(data_transport_factory_t* data_transport_fac
   }
 }
 
-API factory_context_t* CreateFactoryContextWithStaticModel(const char* weights, const size_t len) {
+API factory_context_t* CreateFactoryContextWithStaticModel(const char* weights, const size_t len)
+{
   using namespace reinforcement_learning::model_management;
-    auto context = CreateFactoryContext();
+  auto context = CreateFactoryContext();
 
-  auto data_transport_factory_fn = [weights, len](std::unique_ptr<model_management::i_data_transport>& retval, const utility::configuration& configuration, i_trace* trace_logger, api_status* status) -> int {
-      retval.reset(new rl_net_native::binding_static_model(weights, len));
-      return error_code::success;
+  auto data_transport_factory_fn = [weights, len](std::unique_ptr<model_management::i_data_transport>& retval,
+                                       const utility::configuration& configuration, i_trace* trace_logger,
+                                       api_status* status) -> int
+  {
+    retval.reset(new rl_net_native::binding_static_model(weights, len));
+    return error_code::success;
   };
 
-    data_transport_factory_t* data_transport_factory = new data_transport_factory_t(reinforcement_learning::data_transport_factory);
-    data_transport_factory->register_type(rl_net_native::constants::BINDING_DATA_TRANSPORT, data_transport_factory_fn);
+  data_transport_factory_t* data_transport_factory =
+      new data_transport_factory_t(reinforcement_learning::data_transport_factory);
+  data_transport_factory->register_type(rl_net_native::constants::BINDING_DATA_TRANSPORT, data_transport_factory_fn);
 
-    std::swap(context->data_transport_factory, data_transport_factory);
-    cleanup_data_transport_factory(data_transport_factory);
+  std::swap(context->data_transport_factory, data_transport_factory);
+  cleanup_data_transport_factory(data_transport_factory);
 
-    return context;
+  return context;
 }
 
 void cleanup_trace_logger_factory(trace_logger_factory_t* trace_logger_factory)

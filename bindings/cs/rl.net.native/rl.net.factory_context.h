@@ -1,11 +1,12 @@
 #pragma once
 
-#include <cstddef>
 #include "binding_sender.h"
-#include "factory_resolver.h"
-#include "rl.net.native.h"
-#include "model_mgmt.h"
 #include "binding_static_model.h"
+#include "factory_resolver.h"
+#include "model_mgmt.h"
+#include "rl.net.native.h"
+
+#include <cstddef>
 
 typedef struct factory_context
 {
