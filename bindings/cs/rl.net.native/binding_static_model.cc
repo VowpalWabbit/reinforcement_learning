@@ -1,6 +1,7 @@
 #include "binding_static_model.h"
 #include "model_mgmt.h"
 #include "err_constants.h"
+#include <iostream>
 
 using namespace rl_net_native;
 using namespace reinforcement_learning;
@@ -18,7 +19,7 @@ int binding_static_model::get_data(reinforcement_learning::model_management::mod
         return reinforcement_learning::error_code::static_model_load_error;
     }
     
-    std::memcpy(buffer, this->weights, this->len);
+    memcpy(buffer, this->weights, this->len);
     data.data_sz(this->len);
     
     return reinforcement_learning::error_code::success;
