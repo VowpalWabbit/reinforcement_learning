@@ -6,12 +6,12 @@
 using namespace rl_net_native;
 using namespace reinforcement_learning;
 
-binding_static_model::binding_static_model(const char* weights, const size_t len) : weights(weights), len(len) {}
+binding_static_model::binding_static_model(const char* vw_model, const size_t len) : vw_model(vw_model), len(len) {}
 
 int binding_static_model::get_data(
-    reinforcement_learning::model_management::model_data& data, reinforcement_learning::api_status* status)
+    model_transport::model_data& data, reinforcement_learning::api_status* status)
 {
-  if (this->weights == nullptr || this->len == 0)
+  if (this->vw_model == nullptr || this->len == 0)
   {
     return reinforcement_learning::error_code::static_model_load_error;
   }
@@ -19,7 +19,7 @@ int binding_static_model::get_data(
   char* buffer = data.alloc(this->len);
   if (buffer == nullptr) { return reinforcement_learning::error_code::static_model_load_error; }
 
-  memcpy(buffer, this->weights, this->len);
+  memcpy(buffer, this->vw_model, this->len);
   data.data_sz(this->len);
 
   return reinforcement_learning::error_code::success;
