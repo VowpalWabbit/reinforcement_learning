@@ -3,8 +3,6 @@
 #include "err_constants.h"
 #include "model_mgmt.h"
 
-#include <iostream>
-
 using namespace rl_net_native;
 using namespace reinforcement_learning;
 
