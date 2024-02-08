@@ -34,6 +34,8 @@ int model_data::set_data(const char* vw_model, size_t len)
 
   memcpy(buffer, vw_model, len);
   this->data_sz(len);
+
+  return reinforcement_learning::error_code::success;
 }
 
 }  // namespace model_management
