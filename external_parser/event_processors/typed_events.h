@@ -8,16 +8,14 @@
 #include "loop.h"
 #include "zstd.h"
 
-namespace v2 = reinforcement_learning::messages::flatbuff::v2;
-
 namespace typed_event
 {
 template <typename T>
 struct event_processor;
 template <>
-struct event_processor<v2::MultiSlotEvent>
+struct event_processor<reinforcement_learning::messages::flatbuff::v2::MultiSlotEvent>
 {
-  static bool is_valid(const v2::MultiSlotEvent& evt, const loop::loop_info& loop_info, VW::io::logger& logger)
+  static bool is_valid(const reinforcement_learning::messages::flatbuff::v2::MultiSlotEvent& evt, const loop::loop_info& loop_info, VW::io::logger& logger)
   {
     if (evt.context() == nullptr || evt.slots() == nullptr) { return false; }
 
@@ -33,18 +31,24 @@ struct event_processor<v2::MultiSlotEvent>
     return true;
   }
 
-  static v2::LearningModeType get_learning_mode(const v2::MultiSlotEvent& evt) { return evt.learning_mode(); }
+  static reinforcement_learning::messages::flatbuff::v2::LearningModeType get_learning_mode(
+    const reinforcement_learning::messages::flatbuff::v2::MultiSlotEvent& evt)
+  {
+    return evt.learning_mode();
+  }
 
-  static std::string get_context(const v2::MultiSlotEvent& evt)
+  static std::string get_context(const reinforcement_learning::messages::flatbuff::v2::MultiSlotEvent& evt)
   {
     return {reinterpret_cast<char const*>(evt.context()->data()), evt.context()->size()};
   }
 
-  static joined_event::joined_event fill_in_joined_event(const v2::MultiSlotEvent& evt, const v2::Metadata& metadata,
-      const TimePoint& enqueued_time_utc, std::string&& line_vec)
+  static joined_event::joined_event fill_in_joined_event(
+    const reinforcement_learning::messages::flatbuff::v2::MultiSlotEvent& evt,
+    const reinforcement_learning::messages::flatbuff::v2::Metadata& metadata,
+    const TimePoint& enqueued_time_utc, std::string&& line_vec)
   {
     joined_event::MultiSlotInteraction multislot_data;
-    bool is_ccb = metadata.payload_type() == v2::PayloadType_CCB;
+    bool is_ccb = metadata.payload_type() == reinforcement_learning::messages::flatbuff::v2::PayloadType_CCB;
 
     auto ccb_data = VW::make_unique<joined_event::ccb_joined_event>();
     auto slates_data = VW::make_unique<joined_event::slates_joined_event>();
@@ -95,9 +99,10 @@ struct event_processor<v2::MultiSlotEvent>
 };
 
 template <>
-struct event_processor<v2::CbEvent>
+struct event_processor<reinforcement_learning::messages::flatbuff::v2::CbEvent>
 {
-  static bool is_valid(const v2::CbEvent& evt, const loop::loop_info& loop_info, VW::io::logger& logger)
+  static bool is_valid(const reinforcement_learning::messages::flatbuff::v2::CbEvent& evt,
+    const loop::loop_info& loop_info, VW::io::logger& logger)
   {
     if (evt.context() == nullptr || evt.action_ids() == nullptr || evt.probabilities() == nullptr) { return false; }
 
@@ -113,15 +118,21 @@ struct event_processor<v2::CbEvent>
     return true;
   }
 
-  static v2::LearningModeType get_learning_mode(const v2::CbEvent& evt) { return evt.learning_mode(); }
+  static reinforcement_learning::messages::flatbuff::v2::LearningModeType get_learning_mode(
+    const reinforcement_learning::messages::flatbuff::v2::CbEvent& evt) 
+  {
+    return evt.learning_mode();
+  }
 
-  static std::string get_context(const v2::CbEvent& evt)
+  static std::string get_context(const reinforcement_learning::messages::flatbuff::v2::CbEvent& evt)
   {
     return {reinterpret_cast<char const*>(evt.context()->data()), evt.context()->size()};
   }
 
   static joined_event::joined_event fill_in_joined_event(
-      const v2::CbEvent& evt, const v2::Metadata& metadata, const TimePoint& enqueued_time_utc, std::string&& line_vec)
+      const reinforcement_learning::messages::flatbuff::v2::CbEvent& evt,
+      const reinforcement_learning::messages::flatbuff::v2::Metadata& metadata,
+      const TimePoint& enqueued_time_utc, std::string&& line_vec)
   {
     auto cb_data = VW::make_unique<joined_event::cb_joined_event>();
 
@@ -143,9 +154,10 @@ struct event_processor<v2::CbEvent>
 };
 
 template <>
-struct event_processor<v2::CaEvent>
+struct event_processor<reinforcement_learning::messages::flatbuff::v2::CaEvent>
 {
-  static bool is_valid(const v2::CaEvent& evt, const loop::loop_info& loop_info, VW::io::logger& logger)
+  static bool is_valid(const reinforcement_learning::messages::flatbuff::v2::CaEvent& evt,
+    const loop::loop_info& loop_info, VW::io::logger& logger)
   {
     if (evt.context() == nullptr) { return false; }
 
@@ -161,15 +173,21 @@ struct event_processor<v2::CaEvent>
     return true;
   }
 
-  static v2::LearningModeType get_learning_mode(const v2::CaEvent& evt) { return evt.learning_mode(); }
+  static reinforcement_learning::messages::flatbuff::v2::LearningModeType get_learning_mode(
+    const reinforcement_learning::messages::flatbuff::v2::CaEvent& evt)
+  {
+    return evt.learning_mode();
+  }
 
-  static std::string get_context(const v2::CaEvent& evt)
+  static std::string get_context(const reinforcement_learning::messages::flatbuff::v2::CaEvent& evt)
   {
     return {reinterpret_cast<char const*>(evt.context()->data()), evt.context()->size()};
   }
 
   static joined_event::joined_event fill_in_joined_event(
-      const v2::CaEvent& evt, const v2::Metadata& metadata, const TimePoint& enqueued_time_utc, std::string&& line_vec)
+      const reinforcement_learning::messages::flatbuff::v2::CaEvent& evt,
+      const reinforcement_learning::messages::flatbuff::v2::Metadata& metadata,
+      const TimePoint& enqueued_time_utc, std::string&& line_vec)
   {
     auto ca_data = VW::make_unique<joined_event::ca_joined_event>();
     ca_data->interaction_data.event_id = metadata.id()->str();
@@ -186,10 +204,11 @@ struct event_processor<v2::CaEvent>
 };
 
 template <typename T>
-bool process_compression(const uint8_t* data, size_t size, const v2::Metadata& metadata, const T*& payload,
-    flatbuffers::DetachedBuffer& detached_buffer, VW::io::logger& logger)
+bool process_compression(const uint8_t* data, size_t size,
+  const reinforcement_learning::messages::flatbuff::v2::Metadata& metadata, const T*& payload,
+  flatbuffers::DetachedBuffer& detached_buffer, VW::io::logger& logger)
 {
-  if (metadata.encoding() == v2::EventEncoding_Zstd)
+  if (metadata.encoding() == reinforcement_learning::messages::flatbuff::v2::EventEncoding_Zstd)
   {
     size_t buff_size = ZSTD_getFrameContentSize(data, size);
     if (buff_size == ZSTD_CONTENTSIZE_ERROR)

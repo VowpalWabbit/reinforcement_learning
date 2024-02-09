@@ -11,7 +11,7 @@ namespace VW
 {
 namespace external
 {
-binary_json_converter::binary_json_converter(std::unique_ptr<i_joiner>&& joiner, VW::io::logger logger)
+binary_json_converter::binary_json_converter(std::unique_ptr<i_joiner>&& joiner, const VW::io::logger& logger)
     : parser(logger), _parser(std::move(joiner), logger)
 {
 }

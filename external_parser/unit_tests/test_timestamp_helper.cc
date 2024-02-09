@@ -8,16 +8,17 @@
 // copied from there (hasn't changed since it was checked in)
 // since we need the internals to check that time transformations are done
 // correctly
-std::pair<v2::TimeStamp, std::chrono::time_point<std::chrono::system_clock>> gmt_now_and_timestamp()
+std::pair<reinforcement_learning::messages::flatbuff::v2::TimeStamp, std::chrono::time_point<std::chrono::system_clock>> 
+  gmt_now_and_timestamp()
 {
   const auto tp = std::chrono::system_clock::now();
   const auto dp = date::floor<date::days>(tp);
   const auto ymd = date::year_month_day(dp);
   const auto time = date::make_time(tp - dp);
 
-  return std::make_pair(v2::TimeStamp(int(ymd.year()), unsigned(ymd.month()), unsigned(ymd.day()), time.hours().count(),
-                            time.minutes().count(), time.seconds().count(), time.subseconds().count()),
-      tp);
+  return std::make_pair(reinforcement_learning::messages::flatbuff::v2::TimeStamp(int(ymd.year()),
+    unsigned(ymd.month()), unsigned(ymd.day()), time.hours().count(),
+    time.minutes().count(), time.seconds().count(), time.subseconds().count()), tp);
 }
 
 BOOST_AUTO_TEST_CASE(test_later_than_timestamp)

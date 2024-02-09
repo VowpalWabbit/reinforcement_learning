@@ -10,8 +10,6 @@
 #include <fstream>
 #include <iostream>
 
-namespace v2 = reinforcement_learning::messages::flatbuff::v2;
-
 namespace log_converter
 {
 void build_json(std::ofstream& outfile, joined_event::joined_event& je, VW::io::logger& logger);

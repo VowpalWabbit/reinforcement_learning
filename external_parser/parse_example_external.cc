@@ -14,6 +14,8 @@
 #include <cstdio>
 #include <memory>
 
+namespace v2 = reinforcement_learning::messages::flatbuff::v2;
+
 namespace VW
 {
 namespace external

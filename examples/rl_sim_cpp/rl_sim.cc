@@ -88,8 +88,19 @@ int rl_sim::cb_loop()
     {
       std::cout << " " << stats.count() << ", ctxt, " << p.id() << ", action, " << chosen_action << ", outcome, "
                 << outcome << ", dist, " << get_dist_str(response) << ", " << stats.get_stats(p.id(), chosen_action)
-                << std::endl;
+                << ", ctr: " << stats.get_ctr() << std::endl;
     }
+    // refresh model every _model_refresh_period events
+    std::cerr << "Current events: " << _current_events << std::endl;
+    if (_model_refresh_period != 0 && (_current_events % _model_refresh_period) == 0)
+    {
+      r::api_status status;
+      if (_rl->refresh_model(&status) != err::success)
+      {
+        std::cout << status.get_error_msg() << std::endl;
+        continue;
+      }
+    }    
     std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
 
@@ -165,6 +176,18 @@ int rl_sim::multistep_loop()
     {
       std::cout << status.get_error_msg() << std::endl;
       continue;
+
+    }
+    // refresh model every _model_refresh_period events
+    // Treat each episode as a single event
+    if (_model_refresh_period != 0 && (_current_events / episode_length) % _model_refresh_period == 0)
+    {
+      r::api_status status;
+      if (_rl->refresh_model(&status) != err::success)
+      {
+        std::cout << status.get_error_msg() << std::endl;
+        continue;
+      }
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
@@ -205,6 +228,17 @@ int rl_sim::ca_loop()
       std::cout << " " << stats.count() << " - ctxt: " << joint.id() << ", action: " << chosen_action
                 << ", outcome: " << outcome << ", dist: " << response.get_chosen_action_pdf_value() << ", "
                 << stats.get_stats(joint.id(), chosen_action) << std::endl;
+    }
+
+    // refresh model every _model_refresh_period events
+    if (_model_refresh_period != 0 && _current_events % _model_refresh_period == 0)
+    {
+      r::api_status status;
+      if (_rl->refresh_model(&status) != err::success)
+      {
+        std::cout << status.get_error_msg() << std::endl;
+        continue;
+      }
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
@@ -259,6 +293,17 @@ int rl_sim::ccb_loop()
                   << stats.get_stats(p.id(), chosen_action) << std::endl;
       }
       index++;
+    }
+    
+    // refresh model every _model_refresh_period events
+    if (_model_refresh_period != 0 && _current_events % _model_refresh_period == 0)
+    {
+      r::api_status status;
+      if (_rl->refresh_model(&status) != err::success)
+      {
+        std::cout << status.get_error_msg() << std::endl;
+        continue;
+      }
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
@@ -330,6 +375,17 @@ int rl_sim::slates_loop()
       std::cout << status.get_error_msg() << std::endl;
       continue;
     }
+
+    // refresh model every _model_refresh_period events
+    if (_model_refresh_period != 0 && _current_events % _model_refresh_period == 0)
+    {
+      r::api_status status;
+      if (_rl->refresh_model(&status) != err::success)
+      {
+        std::cout << status.get_error_msg() << std::endl;
+        continue;
+      }
+    }    
 
     std::this_thread::sleep_for(std::chrono::milliseconds(_delay));
   }
@@ -454,11 +510,7 @@ int rl_sim::init_rl()
     config.set(r::name::OBSERVATION_SENDER_IMPLEMENTATION, r::value::OBSERVATION_FILE_SENDER);
   }
 
-  if (!_options["get_model"].as<bool>())
-  {
-    // Set the time provider to the clock time provider
-    config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
-  }
+  if (!_options["get_model"].as<bool>()) { config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA); }
 
   if (_options["log_timestamp"].as<bool>())
   {
@@ -628,7 +680,7 @@ std::string rl_sim::create_context_json(const std::string& cntxt, const std::str
 
 std::string rl_sim::create_event_id()
 {
-  if (_num_events > 0 && ++_current_events >= _num_events) { _run_loop = false; }
+  if (++_current_events >= _num_events && _num_events > 0) { _run_loop = false; }
 
   if (_random_ids) { return boost::uuids::to_string(boost::uuids::random_generator()()); }
 
@@ -637,7 +689,7 @@ std::string rl_sim::create_event_id()
   return oss.str();
 }
 
-rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm)), _loop_kind(CB)
+rl_sim::rl_sim(const boost::program_options::variables_map& vm) : _options(vm), _loop_kind(CB)
 {
   if (_options["ccb"].as<bool>()) { _loop_kind = CCB; }
   else if (_options["slates"].as<bool>()) { _loop_kind = Slates; }
@@ -649,6 +701,7 @@ rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm
   _delay = _options["delay"].as<int64_t>();
   _quiet = _options["quiet"].as<bool>();
   _random_ids = _options["random_ids"].as<bool>();
+  _model_refresh_period = _options["refresh_model_period"].as<uint64_t>();  
 }
 
 std::string get_dist_str(const reinforcement_learning::ranking_response& response)

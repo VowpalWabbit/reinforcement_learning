@@ -17,10 +17,15 @@
 #include "vw/explore/explore.h"
 #include "vw_model/safe_vw.h"
 
+#ifdef RL_BUILD_FEDERATION
+#  include "federation/local_loop_controller.h"
+#endif
+
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <cmath>
 #include <cstring>
+#include <memory>
 
 // Some namespace changes for more concise code
 namespace e = exploration;
@@ -50,12 +55,57 @@ void default_error_callback(const api_status& status, void* watchdog_context)
   watchdog->set_unhandled_background_error(true);
 }
 
+int live_model_impl::check_if_local_loop(bool& output, api_status* status)
+{
+  std::string model_src = _configuration.get(name::MODEL_SRC, value::get_default_data_transport());
+  std::string interaction_sender =
+      _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::get_default_interaction_sender());
+  std::string observation_sender =
+      _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::get_default_observation_sender());
+
+  if (model_src != value::LOCAL_LOOP_MODEL_DATA && interaction_sender != value::LOCAL_LOOP_SENDER &&
+      observation_sender != value::LOCAL_LOOP_SENDER)
+  {
+    // no local loop options used
+    output = false;
+    return error_code::success;
+  }
+
+  if (model_src == value::LOCAL_LOOP_MODEL_DATA)
+  {
+    // (model_src == LOCAL_LOOP_MODEL_DATA) determines that local loop is used
+    // set default value of sender implementation to LOCAL_LOOP_SENDER
+    interaction_sender = _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::LOCAL_LOOP_SENDER);
+    observation_sender = _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::LOCAL_LOOP_SENDER);
+
+    // check that senders are set to allowed values here
+    // currently, only LOCAL_LOOP_SENDER is allowed
+    if (interaction_sender == value::LOCAL_LOOP_SENDER && observation_sender == value::LOCAL_LOOP_SENDER)
+    {
+      output = true;
+      return error_code::success;
+    }
+  }
+
+  RETURN_ERROR_ARG(_trace_logger.get(), status, invalid_argument,
+      "Incompatible values for configuration options MODEL_SRC=", model_src,
+      " and INTERACTION_SENDER_IMPLEMENTATION=", interaction_sender,
+      " and OBSERVATION_SENDER_IMPLEMENTATION=", observation_sender);
+}
+
 int live_model_impl::init(api_status* status)
 {
   RETURN_IF_FAIL(init_trace(status));
   RETURN_IF_FAIL(init_model(status));
-  RETURN_IF_FAIL(init_model_mgmt(status));
-  RETURN_IF_FAIL(init_loggers(status));
+  
+  bool is_local_loop = false;
+  RETURN_IF_FAIL(check_if_local_loop(is_local_loop, status));
+  if (is_local_loop) { RETURN_IF_FAIL(init_local_loop(status)); }
+  else
+  {
+    RETURN_IF_FAIL(init_model_mgmt(status));
+    RETURN_IF_FAIL(init_loggers(status));
+  }
 
   if (_protocol_version == 1)
   {
@@ -506,7 +556,25 @@ int live_model_impl::init_loggers(api_status* status)
   RETURN_IF_FAIL(_sender_factory->create(
       ranking_data_sender, ranking_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
   RETURN_IF_FAIL(ranking_data_sender->init(_configuration, status));
+  // Get the name of raw data (as opposed to message) sender for observations.
+  const auto* const outcome_sender_impl =
+      _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::get_default_observation_sender());
+  std::unique_ptr<i_sender> outcome_sender;
 
+  // Use the name to create an instance of raw data sender for observations
+  _configuration.set(config_constants::CONFIG_SECTION, config_constants::OBSERVATION);
+  RETURN_IF_FAIL(_sender_factory->create(
+      outcome_sender, outcome_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
+  RETURN_IF_FAIL(outcome_sender->init(_configuration, status));
+
+  RETURN_IF_FAIL(init_loggers_common(std::move(ranking_data_sender), std::move(outcome_sender), status));
+  return error_code::success;
+}
+
+// Common part for both init_loggers and init_local_loop
+int live_model_impl::init_loggers_common(
+    std::unique_ptr<i_sender> ranking_data_sender, std::unique_ptr<i_sender> outcome_sender, api_status* status)
+{
   // Create a message sender that will prepend the message with a preamble and send the raw data using the
   // factory created raw data sender
   std::unique_ptr<l::i_message_sender> ranking_msg_sender(
@@ -533,17 +601,6 @@ int live_model_impl::init_loggers(api_status* status)
   _interaction_logger.reset(new logger::interaction_logger_facade(_model->model_type(), _configuration,
       std::move(ranking_msg_sender), _watchdog, std::move(ranking_time_provider), *_logger_extensions, &_error_cb));
   RETURN_IF_FAIL(_interaction_logger->init(status));
-
-  // Get the name of raw data (as opposed to message) sender for observations.
-  const auto* const outcome_sender_impl =
-      _configuration.get(name::OBSERVATION_SENDER_IMPLEMENTATION, value::get_default_observation_sender());
-  std::unique_ptr<i_sender> outcome_sender;
-
-  // Use the name to create an instance of raw data sender for observations
-  _configuration.set(config_constants::CONFIG_SECTION, config_constants::OBSERVATION);
-  RETURN_IF_FAIL(_sender_factory->create(
-      outcome_sender, outcome_sender_impl, _configuration, &_error_cb, _trace_logger.get(), status));
-  RETURN_IF_FAIL(outcome_sender->init(_configuration, status));
 
   // Create a message sender that will prepend the message with a preamble and send the raw data using the
   // factory created raw data sender
@@ -623,17 +680,78 @@ int live_model_impl::init_model_mgmt(api_status* status)
 {
   // Initialize transport for the model using transport factory
   const auto* const tranport_impl = _configuration.get(name::MODEL_SRC, value::get_default_data_transport());
-  RETURN_IF_FAIL(_t_factory->create(_transport, tranport_impl, _configuration, status));
+  std::unique_ptr<m::i_data_transport> ptransport;
+  RETURN_IF_FAIL(_t_factory->create(ptransport, tranport_impl, _configuration, status));
+  // This class manages lifetime of transport
+  this->_transport = std::move(ptransport);
 
   if (_bg_model_proc)
   {
     // Initialize background process and start downloading models
-    _model_download.reset(new m::model_downloader(_transport.get(), &_data_cb, _trace_logger.get()));
+    this->_model_download.reset(new m::model_downloader(_transport.get(), &_data_cb, _trace_logger.get()));
     return _bg_model_proc->init(_model_download.get(), status);
   }
 
   return refresh_model(status);
 }
+
+#ifdef RL_BUILD_FEDERATION
+int live_model_impl::init_local_loop(api_status* status)
+{
+  std::string model_src = _configuration.get(name::MODEL_SRC, value::get_default_data_transport());
+
+  // This function should only be called when the configuration is set to use LOCAL_LOOP_MODEL_DATA
+  assert(model_src == value::LOCAL_LOOP_MODEL_DATA);
+
+  // Creating i_data_transport with type LOCAL_LOOP_MODEL_DATA results in local_loop_controller
+  std::unique_ptr<m::i_data_transport> output;
+  RETURN_IF_FAIL(_t_factory->create(output, model_src, _configuration, _trace_logger.get(), status));
+  std::unique_ptr<local_loop_controller> llc(reinterpret_cast<local_loop_controller*>(output.release()));
+
+  // Create senders with default sender implementation set to LOCAL_LOOP_SENDER
+  std::string interaction_sender_type =
+      _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::LOCAL_LOOP_SENDER);
+  std::string observation_sender_type =
+      _configuration.get(name::INTERACTION_SENDER_IMPLEMENTATION, value::LOCAL_LOOP_SENDER);
+
+  std::unique_ptr<i_sender> interaction_sender;
+  if (interaction_sender_type == value::LOCAL_LOOP_SENDER) { interaction_sender = llc->get_local_sender(); }
+  else
+  {
+    RETURN_IF_FAIL(_sender_factory->create(
+        interaction_sender, interaction_sender_type, _configuration, &_error_cb, _trace_logger.get(), status));
+    RETURN_IF_FAIL(interaction_sender->init(_configuration, status));
+  }
+
+  std::unique_ptr<i_sender> observation_sender;
+  if (observation_sender_type == value::LOCAL_LOOP_SENDER) { observation_sender = llc->get_local_sender(); }
+  else
+  {
+    RETURN_IF_FAIL(_sender_factory->create(
+        observation_sender, observation_sender_type, _configuration, &_error_cb, _trace_logger.get(), status));
+    RETURN_IF_FAIL(observation_sender->init(_configuration, status));
+  }
+
+  RETURN_IF_FAIL(init_loggers_common(std::move(interaction_sender), std::move(observation_sender), status));
+
+  // Set live_model_impl's data transport to local loop controller
+  _transport = std::move(llc);
+
+  if (_bg_model_proc)
+  {
+    // Initialize background process and start downloading models
+    this->_model_download.reset(new m::model_downloader(_transport.get(), &_data_cb, _trace_logger.get()));
+    return _bg_model_proc->init(_model_download.get(), status);
+  }
+  return refresh_model(status);
+}
+#else
+int live_model_impl::init_local_loop(api_status* status)
+{
+  RETURN_ERROR_ARG(_trace_logger.get(), status, invalid_argument,
+      "Cannot use LOCAL_LOOP_MODEL_DATA because library was compiled without support for federated learning");
+}
+#endif
 
 int live_model_impl::request_episodic_decision(const char* event_id, const char* previous_id, string_view context_json,
     unsigned int flags, ranking_response& resp, episode_state& episode, api_status* status)
