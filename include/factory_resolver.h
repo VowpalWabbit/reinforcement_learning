@@ -1,5 +1,9 @@
 #pragma once
+#include "oauth_callback_fn.h"
 #include "object_factory.h"
+
+#include <chrono>
+#include <vector>
 namespace reinforcement_learning
 {
 namespace utility
@@ -70,4 +74,11 @@ private:
 // Every translation unit gets a factory_initializer
 // only one translation unit will initialize it
 static factory_initializer _init;
+
+// no-op if USE_AZURE_FACTORIES is not defined
+/**
+ * @brief Register default factories with an authentication callback
+ */
+void register_default_factories_callback(oauth_callback_t& callback);
+
 }  // namespace reinforcement_learning

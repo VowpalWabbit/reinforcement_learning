@@ -29,6 +29,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      - run: git -C ${{ github.workspace }}/ext_libs/vcpkg fetch --unshallow
       - uses: lukka/get-cmake@latest
       - name: Install ONNX
         run: |
@@ -83,6 +84,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      - run: git -C ${{ github.workspace }}/ext_libs/vcpkg fetch --unshallow
       - uses: lukka/get-cmake@latest
       - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
         shell: bash
@@ -124,6 +126,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      - run: git -C ${{ github.workspace }}/ext_libs/vcpkg fetch --unshallow
       - name: Setup MSVC Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1
       - uses: lukka/get-cmake@latest

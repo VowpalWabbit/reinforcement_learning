@@ -6,6 +6,7 @@
  * @date 2018-07-18
  */
 #pragma once
+#include "azure_credentials.h"
 #include "live_model.h"
 #include "person.h"
 #include "robot_joint.h"
@@ -177,4 +178,7 @@ private:
   int64_t _delay = 2000;
   bool _quiet = false;
   bool _random_ids = true;
+#ifdef LINK_AZURE_LIBS
+  AzureCredentials _creds;
+#endif
 };

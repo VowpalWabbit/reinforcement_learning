@@ -40,8 +40,9 @@ public:
   virtual int init(const utility::configuration& config, api_status* status) override;
 
   // Takes the ownership of the i_http_client and delete it at the end of lifetime
+  template <typename... Args>
   http_transport_client(i_http_client* client, size_t tasks_count, size_t MAX_RETRIES,
-      std::chrono::milliseconds max_retry_duration, i_trace* trace, error_callback_fn* _error_cb);
+      std::chrono::milliseconds max_retry_duration, i_trace* trace, error_callback_fn* _error_cb, Args&&... args);
   ~http_transport_client();
 
 protected:
@@ -162,6 +163,7 @@ pplx::task<http_response> http_transport_client<TAuthorization>::http_request_ta
 
   utility::stl_container_adapter container(_post_data.get());
   const size_t container_size = container.size();
+
   const auto stream = concurrency::streams::bytestream::open_istream(container);
   request.set_body(stream, container_size);
 
@@ -278,14 +280,17 @@ int http_transport_client<TAuthorization>::v_send(const buffer& post_data, api_s
 }
 
 template <typename TAuthorization>
+template <typename... Args>
 http_transport_client<TAuthorization>::http_transport_client(i_http_client* client, size_t max_tasks_count,
-    size_t max_retries, std::chrono::milliseconds max_retry_duration, i_trace* trace, error_callback_fn* error_callback)
+    size_t max_retries, std::chrono::milliseconds max_retry_duration, i_trace* trace, error_callback_fn* error_callback,
+    Args&&... args)
     : _client(client)
     , _max_tasks_count(max_tasks_count)
     , _max_retry_count(max_retries)
     , _max_retry_duration(max_retry_duration)
     , _trace(trace)
     , _error_callback(error_callback)
+    , _authorization(std::forward<Args>(args)...)
 {
 }
 

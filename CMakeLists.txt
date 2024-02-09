@@ -33,6 +33,10 @@ if(RL_BUILD_BENCHMARKS)
   list(APPEND VCPKG_MANIFEST_FEATURES "benchmarks")
 endif()
 
+option(RL_LINK_AZURE_LIBS "Whether to build components requiring the use of Azure libraries. Requires C++14 or greater" OFF)
+if(RL_LINK_AZURE_LIBS)
+  list(APPEND VCPKG_MANIFEST_FEATURES "azurelibs")
+endif()
 project(reinforcement_learning)
 
 # Add support for building library with latest version of C++ supported by your compiler

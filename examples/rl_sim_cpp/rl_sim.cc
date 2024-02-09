@@ -1,6 +1,7 @@
 #include "api_status.h"
 #include "constants.h"
 #include "factory_resolver.h"
+#include "future_compat.h"
 #include "live_model.h"
 #include "multistep.h"
 #include "person.h"
@@ -13,6 +14,7 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <chrono>
 #include <cmath>
+#include <functional>
 #include <thread>
 
 using namespace std;
@@ -487,6 +489,17 @@ int rl_sim::init_rl()
         wrap_sender_generate_for_throughput_sender(reinforcement_learning::value::EPISODE_HTTP_API_SENDER));
     sender_factory = &factory;
   }
+  // probably incompatible with the throughput option?
+  else if (_options["azure_oauth_factories"].as<bool>())
+  {
+#ifdef LINK_AZURE_LIBS
+    // Note: This requires C++14 or better
+    using namespace std::placeholders;
+    reinforcement_learning::oauth_callback_t callback =
+        std::bind(&AzureCredentials::get_credentials, &_creds, _1, _2, _3);
+    reinforcement_learning::register_default_factories_callback(callback);
+#endif
+  }
 
   // Initialize the API
   _rl = std::unique_ptr<r::live_model>(new r::live_model(config, _on_error, this,
@@ -637,7 +650,12 @@ std::string rl_sim::create_event_id()
   return oss.str();
 }
 
-rl_sim::rl_sim(boost::program_options::variables_map vm) : _options(std::move(vm)), _loop_kind(CB)
+rl_sim::rl_sim(boost::program_options::variables_map vm)
+    : _options(std::move(vm))
+    , _loop_kind(CB)
+#ifdef LINK_AZURE_LIBS
+    , _creds(_options["azure_tenant_id"].as<std::string>())
+#endif
 {
   if (_options["ccb"].as<bool>()) { _loop_kind = CCB; }
   else if (_options["slates"].as<bool>()) { _loop_kind = Slates; }

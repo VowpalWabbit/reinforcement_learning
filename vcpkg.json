@@ -1,7 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
   "name": "reinforcement-learning",
-  "version": "1.0.0",
+  "version": "1.0.2",
+  "builtin-baseline": "f30434939d5516ce764c549ab04e3d23d312180a",
   "dependencies": [
     "boost-align",
     "boost-asio",
@@ -23,10 +24,21 @@
     "spdlog",
     "zlib"
   ],
+  "overrides": [
+    {"name": "cpprestsdk", "version": "2.10.18"},
+    {"name": "flatbuffers", "version": "23.1.21"},
+    {"name": "fmt", "version": "9.1.0"},
+    {"name": "spdlog", "version": "1.11.0"},
+    {"name": "zlib", "version": "1.2.13"}
+  ],
   "features": {
     "benchmarks": {
       "description": "Build Benchmarks",
       "dependencies": [{"name":"benchmark", "version>=":"1.7.1"}]
+    },
+    "azurelibs": {
+      "description": "Build Azure-specific code",
+      "dependencies": [{"name":"azure-identity-cpp"}]
     }
   }
 }
