@@ -93,6 +93,8 @@ private:
       std::vector<std::vector<float>>& action_pdfs, std::string& model_version, api_status* status);
 
 private:
+  // ensure trace logger exists during shutdown
+  std::unique_ptr<i_trace> _trace_logger{nullptr};
   // Internal implementation state
   std::atomic_bool _model_ready{false};
   float _initial_epsilon = 0.2f;
@@ -122,7 +124,6 @@ private:
   std::unique_ptr<logger::episode_logger_facade> _episode_logger{nullptr};
 
   std::unique_ptr<model_management::model_downloader> _model_download{nullptr};
-  std::unique_ptr<i_trace> _trace_logger{nullptr};
 
   std::unique_ptr<utility::periodic_background_proc<model_management::model_downloader>> _bg_model_proc;
   uint64_t _seed_shift{};

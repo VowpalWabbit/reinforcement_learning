@@ -300,7 +300,7 @@ http_transport_client<TAuthorization>::~http_transport_client()
   while (_tasks.size() != 0)
   {
     auto result = pop_task(nullptr);
-    if (!result)
+    if (result != error_code::success)
     {
       auto message =
           utility::concat("Failure in pop_task while running ~http_transport_client. Status: '", result, "'");
