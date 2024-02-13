@@ -60,7 +60,7 @@ int rl_sim::cb_loop()
     r::api_status status;
 
     // Choose an action
-    if (_rl->choose_rank(req_id.c_str(), context_json.c_str(), response, &status) != err::success)
+    if (_rl->choose_rank(req_id.c_str(), context_json.c_str(), r::action_flags::DEFERRED, response, &status) != err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
       continue;
@@ -79,6 +79,12 @@ int rl_sim::cb_loop()
 
     // Report outcome received
     if (_rl->report_outcome(req_id.c_str(), outcome, &status) != err::success && outcome > 0.00001f)
+    {
+      std::cout << status.get_error_msg() << std::endl;
+      continue;
+    }
+
+    if (_rl->report_action_taken(req_id.c_str(), &status) != err::success)
     {
       std::cout << status.get_error_msg() << std::endl;
       continue;
