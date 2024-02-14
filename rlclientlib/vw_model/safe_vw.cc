@@ -2,6 +2,7 @@
 #include "constants.h"
 #include "api_status.h"
 
+
 // VW headers
 #include "vw/config/options.h"
 #include "vw/core/debug_print.h"
@@ -10,6 +11,7 @@
 #include "vw/fb_parser/parse_example_flatbuffer.h"
 #include "vw/core/parser.h"
 #include "vw/core/v_array.h"
+#include "vw/core/scope_exit.h"
 
 #include <algorithm>
 #include <iostream>
@@ -195,7 +197,7 @@ namespace detail
   {
     examples.push_back(&ex_fac());
     ensure_audit_buffer<audit>(w);
-
+    
     switch (input_format)
     {
       case input_serialization::vwjson:
@@ -281,6 +283,16 @@ void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& acti
 void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<float>& scores)
 {
   VW::multi_ex examples;
+
+  // clean up examples and push examples back into pool for re-use
+  auto scope_guard = VW::scope_exit([this, &examples] {
+    for (auto&& ex : examples) 
+    { 
+      ex->pred.a_s.clear();
+      _example_pool.emplace_back(ex);
+    }
+  });
+
   parse_context(context, examples);
 
   // finalize example
@@ -296,13 +308,6 @@ void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<f
   {
     actions[i] = predictions[i].action;
     scores[i] = predictions[i].score;
-  }
-
-  // clean up examples and push examples back into pool for re-use
-  for (auto&& ex : examples)
-  {
-    ex->pred.a_s.clear();
-    _example_pool.emplace_back(ex);
   }
 }
 
