@@ -4,7 +4,7 @@ using namespace std;
 
 namespace reinforcement_learning
 {
-void error_callback_fn::report_error(api_status& s)
+void error_callback_fn::report_error(const api_status& s)
 {
   if (!_fn) { return; }
 

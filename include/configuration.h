@@ -41,6 +41,8 @@ public:
   //! Move assignment operator
   configuration(configuration&&) = default;
 
+  std::string& operator[](const char* name);
+
   //! Sets the value for a given name.  It overrides any existing values for that name
   void set(const char* name, const char* value);
   //! Gets the value for a given name.  If the value does not exist, it returns defval

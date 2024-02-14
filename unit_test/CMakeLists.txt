@@ -9,6 +9,7 @@ set(TEST_SOURCES
   explore_test.cc
   factory_test.cc
   fb_serializer_test.cc
+  fb_parser_test.cc
   file_logger_test.cc
   header_auth_test.cc
   http_client_test.cc
@@ -40,6 +41,14 @@ set(TEST_SOURCES
   watchdog_test.cc
 )
 
+set (FB_TEST_BUILDERS_SOURCES
+  ../ext_libs/vowpal_wabbit/vowpalwabbit/fb_parser/tests/prototype_example.h
+  ../ext_libs/vowpal_wabbit/vowpalwabbit/fb_parser/tests/prototype_example_root.h
+  ../ext_libs/vowpal_wabbit/vowpalwabbit/fb_parser/tests/prototype_label.cc
+  ../ext_libs/vowpal_wabbit/vowpalwabbit/fb_parser/tests/prototype_label.h
+  ../ext_libs/vowpal_wabbit/vowpalwabbit/fb_parser/tests/prototype_namespace.h
+)
+
 if (vw_USE_AZURE_FACTORIES)
   list(APPEND TEST_SOURCES
     http_transport_client_test.cc
@@ -49,13 +58,16 @@ if (vw_USE_AZURE_FACTORIES)
 endif()
 
 # If compiling on windows add the stdafx file
-add_executable(rltest ${TEST_SOURCES})
+add_executable(rltest ${TEST_SOURCES} ${FB_TEST_BUILDERS_SOURCES})
 
 # Add the include directories from rlclientlib target for testing
 target_include_directories(rltest
   PRIVATE
     $<TARGET_PROPERTY:rlclientlib,INCLUDE_DIRECTORIES>
+    ../ext_libs/vowpal_wabbit/vowpalwabbit/fb_parser/tests/
 )
+
+target_compile_definitions(rltest PRIVATE VWFB_BUILDERS_ONLY)
 
 if(vw_USE_AZURE_FACTORIES)
   target_compile_definitions(rltest PRIVATE USE_AZURE_FACTORIES)
@@ -92,6 +104,7 @@ target_link_libraries(rltest
     fakeit
     Boost::unit_test_framework
     Boost::system
+    vw_fb_parser
 )
 
 add_test(NAME rltest COMMAND rltest)

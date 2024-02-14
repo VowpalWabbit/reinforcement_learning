@@ -27,5 +27,6 @@ int get_event_ids(string_view context, std::map<size_t, std::string>& event_ids,
 int get_context_info(string_view context, ContextInfo& info, i_trace* trace = nullptr, api_status* status = nullptr);
 int get_slot_ids(string_view context, const ContextInfo::index_vector_t& slots, std::map<size_t, std::string>& slot_ids,
     i_trace* trace = nullptr, api_status* status = nullptr);
+
 }  // namespace utility
 }  // namespace reinforcement_learning

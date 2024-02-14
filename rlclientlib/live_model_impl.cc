@@ -50,10 +50,26 @@ void default_error_callback(const api_status& status, void* watchdog_context)
   watchdog->set_unhandled_background_error(true);
 }
 
+int live_model_impl::check_model_input_serialization(api_status* status)
+{
+  // non-CB only supports VWJSON input serialization (until we re-architect how we construct contexts for
+  // different types of input serializations)
+  if (_model->model_type() != m::model_type_t::CB &&
+    strcmp(_input_serialization, value::VWJSON_INPUT_SERIALIZATION) != 0)
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, input_serialization_unsupported) << "Episodic only supports JSON input.";
+  }
+
+  return error_code::success;
+}
+
 int live_model_impl::init(api_status* status)
 {
   RETURN_IF_FAIL(init_trace(status));
   RETURN_IF_FAIL(init_model(status));
+
+  RETURN_IF_FAIL(check_model_input_serialization(status));
+
   RETURN_IF_FAIL(init_model_mgmt(status));
   RETURN_IF_FAIL(init_loggers(status));
 
@@ -91,7 +107,7 @@ int live_model_impl::choose_rank(
   std::vector<float> action_pdf;
   std::string model_version;
 
-  _model->choose_rank(event_id, seed, context, action_ids, action_pdf, model_version, status);
+  RETURN_IF_FAIL(_model->choose_rank(event_id, seed, context, action_ids, action_pdf, model_version, status));
 
   RETURN_IF_FAIL(sample_and_populate_response(
       seed, action_ids, action_pdf, std::move(model_version), response, _trace_logger.get(), status));
@@ -145,7 +161,7 @@ int live_model_impl::request_continuous_action(const char* event_id, string_view
   RETURN_IF_FAIL(_model->choose_continuous_action(context, action, pdf_value, model_version, status));
   RETURN_IF_FAIL(populate_response(
       action, pdf_value, std::string(event_id), std::string(model_version), response, _trace_logger.get(), status));
-  RETURN_IF_FAIL(_interaction_logger->log_continuous_action(context.data(), flags, response, status));
+  RETURN_IF_FAIL(_interaction_logger->log_continuous_action(context, flags, response, status));
 
   if (_watchdog.has_background_error_been_reported())
   {
@@ -461,6 +477,7 @@ live_model_impl::live_model_impl(const utility::configuration& config, std::func
     , _sender_factory{sender_factory}
     , _time_provider_factory{time_provider_factory}
     , _protocol_version(_configuration.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
+    , _input_serialization(_configuration.get(name::INPUT_SERIALIZATION, nullptr))
 {
   if (_configuration.get_bool(name::MODEL_BACKGROUND_REFRESH, value::DEFAULT_MODEL_BACKGROUND_REFRESH))
   {

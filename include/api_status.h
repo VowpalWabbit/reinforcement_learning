@@ -246,3 +246,11 @@ int report_error(status_builder& sbuilder, const First& first, const Rest&... re
     int retval__LINE__ = (x);                           \
     if (retval__LINE__ != 0) { return retval__LINE__; } \
   } while (0)
+
+/**
+ * @brief Error tracing macro used with left shift operator - similar to RETURN_ERROR_LS
+ * but without returning an error code
+*/
+#define TRACE_ERROR_LS(trace, status, code)                                                                 \
+  reinforcement_learning::status_builder sbuilder(trace, status, reinforcement_learning::error_code::code); \
+  sbuilder << reinforcement_learning::error_code::code##_s

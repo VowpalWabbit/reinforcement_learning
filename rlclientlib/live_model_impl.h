@@ -82,6 +82,7 @@ private:
   int init_model_mgmt(api_status* status);
   int init_loggers(api_status* status);
   int init_trace(api_status* status);
+  int check_model_input_serialization(api_status* status);
   static void _handle_model_update(const model_management::model_data& data, live_model_impl* ctxt);
   void handle_model_update(const model_management::model_data& data);
   template <typename D>
@@ -104,6 +105,7 @@ private:
   utility::watchdog _watchdog;
   learning_mode _learning_mode;
   const int _protocol_version;
+  const char* _input_serialization;
 
   trace_logger_factory_t* _trace_factory;
   data_transport_factory_t* _t_factory;

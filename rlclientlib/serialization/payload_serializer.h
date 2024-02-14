@@ -39,7 +39,7 @@ struct payload_serializer
 
 struct cb_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CB>
 {
-  static generic_event::payload_buffer_t event(const std::string& context_str, unsigned int flags,
+  static generic_event::payload_buffer_t event(const string_view& context_str, unsigned int flags,
       v2::LearningModeType learning_mode, const std::vector<uint64_t>& action_ids,
       const std::vector<float>& probabilities, const std::string& model_id)
   {
@@ -57,7 +57,7 @@ struct cb_serializer : payload_serializer<generic_event::payload_type_t::Payload
 
 struct ca_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_CA>
 {
-  static generic_event::payload_buffer_t event(const std::string& context_str, unsigned int flags, float chosen_action,
+  static generic_event::payload_buffer_t event(const string_view& context_str, unsigned int flags, float chosen_action,
       float chosen_action_pdf_value, const std::string& model_id)
   {
     flatbuffers::FlatBufferBuilder fbb;
@@ -74,7 +74,7 @@ struct ca_serializer : payload_serializer<generic_event::payload_type_t::Payload
 
 struct multi_slot_serializer : payload_serializer<generic_event::payload_type_t::PayloadType_Slates>
 {
-  static generic_event::payload_buffer_t event(const std::string& context_str, unsigned int flags,
+  static generic_event::payload_buffer_t event(const string_view& context_str, unsigned int flags,
       const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs,
       const std::string& model_version, const std::vector<std::string>& slot_ids,
       const std::vector<int>& baseline_actions, v2::LearningModeType learning_mode)

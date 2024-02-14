@@ -19,7 +19,7 @@ const char* const MODEL_REFRESH_INTERVAL_MS = "model.refreshintervalms";
 const char* const MODEL_IMPLEMENTATION = "model.implementation";  // VW vs other ML
 const char* const MODEL_BACKGROUND_REFRESH = "model.backgroundrefresh";
 const char* const MODEL_VW_INITIAL_COMMAND_LINE = "model.vw.initial_command_line";
-const char* const VW_CMDLINE = "vw.commandline";
+const char* const VW_CMDLINE = "vw.commandline"; // TODO: Nobody seems to listen to this?
 const char* const VW_POOL_INIT_SIZE = "vw.pool.init.size";
 const char* const INITIAL_EPSILON = "initial_exploration.epsilon";
 const char* const LEARNING_MODE = "rank.learning.mode";
@@ -29,6 +29,8 @@ const char* const HTTP_API_HEADER_KEY_NAME = "http.api.header.key.name";
 const char* const HTTP_API_OAUTH_TOKEN_TYPE = "http.api.oauth.token.type";
 const char* const AUDIT_ENABLED = "audit.enabled";
 const char* const AUDIT_OUTPUT_PATH = "audit.output.path";
+
+const char* const INPUT_SERIALIZATION = "input.serialization";
 
 // Episode
 const char* const EPISODE_EH_HOST = "episode.eventhub.host";
@@ -146,6 +148,13 @@ const char* const CONTENT_ENCODING_DEDUP = "DEDUP";
 const char* const HTTP_API_DEFAULT_HEADER_KEY_NAME = "Ocp-Apim-Subscription-Key";
 const char* const HTTP_API_DEFAULT_OAUTH_TOKEN_TYPE = "Bearer";
 const char* const TRACE_LOG_LEVEL_DEFAULT = "info";
+
+// this is the default value, which for VW models is the same as "VW/VWJSON", and for PDF_model is "VW/DSJSON"
+const char* const TEXT_INPUT_SERIALIZATION = nullptr;
+
+const char* const VWJSON_INPUT_SERIALIZATION = "VW/VWJSON";
+const char* const DSJSON_INPUT_SERIALIZATION = "VW/DSJSON";
+const char* const VWFB_INPUT_SERIALIZATION = "VW/FLATBUFFER";
 
 const char* const QUEUE_MODE_DROP = "DROP";
 const char* const QUEUE_MODE_BLOCK = "BLOCK";
