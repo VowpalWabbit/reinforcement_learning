@@ -101,9 +101,9 @@ str_view_t create_cb_context(VW::workspace& w, FlatBufferBuilder& builder)
 
   vwtest::multiex cb_example
   {{
-    {{ shared }, vwtest::cb_label_shared() },
-    {{ action1 }},
-    {{ action2}}
+    vwtest::example {{ shared }, vwtest::cb_label_shared() }, 
+    vwtest::example {{ action1 }}, 
+    vwtest::example {{ action2 }}
   }};
 
   Offset<fb::ExampleRoot> root = vwtest::create_example_root(builder, w, cb_example);
