@@ -103,16 +103,22 @@ str_view_t create_cb_context(VW::workspace& w, FlatBufferBuilder& builder)
   std::vector<vwtest::ns> action1_ns { action1 };
   std::vector<vwtest::ns> action2_ns { action2 };
 
-  vwtest::example shared_ex { shared_ns, vwtest::cb_label_shared() };
-  vwtest::example action1_ex { action1_ns };
-  vwtest::example action2_ex { action2_ns };
+  vwtest::example shared_ex;
+  shared_ex.namespaces = shared_ns;
+  shared_ex.label = vwtest::cb_label_shared();
 
-  vwtest::multiex cb_example
-  {{
+  vwtest::example action1_ex;
+  action1_ex.namespaces = action1_ns;
+
+  vwtest::example action2_ex;
+  action2_ex.namespaces = action2_ns;
+
+  vwtest::multiex cb_example;
+  cb_example.examples = {
       shared_ex,
       action1_ex,
       action2_ex
-  }};
+  };
 
   Offset<fb::ExampleRoot> root = vwtest::create_example_root(builder, w, cb_example);
   builder.FinishSizePrefixed(root);
