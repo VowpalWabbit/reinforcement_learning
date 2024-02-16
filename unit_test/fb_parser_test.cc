@@ -95,7 +95,7 @@ str_view_t create_cb_context(VW::workspace& w, FlatBufferBuilder& builder)
 {
   using namespace vwtest;
 
-  vwtest::ns shared { "Shared", { { "t_abc", 1. } } };
+  vwtest::ns shared { "Shared", { { "t_abcd", 1. } } };
   vwtest::ns action1 { "Action", { { "c", 2 } } };
   vwtest::ns action2 { "Action", { { "c", 3 } } };
 
