@@ -181,6 +181,7 @@ set(PROJECT_PRIVATE_HEADERS
   vw_model/pdf_model.h
   vw_model/safe_vw.h
   vw_model/vw_model.h
+  vw_model/vw_api_status_interop.h
 )
 
 if(vw_USE_AZURE_FACTORIES)

@@ -1,7 +1,7 @@
 #include "safe_vw.h"
 #include "constants.h"
+#include "vw_api_status_interop.h"
 #include "api_status.h"
-
 
 // VW headers
 #include "vw/config/options.h"
@@ -188,7 +188,23 @@ namespace detail
     template <bool audit>
     static void parse_context(VW::workspace& w, string_view context, VW::example_factory_t ex_fac, VW::multi_ex& examples, VW::example_sink_f ex_sink)
     {
-      VW::parsers::flatbuffer::read_span_flatbuffer(&w, reinterpret_cast<const uint8_t*>(context.data()), context.size(), ex_fac, examples, ex_sink);
+      VW::experimental::api_status vw_status;
+      if (VW::parsers::flatbuffer::read_span_flatbuffer(&w, reinterpret_cast<const uint8_t*>(context.data()), context.size(), ex_fac, examples, ex_sink, &vw_status) !=
+        VW::experimental::error_code::success)
+      {
+        std::stringstream sstream;
+        sstream << "Failed to parse flatbuffer: " << vw_status.get_error_msg();
+
+        // This is a bit unfortunate, but the APIs around safe_vw were built with
+        // the original VW error handling (THROW() macro) in mind, and catching the
+        // exception at the level of vw_model. Ideally we should do the work to
+        // define a consistent error handling model in VW, and use that here.
+        //
+        // In the short term, wrap the error in an exception and throw it up
+        // one level.
+        throw std::runtime_error(sstream.str().c_str());
+      }
+
     }
   };
 
@@ -197,7 +213,7 @@ namespace detail
   {
     examples.push_back(&ex_fac());
     ensure_audit_buffer<audit>(w);
-    
+
     switch (input_format)
     {
       case input_serialization::vwjson:
@@ -223,7 +239,7 @@ void safe_vw::parse_context(string_view context, VW::multi_ex& examples)
       _example_pool.emplace_back(ex);
     }
   };
-  
+
 
   if (_vw->output_config.audit)
   {
@@ -286,8 +302,8 @@ void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<f
 
   // clean up examples and push examples back into pool for re-use
   auto scope_guard = VW::scope_exit([this, &examples] {
-    for (auto&& ex : examples) 
-    { 
+    for (auto&& ex : examples)
+    {
       ex->pred.a_s.clear();
       _example_pool.emplace_back(ex);
     }
