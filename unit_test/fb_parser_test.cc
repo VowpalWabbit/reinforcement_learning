@@ -99,28 +99,28 @@ str_view_t create_cb_context(VW::workspace& w, FlatBufferBuilder& builder)
   vwtest::ns action1 { "Action", { { "c", 2 } } };
   vwtest::ns action2 { "Action", { { "c", 3 } } };
 
-  std::vector<vwtest::ns> shared_ns { shared };
-  std::vector<vwtest::ns> action1_ns { action1 };
-  std::vector<vwtest::ns> action2_ns { action2 };
+  std::vector<vwtest::ns> shared_ns { std::move(shared) };
+  std::vector<vwtest::ns> action1_ns { std::move(action1) };
+  std::vector<vwtest::ns> action2_ns { std::move(action2) };
 
   vwtest::example shared_ex;
-  shared_ex.namespaces = shared_ns;
+  shared_ex.namespaces = std::move(shared_ns);
   shared_ex.label = vwtest::cb_label_shared();
 
   vwtest::example action1_ex;
-  action1_ex.namespaces = action1_ns;
+  action1_ex.namespaces = std::move(action1_ns);
 
   vwtest::example action2_ex;
-  action2_ex.namespaces = action2_ns;
+  action2_ex.namespaces = std::move(action2_ns);
 
   vwtest::multiex cb_example;
   cb_example.examples = {
-      shared_ex,
-      action1_ex,
-      action2_ex
+      std::move(shared_ex),
+      std::move(action1_ex),
+      std::move(action2_ex)
   };
 
-  Offset<fb::ExampleRoot> root = vwtest::create_example_root(builder, w, cb_example);
+  Offset<fb::ExampleRoot> root = vwtest::create_example_root(builder, w, std::move(cb_example));
   builder.FinishSizePrefixed(root);
 
   return str_view_t(reinterpret_cast<const char*>(builder.GetBufferPointer()), builder.GetSize());
