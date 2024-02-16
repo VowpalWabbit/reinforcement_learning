@@ -99,11 +99,19 @@ str_view_t create_cb_context(VW::workspace& w, FlatBufferBuilder& builder)
   vwtest::ns action1 { "Action", { { "c", 2 } } };
   vwtest::ns action2 { "Action", { { "c", 3 } } };
 
+  std::vector<vwtest::ns> shared_ns { shared };
+  std::vector<vwtest::ns> action1_ns { action1 };
+  std::vector<vwtest::ns> action2_ns { action2 };
+
+  vwtest::example shared_ex { shared_ns, vwtest::cb_label_shared() };
+  vwtest::example action1_ex { action1_ns };
+  vwtest::example action2_ex { action2_ns };
+
   vwtest::multiex cb_example
   {{
-    vwtest::example {{ shared }, vwtest::cb_label_shared() }, 
-    vwtest::example {{ action1 }}, 
-    vwtest::example {{ action2 }}
+      shared_ex,
+      action1_ex,
+      action2_ex
   }};
 
   Offset<fb::ExampleRoot> root = vwtest::create_example_root(builder, w, cb_example);
