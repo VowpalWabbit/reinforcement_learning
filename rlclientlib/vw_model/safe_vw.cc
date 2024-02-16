@@ -36,9 +36,9 @@ const char* get_config_value_for_input_serialization(input_serialization input_f
   }
 }
 
-input_serialization get_serializtion_for_config_value(const char* config_value, input_serialization default)
+input_serialization get_serializtion_for_config_value(const char* config_value, input_serialization default_value)
 {
-  if (config_value == nullptr) { return default; }
+  if (config_value == nullptr) { return default_value; }
 
   if (strcmp(config_value, value::VWJSON_INPUT_SERIALIZATION) == 0) { return input_serialization::vwjson; }
   if (strcmp(config_value, value::DSJSON_INPUT_SERIALIZATION) == 0) { return input_serialization::dsjson; }
@@ -67,18 +67,18 @@ input_serialization vw_input_type_configurator::configure_input_serialization(co
   const auto input_serialization_str = config.get(name::INPUT_SERIALIZATION, default_input_serialization);
   auto input_serialization = get_serializtion_for_config_value(input_serialization_str, _allowed_formats[0]);
 
-  if (input_serialization == input_serialization::unknown ||
+  if (input_serialization == reinforcement_learning::input_serialization::unknown ||
       std::find(_allowed_formats, _allowed_formats + _allowed_format_count, input_serialization) == _allowed_formats + _allowed_format_count)
   {
     std::stringstream ss;
-    std::for_each(_allowed_formats, _allowed_formats + _allowed_format_count, [&ss](const auto& format) {
+    std::for_each(_allowed_formats, _allowed_formats + _allowed_format_count, [&ss](const reinforcement_learning::input_serialization& format) {
       ss << get_config_value_for_input_serialization(format) << ", ";
     });
 
     TRACE_ERROR_LS(trace_logger, status, input_serialization_unsupported)
         << "Input serialization type is not supported: " << input_serialization_str << ". Supported types are: " << ss.str();
 
-    return input_serialization::unknown;
+    return reinforcement_learning::input_serialization::unknown;
   }
 
   return input_serialization;
