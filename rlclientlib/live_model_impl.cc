@@ -54,7 +54,7 @@ int live_model_impl::check_model_input_serialization(api_status* status)
 {
   // non-CB only supports VWJSON input serialization (until we re-architect how we construct contexts for
   // different types of input serializations)
-  if (_model->model_type() != m::model_type_t::CB &&
+  if (_model->model_type() != m::model_type_t::CB && _input_serialization != nullptr &&
     strcmp(_input_serialization, value::VWJSON_INPUT_SERIALIZATION) != 0)
   {
     RETURN_ERROR_LS(_trace_logger.get(), status, input_serialization_unsupported) << "Episodic only supports JSON input.";
@@ -450,6 +450,7 @@ live_model_impl::live_model_impl(const utility::configuration& config, const err
     , _sender_factory{sender_factory}
     , _time_provider_factory{time_provider_factory}
     , _protocol_version(_configuration.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
+    , _input_serialization(_configuration.get(name::INPUT_SERIALIZATION, nullptr))
 {
   // If there is no user supplied error callback, supply a default one that does nothing but report unhandled background
   // errors.

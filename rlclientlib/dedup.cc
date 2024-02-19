@@ -317,7 +317,9 @@ private:
 bool should_use_dedup_logger_extension(const utility::configuration& config, const char* section)
 {
   if (config.get_int(name::PROTOCOL_VERSION, 1) != 2) { return false; }
-  if (std::string{config.get(name::INPUT_SERIALIZATION, nullptr)} == value::VWFB_INPUT_SERIALIZATION) { return false;}
+
+  const char* input_serialization_cstr = config.get(name::INPUT_SERIALIZATION, nullptr);
+  if (input_serialization_cstr != nullptr && strcmp(value::VWFB_INPUT_SERIALIZATION, input_serialization_cstr)) { return false; }
 
   const bool use_compression = config.get_bool(section, name::USE_COMPRESSION, false);
   const bool use_dedup = config.get_bool(section, name::USE_DEDUP, false);
@@ -330,7 +332,12 @@ std::unique_ptr<logger::i_logger_extensions> create_dedup_logger_extension(
     const utility::configuration& config, const char* section, std::unique_ptr<i_time_provider> time_provider)
 {
   if (config.get_int(name::PROTOCOL_VERSION, 1) != 2) { return nullptr; }
-  if (std::string{config.get(name::INPUT_SERIALIZATION, nullptr)} == value::VWFB_INPUT_SERIALIZATION) { return nullptr;}
+
+  const char* input_serialization_cstr = config.get(name::INPUT_SERIALIZATION, nullptr);
+  if (input_serialization_cstr != nullptr && strcmp(value::VWFB_INPUT_SERIALIZATION, input_serialization_cstr))
+  {
+    return nullptr;
+  }
 
   const bool use_compression = config.get_bool(section, name::USE_COMPRESSION, false);
   const bool use_dedup = config.get_bool(section, name::USE_DEDUP, false);
