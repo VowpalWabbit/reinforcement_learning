@@ -27,9 +27,9 @@ int create_onnx_model(
         << "Output name is not provided in the configuration.";
   }
 
-  RL_IGNORE_DEPRECATED_USAGE_START()
+  RL_IGNORE_DEPRECATED_USAGE_START
   bool use_unstructured_input = config.get_bool(name::ONNX_USE_UNSTRUCTURED_INPUT, false);
-  RL_IGNORE_DEPRECATED_USAGE_END()
+  RL_IGNORE_DEPRECATED_USAGE_END
 
   const char* input_serialization = config.get(name::INPUT_SERIALIZATION, value::TENSOR_NOTATION_INPUT_SERIALIZATION);
 
