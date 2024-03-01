@@ -30,6 +30,7 @@ endif()
 if(RL_USE_UBSAN)
   set(VW_USE_UBSAN ON CACHE BOOL "" FORCE)
 endif()
+set(VW_FEAT_FLATBUFFERS ON CACHE BOOL "" FORCE) # TODO: should we make this an option?
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/vowpal_wabbit ${RL_ext_libs_exclude_from_all})
 
 # Build ZStandard

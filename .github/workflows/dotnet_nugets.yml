@@ -64,7 +64,6 @@ jobs:
           -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
           -Drlclientlib_BUILD_DOTNET=On
           -Drlclientlib_DOTNET_USE_MSPROJECT=Off
-          -DBUILD_FLATBUFFERS=Off
           -DRAPIDJSON_SYS_DEP=ON
           -DFMT_SYS_DEP=ON
           -DSPDLOG_SYS_DEP=ON

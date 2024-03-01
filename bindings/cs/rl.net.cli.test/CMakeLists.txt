@@ -17,7 +17,7 @@ else()
   add_custom_target(rl.net.cli.test ALL
     COMMAND ${DOTNET_COMMAND} build ${CMAKE_CURRENT_SOURCE_DIR} -o $<TARGET_FILE_DIR:rlnetnative> -v m --nologo --no-dependencies /clp:NoSummary
     COMMENT Building rl.net.cli.test
-    DEPENDS rl.net.cli
+    DEPENDS rl.net.cli rl.net.flatbuffers
     SOURCES ${RL_NET_CLI_TEST_SOURCES})
 endif()
 

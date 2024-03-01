@@ -55,4 +55,5 @@ ERROR_CODE_DEFINITION(49, baseline_actions_not_defined, "Baseline Actions must b
 ERROR_CODE_DEFINITION(50, http_api_key_not_provided, "Http api key must be provided")
 ERROR_CODE_DEFINITION(51, http_model_uri_not_provided, "Model Blob URI parameter was not passed in via configuration")
 ERROR_CODE_DEFINITION(52, static_model_load_error, "Static model passed in C# layer is not loading properly")
+ERROR_CODE_DEFINITION(53, input_serialization_unsupported, "The model implementation does not support the desired input serialization: ")
 //! [Error Definitions]

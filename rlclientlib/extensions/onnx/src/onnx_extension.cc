@@ -5,6 +5,7 @@
 #include "constants.h"
 #include "err_constants.h"
 #include "factory_resolver.h"
+#include "future_compat.h"
 #include "model_mgmt.h"
 #include "onnx_model.h"
 
@@ -26,7 +27,30 @@ int create_onnx_model(
         << "Output name is not provided in the configuration.";
   }
 
+  RL_IGNORE_DEPRECATED_USAGE_START
   bool use_unstructured_input = config.get_bool(name::ONNX_USE_UNSTRUCTURED_INPUT, false);
+  RL_IGNORE_DEPRECATED_USAGE_END
+
+  const char* input_serialization = config.get(name::INPUT_SERIALIZATION, value::TENSOR_NOTATION_INPUT_SERIALIZATION);
+
+  // TODO: deprecate "USE_UNSUTRUCTURED_INPUT" in favour of "INPUT_SERIALIZATION" types
+  if (use_unstructured_input && strcmp(input_serialization, value::TENSOR_NOTATION_INPUT_SERIALIZATION) != 0)
+  {
+    RETURN_ERROR_LS(trace_logger, status, inference_configuration_error)
+        << "Unstructured input is only supported with TENSOR_NOTATION_INPUT_SERIALIZATION.";
+  }
+  else if (!use_unstructured_input && strcmp(input_serialization, value::TENSOR_NOTATION_INPUT_SERIALIZATION) == 0)
+  {
+    RETURN_ERROR_LS(trace_logger, status, inference_configuration_error)
+        << "Structured input is not supported with TENSOR_NOTATION_INPUT_SERIALIZATION.";
+  }
+
+  if (strcmp(input_serialization, value::TENSOR_NOTATION_INPUT_SERIALIZATION))
+  {
+    RETURN_ERROR_LS(trace_logger, status, input_serialization_unsupported)
+        << "Input serialization type is not supported: " << input_serialization << ". Supported types are: "
+        << value::TENSOR_NOTATION_INPUT_SERIALIZATION << ".";
+  }
 
   retval.reset(new onnx_model(trace_logger, app_id, output_name, use_unstructured_input));
 

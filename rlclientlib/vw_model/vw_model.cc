@@ -18,7 +18,9 @@ vw_model::vw_model(i_trace* trace_logger, const utility::configuration& config)
     , _initial_command_line(std::string(config.get(name::MODEL_VW_INITIAL_COMMAND_LINE,
                                 "--cb_explore_adf --json --quiet --epsilon 0.0 --first_only --id N/A")) +
           (_audit ? " --audit" : ""))
-    , _vw_pool(safe_vw_factory(_initial_command_line),
+    , _input_format(vw_input_type_configurator::get_vw_model_input_adapter_factory().configure_input_serialization(
+          config, trace_logger, nullptr))
+    , _vw_pool(safe_vw_factory(_initial_command_line, _input_format),
           config.get_int(name::VW_POOL_INIT_SIZE, value::DEFAULT_VW_POOL_INIT_SIZE), trace_logger)
     , _trace_logger(trace_logger)
 {
@@ -34,13 +36,13 @@ int vw_model::update(const model_data& data, bool& model_ready, api_status* stat
     {
       std::string cmd_line = add_optional_audit_flag(_quiet_commandline_options);
 
-      std::unique_ptr<safe_vw> init_vw(new safe_vw(data.data(), data.data_sz(), cmd_line));
+      std::unique_ptr<safe_vw> init_vw(new safe_vw(data.data(), data.data_sz(), cmd_line, _input_format));
       if (init_vw->is_CB_to_CCB_model_upgrade(_initial_command_line))
       {
         cmd_line = add_optional_audit_flag(_upgrade_to_CCB_vw_commandline_options);
       }
 
-      safe_vw_factory factory(data, cmd_line);
+      safe_vw_factory factory(data, cmd_line, _input_format);
       std::unique_ptr<safe_vw> test_vw(factory());
       if (test_vw->is_compatible(_initial_command_line))
       {

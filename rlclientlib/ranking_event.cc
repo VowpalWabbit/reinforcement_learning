@@ -45,8 +45,8 @@ ranking_event::ranking_event(const char* event_id, bool deferred_action, float p
     _action_ids_vector.push_back(r.action_id + 1);
     _probilities_vector.push_back(r.probability);
   }
-  string context_str(context);
-  copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
+  //string context_str(context);
+  copy(context.begin(), context.end(), std::back_inserter(_context));
 }
 
 const std::vector<unsigned char>& ranking_event::get_context() const { return _context; }
@@ -73,9 +73,9 @@ decision_ranking_event::decision_ranking_event(const std::vector<const char*>& e
     , _probilities_vector(std::move(pdfs))
     , _model_id(std::move(model_version))
 {
-  string context_str(context);
+  //string context_str(context);
   for (const auto* evt : event_ids) { _event_ids.emplace_back(evt); }
-  copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
+  copy(context.begin(), context.end(), std::back_inserter(_context));
 }
 
 const std::vector<unsigned char>& decision_ranking_event::get_context() const { return _context; }
@@ -103,8 +103,8 @@ multi_slot_decision_event::multi_slot_decision_event(const std::string& event_id
     , _probilities_vector(std::move(pdfs))
     , _model_id(std::move(model_version))
 {
-  string context_str(context);
-  copy(context_str.begin(), context_str.end(), std::back_inserter(_context));
+  //string context_str(context);
+  copy(context.begin(), context.end(), std::back_inserter(_context));
 }
 
 const std::vector<unsigned char>& multi_slot_decision_event::get_context() const { return _context; }

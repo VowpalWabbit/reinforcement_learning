@@ -38,7 +38,7 @@ public:
     else { _fn = nullptr; }
   }
 
-  void report_error(api_status& s);
+  void report_error(const api_status& s);
 
   error_callback_fn(callback_t fn) : _fn(std::move(fn)) {}
 

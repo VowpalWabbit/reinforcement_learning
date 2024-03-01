@@ -27,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\rl.net.cli\rl.net.cli.csproj" />
     <ProjectReference Include="..\rl.net\rl.net.csproj" />
+    <ProjectReference Include="..\rl.net.flatbuffer\rl.net.flatbuffer.csproj" />
   </ItemGroup>
 
 </Project>

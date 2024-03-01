@@ -1,17 +1,23 @@
 #include "safe_vw.h"
+#include "constants.h"
+#include "vw_api_status_interop.h"
+#include "api_status.h"
 
 // VW headers
 #include "vw/config/options.h"
 #include "vw/core/debug_print.h"
 #include "vw/core/example.h"
 #include "vw/core/parse_example_json.h"
+#include "vw/fb_parser/parse_example_flatbuffer.h"
 #include "vw/core/parser.h"
 #include "vw/core/v_array.h"
+#include "vw/core/scope_exit.h"
 
 #include <algorithm>
 #include <iostream>
 #include <iterator>
 #include <utility>
+#include <sstream>
 
 namespace mm = reinforcement_learning::model_management;
 
@@ -19,40 +25,103 @@ namespace reinforcement_learning
 {
 static const std::string SEED_TAG = "seed=";
 
+const char* get_config_value_for_input_serialization(input_serialization input_format)
+{
+  switch (input_format)
+  {
+    case input_serialization::vwjson: return value::VWJSON_INPUT_SERIALIZATION;
+    case input_serialization::dsjson: return value::DSJSON_INPUT_SERIALIZATION;
+    case input_serialization::flatbuffer: return value::VWFB_INPUT_SERIALIZATION;
+    default: return nullptr;
+  }
+}
+
+input_serialization get_serializtion_for_config_value(const char* config_value, input_serialization default_value)
+{
+  if (config_value == nullptr) { return default_value; }
+
+  if (strcmp(config_value, value::VWJSON_INPUT_SERIALIZATION) == 0) { return input_serialization::vwjson; }
+  if (strcmp(config_value, value::DSJSON_INPUT_SERIALIZATION) == 0) { return input_serialization::dsjson; }
+  if (strcmp(config_value, value::VWFB_INPUT_SERIALIZATION) == 0) { return input_serialization::flatbuffer; }
+
+  return input_serialization::unknown;
+}
+
+const vw_input_type_configurator& vw_input_type_configurator::get_vw_model_input_adapter_factory()
+{
+  static const input_serialization allowed_formats[2] = {input_serialization::vwjson, input_serialization::flatbuffer};
+  static const vw_input_type_configurator vw_model_input_adapter_factory(allowed_formats);
+  return vw_model_input_adapter_factory;
+}
+
+const vw_input_type_configurator& vw_input_type_configurator::get_pdf_model_input_adapter_factory()
+{
+  static const input_serialization allowed_formats[1] = {input_serialization::dsjson};
+  static const vw_input_type_configurator pdf_model_input_adapter_factory(allowed_formats);
+  return pdf_model_input_adapter_factory;
+}
+
+input_serialization vw_input_type_configurator::configure_input_serialization(const utility::configuration& config, i_trace* trace_logger, api_status* status) const
+{
+  const char* default_input_serialization = get_config_value_for_input_serialization(_allowed_formats[0]);
+  const auto input_serialization_str = config.get(name::INPUT_SERIALIZATION, default_input_serialization);
+  auto input_serialization = get_serializtion_for_config_value(input_serialization_str, _allowed_formats[0]);
+
+  if (input_serialization == reinforcement_learning::input_serialization::unknown ||
+      std::find(_allowed_formats, _allowed_formats + _allowed_format_count, input_serialization) == _allowed_formats + _allowed_format_count)
+  {
+    std::stringstream ss;
+    std::for_each(_allowed_formats, _allowed_formats + _allowed_format_count, [&ss](const reinforcement_learning::input_serialization& format) {
+      ss << get_config_value_for_input_serialization(format) << ", ";
+    });
+
+    TRACE_ERROR_LS(trace_logger, status, input_serialization_unsupported)
+        << "Input serialization type is not supported: " << input_serialization_str << ". Supported types are: " << ss.str();
+
+    return reinforcement_learning::input_serialization::unknown;
+  }
+
+  return input_serialization;
+}
+
 safe_vw::safe_vw(std::shared_ptr<safe_vw> master) : _master(std::move(master))
 {
   _vw = VW::seed_vw_model(_master->_vw, "", nullptr, nullptr);
+  _input_format = _master->_input_format;
   init();
 }
 
-safe_vw::safe_vw(const char* model_data, size_t len)
+safe_vw::safe_vw(const char* model_data, size_t len, input_serialization input_format)
 {
-  io_buf buf;
+  VW::io_buf buf;
   buf.add_file(VW::io::create_buffer_view(model_data, len));
 
   _vw = VW::initialize("--quiet --json", &buf, false, nullptr, nullptr);
+  _input_format = input_format;
   init();
 }
 
-safe_vw::safe_vw(const char* model_data, size_t len, const std::string& vw_commandline)
+safe_vw::safe_vw(const char* model_data, size_t len, const std::string& vw_commandline, input_serialization input_format)
 {
-  io_buf buf;
+  VW::io_buf buf;
   buf.add_file(VW::io::create_buffer_view(model_data, len));
 
   _vw = VW::initialize(vw_commandline, &buf, false, nullptr, nullptr);
+  _input_format = input_format;
   init();
 }
 
-safe_vw::safe_vw(const std::string& vw_commandline)
+safe_vw::safe_vw(const std::string& vw_commandline, input_serialization input_format)
 {
   _vw = VW::initialize(vw_commandline);
+  _input_format = input_format;
   init();
 }
 
 safe_vw::~safe_vw()
 {
   // cleanup examples
-  for (auto&& ex : _example_pool) { VW::dealloc_examples(ex, 1); }
+  for (auto&& ex : _example_pool) { delete ex; }
 
   // cleanup VW instance
   VW::details::reset_source(*_vw, _vw->initial_weights_config.num_bits);
@@ -65,7 +134,7 @@ VW::example* safe_vw::get_or_create_example()
   // alloc new element if we don't have any left
   if (_example_pool.empty())
   {
-    auto* ex = VW::alloc_examples(1);
+    auto* ex = new VW::example; // new VW APIs suggest allocating an example using new (VW::alloc_examples is deprecated)
     _vw->parser_runtime.example_parser->lbl_parser.default_label(ex->l);
 
     return ex;
@@ -83,8 +152,115 @@ VW::example* safe_vw::get_or_create_example()
 
 VW::example& safe_vw::get_or_create_example_f(void* vw) { return *(((safe_vw*)vw)->get_or_create_example()); }
 
+namespace detail
+{
+  template <bool audit = false>
+  inline void ensure_audit_buffer(VW::workspace& w)
+  {
+    if VW_STD17_CONSTEXPR (audit)
+    {
+      w.output_runtime.audit_buffer->clear();
+    }
+  }
+
+  template <input_serialization input = input_serialization::unknown>
+  struct example_parser
+  {
+    //static_assert(false, "Unsupported input format");
+  };
+
+  template <>
+  struct example_parser<input_serialization::vwjson>
+  {
+    template <bool audit>
+    static void parse_context(VW::workspace& w, string_view context, VW::example_factory_t ex_fac, VW::multi_ex& examples)
+    {
+      // copy due to destructive parsing by rapidjson
+      std::string line_vec(context);
+
+      VW::parsers::json::read_line_json<audit>(w, examples, &line_vec[0], line_vec.size(), ex_fac);
+    }
+  };
+
+  template <>
+  struct example_parser<input_serialization::flatbuffer>
+  {
+    template <bool audit>
+    static void parse_context(VW::workspace& w, string_view context, VW::example_factory_t ex_fac, VW::multi_ex& examples, VW::example_sink_f ex_sink)
+    {
+      VW::experimental::api_status vw_status;
+      if (VW::parsers::flatbuffer::read_span_flatbuffer(&w, reinterpret_cast<const uint8_t*>(context.data()), context.size(), ex_fac, examples, ex_sink, &vw_status) !=
+        VW::experimental::error_code::success)
+      {
+        std::stringstream sstream;
+        sstream << "Failed to parse flatbuffer: " << vw_status.get_error_msg();
+
+        // This is a bit unfortunate, but the APIs around safe_vw were built with
+        // the original VW error handling (THROW() macro) in mind, and catching the
+        // exception at the level of vw_model. Ideally we should do the work to
+        // define a consistent error handling model in VW, and use that here.
+        //
+        // In the short term, wrap the error in an exception and throw it up
+        // one level.
+        throw std::runtime_error(sstream.str().c_str());
+      }
+
+    }
+  };
+
+  template <bool audit>
+  void parse_context(VW::workspace& w, string_view context, input_serialization input_format, VW::example_factory_t ex_fac, VW::multi_ex& examples, VW::example_sink_f ex_sink)
+  {
+    examples.push_back(&ex_fac());
+    ensure_audit_buffer<audit>(w);
+
+    switch (input_format)
+    {
+      case input_serialization::vwjson:
+        example_parser<input_serialization::vwjson>::parse_context<audit>(w, context, ex_fac, examples);
+        break;
+      case input_serialization::flatbuffer:
+        example_parser<input_serialization::flatbuffer>::parse_context<audit>(w, context, ex_fac, examples, ex_sink);
+        break;
+      default:
+        throw std::runtime_error("Unsupported input format");
+  }
+}
+}
+
+void safe_vw::parse_context(string_view context, VW::multi_ex& examples)
+{
+  VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
+  VW::example_sink_f ex_sink = [this](VW::multi_ex&& ec)
+  {
+    for (auto&& ex : ec)
+    {
+      ex->pred.a_s.clear();
+      _example_pool.emplace_back(ex);
+    }
+  };
+
+
+  if (_vw->output_config.audit)
+  {
+    detail::parse_context<true>(*_vw, context, _input_format, ex_fac, examples, ex_sink);
+  }
+  else
+  { detail::parse_context<false>(*_vw, context, _input_format, ex_fac, examples, ex_sink);
+  }
+}
+
 void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& actions, std::vector<float>& scores)
 {
+  VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
+
+  // TODO: Technically, it is an error to call this IFF input_format != dsjson, though we should consider supporting
+  // Flatbuffers here, too.
+  // if (_input_format != input_serialization::dsjson)
+  // {
+  //   throw std::runtime_error("Input format must be DSJSON when using parsing input with PDF/PMF.");
+  // }
+
   VW::parsers::json::decision_service_interaction interaction;
 
   VW::multi_ex examples;
@@ -92,7 +268,6 @@ void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& acti
 
   // copy due to destructive parsing by rapidjson
   std::string line_vec(context);
-  VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
 
   if (_vw->output_config.audit)
   {
@@ -124,29 +299,25 @@ void safe_vw::parse_context_with_pdf(string_view context, std::vector<int>& acti
 void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<float>& scores)
 {
   VW::multi_ex examples;
-  examples.push_back(get_or_create_example());
 
-  // copy due to destructive parsing by rapidjson
-  std::string line_vec(context);
-  VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
+  // clean up examples and push examples back into pool for re-use
+  auto scope_guard = VW::scope_exit([this, &examples] {
+    for (auto&& ex : examples)
+    {
+      ex->pred.a_s.clear();
+      _example_pool.emplace_back(ex);
+    }
+  });
 
-  if (_vw->output_config.audit)
-  {
-    _vw->output_runtime.audit_buffer->clear();
-    VW::parsers::json::read_line_json<true>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac);
-  }
-  else { VW::parsers::json::read_line_json<false>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac); }
+  parse_context(context, examples);
 
   // finalize example
   VW::setup_examples(*_vw, examples);
 
-  // TODO: refactor setup_examples to take in multi_ex
-  VW::multi_ex examples2(examples.begin(), examples.end());
-
-  _vw->predict(examples2);
+  _vw->predict(examples);
 
   // prediction are in the first-example
-  const auto& predictions = examples2[0]->pred.a_s;
+  const auto& predictions = examples[0]->pred.a_s;
   actions.resize(predictions.size());
   scores.resize(predictions.size());
   for (size_t i = 0; i < predictions.size(); ++i)
@@ -154,30 +325,12 @@ void safe_vw::rank(string_view context, std::vector<int>& actions, std::vector<f
     actions[i] = predictions[i].action;
     scores[i] = predictions[i].score;
   }
-
-  // clean up examples and push examples back into pool for re-use
-  for (auto&& ex : examples)
-  {
-    ex->pred.a_s.clear();
-    _example_pool.emplace_back(ex);
-  }
 }
 
 void safe_vw::choose_continuous_action(string_view context, float& action, float& pdf_value)
 {
   VW::multi_ex examples;
-  examples.push_back(get_or_create_example());
-
-  // copy due to destructive parsing by rapidjson
-  std::string line_vec(context);
-  VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
-
-  if (_vw->output_config.audit)
-  {
-    _vw->output_runtime.audit_buffer->clear();
-    VW::parsers::json::read_line_json<true>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac);
-  }
-  else { VW::parsers::json::read_line_json<false>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac); }
+  parse_context(context, examples);
 
   // finalize example
   VW::setup_examples(*_vw, examples);
@@ -198,18 +351,7 @@ void safe_vw::rank_decisions(const std::vector<const char*>& event_ids, string_v
     std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
 {
   VW::multi_ex examples;
-  examples.push_back(get_or_create_example());
-
-  // copy due to destructive parsing by rapidjson
-  std::string line_vec(context);
-  VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
-
-  if (_vw->output_config.audit)
-  {
-    _vw->output_runtime.audit_buffer->clear();
-    VW::parsers::json::read_line_json<true>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac);
-  }
-  else { VW::parsers::json::read_line_json<false>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac); }
+  parse_context(context, examples);
 
   // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the
   // example tag.
@@ -224,13 +366,10 @@ void safe_vw::rank_decisions(const std::vector<const char*>& event_ids, string_v
   // finalize example
   VW::setup_examples(*_vw, examples);
 
-  // TODO: refactor setup_examples to take in multi_ex
-  VW::multi_ex examples2(examples.begin(), examples.end());
-
-  _vw->predict(examples2);
+  _vw->predict(examples);
 
   // prediction are in the first-example
-  auto& predictions = examples2[0]->pred.decision_scores;
+  auto& predictions = examples[0]->pred.decision_scores;
   actions.resize(predictions.size());
   scores.resize(predictions.size());
   for (size_t i = 0; i < predictions.size(); ++i)
@@ -253,18 +392,7 @@ void safe_vw::rank_multi_slot_decisions(const char* event_id, const std::vector<
     string_view context, std::vector<std::vector<uint32_t>>& actions, std::vector<std::vector<float>>& scores)
 {
   VW::multi_ex examples;
-  examples.push_back(get_or_create_example());
-
-  // copy due to destructive parsing by rapidjson
-  std::string line_vec(context);
-  VW::example_factory_t ex_fac = [this]() -> VW::example& { return get_or_create_example_f(this); };
-
-  if (_vw->output_config.audit)
-  {
-    _vw->output_runtime.audit_buffer->clear();
-    VW::parsers::json::read_line_json<true>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac);
-  }
-  else { VW::parsers::json::read_line_json<false>(*_vw, examples, &line_vec[0], line_vec.size(), ex_fac); }
+  parse_context(context, examples);
 
   // In order to control the seed for the sampling of each slot the event id + app id is passed in as the seed using the
   // example tag.
@@ -280,13 +408,10 @@ void safe_vw::rank_multi_slot_decisions(const char* event_id, const std::vector<
   // finalize example
   VW::setup_examples(*_vw, examples);
 
-  // TODO: refactor setup_examples to take in multi_ex
-  VW::multi_ex examples2(examples.begin(), examples.end());
-
-  _vw->predict(examples2);
+  _vw->predict(examples);
 
   // prediction are in the first-example
-  auto& predictions = examples2[0]->pred.decision_scores;
+  auto& predictions = examples[0]->pred.decision_scores;
   actions.resize(predictions.size());
   scores.resize(predictions.size());
   for (size_t i = 0; i < predictions.size(); ++i)
@@ -380,19 +505,19 @@ void safe_vw::init()
   }
 }
 
-safe_vw_factory::safe_vw_factory(std::string command_line) : _command_line(std::move(command_line)) {}
+safe_vw_factory::safe_vw_factory(std::string command_line, input_serialization input_format) : _command_line(std::move(command_line)), _input_format(input_format) {}
 
-safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data) : _master_data(master_data) {}
+safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data, input_serialization input_format) : _master_data(master_data), _input_format(input_format) {}
 
-safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_data) : _master_data(master_data) {}
+safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_data, input_serialization input_format) : _master_data(master_data), _input_format(input_format) {}
 
-safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data, std::string command_line)
-    : _master_data(master_data), _command_line(std::move(command_line))
+safe_vw_factory::safe_vw_factory(const model_management::model_data& master_data, std::string command_line, input_serialization input_format)
+    : _master_data(master_data), _command_line(std::move(command_line)), _input_format(input_format)
 {
 }
 
-safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_data, std::string command_line)
-    : _master_data(master_data), _command_line(std::move(command_line))
+safe_vw_factory::safe_vw_factory(const model_management::model_data&& master_data, std::string command_line, input_serialization input_format)
+    : _master_data(master_data), _command_line(std::move(command_line)), _input_format(input_format)
 {
 }
 
@@ -401,13 +526,13 @@ safe_vw* safe_vw_factory::operator()()
   if ((_master_data.data() != nullptr) && !_command_line.empty())
   {
     // Construct new vw object from raw model data and command line argument
-    return new safe_vw(_master_data.data(), _master_data.data_sz(), _command_line);
+    return new safe_vw(_master_data.data(), _master_data.data_sz(), _command_line, _input_format);
   }
   if (_master_data.data() != nullptr)
   {
     // Construct new vw object from raw model data.
-    return new safe_vw(_master_data.data(), _master_data.data_sz());
+    return new safe_vw(_master_data.data(), _master_data.data_sz(), _input_format);
   }
-  return new safe_vw(_command_line);
+  return new safe_vw(_command_line, _input_format);
 }
 }  // namespace reinforcement_learning

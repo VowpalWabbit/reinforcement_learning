@@ -23,29 +23,29 @@ extern "C"
 
   API int LiveModelInit(livemodel_context_t* livemodel, reinforcement_learning::api_status* status = nullptr);
 
-  API int LiveModelChooseRank(livemodel_context_t* livemodel, const char* event_id, const char* context_json,
+  /*API int LiveModelChooseRank(livemodel_context_t* livemodel, const char* event_id, const char* context_json,
       int context_json_size, reinforcement_learning::ranking_response* resp,
-      reinforcement_learning::api_status* status = nullptr);
+      reinforcement_learning::api_status* status = nullptr);*/
   API int LiveModelChooseRankWithFlags(livemodel_context_t* livemodel, const char* event_id, const char* context_json,
       int context_json_size, unsigned int flags, reinforcement_learning::ranking_response* resp,
       reinforcement_learning::api_status* status = nullptr);
 
-  API int LiveModelRequestContinuousAction(livemodel_context_t* livemodel, const char* event_id,
+  /*API int LiveModelRequestContinuousAction(livemodel_context_t* livemodel, const char* event_id,
       const char* context_json, int context_json_size, reinforcement_learning::continuous_action_response* resp,
-      reinforcement_learning::api_status* status = nullptr);
+      reinforcement_learning::api_status* status = nullptr);*/
   API int LiveModelRequestContinuousActionWithFlags(livemodel_context_t* livemodel, const char* event_id,
       const char* context_json, int context_json_size, unsigned int flags,
       reinforcement_learning::continuous_action_response* resp, reinforcement_learning::api_status* status = nullptr);
 
-  API int LiveModelRequestDecision(livemodel_context_t* livemodel, const char* context_json, int context_json_size,
-      reinforcement_learning::decision_response* resp, reinforcement_learning::api_status* status = nullptr);
+  /*API int LiveModelRequestDecision(livemodel_context_t* livemodel, const char* context_json, int context_json_size,
+      reinforcement_learning::decision_response* resp, reinforcement_learning::api_status* status = nullptr);*/
   API int LiveModelRequestDecisionWithFlags(livemodel_context_t* livemodel, const char* context_json,
       int context_json_size, unsigned int flags, reinforcement_learning::decision_response* resp,
       reinforcement_learning::api_status* status = nullptr);
 
-  API int LiveModelRequestMultiSlotDecision(livemodel_context_t* context, const char* event_id,
+  /*API int LiveModelRequestMultiSlotDecision(livemodel_context_t* context, const char* event_id,
       const char* context_json, int context_json_size, reinforcement_learning::multi_slot_response* resp,
-      reinforcement_learning::api_status* status = nullptr);
+      reinforcement_learning::api_status* status = nullptr);*/
   API int LiveModelRequestMultiSlotDecisionWithFlags(livemodel_context_t* context, const char* event_id,
       const char* context_json, int context_json_size, unsigned int flags,
       reinforcement_learning::multi_slot_response* resp, reinforcement_learning::api_status* status = nullptr);
@@ -54,9 +54,9 @@ extern "C"
       reinforcement_learning::multi_slot_response* resp, const int* baseline_actions,
       const size_t baseline_actions_size, reinforcement_learning::api_status* status = nullptr);
 
-  API int LiveModelRequestMultiSlotDecisionDetailed(livemodel_context_t* context, const char* event_id,
+  /*API int LiveModelRequestMultiSlotDecisionDetailed(livemodel_context_t* context, const char* event_id,
       const char* context_json, int context_json_size, reinforcement_learning::multi_slot_response_detailed* resp,
-      reinforcement_learning::api_status* status = nullptr);
+      reinforcement_learning::api_status* status = nullptr);*/
   API int LiveModelRequestMultiSlotDecisionDetailedWithFlags(livemodel_context_t* context, const char* event_id,
       const char* context_json, int context_json_size, unsigned int flags,
       reinforcement_learning::multi_slot_response_detailed* resp, reinforcement_learning::api_status* status = nullptr);
@@ -68,9 +68,9 @@ extern "C"
       const char* previous_id, const char* context_json, unsigned int flags,
       reinforcement_learning::ranking_response& resp, reinforcement_learning::episode_state& episode,
       reinforcement_learning::api_status* status);
-  API int LiveModelRequestEpisodicDecision(livemodel_context_t* context, const char* event_id, const char* previous_id,
+  /*API int LiveModelRequestEpisodicDecision(livemodel_context_t* context, const char* event_id, const char* previous_id,
       const char* context_json, reinforcement_learning::ranking_response& resp,
-      reinforcement_learning::episode_state& episode, reinforcement_learning::api_status* status);
+      reinforcement_learning::episode_state& episode, reinforcement_learning::api_status* status);*/
 
   API int LiveModelReportActionTaken(
       livemodel_context_t* livemodel, const char* event_id, reinforcement_learning::api_status* status = nullptr);

@@ -19,6 +19,9 @@
 # VS CMake configuration
 CMakeSettings.json
 
+# CMake User Presets
+CMakeUserPresets.json
+
 # Ignore NuGet Packages
 *.nupkg
 # Ignore the packages folder

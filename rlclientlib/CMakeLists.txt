@@ -22,7 +22,7 @@ set(RL_FLAT_BUFFER_FILES_V1
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v1/SlatesEvent.fbs" )
 
 set(RL_FLAT_BUFFER_FILES_V2
-  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CaEvent.fbs" 
+  "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CaEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/CbEvent.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/DedupInfo.fbs"
   "${CMAKE_CURRENT_SOURCE_DIR}/schema/v2/Event.fbs"
@@ -181,6 +181,7 @@ set(PROJECT_PRIVATE_HEADERS
   vw_model/pdf_model.h
   vw_model/safe_vw.h
   vw_model/vw_model.h
+  vw_model/vw_api_status_interop.h
 )
 
 if(vw_USE_AZURE_FACTORIES)
@@ -229,8 +230,8 @@ target_include_directories(rlclientlib
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../ext_libs/date
 )
-
-target_link_libraries(rlclientlib PUBLIC Boost::system vw_common vw_core PRIVATE RapidJSON)
+# conditionally include fb_parser?
+target_link_libraries(rlclientlib PUBLIC Boost::system vw_common vw_core vw_fb_parser PRIVATE RapidJSON)
 
 # If flatbuffers found via CONFIG, add its target as a library dependency
 # Otherwise, the flatbuffers MODULE defines FLATBUFFERS_INCLUDE_DIR to add to the include path

@@ -10,6 +10,8 @@ namespace utility
 {
 void configuration::set(const char* name, const char* value) { _pmap[name] = value; }
 
+std::string& configuration::operator[](const char* name) { return _pmap[name]; }
+
 const char* configuration::get(const char* name, const char* defval) const
 {
   const auto it = _pmap.find(name);

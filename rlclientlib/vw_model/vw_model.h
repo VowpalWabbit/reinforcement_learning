@@ -47,6 +47,7 @@ private:
   const std::string _initial_command_line;
   const std::string _quiet_commandline_options{"--json --quiet"};
   const std::string _upgrade_to_CCB_vw_commandline_options{"--ccb_explore_adf --json --quiet"};
+  const input_serialization _input_format;
   utility::versioned_object_pool<safe_vw> _vw_pool;
   i_trace* _trace_logger;
 };
