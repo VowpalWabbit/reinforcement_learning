@@ -19,34 +19,34 @@ namespace Rl.Net
             [DllImport("rlnetnative")]
             public static extern int CBLoopInit(IntPtr cbLoop, IntPtr apiStatus);
 
-            [DllImport("rlnetnative", EntryPoint = "CBLoopChooseRank")]
-            private static extern int CBLoopChooseRankNative(IntPtr cbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr rankingResponse, IntPtr apiStatus);
+            // [DllImport("rlnetnative", EntryPoint = "CBLoopChooseRank")]
+            // private static extern int CBLoopChooseRankNative(IntPtr cbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr rankingResponse, IntPtr apiStatus);
 
-            internal static Func<IntPtr, IntPtr, IntPtr, int, IntPtr, IntPtr, int> CBLoopChooseRankOverride { get; set; }
+            // internal static Func<IntPtr, IntPtr, IntPtr, int, IntPtr, IntPtr, int> CBLoopChooseRankOverride { get; set; }
 
-            public static int CBLoopChooseRank(IntPtr cbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr rankingResponse, IntPtr apiStatus)
-            {
-                if (CBLoopChooseRankOverride != null)
-                {
-                    return CBLoopChooseRankOverride(cbLoop, eventId, contextJson, contextJsonSize, rankingResponse, apiStatus);
-                }
+            // public static int CBLoopChooseRank(IntPtr cbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr rankingResponse, IntPtr apiStatus)
+            // {
+            //     if (CBLoopChooseRankOverride != null)
+            //     {
+            //         return CBLoopChooseRankOverride(cbLoop, eventId, contextJson, contextJsonSize, rankingResponse, apiStatus);
+            //     }
 
-                return CBLoopChooseRankNative(cbLoop, eventId, contextJson, contextJsonSize, rankingResponse, apiStatus);
-            }
+            //     return CBLoopChooseRankNative(cbLoop, eventId, contextJson, contextJsonSize, rankingResponse, apiStatus);
+            // }
 
             [DllImport("rlnetnative", EntryPoint = "CBLoopChooseRankWithFlags")]
-            private static extern int CBLoopChooseRankWithFlagsNative(IntPtr cbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr rankingResponse, IntPtr apiStatus);
+            private static extern int CBLoopChooseRankWithFlagsNative(IntPtr cbLoop, IntPtr eventId, IntPtr contextBytes, int contextJsonSize, uint flags, IntPtr rankingResponse, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> CBLoopChooseRankWithFlagsOverride { get; set; }
 
-            public static int CBLoopChooseRankWithFlags(IntPtr cbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr rankingResponse, IntPtr apiStatus)
+            public static int CBLoopChooseRankWithFlags(IntPtr cbLoop, IntPtr eventId, IntPtr contextBytes, int contextJsonSize, uint flags, IntPtr rankingResponse, IntPtr apiStatus)
             {
                 if (CBLoopChooseRankWithFlagsOverride != null)
                 {
-                    return CBLoopChooseRankWithFlagsOverride(cbLoop, eventId, contextJson, contextJsonSize, flags, rankingResponse, apiStatus);
+                    return CBLoopChooseRankWithFlagsOverride(cbLoop, eventId, contextBytes, contextJsonSize, flags, rankingResponse, apiStatus);
                 }
 
-                return CBLoopChooseRankWithFlagsNative(cbLoop, eventId, contextJson, contextJsonSize, flags, rankingResponse, apiStatus);
+                return CBLoopChooseRankWithFlagsNative(cbLoop, eventId, contextBytes, contextJsonSize, flags, rankingResponse, apiStatus);
             }
 
             [DllImport("rlnetnative", EntryPoint = "CBLoopReportActionTaken")]
@@ -165,51 +165,62 @@ namespace Rl.Net
             }
         }
 
-        unsafe private static int CBLoopChooseRank(IntPtr cbLoop, string eventId, string contextJson, IntPtr rankingResponse, IntPtr apiStatus)
-        {
-            CheckJsonString(contextJson);
+        private const uint DEFAULT_FLAGS = (uint)ActionFlags.Default;
 
-            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+        // unsafe private static int CBLoopChooseRank(IntPtr cbLoop, string eventId, string contextJson, IntPtr rankingResponse, IntPtr apiStatus)
+        // {
+        //     CheckJsonString(contextJson);
+
+        //     fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
+        //     {
+        //         int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
+        //         IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
+
+        //         // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
+        //         // eventId and use supplied eventId at the rl.net.native layer.
+        //         if (eventId == null)
+        //         {
+        //             return NativeMethods.CBLoopChooseRank(cbLoop, IntPtr.Zero, contextJsonUtf8Ptr, contextJsonSize, rankingResponse, apiStatus);
+        //         }
+
+        //         fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
+        //         {
+        //             return NativeMethods.CBLoopChooseRank(cbLoop, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, contextJsonSize, rankingResponse, apiStatus);
+        //         }
+        //     }
+        // }
+
+        // TODO: Should we reduce the rl.net.native interface to only have one of these?
+        unsafe private static int CBLoopChooseRankWithFlags(IntPtr cbLoop, string eventId, byte[] contextBytes, uint flags, IntPtr rankingResponse, IntPtr apiStatus)
+        {
+            //CheckJsonString(contextJson);
+
+            fixed (byte* contextBytesFixed = contextBytes)
             {
-                int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
-                IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
+                int contextBytesSize = contextBytes.Length;
+                IntPtr contextBytesPtr = new IntPtr(contextBytesFixed);
 
                 // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
                 // eventId and use supplied eventId at the rl.net.native layer.
                 if (eventId == null)
                 {
-                    return NativeMethods.CBLoopChooseRank(cbLoop, IntPtr.Zero, contextJsonUtf8Ptr, contextJsonSize, rankingResponse, apiStatus);
+                    return NativeMethods.CBLoopChooseRankWithFlags(cbLoop, IntPtr.Zero, contextBytesPtr, contextBytesSize, flags, rankingResponse, apiStatus);
                 }
 
                 fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
                 {
-                    return NativeMethods.CBLoopChooseRank(cbLoop, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, contextJsonSize, rankingResponse, apiStatus);
+                    return NativeMethods.CBLoopChooseRankWithFlags(cbLoop, new IntPtr(eventIdUtf8Bytes), contextBytesPtr, contextBytesSize, flags, rankingResponse, apiStatus);
                 }
             }
         }
 
-        // TODO: Should we reduce the rl.net.native interface to only have one of these?
         unsafe private static int CBLoopChooseRankWithFlags(IntPtr cbLoop, string eventId, string contextJson, uint flags, IntPtr rankingResponse, IntPtr apiStatus)
         {
             CheckJsonString(contextJson);
 
-            fixed (byte* contextJsonUtf8Bytes = NativeMethods.StringEncoding.GetBytes(contextJson))
-            {
-                int contextJsonSize = NativeMethods.StringEncoding.GetByteCount(contextJson);
-                IntPtr contextJsonUtf8Ptr = new IntPtr(contextJsonUtf8Bytes);
+            byte[] contextJsonEncodedBytes = NativeMethods.StringEncoding.GetBytes(contextJson);
 
-                // It is important to pass null on faithfully here, because we rely on this to switch between auto-generate
-                // eventId and use supplied eventId at the rl.net.native layer.
-                if (eventId == null)
-                {
-                    return NativeMethods.CBLoopChooseRankWithFlags(cbLoop, IntPtr.Zero, contextJsonUtf8Ptr, contextJsonSize, flags, rankingResponse, apiStatus);
-                }
-
-                fixed (byte* eventIdUtf8Bytes = NativeMethods.StringEncoding.GetBytes(eventId))
-                {
-                    return NativeMethods.CBLoopChooseRankWithFlags(cbLoop, new IntPtr(eventIdUtf8Bytes), contextJsonUtf8Ptr, contextJsonSize, flags, rankingResponse, apiStatus);
-                }
-            }
+            return CBLoopChooseRankWithFlags(cbLoop, eventId, contextJsonEncodedBytes, flags, rankingResponse, apiStatus);
         }
 
         unsafe private static int CBLoopReportActionTaken(IntPtr cbLoop, string eventId, IntPtr apiStatus)
@@ -331,9 +342,23 @@ namespace Rl.Net
             return this.TryChooseRank(eventId, contextJson, response, apiStatus);
         }
 
+        public bool TryChooseRank(string eventId, byte[] contextBytes, out RankingResponse response, ApiStatus apiStatus = null)
+        {
+            response = new RankingResponse();
+            return this.TryChooseRank(eventId, contextBytes, response, apiStatus);
+        }
+
         public bool TryChooseRank(string eventId, string contextJson, RankingResponse response, ApiStatus apiStatus = null)
         {
-            int result = CBLoopChooseRank(this.DangerousGetHandle(), eventId, contextJson, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+            int result = CBLoopChooseRankWithFlags(this.DangerousGetHandle(), eventId, contextJson, CBLoop.DEFAULT_FLAGS, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public bool TryChooseRank(string eventId, byte[] contextBytes, RankingResponse response, ApiStatus apiStatus = null)
+        {
+            int result = CBLoopChooseRankWithFlags(this.DangerousGetHandle(), eventId, contextBytes, CBLoop.DEFAULT_FLAGS, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
 
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
@@ -352,15 +377,42 @@ namespace Rl.Net
             return result;
         }
 
+        public RankingResponse ChooseRank(string eventId, byte[] contextBytes)
+        {
+            RankingResponse result = new RankingResponse();
+
+            using (ApiStatus apiStatus = new ApiStatus())
+                if (!this.TryChooseRank(eventId, contextBytes, result, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
+
+            return result;
+        }
+
         public bool TryChooseRank(string eventId, string contextJson, ActionFlags flags, out RankingResponse response, ApiStatus apiStatus = null)
         {
             response = new RankingResponse();
             return this.TryChooseRank(eventId, contextJson, flags, response, apiStatus);
         }
 
+        public bool TryChooseRank(string eventId, byte[] contextBytes, ActionFlags flags, out RankingResponse response, ApiStatus apiStatus = null)
+        {
+            response = new RankingResponse();
+            return this.TryChooseRank(eventId, contextBytes, flags, response, apiStatus);
+        }
+
         public bool TryChooseRank(string eventId, string contextJson, ActionFlags flags, RankingResponse response, ApiStatus apiStatus = null)
         {
             int result = CBLoopChooseRankWithFlags(this.DangerousGetHandle(), eventId, contextJson, (uint)flags, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
+
+            GC.KeepAlive(this);
+            return result == NativeMethods.SuccessStatus;
+        }
+
+        public bool TryChooseRank(string eventId, byte[] contextBytes, ActionFlags flags, RankingResponse response, ApiStatus apiStatus = null)
+        {
+            int result = CBLoopChooseRankWithFlags(this.DangerousGetHandle(), eventId, contextBytes, (uint)flags, response.DangerousGetHandle(), apiStatus.ToNativeHandleOrNullptrDangerous());
 
             GC.KeepAlive(this);
             return result == NativeMethods.SuccessStatus;
@@ -372,6 +424,19 @@ namespace Rl.Net
 
             using (ApiStatus apiStatus = new ApiStatus())
                 if (!this.TryChooseRank(eventId, contextJson, flags, result, apiStatus))
+                {
+                    throw new RLException(apiStatus);
+                }
+
+            return result;
+        }
+
+        public RankingResponse ChooseRank(string eventId, byte[] contextBytes, ActionFlags flags)
+        {
+            RankingResponse result = new RankingResponse();
+
+            using (ApiStatus apiStatus = new ApiStatus())
+                if (!this.TryChooseRank(eventId, contextBytes, flags, result, apiStatus))
                 {
                     throw new RLException(apiStatus);
                 }
