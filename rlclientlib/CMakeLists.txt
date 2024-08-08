@@ -118,6 +118,7 @@ endif()
 set(PROJECT_PUBLIC_HEADERS
   ../include/action_flags.h
   ../include/api_status.h
+  ../include/azure_credentials_provider.h
   ../include/loop_apis/base_loop.h
   ../include/loop_apis/ca_loop.h
   ../include/loop_apis/cb_loop.h

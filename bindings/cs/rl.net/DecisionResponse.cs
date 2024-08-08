@@ -12,25 +12,25 @@ namespace Rl.Net {
     {
         internal partial class NativeMethods
         {
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern IntPtr CreateSlotResponse();
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern IntPtr GetSlotSlotId(IntPtr slotResponse);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern int GetSlotActionId(IntPtr slotResponse);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern float GetSlotProbability(IntPtr slotResponse);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern IntPtr CreateDecisionResponse();
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern void DeleteDecisionResponse(IntPtr decisionResponse);
 
-            [DllImport("rlnetnative", EntryPoint = "GetDecisionModelId")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "GetDecisionModelId")]
             private static extern IntPtr GetDecisionModelIdNative(IntPtr decisionResponse);
 
             internal static Func<IntPtr, IntPtr> GetDecisionModelIdOverride { get; set; }
@@ -47,7 +47,7 @@ namespace Rl.Net {
 
             // TODO: CLS-compliance requires that we not publically expose unsigned types.
             // Probably not a big issue ("9e18 actions ought to be enough for anyone...")
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern UIntPtr GetDecisionSize(IntPtr decisionResponse);
         }
     }
@@ -133,7 +133,7 @@ namespace Rl.Net {
 
         private class DecisionResponseEnumerator : NativeObject<DecisionResponseEnumerator>, IEnumerator<SlotResponse>
         {
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             private static extern IntPtr CreateDecisionEnumeratorAdapter(IntPtr decisionResponse);
 
             private static New<DecisionResponseEnumerator> BindConstructorArguments(DecisionResponse decisionResponse)
@@ -148,16 +148,16 @@ namespace Rl.Net {
                 });
             }
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             private static extern void DeleteDecisionEnumeratorAdapter(IntPtr decisionEnumeratorAdapter);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             private static extern int DecisionEnumeratorInit(IntPtr decisionEnumeratorAdapter);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             private static extern int DecisionEnumeratorMoveNext(IntPtr decisionEnumeratorAdapter);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             private static extern IntPtr GetDecisionEnumeratorCurrent(IntPtr decisionEnumeratorAdapter);
 
             private bool initialState = true;

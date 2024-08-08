@@ -6,11 +6,6 @@ set(RL_SIM_SOURCES
   robot_joint.cc
   rl_sim.cc
 )
-if(RL_LINK_AZURE_LIBS)
-  list(APPEND RL_SIM_SOURCES
-    azure_credentials.cc
-  )
-endif()
 
 add_executable(rl_sim_cpp.out
   ${RL_SIM_SOURCES}

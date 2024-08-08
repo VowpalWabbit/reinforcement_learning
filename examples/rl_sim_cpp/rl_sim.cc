@@ -496,7 +496,7 @@ int rl_sim::init_rl()
     // Note: This requires C++14 or better
     using namespace std::placeholders;
     reinforcement_learning::oauth_callback_t callback =
-        std::bind(&AzureCredentials::get_credentials, &_creds, _1, _2, _3);
+      std::bind(&azure_credentials_provider_t::get_credentials, &_creds, _1, _2, _3);
     reinforcement_learning::register_default_factories_callback(callback);
 #endif
   }
@@ -653,10 +653,8 @@ std::string rl_sim::create_event_id()
 rl_sim::rl_sim(boost::program_options::variables_map vm)
     : _options(std::move(vm))
     , _loop_kind(CB)
-#ifdef LINK_AZURE_LIBS
-    , _creds(_options["azure_tenant_id"].as<std::string>())
-#endif
 {
+
   if (_options["ccb"].as<bool>()) { _loop_kind = CCB; }
   else if (_options["slates"].as<bool>()) { _loop_kind = Slates; }
   else if (_options["ca"].as<bool>()) { _loop_kind = CA; }

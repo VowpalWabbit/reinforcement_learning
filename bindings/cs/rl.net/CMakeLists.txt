@@ -1,7 +1,16 @@
+find_program(DOTNET_T4_EXECUTABLE NAMES t4)
+
+if (DOTNET_T4_EXECUTABLE)
+  message(STATUS "found dotnet-t4: ${DOTNET_T4_EXECUTABLE}")
+else()
+  message(FATAL_ERROR "dotnet-t4 tool not found. install dotnet-t4 using: dotnet tool install -g dotnet-t4")
+endif()
+
 set(RL_NET_SOURCES
   Native/ErrorCallback.cs
   Native/GCHandleLifetime.cs
   Native/Global.cs
+  Native/NativeImports.cs
   Native/NativeObject.cs
   Native/SenderAdapter.cs
   Native/StringExtensions.cs
@@ -9,6 +18,7 @@ set(RL_NET_SOURCES
   ActionFlags.cs
   ApiStatus.cs
   AsyncSender.cs
+  OAuthCredentialProvider.cs
   CALoop.cs
   CBLoop.cs
   CCBLoop.cs

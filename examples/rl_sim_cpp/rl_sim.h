@@ -6,7 +6,12 @@
  * @date 2018-07-18
  */
 #pragma once
-#include "azure_credentials.h"
+#include "azure_credentials_provider.h"
+
+#ifdef LINK_AZURE_LIBS
+#include <azure/identity/default_azure_credential.hpp>
+#endif
+
 #include "live_model.h"
 #include "person.h"
 #include "robot_joint.h"
@@ -179,6 +184,8 @@ private:
   bool _quiet = false;
   bool _random_ids = true;
 #ifdef LINK_AZURE_LIBS
-  AzureCredentials _creds;
+  using azure_cred_t = Azure::Identity::DefaultAzureCredential;
+  using azure_credentials_provider_t = reinforcement_learning::azure_credentials_provider<azure_cred_t>;
+  azure_credentials_provider_t _creds;
 #endif
 };
