@@ -17,6 +17,11 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <memory>
+
+#  ifdef LINK_AZURE_LIBS
+#    include <azure/core/credentials/credentials.hpp>
+#  endif
 
 namespace reinforcement_learning
 {
