@@ -1,7 +1,7 @@
 #pragma once
 
-#include "rl.net.native.h"
 #include "factory_resolver.h"
+#include "rl.net.native.h"
 
 #include <cstddef>
 
@@ -28,8 +28,8 @@ extern "C"
   // both the callback and completion functions must be registered before any calls to the Azure factories are made
   // typically, this function should be called once during the initialization of the application
   //  callback - the callback function to be called by the C++ code to get the OAuth token
-  //  completion - the callback function to be called by the C++ code to signal the completion of the OAuth token request
-  API void RegisterDefaultFactoriesCallback(
-    rl_net_native::azure_factory_oauth_callback_t callback,
-    rl_net_native::azure_factory_oauth_callback_complete_t completion);
+  //  completion - the callback function to be called by the C++ code to signal the completion of the OAuth token
+  //  request
+  API void RegisterDefaultFactoriesCallback(rl_net_native::azure_factory_oauth_callback_t callback,
+      rl_net_native::azure_factory_oauth_callback_complete_t completion);
 }

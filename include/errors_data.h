@@ -56,5 +56,6 @@ ERROR_CODE_DEFINITION(50, http_api_key_not_provided, "Http api key must be provi
 ERROR_CODE_DEFINITION(51, http_model_uri_not_provided, "Model Blob URI parameter was not passed in via configuration")
 ERROR_CODE_DEFINITION(52, static_model_load_error, "Static model passed in C# layer is not loading properly")
 ERROR_CODE_DEFINITION(53, http_oauth_authentication_error, "http request failed to authenticate")
-ERROR_CODE_DEFINITION(54, http_oauth_unexpected_error, "http request failed with an unexpected error while retrieving a token")
+ERROR_CODE_DEFINITION(
+    54, http_oauth_unexpected_error, "http request failed with an unexpected error while retrieving a token")
 //! [Error Definitions]

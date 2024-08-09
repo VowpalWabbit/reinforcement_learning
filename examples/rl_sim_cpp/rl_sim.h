@@ -9,7 +9,7 @@
 #include "azure_credentials_provider.h"
 
 #ifdef LINK_AZURE_LIBS
-#include <azure/identity/default_azure_credential.hpp>
+#  include <azure/identity/default_azure_credential.hpp>
 #endif
 
 #include "live_model.h"
