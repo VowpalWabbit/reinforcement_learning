@@ -2,14 +2,6 @@
 
 #ifdef LINK_AZURE_LIBS
 
-#include "api_status.h"
-#include "configuration.h"
-#include "future_compat.h"
-
-#include "err_constants.h"
-#include "future_compat.h"
-
-#include <azure/core/datetime.hpp>
 #include <chrono>
 #include <mutex>
 // These are needed because azure does a bad time conversion
@@ -19,34 +11,44 @@
 #include <sstream>
 #include <memory>
 
-#  ifdef LINK_AZURE_LIBS
-#    include <azure/core/credentials/credentials.hpp>
-#  endif
+#include <azure/core/datetime.hpp>
+
+#ifdef LINK_AZURE_LIBS
+#include <azure/core/credentials/credentials.hpp>
+#endif
+
+#include "err_constants.h"
+#include "trace_logger.h"
 
 namespace reinforcement_learning
 {
-
 template<typename T>
 class azure_credentials_provider
 {
 public:
   template<typename... Args>
   azure_credentials_provider(Args&&... args) :
-    _creds(std::make_unique<T>(std::forward<Args>(args)...)) {}
+    _creds(std::make_unique<T>(std::forward<Args>(args)...))
+  {
+  }
 
   int get_credentials(const std::vector<std::string>& scopes, std::string& token_out,
-      std::chrono::system_clock::time_point& expiry_out)
+    std::chrono::system_clock::time_point& expiry_out, i_trace* trace)
   {
+    using namespace Azure::Core;
+    using namespace Azure::Core::Credentials;
     try
     {
-      Azure::Core::Credentials::TokenRequestContext request_context;
+      TokenRequestContext request_context;
+      Context context;
+
       request_context.Scopes = scopes;
-
-      Azure::Core::Context context;
-      std::cout << "fetching token for " << scopes[0] << std::endl;
-
-      std::lock_guard<std::mutex> lock(_creds_mtx);
-      auto auth = _creds->GetToken(request_context, context);
+      AccessToken auth;
+      {
+        std::lock_guard<std::mutex> lock(_creds_mtx);
+        auth = _creds->GetToken(request_context, context);
+        TRACE_DEBUG(trace, "azure_credentials_provider: successfully retrieved token");
+      }
       token_out = auth.Token;
 
       // Casting from an azure DateTime object to a time_point does the calculation
@@ -59,19 +61,22 @@ public:
       std::istringstream ss(dt_string);
       ss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%SZ");
       expiry_out = std::chrono::system_clock::from_time_t(std::mktime(&tm));
-
-      return 0;
     }
-    catch (std::exception& e)
-    {
-      std::cout << "Error getting auth token: " << e.what();
-      return error_code::external_error;
-    }
-    catch (...)
-    {
-      std::cout << "Unknown error while getting auth token";
-      return error_code::external_error;
-    }
+    catch (AuthenticationException& e)
+	{
+      TRACE_ERROR(trace, e.what());
+      return error_code::http_oauth_authentication_error;
+	}
+	catch (std::exception& e)
+	{
+      TRACE_ERROR(trace, e.what());
+	  return error_code::http_oauth_unexpected_error;
+	}
+	catch (...)
+	{
+      TRACE_ERROR(trace, "azure_credentials_provider: an unexpected unknown error occurred");
+	  return error_code::http_oauth_unexpected_error;
+	}
     return error_code::success;
   }
 
@@ -79,7 +84,6 @@ private:
   std::unique_ptr<T> _creds;
   mutable std::mutex _creds_mtx;
 };
-
 }  // namespace reinforcement_learning
 
 #endif

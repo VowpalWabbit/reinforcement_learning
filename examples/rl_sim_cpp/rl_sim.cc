@@ -496,7 +496,7 @@ int rl_sim::init_rl()
     // Note: This requires C++14 or better
     using namespace std::placeholders;
     reinforcement_learning::oauth_callback_t callback =
-      std::bind(&azure_credentials_provider_t::get_credentials, &_creds, _1, _2, _3);
+      std::bind(&azure_credentials_provider_t::get_credentials, &_creds, _1, _2, _3, _4);
     reinforcement_learning::register_default_factories_callback(callback);
 #endif
   }

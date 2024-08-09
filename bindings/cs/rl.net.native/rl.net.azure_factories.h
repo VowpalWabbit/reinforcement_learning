@@ -17,6 +17,8 @@ typedef int (*azure_factory_oauth_callback_t)(const char**, char**, std::int64_t
 
 // Callback function to be called by the C# code to signal the completion of the OAuth token request
 // this provides the C# code with the opportunity to free the memory allocated for the token
+//   tokenStringToFree - pointer to the token string than needs to be freed
+//   errorCode - for future use
 typedef void (*azure_factory_oauth_callback_complete_t)(char*, int);
 }  // namespace rl_net_native
 
