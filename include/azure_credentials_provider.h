@@ -47,8 +47,8 @@ public:
       {
         std::lock_guard<std::mutex> lock(_creds_mtx);
         auth = _creds->GetToken(request_context, context);
-        TRACE_DEBUG(trace, "azure_credentials_provider: successfully retrieved token");
       }
+      TRACE_DEBUG(trace, "azure_credentials_provider: successfully retrieved token");
       token_out = auth.Token;
 
       // Casting from an azure DateTime object to a time_point does the calculation
