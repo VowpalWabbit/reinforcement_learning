@@ -26,7 +26,7 @@ jobs:
         config:
           - { os: "windows-latest", vcpkg_target_triplet: "x64-windows-static" }
           - { os: "ubuntu-latest", vcpkg_target_triplet: "x64-linux" }
-          - { os: "macos-latest-large", vcpkg_target_triplet: "x64-osx" }
+          - { os: "macos-13", vcpkg_target_triplet: "x64-osx" }
         build:
           # Set the appropriate static runtime for MSVC on Windows
           # CMake ignores the CMAKE_MSVC_RUNTIME_LIBRARY option on other platforms
