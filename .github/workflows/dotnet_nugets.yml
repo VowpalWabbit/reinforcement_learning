@@ -29,7 +29,7 @@ jobs:
         config:
           - { os: "windows-latest", runtime_id: "win-x64", vcpkg_target_triplet: "x64-windows-static" }
           - { os: "ubuntu-latest", runtime_id: "linux-x64", vcpkg_target_triplet: "x64-linux" }
-          - { os: "macos-latest", runtime_id: "osx-x64", vcpkg_target_triplet: "x64-osx" }
+          - { os: "macos-latest-large", runtime_id: "osx-x64", vcpkg_target_triplet: "x64-osx" }
     runs-on: ${{matrix.config.os}}
     steps:
       - uses: actions/checkout@v2
@@ -162,7 +162,7 @@ jobs:
         config:
           - { os: "windows-latest", runtime_id: "win-x64" }
           - { os: "ubuntu-latest", runtime_id: "linux-x64" }
-          - { os: "macos-latest", runtime_id: "osx-x64" }
+          - { os: "macos-latest-large", runtime_id: "osx-x64" }
     runs-on: ${{matrix.config.os}}
     steps:
       - uses: actions/checkout@v2
