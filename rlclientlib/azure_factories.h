@@ -1,6 +1,8 @@
 #pragma once
 #include "oauth_callback_fn.h"
 
+#include <memory>
+
 namespace reinforcement_learning
 {
 void register_azure_factories();

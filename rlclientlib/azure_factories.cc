@@ -1,8 +1,8 @@
 #include "azure_factories.h"
 
+#include "azure_credentials_provider.h"
 #include "constants.h"
 #include "factory_resolver.h"
-#include "azure_credentials_provider.h"
 #include "logger/event_logger.h"
 #include "logger/http_transport_client.h"
 #include "model_mgmt/restapi_data_transport.h"
@@ -47,22 +47,21 @@ int interaction_api_sender_create(std::unique_ptr<i_sender>& retval, const u::co
 
 int oauth_restapi_data_transport_cb_create(oauth_callback_t& callback, std::unique_ptr<m::i_data_transport>& retval,
     const u::configuration& config, i_trace* trace_logger, api_status* status);
-int episode_api_sender_oauth_cb_create(oauth_callback_t& callback,
-    std::unique_ptr<i_sender>& retval,
+int episode_api_sender_oauth_cb_create(oauth_callback_t& callback, std::unique_ptr<i_sender>& retval,
     const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status);
 int observation_api_sender_oauth_cb_create(oauth_callback_t& callback, std::unique_ptr<i_sender>& retval,
     const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status);
 int interaction_api_sender_oauth_cb_create(oauth_callback_t& callback, std::unique_ptr<i_sender>& retval,
     const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status);
 
-int oauth_restapi_data_transport_create(std::unique_ptr<m::i_data_transport>& retval,
-    const u::configuration& config, i_trace* trace_logger, api_status* status);
-int episode_api_sender_oauth_create(std::unique_ptr<i_sender>& retval,
-    const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status);
-int observation_api_sender_oauth_create(std::unique_ptr<i_sender>& retval,
-    const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status);
-int interaction_api_sender_oauth_create(std::unique_ptr<i_sender>& retval,
-    const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status);
+int oauth_restapi_data_transport_create(std::unique_ptr<m::i_data_transport>& retval, const u::configuration& config,
+    i_trace* trace_logger, api_status* status);
+int episode_api_sender_oauth_create(std::unique_ptr<i_sender>& retval, const u::configuration& cfg,
+    error_callback_fn* error_cb, i_trace* trace_logger, api_status* status);
+int observation_api_sender_oauth_create(std::unique_ptr<i_sender>& retval, const u::configuration& cfg,
+    error_callback_fn* error_cb, i_trace* trace_logger, api_status* status);
+int interaction_api_sender_oauth_create(std::unique_ptr<i_sender>& retval, const u::configuration& cfg,
+    error_callback_fn* error_cb, i_trace* trace_logger, api_status* status);
 
 int azure_default_cred_provider_create(std::unique_ptr<i_oauth_credentials_provider>& retval,
     const u::configuration& cfg, i_trace* trace_logger, api_status* status);
@@ -72,7 +71,6 @@ int azure_azurecli_cred_provider_create(std::unique_ptr<i_oauth_credentials_prov
     const u::configuration& cfg, i_trace* trace_logger, api_status* status);
 int azure_clientsecret_cred_provider_create(std::unique_ptr<i_oauth_credentials_provider>& retval,
     const u::configuration& cfg, i_trace* trace_logger, api_status* status);
-
 
 void register_azure_factories()
 {
@@ -92,9 +90,12 @@ void register_azure_factories()
 
   // register default azure credentials provider factories
   azure_cred_provider_factory.register_type(value::AZURE_OAUTH_CREDENTIALS_DEFAULT, azure_default_cred_provider_create);
-  azure_cred_provider_factory.register_type(value::AZURE_OAUTH_CREDENTIALS_MANAGEDIDENTITY, azure_managed_cred_provider_create);
-  azure_cred_provider_factory.register_type(value::AZURE_OAUTH_CREDENTIALS_AZURECLI, azure_azurecli_cred_provider_create);
-  azure_cred_provider_factory.register_type(value::AZURE_OAUTH_CREDENTIALS_CLIENTSECRET, azure_clientsecret_cred_provider_create);
+  azure_cred_provider_factory.register_type(
+      value::AZURE_OAUTH_CREDENTIALS_MANAGEDIDENTITY, azure_managed_cred_provider_create);
+  azure_cred_provider_factory.register_type(
+      value::AZURE_OAUTH_CREDENTIALS_AZURECLI, azure_azurecli_cred_provider_create);
+  azure_cred_provider_factory.register_type(
+      value::AZURE_OAUTH_CREDENTIALS_CLIENTSECRET, azure_clientsecret_cred_provider_create);
 
   // register built-in azure oauth factories
   data_transport_factory.register_type(value::HTTP_MODEL_DATA_OAUTH_AZ, oauth_restapi_data_transport_create);
@@ -197,19 +198,18 @@ int create_apim_http_api_oauth_cb_sender(oauth_callback_t& callback, std::unique
   return error_code::success;
 }
 
-int create_apim_http_api_oauth_sender(std::unique_ptr<i_sender>& retval,
-    const u::configuration& cfg, const char* api_host, int tasks_limit, int max_http_retries,
-    std::chrono::milliseconds max_http_retry_duration, error_callback_fn* error_cb, i_trace* trace_logger,
-    api_status* status)
+int create_apim_http_api_oauth_sender(std::unique_ptr<i_sender>& retval, const u::configuration& cfg,
+    const char* api_host, int tasks_limit, int max_http_retries, std::chrono::milliseconds max_http_retry_duration,
+    error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
 {
   std::unique_ptr<i_oauth_credentials_provider> cred_provider;
   int ret_code = get_azure_credential_provider(cred_provider, cfg, trace_logger, status);
   if (ret_code != error_code::success) { return ret_code; }
   i_http_client* client = nullptr;
   RETURN_IF_FAIL(create_http_client(api_host, cfg, &client, status));
-  retval.reset(
-      new http_transport_client<api_header_token_callback<eventhub_headers>>(client, tasks_limit, max_http_retries,
-          max_http_retry_duration, trace_logger, error_cb, std::move(cred_provider), "https://eventhubs.azure.net//.default"));
+  retval.reset(new http_transport_client<api_header_token_callback<eventhub_headers>>(client, tasks_limit,
+      max_http_retries, max_http_retry_duration, trace_logger, error_cb, std::move(cred_provider),
+      "https://eventhubs.azure.net//.default"));
   return error_code::success;
 }
 
@@ -322,8 +322,8 @@ int interaction_api_sender_oauth_cb_create(oauth_callback_t& callback, std::uniq
       trace_logger, status);
 }
 
-int oauth_restapi_data_transport_create(std::unique_ptr<m::i_data_transport>& retval,
-    const u::configuration& config, i_trace* trace_logger, api_status* status)
+int oauth_restapi_data_transport_create(std::unique_ptr<m::i_data_transport>& retval, const u::configuration& config,
+    i_trace* trace_logger, api_status* status)
 {
   std::unique_ptr<i_oauth_credentials_provider> cred_provider;
   int ret_code = get_azure_credential_provider(cred_provider, config, trace_logger, status);
@@ -337,38 +337,38 @@ int oauth_restapi_data_transport_create(std::unique_ptr<m::i_data_transport>& re
   return error_code::success;
 }
 
-int episode_api_sender_oauth_create(std::unique_ptr<i_sender>& retval,
-    const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
+int episode_api_sender_oauth_create(std::unique_ptr<i_sender>& retval, const u::configuration& cfg,
+    error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
 {
   const auto* const api_host = cfg.get(name::EPISODE_HTTP_API_HOST, "localhost:8080");
-  return create_apim_http_api_oauth_sender(retval, cfg, api_host,
-      cfg.get_int(name::EPISODE_APIM_MAX_HTTP_RETRIES, 4), cfg.get_int(name::EPISODE_APIM_TASKS_LIMIT, 4),
+  return create_apim_http_api_oauth_sender(retval, cfg, api_host, cfg.get_int(name::EPISODE_APIM_MAX_HTTP_RETRIES, 4),
+      cfg.get_int(name::EPISODE_APIM_TASKS_LIMIT, 4),
       std::chrono::milliseconds(cfg.get_int(name::EPISODE_APIM_MAX_HTTP_RETRY_DURATION_MS, 3600000)), error_cb,
       trace_logger, status);
 }
 
-int observation_api_sender_oauth_create(std::unique_ptr<i_sender>& retval,
-    const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
+int observation_api_sender_oauth_create(std::unique_ptr<i_sender>& retval, const u::configuration& cfg,
+    error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
 {
   const auto* const api_host = cfg.get(name::OBSERVATION_HTTP_API_HOST, "localhost:8080");
-  return create_apim_http_api_oauth_sender(retval, cfg, api_host,
-      cfg.get_int(name::OBSERVATION_APIM_TASKS_LIMIT, 16), cfg.get_int(name::OBSERVATION_APIM_MAX_HTTP_RETRIES, 4),
+  return create_apim_http_api_oauth_sender(retval, cfg, api_host, cfg.get_int(name::OBSERVATION_APIM_TASKS_LIMIT, 16),
+      cfg.get_int(name::OBSERVATION_APIM_MAX_HTTP_RETRIES, 4),
       std::chrono::milliseconds(cfg.get_int(name::OBSERVATION_APIM_MAX_HTTP_RETRY_DURATION_MS, 3600000)), error_cb,
       trace_logger, status);
 }
 
-int interaction_api_sender_oauth_create(std::unique_ptr<i_sender>& retval,
-    const u::configuration& cfg, error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
+int interaction_api_sender_oauth_create(std::unique_ptr<i_sender>& retval, const u::configuration& cfg,
+    error_callback_fn* error_cb, i_trace* trace_logger, api_status* status)
 {
   const auto* const api_host = cfg.get(name::INTERACTION_HTTP_API_HOST, "localhost:8080");
-  return create_apim_http_api_oauth_sender(retval, cfg, api_host,
-      cfg.get_int(name::INTERACTION_APIM_TASKS_LIMIT, 16), cfg.get_int(name::INTERACTION_APIM_MAX_HTTP_RETRIES, 4),
+  return create_apim_http_api_oauth_sender(retval, cfg, api_host, cfg.get_int(name::INTERACTION_APIM_TASKS_LIMIT, 16),
+      cfg.get_int(name::INTERACTION_APIM_MAX_HTTP_RETRIES, 4),
       std::chrono::milliseconds(cfg.get_int(name::INTERACTION_APIM_MAX_HTTP_RETRY_DURATION_MS, 3600000)), error_cb,
       trace_logger, status);
 }
 
-int azure_default_cred_provider_create(std::unique_ptr<i_oauth_credentials_provider>& retval, const u::configuration& cfg,
-  i_trace* trace_logger, api_status* status)
+int azure_default_cred_provider_create(std::unique_ptr<i_oauth_credentials_provider>& retval,
+    const u::configuration& cfg, i_trace* trace_logger, api_status* status)
 {
   int ret_code = error_code::not_supported;
 #ifdef LINK_AZURE_LIBS
@@ -379,7 +379,7 @@ int azure_default_cred_provider_create(std::unique_ptr<i_oauth_credentials_provi
 }
 
 int azure_managed_cred_provider_create(std::unique_ptr<i_oauth_credentials_provider>& retval,
-  const u::configuration& cfg, i_trace* trace_logger, api_status* status)
+    const u::configuration& cfg, i_trace* trace_logger, api_status* status)
 {
   int ret_code = error_code::not_supported;
 #ifdef LINK_AZURE_LIBS
@@ -391,7 +391,7 @@ int azure_managed_cred_provider_create(std::unique_ptr<i_oauth_credentials_provi
 }
 
 int azure_azurecli_cred_provider_create(std::unique_ptr<i_oauth_credentials_provider>& retval,
-  const u::configuration& cfg, i_trace* trace_logger, api_status* status)
+    const u::configuration& cfg, i_trace* trace_logger, api_status* status)
 {
   int ret_code = error_code::not_supported;
 #ifdef LINK_AZURE_LIBS
@@ -405,15 +405,15 @@ int azure_azurecli_cred_provider_create(std::unique_ptr<i_oauth_credentials_prov
 }
 
 int azure_clientsecret_cred_provider_create(std::unique_ptr<i_oauth_credentials_provider>& retval,
-  const u::configuration& cfg, i_trace* trace_logger, api_status* status)
+    const u::configuration& cfg, i_trace* trace_logger, api_status* status)
 {
   int ret_code = error_code::not_supported;
 #ifdef LINK_AZURE_LIBS
   const auto client_id = cfg.get(name::AZURE_OAUTH_CREDENTIAL_CLIENTID, "");
   const auto tenant_id = cfg.get(name::AZURE_OAUTH_CREDENTIAL_TENANTID, "");
   const auto secret = cfg.get(name::AZURE_OAUTH_CREDENTIAL_CLIENTSECRET, "");
-  retval =
-    std::make_unique<azure_credentials_provider<Azure::Identity::ClientSecretCredential>>(tenant_id, client_id, secret);
+  retval = std::make_unique<azure_credentials_provider<Azure::Identity::ClientSecretCredential>>(
+      tenant_id, client_id, secret);
   ret_code = error_code::success;
 #endif
   return ret_code;
