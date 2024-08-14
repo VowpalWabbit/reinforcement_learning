@@ -490,16 +490,18 @@ int rl_sim::init_rl()
     sender_factory = &factory;
   }
   // probably incompatible with the throughput option?
-  else if (_options["azure_oauth_factories"].as<bool>())
-  {
 #ifdef LINK_AZURE_LIBS
-    // Note: This requires C++14 or better
-    using namespace std::placeholders;
-    reinforcement_learning::oauth_callback_t callback =
-        std::bind(&azure_credentials_provider_t::get_credentials, &_creds, _1, _2, _3, _4);
-    reinforcement_learning::register_default_factories_callback(callback);
+  // Note: The azure_oauth_factories switch has been removed since registering the factories by default does not
+  //       directly utilize the callback. The factory implementations need to be configured in the configuration file
+  //       for them to function (see factory_resolver.h).
+  // Note: If USE_AZURE_FACTORIES is defined, the default factory implementations will be different (see
+  //       factory_resolver.h).
+  // Note: This requires C++14 or better since the Azure libraries require C++14 or better.
+  using namespace std::placeholders;
+  reinforcement_learning::oauth_callback_t callback =
+      std::bind(&azure_credentials_provider_t::get_token, &_creds, _1, _2, _3, _4);
+  reinforcement_learning::register_default_factories_callback(callback);
 #endif
-  }
 
   // Initialize the API
   _rl = std::unique_ptr<r::live_model>(new r::live_model(config, _on_error, this,

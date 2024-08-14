@@ -214,6 +214,12 @@ if(vw_USE_AZURE_FACTORIES)
   target_compile_definitions(rlclientlib PRIVATE USE_AZURE_FACTORIES)
 endif()
 
+if(RL_LINK_AZURE_LIBS)
+  target_compile_definitions(rlclientlib PRIVATE LINK_AZURE_LIBS)
+  find_package(azure-identity-cpp CONFIG REQUIRED)
+  target_link_libraries(rlclientlib PRIVATE Azure::azure-identity)
+endif()
+
 if(RL_USE_ZSTD)
   target_compile_definitions(rlclientlib PRIVATE USE_ZSTD)
   target_link_libraries(rlclientlib PRIVATE libzstd_static)

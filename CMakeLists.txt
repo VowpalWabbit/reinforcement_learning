@@ -6,11 +6,6 @@ if(POLICY CMP0091)
     cmake_policy(SET CMP0091 NEW)
 endif()
 
-# ensure all of the build tools generate the same output on all platforms
-# note: this change was made since building with Ninja does not add suffixes
-#       but, using the VS generator does.
-set(CMAKE_DEBUG_POSTFIX "")
-
 if(WIN32)
   # Due to needing to configure the CMAKE platform, this needs to be included before the
   # top-level project() declaration.

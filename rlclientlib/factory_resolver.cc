@@ -37,6 +37,7 @@ static natural_align<model_factory_t>::type modelfactory_buf;
 static natural_align<sender_factory_t>::type senderfactory_buf;
 static natural_align<trace_logger_factory_t>::type traceloggerfactory_buf;
 static natural_align<time_provider_factory_t>::type time_provider_factory_buf;
+static natural_align<azure_cred_provider_factory_t>::type azure_cred_provider_factory_buf;
 
 // Reference should point to the allocated memory to be initialized by placement new in
 // factory_initializer::factory_initializer()
@@ -45,6 +46,8 @@ model_factory_t& model_factory = (model_factory_t&)(modelfactory_buf);
 sender_factory_t& sender_factory = (sender_factory_t&)(senderfactory_buf);
 trace_logger_factory_t& trace_logger_factory = (trace_logger_factory_t&)(traceloggerfactory_buf);
 time_provider_factory_t& time_provider_factory = (time_provider_factory_t&)(time_provider_factory_buf);
+azure_cred_provider_factory_t& azure_cred_provider_factory =
+    (azure_cred_provider_factory_t&)(azure_cred_provider_factory_buf);
 
 factory_initializer::factory_initializer()
 {
@@ -55,6 +58,7 @@ factory_initializer::factory_initializer()
     new (&sender_factory) sender_factory_t();
     new (&trace_logger_factory) trace_logger_factory_t();
     new (&time_provider_factory) time_provider_factory_t();
+    new (&azure_cred_provider_factory) azure_cred_provider_factory_t();
 
     register_default_factories();
   }
@@ -72,12 +76,7 @@ factory_initializer::~factory_initializer()
   }
 }
 
-void register_default_factories_callback(oauth_callback_t& callback)
-{
-#ifdef USE_AZURE_FACTORIES
-  register_azure_oauth_factories(callback);
-#endif
-}
+void register_default_factories_callback(oauth_callback_t& callback) { register_azure_oauth_factories(callback); }
 
 template <typename model_t>
 int model_create(
