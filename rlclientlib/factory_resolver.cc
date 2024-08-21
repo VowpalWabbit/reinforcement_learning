@@ -73,6 +73,7 @@ factory_initializer::~factory_initializer()
     (&sender_factory)->~sender_factory_t();
     (&trace_logger_factory)->~trace_logger_factory_t();
     (&time_provider_factory)->~time_provider_factory_t();
+    (&azure_cred_provider_factory)->~azure_cred_provider_factory_t();
   }
 }
 
