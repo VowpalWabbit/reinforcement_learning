@@ -118,6 +118,7 @@ endif()
 set(PROJECT_PUBLIC_HEADERS
   ../include/action_flags.h
   ../include/api_status.h
+  ../include/azure_credentials_provider.h
   ../include/loop_apis/base_loop.h
   ../include/loop_apis/ca_loop.h
   ../include/loop_apis/cb_loop.h
@@ -211,6 +212,12 @@ endif()
 
 if(vw_USE_AZURE_FACTORIES)
   target_compile_definitions(rlclientlib PRIVATE USE_AZURE_FACTORIES)
+endif()
+
+if(RL_LINK_AZURE_LIBS)
+  target_compile_definitions(rlclientlib PRIVATE LINK_AZURE_LIBS)
+  find_package(azure-identity-cpp CONFIG REQUIRED)
+  target_link_libraries(rlclientlib PRIVATE Azure::azure-identity)
 endif()
 
 if(RL_USE_ZSTD)

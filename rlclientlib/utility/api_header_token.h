@@ -1,9 +1,9 @@
 #pragma once
 
 #include "api_status.h"
+#include "azure_credentials_provider.h"
 #include "configuration.h"
 #include "constants.h"
-#include "oauth_callback_fn.h"
 #include "trace_logger.h"
 
 #include <cpprest/http_headers.h>
@@ -53,8 +53,8 @@ template <typename Resource>
 class api_header_token_callback
 {
 public:
-  api_header_token_callback(oauth_callback_t& token_cb, std::string scope)
-      : _token_callback(token_cb), _scopes{std::move(scope)}
+  api_header_token_callback(std::unique_ptr<i_oauth_credentials_provider>&& cred_provider, std::string scope)
+      : _cred_provider(std::move(cred_provider)), _scopes{std::move(scope)}
   {
   }
   ~api_header_token_callback() = default;
@@ -107,7 +107,7 @@ private:
   {
     using namespace std::chrono;
     system_clock::time_point tp;
-    RETURN_IF_FAIL(_token_callback(_scopes, _bearer_token, _token_expiry));
+    RETURN_IF_FAIL(_cred_provider->get_token(_scopes, _bearer_token, _token_expiry, trace));
 
     if (_bearer_token.empty())
     {
@@ -123,7 +123,7 @@ private:
 private:
   http_headers::key_type _http_api_header_key_name;
   std::string _token_type;
-  oauth_callback_t _token_callback;
+  std::unique_ptr<i_oauth_credentials_provider> _cred_provider;
   std::vector<std::string> _scopes;
 
   std::string _bearer_token;

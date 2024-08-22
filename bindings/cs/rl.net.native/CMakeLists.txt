@@ -45,6 +45,15 @@ set(rl_net_native_HEADERS
   rl.net.slot_ranking.h
 )
 
+if(RL_LINK_AZURE_LIBS)
+  list(APPEND rl_net_native_HEADERS
+    rl.net.azure_factories.h
+  )
+  list(APPEND rl_net_native_SOURCES
+    rl.net.azure_factories.cc
+  )
+endif()
+
 source_group("Sources" FILES ${rl_net_native_SOURCES})
 source_group("Headers" FILES ${rl_net_native_HEADERS})
 

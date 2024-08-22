@@ -38,9 +38,7 @@ po::variables_map process_cmd_line(const int argc, char** argv)
       "random_seed", po::value<uint64_t>()->default_value(rand()), "Random seed. Default is random")(
       "delay", po::value<int64_t>()->default_value(2000), "Delay between events in ms")(
       "quiet", po::bool_switch(), "Suppress logs")("random_ids", po::value<bool>()->default_value(true),
-      "Use randomly generated Event IDs. Default is true")("throughput", "print throughput stats")(
-      "azure_oauth_factories", po::value<bool>()->default_value(false), "Use oauth for azure factores. Default false")(
-      "azure_tenant_id", po::value<std::string>()->default_value(""), "Tenant ID for use with azure oauth factories.");
+      "Use randomly generated Event IDs. Default is true")("throughput", "print throughput stats");
 
   po::variables_map vm;
   store(parse_command_line(argc, argv, desc), vm);

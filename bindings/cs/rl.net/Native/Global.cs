@@ -22,7 +22,7 @@ namespace Rl.Net.Native {
             return nativeObject.DangerousGetHandle();
         }
 
-        [DllImport("rlnetnative")]
+        [DllImport(NativeImports.RLNETNATIVE)]
         public static extern IntPtr LookupMessageForErrorCode(int error_code);
 
         public static string MarshalMessageForErrorCode(int error_code)

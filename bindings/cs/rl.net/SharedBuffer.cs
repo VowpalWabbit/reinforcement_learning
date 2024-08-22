@@ -5,16 +5,16 @@ using Rl.Net.Native;
 namespace Rl.Net {
     public sealed class SharedBuffer : NativeObject<SharedBuffer>
     {
-        [DllImport("rlnetnative")]
+        [DllImport(NativeImports.RLNETNATIVE)]
         private static extern IntPtr CloneBufferSharedPointer(IntPtr original);
 
-        [DllImport("rlnetnative")]
+        [DllImport(NativeImports.RLNETNATIVE)]
         private static extern void ReleaseBufferSharedPointer(IntPtr shared_buffer);
 
-        [DllImport("rlnetnative")]
+        [DllImport(NativeImports.RLNETNATIVE)]
         private static extern IntPtr GetSharedBufferBegin(IntPtr shared_buffer);
 
-        [DllImport("rlnetnative")]
+        [DllImport(NativeImports.RLNETNATIVE)]
         private static extern UIntPtr GetSharedBufferLength(IntPtr status);
 
         private static New<SharedBuffer> BindConstructorArguments(SharedBuffer original)

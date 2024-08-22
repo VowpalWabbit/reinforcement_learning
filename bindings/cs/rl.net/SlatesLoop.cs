@@ -10,16 +10,16 @@ namespace Rl.Net
         // The publics in this class are just a verbose, but jittably-efficient way of enabling overriding a native invocation
         internal static partial class NativeMethods
         {
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern IntPtr CreateSlatesLoop(IntPtr config, IntPtr factoryContext);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern void DeleteSlatesLoop(IntPtr slatesLoop);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern int SlatesLoopInit(IntPtr slatesLoop, IntPtr apiStatus);
 
-            [DllImport("rlnetnative", EntryPoint = "SlatesLoopRequestMultiSlotDecision")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "SlatesLoopRequestMultiSlotDecision")]
             private static extern int SlatesLoopRequestMultiSlotDecisionNative(IntPtr slatesLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr multiSlotResponse, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, IntPtr, IntPtr, int> SlatesLoopRequestMultiSlotDecisionOverride { get; set; }
@@ -34,7 +34,7 @@ namespace Rl.Net
                 return SlatesLoopRequestMultiSlotDecisionNative(slatesLoop, eventId, contextJson, contextJsonSize, multiSlotResponse, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "SlatesLoopRequestMultiSlotDecisionWithFlags")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "SlatesLoopRequestMultiSlotDecisionWithFlags")]
             private static extern int SlatesLoopRequestMultiSlotDecisionWithFlagsNative(IntPtr slatesLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr multiSlotResponse, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> SlatesLoopRequestMultiSlotDecisionWithFlagsOverride { get; set; }
@@ -49,7 +49,7 @@ namespace Rl.Net
                 return SlatesLoopRequestMultiSlotDecisionWithFlagsNative(slatesLoop, eventId, contextJson, contextJsonSize, flags, multiSlotResponse, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "SlatesLoopRequestMultiSlotDecisionWithBaselineAndFlags")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "SlatesLoopRequestMultiSlotDecisionWithBaselineAndFlags")]
             private static extern int SlatesLoopRequestMultiSlotDecisionWithBaselineAndFlagsNative(IntPtr slatesLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr multiSlotResponse, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, IntPtr, IntPtr, int> SlatesLoopRequestMultiSlotDecisionWithBaselineAndFlagsOverride { get; set; }
@@ -64,7 +64,7 @@ namespace Rl.Net
                 return SlatesLoopRequestMultiSlotDecisionWithBaselineAndFlagsNative(slatesLoop, eventId, contextJson, contextJsonSize, flags, multiSlotResponse, baselineActions, baselineActionsSize, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "SlatesLoopRequestMultiSlotDecisionDetailed")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "SlatesLoopRequestMultiSlotDecisionDetailed")]
             private static extern int SlatesLoopRequestMultiSlotDecisionDetailedNative(IntPtr slatesLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr multiSlotResponseDetailed, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, IntPtr, IntPtr, int> SlatesLoopRequestMultiSlotDecisionDetailedOverride { get; set; }
@@ -79,7 +79,7 @@ namespace Rl.Net
                 return SlatesLoopRequestMultiSlotDecisionDetailedNative(slatesLoop, eventId, contextJson, contextJsonSize, multiSlotResponseDetailed, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "SlatesLoopRequestMultiSlotDecisionDetailedWithFlags")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "SlatesLoopRequestMultiSlotDecisionDetailedWithFlags")]
             private static extern int SlatesLoopRequestMultiSlotDecisionDetailedWithFlagsNative(IntPtr slatesLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr multiSlotResponseDetailed, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> SlatesLoopRequestMultiSlotDecisionDetailedWithFlagsOverride { get; set; }
@@ -94,7 +94,7 @@ namespace Rl.Net
                 return SlatesLoopRequestMultiSlotDecisionDetailedWithFlagsNative(slatesLoop, eventId, contextJson, contextJsonSize, flags, multiSlotResponseDetailed, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "SlatesLoopRequestMultiSlotDecisionDetailedWithBaselineAndFlags")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "SlatesLoopRequestMultiSlotDecisionDetailedWithBaselineAndFlags")]
             private static extern int SlatesLoopRequestMultiSlotDecisionDetailedWithBaselineAndFlagsNative(IntPtr slatesLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr multiSlotResponseDetailed, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, IntPtr, IntPtr, int> SlatesLoopRequestMultiSlotDecisionDetailedWithBaselineAndFlagsOverride { get; set; }
@@ -109,7 +109,7 @@ namespace Rl.Net
                 return SlatesLoopRequestMultiSlotDecisionDetailedWithBaselineAndFlagsNative(slatesLoop, eventId, contextJson, contextJsonSize, flags, multiSlotResponseDetailed, baselineActions, baselineActionsSize, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "SlatesLoopReportActionTaken")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "SlatesLoopReportActionTaken")]
             private static extern int SlatesLoopReportActionTakenNative(IntPtr slatesLoop, IntPtr eventId, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int> SlatesLoopReportActionTakenOverride { get; set; }
@@ -124,7 +124,7 @@ namespace Rl.Net
                 return SlatesLoopReportActionTakenNative(slatesLoop, eventId, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "SlatesLoopReportActionMultiIdTaken")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "SlatesLoopReportActionMultiIdTaken")]
             private static extern int SlatesLoopReportActionTakenMultiIdNative(IntPtr slatesLoop, IntPtr primaryId, IntPtr secondaryId, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> SlatesLoopReportActionTakenMultiIdOverride { get; set; }
@@ -139,7 +139,7 @@ namespace Rl.Net
                 return SlatesLoopReportActionTakenMultiIdNative(slatesLoop, primaryId, secondaryId, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "SlatesLoopReportOutcomeF")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "SlatesLoopReportOutcomeF")]
             private static extern int SlatesLoopReportOutcomeFNative(IntPtr slatesLoop, IntPtr eventId, float outcome, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, float, IntPtr, int> SlatesLoopReportOutcomeFOverride { get; set; }
@@ -154,7 +154,7 @@ namespace Rl.Net
                 return SlatesLoopReportOutcomeFNative(slatesLoop, eventId, outcome, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "SlatesLoopReportOutcomeJson")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "SlatesLoopReportOutcomeJson")]
             private static extern int SlatesLoopReportOutcomeJsonNative(IntPtr slatesLoop, IntPtr eventId, IntPtr outcomeJson, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> SlatesLoopReportOutcomeJsonOverride { get; set; }
@@ -169,13 +169,13 @@ namespace Rl.Net
                 return SlatesLoopReportOutcomeJsonNative(slatesLoop, eventId, outcomeJson, apiStatus);
             }
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern int SlatesLoopRefreshModel(IntPtr slatesLoop, IntPtr apiStatus);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern void SlatesLoopSetCallback(IntPtr slatesLoop, [MarshalAs(UnmanagedType.FunctionPtr)] managed_background_error_callback_t callback = null);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern void SlatesLoopSetTrace(IntPtr slatesLoop, [MarshalAs(UnmanagedType.FunctionPtr)] managed_trace_callback_t callback = null);
         }
     }

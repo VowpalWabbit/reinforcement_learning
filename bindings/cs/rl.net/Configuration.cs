@@ -14,13 +14,13 @@ namespace Rl.Net {
         // The publics in this class are just a verbose, but jittably-efficient way of enabling overriding a native invocation
         internal static partial class NativeMethods
         {
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern IntPtr CreateConfig();
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern void DeleteConfig(IntPtr config);
 
-            [DllImport("rlnetnative", EntryPoint = "LoadConfigurationFromJson")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "LoadConfigurationFromJson")]
             private static extern int LoadConfigurationFromJsonNative(int jsonLength, IntPtr json, IntPtr config, IntPtr apiStatus);
 
             internal static Func<int, IntPtr, IntPtr, IntPtr, int> LoadConfigurationFromJsonOverride { get; set; }
@@ -35,7 +35,7 @@ namespace Rl.Net {
                 return LoadConfigurationFromJsonNative(jsonLength, json, config, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "ConfigurationSet")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "ConfigurationSet")]
             private static extern void ConfigurationSetNative(IntPtr config, IntPtr name, IntPtr value);
 
             internal static Action<IntPtr, IntPtr, IntPtr> ConfigurationSetOverride { get; set; }
@@ -51,7 +51,7 @@ namespace Rl.Net {
                 ConfigurationSetNative(config, name, value);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "ConfigurationGet")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "ConfigurationGet")]
             private static extern IntPtr ConfigurationGetNative(IntPtr config, IntPtr name, IntPtr defVal);
 
             internal static Func<IntPtr, IntPtr, IntPtr, IntPtr> ConfigurationGetOverride { get; set; }

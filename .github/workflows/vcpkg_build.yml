@@ -18,12 +18,12 @@ concurrency:
 
 jobs:
   job:
-    name: ${{ matrix.os }}-${{ matrix.preset }}-${{ github.workflow }}
+    name: ${{ startsWith(matrix.os, 'macos') && 'macos-latest' || matrix.os }}-${{ matrix.preset }}-${{ github.workflow }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-13, windows-latest]
         preset: [vcpkg-debug, vcpkg-release]
     steps:
       - uses: actions/checkout@v3
@@ -39,7 +39,7 @@ jobs:
           cache-name: vcpkg-cache
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
-          key: ${{ matrix.os }}-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
+          key: ${{ startsWith(matrix.os, 'macos') && 'macos-latest' || matrix.os }}-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
       - uses: lukka/run-vcpkg@v10
         with:
           vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
