@@ -52,7 +52,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
-          key: ${{ matrix.config.os }}-build-${{ matrix.config.vcpkg_target_triplet }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}
+          key: ${{ matrix.config.os == 'macos-13' && 'macos-latest' || matrix.config.os }}-build-${{ matrix.config.vcpkg_target_triplet }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}
 
       - name: Configure .NET Core
         run: >
