@@ -25,7 +25,7 @@ jobs:
           # UBSan not supported by MSVC on Windows
           - { os: windows-latest, preset: vcpkg-ubsan-debug }
     runs-on: ${{ matrix.os }}
-    name: asan.${{ matrix.os }}.${{ matrix.preset }}
+    name: asan.${{ matrix.os == 'macos-13' ? 'macos' : matrix.os }}.${{ matrix.preset }}
     env:
       UBSAN_OPTIONS: "print_stacktrace=1"
 
