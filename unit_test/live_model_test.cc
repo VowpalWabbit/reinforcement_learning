@@ -923,6 +923,64 @@ BOOST_AUTO_TEST_CASE(live_model_logger_receive_data)
   BOOST_CHECK_GE(recorded_observations.size(), 1);
 }
 
+BOOST_AUTO_TEST_CASE(live_model_disable_event_logging)
+{
+  std::vector<buffer_data_t> recorded_interactions;
+  auto mock_interaction_sender = get_mock_sender(recorded_interactions);
+
+  std::vector<buffer_data_t> recorded_observations;
+  auto mock_observation_sender = get_mock_sender(recorded_observations);
+
+  auto mock_data_transport = get_mock_data_transport();
+  auto mock_model = get_mock_model(r::model_management::model_type_t::CB);
+
+  auto logger_factory = get_mock_sender_factory(mock_observation_sender.get(), mock_interaction_sender.get());
+  auto data_transport_factory = get_mock_data_transport_factory(mock_data_transport.get());
+  auto model_factory = get_mock_model_factory(mock_model.get());
+
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EH_TEST, "true");
+  config.set(r::name::EVENT_LOGGING_ENABLED, "false");  // Disable event logging.
+
+  auto const version_number = "1";
+
+  auto const event_id_1 = "event_id";
+  auto const event_id_2 = "event_id_2";
+
+  auto const expected_interaction_1 = u::concat(R"({"Version":")", version_number, R"(","EventId":")", event_id_1,
+      R"(","a":[1,2],"c":)", JSON_CONTEXT, R"(,"p":[0.500000,0.500000],"VWState":{"m":"N/A"}})");
+  auto const expected_observation_1 = u::concat(R"({"EventId":")", event_id_1, R"(","v":1.000000})");
+
+  auto const expected_interaction_2 = u::concat(R"({"Version":")", version_number, R"(","EventId":")", event_id_2,
+      R"(","a":[1,2],"c":)", JSON_CONTEXT, R"(,"p":[0.500000,0.500000],"VWState":{"m":"N/A"}})");
+  auto const expected_observation_2 = u::concat(R"({"EventId":")", event_id_2, R"(","v":1.000000})");
+  auto const num_iterations = 5;
+
+  {
+    r::cb_loop model = create_mock_live_model<r::cb_loop>(
+        config, data_transport_factory.get(), model_factory.get(), logger_factory.get());
+
+    r::api_status status;
+    BOOST_CHECK_EQUAL(model.init(&status), err::success);
+
+    r::ranking_response response;
+    for (auto i = 0; i < num_iterations; i++)
+    {
+      BOOST_CHECK_EQUAL(model.choose_rank(event_id_1, JSON_CONTEXT, response), err::success);
+      BOOST_CHECK_EQUAL(model.report_outcome(event_id_1, 1.0), err::success);
+
+      BOOST_CHECK_EQUAL(model.choose_rank(event_id_2, JSON_CONTEXT, response), err::success);
+      BOOST_CHECK_EQUAL(model.report_outcome(event_id_2, 1.0), err::success);
+    }
+
+    Verify(Method((*mock_interaction_sender), init)).Exactly(0);
+    Verify(Method((*mock_observation_sender), init)).Exactly(0);
+  }
+  BOOST_CHECK_GE(recorded_interactions.size(), 0);
+  BOOST_CHECK_GE(recorded_observations.size(), 0);
+}
+
 BOOST_AUTO_TEST_CASE(populate_response_same_size_test)
 {
   r::api_status status;
