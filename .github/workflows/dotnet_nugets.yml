@@ -144,7 +144,7 @@ jobs:
           echo "Generated version number: $version"
           echo "RL_NUGET_VERSION=$GENERATED_VERSION" >> $GITHUB_ENV
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: artifacts
           path: artifacts
@@ -178,7 +178,7 @@ jobs:
           GENERATED_VERSION=$(./.scripts/version_number.py)
           echo "Generated version number: $version"
           echo "RL_NUGET_VERSION=$GENERATED_VERSION" >> $GITHUB_ENV
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: dist
           path: dist

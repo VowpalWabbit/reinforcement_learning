@@ -71,11 +71,11 @@ jobs:
         if: github.event_name == 'release'
         run: echo "FOLDER_NAME=$(echo ${GITHUB_REF:10})" >> $GITHUB_ENV
       - name: Download c++ Docs
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: cxx_docs
       - name: Download Python Docs
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4.1.7
         with:
           name: python_docs
       - uses: actions/checkout@v1
