@@ -148,8 +148,10 @@ jobs:
         with:
           name: artifacts-ubuntu-latest
           path: artifacts
+      - name: Display structure of artifacts
+        run: ls -R artifacts
       - uses: NuGet/setup-nuget@v1.1.1
-      - run: nuget pack nuget/dotnet/rl.net.nuspec -Properties RL_NUGET_PACKAGE_VERSION=$RL_NUGET_VERSION -BasePath artifacts/artifacts-ubuntu-latest -OutputDirectory nuget_output
+      - run: nuget pack nuget/dotnet/rl.net.nuspec -Properties RL_NUGET_PACKAGE_VERSION=$RL_NUGET_VERSION -BasePath artifacts -OutputDirectory nuget_output
       - uses: actions/upload-artifact@v4
         with:
           name: dist-ubuntu-latest
@@ -188,8 +190,8 @@ jobs:
         run: |
           set +e
           cd nuget/dotnet/test
-          dotnet add dotnetcore_nuget_test.csproj package RL.Net --version ${{ env.RL_NUGET_VERSION }} --source "${{github.workspace}}/dist/dist-${{ matrix.config.os_name }}" --no-restore
-          dotnet restore dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}} --source "${{github.workspace}}/dist/dist-${{ matrix.config.os_name }}"
+          dotnet add dotnetcore_nuget_test.csproj package RL.Net --version ${{ env.RL_NUGET_VERSION }} --source "${{github.workspace}}/dist --no-restore
+          dotnet restore dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}} --source "${{github.workspace}}/dist
           dotnet restore dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}}
       - name: Build and run test
         run: |
