@@ -144,15 +144,15 @@ jobs:
           echo "Generated version number: $version"
           echo "RL_NUGET_VERSION=$GENERATED_VERSION" >> $GITHUB_ENV
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: artifacts
+          name: artifacts-ubuntu-latest
           path: artifacts
       - uses: NuGet/setup-nuget@v1.1.1
       - run: nuget pack nuget/dotnet/rl.net.nuspec -Properties RL_NUGET_PACKAGE_VERSION=$RL_NUGET_VERSION -BasePath artifacts -OutputDirectory nuget_output
       - uses: actions/upload-artifact@v4
         with:
-          name: dist-${{ matrix.config.os_name }}
+          name: dist-ubuntu-latest
           path: nuget_output/
 
   test-nuget:
@@ -161,9 +161,9 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: "windows-latest", runtime_id: "win-x64" }
-          - { os: "ubuntu-latest", runtime_id: "linux-x64" }
-          - { os: "macos-13", runtime_id: "osx-x64" }
+          - { os: "windows-latest", os_name: "windows-latest", runtime_id: "win-x64" }
+          - { os: "ubuntu-latest", os_name: "ubuntu-latest", runtime_id: "linux-x64" }
+          - { os: "macos-13", os_name: "macos-latest", runtime_id: "osx-x64" }
     runs-on: ${{matrix.config.os}}
     name: test-nuget (${{ matrix.config.os_name }}, ${{ matrix.config.runtime_id }})
     steps:
@@ -178,9 +178,9 @@ jobs:
           GENERATED_VERSION=$(./.scripts/version_number.py)
           echo "Generated version number: $version"
           echo "RL_NUGET_VERSION=$GENERATED_VERSION" >> $GITHUB_ENV
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: dist
+          name: dist-${{ matrix.config.os_name }}
           path: dist
       - uses: actions/setup-dotnet@v3
       - name: Install package
