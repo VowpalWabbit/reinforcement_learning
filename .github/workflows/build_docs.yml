@@ -29,7 +29,7 @@ jobs:
           cd doc/cpp/
           doxygen
       - name: Upload built docs
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: cxx_docs
           path: doc/cpp/html/
@@ -54,7 +54,7 @@ jobs:
           cd bindings/python/docs
           make html SPHINXBUILD=/opt/python/cp38-cp38/bin/sphinx-build
       - name: Upload built docs
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: python_docs
           path: bindings/python/docs/build/

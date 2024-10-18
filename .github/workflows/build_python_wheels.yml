@@ -32,7 +32,7 @@ jobs:
           ${{ matrix.config.base_path }}bin/pip wheel . -w wheel_output/ --verbose
           auditwheel repair wheel_output/*whl -w audit_output/
       - name: Upload built wheel
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: wheel_${{ matrix.config.version }}
           path: audit_output/

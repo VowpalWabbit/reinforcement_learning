@@ -81,13 +81,13 @@ jobs:
         run: cmake --build build --config RelWithDebInfo -t rl.net
 
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: artifacts
           path: build/binaries/*.dll
 
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: symbols
           path: build/binaries/*.pdb
@@ -99,13 +99,13 @@ jobs:
           strip --strip-debug --strip-unneeded build/bindings/cs/rl.net.native/librlnetnative.so
 
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: artifacts
           path: build/bindings/cs/rl.net.native/librlnetnative.so
 
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: symbols
           path: symbols/librlnetnative.debug
@@ -117,13 +117,13 @@ jobs:
           strip -S build/bindings/cs/rl.net.native/librlnetnative.dylib
 
       - if: ${{ startsWith(matrix.config.os, 'macos') }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: artifacts
           path: build/bindings/cs/rl.net.native/librlnetnative.dylib
 
       - if: ${{ startsWith(matrix.config.os, 'macos') }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: symbols
           path: symbols/librlnetnative.dSYM
@@ -150,7 +150,7 @@ jobs:
           path: artifacts
       - uses: NuGet/setup-nuget@v1.1.1
       - run: nuget pack nuget/dotnet/rl.net.nuspec -Properties RL_NUGET_PACKAGE_VERSION=$RL_NUGET_VERSION -BasePath artifacts -OutputDirectory nuget_output
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v4
         with:
           name: dist
           path: nuget_output/
