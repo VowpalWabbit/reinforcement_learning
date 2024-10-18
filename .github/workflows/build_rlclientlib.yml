@@ -136,8 +136,8 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
-            '3.1.x'
-            '8.0.x'
+            3.1.x
+            8.0.x
       - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
         shell: bash
       - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
