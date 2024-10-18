@@ -27,11 +27,11 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: "windows-latest", runtime_id: "win-x64", vcpkg_target_triplet: "x64-windows-static" }
-          - { os: "ubuntu-latest", runtime_id: "linux-x64", vcpkg_target_triplet: "x64-linux" }
-          - { os: "macos-13", runtime_id: "osx-x64", vcpkg_target_triplet: "x64-osx" }
+          - { os: "windows-latest", os_name: "windows-latest", runtime_id: "win-x64", vcpkg_target_triplet: "x64-windows-static" }
+          - { os: "ubuntu-latest", os_name: "ubuntu-latest", runtime_id: "linux-x64", vcpkg_target_triplet: "x64-linux" }
+          - { os: "macos-13", os_name: "macos-latest", runtime_id: "osx-x64", vcpkg_target_triplet: "x64-osx" }
     runs-on: ${{matrix.config.os}}
-    name: build-nuget-dotnet (${{ startsWith(matrix.config.os, 'macos') && 'macos-latest' || matrix.config.os }}, ${{ matrix.config.runtime_id }}, ${{ matrix.config.vcpkg_target_triplet }})
+    name: build-nuget-dotnet (${{ matrix.config.os_name }}, ${{ matrix.config.runtime_id }}, ${{ matrix.config.vcpkg_target_triplet }})
     steps:
       - uses: actions/checkout@v2
       - run: |
@@ -53,7 +53,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
-          key: ${{ startsWith(matrix.config.os, 'macos') && 'macos-latest' || matrix.config.os }}-build-${{ matrix.config.vcpkg_target_triplet }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}
+          key: ${{ matrix.config.os_name }}-build-${{ matrix.config.vcpkg_target_triplet }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}
 
       - name: Configure .NET Core
         run: >
@@ -83,13 +83,13 @@ jobs:
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts
+          name: artifacts-${{ matrix.config.os_name }}
           path: build/binaries/*.dll
 
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
         uses: actions/upload-artifact@v4
         with:
-          name: symbols
+          name: symbols-${{ matrix.config.os_name }}
           path: build/binaries/*.pdb
 
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
@@ -101,13 +101,13 @@ jobs:
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts
+          name: artifacts-${{ matrix.config.os_name }}
           path: build/bindings/cs/rl.net.native/librlnetnative.so
 
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
         uses: actions/upload-artifact@v4
         with:
-          name: symbols
+          name: symbols-${{ matrix.config.os_name }}
           path: symbols/librlnetnative.debug
 
       - if: ${{ startsWith(matrix.config.os, 'macos') }}
@@ -119,13 +119,13 @@ jobs:
       - if: ${{ startsWith(matrix.config.os, 'macos') }}
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts
+          name: artifacts-${{ matrix.config.os_name }}
           path: build/bindings/cs/rl.net.native/librlnetnative.dylib
 
       - if: ${{ startsWith(matrix.config.os, 'macos') }}
         uses: actions/upload-artifact@v4
         with:
-          name: symbols
+          name: symbols-${{ matrix.config.os_name }}
           path: symbols/librlnetnative.dSYM
 
   package-nuget:
@@ -152,7 +152,7 @@ jobs:
       - run: nuget pack nuget/dotnet/rl.net.nuspec -Properties RL_NUGET_PACKAGE_VERSION=$RL_NUGET_VERSION -BasePath artifacts -OutputDirectory nuget_output
       - uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: dist-${{ matrix.config.os_name }}
           path: nuget_output/
 
   test-nuget:
@@ -165,7 +165,7 @@ jobs:
           - { os: "ubuntu-latest", runtime_id: "linux-x64" }
           - { os: "macos-13", runtime_id: "osx-x64" }
     runs-on: ${{matrix.config.os}}
-    name: test-nuget (${{ startsWith(matrix.config.os, 'macos') && 'macos-latest' || matrix.config.os }}, ${{ matrix.config.runtime_id }})
+    name: test-nuget (${{ matrix.config.os_name }}, ${{ matrix.config.runtime_id }})
     steps:
       - uses: actions/checkout@v2
       - name: Update git tags
