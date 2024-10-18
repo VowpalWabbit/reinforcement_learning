@@ -146,8 +146,8 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: artifacts-ubuntu-latest
           path: artifacts
+          merge-multiple: true
       - name: Display structure of artifacts
         run: ls -R artifacts
       - uses: NuGet/setup-nuget@v1.1.1
