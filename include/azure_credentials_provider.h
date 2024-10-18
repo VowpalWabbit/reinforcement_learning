@@ -31,9 +31,14 @@ inline std::chrono::system_clock::duration get_gmt_offset()
   };
   std::time_t now = std::time(nullptr);
   std::tm local_tm{};
-  localtime_s(&local_tm, &now);
   std::tm gmt_tm{};
+#  ifdef _WIN32
+  localtime_s(&local_tm, &now);
   gmtime_s(&gmt_tm, &now);
+#  else
+  localtime_r(&now, &local_tm);
+  gmtime_r(&now, &gmt_tm);
+#  endif
   return get_time_point(local_tm) - get_time_point(gmt_tm);
 }
 }  // namespace
