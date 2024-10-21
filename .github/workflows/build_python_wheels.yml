@@ -22,11 +22,6 @@ jobs:
         - { version: 3.8, base_path: /opt/python/cp38-cp38/ }
         - { version: 3.9, base_path: /opt/python/cp39-cp39/ }
     steps:
-      - name: install dependencies
-        shell: sh
-        run: |
-          yum update -y
-          yum install -y glibc-2.36
       # v1 must be used because newer versions require a node.js version that will not run on this old image.
       - uses: actions/checkout@v1
         with:
