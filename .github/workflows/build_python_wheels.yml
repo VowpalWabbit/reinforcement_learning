@@ -23,7 +23,8 @@ jobs:
         - { version: 3.9, base_path: /opt/python/cp39-cp39/ }
     steps:
       - name: install dependencies
-        shell: bash |
+        shell: bash
+        run: |
           apt-get update
           apt-get install -y libc6
       # v1 must be used because newer versions require a node.js version that will not run on this old image.
