@@ -24,6 +24,7 @@ jobs:
         shell: sh
         run: |
           yum update -y
+          yum list available glibc
           yum install -y glibc-2.36
       # v1 must be used because newer versions require a node.js version that will not run on this old image.
       - uses: actions/checkout@v1
