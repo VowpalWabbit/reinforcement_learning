@@ -35,7 +35,7 @@ jobs:
           path: doc/cpp/html/
   python:
     container:
-      image: vowpalwabbit/rlclientlib-manylinux2010-build:latest
+      image: vowpalwabbit/rl-manylinux-2_28-build:latest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
