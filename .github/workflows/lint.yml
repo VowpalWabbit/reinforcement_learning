@@ -27,6 +27,9 @@ jobs:
       - name: Build wheel
         shell: bash
         run: |
+          export OPENSSL_ROOT_DIR=/usr/local/openssl
+          export OPENSSL_LIBRARIES=/usr/local/openssl/lib
+          export OPENSSL_INCLUDE_DIR=/usr/local/openssl/include
           ${{ matrix.config.base_path }}bin/pip wheel . -w wheel_output/ --verbose
           auditwheel repair wheel_output/*whl -w audit_output/
       - name: Upload built wheel
