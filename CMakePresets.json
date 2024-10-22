@@ -146,6 +146,72 @@
           "value": "On"
         }
       }
+    },
+    {
+      "name": "vcpkg-azure",
+      "inherits": "default",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": {
+          "type": "STRING",
+          "value": "Release"
+        },
+        "vw_USE_AZURE_FACTORIES": {
+          "type": "BOOL",
+          "value": "ON"
+        },
+        "RL_LINK_AZURE_LIBS": {
+          "type": "BOOL",
+          "value": "ON"
+        }
+      }
+    },
+    {
+      "name": "vcpkg-azure-static",
+      "inherits": "vcpkg-azure",
+      "cacheVariables": {
+        "RL_STATIC_DEPS": {
+          "type": "BOOL",
+          "value": "ON"
+        }
+      }
+    },
+    {
+      "name": "vcpkg-azure-static-windows",
+      "inherits": "vcpkg-azure-static",
+      "cacheVariables": {
+        "CMAKE_MSVC_RUNTIME_LIBRARY": {
+          "type": "STRING",
+          "value": "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+        },
+        "VCPKG_TARGET_TRIPLET": {
+          "type": "STRING",
+          "value": "x64-windows-static"
+        },
+        "VCPKG_HOST_TRIPLET": {
+          "type": "STRING",
+          "value": "x64-windows-static"
+        }
+      }
+    },
+    {
+      "name": "vcpkg-azure-static-linux",
+      "inherits": "vcpkg-azure-static",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": {
+          "type": "STRING",
+          "value": "x64-linux"
+        }
+      }
+    },
+    {
+      "name": "vcpkg-azure-static-osx",
+      "inherits": "vcpkg-azure-static",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": {
+          "type": "STRING",
+          "value": "x64-osx"
+        }
+      }
     }
   ],
   "buildPresets": [
@@ -156,6 +222,22 @@
     {
       "name": "vcpkg-release",
       "configurePreset": "vcpkg-release"
+    },
+    {
+      "name": "vcpkg-azure",
+      "configurePreset": "vcpkg-azure"
+    },
+    {
+      "name": "vcpkg-azure-static-windows",
+      "configurePreset": "vcpkg-azure-static-windows"
+    },
+    {
+      "name": "vcpkg-azure-static-linux",
+      "configurePreset": "vcpkg-azure-static-linux"
+    },
+    {
+      "name": "vcpkg-azure-static-osx",
+      "configurePreset": "vcpkg-azure-static-osx"
     }
   ],
   "testPresets": [

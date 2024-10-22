@@ -13,7 +13,7 @@ jobs:
   typecheck-build:
     name: lint.python.typecheck-build
     container:
-      image: vowpalwabbit/rlclientlib-manylinux2010-build:latest
+      image: vowpalwabbit/rl-manylinux-2_28-build:latest
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -27,11 +27,14 @@ jobs:
       - name: Build wheel
         shell: bash
         run: |
+          export OPENSSL_ROOT_DIR=/usr/local/openssl
+          export OPENSSL_LIBRARIES=/usr/local/openssl/lib
+          export OPENSSL_INCLUDE_DIR=/usr/local/openssl/include
           ${{ matrix.config.base_path }}bin/pip wheel . -w wheel_output/ --verbose
           auditwheel repair wheel_output/*whl -w audit_output/
       - name: Upload built wheel
         # v1 must be used because newer versions require a node.js version that will not run on this old image.
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: wheel_${{ matrix.config.version }}
           path: audit_output/
@@ -50,9 +53,10 @@ jobs:
         with:
           submodules: recursive
       - name: Download Wheel
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
           name: wheel_${{ matrix.config.version }}
+          path: ${{ github.workspace }}/wheel_${{ matrix.config.version }}
       - name: Install dependencies
         shell: bash
         run: |

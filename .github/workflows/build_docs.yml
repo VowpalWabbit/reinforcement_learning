@@ -29,7 +29,7 @@ jobs:
           cd doc/cpp/
           doxygen
       - name: Upload built docs
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: cxx_docs
           path: doc/cpp/html/
@@ -54,7 +54,7 @@ jobs:
           cd bindings/python/docs
           make html SPHINXBUILD=/opt/python/cp38-cp38/bin/sphinx-build
       - name: Upload built docs
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: python_docs
           path: bindings/python/docs/build/
@@ -71,11 +71,11 @@ jobs:
         if: github.event_name == 'release'
         run: echo "FOLDER_NAME=$(echo ${GITHUB_REF:10})" >> $GITHUB_ENV
       - name: Download c++ Docs
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
           name: cxx_docs
       - name: Download Python Docs
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
           name: python_docs
       - uses: actions/checkout@v1
