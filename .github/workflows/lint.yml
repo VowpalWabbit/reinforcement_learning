@@ -13,7 +13,7 @@ jobs:
   typecheck-build:
     name: lint.python.typecheck-build
     container:
-      image: vowpalwabbit/rlclientlib-manylinux2010-build:latest
+      image: vowpalwabbit/rl-manylinux-2_28-build:latest
     runs-on: ubuntu-latest
     strategy:
       matrix:
