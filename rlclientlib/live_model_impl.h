@@ -136,7 +136,7 @@ int live_model_impl::report_outcome_internal(const char* event_id, D outcome, ap
   api_status::try_clear(status);
 
   // Send the outcome event to the backend
-  RETURN_IF_FAIL(_outcome_logger->log(event_id, outcome, status));
+  if (_outcome_logger) { RETURN_IF_FAIL(_outcome_logger->log(event_id, outcome, status)); }
 
   // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
   if (_watchdog.has_background_error_been_reported())
@@ -154,7 +154,7 @@ int live_model_impl::report_outcome_internal(const char* primary_id, I secondary
   api_status::try_clear(status);
 
   // Send the outcome event to the backend
-  RETURN_IF_FAIL(_outcome_logger->log(primary_id, secondary_id, outcome, status));
+  if (_outcome_logger) { RETURN_IF_FAIL(_outcome_logger->log(primary_id, secondary_id, outcome, status)); }
 
   // Check watchdog for any background errors. Do this at the end of function so that the work is still done.
   if (_watchdog.has_background_error_been_reported())
