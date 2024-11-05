@@ -40,3 +40,9 @@ dist/
 rl_client.egg-info/
 
 .cache
+
+# Unit test outputs
+interaction.fb.data
+interaction.txt
+observation.fb.data
+observation.txt

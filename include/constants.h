@@ -33,6 +33,7 @@ const char* const AZURE_OAUTH_CREDENTIAL_TENANTID = "azure.oauth.credential.tena
 const char* const AZURE_OAUTH_CREDENTIAL_CLIENTSECRET = "azure.oauth.credential.clientsecret";
 const char* const AUDIT_ENABLED = "audit.enabled";
 const char* const AUDIT_OUTPUT_PATH = "audit.output.path";
+const char* const EVENT_LOGGING_ENABLED = "event.logging.enabled";
 
 // Episode
 const char* const EPISODE_EH_HOST = "episode.eventhub.host";
@@ -166,6 +167,7 @@ const bool DEFAULT_MODEL_BACKGROUND_REFRESH = true;
 const int DEFAULT_VW_POOL_INIT_SIZE = 4;
 const int DEFAULT_PROTOCOL_VERSION = 1;
 const char* const DEFAULT_AUDIT_OUTPUT_PATH = "audit";
+const bool DEFAULT_EVENT_LOGGING_ENABLED = true;
 
 const char* get_default_episode_sender();
 const char* get_default_observation_sender();
