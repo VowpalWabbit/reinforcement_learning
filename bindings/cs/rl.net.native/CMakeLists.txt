@@ -63,6 +63,7 @@ add_library(rlnetnative SHARED
 
 if(MSVC)
   target_compile_options(rlnetnative PRIVATE /guard:cf)
+  target_link_options(rlnetnative PRIVATE /guard:cf /DYNAMICBASE)
 endif()
 
 set_target_properties(rlnetnative PROPERTIES POSITION_INDEPENDENT_CODE ON)
