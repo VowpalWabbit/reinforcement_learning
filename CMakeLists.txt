@@ -7,10 +7,9 @@ if(POLICY CMP0091)
 endif()
 
 if(WIN32)
-  # Due to needing to configure the CMAKE platform, this needs to be included before the
+  # Due to needing to configure the .NET output paths, this needs to be included before the
   # top-level project() declaration.
   include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/platforms/win32.cmake)
-  message(STATUS "WinSDK Version: ${CMAKE_SYSTEM_VERSION}")
 endif()
 
 if(NOT WIN32)
@@ -38,6 +37,9 @@ if(RL_LINK_AZURE_LIBS)
   list(APPEND VCPKG_MANIFEST_FEATURES "azurelibs")
 endif()
 project(reinforcement_learning)
+if(WIN32)
+  message(STATUS "WinSDK Version: ${CMAKE_SYSTEM_VERSION}")
+endif()
 
 # Add support for building library with latest version of C++ supported by your compiler
 # Copied from VW

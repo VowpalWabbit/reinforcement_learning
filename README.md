@@ -85,6 +85,8 @@ Open the project directory in Visual Studio. Building the library can be easily 
 - Run tests with `Test > Run CTests for <project name>`
 
 This procedure has been verified to work well in Visual Studio 2022.
+The Visual Studio generator selects an installed Windows SDK by default.
+Use `-DCMAKE_SYSTEM_VERSION=<sdk-version>` to select a specific installed SDK.
 
 #### Configure with command line + Build in Visual Studio
 Alternatively, CMake configuration can be done in the command line.
