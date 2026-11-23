@@ -35,8 +35,15 @@ jobs:
       - name: Install ONNX
         run: |
           ONNX_FILENAME="onnxruntime-linux-x64-1.13.1"
-          wget "https://github.com/microsoft/onnxruntime/releases/download/v1.13.1/$ONNX_FILENAME.tgz"
-          tar xvf "$ONNX_FILENAME.tgz"
+          curl --fail --location --output onnxruntime.nupkg \
+            "https://pkgs.dev.azure.com/dnceng/9ee6d478-d288-47f7-aacc-f6e6d082ae6d/_packaging/45bacae2-5efb-47c8-91e5-8ec20c22b4f8/nuget/v3/flat2/microsoft.ml.onnxruntime/1.13.1/microsoft.ml.onnxruntime.1.13.1.nupkg"
+          echo "590e655b036e6e663ad1274bf8650ae671859005cd61eff432dfd3dba66b5904  onnxruntime.nupkg" | sha256sum --check
+          unzip -q onnxruntime.nupkg -d onnxruntime-package
+          mkdir -p "$ONNX_FILENAME/lib"
+          cp -r onnxruntime-package/build/native/include "$ONNX_FILENAME/include"
+          cp onnxruntime-package/runtimes/linux-x64/native/libonnxruntime.so "$ONNX_FILENAME/lib/"
+          ln -s libonnxruntime.so "$ONNX_FILENAME/lib/libonnxruntime.so.1.13.1"
+          echo "1.13.1" > "$ONNX_FILENAME/VERSION_NUMBER"
           echo "ONNXRUNTIME_ROOT=$ONNX_FILENAME" >> $GITHUB_ENV
       - name: Configure
         run: >
