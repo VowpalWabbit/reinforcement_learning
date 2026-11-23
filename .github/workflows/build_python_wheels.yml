@@ -12,49 +12,51 @@ on:
 jobs:
   build:
     container:
-      image: vowpalwabbit/rl-manylinux-2_28-build:latest
-    runs-on: ubuntu-latest
+      image: quay.io/pypa/manylinux_2_28_x86_64@sha256:55a36963bc0504cdf004011001c1072306402f0b8b83be5a5eba7068f93eec53
+    runs-on: ubuntu-22.04
+    env:
+      VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
     strategy:
+      fail-fast: false
       matrix:
         config:
-        - { version: 3.6, base_path: /opt/python/cp36-cp36m/ }
-        - { version: 3.7, base_path: /opt/python/cp37-cp37m/ }
-        - { version: 3.8, base_path: /opt/python/cp38-cp38/ }
-        - { version: 3.9, base_path: /opt/python/cp39-cp39/ }
+        - { version: '3.11', base_path: /opt/python/cp311-cp311/ }
+        - { version: '3.12', base_path: /opt/python/cp312-cp312/ }
+        - { version: '3.13', base_path: /opt/python/cp313-cp313/ }
+        - { version: '3.14', base_path: /opt/python/cp314-cp314/ }
     steps:
-      # v1 must be used because newer versions require a node.js version that will not run on this old image.
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - uses: ./.github/actions/setup-build
+        with:
+          cache-key: python-${{ matrix.config.version }}
       - name: Build wheel
         shell: bash
-        run: |
-          export OPENSSL_ROOT_DIR=/usr/local/openssl
-          export OPENSSL_LIBRARIES=/usr/local/openssl/lib
-          export OPENSSL_INCLUDE_DIR=/usr/local/openssl/include
-          ${{ matrix.config.base_path }}bin/pip wheel . -w wheel_output/ --verbose
-          auditwheel repair wheel_output/*whl -w audit_output/
+        env:
+          PYTHON: ${{ matrix.config.base_path }}bin/python
+        run: bash ./.scripts/linux/build-python-wheel.sh
       - name: Upload built wheel
         uses: actions/upload-artifact@v4
         with:
           name: wheel_${{ matrix.config.version }}
           path: audit_output/
+          if-no-files-found: error
   test:
     needs: build
     container:
-      image: python:${{ matrix.config.version }}
-    runs-on: ubuntu-latest
+      image: python:${{ matrix.config.version }}-slim-bookworm
+    runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
         config:
-        - { version: 3.6 }
-        - { version: 3.7 }
-        - { version: 3.8 }
-        - { version: 3.9 }
+        - { version: '3.11' }
+        - { version: '3.12' }
+        - { version: '3.13' }
+        - { version: '3.14' }
     steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
+      - uses: actions/checkout@v4
       - name: Download Wheel
         uses: actions/download-artifact@v4
         with:

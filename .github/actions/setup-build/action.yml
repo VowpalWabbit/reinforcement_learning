@@ -1,0 +1,35 @@
+name: Setup native build
+description: Install pinned build tools and bootstrap the checked-in vcpkg revision.
+inputs:
+  cache-key:
+    description: Distinguish build configurations sharing a workflow job.
+    default: default
+runs:
+  using: composite
+  steps:
+    - uses: lukka/get-cmake@5f02790fdaf6d6149257a4e3f8a581e3d6e50c5a # v4.5.1
+      with:
+        cmakeVersion: 3.31.6
+        ninjaVersion: 1.12.1
+    - name: Prepare vcpkg
+      id: vcpkg
+      shell: bash
+      run: |
+        if [ "$(git -C ext_libs/vcpkg rev-parse --is-shallow-repository)" = true ]; then
+          git -C ext_libs/vcpkg fetch --unshallow
+        fi
+        echo "commit=$(git -C ext_libs/vcpkg rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        echo "VCPKG_ROOT=$GITHUB_WORKSPACE/ext_libs/vcpkg" >> "$GITHUB_ENV"
+        mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
+    - uses: actions/cache@v4
+      with:
+        path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+        key: ${{ runner.os }}-${{ runner.arch }}-cmake3.31.6-${{ github.job }}-${{ inputs.cache-key }}-${{ hashFiles('vcpkg.json', 'CMakePresets.json', '.github/triplets/*.cmake') }}-${{ steps.vcpkg.outputs.commit }}
+    - name: Bootstrap vcpkg on Windows
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: .\ext_libs\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+    - name: Bootstrap vcpkg on Unix
+      if: runner.os != 'Windows'
+      shell: bash
+      run: ./ext_libs/vcpkg/bootstrap-vcpkg.sh -disableMetrics

@@ -356,7 +356,8 @@ BOOST_AUTO_TEST_CASE(queue_config_drop_rate_test)
   error_callback_fn error_fn(expect_no_error, nullptr);
   utility::watchdog watchdog(nullptr);
   utility::async_batcher_config config;
-  config.send_high_water_mark = 262143;
+  // Force split batches so the assertion cannot depend on background-thread timing.
+  config.send_high_water_mark = 1;
   config.send_batch_interval_ms = static_cast<int>(timeout_ms);
   config.send_queue_max_capacity = static_cast<int>(queue_max_size);
   config.queue_mode = queue_mode;
@@ -384,8 +385,10 @@ BOOST_AUTO_TEST_CASE(queue_config_drop_rate_test)
     }
   }
 
-  BOOST_REQUIRE(!items.empty());
-  BOOST_CHECK_EQUAL(items[0], "0.00\n0.69\n0.70\n");
+  BOOST_REQUIRE_GT(items.size(), 1);
+  std::string actual_output;
+  for (const auto& item : items) { actual_output.append(item); }
+  BOOST_CHECK_EQUAL(actual_output, "0.00\n0.69\n0.70\n");
 }
 
 BOOST_AUTO_TEST_CASE(get_batcher_config_counter_status_test)

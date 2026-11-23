@@ -23,30 +23,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-13, windows-latest]
+        os: [ubuntu-22.04, macos-15-intel, windows-2022]
         preset: [vcpkg-debug, vcpkg-release]
     steps:
-      - uses: actions/checkout@v3
+      - name: Enable long paths before recursive checkout
+        if: runner.os == 'Windows'
+        run: git config --global core.longpaths true
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - run: git -C ${{ github.workspace }}/ext_libs/vcpkg fetch --unshallow
-      - uses: lukka/get-cmake@latest
-      - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
-        shell: bash
-      - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-      - uses: actions/cache@v3
-        env:
-          cache-name: vcpkg-cache
+      - name: Setup MSVC Developer Command Prompt
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+      - uses: ./.github/actions/setup-build
         with:
-          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
-          key: ${{ startsWith(matrix.os, 'macos') && 'macos-latest' || matrix.os }}-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
-      - uses: lukka/run-vcpkg@v10
-        with:
-          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
-          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
-      - uses: lukka/run-cmake@v10
-        with:
-          cmakeListsTxtPath: "${{ github.workspace }}/CMakeLists.txt"
-          configurePreset: "${{ matrix.preset }}"
-          buildPreset: "${{ matrix.preset }}"
-          testPreset: "${{ matrix.preset }}"
+          cache-key: ${{ matrix.preset }}
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }}
+      - name: Build
+        run: cmake --build --preset ${{ matrix.preset }}
+      - name: Test
+        run: ctest --preset ${{ matrix.preset }}
