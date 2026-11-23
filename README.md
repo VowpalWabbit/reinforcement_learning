@@ -111,6 +111,14 @@ VcpkgIntegration=c:\s\vcpkg\scripts\buildsystems\msbuild\vcpkg.targets
 Open `reinforcement_learning.sln` in Visual Studio. Build Release or Debug x64 configuration.
 
 ## Troubleshooting
+### Python serialized-event tools
+The E2E comparator and log parser tools generate their Python FlatBuffers
+accessors on first use. Use the pinned `flatc` 23.1.21 on `PATH`, or set `FLATC`
+to its executable path. Generation goes through binary reflection schemas
+(`--binary --schema`, then `--python`) to preserve the wire schema's literal
+string unions, which direct Python schema parsing rejects. The comparison
+still decodes and checks both numeric and literal outcomes.
+
 ### Long Windows build paths
 Windows compiler and resource tools can fail on deeply nested vcpkg build paths
 even when Git long paths are enabled. Keep the checkout path short, or pass

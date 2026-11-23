@@ -1,20 +1,11 @@
 #! /usr/bin/env python3 -W ignore::DeprecationWarning
-try:
-    import reinforcement_learning.messages.flatbuff.v2.EventBatch
-except Exception as e:
-    import pathlib
-    import subprocess
+from pathlib import Path
+import sys
 
-    script_dir = pathlib.Path(__file__).parent.absolute()
-    input_dir = (
-        pathlib.Path(script_dir).parents[1].joinpath("rlclientlib", "schema", "v2")
-    )
-    print(input_dir)
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from generate_flatbuffers import ensure_flatbuffer_bindings
 
-    input_files = " ".join([str(x) for x in input_dir.glob("*.fbs")])
-    subprocess.run(
-        f"flatc --python {input_files}", cwd=script_dir, shell=True, check=True
-    )
+ensure_flatbuffer_bindings(Path(__file__).resolve().parent)
 
 
 # must be done after the above that generates the classes we're importing
@@ -44,6 +35,7 @@ from reinforcement_learning.messages.flatbuff.v2.CheckpointInfo import *
 from reinforcement_learning.messages.flatbuff.v2.ProblemType import *
 
 import argparse
+from itertools import zip_longest
 import flatbuffers
 import numpy as np
 import os
@@ -55,6 +47,12 @@ PREAMBLE_LENGTH = 8
 class PreambleStreamReader:
     def __init__(self, file_name):
         self.file = open(file_name, "rb")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.file.close()
 
     def parse_preamble(self):
         buf = self.file.read(8)
@@ -232,32 +230,31 @@ def main():
 
     for filename in base_files:
         print(f"comparing file {filename}")
-        base_reader = PreambleStreamReader(os.path.join(args.base_dir, filename))
-        compare_reader = PreambleStreamReader(os.path.join(args.compare_dir, filename))
-
-        for base, compare in zip(base_reader.messages(), compare_reader.messages()):
-            if base is None or compare is None:
-                raise Exception(
-                    "base and compare files do not contain the same number of events"
-                )
-            if base[0] != compare[0]:
-                raise Exception("base and compare types are no the same")
-            if base[0] == PayloadType.CB:
-                compare_cb(base[1], compare[1])
-            elif base[0] == PayloadType.CCB or base[0] == PayloadType.Slates:
-                compare_multislot(base[1], compare[1])
-            elif base[0] == PayloadType.Outcome:
-                compare_outcome(base[1], compare[1])
-            elif base[0] == PayloadType.CA:
-                compare_ca(base[1], compare[1])
-            elif base[0] == PayloadType.DedupInfo:
-                compare_dedup(base[1], compare[1])
-            elif base[0] == PayloadType.MultiStep:
-                compare_multistep(base[1], compare[1])
-            elif base[0] == PayloadType.Episode:
-                compare_episode(base[1], compare[1])
-            else:
-                raise Exception("Unknown type")
+        with PreambleStreamReader(os.path.join(args.base_dir, filename)) as base_reader, \
+                PreambleStreamReader(os.path.join(args.compare_dir, filename)) as compare_reader:
+            for base, compare in zip_longest(base_reader.messages(), compare_reader.messages()):
+                if base is None or compare is None:
+                    raise Exception(
+                        "base and compare files do not contain the same number of events"
+                    )
+                if base[0] != compare[0]:
+                    raise Exception("base and compare types are no the same")
+                if base[0] == PayloadType.CB:
+                    compare_cb(base[1], compare[1])
+                elif base[0] == PayloadType.CCB or base[0] == PayloadType.Slates:
+                    compare_multislot(base[1], compare[1])
+                elif base[0] == PayloadType.Outcome:
+                    compare_outcome(base[1], compare[1])
+                elif base[0] == PayloadType.CA:
+                    compare_ca(base[1], compare[1])
+                elif base[0] == PayloadType.DedupInfo:
+                    compare_dedup(base[1], compare[1])
+                elif base[0] == PayloadType.MultiStep:
+                    compare_multistep(base[1], compare[1])
+                elif base[0] == PayloadType.Episode:
+                    compare_episode(base[1], compare[1])
+                else:
+                    raise Exception("Unknown type")
 
     print("Comparison completed. All events match")
 
