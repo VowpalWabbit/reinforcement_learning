@@ -108,6 +108,14 @@ VcpkgIntegration=c:\s\vcpkg\scripts\buildsystems\msbuild\vcpkg.targets
 Open `reinforcement_learning.sln` in Visual Studio. Build Release or Debug x64 configuration.
 
 ## Troubleshooting
+### Long Windows build paths
+Windows compiler and resource tools can fail on deeply nested vcpkg build paths
+even when Git long paths are enabled. Keep the checkout path short, or pass
+`-DVCPKG_INSTALL_OPTIONS="--x-buildtrees-root=<short-absolute-path>"` when
+configuring to move dependency scratch files to a shorter path. The installed
+dependency directory is unchanged. Direct vcpkg installs accept the same
+`--x-buildtrees-root` option.
+
 ### OpenSSL on MacOS
 If you get an error similar to the following on MacOS when running `cmake ..`, then you may be able to fix it by supplying the OpenSSL path to CMake.
 ```
