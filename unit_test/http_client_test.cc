@@ -50,25 +50,33 @@ BOOST_AUTO_TEST_CASE(http_client_timeout_default)
 
 BOOST_AUTO_TEST_CASE(http_client_timeout_positive_values)
 {
-  for (const int timeout : {1, 30, 31, 120, 3600, (std::numeric_limits<int>::max)()})
+  const int max_timeout_seconds = (std::numeric_limits<int>::max)() / 1000;
+  for (const int timeout : {1, 30, 31, 120, 3600, max_timeout_seconds})
   {
     BOOST_TEST_CONTEXT("http.timeout = " << timeout)
     {
       u::configuration cc;
       cc.set(r::name::HTTP_CLIENT_TIMEOUT, std::to_string(timeout).c_str());
-      BOOST_CHECK_EQUAL(u::get_http_config(cc).timeout().count(), timeout);
+      const auto http_config = u::get_http_config(cc);
+      BOOST_CHECK_EQUAL(http_config.timeout().count(), timeout);
+      const auto milliseconds = http_config.timeout<std::chrono::milliseconds>().count();
+      BOOST_CHECK_EQUAL(milliseconds, static_cast<long long>(timeout) * 1000);
+      BOOST_CHECK_LE(milliseconds, (std::numeric_limits<int>::max)());
+      BOOST_CHECK_EQUAL(static_cast<int>(milliseconds), milliseconds);
     }
   }
 }
 
 BOOST_AUTO_TEST_CASE(http_client_timeout_invalid_values)
 {
-  for (const char* timeout : {"0", "-1", "invalid"})
+  const int max_timeout_seconds = (std::numeric_limits<int>::max)() / 1000;
+  for (const std::string& timeout : {std::string("0"), std::string("-1"), std::string("invalid"),
+           std::to_string(max_timeout_seconds + 1), std::to_string((std::numeric_limits<int>::max)())})
   {
     BOOST_TEST_CONTEXT("http.timeout = " << timeout)
     {
       u::configuration cc;
-      cc.set(r::name::HTTP_CLIENT_TIMEOUT, timeout);
+      cc.set(r::name::HTTP_CLIENT_TIMEOUT, timeout.c_str());
       BOOST_CHECK_EQUAL(u::get_http_config(cc).timeout().count(), 30);
     }
   }
