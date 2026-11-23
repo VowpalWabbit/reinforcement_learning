@@ -10,6 +10,8 @@ if(WIN32)
   # Due to needing to configure the .NET output paths, this needs to be included before the
   # top-level project() declaration.
   include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/platforms/win32.cmake)
+  list(APPEND VCPKG_OVERLAY_PORTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vcpkg-overlay-ports")
+  list(REMOVE_DUPLICATES VCPKG_OVERLAY_PORTS)
 endif()
 
 if(NOT WIN32)

@@ -9,6 +9,11 @@ endif()
 # Set this to on so that tooling can make use of the outputted compile commands (such as clang-tidy)
 set(CMAKE_EXPORT_COMPILE_COMMANDS On)
 
+if(WIN32 AND CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+  list(APPEND VCPKG_OVERLAY_PORTS "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/vcpkg-overlay-ports")
+  list(REMOVE_DUPLICATES VCPKG_OVERLAY_PORTS)
+endif()
+
 project(vw_binary_parser)
 
 if(DEFINED RL_CXX_STANDARD)
