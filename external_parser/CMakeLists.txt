@@ -171,7 +171,10 @@ add_dependencies(rl_binary_parser fbgen)
 
 add_executable(rl_binary_parser_bin main.cc)
 target_link_libraries(rl_binary_parser_bin PUBLIC rl_binary_parser)
-set_target_properties(rl_binary_parser_bin PROPERTIES OUTPUT_NAME "vw")
+# Keep the parser CLI separate from VW's CLI in the shared Windows binaries directory.
+set_target_properties(rl_binary_parser_bin PROPERTIES
+  OUTPUT_NAME "vw"
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
 if(STATIC_LINK_BINARY_PARSER AND NOT APPLE)
   target_link_libraries(rl_binary_parser_bin PRIVATE -static)
