@@ -27,6 +27,7 @@ CMakeSettings.json
 nuget_staging/
 
 build
+/build-release/
 ext_deps
 /rlclientlib/generated
 /external_parser/generated
