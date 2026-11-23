@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
   "name": "reinforcement-learning",
   "version": "1.0.2",
-  "builtin-baseline": "f30434939d5516ce764c549ab04e3d23d312180a",
+  "builtin-baseline": "d5ec528843d29e3a52d745a64b469f810b2cedbf",
   "dependencies": [
     "boost-align",
     "boost-asio",
@@ -27,8 +27,8 @@
   "overrides": [
     {"name": "cpprestsdk", "version": "2.10.18"},
     {"name": "flatbuffers", "version": "23.1.21"},
-    {"name": "fmt", "version": "9.1.0"},
-    {"name": "spdlog", "version": "1.11.0"},
+    {"name": "fmt", "version": "11.0.2"},
+    {"name": "spdlog", "version": "1.15.0"},
     {"name": "zlib", "version": "1.2.13"}
   ],
   "features": {

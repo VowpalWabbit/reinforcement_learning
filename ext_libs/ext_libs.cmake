@@ -2,6 +2,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/fakeit)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/date)
 
 if(RL_BUILD_PYTHON)
+  set(PYBIND11_FINDPYTHON ON)
   add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/pybind11)
 endif()
 

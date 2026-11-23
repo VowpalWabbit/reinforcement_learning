@@ -42,9 +42,9 @@ project(reinforcement_learning)
 # Add support for building library with latest version of C++ supported by your compiler
 # Copied from VW
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake/")
-option(USE_LATEST_STD "Override using C++11 with the latest standard the compiler offers. Default is C++11. " OFF)
+option(USE_LATEST_STD "Override using C++14 with the latest standard the compiler offers. Default is C++14. " OFF)
 include(DetectCXXStandard)
-set(RL_CXX_STANDARD 11)
+set(RL_CXX_STANDARD 14)
 if(USE_LATEST_STD)
   DetectCXXStandard(RL_CXX_STANDARD)
 endif()
@@ -88,15 +88,6 @@ if(RL_USE_UBSAN)
     add_compile_options(-fsanitize=undefined -fno-sanitize-recover -fno-omit-frame-pointer -g3)
     add_link_options(-fsanitize=undefined -fno-sanitize-recover -fno-omit-frame-pointer -g3)
   endif()
-endif()
-
-if(UNIX AND NOT APPLE)
-  # Temporary workaround for VW 9.6 missing size_t on Linux builds
-  # TODO remove when VW submodule is updated
-  # This must be stddef.h and not cstddef because it also applies to C code
-  add_compile_options(-include stddef.h)
-  # Enable C++17 math functions in C++11
-  add_compile_definitions(__STDCPP_WANT_MATH_SPEC_FUNCS__)
 endif()
 
 # For Nuget package don't use system libraries, use vendored ones in ext_libs instead
