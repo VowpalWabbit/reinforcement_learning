@@ -58,6 +58,7 @@ jobs:
           ./ext_libs/vcpkg/vcpkg.exe install
           --host-triplet=x64-windows
           --triplet=x64-windows
+          --overlay-ports="${{ github.workspace }}/cmake/vcpkg-overlay-ports"
           --overlay-triplets="${{ github.workspace }}/.github/triplets"
           --x-install-root="${{ github.workspace }}/build/vcpkg_installed"
 
