@@ -24,7 +24,7 @@ runs:
     - uses: actions/cache@v4
       with:
         path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-        key: ${{ runner.os }}-${{ runner.arch }}-cmake3.31.6-${{ github.job }}-${{ inputs.cache-key }}-${{ hashFiles('vcpkg.json', 'CMakePresets.json', '.github/triplets/*.cmake') }}-${{ steps.vcpkg.outputs.commit }}
+        key: ${{ runner.os }}-${{ runner.arch }}-cmake3.31.6-${{ github.job }}-${{ inputs.cache-key }}-${{ hashFiles('vcpkg.json', 'CMakePresets.json', '.github/triplets/*.cmake', 'cmake/vcpkg-overlay-ports/**') }}-${{ steps.vcpkg.outputs.commit }}
     - name: Bootstrap vcpkg on Windows
       if: runner.os == 'Windows'
       shell: pwsh
