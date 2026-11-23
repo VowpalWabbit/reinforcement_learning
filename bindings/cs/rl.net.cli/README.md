@@ -6,6 +6,20 @@ It follows the best practices when using it.
 Beyond that, it provides a suite of commands that helps test and develop rlclientlib itself.
 In particular, the simulation modes are useful to generate synthetic data.
 
+## Building and testing
+
+The CLI and its tests require the .NET 10 SDK. The public `rl.net` library
+continues to target .NET Standard 2.0.
+
+Install `dotnet-t4` and build the native C# binding before running the CLI tests:
+
+```sh
+dotnet tool install --global dotnet-t4
+dotnet test bindings/cs/rl.net.cli.test/rl.net.cli.test.csproj -p:Platform=x64
+```
+
+The native binding and its dependencies must be available on the test process's
+library search path.
 
 ## Stats
 
