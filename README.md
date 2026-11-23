@@ -24,8 +24,11 @@ Enable them with `-DRL_BUILD_PYTHON=ON`; select an interpreter with
 `-DPython_EXECUTABLE=<path-to-python>`.
 The checked-in vcpkg revision and manifest baseline are both pinned to
 2025.02.14, with fmt 11.0.2 and spdlog 1.15.0 overrides.
-Windows builds apply a small overlay to that pinned Boost helper to avoid
-trailing separators in directory renames rejected by Windows.
+Windows builds apply small overlays to that pinned registry: the Boost helper
+avoids trailing separators in directory renames rejected by Windows, and the
+CMake helper corrects the native MinGW package filter so acquiring pkgconf does
+not unnecessarily fetch a removed MSYS runtime archive. Package versions and
+download hashes remain pinned.
 Root and standalone parser CMake builds select it automatically; direct Windows
 vcpkg installs must add `--overlay-ports=cmake\vcpkg-overlay-ports`.
 
