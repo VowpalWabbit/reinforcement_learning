@@ -15,7 +15,7 @@ cd reinforcement_learning
 
 ### Building with Vcpkg + CMake Presets
 #### Requirements
-* CMake 3.20+
+* CMake 3.21+ (CMake Presets schema version 3; CI pins CMake 3.31.6)
 * Ninja
 * A C++14-capable compiler (the pinned Vowpal Wabbit 9.11.9 requires C++14)
 
@@ -23,7 +23,7 @@ Optional Python bindings use pybind11 3.1.0 and require Python 3.8 or newer.
 Enable them with `-DRL_BUILD_PYTHON=ON`; select an interpreter with
 `-DPython_EXECUTABLE=<path-to-python>`.
 The checked-in vcpkg revision and manifest baseline are both pinned to
-2025.02.14, with fmt 11.0.2 and spdlog 1.15.0 matching VW's vendored dependencies.
+2025.02.14, with fmt 11.0.2 and spdlog 1.15.0 overrides.
 
 #### Commands
 ```sh
