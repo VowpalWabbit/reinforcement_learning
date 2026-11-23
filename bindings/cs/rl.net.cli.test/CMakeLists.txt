@@ -25,5 +25,5 @@ endif()
 add_test(
   NAME rl.net.cli.test
   COMMAND
-    ${DOTNET_COMMAND} test $<TARGET_FILE_DIR:rlnetnative>/rl.net.cli.test.dll --Platform:x64 --InIsolation "--logger:console;verbosity=default"
+    ${DOTNET_COMMAND} test $<TARGET_FILE_DIR:rlnetnative>/Rl.Net.Cli.Test.dll --Platform:x64 --InIsolation "--logger:console;verbosity=default"
 )

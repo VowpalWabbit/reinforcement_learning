@@ -62,5 +62,4 @@ PYTHON=/opt/python/cp311-cp311/bin/python bash ./.scripts/linux/build-python-whe
 The script writes repaired wheels to `audit_output`. The wheel test jobs install
 each wheel into a separate Python container and run the binding unit tests.
 Python 3.6-3.9 are end-of-life and are no longer in the CI support matrix.
-    + reinforcement_learning/examples/rl_sim_cpp
 */
