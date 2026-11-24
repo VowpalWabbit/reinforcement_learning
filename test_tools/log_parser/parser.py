@@ -254,23 +254,40 @@ def dump_event_csv(event_payload, idx, timestamp=None, verbose=False, batch_idx=
     return {"type": payload_name(m.PayloadType()), "message": message}
 
 
-def dump_event_batch(buf):
+def dump_event_batch(buf, short=False, summary=False):
     batch = EventBatch.GetRootAsEventBatch(buf, 0)
-    meta = batch.Metadata()
-    enc = meta.ContentEncoding().decode("utf-8")
-    print(f"event-batch evt-count:{batch.EventsLength()} enc:{enc}")
-    is_dedup = b"DEDUP" == meta.ContentEncoding()
-    for i in range(0, batch.EventsLength()):
-        dump_event(batch.Events(i).PayloadAsNumpy(), i)
-    print("----\n")
+    if not summary:
+        meta = batch.Metadata()
+        enc = meta.ContentEncoding().decode("utf-8")
+        print(f"event-batch evt-count:{batch.EventsLength()} enc:{enc}")
+    if not (short or summary):
+        for i in range(0, batch.EventsLength()):
+            dump_event(batch.Events(i).PayloadAsNumpy(), i)
+        print("----\n")
+    return batch.EventsLength()
 
 
-def dump_preamble_file(file_name, buf):
+def dump_preamble_file(file_name, buf, short=False, summary=False):
+    batch_count = 0
+    event_count = 0
+    data_size = 0
     while len(buf) > 8:
         preamble = parse_preamble(buf)
-        print(f"parsing preamble file {file_name}\n\tpreamble:{preamble}")
-        dump_event_batch(buf[PREAMBLE_LENGTH : PREAMBLE_LENGTH + preamble["msg_size"]])
+        if not summary:
+            print(f"parsing preamble file {file_name}\n\tpreamble:{preamble}")
+        event_count += dump_event_batch(
+            buf[PREAMBLE_LENGTH : PREAMBLE_LENGTH + preamble["msg_size"]],
+            short=short,
+            summary=summary,
+        )
+        batch_count += 1
+        data_size += preamble["msg_size"]
         buf = buf[PREAMBLE_LENGTH + preamble["msg_size"] :]
+    if summary:
+        print(
+            f"preamble file:{file_name} batches:{batch_count} "
+            f"events:{event_count} data:{data_size} bytes"
+        )
 
 
 MSG_TYPE_FILEMAGIC = 0x42465756
@@ -326,13 +343,22 @@ class JoinedLogStreamReader:
                 yield (msg[0], msg[1])
 
 
-def dump_joined_log_file(file_name, buf, verbose):
+def dump_joined_log_file(file_name, buf, verbose, short=False, summary=False):
     print(f"Parsing binary-log file:{file_name}")
 
     reader = JoinedLogStreamReader(buf)
+    msg_count = 0
+    data_size = 0
     for msg in reader.messages():
         if msg[0] == MSG_TYPE_REGULAR:
             msg = msg[1]
+            if summary:
+                msg_count += 1
+                data_size += len(msg._tab.Bytes)
+                continue
+            if short:
+                print(f"regular-msg len:{len(msg._tab.Bytes)} offset:{reader.offset}")
+                continue
             print(f"joined-batch events: {msg.EventsLength()}")
             for i in range(msg.EventsLength()):
                 joined_event = msg.Events(i)
@@ -341,6 +367,17 @@ def dump_joined_log_file(file_name, buf, verbose):
                 )
         elif msg[0] == MSG_TYPE_CHECKPOINT:
             checkpoint_info = msg[1]
+            if summary:
+                print(
+                    f"checkpoint len:{len(checkpoint_info._tab.Bytes)} "
+                    f"messages before:{msg_count} data before:{data_size} bytes"
+                )
+                msg_count = 0
+                data_size = 0
+                continue
+            if short:
+                print(f"checkpoint len:{len(checkpoint_info._tab.Bytes)}")
+                continue
             print("Parsing checkpoint info:")
             print(f"\treward function type is: {checkpoint_info.RewardFunctionType()}")
             print(f"\tdefault reward is: {checkpoint_info.DefaultReward()}")
@@ -358,6 +395,11 @@ def dump_joined_log_file(file_name, buf, verbose):
             print(f" File Version: {msg[1]}")
         else:
             print(f"unknown message type: {msg[0]}")
+    if summary:
+        print(
+            f"finished reading remaining messages: {msg_count} "
+            f"size: {data_size} bytes"
+        )
 
 
 def get_records(file_name):
@@ -416,13 +458,13 @@ def is_binary_log_msg(buf):
     )
 
 
-def dump_file(f, verbose=False):
+def dump_file(f, verbose=False, short=False, summary=False):
     buf = bytearray(open(f, "rb").read())
 
     if is_binary_log_msg(buf[0:4]):
-        dump_joined_log_file(f, buf, verbose)
+        dump_joined_log_file(f, buf, verbose, short=short, summary=summary)
     else:
-        dump_preamble_file(f, buf)
+        dump_preamble_file(f, buf, short=short, summary=summary)
 
 
 from pathlib import Path
@@ -466,13 +508,22 @@ def main():
     parser.add_argument(
         "files", metavar="N", type=str, nargs="+", help="files to parse"
     )
-    parser.add_argument(
+    output = parser.add_mutually_exclusive_group()
+    output.add_argument(
         "--verbose", dest="verbose", action="store_true", help="verbose output"
+    )
+    output.add_argument(
+        "--short", action="store_true", help="print batch/message metadata only"
+    )
+    output.add_argument(
+        "--summary",
+        action="store_true",
+        help="summarize joined messages per checkpoint or preamble batches per file",
     )
 
     args = parser.parse_args()
     for input_file in args.files:
-        dump_file(input_file, args.verbose)
+        dump_file(input_file, args.verbose, short=args.short, summary=args.summary)
 
 
 if __name__ == "__main__":

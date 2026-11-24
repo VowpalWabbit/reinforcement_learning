@@ -139,6 +139,14 @@ to its executable path. Generation goes through binary reflection schemas
 string unions, which direct Python schema parsing rejects. The comparison
 still decodes and checks both numeric and literal outcomes.
 
+The log parser accepts `--short` to print batch/message metadata without event
+payloads, or `--summary` to report joined batch counts and payload bytes between
+checkpoints (including the final segment). For unjoined preamble files,
+`--summary` reports total batches, events, and batch payload bytes per file.
+These modes are mutually exclusive with `--verbose`; default output and
+`get_records` are unchanged. They reduce decoding and output, not file-buffer
+memory: the parser still reads the entire input file.
+
 ### Long Windows build paths
 Windows compiler and resource tools can fail on deeply nested vcpkg build paths
 even when Git long paths are enabled. Keep the checkout path short, or pass
