@@ -14,6 +14,12 @@ The general format of each message is shown in this table. Details for each mess
 | `payload_size` | payload content (required if not inline payload) |
 | `payload_size % 8` | padding (required if not inline payload) |
 
+### Byte ordering
+
+The message type identifier, payload size, and inline FILEMAGIC version are unsigned 32-bit integers encoded in little-endian byte order. For example, a FILEMAGIC message with version `1` is stored as `56 57 46 42 01 00 00 00` (the first four bytes spell `VWFB`).
+
+Non-empty HEADER, CHECKPOINT, and REGULAR payloads use the FlatBuffers format, whose multi-byte scalar fields are little-endian. Byte vectors within these payloads, including encoded event data, retain their own format and must not be byte-swapped.
+
 ### Message type
 The first 4 bytes in each message is an unique indentifier:
 - `MSG_TYPE_FILEMAGIC = 0x42465756` (in ASCII this is `VWFB`)
