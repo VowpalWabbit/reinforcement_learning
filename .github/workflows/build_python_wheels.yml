@@ -58,6 +58,7 @@ jobs:
           path: audit_output/
           if-no-files-found: error
   test:
+    name: test (${{ matrix.config.version }})
     needs: build
     runs-on: ubuntu-22.04
     strategy:
