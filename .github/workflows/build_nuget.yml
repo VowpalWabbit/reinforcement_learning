@@ -44,8 +44,9 @@ jobs:
         shell: pwsh
         run: |
           $component = if ("${{ matrix.toolset }}" -eq "v141") { "Microsoft.VisualStudio.Component.VC.v141.x86.x64" } else { "Microsoft.VisualStudio.ComponentGroup.VC.Tools.142.x86.x64" }
-          $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
-          $process = Start-Process $installer -ArgumentList "modify", "--installPath", "`"$env:VSINSTALLDIR`"", "--add", $component, "--quiet", "--norestart" -Wait -PassThru
+          $installPath = $env:VSINSTALLDIR.TrimEnd('\', '/')
+          $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\setup.exe"
+          $process = Start-Process $installer -ArgumentList "modify", "--installPath", "`"$installPath`"", "--add", $component, "--quiet", "--norestart" -Wait -PassThru
           if ($process.ExitCode -notin 0, 3010) { throw "Toolset installation failed: $($process.ExitCode)" }
       # NASM required to compile OpenSSL assembly language code
       - uses: ilammy/setup-nasm@v1
@@ -131,8 +132,9 @@ jobs:
         shell: pwsh
         run: |
           $component = if ("${{ matrix.toolset }}" -eq "v141") { "Microsoft.VisualStudio.Component.VC.v141.x86.x64" } else { "Microsoft.VisualStudio.ComponentGroup.VC.Tools.142.x86.x64" }
-          $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
-          $process = Start-Process $installer -ArgumentList "modify", "--installPath", "`"$env:VSINSTALLDIR`"", "--add", $component, "--quiet", "--norestart" -Wait -PassThru
+          $installPath = $env:VSINSTALLDIR.TrimEnd('\', '/')
+          $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\setup.exe"
+          $process = Start-Process $installer -ArgumentList "modify", "--installPath", "`"$installPath`"", "--add", $component, "--quiet", "--norestart" -Wait -PassThru
           if ($process.ExitCode -notin 0, 3010) { throw "Toolset installation failed: $($process.ExitCode)" }
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v2
