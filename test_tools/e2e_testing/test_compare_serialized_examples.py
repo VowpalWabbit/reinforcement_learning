@@ -8,7 +8,12 @@ from unittest.mock import patch
 import flatbuffers
 
 import compare_serialized_examples as compare
-from reinforcement_learning.messages.flatbuff.v2 import IndexValue, NumericIndex, NumericOutcome, OutcomeEvent
+from reinforcement_learning.messages.flatbuff.v2 import (
+    IndexValue,
+    NumericIndex,
+    NumericOutcome,
+    OutcomeEvent,
+)
 
 
 def outcome(value, index=None):
@@ -52,7 +57,9 @@ class SerializedComparisonTests(unittest.TestCase):
             compare.compare_outcome(outcome("same", "first"), outcome("same", "second"))
 
     def test_real_stream_fixtures_and_missing_events(self):
-        base_dir = Path(__file__).resolve().parent / "base_files" / "input" / "multistep"
+        base_dir = (
+            Path(__file__).resolve().parent / "base_files" / "input" / "multistep"
+        )
         with tempfile.TemporaryDirectory() as output:
             comparison_dir = Path(output)
             for source in base_dir.iterdir():

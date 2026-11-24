@@ -9,7 +9,9 @@ import tempfile
 
 def ensure_flatbuffer_bindings(output_dir):
     try:
-        importlib.import_module("reinforcement_learning.messages.flatbuff.v2.EventBatch")
+        importlib.import_module(
+            "reinforcement_learning.messages.flatbuff.v2.EventBatch"
+        )
         return
     except ModuleNotFoundError as error:
         if not error.name or not (

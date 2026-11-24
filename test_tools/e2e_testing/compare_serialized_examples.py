@@ -230,9 +230,14 @@ def main():
 
     for filename in base_files:
         print(f"comparing file {filename}")
-        with PreambleStreamReader(os.path.join(args.base_dir, filename)) as base_reader, \
-                PreambleStreamReader(os.path.join(args.compare_dir, filename)) as compare_reader:
-            for base, compare in zip_longest(base_reader.messages(), compare_reader.messages()):
+        with PreambleStreamReader(
+            os.path.join(args.base_dir, filename)
+        ) as base_reader, PreambleStreamReader(
+            os.path.join(args.compare_dir, filename)
+        ) as compare_reader:
+            for base, compare in zip_longest(
+                base_reader.messages(), compare_reader.messages()
+            ):
                 if base is None or compare is None:
                     raise Exception(
                         "base and compare files do not contain the same number of events"
