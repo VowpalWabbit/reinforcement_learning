@@ -2,8 +2,17 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/fakeit)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/date)
 
 if(RL_BUILD_PYTHON)
+  if(CMAKE_VERSION VERSION_LESS 3.18)
+    find_package(Python 3.6 REQUIRED COMPONENTS Interpreter Development)
+  else()
+    find_package(Python 3.6 REQUIRED COMPONENTS Interpreter Development.Module)
+  endif()
   set(PYBIND11_FINDPYTHON ON)
-  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/pybind11)
+  if(Python_VERSION VERSION_LESS 3.9)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/pybind11_legacy)
+  else()
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/pybind11)
+  endif()
 endif()
 
 # Nuget build relies on installing libraries with cmake --install

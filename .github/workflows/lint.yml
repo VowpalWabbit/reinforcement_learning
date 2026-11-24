@@ -18,8 +18,10 @@ jobs:
     env:
       VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
     strategy:
+      fail-fast: false
       matrix:
         config:
+        - { version: "3.9", base_path: /opt/python/cp39-cp39/, include_dir_name: python3.9/ }
         - { version: "3.11", base_path: /opt/python/cp311-cp311/, include_dir_name: python3.11/ }
     steps:
       - uses: actions/checkout@v4
@@ -31,7 +33,7 @@ jobs:
           perl -e 'use IPC::Cmd;'
       - uses: ./.github/actions/setup-build
         with:
-          cache-key: python-typecheck
+          cache-key: python-typecheck-${{ matrix.config.version }}
       - name: Build wheel
         shell: bash
         env:
@@ -42,15 +44,18 @@ jobs:
         with:
           name: wheel_${{ matrix.config.version }}
           path: audit_output/
+          if-no-files-found: error
   typecheck-check:
     name: lint.python.typecheck-check
     needs: typecheck-build
     container:
       image: python:${{ matrix.config.version }}-slim-bookworm
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
         config:
+        - { version: "3.9" }
         - { version: "3.11" }
     steps:
       - uses: actions/checkout@v4
@@ -61,15 +66,17 @@ jobs:
           path: ${{ github.workspace }}/wheel_${{ matrix.config.version }}
       - name: Install dependencies
         shell: bash
+        env:
+          PYTYPE_VERSION: ${{ matrix.config.version == '3.9' && '2024.4.11' || '2024.10.11' }}
         run: |
-          pip install pytype==2024.10.11
+          python -m pip install "pytype==$PYTYPE_VERSION"
       - name: Install wheel
         shell: bash
         run: |
           export wheel_files=(wheel_${{ matrix.config.version }}/*)
           export wheel_file="${wheel_files[0]}"
           echo Installing ${wheel_file}...
-          pip install ${wheel_file}
+          python -m pip install "${wheel_file}"
       - name: Run pytype
         shell: bash
         run: |

@@ -19,9 +19,19 @@ cd reinforcement_learning
 * Ninja
 * A C++14-capable compiler (the pinned Vowpal Wabbit 9.11.9 requires C++14)
 
-Optional Python bindings use pybind11 3.1.0 and require Python 3.8 or newer.
+Optional Python bindings support Python 3.6 or newer. Builds select the pinned
+pybind11 2.12.1 for Python 3.6-3.8 and pybind11 3.1.0 for Python 3.9 or newer.
 Enable them with `-DRL_BUILD_PYTHON=ON`; select an interpreter with
 `-DPython_EXECUTABLE=<path-to-python>`.
+Linux wheel CI builds and tests Python 3.6-3.14 with the existing manylinux_2_28
+baseline (glibc 2.28 or newer). Older interpreters are built from checksum-pinned
+CPython sources in the current build image; wheel repair uses a separate modern
+interpreter. Consumers on Python 3.6-3.7 need pip 20.3 or newer to recognize
+manylinux_2_28 wheels (pip 21.3.1 supports both).
+Source distributions include both binder versions and the native CMake sources;
+the native dependency prerequisites below still apply when building from source.
+Use system dependencies or an existing vcpkg checkout/install; source archives
+do not bundle vcpkg's Git registry or downloaded packages.
 The checked-in vcpkg revision and manifest baseline are both pinned to
 2025.02.14, with fmt 11.0.2 and spdlog 1.15.0 overrides.
 Windows builds apply small overlays to that pinned registry: the Boost helper

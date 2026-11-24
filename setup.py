@@ -133,6 +133,7 @@ setup(
     version="0.1.3",
     url="https://github.com/VowpalWabbit/reinforcement_learning",
     description="Python binding for reinforcement learning client library",
+    python_requires=">=3.6",
     long_description="",
     license="MIT",
     ext_modules=[CMakeExtension("rl_client")],

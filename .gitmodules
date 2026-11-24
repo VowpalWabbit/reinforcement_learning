@@ -20,3 +20,6 @@
 [submodule "ext_libs/vcpkg"]
 	path = ext_libs/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
+[submodule "ext_libs/pybind11_legacy"]
+	path = ext_libs/pybind11_legacy
+	url = https://github.com/pybind/pybind11.git
