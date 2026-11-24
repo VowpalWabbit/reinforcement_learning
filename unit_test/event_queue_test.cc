@@ -8,8 +8,13 @@
 #include "data_buffer.h"
 #include "err_constants.h"
 
+#include <condition_variable>
+#include <cstdint>
 #include <functional>
+#include <mutex>
+#include <set>
 #include <thread>
+#include <vector>
 
 using namespace reinforcement_learning;
 using namespace std;
@@ -38,6 +43,37 @@ int passthru(test_event& out_evt, api_status*, const std::shared_ptr<test_event>
 {
   out_evt = std::move(*evt_sp);
   return reinforcement_learning::error_code::success;
+}
+
+void push_in_parallel(event_queue<test_event>& queue, const std::vector<std::string>& ids)
+{
+  std::mutex mutex;
+  std::condition_variable ready;
+  size_t waiting = 0;
+  bool start = false;
+  std::vector<std::thread> threads;
+  for (const auto& id : ids)
+  {
+    threads.emplace_back(
+        [&, id]
+        {
+          {
+            std::unique_lock<std::mutex> lock(mutex);
+            ++waiting;
+            ready.notify_all();
+            ready.wait(lock, [&] { return start; });
+          }
+          auto evt_sp = std::make_shared<test_event>(id);
+          queue.push(std::bind(passthru, _1, _2, evt_sp), 10, evt_sp.get());
+        });
+  }
+  {
+    std::unique_lock<std::mutex> lock(mutex);
+    ready.wait(lock, [&] { return waiting == ids.size(); });
+    start = true;
+  }
+  ready.notify_all();
+  for (auto& thread : threads) { thread.join(); }
 }
 
 BOOST_AUTO_TEST_CASE(push_pop_test)
@@ -199,82 +235,62 @@ BOOST_AUTO_TEST_CASE(queue_push_pop_subsample)
 BOOST_AUTO_TEST_CASE(queue_push_pop_threads)
 {
   reinforcement_learning::event_queue<test_event> queue(30, events_counter_status::ENABLE);
-  std::vector<thread> _threads;
-
   int n = 10;
-  for (int i = 0; i < n; ++i)
-  {
-    _threads.push_back(thread(
-        [&queue, i]
-        {
-          auto evt_sp = std::make_shared<test_event>(std::to_string(i + 1));
-          queue.push(std::bind(passthru, _1, _2, evt_sp), 10, evt_sp.get());
-        }));
-    std::this_thread::sleep_for(std::chrono::milliseconds(5));  // safe timeout
-  }
+  std::vector<std::string> ids;
+  for (int i = 0; i < n; ++i) { ids.push_back(std::to_string(i + 1)); }
+  push_in_parallel(queue, ids);
+  std::set<std::string> remaining(ids.begin(), ids.end());
 
-  for (int i = 0; i < n; ++i) { _threads[i].join(); }
-
-  BOOST_CHECK_EQUAL(queue.size(), n);
+  BOOST_REQUIRE_EQUAL(queue.size(), n);
   Func f;
   test_event item;
   // pop front
   for (int i = 0; i < n; ++i)
   {
-    queue.pop(&f);
-    f(item, nullptr);
-    BOOST_CHECK_EQUAL(item.get_event_id(), std::to_string(i + 1));
+    BOOST_REQUIRE(queue.pop(&f));
+    BOOST_REQUIRE_EQUAL(f(item, nullptr), reinforcement_learning::error_code::success);
+    BOOST_CHECK_EQUAL(remaining.erase(item.get_event_id()), 1);
     BOOST_CHECK_EQUAL(item.get_event_index(), i + 1);
   }
+  BOOST_CHECK(remaining.empty());
 }
 
 BOOST_AUTO_TEST_CASE(queue_push_pop_threads_subsampling)
 {
   reinforcement_learning::event_queue<test_event> queue(30, events_counter_status::ENABLE, 0.5);
-  std::vector<thread> _threads;
-
   int n = 10;
+  std::vector<std::string> ids;
+  std::set<std::string> remaining;
   for (int i = 0; i < n; ++i)
   {
-    if (i % 2 == 0)
-    {
-      _threads.push_back(thread(
-          [&queue, i]
-          {
-            auto evt_sp = std::make_shared<test_event>("drop_" + std::to_string(i + 1));
-            queue.push(std::bind(passthru, _1, _2, evt_sp), 10, evt_sp.get());
-          }));
-    }
-    else
-    {
-      _threads.push_back(thread(
-          [&queue, i]
-          {
-            auto evt_sp = std::make_shared<test_event>("no_drop_" + std::to_string(i + 1));
-            queue.push(std::bind(passthru, _1, _2, evt_sp), 10, evt_sp.get());
-          }));
-    }
-    std::this_thread::sleep_for(std::chrono::milliseconds(5));  // safe timeout
+    ids.push_back((i % 2 == 0 ? "drop_" : "no_drop_") + std::to_string(i + 1));
+    if (i % 2 != 0) { remaining.insert(ids.back()); }
   }
+  push_in_parallel(queue, ids);
+  BOOST_REQUIRE_EQUAL(queue.size(), n / 2);
 
-  for (int i = 0; i < n; ++i) { _threads[i].join(); }
-
-  BOOST_CHECK_EQUAL(queue.size(), n / 2);
+  // The final index must include dropped events as well as retained events.
+  auto sentinel = std::make_shared<test_event>("no_drop_sentinel");
+  BOOST_REQUIRE(queue.push(std::bind(passthru, _1, _2, sentinel), 10, sentinel.get()));
 
   Func f;
   test_event item;
-
-  // pop all
-  for (int i = 0; i < n; ++i)
+  uint64_t previous_index = 0;
+  for (int i = 0; i < n / 2; ++i)
   {
-    if (i % 2 != 0)
-    {
-      queue.pop(&f);
-      f(item, nullptr);
-      BOOST_CHECK_EQUAL(item.get_event_id(), "no_drop_" + std::to_string(i + 1));
-      BOOST_CHECK_EQUAL(item.get_event_index(), i + 1);
-    }
+    BOOST_REQUIRE(queue.pop(&f));
+    BOOST_REQUIRE_EQUAL(f(item, nullptr), reinforcement_learning::error_code::success);
+    BOOST_CHECK_EQUAL(remaining.erase(item.get_event_id()), 1);
+    BOOST_CHECK_GT(item.get_event_index(), previous_index);
+    BOOST_CHECK_LE(item.get_event_index(), n);
+    previous_index = item.get_event_index();
   }
+  BOOST_CHECK(remaining.empty());
+  BOOST_REQUIRE(queue.pop(&f));
+  BOOST_REQUIRE_EQUAL(f(item, nullptr), reinforcement_learning::error_code::success);
+  BOOST_CHECK_EQUAL(item.get_event_id(), "no_drop_sentinel");
+  BOOST_CHECK_EQUAL(item.get_event_index(), n + 1);
+  BOOST_CHECK_EQUAL(queue.size(), 0);
 }
 BOOST_AUTO_TEST_CASE(queue_pop_empty)
 {
