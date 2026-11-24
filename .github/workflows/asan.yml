@@ -24,7 +24,7 @@ jobs:
         os: [ubuntu-22.04, macos-15-intel] # Windows ASan remains disabled.
         preset: [vcpkg-asan-debug, vcpkg-ubsan-debug]
     runs-on: ${{ matrix.os }}
-    name: asan.${{ startsWith(matrix.os, 'macos') && 'macos-latest' || matrix.os }}.${{ matrix.preset }}
+    name: asan.${{ startsWith(matrix.os, 'ubuntu') && 'ubuntu-latest' || startsWith(matrix.os, 'macos') && 'macos-latest' || matrix.os }}.${{ matrix.preset }}
     env:
       UBSAN_OPTIONS: "print_stacktrace=1"
 

@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   build-binary-parser:
-    name: binary-parser-${{ matrix.build.build_type }}-${{ startsWith(matrix.config.os, 'macos') && 'macos-latest' || matrix.config.os }}
+    name: binary-parser-${{ matrix.build.build_type }}-${{ startsWith(matrix.config.os, 'ubuntu') && 'ubuntu-latest' || startsWith(matrix.config.os, 'windows') && 'windows-latest' || startsWith(matrix.config.os, 'macos') && 'macos-latest' || matrix.config.os }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false

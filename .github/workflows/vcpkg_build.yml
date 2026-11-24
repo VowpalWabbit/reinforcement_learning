@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   job:
-    name: ${{ startsWith(matrix.os, 'macos') && 'macos-latest' || matrix.os }}-${{ matrix.preset }}-${{ github.workflow }}
+    name: ${{ startsWith(matrix.os, 'ubuntu') && 'ubuntu-latest' || startsWith(matrix.os, 'windows') && 'windows-latest' || startsWith(matrix.os, 'macos') && 'macos-latest' || matrix.os }}-${{ matrix.preset }}-${{ github.workflow }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
