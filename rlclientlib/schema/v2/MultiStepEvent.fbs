@@ -13,4 +13,9 @@ table MultiStepEvent {
     deferred_action:bool = false;
 }
 
+table EpisodeEvent {
+    episode_id:string;
+}
+
 root_type MultiStepEvent;
+root_type EpisodeEvent;

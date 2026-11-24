@@ -13,6 +13,7 @@ from torch.optim.lr_scheduler import StepLR
 import numpy as np
 from torch.utils.data.sampler import SubsetRandomSampler
 
+
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -41,8 +42,8 @@ def train(model, device, train_loader, optimizer, epoch, output_dir):
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
-        print('Train: [{}]\tLoss: {:.6f}'.format(
-            batch_idx * len(data), loss.item()))
+        print("Train: [{}]\tLoss: {:.6f}".format(batch_idx * len(data), loss.item()))
+
 
 def test(model, device, test_loader):
     model.eval()
@@ -52,14 +53,23 @@ def test(model, device, test_loader):
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data.float())
-            test_loss += F.nll_loss(output, target, size_average=False, reduce=True).item()  # sum up batch loss
-            pred = output.max(1, keepdim=True)[1]  # get the index of the max log-probability
+            test_loss += F.nll_loss(
+                output, target, size_average=False, reduce=True
+            ).item()  # sum up batch loss
+            pred = output.max(1, keepdim=True)[
+                1
+            ]  # get the index of the max log-probability
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-        test_loss, correct, len(test_loader.dataset),
-        100. * correct / len(test_loader.dataset)))
+    print(
+        "\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n".format(
+            test_loss,
+            correct,
+            len(test_loader.dataset),
+            100.0 * correct / len(test_loader.dataset),
+        )
+    )
 
 
 def split_train_validation(ds, batch_size, ratio):
@@ -73,30 +83,41 @@ def split_train_validation(ds, batch_size, ratio):
     train_sampler = SubsetRandomSampler(train_indices)
     valid_sampler = SubsetRandomSampler(val_indices)
 
-    train_loader = torch.utils.data.DataLoader(ds, batch_size=batch_size, 
-                                           sampler=train_sampler)
-    test_loader = torch.utils.data.DataLoader(ds, batch_size=batch_size,
-                                                sampler=valid_sampler)
+    train_loader = torch.utils.data.DataLoader(
+        ds, batch_size=batch_size, sampler=train_sampler
+    )
+    test_loader = torch.utils.data.DataLoader(
+        ds, batch_size=batch_size, sampler=valid_sampler
+    )
     return train_loader, test_loader
+
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--batch-size', type=int, default=64, metavar='N',
-                        help='input batch size for training (default: 64)')
-    parser.add_argument('--output-dir', type=str, default='outputs')
-    parser.add_argument('--start-date', type=str)
-    parser.add_argument('--end_date', type=str)
-    parser.add_argument('filename', type=str)
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=64,
+        metavar="N",
+        help="input batch size for training (default: 64)",
+    )
+    parser.add_argument("--output-dir", type=str, default="outputs")
+    parser.add_argument("--start-date", type=str)
+    parser.add_argument("--end_date", type=str)
+    parser.add_argument("filename", type=str)
     args = parser.parse_args()
 
     output_dir = args.output_dir
     os.makedirs(output_dir, exist_ok=True)
 
-    data = bytearray(open(args.filename, 'rb').read())
+    data = bytearray(open(args.filename, "rb").read())
     from common.parser import VWFlatbufferParser
+
     ds = pytorch.IterableLogs(VWFlatbufferParser(data), pytorch.DictToCbTensor())
 
-    train_loader = torch.utils.data.DataLoader(ds, batch_size = args.batch_size, num_workers=0)
+    train_loader = torch.utils.data.DataLoader(
+        ds, batch_size=args.batch_size, num_workers=0
+    )
 
     torch.manual_seed(1)
     device = torch.device("cpu")
@@ -107,8 +128,9 @@ def main():
     for epoch in range(1, 6):
         train(model, device, train_loader, optimizer, epoch, output_dir)
 
-    model_path = os.path.join(output_dir, 'current.onnx')
+    model_path = os.path.join(output_dir, "current.onnx")
     pytorch.Model.export(model, device, model_path)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

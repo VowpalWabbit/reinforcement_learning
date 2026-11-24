@@ -1,0 +1,16 @@
+diff --git a/portfile.cmake b/portfile.cmake
+--- a/portfile.cmake
++++ b/portfile.cmake
+@@ -7,7 +7,8 @@ vcpkg_from_github(
+     HEAD_REF master
+     PATCHES
+-        0001-Prevent-invalid-inclusions-when-HAVE_-is-set-to-0.patch
+-        0002-skip-building-examples.patch
+-        0003-build-static-or-shared-not-both.patch
+-        0004-android-and-mingw-fixes.patch
++        "${CMAKE_CURRENT_LIST_DIR}/0001-Prevent-invalid-inclusions-when-HAVE_-is-set-to-0.patch"
++        "${CMAKE_CURRENT_LIST_DIR}/0002-skip-building-examples.patch"
++        "${CMAKE_CURRENT_LIST_DIR}/0003-build-static-or-shared-not-both.patch"
++        "${CMAKE_CURRENT_LIST_DIR}/0004-android-and-mingw-fixes.patch"
++        "${CMAKE_CURRENT_LIST_DIR}/modern-macos.patch"
+ )

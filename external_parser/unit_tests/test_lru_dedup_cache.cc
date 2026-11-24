@@ -1,22 +1,27 @@
-#include "lru_dedup_cache.h"
-#include "test_common.h"
 #include <boost/test/unit_test.hpp>
 
-BOOST_AUTO_TEST_CASE(test_lru_add_new_examples_to_cache) {
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+#include "lru_dedup_cache.h"
+#include "parse_example_external.h"
+#include "test_common.h"
+#include "vw/config/options_cli.h"
 
-  v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+BOOST_AUTO_TEST_CASE(test_lru_add_new_examples_to_cache)
+{
+  auto options = VW::make_unique<VW::config::options_cli>(
+      std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
+
+  VW::multi_ex examples;
+  examples.push_back(VW::new_unused_example(*vw));
   // create a dummy examples to be cached
   examples[0]->indices.push_back('A');
-  examples[0]->feature_space['A'].indicies.push_back(1);
+  examples[0]->feature_space['A'].indices.push_back(1);
   examples[0]->feature_space['A'].values.push_back(0.2f);
   uint64_t dedup_id_0 = 0;
 
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
   examples[1]->indices.push_back('B');
-  examples[1]->feature_space['B'].indicies.push_back(2);
+  examples[1]->feature_space['B'].indices.push_back(2);
   examples[1]->feature_space['B'].values.push_back(0.5f);
   uint64_t dedup_id_1 = 1;
 
@@ -39,19 +44,19 @@ BOOST_AUTO_TEST_CASE(test_lru_add_new_examples_to_cache) {
 
   // check examples are OK
   BOOST_CHECK_EQUAL(dedup_cache.dedup_examples.size(), 2);
-  auto *ex_0 = dedup_cache.dedup_examples[dedup_id_0];
+  auto* ex_0 = dedup_cache.dedup_examples[dedup_id_0];
   BOOST_CHECK_EQUAL(ex_0->indices.size(), 1);
   BOOST_CHECK_EQUAL(ex_0->indices[0], 'A');
-  BOOST_CHECK_EQUAL(ex_0->feature_space['A'].indicies.size(), 1);
-  BOOST_CHECK_EQUAL(ex_0->feature_space['A'].indicies[0], 1);
+  BOOST_CHECK_EQUAL(ex_0->feature_space['A'].indices.size(), 1);
+  BOOST_CHECK_EQUAL(ex_0->feature_space['A'].indices[0], 1);
   BOOST_CHECK_EQUAL(ex_0->feature_space['A'].values.size(), 1);
   BOOST_CHECK_EQUAL(ex_0->feature_space['A'].values[0], 0.2f);
 
-  auto *ex_1 = dedup_cache.dedup_examples[dedup_id_1];
+  auto* ex_1 = dedup_cache.dedup_examples[dedup_id_1];
   BOOST_CHECK_EQUAL(ex_1->indices.size(), 1);
   BOOST_CHECK_EQUAL(ex_1->indices[0], 'B');
-  BOOST_CHECK_EQUAL(ex_1->feature_space['B'].indicies.size(), 1);
-  BOOST_CHECK_EQUAL(ex_1->feature_space['B'].indicies[0], 2);
+  BOOST_CHECK_EQUAL(ex_1->feature_space['B'].indices.size(), 1);
+  BOOST_CHECK_EQUAL(ex_1->feature_space['B'].indices[0], 2);
   BOOST_CHECK_EQUAL(ex_1->feature_space['B'].values.size(), 1);
   BOOST_CHECK_EQUAL(ex_1->feature_space['B'].values[0], 0.5f);
   // done checking examples
@@ -61,26 +66,28 @@ BOOST_AUTO_TEST_CASE(test_lru_add_new_examples_to_cache) {
   BOOST_CHECK_EQUAL(dedup_cache.exists(dedup_id_0), false);
   BOOST_CHECK_EQUAL(dedup_cache.exists(dedup_id_1), true);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }
 
-BOOST_AUTO_TEST_CASE(test_lru_update) {
-  auto vw = VW::initialize("--cb_explore_adf --binary_parser --quiet", nullptr,
-                           false, nullptr, nullptr);
+BOOST_AUTO_TEST_CASE(test_lru_update)
+{
+  auto options = VW::make_unique<VW::config::options_cli>(
+      std::vector<std::string>{"--quiet", "--binary_parser", "--cb_explore_adf"});
+  auto vw = VW::external::initialize_with_binary_parser(std::move(options));
 
-  v_array<example *> examples;
-  examples.push_back(&VW::get_unused_example(vw));
+  VW::multi_ex examples;
+  examples.push_back(VW::new_unused_example(*vw));
 
   // create a dummy examples to be cached
   examples[0]->indices.push_back('A');
-  examples[0]->feature_space['A'].indicies.push_back(1);
+  examples[0]->feature_space['A'].indices.push_back(1);
   examples[0]->feature_space['A'].values.push_back(0.2f);
   uint64_t dedup_id_0 = 0;
 
-  examples.push_back(&VW::get_unused_example(vw));
+  examples.push_back(VW::new_unused_example(*vw));
   examples[1]->indices.push_back('B');
-  examples[1]->feature_space['B'].indicies.push_back(2);
+  examples[1]->feature_space['B'].indices.push_back(2);
   examples[1]->feature_space['B'].values.push_back(0.5f);
   uint64_t dedup_id_1 = 1;
 
@@ -100,19 +107,19 @@ BOOST_AUTO_TEST_CASE(test_lru_update) {
 
   // check examples are OK
   BOOST_CHECK_EQUAL(dedup_cache.dedup_examples.size(), 2);
-  auto *ex_0 = dedup_cache.dedup_examples[dedup_id_0];
+  auto* ex_0 = dedup_cache.dedup_examples[dedup_id_0];
   BOOST_CHECK_EQUAL(ex_0->indices.size(), 1);
   BOOST_CHECK_EQUAL(ex_0->indices[0], 'A');
-  BOOST_CHECK_EQUAL(ex_0->feature_space['A'].indicies.size(), 1);
-  BOOST_CHECK_EQUAL(ex_0->feature_space['A'].indicies[0], 1);
+  BOOST_CHECK_EQUAL(ex_0->feature_space['A'].indices.size(), 1);
+  BOOST_CHECK_EQUAL(ex_0->feature_space['A'].indices[0], 1);
   BOOST_CHECK_EQUAL(ex_0->feature_space['A'].values.size(), 1);
   BOOST_CHECK_EQUAL(ex_0->feature_space['A'].values[0], 0.2f);
 
-  auto *ex_1 = dedup_cache.dedup_examples[dedup_id_1];
+  auto* ex_1 = dedup_cache.dedup_examples[dedup_id_1];
   BOOST_CHECK_EQUAL(ex_1->indices.size(), 1);
   BOOST_CHECK_EQUAL(ex_1->indices[0], 'B');
-  BOOST_CHECK_EQUAL(ex_1->feature_space['B'].indicies.size(), 1);
-  BOOST_CHECK_EQUAL(ex_1->feature_space['B'].indicies[0], 2);
+  BOOST_CHECK_EQUAL(ex_1->feature_space['B'].indices.size(), 1);
+  BOOST_CHECK_EQUAL(ex_1->feature_space['B'].indices[0], 2);
   BOOST_CHECK_EQUAL(ex_1->feature_space['B'].values.size(), 1);
   BOOST_CHECK_EQUAL(ex_1->feature_space['B'].values[0], 0.5f);
   // done checking examples
@@ -123,6 +130,6 @@ BOOST_AUTO_TEST_CASE(test_lru_update) {
   BOOST_CHECK_EQUAL(dedup_cache.exists(dedup_id_0), true);
   BOOST_CHECK_EQUAL(dedup_cache.exists(dedup_id_1), false);
 
-  clear_examples(examples, vw);
-  VW::finish(*vw);
+  clear_examples(examples, vw.get());
+  VW::finish(*vw, false);
 }

@@ -5,21 +5,23 @@
 #pragma once
 
 #include "joiners/i_joiner.h"
-#include "parse_example_external.h"
 #include "parse_example_binary.h"
+#include "parse_example_external.h"
 
-namespace VW {
-namespace external {
-
-class binary_json_converter : public parser {
+namespace VW
+{
+namespace external
+{
+class binary_json_converter : public parser
+{
 public:
-  binary_json_converter(std::unique_ptr<i_joiner>&& joiner);  //taking ownership of joiner
+  binary_json_converter(std::unique_ptr<i_joiner>&& joiner, VW::io::logger logger);  // taking ownership of joiner
   ~binary_json_converter();
-  bool parse_examples(vw *all, io_buf& io_buf, v_array<example *> &examples) override;
-  void persist_metrics(std::vector<std::pair<std::string, size_t>>& list_metrics) override;
+  bool parse_examples(VW::workspace* all, io_buf& io_buf, VW::multi_ex& examples) override;
+  void persist_metrics(metric_sink& metrics_sink) override;
 
 private:
   binary_parser _parser;
 };
-} // namespace external
-} // namespace VW
+}  // namespace external
+}  // namespace VW

@@ -1,127 +1,153 @@
 [![Linux Build Status)](https://img.shields.io/azure-devops/build/vowpalwabbit/3934113c-9e2b-4dbc-8972-72ab9b9b4342/23/master?label=Linux%20build&logo=Azure%20Devops)](https://dev.azure.com/vowpalwabbit/Vowpal%20Wabbit/_build?definitionId=31)
 [![MacOS Build Status](https://img.shields.io/azure-devops/build/vowpalwabbit/3934113c-9e2b-4dbc-8972-72ab9b9b4342/22/master?label=MacOS%20build&logo=Azure%20Devops)](https://dev.azure.com/vowpalwabbit/Vowpal%20Wabbit/_build?definitionId=32)
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/57p7o5v34onsqma2/branch/master?svg=true)](https://ci.appveyor.com/project/JohnLangford/reinforcement-learning/branch/master)
+[![Integration with latest VW](https://github.com/VowpalWabbit/reinforcement_learning/actions/workflows/daily_integration.yml/badge.svg?event=schedule)](https://github.com/VowpalWabbit/reinforcement_learning/actions/workflows/daily_integration.yml)
 
-# reinforcement_learning
+# RL Client Library
+Interaction-side integration library for Reinforcement Learning loops: Predict, Log, [Learn,] Update
 
+## Compiling the library
+### Getting the source code
+```sh
+git clone --recursive https://github.com/VowpalWabbit/reinforcement_learning.git
+cd reinforcement_learning
 ```
-git submodule update --init --recursive
+
+### Building with Vcpkg + CMake Presets
+#### Requirements
+* CMake 3.21+ (CMake Presets schema version 3; CI pins CMake 3.31.6)
+* Ninja
+* A C++14-capable compiler (the pinned Vowpal Wabbit 9.11.9 requires C++14)
+
+Optional Python bindings support Python 3.6 or newer. Builds select the pinned
+pybind11 2.12.1 for Python 3.6-3.8 and pybind11 3.1.0 for Python 3.9 or newer.
+Enable them with `-DRL_BUILD_PYTHON=ON`; select an interpreter with
+`-DPython_EXECUTABLE=<path-to-python>`.
+Linux wheel CI builds and tests Python 3.6-3.14 with the existing manylinux_2_28
+baseline (glibc 2.28 or newer). Older interpreters are built from checksum-pinned
+CPython sources in the current build image; wheel repair uses a separate modern
+interpreter. Consumers on Python 3.6-3.7 need pip 20.3 or newer to recognize
+manylinux_2_28 wheels (pip 21.3.1 supports both).
+Source distributions include both binder versions and the native CMake sources;
+the native dependency prerequisites below still apply when building from source.
+Use system dependencies or an existing vcpkg checkout/install; source archives
+do not bundle vcpkg's Git registry or downloaded packages.
+The checked-in vcpkg revision and manifest baseline are both pinned to
+2025.02.14, with fmt 11.0.2 and spdlog 1.15.0 overrides.
+Windows builds apply small overlays to that pinned registry: the Boost helper
+avoids trailing separators in directory renames rejected by Windows, and the
+CMake helper corrects the native MinGW package filter so acquiring pkgconf does
+not unnecessarily fetch a removed MSYS runtime archive. Package versions and
+download hashes remain pinned.
+Root and standalone parser CMake builds select it automatically; direct Windows
+vcpkg installs must add `--overlay-ports=cmake\vcpkg-overlay-ports`.
+
+#### Commands
+```sh
+cmake --preset=vcpkg-release
+cmake --build --preset=vcpkg-release
 ```
 
-## Ubuntu
-
-### Dependencies
-
+## Alternative system-specific build instructions
+### Ubuntu
+#### Dependencies
+Install the dependencies for this project with the following commands. We recommend the use of [vcpkg](https://github.com/microsoft/vcpkg) for installing `cpprestsdk` and `flatbuffers`.
 ```sh
 sudo apt-get install libboost-all-dev libssl-dev
+vcpkg install cpprestsdk flatbuffers
 ```
 
-#### Install Cpprest
-```bash
-cd ~
-git clone https://github.com/Microsoft/cpprestsdk.git cpprestsdk
-cd cpprestsdk
-# Checkout 2.10.1 version of cpprestsdk
-git checkout e8dda215426172cd348e4d6d455141f40768bf47
-git submodule update --init
-cd Release
-mkdir build
-cd build
-cmake ..
-make -j `nproc`
-make install
-cd ../../../
-rm -rf cpprestsdk
-```
-
-#### Install Flatbuffers
-```bash
-cd ~
-git clone https://github.com/google/flatbuffers.git flatbuffers
-cd ./flatbuffers
-# 2.0.0 release commit
-git checkout a9a295fecf3fbd5a4f571f53b01f63202a3e2113
-mkdir build
-cd build
-cmake .. -DFLATBUFFERS_BUILD_TESTS=Off -DFLATBUFFERS_INSTALL=On -DCMAKE_BUILD_TYPE=Release -DFLATBUFFERS_BUILD_FLATHASH=Off
-make -j `nproc`
-sudo make install
-cd ../../
-rm -rf flatbuffers
-```
-
-### Configure +  Build
-
+#### Configure + Build
+When configuring a CMake project using vcpkg dependencies, we must provide the full path to the `vcpkg.cmake` toolchain file.
 ```sh
-cmake -S . -B build
-cmake --build build --target all -j 4 # $(nproc)
+# Configure
+cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=</path/to/vcpkg>/scripts/buildsystems/vcpkg.cmake
+
+# Build
+cmake --build build -j `nproc`
 
 # Test
-cmake --build build --target rltest -j 4 # $(nproc)
+cmake --build build --target rltest -j `nproc`
 cmake --build build --target test
 ```
 
-## MacOS
-
-### Dependencies
-
+### MacOS
+#### Dependencies
 MacOS dependencies can be managed through homebrew.
-
 ```sh
 brew install cpprestsdk flatbuffers openssl
 ```
 
-### Configure +  Build
-
+#### Configure +  Build
 In order to build using homebrew dependencies, you must invoke cmake this way:
-
 ```sh
 cmake -S . -B build -DOPENSSL_ROOT_DIR=`brew --prefix openssl` -DOPENSSL_LIBRARIES=`brew --prefix openssl`/lib
 cmake --build build --target all -j 4
 ```
 
-## Windows
-### CMake (recommended)
-
-**Note:** The C# targets are not yet available in the CMake project. If those are required instructions for (Checked in solution)[#Checked-in-solution] should be used.
-
+### Windows
 #### Dependencies
+Dependencies on Windows should be managed using [vcpkg](https://github.com/microsoft/vcpkg).
 ```cmd
-vcpkg install --triplet x64-windows zlib boost-system boost-program-options boost-test boost-align boost-foreach boost-math boost-uuid cpprestsdk flatbuffers
+vcpkg install --triplet x64-windows zlib boost-system boost-program-options boost-test boost-align boost-foreach boost-math boost-uuid cpprestsdk flatbuffers openssl
 ```
 
-Add the flatbuffers tool directory to your PATH: `<vcpkg_root>\installed\x64-windows\tools\flatbuffers`
+If needed, add the flatbuffers executables to your PATH: `<vcpkg_root>\installed\x64-windows\tools\flatbuffers`
 
-#### Configure
+#### Configure + Build in Visual Studio
+Open the project directory in Visual Studio. Building the library can be easily done in the GUI.
+- Edit CMake command line settings with `Project > CMake Settings for <project name>`
+- Run CMake configuration with `Project > Configure Cache`. Use `Project > Delete Cache and Reconfigure` to force a full reconfiguration starting from a clean working directory.
+- Compile with `Build > Build All`
+- Run tests with `Test > Run CTests for <project name>`
+
+This procedure has been verified to work well in Visual Studio 2022.
+The Visual Studio generator selects an installed Windows SDK by default.
+Use `-DCMAKE_SYSTEM_VERSION=<sdk-version>` to select a specific installed SDK.
+
+#### Configure with command line + Build in Visual Studio
+Alternatively, CMake configuration can be done in the command line.
 ```cmd
 cmake -S . -B build  -DCMAKE_TOOLCHAIN_FILE=<vcpkg_root>\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows -A x64 -G "Visual Studio 16 2019"
 rem Generates a solution you can open and use in Visual Studio
 .\build\reinforcement_learning.sln
 ```
 
-### Checked in solution
-Windows dependencies are managed through Vcpkg and Nuget.
-
+Set VcpkgIntegration environment variable to `vcpkg.targets` file on your machine. Example:
 ```
-vcpkg install cpprestsdk:x64-windows
-vcpkg install flatbuffers:x64-windows
+VcpkgIntegration=c:\s\vcpkg\scripts\buildsystems\msbuild\vcpkg.targets
 ```
 
-You'll need to add the flatbuffers tool directory to your PATH aswell: `<vcpkg_root>\installed\x64-windows\tools\flatbuffers`
+Open `reinforcement_learning.sln` in Visual Studio. Build Release or Debug x64 configuration.
 
-#### Build + Test
-
-Set VcpkgIntegration environment variable to `vcpkg.targets` file on your machine
-
-Example:
-`VcpkgIntegration=c:\s\vcpkg\scripts\buildsystems\msbuild\vcpkg.targets`
-
-Ensure that the v140 toolset is installed in Visual Studio 2017.
-
-Open `rl.sln` in Visual Studio 2017.
-Build Release or Debug x64 configuration.
+Native NuGet builds (`RL_BUILD_NUGET=ON`) bundle their dependencies. The zlib
+static archive is installed once through VW, retaining the `zlibstatic.lib` and
+`zlibstaticd.lib` filenames referenced by the package's MSBuild targets.
+The consumer smoke project uses an installed Windows 10 SDK and shares its
+Debug/Release runtime and output settings across the selected compiler toolsets.
+Bundled cpprestsdk's UnitTest++ target explicitly includes `chrono` under MSVC,
+without changing the pinned dependency sources or removing its test targets.
+The managed NuGet smoke consumer restores through its explicit `NuGet.Config`,
+using the downloaded package in `dist` and nuget.org as separate sources.
 
 ## Troubleshooting
+### Python serialized-event tools
+The E2E comparator and log parser tools generate their Python FlatBuffers
+accessors on first use. Use the pinned `flatc` 23.1.21 on `PATH`, or set `FLATC`
+to its executable path. Generation goes through binary reflection schemas
+(`--binary --schema`, then `--python`) to preserve the wire schema's literal
+string unions, which direct Python schema parsing rejects. The comparison
+still decodes and checks both numeric and literal outcomes.
+
+### Long Windows build paths
+Windows compiler and resource tools can fail on deeply nested vcpkg build paths
+even when Git long paths are enabled. Keep the checkout path short, or pass
+`-DVCPKG_INSTALL_OPTIONS="--x-buildtrees-root=<short-absolute-path>"` when
+configuring to move dependency scratch files to a shorter path. The installed
+dependency directory is unchanged. Direct vcpkg installs accept the same
+`--x-buildtrees-root` option.
+
+### OpenSSL on MacOS
 If you get an error similar to the following on MacOS when running `cmake ..`, then you may be able to fix it by supplying the OpenSSL path to CMake.
 ```
 Make Error at /usr/local/Cellar/cmake/3.14.4/share/cmake/Modules/FindPackageHandleStandardArgs.cmake:137 (message):
@@ -140,7 +166,7 @@ This can be fixed by invoking CMake similar to the following:
 cmake -DOPENSSL_ROOT_DIR=`brew --prefix openssl` -DOPENSSL_LIBRARIES=`brew --prefix openssl`/lib ..
 ```
 
-
+### System cpprestsdk on Linux
 Installing cpprestsdk on Ubuntu18.04 using apt-get may result in cmake failing with:
 ```
 CMake Error at CMakeLists.txt:9 (find_package):

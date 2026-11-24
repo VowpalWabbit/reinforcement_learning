@@ -2,27 +2,75 @@
 Building RL Inference Library
 ------------------------------
 
-Linux:
-------
-- Pre-requisites:
-    + g++ 4.9 or higher
-    + cpprestsdk (https://github.com/Microsoft/cpprestsdk)
-    + boost
-- Make targets:
-    + rlclientlib (API)
-    + rltest (Unit tests)
-    + _rl_python (Python Bindings)
+Supported CI toolchains:
+------------------------
+- Ubuntu 22.04, Windows Server 2022 (Visual Studio 2022), and macOS 15 Intel.
+- A C++14 compiler, CMake 3.31.6, Ninja 1.12.1, and Git.
+- Windows: install the Visual Studio C++ build tools and a Windows SDK, then
+  run commands from an x64 Developer Command Prompt.
+- Managed bindings and tests: .NET 10 SDK. Windows also needs the `dotnet-t4`
+  tool (`dotnet tool install --global dotnet-t4`).
 
-Windows:
---------
-- Pre-requisites:
-    + cpprestsdk (https://github.com/Microsoft/cpprestsdk)
-    + boost
-- Visual Studio Solution:
-    + vowpalwabbit/vw.sln
-- Visual Studio Projects
-    + reinforcement_learning/rlclientlib
-    + reinforcement_learning/unit_test
-    + reinforcement_learning/examples/basic_usage_cpp
-    + reinforcement_learning/examples/rl_sim_cpp
+Initialize dependencies:
+-------------------------
+On Windows, enable long paths before checking out the recursive submodules:
+
+\verbatim
+git config --global core.longpaths true
+git submodule update --init --recursive
+ext_libs\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+\endverbatim
+
+On Linux and macOS:
+
+\verbatim
+git submodule update --init --recursive
+./ext_libs/vcpkg/bootstrap-vcpkg.sh -disableMetrics
+\endverbatim
+
+Use the checked-in vcpkg revision and manifest rather than the runner's global
+vcpkg installation. The manifest pins dependency versions, including cpprestsdk.
+The shared CI setup is in `.github/actions/setup-build/action.yml`; its binary
+cache includes the vcpkg revision, manifest, overlays, platform, and build configuration.
+
+Build and test:
+---------------
+\verbatim
+cmake --preset vcpkg-debug
+cmake --build --preset vcpkg-debug
+ctest --preset vcpkg-debug
+\endverbatim
+
+Replace `vcpkg-debug` with `vcpkg-release` for an optimized build. To enable the
+standalone parser in the same build, add `-DRL_BUILD_EXTERNAL_PARSER=ON` to
+the configure command. To enable managed bindings, add
+`-Drlclientlib_BUILD_DOTNET=ON`.
+
+On Windows, SDK resource tools can reject long vcpkg scratch paths even when
+Git long paths are enabled. Use a short absolute buildtree path; this Developer
+Command Prompt example keeps scratch files under `build\b`:
+
+\verbatim
+cmake --preset vcpkg-debug "-DVCPKG_INSTALL_OPTIONS=--x-buildtrees-root=%CD%\build\b"
+\endverbatim
+
+For very long checkout paths, choose a shorter directory outside the checkout.
+This changes only scratch-file locations, not dependency versions.
+
+Important targets include `rlclientlib` (API), `rltest` (native tests),
+`binary_parser_unit_tests` (when the parser is enabled), and `rl_client`
+(when `-DRL_BUILD_PYTHON=ON` is set).
+
+Python wheels:
+---------------
+CI builds and installs CPython 3.11-3.14 wheels in a digest-pinned
+manylinux_2_28 x86-64 image. Inside that image, after initializing dependencies:
+
+\verbatim
+PYTHON=/opt/python/cp311-cp311/bin/python bash ./.scripts/linux/build-python-wheel.sh
+\endverbatim
+
+The script writes repaired wheels to `audit_output`. The wheel test jobs install
+each wheel into a separate Python container and run the binding unit tests.
+Python 3.6-3.9 are end-of-life and are no longer in the CI support matrix.
 */

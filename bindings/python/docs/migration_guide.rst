@@ -40,7 +40,7 @@ Changes to:
 
     # ...
 
-    client = rl_client.live_model(_, on_error)
+    client = rl_client.LiveModel(_, on_error)
 
 
 3. Init
@@ -57,12 +57,12 @@ Changes to:
 
 .. code-block:: python
 
-    client = rl_client.live_model(config)
+    client = rl_client.LiveModel(config)
 
 4. `choose_rank` return value
 -----------------------------
 
-`choose_rank` no longer returns a tuple, but now returns a :meth:`rl_client.ranking_response` object that contains the same information as was contained in the tuple.
+`choose_rank` no longer returns a tuple, but now returns a :meth:`rl_client.RankingResponse` object that contains the same information as was contained in the tuple.
 
 .. code-block:: python
 

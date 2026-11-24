@@ -1,0 +1,4 @@
+flatbuffers==23.1.21
+numpy==1.26.4
+zstd==1.5.7.2
+vw-executor==0.3.3

@@ -1,7 +1,7 @@
 import unittest
 import rl_client
 
-test_config_json = '''
+test_config_json = """
   {
     "appid": "pythontest",
     "interaction.sender.implementation": "INTERACTION_FILE_SENDER",
@@ -13,7 +13,8 @@ test_config_json = '''
     "model.backgroundrefresh": false,
     "protocol.version": 2
   }
-'''
+"""
+
 
 class ConfigTests(unittest.TestCase):
     @classmethod
@@ -25,11 +26,19 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(self.config.get("CustomKey", None), "CustomValue")
 
     def test_get(self):
-        self.assertEqual(self.config.get(rl_client.constants.APP_ID, None), "pythontest")
-        self.assertEqual(self.config.get(rl_client.constants.INTERACTION_SENDER_IMPLEMENTATION, None), "INTERACTION_FILE_SENDER")
+        self.assertEqual(
+            self.config.get(rl_client.constants.APP_ID, None), "pythontest"
+        )
+        self.assertEqual(
+            self.config.get(
+                rl_client.constants.INTERACTION_SENDER_IMPLEMENTATION, None
+            ),
+            "INTERACTION_FILE_SENDER",
+        )
 
     def test_get_default(self):
         self.assertEqual(self.config.get("UnsetKey", "DefaultValue"), "DefaultValue")
+
 
 class LiveModelTests(unittest.TestCase):
     @classmethod
@@ -48,14 +57,18 @@ class LiveModelTests(unittest.TestCase):
 
         event_id = "event_id"
         invalid_context = ""
-        self.assertRaises(rl_client.RLException, model.choose_rank, event_id, invalid_context)
+        self.assertRaises(
+            rl_client.RLException, model.choose_rank, event_id, invalid_context
+        )
 
     def test_choose_rank_invalid_event_id(self):
         model = rl_client.LiveModel(self.config)
 
         invalid_event_id = ""
         context = '{"_multi":[{},{}]}'
-        self.assertRaises(rl_client.RLException, model.choose_rank, invalid_event_id, context)
+        self.assertRaises(
+            rl_client.RLException, model.choose_rank, invalid_event_id, context
+        )
 
     def test_exception_contains_code(self):
         try:
@@ -76,7 +89,7 @@ class LiveModelTests(unittest.TestCase):
         context = '{"_multi":[{},{}]}'
         model.choose_rank(context, event_id=event_id)
         model.report_outcome(event_id, 1.0)
-        model.report_outcome(event_id,"{'result':'res'}")
+        model.report_outcome(event_id, "{'result':'res'}")
 
     def test_report_outcome_no_connection(self):
         # Requires dependency injection for network.
@@ -95,5 +108,6 @@ class LiveModelTests(unittest.TestCase):
         # Requires dependency injection to fake a background failure, but we can at least make sure it loads the callback.
         return
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

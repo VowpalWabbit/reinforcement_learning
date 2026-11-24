@@ -1,0 +1,5 @@
+<Project>
+    <ItemGroup>
+        <NativeDllDependencies Include="$(MSBuildThisFileDirectory)../../runtimes/win-x64/native/rlnetnative.dll" />
+    </ItemGroup>
+</Project>
