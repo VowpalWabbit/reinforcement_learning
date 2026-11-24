@@ -32,6 +32,9 @@ jobs:
       UBSAN_OPTIONS: "print_stacktrace=1"
 
     steps:
+      - name: Enable long paths before recursive checkout
+        if: runner.os == 'Windows'
+        run: git config --global core.longpaths true
       - uses: actions/checkout@v4
         with:
           submodules: recursive
