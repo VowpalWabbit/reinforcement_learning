@@ -62,7 +62,7 @@ jobs:
           -DVCPKG_HOST_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
           -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
           -Drlclientlib_BUILD_DOTNET=On
-          -DRL_DOTNET_TARGET_FRAMEWORK=net10.0
+          "-DRL_DOTNET_TARGET_FRAMEWORK=net10.0"
           -Drlclientlib_DOTNET_USE_MSPROJECT=Off
           -DBUILD_FLATBUFFERS=Off
           -DRAPIDJSON_SYS_DEP=ON

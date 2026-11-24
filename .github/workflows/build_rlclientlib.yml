@@ -128,7 +128,7 @@ jobs:
           --preset vcpkg-${{ matrix.build_type }}
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
           -Drlclientlib_BUILD_DOTNET=ON
-          -DRL_DOTNET_TARGET_FRAMEWORK=${{ matrix.framework }}
+          "-DRL_DOTNET_TARGET_FRAMEWORK=${{ matrix.framework }}"
       - name: Build
         run: |
           cmake --build build
