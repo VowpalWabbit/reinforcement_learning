@@ -177,6 +177,7 @@ jobs:
       - name: Build test
         run: |
           cd nuget\test
-          msbuild test_rl_nuget.vcxproj -t:rebuild "-property:Configuration=${{ matrix.build_type }};Platform=x64;PlatformToolset=${{ matrix.toolset }}"
+          $sdkVersion = $env:WindowsSDKVersion.TrimEnd('\', '/')
+          msbuild test_rl_nuget.vcxproj -t:rebuild "-property:Configuration=${{ matrix.build_type }};Platform=x64;PlatformToolset=${{ matrix.toolset }};WindowsTargetPlatformVersion=$sdkVersion"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           .\bin\x64\${{ matrix.build_type }}\test_rl_nuget.exe
