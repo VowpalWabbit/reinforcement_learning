@@ -2,7 +2,17 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/fakeit)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/date)
 
 if(RL_BUILD_PYTHON)
-  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/pybind11)
+  if(CMAKE_VERSION VERSION_LESS 3.18)
+    find_package(Python 3.6 REQUIRED COMPONENTS Interpreter Development)
+  else()
+    find_package(Python 3.6 REQUIRED COMPONENTS Interpreter Development.Module)
+  endif()
+  set(PYBIND11_FINDPYTHON ON)
+  if(Python_VERSION VERSION_LESS 3.9)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/pybind11_legacy)
+  else()
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/pybind11)
+  endif()
 endif()
 
 # Nuget build relies on installing libraries with cmake --install
@@ -10,6 +20,8 @@ endif()
 if(RL_BUILD_NUGET)
   set(VW_INSTALL ON CACHE BOOL "" FORCE)
   set(CPPREST_INSTALL ON CACHE BOOL "" FORCE)
+  # VW installs zlibstatic; zlib's own export would register the same target twice.
+  set(ZLIB_INSTALL OFF CACHE BOOL "" FORCE)
   set(OPENSSL_INSTALL ON)
   set(RL_ext_libs_exclude_from_all "")
 else()
@@ -31,6 +43,16 @@ if(RL_USE_UBSAN)
   set(VW_USE_UBSAN ON CACHE BOOL "" FORCE)
 endif()
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/vowpal_wabbit ${RL_ext_libs_exclude_from_all})
+
+if(RL_BUILD_NUGET)
+  # Keep the archive names referenced by the NuGet MSBuild targets.
+  set_target_properties(zlibstatic PROPERTIES OUTPUT_NAME zlibstatic)
+  get_target_property(RL_ZLIB_SOURCE_DIR zlibstatic SOURCE_DIR)
+  get_target_property(RL_ZLIB_BINARY_DIR zlibstatic BINARY_DIR)
+  install(
+    FILES "${RL_ZLIB_SOURCE_DIR}/zlib.h" "${RL_ZLIB_BINARY_DIR}/zconf.h"
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+endif()
 
 # Build ZStandard
 if(RL_USE_ZSTD)
@@ -172,6 +194,10 @@ if(vw_USE_AZURE_FACTORIES)
     set(WERROR OFF CACHE BOOL "")
     set(CPPREST_ABI_TAG "" CACHE BOOL "" FORCE)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/cpprestsdk ${RL_ext_libs_exclude_from_all})
+    if(MSVC AND TARGET unittestpp)
+      # Pinned UnitTest++ uses system_clock without including <chrono>.
+      target_compile_options(unittestpp PRIVATE /FIchrono)
+    endif()
     add_library(cpprestsdk::cpprest ALIAS cpprest)
   endif() # RL_CPPREST_SYS_DEP
 endif() # vw_USE_AZURE_FACTORIES

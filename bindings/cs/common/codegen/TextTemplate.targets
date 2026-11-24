@@ -5,8 +5,9 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <T4Command>dotnet t4</T4Command>
-    <T4Command Condition="'$(OS)' == 'Windows_NT'">t4</T4Command>
+    <!-- if this fails you may need to install dotnet-t4 as follows -->
+    <!-- dotnet tool install -g dotnet-t4                            -->
+    <T4Command Condition="'$(T4Command)' == ''">t4</T4Command>
   </PropertyGroup>
 
   <Target Name="TextTemplateTransform" BeforeTargets="BeforeBuild">
@@ -17,7 +18,8 @@
     <MakeDir Directories="$(IntermediateOutputPath)" />
     <PropertyGroup>
       <Parameters>@(TextTransformParameter -> '-a !!%(Identity)!%(Value)', ' ')</Parameters>
-      <TaskCommand>$(T4Command) "%(TextTemplate.Identity)" -o "$([System.IO.Path]::Combine($(IntermediateOutputPath),%(TextTemplate.FileName).T4Generated.cs))" $(Parameters)</TaskCommand>
+      <TaskCommand Condition="'$(OS)' != 'Windows_NT'">$(T4Command) "%(TextTemplate.Identity)" -o "$([System.IO.Path]::Combine($(IntermediateOutputPath),%(TextTemplate.FileName).T4Generated.cs))" $(Parameters)</TaskCommand>
+      <TaskCommand Condition="'$(OS)' == 'Windows_NT'">$(T4Command) "%(TextTemplate.Identity)" -out "$([System.IO.Path]::Combine($(IntermediateOutputPath),%(TextTemplate.FileName).T4Generated.cs))" $(Parameters)</TaskCommand>
     </PropertyGroup>
 
     <Exec WorkingDirectory="$(ProjectDir)" Command="$(TaskCommand)"/>
@@ -25,6 +27,14 @@
     <ItemGroup>
         <Compile Include="$(IntermediateOutputPath)\*.T4Generated.cs"/>
     </ItemGroup>
+
+    <OnError ExecuteTargets="HandleT4Failure" />
+  </Target>
+
+  <Target Name="HandleT4Failure">
+    <Message Text="T4 template failed to transform: %(TextTemplate.Identity); check if you have dotnet-t4 installed. if not, install it with: dotnet tool install -g dotnet-t4" Importance="high"/>
+    <Error Text="T4 template failed to transform: %(TextTemplate.Identity)" />
+    <Error Text="check if you have dotnet-t4 installed. if not, install it with: dotnet tool install -g dotnet-t4" />
   </Target>
 
   <Target Name="TextTemplateClean" AfterTargets="Clean">

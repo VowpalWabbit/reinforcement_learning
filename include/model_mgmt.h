@@ -1,8 +1,10 @@
 #pragma once
+#include "err_constants.h"
 #include "multistep.h"
 
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <string>
 #include <utility>
 #include <vector>
@@ -33,6 +35,9 @@ public:
   // Allocate
   char* alloc(size_t desired);
   void free();
+
+  // Set data
+  int set_data(const char* vw_model, size_t len);
 
   model_data() = default;
   ~model_data() = default;

@@ -2,6 +2,7 @@ set(RL_NET_SOURCES
   Native/ErrorCallback.cs
   Native/GCHandleLifetime.cs
   Native/Global.cs
+  Native/NativeImports.cs
   Native/NativeObject.cs
   Native/SenderAdapter.cs
   Native/StringExtensions.cs
@@ -9,6 +10,7 @@ set(RL_NET_SOURCES
   ActionFlags.cs
   ApiStatus.cs
   AsyncSender.cs
+  OAuthCredentialProvider.cs
   CALoop.cs
   CBLoop.cs
   CCBLoop.cs

@@ -10,16 +10,16 @@ namespace Rl.Net
         // The publics in this class are just a verbose, but jittably-efficient way of enabling overriding a native invocation
         internal static partial class NativeMethods
         {
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern IntPtr CreateCALoop(IntPtr config, IntPtr factoryContext);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern void DeleteCALoop(IntPtr caLoop);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern int CALoopInit(IntPtr caLoop, IntPtr apiStatus);
 
-            [DllImport("rlnetnative", EntryPoint = "CALoopRequestContinuousAction")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CALoopRequestContinuousAction")]
             private static extern int CALoopRequestContinuousActionNative(IntPtr caLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr continuousActionResponse, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, IntPtr, IntPtr, int> CALoopRequestContinuousActionOverride { get; set; }
@@ -34,7 +34,7 @@ namespace Rl.Net
                 return CALoopRequestContinuousActionNative(caLoop, eventId, contextJson, contextJsonSize, continuousActionResponse, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CALoopRequestContinuousActionWithFlags")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CALoopRequestContinuousActionWithFlags")]
             private static extern int CALoopRequestContinuousActionWithFlagsNative(IntPtr caLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr continuousActionResponse, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> CALoopRequestContinuousActionWithFlagsOverride { get; set; }
@@ -49,7 +49,7 @@ namespace Rl.Net
                 return CALoopRequestContinuousActionWithFlagsNative(caLoop, eventId, contextJson, contextJsonSize, flags, continuousActionResponse, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CALoopReportActionTaken")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CALoopReportActionTaken")]
             private static extern int CALoopReportActionTakenNative(IntPtr caLoop, IntPtr eventId, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int> CALoopReportActionTakenOverride { get; set; }
@@ -64,7 +64,7 @@ namespace Rl.Net
                 return CALoopReportActionTakenNative(caLoop, eventId, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CALoopReportActionMultiIdTaken")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CALoopReportActionMultiIdTaken")]
             private static extern int CALoopReportActionTakenMultiIdNative(IntPtr caLoop, IntPtr primaryId, IntPtr secondaryId, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> CALoopReportActionTakenMultiIdOverride { get; set; }
@@ -79,7 +79,7 @@ namespace Rl.Net
                 return CALoopReportActionTakenMultiIdNative(caLoop, primaryId, secondaryId, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CALoopReportOutcomeF")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CALoopReportOutcomeF")]
             private static extern int CALoopReportOutcomeFNative(IntPtr caLoop, IntPtr eventId, float outcome, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, float, IntPtr, int> CALoopReportOutcomeFOverride { get; set; }
@@ -94,7 +94,7 @@ namespace Rl.Net
                 return CALoopReportOutcomeFNative(caLoop, eventId, outcome, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CALoopReportOutcomeJson")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CALoopReportOutcomeJson")]
             private static extern int CALoopReportOutcomeJsonNative(IntPtr caLoop, IntPtr eventId, IntPtr outcomeJson, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> CALoopReportOutcomeJsonOverride { get; set; }
@@ -109,13 +109,13 @@ namespace Rl.Net
                 return CALoopReportOutcomeJsonNative(caLoop, eventId, outcomeJson, apiStatus);
             }
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern int CALoopRefreshModel(IntPtr caLoop, IntPtr apiStatus);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern void CALoopSetCallback(IntPtr caLoop, [MarshalAs(UnmanagedType.FunctionPtr)] managed_background_error_callback_t callback = null);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern void CALoopSetTrace(IntPtr caLoop, [MarshalAs(UnmanagedType.FunctionPtr)] managed_trace_callback_t callback = null);
         }
     }

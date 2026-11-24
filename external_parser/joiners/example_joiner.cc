@@ -232,8 +232,7 @@ bool example_joiner::process_interaction(
         "and Interaction event type [{}] "
         "don't match. Skipping interaction from processing. "
         "EventId: [{}]",
-        EnumNameProblemType(_loop_info.problem_type_config), EnumNamePayloadType(metadata.payload_type()),
-        metadata.id()->c_str());
+        loop_type, EnumNamePayloadType(metadata.payload_type()), metadata.id()->c_str());
     return false;
   }
 
@@ -312,7 +311,7 @@ bool example_joiner::process_interaction(
         "Interaction event learning mode [{}] not "
         "currently supported, skipping interaction "
         "EventId: [{}]",
-        metadata.payload_type(), metadata.id()->c_str());
+        EnumNamePayloadType(metadata.payload_type()), metadata.id()->c_str());
     return false;
   }
 
