@@ -9,6 +9,9 @@ on:
     branches:
       - '*'
 
+env:
+  VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
   cancel-in-progress: true
@@ -18,30 +21,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        #os: [windows-latest, ubuntu-latest, macos-13]
-        os: [ubuntu-latest, macos-13] # Temporarily remove windows asan
+        os: [ubuntu-22.04, macos-15-intel] # Windows ASan remains disabled.
         preset: [vcpkg-asan-debug, vcpkg-ubsan-debug]
-        exclude:
-          # UBSan not supported by MSVC on Windows
-          - { os: windows-latest, preset: vcpkg-ubsan-debug }
     runs-on: ${{ matrix.os }}
-    name: asan.${{ startsWith(matrix.os, 'macos') && 'macos-latest' || matrix.os }}.${{ matrix.preset }}
+    name: asan.${{ startsWith(matrix.os, 'ubuntu') && 'ubuntu-latest' || startsWith(matrix.os, 'macos') && 'macos-latest' || matrix.os }}.${{ matrix.preset }}
     env:
       UBSAN_OPTIONS: "print_stacktrace=1"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - run: git -C ${{ github.workspace }}/ext_libs/vcpkg fetch --unshallow
-      - name: Setup MSVC Developer Command Prompt
-        if: ${{ startsWith(matrix.os, 'windows') }}
-        uses: ilammy/msvc-dev-cmd@v1
-      - uses: lukka/get-cmake@latest
-      - uses: lukka/run-vcpkg@v10
+      - uses: ./.github/actions/setup-build
         with:
-          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
-          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
+          cache-key: ${{ matrix.preset }}
       - name: Configure
         run: cmake --preset ${{ matrix.preset }} -DRL_BUILD_EXTERNAL_PARSER=On
       - name: Build
@@ -49,4 +42,4 @@ jobs:
       - name: Run unit tests
         run: |
           cd build
-          ctest --verbose --output-on-failure
+          ctest --verbose --output-on-failure --no-tests=error

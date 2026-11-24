@@ -27,33 +27,31 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: "windows-latest", os_name: "windows-latest", runtime_id: "win-x64", vcpkg_target_triplet: "x64-windows-static" }
-          - { os: "ubuntu-latest", os_name: "ubuntu-latest", runtime_id: "linux-x64", vcpkg_target_triplet: "x64-linux" }
-          - { os: "macos-13", os_name: "macos-latest", runtime_id: "osx-x64", vcpkg_target_triplet: "x64-osx" }
+          - { os: "windows-2022", os_name: "windows-latest", runtime_id: "win-x64", vcpkg_target_triplet: "x64-windows-static" }
+          - { os: "ubuntu-22.04", os_name: "ubuntu-latest", runtime_id: "linux-x64", vcpkg_target_triplet: "x64-linux" }
+          - { os: "macos-15-intel", os_name: "macos-latest", runtime_id: "osx-x64", vcpkg_target_triplet: "x64-osx" }
     runs-on: ${{matrix.config.os}}
     name: build-nuget-dotnet (${{ matrix.config.os_name }}, ${{ matrix.config.runtime_id }}, ${{ matrix.config.vcpkg_target_triplet }})
     steps:
-      - uses: actions/checkout@v2
-      - run: |
-          git submodule update --init ext_libs/vcpkg ext_libs/vowpal_wabbit ext_libs/zstd
-          cd ext_libs/vowpal_wabbit
-          git submodule update --init ext_libs/eigen
+      - name: Enable long paths before recursive checkout
+        if: runner.os == 'Windows'
+        run: git config --global core.longpaths true
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Setup MSVC Developer Command Prompt
         if: ${{ startsWith(matrix.config.os, 'windows') }}
         uses: ilammy/msvc-dev-cmd@v1
-      - uses: lukka/get-cmake@latest
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
       - name: Install dotnet t4
         if: ${{ startsWith(matrix.config.os, 'windows') }}
         run: dotnet tool install --global dotnet-t4
 
-      - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
-        shell: bash
-      - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-      - name: Cache vcpkg binary cache
-        uses: actions/cache@v3
+      - uses: ./.github/actions/setup-build
         with:
-          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
-          key: ${{ matrix.config.os_name }}-build-${{ matrix.config.vcpkg_target_triplet }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}
+          cache-key: ${{ matrix.config.vcpkg_target_triplet }}
 
       - name: Configure .NET Core
         run: >
@@ -64,6 +62,7 @@ jobs:
           -DVCPKG_HOST_TRIPLET=${{ matrix.config.vcpkg_target_triplet }}
           -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
           -Drlclientlib_BUILD_DOTNET=On
+          "-DRL_DOTNET_TARGET_FRAMEWORK=net10.0"
           -Drlclientlib_DOTNET_USE_MSPROJECT=Off
           -DBUILD_FLATBUFFERS=Off
           -DRAPIDJSON_SYS_DEP=ON
@@ -85,12 +84,14 @@ jobs:
         with:
           name: artifacts-${{ matrix.config.os_name }}
           path: build/binaries/*.dll
+          if-no-files-found: error
 
       - if: ${{ startsWith(matrix.config.os, 'windows') }}
         uses: actions/upload-artifact@v4
         with:
           name: symbols-${{ matrix.config.os_name }}
           path: build/binaries/*.pdb
+          if-no-files-found: error
 
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
         run: |
@@ -103,12 +104,14 @@ jobs:
         with:
           name: artifacts-${{ matrix.config.os_name }}
           path: build/bindings/cs/rl.net.native/librlnetnative.so
+          if-no-files-found: error
 
       - if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
         uses: actions/upload-artifact@v4
         with:
           name: symbols-${{ matrix.config.os_name }}
           path: symbols/librlnetnative.debug
+          if-no-files-found: error
 
       - if: ${{ startsWith(matrix.config.os, 'macos') }}
         run: |
@@ -121,18 +124,23 @@ jobs:
         with:
           name: artifacts-${{ matrix.config.os_name }}
           path: build/bindings/cs/rl.net.native/librlnetnative.dylib
+          if-no-files-found: error
 
       - if: ${{ startsWith(matrix.config.os, 'macos') }}
         uses: actions/upload-artifact@v4
         with:
           name: symbols-${{ matrix.config.os_name }}
           path: symbols/librlnetnative.dSYM
+          if-no-files-found: error
 
   package-nuget:
     needs: build-nuget-dotnet
-    runs-on: ubuntu-latest
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: bash
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Update git tags
         # Needed because actions/checkout performs a shallow checkout without tags
         run: git fetch --unshallow --tags --recurse-submodules=no
@@ -141,7 +149,7 @@ jobs:
         shell: bash
         run: |
           GENERATED_VERSION=$(./.scripts/version_number.py)
-          echo "Generated version number: $version"
+          echo "Generated version number: $GENERATED_VERSION"
           echo "RL_NUGET_VERSION=$GENERATED_VERSION" >> $GITHUB_ENV
 
       - uses: actions/download-artifact@v4
@@ -150,26 +158,28 @@ jobs:
           merge-multiple: true
       - name: Display structure of artifacts
         run: ls -R artifacts
-      - uses: NuGet/setup-nuget@v1.1.1
+      - uses: NuGet/setup-nuget@v2
       - run: nuget pack nuget/dotnet/rl.net.nuspec -Properties RL_NUGET_PACKAGE_VERSION=$RL_NUGET_VERSION -BasePath artifacts -OutputDirectory nuget_output
       - uses: actions/upload-artifact@v4
         with:
           name: dist
           path: nuget_output/
+          if-no-files-found: error
 
   test-nuget:
     needs: package-nuget
     strategy:
       fail-fast: false
       matrix:
+        framework: [net6.0, net10.0]
         config:
-          - { os: "windows-latest", os_name: "windows-latest", runtime_id: "win-x64" }
-          - { os: "ubuntu-latest", os_name: "ubuntu-latest", runtime_id: "linux-x64" }
-          - { os: "macos-13", os_name: "macos-latest", runtime_id: "osx-x64" }
+          - { os: "windows-2022", os_name: "windows-latest", runtime_id: "win-x64" }
+          - { os: "ubuntu-22.04", os_name: "ubuntu-latest", runtime_id: "linux-x64" }
+          - { os: "macos-15-intel", os_name: "macos-latest", runtime_id: "osx-x64" }
     runs-on: ${{matrix.config.os}}
-    name: test-nuget (${{ matrix.config.os_name }}, ${{ matrix.config.runtime_id }})
+    name: test-nuget (${{ matrix.config.os_name }}, ${{ matrix.config.runtime_id }}${{ matrix.framework == 'net6.0' && ', net6.0' || '' }})
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Update git tags
         # Needed because actions/checkout performs a shallow checkout without tags
         run: git fetch --unshallow --tags --recurse-submodules=no
@@ -178,23 +188,26 @@ jobs:
         shell: bash
         run: |
           GENERATED_VERSION=$(./.scripts/version_number.py)
-          echo "Generated version number: $version"
+          echo "Generated version number: $GENERATED_VERSION"
           echo "RL_NUGET_VERSION=$GENERATED_VERSION" >> $GITHUB_ENV
       - uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
-      - uses: actions/setup-dotnet@v3
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            6.0.x
+            10.0.x
       - name: Install package
-        # enable error ignoring state with +e because we need to restore from two sources
+        shell: bash
         run: |
-          set +e
           cd nuget/dotnet/test
           dotnet add dotnetcore_nuget_test.csproj package RL.Net --version ${{ env.RL_NUGET_VERSION }} --source "${{github.workspace}}/dist" --no-restore
-          dotnet restore dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}} --source "${{github.workspace}}/dist"
-          dotnet restore dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}}
+          dotnet restore dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}} --configfile NuGet.Config
       - name: Build and run test
+        shell: bash
         run: |
           cd nuget/dotnet/test
-          dotnet build dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}} --output build --no-restore --self-contained
-          ./build/dotnetcore_nuget_test
+          dotnet build dotnetcore_nuget_test.csproj --framework ${{ matrix.framework }} --runtime ${{matrix.config.runtime_id}} --output build/${{ matrix.framework }} --no-restore --self-contained false
+          dotnet build/${{ matrix.framework }}/dotnetcore_nuget_test.dll

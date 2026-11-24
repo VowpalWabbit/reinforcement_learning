@@ -15,7 +15,7 @@ jobs:
   cpp:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Apt update
@@ -35,24 +35,31 @@ jobs:
           path: doc/cpp/html/
   python:
     container:
-      image: vowpalwabbit/rl-manylinux-2_28-build:latest
-    runs-on: ubuntu-latest
+      image: quay.io/pypa/manylinux_2_28_x86_64@sha256:55a36963bc0504cdf004011001c1072306402f0b8b83be5a5eba7068f93eec53
+    runs-on: ubuntu-22.04
+    env:
+      VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Clone submodules
-        shell: bash
-        run: git submodule update --init --recursive
+      - name: Install vcpkg build prerequisites
+        run: |
+          dnf install -y zip unzip curl tar perl-IPC-Cmd
+          perl -e 'use IPC::Cmd;'
+      - uses: ./.github/actions/setup-build
+        with:
+          cache-key: python-docs
       - name: Install package
         shell: bash
         run: |
-          /opt/python/cp38-cp38/bin/python setup.py install
+          PYTHON=/opt/python/cp311-cp311/bin/python bash ./.scripts/linux/build-python-wheel.sh
+          /opt/python/cp311-cp311/bin/pip install audit_output/*.whl
       - name: Build docs
         run: |
-          /opt/python/cp38-cp38/bin/pip install sphinx
+          /opt/python/cp311-cp311/bin/pip install sphinx
           cd bindings/python/docs
-          make html SPHINXBUILD=/opt/python/cp38-cp38/bin/sphinx-build
+          make html SPHINXBUILD=/opt/python/cp311-cp311/bin/sphinx-build
       - name: Upload built docs
         uses: actions/upload-artifact@v4
         with:
@@ -74,17 +81,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: cxx_docs
+          path: cxx_docs
       - name: Download Python Docs
         uses: actions/download-artifact@v4
         with:
           name: python_docs
-      - uses: actions/checkout@v1
+          path: python_docs
+      - uses: actions/checkout@v4
         with:
           repository: VowpalWabbit/docs
           ref: master
-          # For some reason, path is relative to the directory above GITHUB_WORKSPACE
-          # To ensure the rest of the script makes sense, we need to place this under reinforcement_learning
-          path: reinforcement_learning/docs
+          path: docs
           submodules: recursive
       - name: Copy c++ Docs
         shell: bash

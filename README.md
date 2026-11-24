@@ -15,8 +15,32 @@ cd reinforcement_learning
 
 ### Building with Vcpkg + CMake Presets
 #### Requirements
-* CMake 3.20+
+* CMake 3.21+ (CMake Presets schema version 3; CI pins CMake 3.31.6)
 * Ninja
+* A C++14-capable compiler (the pinned Vowpal Wabbit 9.11.9 requires C++14)
+
+Optional Python bindings support Python 3.6 or newer. Builds select the pinned
+pybind11 2.12.1 for Python 3.6-3.8 and pybind11 3.1.0 for Python 3.9 or newer.
+Enable them with `-DRL_BUILD_PYTHON=ON`; select an interpreter with
+`-DPython_EXECUTABLE=<path-to-python>`.
+Linux wheel CI builds and tests Python 3.6-3.14 with the existing manylinux_2_28
+baseline (glibc 2.28 or newer). Older interpreters are built from checksum-pinned
+CPython sources in the current build image; wheel repair uses a separate modern
+interpreter. Consumers on Python 3.6-3.7 need pip 20.3 or newer to recognize
+manylinux_2_28 wheels (pip 21.3.1 supports both).
+Source distributions include both binder versions and the native CMake sources;
+the native dependency prerequisites below still apply when building from source.
+Use system dependencies or an existing vcpkg checkout/install; source archives
+do not bundle vcpkg's Git registry or downloaded packages.
+The checked-in vcpkg revision and manifest baseline are both pinned to
+2025.02.14, with fmt 11.0.2 and spdlog 1.15.0 overrides.
+Windows builds apply small overlays to that pinned registry: the Boost helper
+avoids trailing separators in directory renames rejected by Windows, and the
+CMake helper corrects the native MinGW package filter so acquiring pkgconf does
+not unnecessarily fetch a removed MSYS runtime archive. Package versions and
+download hashes remain pinned.
+Root and standalone parser CMake builds select it automatically; direct Windows
+vcpkg installs must add `--overlay-ports=cmake\vcpkg-overlay-ports`.
 
 #### Commands
 ```sh
@@ -78,6 +102,8 @@ Open the project directory in Visual Studio. Building the library can be easily 
 - Run tests with `Test > Run CTests for <project name>`
 
 This procedure has been verified to work well in Visual Studio 2022.
+The Visual Studio generator selects an installed Windows SDK by default.
+Use `-DCMAKE_SYSTEM_VERSION=<sdk-version>` to select a specific installed SDK.
 
 #### Configure with command line + Build in Visual Studio
 Alternatively, CMake configuration can be done in the command line.
@@ -94,7 +120,33 @@ VcpkgIntegration=c:\s\vcpkg\scripts\buildsystems\msbuild\vcpkg.targets
 
 Open `reinforcement_learning.sln` in Visual Studio. Build Release or Debug x64 configuration.
 
+Native NuGet builds (`RL_BUILD_NUGET=ON`) bundle their dependencies. The zlib
+static archive is installed once through VW, retaining the `zlibstatic.lib` and
+`zlibstaticd.lib` filenames referenced by the package's MSBuild targets.
+The consumer smoke project uses an installed Windows 10 SDK and shares its
+Debug/Release runtime and output settings across the selected compiler toolsets.
+Bundled cpprestsdk's UnitTest++ target explicitly includes `chrono` under MSVC,
+without changing the pinned dependency sources or removing its test targets.
+The managed NuGet smoke consumer restores through its explicit `NuGet.Config`,
+using the downloaded package in `dist` and nuget.org as separate sources.
+
 ## Troubleshooting
+### Python serialized-event tools
+The E2E comparator and log parser tools generate their Python FlatBuffers
+accessors on first use. Use the pinned `flatc` 23.1.21 on `PATH`, or set `FLATC`
+to its executable path. Generation goes through binary reflection schemas
+(`--binary --schema`, then `--python`) to preserve the wire schema's literal
+string unions, which direct Python schema parsing rejects. The comparison
+still decodes and checks both numeric and literal outcomes.
+
+### Long Windows build paths
+Windows compiler and resource tools can fail on deeply nested vcpkg build paths
+even when Git long paths are enabled. Keep the checkout path short, or pass
+`-DVCPKG_INSTALL_OPTIONS="--x-buildtrees-root=<short-absolute-path>"` when
+configuring to move dependency scratch files to a shorter path. The installed
+dependency directory is unchanged. Direct vcpkg installs accept the same
+`--x-buildtrees-root` option.
+
 ### OpenSSL on MacOS
 If you get an error similar to the following on MacOS when running `cmake ..`, then you may be able to fix it by supplying the OpenSSL path to CMake.
 ```

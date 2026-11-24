@@ -1,6 +1,4 @@
 # This file contains header definitions applicable to Win32
-# CMAKE_SYSTEM_VERSION must come before the project is defined in the top level CMakeLists file
-# https://stackoverflow.com/questions/45692367/how-to-set-msvc-target-platform-version-with-cmake
 
 # This is largely a copy of the same file under ext_libs/vowpal_wabbit/cmake/platforms, but does
 # not include the .NET bit, as we use the CMake custom command infrastructure to drive building
@@ -9,9 +7,6 @@
 # TODO: Share this file with VW
 
 if(WIN32)
-  # VW targets Windows 10.0.16299.0 SDK
-  set(CMAKE_SYSTEM_VERSION "10.0.16299.0" CACHE INTERNAL "Windows SDK version to target.")
-
   # TODO: Enable building .NET bindings via CMake on Linux 
   option(rlclientlib_BUILD_DOTNET "Build .NET bindings" ON)
   option(rlclientlib_DOTNET_USE_MSPROJECT "[Experimental] Use import_external_msproject to build .NET csproj files." OFF)

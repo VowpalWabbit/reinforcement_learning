@@ -1,5 +1,14 @@
 # Parser and reward calculator for joined binary schema v2 files
 
+When enabled from the repository root with `-DRL_BUILD_EXTERNAL_PARSER=ON`, the
+parser executable is written under `build/external_parser` (with a configuration
+subdirectory for multi-configuration generators). This keeps it separate from
+the upstream VW executable in the shared Windows `binaries` directory.
+
+`--extra_metrics` follows VW 9.11's nested reduction metrics layout, including
+`extra_metrics`, `cb_explore_adf_greedy`, and `shared_feature_merger` objects.
+Parser-level `dsjson_*` metrics and event metadata remain at the JSON root.
+
 ## File format
 
 The file format constitute of a sequence of messages writen one after the other. All messages have the same format:

@@ -9,22 +9,25 @@ endif()
 # Set this to on so that tooling can make use of the outputted compile commands (such as clang-tidy)
 set(CMAKE_EXPORT_COMPILE_COMMANDS On)
 
-project(vw_binary_parser)
-
-if(UNIX AND NOT APPLE)
-  # Temporary workaround for VW 9.6 missing size_t on Linux builds
-  # TODO remove when VW submodule is updated
-  # This must be stddef.h and not cstddef because it also applies to C code
-  add_compile_options(-include stddef.h)
-  # Enable C++17 math functions in C++11
-  add_compile_definitions(__STDCPP_WANT_MATH_SPEC_FUNCS__)
+if(WIN32 AND CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+  list(APPEND VCPKG_OVERLAY_PORTS "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/vcpkg-overlay-ports")
+  list(REMOVE_DUPLICATES VCPKG_OVERLAY_PORTS)
 endif()
+
+if(CMAKE_HOST_APPLE AND CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+  list(APPEND VCPKG_OVERLAY_PORTS "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/vcpkg-overlay-ports-osx")
+  list(REMOVE_DUPLICATES VCPKG_OVERLAY_PORTS)
+endif()
+
+project(vw_binary_parser)
 
 if(DEFINED RL_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD ${RL_CXX_STANDARD})
 else()
-  set(CMAKE_CXX_STANDARD 11)
+  set(CMAKE_CXX_STANDARD 14)
 endif()
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(NOT WIN32)
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g -DNDEBUG")
@@ -173,7 +176,10 @@ add_dependencies(rl_binary_parser fbgen)
 
 add_executable(rl_binary_parser_bin main.cc)
 target_link_libraries(rl_binary_parser_bin PUBLIC rl_binary_parser)
-set_target_properties(rl_binary_parser_bin PROPERTIES OUTPUT_NAME "vw")
+# Keep the parser CLI separate from VW's CLI in the shared Windows binaries directory.
+set_target_properties(rl_binary_parser_bin PROPERTIES
+  OUTPUT_NAME "vw"
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
 if(STATIC_LINK_BINARY_PARSER AND NOT APPLE)
   target_link_libraries(rl_binary_parser_bin PRIVATE -static)
