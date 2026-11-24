@@ -84,10 +84,13 @@ BOOST_AUTO_TEST_CASE(test_trace_logging)
 
   r::api_status status;
 
-  // create the ds live_model, and initialize it with the config
-  r::live_model ds(config, nullptr, nullptr, &r::trace_logger_factory, data_transport_factory.get(),
-      model_factory.get(), logger_factory.get());
-  BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+  {
+    r::live_model ds(config, nullptr, nullptr, &r::trace_logger_factory, data_transport_factory.get(),
+        model_factory.get(), logger_factory.get());
+    BOOST_CHECK_EQUAL(ds.init(&status), err::success);
+  }
+  // Destruction joins the logging threads before reading their trace output.
+  BOOST_REQUIRE(!tracer_data.empty());
   BOOST_CHECK_EQUAL(tracer_data[0], "API Tracing initialized");
 }
 
