@@ -110,6 +110,10 @@ VcpkgIntegration=c:\s\vcpkg\scripts\buildsystems\msbuild\vcpkg.targets
 
 Open `reinforcement_learning.sln` in Visual Studio. Build Release or Debug x64 configuration.
 
+Native NuGet builds (`RL_BUILD_NUGET=ON`) bundle their dependencies. The zlib
+static archive is installed once through VW, retaining the `zlibstatic.lib` and
+`zlibstaticd.lib` filenames referenced by the package's MSBuild targets.
+
 ## Troubleshooting
 ### Python serialized-event tools
 The E2E comparator and log parser tools generate their Python FlatBuffers

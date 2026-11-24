@@ -11,6 +11,8 @@ endif()
 if(RL_BUILD_NUGET)
   set(VW_INSTALL ON CACHE BOOL "" FORCE)
   set(CPPREST_INSTALL ON CACHE BOOL "" FORCE)
+  # VW installs zlibstatic; zlib's own export would register the same target twice.
+  set(ZLIB_INSTALL OFF CACHE BOOL "" FORCE)
   set(OPENSSL_INSTALL ON)
   set(RL_ext_libs_exclude_from_all "")
 else()
@@ -32,6 +34,16 @@ if(RL_USE_UBSAN)
   set(VW_USE_UBSAN ON CACHE BOOL "" FORCE)
 endif()
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/vowpal_wabbit ${RL_ext_libs_exclude_from_all})
+
+if(RL_BUILD_NUGET)
+  # Keep the archive names referenced by the NuGet MSBuild targets.
+  set_target_properties(zlibstatic PROPERTIES OUTPUT_NAME zlibstatic)
+  get_target_property(RL_ZLIB_SOURCE_DIR zlibstatic SOURCE_DIR)
+  get_target_property(RL_ZLIB_BINARY_DIR zlibstatic BINARY_DIR)
+  install(
+    FILES "${RL_ZLIB_SOURCE_DIR}/zlib.h" "${RL_ZLIB_BINARY_DIR}/zconf.h"
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+endif()
 
 # Build ZStandard
 if(RL_USE_ZSTD)
