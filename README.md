@@ -48,6 +48,23 @@ cmake --preset=vcpkg-release
 cmake --build --preset=vcpkg-release
 ```
 
+#### AddressSanitizer
+The sanitizer workflow runs the native RL and binary parser tests with ASan on
+Windows, Linux, and macOS. On Windows, use an x64 Visual Studio 2022 developer
+prompt with the C++ AddressSanitizer component installed. UBSan is only supported
+on Linux and macOS.
+
+```sh
+cmake --preset=vcpkg-asan-debug -DRL_BUILD_EXTERNAL_PARSER=ON
+cmake --build build --target rltest binary_parser_unit_tests
+ctest --test-dir build --verbose --output-on-failure --no-tests=error
+```
+
+These presets instrument the sources built by this repository, including VW;
+the standard vcpkg dependencies are not rebuilt with sanitizer instrumentation.
+The Windows job verifies that both test binaries import the ASan runtime before
+running them.
+
 ## Alternative system-specific build instructions
 ### Ubuntu
 #### Dependencies
