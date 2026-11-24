@@ -16,7 +16,9 @@ The general format of each message is shown in this table. Details for each mess
 
 ### Byte ordering
 
-The byte order for message type identifier and payload size must be little-endian. The payload itself can be message type defined, but since all messages are either empty or flatbuffers (which are themselves little-endian) in practice this means the payload is also little-endian.
+The message type identifier, payload size, and inline FILEMAGIC version are unsigned 32-bit integers encoded in little-endian byte order. For example, a FILEMAGIC message with version `1` is stored as `56 57 46 42 01 00 00 00` (the first four bytes spell `VWFB`).
+
+Non-empty HEADER, CHECKPOINT, and REGULAR payloads use the FlatBuffers format, whose multi-byte scalar fields are little-endian. Byte vectors within these payloads, including encoded event data, retain their own format and must not be byte-swapped.
 
 ### Message type
 The first 4 bytes in each message is an unique indentifier:
