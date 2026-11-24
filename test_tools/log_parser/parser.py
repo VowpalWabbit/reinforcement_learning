@@ -86,10 +86,12 @@ def cast(table, tmp_type):
 
 
 def parse_cb(payload, verbose):
+    """chosen_action is the one-based logged choice, not proof of execution."""
     evt = CbEvent.GetRootAsCbEvent(payload, 0)
     if not verbose:
+        chosen_action = evt.ActionIds(0) if evt.ActionIdsLength() else None
         print(
-            f"\tcb: actions:{evt.ActionIdsLength()} model:{evt.ModelId()} lm:{learning_mode_name(evt.LearningMode())} deferred:{evt.DeferredAction()}"
+            f"\tcb: actions:{evt.ActionIdsLength()} chosen_action:{chosen_action} model:{evt.ModelId()} lm:{learning_mode_name(evt.LearningMode())} deferred:{evt.DeferredAction()}"
         )
     else:
         print(
