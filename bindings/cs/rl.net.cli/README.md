@@ -8,18 +8,27 @@ In particular, the simulation modes are useful to generate synthetic data.
 
 ## Building and testing
 
-The CLI and its tests require the .NET 10 SDK. The public `rl.net` library
-continues to target .NET Standard 2.0.
+The CLI and its tests target both .NET Core 3.1 and .NET 10. The public `rl.net`
+library continues to target .NET Standard 2.0. Build with the .NET 10 SDK and
+install the matching runtime for each target you run. .NET Core 3.1 is retained
+for compatibility; it is out of support and .NET 10 is recommended for new deployments.
 
 Install `dotnet-t4` and build the native C# binding before running the CLI tests:
 
 ```sh
 dotnet tool install --global dotnet-t4
-dotnet test bindings/cs/rl.net.cli.test/rl.net.cli.test.csproj -p:Platform=x64
+dotnet test bindings/cs/rl.net.cli.test/rl.net.cli.test.csproj --framework netcoreapp3.1 -p:Platform=x64
+dotnet test bindings/cs/rl.net.cli.test/rl.net.cli.test.csproj --framework net10.0 -p:Platform=x64
 ```
 
 The native binding and its dependencies must be available on the test process's
 library search path.
+
+Outputs are separated by target framework. CMake defaults to `net10.0`;
+set `-DRL_DOTNET_TARGET_FRAMEWORK=netcoreapp3.1` to build and run legacy CLI tests.
+CI runs both targets on their matching runtimes, without major-version roll-forward.
+The downloaded `RL.Net` package smoke consumer similarly covers both .NET 6
+and .NET 10 on their matching runtimes.
 
 ## Stats
 

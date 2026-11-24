@@ -98,6 +98,7 @@ jobs:
           --preset vcpkg-debug
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
           -Drlclientlib_BUILD_DOTNET=ON
+          -DRL_DOTNET_TARGET_FRAMEWORK=net10.0
       - name: Build
         run: |
           cmake --build build
