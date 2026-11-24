@@ -1,0 +1,27 @@
+include CMakeLists.txt vcpkg.json
+graft cmake
+graft include
+graft rlclientlib
+graft examples
+graft test_tools
+graft unit_test
+graft external_parser
+graft bindings/python
+graft ext_libs
+prune rlclientlib/generated
+prune external_parser/generated
+prune test_tools/e2e_testing/reinforcement_learning
+prune test_tools/log_parser/reinforcement_learning
+prune ext_libs/vcpkg/downloads
+prune ext_libs/vcpkg/buildtrees
+prune ext_libs/vcpkg/packages
+prune ext_libs/vcpkg/installed
+prune ext_libs/vcpkg/ports
+prune ext_libs/vcpkg/versions
+prune ext_libs/vowpal_wabbit/ext_libs/vcpkg/downloads
+prune ext_libs/vowpal_wabbit/ext_libs/vcpkg/buildtrees
+prune ext_libs/vowpal_wabbit/ext_libs/vcpkg/packages
+prune ext_libs/vowpal_wabbit/ext_libs/vcpkg/installed
+prune ext_libs/vowpal_wabbit/ext_libs/vcpkg/ports
+prune ext_libs/vowpal_wabbit/ext_libs/vcpkg/versions
+global-exclude .git *.pyc *.pyo *.obj *.o *.a *.lib *.dll *.exe *.pyd

@@ -16,16 +16,29 @@
 *.csproj.user
 *.VC.db
 .vs
+# VS CMake configuration
+CMakeSettings.json
 
 # Ignore NuGet Packages
 *.nupkg
 # Ignore the packages folder
 **/packages
+# Ignore nuget_staging directory used for building the nuget package
+nuget_staging/
 
 build
+/build-release/
+ext_deps
 /rlclientlib/generated
 /external_parser/generated
 /.vscode
 /bindings/cs/rl.net/InternalsVisibleToTest.cs
 /bindings/cs/rl.net.cli/InternalsVisibleToTest.cs
 /test_tools/log_parser/reinforcement_learning/
+/test_tools/e2e_testing/reinforcement_learning/
+_build
+.idea
+dist/
+rl_client.egg-info/
+
+.cache

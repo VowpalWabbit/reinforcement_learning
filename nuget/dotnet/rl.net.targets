@@ -1,0 +1,6 @@
+
+<Project>
+    <Target Name="CopyNativeDllDependencies" BeforeTargets="Build" Condition="!$(TargetFramework.StartsWith('netstandard'))">
+        <Copy SourceFiles="@(NativeDllDependencies)" DestinationFolder="$(TargetDir)" />
+    </Target>
+</Project>

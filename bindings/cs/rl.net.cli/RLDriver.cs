@@ -30,6 +30,11 @@ namespace Rl.Net.Cli
             get;
         }
 
+        string CcbContext
+        {
+            get;
+        }
+
         string SlatesContext
         {
             get;
@@ -37,6 +42,14 @@ namespace Rl.Net.Cli
 
         string ContinuousActionContext
         {
+            get;
+        }
+
+        ActionFlags DecisionFlags
+        {
+            get;
+        }
+        bool IsStepActivated {
             get;
         }
 
@@ -85,14 +98,15 @@ namespace Rl.Net.Cli
         bool TryQueueOutcomeEvent(RunContext runContext, string eventId, string slotId, TOutcome outcome);
     }
 
-    public class RLDriver : IOutcomeReporter<float>, IOutcomeReporter<string>, IDisposable
+    public class RLDriver : IOutcomeReporter<float>, IOutcomeReporter<float?>, IOutcomeReporter<string>, IDisposable
     {
         private LiveModel liveModel;
         private LoopKind loopKind;
 
+        /// <summary>Creates a driver that owns and disposes the supplied live model.</summary>
         public RLDriver(LiveModel liveModel, LoopKind loopKind = LoopKind.CB)
         {
-            this.liveModel = liveModel;
+            this.liveModel = liveModel ?? throw new ArgumentNullException(nameof(liveModel));
             this.loopKind = loopKind;
         }
 
@@ -104,6 +118,11 @@ namespace Rl.Net.Cli
 
         public void Run<TOutcome>(IDriverStepProvider<TOutcome> stepProvider)
         {
+            if (disposedValue)
+            {
+                throw new ObjectDisposedException(nameof(RLDriver));
+            }
+
             // TODO: Enable consumers to provider their own outcomeReporter
             IOutcomeReporter<TOutcome> outcomeReporter = this as IOutcomeReporter<TOutcome>;
             if (outcomeReporter == null)
@@ -148,6 +167,16 @@ namespace Rl.Net.Cli
             return this.liveModel.TryQueueOutcomeEvent(eventId, slotId, outcome, runContext.ApiStatusContainer);
         }
 
+        bool IOutcomeReporter<float?>.TryQueueOutcomeEvent(RunContext runContext, string eventId, float? outcome)
+        {
+            return this.liveModel.TryQueueOutcomeEvent(eventId, outcome.Value, runContext.ApiStatusContainer);
+        }
+
+        bool IOutcomeReporter<float?>.TryQueueOutcomeEvent(RunContext runContext, string eventId, string slotId, float? outcome)
+        {
+            return this.liveModel.TryQueueOutcomeEvent(eventId, slotId, outcome.Value, runContext.ApiStatusContainer);
+        }
+
         private void Step<TOutcome>(RunContext runContext, IOutcomeReporter<TOutcome> outcomeReporter, IStepContext<TOutcome> step)
         {
             string eventId = step.EventId;
@@ -184,7 +213,7 @@ namespace Rl.Net.Cli
             }
             else if (loopKind == LoopKind.CCB)
             {
-                if (!liveModel.TryRequestDecision(step.DecisionContext, runContext.DecisionResponseContainer, runContext.ApiStatusContainer))
+                if (!liveModel.TryRequestDecision(step.CcbContext, runContext.DecisionResponseContainer, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
                 }
@@ -202,7 +231,7 @@ namespace Rl.Net.Cli
             }
             else if (loopKind == LoopKind.CCBv2)
             {
-                if (!liveModel.TryRequestMultiSlotDecisionDetailed(eventId, step.DecisionContext, runContext.MultiSlotResponseDetailedContainer, runContext.ApiStatusContainer))
+                if (!liveModel.TryRequestMultiSlotDecisionDetailed(eventId, step.CcbContext, runContext.MultiSlotResponseDetailedContainer, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
                 }
@@ -218,7 +247,8 @@ namespace Rl.Net.Cli
             }
             else
             {
-                if (!liveModel.TryChooseRank(eventId, step.DecisionContext, runContext.ResponseContainer, runContext.ApiStatusContainer))
+                var flags = step.DecisionFlags;
+                if (!liveModel.TryChooseRank(eventId, step.DecisionContext, flags, runContext.ResponseContainer, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
                 }
@@ -227,6 +257,14 @@ namespace Rl.Net.Cli
                 if (!runContext.ResponseContainer.TryGetChosenAction(out actionIndex, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
+                }
+
+                if(flags.HasFlag(ActionFlags.Deferred) && step.IsStepActivated)
+                {
+                    if (!this.liveModel.TryQueueActionTakenEvent(eventId, runContext.ApiStatusContainer))
+                    {
+                        this.SafeRaiseError(runContext.ApiStatusContainer);
+                    }
                 }
 
                 outcome = step.GetOutcome(actionIndex, runContext.ResponseContainer.AsEnumerable());
@@ -252,7 +290,7 @@ namespace Rl.Net.Cli
         }
 
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        private bool disposedValue;
 
         protected virtual void Dispose(bool disposing)
         {
@@ -268,11 +306,10 @@ namespace Rl.Net.Cli
             }
         }
 
-
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

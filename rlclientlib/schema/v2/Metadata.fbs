@@ -1,6 +1,6 @@
 namespace reinforcement_learning.messages.flatbuff.v2;
 
-enum PayloadType : ubyte { CB, CCB, Slates, Outcome, CA, DedupInfo, MultiStep }
+enum PayloadType : ubyte { CB, CCB, Slates, Outcome, CA, DedupInfo, MultiStep, Episode }
 enum EventEncoding: ubyte { Identity, Zstd }
 
 struct TimeStamp {

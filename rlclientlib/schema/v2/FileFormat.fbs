@@ -29,6 +29,7 @@ table CheckpointInfo {
     default_reward: float;
     learning_mode_config: LearningModeType;
     problem_type_config: ProblemType;
+    use_client_time: bool;
 }
 
 root_type FileHeader;

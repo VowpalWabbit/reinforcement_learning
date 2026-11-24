@@ -151,7 +151,8 @@ namespace Rl.Net.Cli
         {
             internal static readonly (Topic topic, int slot_id)[] ActionSet = new[] { (Topic.HerbGarden, 0), (Topic.MachineLearning, 0), (Topic.Soccer, 1), (Topic.SpaceExploration, 1) };
 
-            private static readonly string ActionsJson = string.Join(",", ActionSet.Select(action => $"{{ \"TAction\": {{ \"topic\": \"{action.topic}\" }}, \"_slot_id\": {action.slot_id} }}"));
+            private static readonly string ActionsJsonWithSlotId = string.Join(",", ActionSet.Select(action => $"{{ \"TAction\": {{ \"topic\": \"{action.topic}\" }}, \"_slot_id\": {action.slot_id} }}"));
+            private static readonly string ActionsJsonWithoutSlotId  = string.Join(",", ActionSet.Select(action => $"{{ \"TAction\": {{ \"topic\": \"{action.topic}\" }} }}"));
             private string SlotsJson => string.Join(",", Enumerable.Range(0, SlotCount).Select(slotId => $"{{ \"slot_id\": \"__{slotId}\" }}"));
 
             public StatisticsCalculator<Person, int> StatisticsCalculator
@@ -215,9 +216,13 @@ namespace Rl.Net.Cli
                 set;
             }
 
-            public string DecisionContext => $"{{ { this.Person.FeaturesJson }, \"_multi\": [{ ActionsJson }] }}";
-            public string SlatesContext => $"{{ { this.Person.FeaturesJson }, \"_multi\":[{ActionsJson}], \"_slots\": [{SlotsJson}] }}";
+            public string DecisionContext => $"{{ { this.Person.FeaturesJson }, \"_multi\": [{ ActionsJsonWithoutSlotId }] }}";
+            public string CcbContext => $"{{ { this.Person.FeaturesJson }, \"_multi\": [{ ActionsJsonWithSlotId }] }}";
+            public string SlatesContext => $"{{ { this.Person.FeaturesJson }, \"_multi\":[{ActionsJsonWithSlotId}], \"_slots\": [{SlotsJson}] }}";
             public string ContinuousActionContext => $"{{ { this.RobotJoint.FeaturesJson } }}";
+            public ActionFlags DecisionFlags => ActionFlags.Default;
+            public bool IsStepActivated => throw new NotImplementedException();
+
 
             private float? outcomeCache;
             private IEnumerable<ActionProbability> actionDistributionCache;
@@ -306,6 +311,11 @@ namespace Rl.Net.Cli
 
         public void Run(int steps = SimulatorStepProvider.InfinitySteps, int slots = SimulatorStepProvider.DefaultSlatesSlotCount)
         {
+            if (disposedValue)
+            {
+                throw new ObjectDisposedException(nameof(RLSimulator));
+            }
+
             SimulatorStepProvider stepProvider = new SimulatorStepProvider(steps, slots);
 
             this.driver.Run(stepProvider);
@@ -324,11 +334,10 @@ namespace Rl.Net.Cli
         }
 
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        private bool disposedValue;
 
         protected virtual void Dispose(bool disposing)
         {
-            Console.WriteLine("Disponsing rlsim");
             if (!disposedValue)
             {
                 if (disposing)
@@ -344,6 +353,7 @@ namespace Rl.Net.Cli
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

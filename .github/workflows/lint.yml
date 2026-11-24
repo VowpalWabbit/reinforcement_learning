@@ -1,0 +1,160 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - master
+      - 'releases/**'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  typecheck-build:
+    name: lint.python.typecheck-build
+    container:
+      image: quay.io/pypa/manylinux_2_28_x86_64@sha256:55a36963bc0504cdf004011001c1072306402f0b8b83be5a5eba7068f93eec53
+    runs-on: ubuntu-22.04
+    env:
+      VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - { version: "3.9", base_path: /opt/python/cp39-cp39/, include_dir_name: python3.9/ }
+        - { version: "3.11", base_path: /opt/python/cp311-cp311/, include_dir_name: python3.11/ }
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install vcpkg build prerequisites
+        run: |
+          dnf install -y zip unzip curl tar perl-IPC-Cmd
+          perl -e 'use IPC::Cmd;'
+      - uses: ./.github/actions/setup-build
+        with:
+          cache-key: python-typecheck-${{ matrix.config.version }}
+      - name: Build wheel
+        shell: bash
+        env:
+          PYTHON: ${{ matrix.config.base_path }}bin/python
+        run: bash ./.scripts/linux/build-python-wheel.sh
+      - name: Upload built wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel_${{ matrix.config.version }}
+          path: audit_output/
+          if-no-files-found: error
+  typecheck-check:
+    name: lint.python.typecheck-check
+    needs: typecheck-build
+    container:
+      image: python:${{ matrix.config.version }}-slim-bookworm
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - { version: "3.9" }
+        - { version: "3.11" }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Wheel
+        uses: actions/download-artifact@v4
+        with:
+          name: wheel_${{ matrix.config.version }}
+          path: ${{ github.workspace }}/wheel_${{ matrix.config.version }}
+      - name: Install dependencies
+        shell: bash
+        env:
+          PYTYPE_VERSION: ${{ matrix.config.version == '3.9' && '2024.4.11' || '2024.10.11' }}
+        run: |
+          python -m pip install "pytype==$PYTYPE_VERSION"
+      - name: Install wheel
+        shell: bash
+        run: |
+          export wheel_files=(wheel_${{ matrix.config.version }}/*)
+          export wheel_file="${wheel_files[0]}"
+          echo Installing ${wheel_file}...
+          python -m pip install "${wheel_file}"
+      - name: Run pytype
+        shell: bash
+        run: |
+          python -m pytype ./bindings/python/ --verbosity=2
+          python -m pytype ./examples/python/ --verbosity=2
+  python-formatting:
+    name: lint.python.formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install 'black[jupyter]==23.3.0'
+      - name: Run python formatting
+        shell: bash
+        run: |
+          python -m black --check . --exclude ext_libs/ || (echo -e "---\nTo fix, run:\n\tpython -m black . --exclude ext_libs"; exit 1)
+  cpp-formatting:
+    name: lint.c++.formatting
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install clang-format
+        shell: bash
+        run: |
+          sudo apt update
+          sudo apt install clang-format-14
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-14 100
+          sudo update-alternatives --install /usr/bin/clang-format-diff clang-format-diff /usr/bin/clang-format-diff-14 100
+          clang-format --version
+      - name: Check code formatting for codebase
+        shell: bash
+        run: ./.scripts/linux/clang-format.sh check
+        env:
+          GH_WORKFLOW_LOGGING: true
+      - name: Check code formatting for diff
+        # Only run the diff check for pull requests
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          if [[ ! -f .clang-format ]]; then
+            echo "Cannot find .clang-format file!"
+            exit 1
+          fi
+          git diff origin/master...HEAD -U0 --no-color -- :^/ext_libs | clang-format-diff -r '^.*\.(cc|h)$' -p1 > clang_format_diff.txt
+          if [ -s clang_format_diff.txt ]; then
+            cat clang_format_diff.txt
+            echo "::error:: Formatting issues found"
+            echo "To fix:"
+            echo -e "\tUse the clang-format.sh script in docker mode:"
+            echo -e "\t\tRun: \"./.scripts/linux/clang-format.sh docker fix\""
+            echo -e "\tOr, install the right verson of clang-format locally"
+            echo -e "\t\tRun: \"git diff upstream/master...HEAD -U0 --no-color | clang-format-diff -r '^.*\.(cc|h)$' -p1 -i\""
+            echo -e "\tBe sure to check your version of clang-format. The version used here is..."
+            clang-format --version
+            exit 1
+          else
+            echo "No formatting issues found in the PR diff."
+          fi
+  run-clang-tidy:
+    name: lint.c++.clang-tidy
+    container:
+      image: vowpalwabbit/ubuntu2004-dev:latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        shell: bash
+        run: |
+          apt update
+          apt install -y libspdlog-dev libfmt-dev libboost-math-dev
+          apt install -y jq
+      - name: Run clang tidy
+        shell: bash
+        run: ./.scripts/linux/run-clang-tidy.sh

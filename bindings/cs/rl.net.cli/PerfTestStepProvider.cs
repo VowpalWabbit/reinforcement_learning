@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace Rl.Net.Cli
 {
@@ -31,8 +32,13 @@ namespace Rl.Net.Cli
             }
 
             public string DecisionContext { get; set; }
+            public string CcbContext { get; set; }
             public string SlatesContext { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
             public string ContinuousActionContext { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+            public ActionFlags DecisionFlags => ActionFlags.Default;
+
+            public bool IsStepActivated => throw new NotImplementedException();
 
             public float GetOutcome(long actionIndex, IEnumerable<ActionProbability> actionDistribution)
             {
@@ -58,6 +64,10 @@ namespace Rl.Net.Cli
         public string Tag { get; set; } = "Id";
 
         public TimeSpan Duration { get; set; } = TimeSpan.FromSeconds(20);
+
+        public int NumLines { get; set; } = 0;
+
+        public int NumLinesProcessed { get; set; } = 0;
 
         public double DataSize { get; set; } = 0;
 
@@ -88,11 +98,38 @@ namespace Rl.Net.Cli
             }
         }
 
+        public PerfTestStepProvider(string filePath)
+        {
+            using (StreamReader sr = new StreamReader(filePath))
+            {
+                string line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    Contexts.Add(line);
+                }
+            }
+            this.NumLines = Contexts.Count;
+            this.RingSize = this.NumLines;
+        }
+
         public IEnumerator<IStepContext<float>> GetEnumerator()
         {
             this.Stats = new Statistics();
-            while (this.Stats.Bytes < this.DataSize || this.Stats.ElapsedMs < this.Duration.TotalMilliseconds)
+            while (true)
             {
+                if (this.NumLines > 0)
+                {
+                    if (this.NumLines == this.NumLinesProcessed)
+                    {
+                        break;
+                    }
+                    this.NumLinesProcessed++;
+                }
+                else if (!(this.Stats.Bytes < this.DataSize ||
+                        this.Stats.ElapsedMicroseconds < this.Duration.TotalMilliseconds * 1000))
+                {
+                    break;
+                }
                 var step = new PerfTestStep
                 {
                     EventId = $"{Tag}-{this.Stats.Messages}",

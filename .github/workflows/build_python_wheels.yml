@@ -1,0 +1,97 @@
+name: Linux / Python
+
+on:
+  push:
+    branches:
+      - master
+      - 'releases/**'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    container:
+      image: quay.io/pypa/manylinux_2_28_x86_64@sha256:55a36963bc0504cdf004011001c1072306402f0b8b83be5a5eba7068f93eec53
+    runs-on: ubuntu-22.04
+    env:
+      VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - { version: '3.6', base_path: /opt/python/cp36-cp36m/ }
+        - { version: '3.7', base_path: /opt/python/cp37-cp37m/ }
+        - { version: '3.8', base_path: /opt/python/cp38-cp38/ }
+        - { version: '3.9', base_path: /opt/python/cp39-cp39/ }
+        - { version: '3.10', base_path: /opt/python/cp310-cp310/ }
+        - { version: '3.11', base_path: /opt/python/cp311-cp311/ }
+        - { version: '3.12', base_path: /opt/python/cp312-cp312/ }
+        - { version: '3.13', base_path: /opt/python/cp313-cp313/ }
+        - { version: '3.14', base_path: /opt/python/cp314-cp314/ }
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install vcpkg and legacy Python build prerequisites
+        run: |
+          dnf install -y zip unzip curl tar perl-IPC-Cmd gcc gcc-c++ make openssl-devel libffi-devel bzip2-devel xz-devel zlib-devel
+          perl -e 'use IPC::Cmd;'
+      - name: Provision legacy Python
+        if: contains(fromJSON('["3.6", "3.7", "3.8"]'), matrix.config.version)
+        shell: bash
+        env:
+          PYTHON: ${{ matrix.config.base_path }}bin/python
+        run: bash ./.scripts/linux/prepare-legacy-python.sh "${{ matrix.config.version }}"
+      - uses: ./.github/actions/setup-build
+        with:
+          cache-key: python-${{ matrix.config.version }}
+      - name: Build wheel
+        shell: bash
+        env:
+          PYTHON: ${{ matrix.config.base_path }}bin/python
+        run: bash ./.scripts/linux/build-python-wheel.sh
+      - name: Upload built wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel_${{ matrix.config.version }}
+          path: audit_output/
+          if-no-files-found: error
+  test:
+    name: test (${{ matrix.config.version }})
+    needs: build
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - { version: '3.6', image: 'python:3.6-slim-buster' }
+        - { version: '3.7', image: 'python:3.7-slim-bullseye' }
+        - { version: '3.8', image: 'python:3.8-slim-bookworm' }
+        - { version: '3.9', image: 'python:3.9-slim-bookworm' }
+        - { version: '3.10', image: 'python:3.10-slim-bookworm' }
+        - { version: '3.11', image: 'python:3.11-slim-bookworm' }
+        - { version: '3.12', image: 'python:3.12-slim-bookworm' }
+        - { version: '3.13', image: 'python:3.13-slim-bookworm' }
+        - { version: '3.14', image: 'python:3.14-slim-bookworm' }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Wheel
+        uses: actions/download-artifact@v4
+        with:
+          name: wheel_${{ matrix.config.version }}
+          path: ${{ github.workspace }}/wheel_${{ matrix.config.version }}
+      - name: Test installed wheel in the consumer runtime
+        shell: bash
+        env:
+          RUNTIME_IMAGE: ${{ matrix.config.image }}
+          PYTHON_VERSION: ${{ matrix.config.version }}
+        run: |
+          docker run --rm --volume "$GITHUB_WORKSPACE:/workspace" --workdir /workspace \
+            --env PYTHON_VERSION "$RUNTIME_IMAGE" sh -ec '
+              case "$PYTHON_VERSION" in
+                3.6|3.7|3.8|3.9) python -m pip install pip==21.3.1 ;;
+              esac
+              python -m pip install wheel_"$PYTHON_VERSION"/*.whl
+              python ./bindings/python/test/unit_test.py
+            '
