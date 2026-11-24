@@ -200,7 +200,7 @@ jobs:
         run: |
           cd nuget/dotnet/test
           dotnet add dotnetcore_nuget_test.csproj package RL.Net --version ${{ env.RL_NUGET_VERSION }} --source "${{github.workspace}}/dist" --no-restore
-          dotnet restore dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}} --source "${{github.workspace}}/dist" --source https://api.nuget.org/v3/index.json
+          dotnet restore dotnetcore_nuget_test.csproj --runtime ${{matrix.config.runtime_id}} --configfile NuGet.Config
       - name: Build and run test
         shell: bash
         run: |

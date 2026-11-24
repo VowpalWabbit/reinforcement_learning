@@ -113,6 +113,12 @@ Open `reinforcement_learning.sln` in Visual Studio. Build Release or Debug x64 c
 Native NuGet builds (`RL_BUILD_NUGET=ON`) bundle their dependencies. The zlib
 static archive is installed once through VW, retaining the `zlibstatic.lib` and
 `zlibstaticd.lib` filenames referenced by the package's MSBuild targets.
+The consumer smoke project uses an installed Windows 10 SDK and shares its
+Debug/Release runtime and output settings across the selected compiler toolsets.
+Bundled cpprestsdk's UnitTest++ target explicitly includes `chrono` under MSVC,
+without changing the pinned dependency sources or removing its test targets.
+The managed NuGet smoke consumer restores through its explicit `NuGet.Config`,
+using the downloaded package in `dist` and nuget.org as separate sources.
 
 ## Troubleshooting
 ### Python serialized-event tools

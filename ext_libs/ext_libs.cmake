@@ -185,6 +185,10 @@ if(vw_USE_AZURE_FACTORIES)
     set(WERROR OFF CACHE BOOL "")
     set(CPPREST_ABI_TAG "" CACHE BOOL "" FORCE)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/cpprestsdk ${RL_ext_libs_exclude_from_all})
+    if(MSVC AND TARGET unittestpp)
+      # Pinned UnitTest++ uses system_clock without including <chrono>.
+      target_compile_options(unittestpp PRIVATE /FIchrono)
+    endif()
     add_library(cpprestsdk::cpprest ALIAS cpprest)
   endif() # RL_CPPREST_SYS_DEP
 endif() # vw_USE_AZURE_FACTORIES
