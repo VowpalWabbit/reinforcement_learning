@@ -16,12 +16,12 @@ public:
   }
 
   std::unique_ptr<i_async_batcher<generic_event>> create_batcher(std::unique_ptr<i_message_sender> sender,
-      utility::watchdog& watchdog, error_callback_fn* perror_cb, const char* section) override
+      utility::watchdog& watchdog, error_callback_fn* perror_cb, const char* section, i_trace* trace) override
   {
     auto config = utility::get_batcher_config(_config, section);
     return std::unique_ptr<async_batcher<generic_event, fb_collection_serializer>>(
         new async_batcher<generic_event, fb_collection_serializer>(
-            std::move(sender), watchdog, _dummy_state, perror_cb, config));
+            std::move(sender), watchdog, _dummy_state, perror_cb, config, trace));
   }
 
   bool is_object_extraction_enabled() const override { return false; }

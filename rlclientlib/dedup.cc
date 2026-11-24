@@ -276,7 +276,7 @@ public:
 
   std::unique_ptr<logger::i_async_batcher<generic_event>> create_batcher(
       std::unique_ptr<logger::i_message_sender> sender, utility::watchdog& watchdog, error_callback_fn* perror_cb,
-      const char* section) override
+      const char* section, i_trace* trace) override
   {
     auto config = utility::get_batcher_config(_config, section);
 
@@ -284,12 +284,12 @@ public:
     {
       return std::unique_ptr<logger::i_async_batcher<generic_event>>(
           new logger::async_batcher<generic_event, dedup_collection_serializer>(
-              std::move(sender), watchdog, _dedup_state, perror_cb, config));
+              std::move(sender), watchdog, _dedup_state, perror_cb, config, trace));
     }
 
     return std::unique_ptr<logger::i_async_batcher<generic_event>>(
         new logger::async_batcher<generic_event, logger::fb_collection_serializer>(
-            std::move(sender), watchdog, _dummy_state, perror_cb, config));
+            std::move(sender), watchdog, _dummy_state, perror_cb, config, trace));
   }
 
   bool is_object_extraction_enabled() const override { return _use_dedup; }

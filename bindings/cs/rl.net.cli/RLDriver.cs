@@ -98,14 +98,15 @@ namespace Rl.Net.Cli
         bool TryQueueOutcomeEvent(RunContext runContext, string eventId, string slotId, TOutcome outcome);
     }
 
-    public class RLDriver : IOutcomeReporter<float>, IOutcomeReporter<float?>, IOutcomeReporter<string>
+    public class RLDriver : IOutcomeReporter<float>, IOutcomeReporter<float?>, IOutcomeReporter<string>, IDisposable
     {
         private LiveModel liveModel;
         private LoopKind loopKind;
 
+        /// <summary>Creates a driver that owns and disposes the supplied live model.</summary>
         public RLDriver(LiveModel liveModel, LoopKind loopKind = LoopKind.CB)
         {
-            this.liveModel = liveModel;
+            this.liveModel = liveModel ?? throw new ArgumentNullException(nameof(liveModel));
             this.loopKind = loopKind;
         }
 
@@ -117,6 +118,11 @@ namespace Rl.Net.Cli
 
         public void Run<TOutcome>(IDriverStepProvider<TOutcome> stepProvider)
         {
+            if (disposedValue)
+            {
+                throw new ObjectDisposedException(nameof(RLDriver));
+            }
+
             // TODO: Enable consumers to provider their own outcomeReporter
             IOutcomeReporter<TOutcome> outcomeReporter = this as IOutcomeReporter<TOutcome>;
             if (outcomeReporter == null)
@@ -282,5 +288,29 @@ namespace Rl.Net.Cli
                 localHandler(this, errorStatus);
             }
         }
+
+        #region IDisposable Support
+        private bool disposedValue;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    this.liveModel?.Dispose();
+                    this.liveModel = null;
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 }

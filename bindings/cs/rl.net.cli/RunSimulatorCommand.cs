@@ -16,10 +16,12 @@ namespace Rl.Net.Cli
         {
             LiveModel liveModel = Helpers.CreateLiveModelOrExit(this.ConfigPath);
 
-            RLSimulator rlSim = new RLSimulator(liveModel, loopKind: this.GetLoopKind());
-            rlSim.StepInterval = TimeSpan.FromMilliseconds(this.SleepIntervalMs);
-            rlSim.OnError += (sender, apiStatus) => Helpers.WriteStatusAndExit(apiStatus);
-            rlSim.Run(this.Steps);
+            using (RLSimulator rlSim = new RLSimulator(liveModel, loopKind: this.GetLoopKind()))
+            {
+                rlSim.StepInterval = TimeSpan.FromMilliseconds(this.SleepIntervalMs);
+                rlSim.OnError += (sender, apiStatus) => Helpers.WriteStatusAndExit(apiStatus);
+                rlSim.Run(this.Steps);
+            }
         }
     }
 }

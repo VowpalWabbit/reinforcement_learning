@@ -18,41 +18,42 @@ int protocol_not_supported(api_status* status)
 template <typename T>
 std::unique_ptr<i_async_batcher<T>> create_legacy_async_batcher(const utility::configuration& c,
     std::unique_ptr<i_message_sender> sender, utility::watchdog& watchdog, error_callback_fn* perror_cb,
-    const char* section, typename async_batcher<T, fb_collection_serializer>::shared_state_t& shared_state)
+    const char* section, typename async_batcher<T, fb_collection_serializer>::shared_state_t& shared_state,
+    i_trace* trace)
 {
   auto config = utility::get_batcher_config(c, section);
-  return std::unique_ptr<async_batcher<T, fb_collection_serializer>>(
-      new async_batcher<T, fb_collection_serializer>(std::move(sender), watchdog, shared_state, perror_cb, config));
+  return std::unique_ptr<async_batcher<T, fb_collection_serializer>>(new async_batcher<T, fb_collection_serializer>(
+      std::move(sender), watchdog, shared_state, perror_cb, config, trace));
 }
 
 interaction_logger_facade::interaction_logger_facade(model_type_t model_type, const utility::configuration& c,
     std::unique_ptr<i_message_sender> sender, utility::watchdog& watchdog,
     std::unique_ptr<i_time_provider> time_provider, i_logger_extensions& logger_extensions,
-    error_callback_fn* perror_cb)
+    error_callback_fn* perror_cb, i_trace* trace)
     : _model_type(model_type)
     , _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
     , _serializer_shared_state(0)
     , _logger_extensions(logger_extensions)
     , _v1_cb(_version == 1 && _model_type == model_type_t::CB
               ? new interaction_logger(std::move(time_provider),
-                    create_legacy_async_batcher<ranking_event>(
-                        c, std::move(sender), watchdog, perror_cb, INTERACTION_SECTION, _serializer_shared_state))
+                    create_legacy_async_batcher<ranking_event>(c, std::move(sender), watchdog, perror_cb,
+                        INTERACTION_SECTION, _serializer_shared_state, trace))
               : nullptr)
     , _v1_ccb(_version == 1 && _model_type == model_type_t::CCB
               ? new ccb_logger(std::move(time_provider),
-                    create_legacy_async_batcher<decision_ranking_event>(
-                        c, std::move(sender), watchdog, perror_cb, INTERACTION_SECTION, _serializer_shared_state))
+                    create_legacy_async_batcher<decision_ranking_event>(c, std::move(sender), watchdog, perror_cb,
+                        INTERACTION_SECTION, _serializer_shared_state, trace))
               : nullptr)
     , _v1_multislot(_version == 1 && _model_type == model_type_t::SLATES
               ? new multi_slot_logger(std::move(time_provider),
-                    create_legacy_async_batcher<multi_slot_decision_event>(
-                        c, std::move(sender), watchdog, perror_cb, INTERACTION_SECTION, _serializer_shared_state))
+                    create_legacy_async_batcher<multi_slot_decision_event>(c, std::move(sender), watchdog, perror_cb,
+                        INTERACTION_SECTION, _serializer_shared_state, trace))
               : nullptr)
-    , _v2(_version == 2
-              ? new generic_event_logger(std::move(time_provider),
-                    _logger_extensions.create_batcher(std::move(sender), watchdog, perror_cb, INTERACTION_SECTION),
-                    c.get(name::APP_ID, ""))
-              : nullptr)
+    , _v2(_version == 2 ? new generic_event_logger(std::move(time_provider),
+                              _logger_extensions.create_batcher(
+                                  std::move(sender), watchdog, perror_cb, INTERACTION_SECTION, trace),
+                              c.get(name::APP_ID, ""))
+                        : nullptr)
 {
 }
 
@@ -224,16 +225,16 @@ int interaction_logger_facade::log_continuous_action(
 
 observation_logger_facade::observation_logger_facade(const utility::configuration& c,
     std::unique_ptr<i_message_sender> sender, utility::watchdog& watchdog,
-    std::unique_ptr<i_time_provider> time_provider, error_callback_fn* perror_cb)
+    std::unique_ptr<i_time_provider> time_provider, error_callback_fn* perror_cb, i_trace* trace)
     : _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
     , _serializer_shared_state(0)
     , _v1(_version == 1 ? new observation_logger(std::move(time_provider),
                               create_legacy_async_batcher<outcome_event>(c, std::move(sender), watchdog, perror_cb,
-                                  OBSERVATION_SECTION, _serializer_shared_state))
+                                  OBSERVATION_SECTION, _serializer_shared_state, trace))
                         : nullptr)
     , _v2(_version == 2 ? new generic_event_logger(std::move(time_provider),
                               create_legacy_async_batcher<generic_event>(c, std::move(sender), watchdog, perror_cb,
-                                  OBSERVATION_SECTION, _serializer_shared_state),
+                                  OBSERVATION_SECTION, _serializer_shared_state, trace),
                               c.get(name::APP_ID, ""))
                         : nullptr)
 {
@@ -361,12 +362,13 @@ int observation_logger_facade::report_action_taken(const char* primary_id, const
 
 // TODO: Do we need an EPISODE_SECTION for the config? Just use OBSERVATION_SECTION for now
 episode_logger_facade::episode_logger_facade(const utility::configuration& c, std::unique_ptr<i_message_sender> sender,
-    utility::watchdog& watchdog, std::unique_ptr<i_time_provider> time_provider, error_callback_fn* perror_cb)
+    utility::watchdog& watchdog, std::unique_ptr<i_time_provider> time_provider, error_callback_fn* perror_cb,
+    i_trace* trace)
     : _version(c.get_int(name::PROTOCOL_VERSION, value::DEFAULT_PROTOCOL_VERSION))
     , _serializer_shared_state(0)
     , _v2(_version == 2 ? new generic_event_logger(std::move(time_provider),
                               create_legacy_async_batcher<generic_event>(c, std::move(sender), watchdog, perror_cb,
-                                  OBSERVATION_SECTION, _serializer_shared_state),
+                                  OBSERVATION_SECTION, _serializer_shared_state, trace),
                               c.get(name::APP_ID, ""))
                         : nullptr)
 {

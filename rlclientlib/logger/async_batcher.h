@@ -10,6 +10,8 @@
 #include "rl_string_view.h"
 #include "serialization/fb_serializer.h"
 #include "serialization/json_serializer.h"
+#include "str_util.h"
+#include "trace_logger.h"
 #include "utility/config_helper.h"
 #include "utility/object_pool.h"
 #include "utility/periodic_background_proc.h"
@@ -74,8 +76,9 @@ private:
   void flush();  // flush all batches
 
 public:
+  // The optional trace logger is borrowed and must outlive the batcher.
   async_batcher(std::unique_ptr<i_message_sender> sender, utility::watchdog& watchdog, shared_state_t& shared_state,
-      error_callback_fn* perror_cb, const utility::async_batcher_config& config);
+      error_callback_fn* perror_cb, const utility::async_batcher_config& config, i_trace* trace = nullptr);
   ~async_batcher();
 
 private:
@@ -84,6 +87,7 @@ private:
   event_queue<TEvent> _queue;  // A queue to accumulate batch of events.
   size_t _send_high_water_mark;
   error_callback_fn* _perror_cb;
+  i_trace* _trace;
   shared_state_t& _shared_state;
 
   utility::periodic_background_proc<async_batcher> _periodic_background_proc;
@@ -162,6 +166,7 @@ int async_batcher<TEvent, TSerializer>::fill_buffer(
   TEvent evt;
   TSerializer<TEvent> collection_serializer(*buffer.get(), _batch_content_encoding, _shared_state);
 
+  size_t event_count = 0;
   while (remaining > 0 && collection_serializer.size() < _send_high_water_mark)
   {
     if (_queue.pop(&f_evt))
@@ -170,6 +175,7 @@ int async_batcher<TEvent, TSerializer>::fill_buffer(
       RETURN_IF_FAIL(f_evt(evt, status));
       RETURN_IF_FAIL(collection_serializer.add(evt, status));
       --remaining;
+      ++event_count;
     }
   }
 
@@ -181,6 +187,9 @@ int async_batcher<TEvent, TSerializer>::fill_buffer(
     RETURN_IF_FAIL(collection_serializer.finalize(status, original_event_count));
   }
   else { RETURN_IF_FAIL(collection_serializer.finalize(status)); }
+  TRACE_INFO(_trace,
+      utility::concat("async_batcher.fill_buffer: created batch with ", event_count, " events and ",
+          collection_serializer.size(), " bytes"));
   return error_code::success;
 }
 
@@ -190,7 +199,11 @@ void async_batcher<TEvent, TSerializer>::flush()
   const auto queue_size = _queue.size();
 
   // Early exit if queue is empty.
-  if (queue_size == 0) { return; }
+  if (queue_size == 0)
+  {
+    TRACE_DEBUG(_trace, "async_batcher.flush: empty queue");
+    return;
+  }
 
   auto remaining = queue_size;
   // Handle batching
@@ -210,11 +223,12 @@ void async_batcher<TEvent, TSerializer>::flush()
 template <typename TEvent, template <typename> class TSerializer>
 async_batcher<TEvent, TSerializer>::async_batcher(std::unique_ptr<i_message_sender> sender, utility::watchdog& watchdog,
     typename TSerializer<TEvent>::shared_state_t& shared_state, error_callback_fn* perror_cb,
-    const utility::async_batcher_config& config)
+    const utility::async_batcher_config& config, i_trace* trace)
     : _sender(std::move(sender))
     , _queue(config.send_queue_max_capacity, config.event_counter_status, config.subsample_rate)
     , _send_high_water_mark(config.send_high_water_mark)
     , _perror_cb(perror_cb)
+    , _trace(trace)
     , _shared_state(shared_state)
     , _periodic_background_proc(
           static_cast<int>(config.send_batch_interval_ms), watchdog, "Async batcher thread", perror_cb)

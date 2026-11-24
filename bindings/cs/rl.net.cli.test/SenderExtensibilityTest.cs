@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,13 +47,20 @@ namespace Rl.Net.Cli.Test
 }
 ";
 
-        private LiveModel CreateLiveModel(FactoryContext factoryContext = null)
+        private LiveModel CreateLiveModel(FactoryContext factoryContext = null, int? batchIntervalMs = null)
         {
             Configuration config;
             ApiStatus apiStatus = new ApiStatus();
             if (!Configuration.TryLoadConfigurationFromJson(CustomSenderConfigJson, out config, apiStatus))
             {
                 Assert.Fail("Failed to parse pseudolocalized configuration JSON: " + apiStatus.ErrorMessage);
+            }
+
+            if (batchIntervalMs.HasValue)
+            {
+                config["interaction.send.batchintervalms"] = batchIntervalMs.Value.ToString();
+                config["observation.send.batchintervalms"] = batchIntervalMs.Value.ToString();
+                config["trace.logger.level"] = "debug";
             }
 
             LiveModel liveModel = factoryContext == null ? new LiveModel(config) : new LiveModel(config, factoryContext);
@@ -264,6 +273,149 @@ namespace Rl.Net.Cli.Test
     ""p"": [0.3, 0.7]
 }
 ";
+
+        private static IEnumerable<string> ReplayLines(bool fail)
+        {
+            yield return JsonConvert.SerializeObject(new
+            {
+                EventId,
+                c = JObject.Parse(ContextJsonWithPdf),
+                o = new[] { new { v = 1 } }
+            });
+            if (fail)
+            {
+                throw new InvalidOperationException("Replay failed");
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public void Test_Driver_DisposalFlushesPendingEvents(bool fail)
+        {
+            int sends = 0;
+            int emptyQueues = 0;
+            using var initialIterations = new ManualResetEventSlim();
+            var traces = new ConcurrentQueue<string>();
+            FactoryContext factoryContext = CreateFactoryContext(
+                sendAction: (buffer, status) => Interlocked.Increment(ref sends));
+            LiveModel liveModel = CreateLiveModel(factoryContext, batchIntervalMs: 60000);
+            this.TestCleanup.Add(liveModel);
+            liveModel.TraceLoggerEvent += (sender, args) =>
+            {
+                traces.Enqueue(args.Message);
+                if (args.Message == "async_batcher.flush: empty queue" &&
+                    Interlocked.Increment(ref emptyQueues) == 2)
+                {
+                    initialIterations.Set();
+                }
+            };
+            liveModel.Init();
+            Assert.IsTrue(initialIterations.Wait(TimeSpan.FromSeconds(10)));
+            var driver = new RLDriver(liveModel) { StepInterval = TimeSpan.Zero };
+            Action run = () =>
+            {
+                using (driver)
+                {
+                    driver.Run(new ReplayStepProvider(ReplayLines(fail)));
+                    Assert.AreEqual(0, sends, "Events must still be queued before disposal.");
+                }
+            };
+            if (fail)
+            {
+                Assert.ThrowsException<InvalidOperationException>(run);
+            }
+            else
+            {
+                run();
+            }
+            Assert.IsTrue(liveModel.IsClosed, "Driver must release its live model.");
+            Assert.IsTrue(sends >= 2, "Interaction and outcome queues must both be delivered.");
+            Assert.IsFalse(Array.Exists(traces.ToArray(),
+                message => message.StartsWith("async_batcher.fill_buffer: created batch with ")),
+                "Managed trace callbacks remain detached during shutdown.");
+            driver.Dispose();
+            Assert.ThrowsException<ObjectDisposedException>(() => driver.Run(new ReplayStepProvider(ReplayLines(false))));
+        }
+
+        [TestMethod]
+        public void Test_Driver_DisposalSendFailureDoesNotInvokeDetachedCallback()
+        {
+            int errors = 0;
+            int sends = 0;
+            int emptyQueues = 0;
+            using var initialIterations = new ManualResetEventSlim();
+            FactoryContext factoryContext = CreateFactoryContext(sendAction: (buffer, status) =>
+            {
+                Interlocked.Increment(ref sends);
+                new ApiStatusBuilder(NativeMethods.OpaqueBindingError).Append("Shutdown send failed").UpdateApiStatus(status);
+            });
+            LiveModel liveModel = CreateLiveModel(factoryContext, batchIntervalMs: 60000);
+            this.TestCleanup.Add(liveModel);
+            liveModel.BackgroundError += (sender, status) => Interlocked.Increment(ref errors);
+            liveModel.TraceLoggerEvent += (sender, args) =>
+            {
+                if (args.Message == "async_batcher.flush: empty queue" &&
+                    Interlocked.Increment(ref emptyQueues) == 2)
+                {
+                    initialIterations.Set();
+                }
+            };
+            liveModel.Init();
+            Assert.IsTrue(initialIterations.Wait(TimeSpan.FromSeconds(10)));
+            using (var driver = new RLDriver(liveModel) { StepInterval = TimeSpan.Zero })
+            {
+                driver.Run(new ReplayStepProvider(ReplayLines(false)));
+            }
+            Assert.IsTrue(liveModel.IsClosed);
+            Assert.IsTrue(sends >= 2);
+            Assert.AreEqual(0, errors, "Managed error callbacks remain detached during shutdown.");
+        }
+
+        [TestMethod]
+        public void Test_Driver_BatchDiagnostics()
+        {
+            using var batchTraced = new ManualResetEventSlim();
+            LiveModel liveModel = CreateLiveModel(CreateFactoryContext(sendAction: (buffer, status) => { }));
+            this.TestCleanup.Add(liveModel);
+            liveModel.TraceLoggerEvent += (sender, args) =>
+            {
+                if (args.Message.StartsWith("async_batcher.fill_buffer: created batch with "))
+                {
+                    batchTraced.Set();
+                }
+            };
+            liveModel.Init();
+            using (var driver = new RLDriver(liveModel) { StepInterval = TimeSpan.Zero })
+            {
+                driver.Run(new ReplayStepProvider(ReplayLines(false)));
+                Assert.IsTrue(batchTraced.Wait(TimeSpan.FromSeconds(10)));
+            }
+        }
+
+        [TestMethod]
+        public void Test_Simulator_DisposalFlushesPendingEvents()
+        {
+            int sends = 0;
+            FactoryContext factoryContext = CreateFactoryContext(
+                sendAction: (buffer, status) => Interlocked.Increment(ref sends));
+            Assert.IsTrue(Configuration.TryLoadConfigurationFromJson(CustomSenderConfigJson, out Configuration config));
+            config["model.implementation"] = "VW";
+            config["interaction.send.batchintervalms"] = "60000";
+            config["observation.send.batchintervalms"] = "60000";
+            LiveModel liveModel = new LiveModel(config, factoryContext);
+            this.TestCleanup.Add(liveModel);
+            liveModel.Init();
+            var simulator = new RLSimulator(liveModel, LoopKind.CB) { StepInterval = TimeSpan.Zero };
+            using (simulator)
+            {
+                simulator.Run(1);
+            }
+            Assert.IsTrue(liveModel.IsClosed, "Simulator must release its driver and live model.");
+            Assert.IsTrue(sends >= 2);
+            simulator.Dispose();
+            Assert.ThrowsException<ObjectDisposedException>(() => simulator.Run(0));
+        }
 
         [TestMethod]
         public void Test_CustomSender_SendSuccess()

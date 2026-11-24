@@ -66,7 +66,6 @@ namespace Rl.Net.Cli
 
         private PerfTestStepProvider DoWork(string tag)
         {
-            LiveModel liveModel = Helpers.CreateLiveModelOrExit(this.ConfigPath);
             PerfTestStepProvider stepProvider;
             if (this.FilePath != "")
             {
@@ -86,11 +85,13 @@ namespace Rl.Net.Cli
             }
 
             Console.WriteLine(stepProvider.DataSize);
-            RLDriver rlDriver = new RLDriver(liveModel, loopKind: this.GetLoopKind())
+            LiveModel liveModel = Helpers.CreateLiveModelOrExit(this.ConfigPath);
+            using (RLDriver rlDriver = new RLDriver(liveModel, loopKind: this.GetLoopKind()))
             {
-                StepInterval = TimeSpan.FromMilliseconds(this.SleepIntervalMs)
-            };
-            rlDriver.Run(stepProvider);
+                rlDriver.StepInterval = TimeSpan.FromMilliseconds(this.SleepIntervalMs);
+                rlDriver.Run(stepProvider);
+            }
+
             stepProvider.Stats.Print();
             return stepProvider;
         }

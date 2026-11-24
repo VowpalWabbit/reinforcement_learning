@@ -21,6 +21,7 @@ class watchdog;
 class generic_event;
 class api_status;
 class i_time_provider;
+class i_trace;
 namespace logger
 {
 template <typename TEvent>
@@ -58,7 +59,7 @@ public:
   virtual bool is_serialization_transform_enabled() const = 0;
 
   virtual std::unique_ptr<i_async_batcher<generic_event>> create_batcher(std::unique_ptr<i_message_sender> sender,
-      utility::watchdog& watchdog, error_callback_fn* perror_cb, const char* section) = 0;
+      utility::watchdog& watchdog, error_callback_fn* perror_cb, const char* section, i_trace* trace = nullptr) = 0;
   virtual int transform_payload_and_extract_objects(
       string_view context, std::string& edited_payload, object_list_t& objects, api_status* status) = 0;
   virtual int transform_serialized_payload(

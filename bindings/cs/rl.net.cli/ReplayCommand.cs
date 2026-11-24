@@ -17,15 +17,17 @@ namespace Rl.Net.Cli
         public override void Run()
         {
             LiveModel liveModel = Helpers.CreateLiveModelOrExit(this.ConfigPath);
-            RLDriver rlDriver = new RLDriver(liveModel, loopKind: this.GetLoopKind());
-            rlDriver.StepInterval = TimeSpan.FromMilliseconds(this.SleepIntervalMs);
-
-            using (TextReader textReader = File.OpenText(this.LogPath))
+            using (RLDriver rlDriver = new RLDriver(liveModel, loopKind: this.GetLoopKind()))
             {
-                IEnumerable<string> dsJsonLines = textReader.LazyReadLines();
-                ReplayStepProvider stepProvider = new ReplayStepProvider(dsJsonLines);
+                rlDriver.StepInterval = TimeSpan.FromMilliseconds(this.SleepIntervalMs);
 
-                rlDriver.Run(stepProvider);
+                using (TextReader textReader = File.OpenText(this.LogPath))
+                {
+                    IEnumerable<string> dsJsonLines = textReader.LazyReadLines();
+                    ReplayStepProvider stepProvider = new ReplayStepProvider(dsJsonLines);
+
+                    rlDriver.Run(stepProvider);
+                }
             }
         }
     }

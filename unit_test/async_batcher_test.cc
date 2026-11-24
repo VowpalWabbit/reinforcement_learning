@@ -134,6 +134,81 @@ void expect_no_error(const api_status& s, void* cntxt)
   BOOST_FAIL("Should not get background error notifications");
 }
 
+BOOST_AUTO_TEST_CASE(batch_trace_during_shutdown)
+{
+  class recording_trace : public i_trace
+  {
+  public:
+    std::vector<std::string> messages;
+    void log(int, const std::string& msg) override { messages.push_back(msg); }
+    void set_level(int) override {}
+  } trace;
+
+  std::vector<std::string> items;
+  utility::watchdog watchdog(nullptr);
+  utility::async_batcher_config config;
+  config.send_high_water_mark = 5;
+  int dummy = 0;
+  {
+    std::unique_ptr<logger::i_message_sender> sender(new message_sender(items));
+    logger::async_batcher<test_undroppable_event> batcher(std::move(sender), watchdog, dummy, nullptr, config, &trace);
+    for (const auto& id : {std::string("foo"), std::string("bar"), std::string("baz")})
+    {
+      auto event = std::make_shared<test_undroppable_event>(id);
+      auto make_event = [event](test_undroppable_event& out_event, api_status*)
+      {
+        out_event = std::move(*event);
+        return error_code::success;
+      };
+      batcher.append(std::move(make_event), event.get());
+    }
+  }
+  BOOST_REQUIRE_EQUAL(items.size(), 2);
+  BOOST_CHECK_EQUAL(items[0], "foo\nbar\n");
+  BOOST_CHECK_EQUAL(items[1], "baz\n");
+  BOOST_REQUIRE_EQUAL(trace.messages.size(), 2);
+  BOOST_CHECK_EQUAL(trace.messages[0], "async_batcher.fill_buffer: created batch with 2 events and 8 bytes");
+  BOOST_CHECK_EQUAL(trace.messages[1], "async_batcher.fill_buffer: created batch with 1 events and 4 bytes");
+}
+
+BOOST_AUTO_TEST_CASE(batch_shutdown_reports_send_error)
+{
+  class failing_sender : public logger::i_message_sender
+  {
+  public:
+    int init(api_status*) override { return error_code::success; }
+    int send(uint16_t, const buffer&, api_status* status) override
+    {
+      api_status::try_update(status, error_code::invalid_argument, "Shutdown send failed");
+      return error_code::invalid_argument;
+    }
+  };
+  int errors = 0;
+  error_callback_fn error_fn(
+      [](const api_status& status, void* context)
+      {
+        BOOST_CHECK_EQUAL(status.get_error_code(), error_code::invalid_argument);
+        BOOST_CHECK_EQUAL(status.get_error_msg(), "Shutdown send failed");
+        ++*static_cast<int*>(context);
+      },
+      &errors);
+  utility::watchdog watchdog(nullptr);
+  utility::async_batcher_config config;
+  int dummy = 0;
+  {
+    std::unique_ptr<logger::i_message_sender> sender(new failing_sender());
+    logger::async_batcher<test_undroppable_event> batcher(std::move(sender), watchdog, dummy, &error_fn, config);
+    auto event = std::make_shared<test_undroppable_event>("foo");
+    auto make_event = [event](test_undroppable_event& out_event, api_status*)
+    {
+      out_event = std::move(*event);
+      return error_code::success;
+    };
+    batcher.append(std::move(make_event), event.get());
+  }
+  BOOST_CHECK_EQUAL(errors, 1);
+}
+
 // test the flush mechanism based on a timer
 BOOST_AUTO_TEST_CASE(flush_timeout)
 {

@@ -288,7 +288,7 @@ namespace Rl.Net.Cli
         }
     }
 
-    internal class RLSimulator
+    internal class RLSimulator : IDisposable
     {
         private RLDriver driver;
 
@@ -311,6 +311,11 @@ namespace Rl.Net.Cli
 
         public void Run(int steps = SimulatorStepProvider.InfinitySteps, int slots = SimulatorStepProvider.DefaultSlatesSlotCount)
         {
+            if (disposedValue)
+            {
+                throw new ObjectDisposedException(nameof(RLSimulator));
+            }
+
             SimulatorStepProvider stepProvider = new SimulatorStepProvider(steps, slots);
 
             this.driver.Run(stepProvider);
@@ -327,5 +332,29 @@ namespace Rl.Net.Cli
                 this.driver.OnError -= value;
             }
         }
+
+        #region IDisposable Support
+        private bool disposedValue;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    this.driver?.Dispose();
+                    this.driver = null;
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 }
