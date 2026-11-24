@@ -22,6 +22,7 @@
 #include "slates_loop.h"
 #include "str_util.h"
 
+#include <chrono>
 #include <fstream>
 #include <thread>
 #include <vector>
@@ -942,19 +943,11 @@ BOOST_AUTO_TEST_CASE(live_model_disable_event_logging)
   cfg::create_from_json(JSON_CFG, config);
   config.set(r::name::EH_TEST, "true");
   config.set(r::name::EVENT_LOGGING_ENABLED, "false");  // Disable event logging.
-
-  auto const version_number = "1";
+  config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
 
   auto const event_id_1 = "event_id";
   auto const event_id_2 = "event_id_2";
 
-  auto const expected_interaction_1 = u::concat(R"({"Version":")", version_number, R"(","EventId":")", event_id_1,
-      R"(","a":[1,2],"c":)", JSON_CONTEXT, R"(,"p":[0.500000,0.500000],"VWState":{"m":"N/A"}})");
-  auto const expected_observation_1 = u::concat(R"({"EventId":")", event_id_1, R"(","v":1.000000})");
-
-  auto const expected_interaction_2 = u::concat(R"({"Version":")", version_number, R"(","EventId":")", event_id_2,
-      R"(","a":[1,2],"c":)", JSON_CONTEXT, R"(,"p":[0.500000,0.500000],"VWState":{"m":"N/A"}})");
-  auto const expected_observation_2 = u::concat(R"({"EventId":")", event_id_2, R"(","v":1.000000})");
   auto const num_iterations = 5;
 
   {
@@ -962,23 +955,213 @@ BOOST_AUTO_TEST_CASE(live_model_disable_event_logging)
         config, data_transport_factory.get(), model_factory.get(), logger_factory.get());
 
     r::api_status status;
-    BOOST_CHECK_EQUAL(model.init(&status), err::success);
+    BOOST_REQUIRE_EQUAL(model.init(&status), err::success);
 
     r::ranking_response response;
     for (auto i = 0; i < num_iterations; i++)
     {
       BOOST_CHECK_EQUAL(model.choose_rank(event_id_1, JSON_CONTEXT, response), err::success);
+      BOOST_CHECK_EQUAL(response.size(), 2);
+      BOOST_CHECK_EQUAL(response.get_event_id(), event_id_1);
       BOOST_CHECK_EQUAL(model.report_outcome(event_id_1, 1.0), err::success);
 
       BOOST_CHECK_EQUAL(model.choose_rank(event_id_2, JSON_CONTEXT, response), err::success);
       BOOST_CHECK_EQUAL(model.report_outcome(event_id_2, 1.0), err::success);
     }
-
-    Verify(Method((*mock_interaction_sender), init)).Exactly(0);
-    Verify(Method((*mock_observation_sender), init)).Exactly(0);
   }
-  BOOST_CHECK_GE(recorded_interactions.size(), 0);
-  BOOST_CHECK_GE(recorded_observations.size(), 0);
+  Verify(Method((*mock_interaction_sender), init)).Exactly(0);
+  Verify(Method((*mock_observation_sender), init)).Exactly(0);
+  Verify(Method((*mock_interaction_sender), send)).Exactly(0);
+  Verify(Method((*mock_observation_sender), send)).Exactly(0);
+  BOOST_CHECK_EQUAL(recorded_interactions.size(), 0);
+  BOOST_CHECK_EQUAL(recorded_observations.size(), 0);
+}
+
+BOOST_AUTO_TEST_CASE(live_model_disable_event_logging_legacy_and_outcomes)
+{
+  for (const auto* version : {"1", "2"})
+  {
+    u::configuration config;
+    config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+    config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
+    config.set(r::name::EVENT_LOGGING_ENABLED, "false");
+    config.set(r::name::PROTOCOL_VERSION, version);
+    r::sender_factory_t no_senders;
+    r::time_provider_factory_t no_time_providers;
+    r::live_model model(config, nullptr, nullptr, &r::trace_logger_factory, &r::data_transport_factory,
+        &r::model_factory, &no_senders, &no_time_providers);
+    r::api_status status;
+    BOOST_CHECK_EQUAL(model.report_outcome("event", 1.f, &status), err::not_initialized);
+    BOOST_REQUIRE_EQUAL(model.init(&status), err::success);
+
+    r::ranking_response response;
+    BOOST_CHECK_EQUAL(model.choose_rank("event", JSON_CONTEXT, response, &status), err::success);
+    BOOST_CHECK_EQUAL(response.size(), 2);
+    BOOST_CHECK_EQUAL(model.choose_rank("", JSON_CONTEXT, response, &status), err::invalid_argument);
+    BOOST_CHECK_EQUAL(model.report_outcome("", 1.f, &status), err::invalid_argument);
+    BOOST_CHECK_EQUAL(model.report_outcome("event", "", &status), err::invalid_argument);
+    BOOST_CHECK_EQUAL(model.report_outcome("event", "", 1.f, &status), err::invalid_argument);
+    BOOST_CHECK_EQUAL(model.report_action_taken("", &status), err::invalid_argument);
+    BOOST_CHECK_EQUAL(model.report_action_taken("event", "", &status), err::invalid_argument);
+    BOOST_CHECK_EQUAL(model.report_action_taken("event", nullptr, &status), err::invalid_argument);
+    BOOST_CHECK_EQUAL(model.report_action_taken(nullptr, &status), err::invalid_argument);
+
+    BOOST_CHECK_EQUAL(model.report_outcome("event", 1.f, &status), err::success);
+    BOOST_CHECK_EQUAL(model.report_outcome("event", R"({"reward":1})", &status), err::success);
+    BOOST_CHECK_EQUAL(model.report_outcome("event", 0, 1.f, &status), err::success);
+    BOOST_CHECK_EQUAL(model.report_outcome("event", 0, R"({"reward":1})", &status), err::success);
+    BOOST_CHECK_EQUAL(model.report_outcome("event", "slot", 1.f, &status), err::success);
+    BOOST_CHECK_EQUAL(model.report_outcome("event", "slot", R"({"reward":1})", &status), err::success);
+    BOOST_CHECK_EQUAL(model.report_action_taken("event", &status), err::success);
+    BOOST_CHECK_EQUAL(model.report_action_taken("event", "slot", &status), err::success);
+    BOOST_CHECK_EQUAL(status.get_error_code(), err::success);
+    BOOST_CHECK_EQUAL(model.refresh_model(&status), err::success);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(live_model_disable_event_logging_other_decisions)
+{
+  u::configuration config;
+  config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+  config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
+  config.set(r::name::EVENT_LOGGING_ENABLED, "false");
+  config.set(r::name::PROTOCOL_VERSION, "2");
+  config.set(r::name::EPISODE_FILE_NAME, "unused-episode-log");
+  r::sender_factory_t no_senders;
+  r::api_status status;
+
+  {
+    config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--cats 4 --min_value 0 --max_value 1 --json --quiet");
+    r::ca_loop model(
+        config, nullptr, nullptr, &r::trace_logger_factory, &r::data_transport_factory, &r::model_factory, &no_senders);
+    BOOST_REQUIRE_EQUAL(model.init(&status), err::success);
+    r::continuous_action_response response;
+    BOOST_CHECK_EQUAL(
+        model.request_continuous_action("event", JSON_CONTEXT_CONTINUOUS_ACTIONS, response, &status), err::success);
+    BOOST_CHECK_EQUAL(response.get_event_id(), "event");
+  }
+  {
+    config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--ccb_explore_adf --json --quiet --epsilon 0 --first_only");
+    r::ccb_loop model(
+        config, nullptr, nullptr, &r::trace_logger_factory, &r::data_transport_factory, &r::model_factory, &no_senders);
+    BOOST_REQUIRE_EQUAL(model.init(&status), err::success);
+    r::multi_slot_response response;
+    r::multi_slot_response_detailed detailed;
+    RL_IGNORE_DEPRECATED_USAGE_START
+    BOOST_CHECK_EQUAL(
+        model.request_multi_slot_decision("event", JSON_CONTEXT_WITH_SLOTS, response, &status), err::success);
+    RL_IGNORE_DEPRECATED_USAGE_END
+    BOOST_CHECK_EQUAL(
+        model.request_multi_slot_decision("event", JSON_CONTEXT_WITH_SLOTS, detailed, &status), err::success);
+    BOOST_CHECK_EQUAL(response.size(), 1);
+    BOOST_CHECK_EQUAL(detailed.size(), 1);
+
+    config.set(r::name::PROTOCOL_VERSION, "1");
+    r::ccb_loop legacy(
+        config, nullptr, nullptr, &r::trace_logger_factory, &r::data_transport_factory, &r::model_factory, &no_senders);
+    BOOST_REQUIRE_EQUAL(legacy.init(&status), err::success);
+    r::decision_response decisions;
+    RL_IGNORE_DEPRECATED_USAGE_START
+    BOOST_CHECK_EQUAL(legacy.request_decision(JSON_CONTEXT_WITH_SLOTS, decisions, &status), err::success);
+    RL_IGNORE_DEPRECATED_USAGE_END
+    BOOST_CHECK_EQUAL(decisions.size(), 1);
+  }
+  {
+    config.set(r::name::PROTOCOL_VERSION, "2");
+    config.set(
+        r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--slates --ccb_explore_adf --json --quiet --epsilon 0 --first_only");
+    r::slates_loop model(
+        config, nullptr, nullptr, &r::trace_logger_factory, &r::data_transport_factory, &r::model_factory, &no_senders);
+    BOOST_REQUIRE_EQUAL(model.init(&status), err::success);
+    r::multi_slot_response response;
+    const auto* context = R"({"_multi":[{"_slot_id":0},{"_slot_id":0}],"_slots":[{}]})";
+    BOOST_CHECK_EQUAL(model.request_multi_slot_decision("event", context, response, &status), err::success);
+    BOOST_CHECK_EQUAL(response.size(), 1);
+  }
+  {
+    config.set(r::name::PROTOCOL_VERSION, "2");
+    config.set(r::name::MODEL_VW_INITIAL_COMMAND_LINE, "--cb_explore_adf --json --quiet --epsilon 0 --first_only");
+    r::live_model model(
+        config, nullptr, nullptr, &r::trace_logger_factory, &r::data_transport_factory, &r::model_factory, &no_senders);
+    BOOST_REQUIRE_EQUAL(model.init(&status), err::success);
+    r::episode_state episode("episode");
+    r::ranking_response response;
+    BOOST_CHECK_EQUAL(
+        model.request_episodic_decision("event1", nullptr, JSON_CONTEXT, response, episode, &status), err::success);
+    BOOST_CHECK_EQUAL(
+        model.request_episodic_decision("event2", "event1", JSON_CONTEXT, response, episode, &status), err::success);
+    BOOST_CHECK_EQUAL(response.size(), 2);
+    BOOST_CHECK_EQUAL(episode.size(), 2);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(live_model_disable_event_logging_background_errors)
+{
+  u::configuration config;
+  cfg::create_from_json(JSON_CFG, config);
+  config.set(r::name::EVENT_LOGGING_ENABLED, "false");
+  auto transport = get_mock_failing_data_transport();
+  auto transport_factory = get_mock_data_transport_factory(transport.get());
+  r::sender_factory_t no_senders;
+  r::cb_loop model = create_mock_live_model<r::cb_loop>(config, transport_factory.get(), nullptr, &no_senders);
+  r::api_status status;
+  BOOST_REQUIRE_EQUAL(model.init(&status), err::success);
+
+  const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(2);
+  int result;
+  do {
+    result = model.report_outcome("event", 1.f, &status);
+    if (result != err::success) { break; }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  } while (std::chrono::steady_clock::now() < deadline);
+  BOOST_REQUIRE_EQUAL(result, err::unhandled_background_error_occurred);
+  BOOST_CHECK_EQUAL(model.report_action_taken("event", &status), err::unhandled_background_error_occurred);
+  BOOST_CHECK_EQUAL(model.report_action_taken("event", "slot", &status), err::unhandled_background_error_occurred);
+  r::ranking_response response;
+  BOOST_CHECK_EQUAL(
+      model.choose_rank("event", JSON_CONTEXT, response, &status), err::unhandled_background_error_occurred);
+  BOOST_CHECK_EQUAL(response.size(), 2);
+}
+
+BOOST_AUTO_TEST_CASE(live_model_event_logging_default_and_explicit_enable)
+{
+  const char* enabled_options[] = {nullptr, "true"};
+  for (const auto* enabled : enabled_options)
+  {
+    u::configuration config;
+    config.set(r::name::MODEL_SRC, r::value::NO_MODEL_DATA);
+    config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
+    if (enabled != nullptr) { config.set(r::name::EVENT_LOGGING_ENABLED, enabled); }
+    r::sender_factory_t no_senders;
+    r::cb_loop model(
+        config, nullptr, nullptr, &r::trace_logger_factory, &r::data_transport_factory, &r::model_factory, &no_senders);
+    r::api_status status;
+    BOOST_CHECK_NE(model.init(&status), err::success);
+    BOOST_CHECK_NE(status.get_error_code(), err::success);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(live_model_disable_event_logging_learning_modes)
+{
+  for (const auto* mode : {r::value::LEARNING_MODE_APPRENTICE, r::value::LEARNING_MODE_LOGGINGONLY})
+  {
+    u::configuration config;
+    cfg::create_from_json(JSON_CFG, config);
+    config.set(r::name::MODEL_BACKGROUND_REFRESH, "false");
+    config.set(r::name::EVENT_LOGGING_ENABLED, "false");
+    config.set(r::name::LEARNING_MODE, mode);
+    r::sender_factory_t no_senders;
+    r::cb_loop model = create_mock_live_model<r::cb_loop>(config, nullptr, nullptr, &no_senders);
+    r::api_status status;
+    BOOST_REQUIRE_EQUAL(model.init(&status), err::success);
+    r::ranking_response response;
+    BOOST_REQUIRE_EQUAL(model.choose_rank("event", JSON_CONTEXT, response, &status), err::success);
+    size_t chosen_action;
+    BOOST_CHECK_EQUAL(response.get_chosen_action_id(chosen_action, &status), err::success);
+    BOOST_CHECK_EQUAL(chosen_action, 0);
+    size_t expected_action = 0;
+    for (const auto& action : response) { BOOST_CHECK_EQUAL(action.action_id, expected_action++); }
+  }
 }
 
 BOOST_AUTO_TEST_CASE(populate_response_same_size_test)

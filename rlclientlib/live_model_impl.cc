@@ -365,6 +365,11 @@ int live_model_impl::report_action_taken(const char* event_id, api_status* statu
   api_status::try_clear(status);
   // Send the outcome event to the backend
   if (_outcome_logger) { return _outcome_logger->report_action_taken(event_id, status); }
+  RETURN_IF_FAIL(check_null_or_empty(event_id, _trace_logger.get(), status));
+  if (_watchdog.has_background_error_been_reported())
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+  }
   return error_code::success;
 }
 
@@ -374,6 +379,12 @@ int live_model_impl::report_action_taken(const char* primary_id, const char* sec
   api_status::try_clear(status);
   // Send the outcome event to the backend
   if (_outcome_logger) { return _outcome_logger->report_action_taken(primary_id, secondary_id, status); }
+  RETURN_IF_FAIL(check_null_or_empty(primary_id, _trace_logger.get(), status));
+  RETURN_IF_FAIL(check_null_or_empty(secondary_id, _trace_logger.get(), status));
+  if (_watchdog.has_background_error_been_reported())
+  {
+    RETURN_ERROR_LS(_trace_logger.get(), status, unhandled_background_error_occurred);
+  }
   return error_code::success;
 }
 
@@ -682,13 +693,13 @@ int live_model_impl::request_episodic_decision(const char* event_id, const char*
 
   RETURN_IF_FAIL(episode.update(event_id, previous_id, context_json, resp, status));
 
-  if (episode.size() == 1)
-  {
-    // Log the episode id when starting a new episode
-    if (_episode_logger) { RETURN_IF_FAIL(_episode_logger->log(episode.get_episode_id(), status)); }
-  }
   if (_interaction_logger)
   {
+    if (episode.size() == 1)
+    {
+      // Log the episode id when starting a new episode
+      RETURN_IF_FAIL(_episode_logger->log(episode.get_episode_id(), status));
+    }
     RETURN_IF_FAIL(
         _interaction_logger->log(episode.get_episode_id(), previous_id, context_patched.c_str(), flags, resp, status));
   }
