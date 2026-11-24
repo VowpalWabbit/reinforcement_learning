@@ -1,4 +1,6 @@
 // EventHubInteraction Schema used by FlatBuffer
+include "LearningModeType.fbs";
+
 namespace reinforcement_learning.messages.flatbuff.v2;
 
 table CaEvent {
@@ -7,6 +9,7 @@ table CaEvent {
     context:[ubyte];          // context
     pdf_value:float;          // pdf_value at chosen location
     model_id:string;          // model ID
+    learning_mode:LearningModeType;  // decision mode used to determine rank behavior
 }
 
 root_type CaEvent;

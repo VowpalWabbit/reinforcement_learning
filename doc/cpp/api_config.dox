@@ -35,4 +35,10 @@ Initialize a configuration from a json string:
 
 Instantiate Inference API using config:
 \snippet examples/basic_usage_cpp/basic_usage_cpp.cc (1) Instantiate Inference API using config
+
+HTTP requests use the \c http.timeout setting, in seconds. The default is 30 seconds.
+Positive values up to \c INT_MAX / 1000 seconds are accepted, including values above
+30 such as 120 seconds. This bound ensures the timeout fits in signed integer
+milliseconds used by HTTP backends (2147483 seconds, about 24.8 days, for a 32-bit
+\c int). Zero, negative, non-numeric, and above-bound values use the default timeout.
 */

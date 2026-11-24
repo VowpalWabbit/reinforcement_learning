@@ -1,0 +1,39 @@
+# This file contains header definitions applicable to Win32
+
+# This is largely a copy of the same file under ext_libs/vowpal_wabbit/cmake/platforms, but does
+# not include the .NET bit, as we use the CMake custom command infrastructure to drive building
+# .NET, due to lack of CMake support for .NET on non-Windows generators.
+
+# TODO: Share this file with VW
+
+if(WIN32)
+  # TODO: Enable building .NET bindings via CMake on Linux 
+  option(rlclientlib_BUILD_DOTNET "Build .NET bindings" ON)
+  option(rlclientlib_DOTNET_USE_MSPROJECT "[Experimental] Use import_external_msproject to build .NET csproj files." OFF)
+
+  if (rlclientlib_BUILD_DOTNET)
+    cmake_minimum_required(VERSION 3.14)
+    
+    # The MSBuild system does not get properly enlightened to C++/CLI projects (for chaining dependencies) when
+    # set up through CMake (TODO: How to fix this?). This makes it so native dependencies of the underlying VW
+    # native library do not get passed through the project reference properly. The fix is to do the same as on
+    # windows and redirect all targets to the same place.
+    SET(rlclientlib_win32_CMAKE_RUNTIME_OUTPUT_DIRECTORY_backup ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+    if (rlclientlib_DOTNET_USE_MSPROJECT)
+      SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/binaries/x64")
+    else()
+      SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/binaries/")
+    endif()
+
+    if(NOT TARGET launch_vs)
+      add_custom_target(launch_vs COMMAND set "BinaryOutputBase=${CMAKE_BINARY_DIR}/binaries" && start "${CMAKE_CACHEFILE_DIR}/reinforcement_learning.sln")
+    endif()
+  else()
+    if(NOT TARGET launch_vs)
+      add_custom_target(launch_vs COMMAND start "${CMAKE_CACHEFILE_DIR}/reinforcement_learning.sln")
+    endif()
+  endif()
+else()
+  message(FATAL_ERROR "Loading Win32-specific configuration under a non-Win32 build.")
+endif()

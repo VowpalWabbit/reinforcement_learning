@@ -1,0 +1,12 @@
+{
+    "ApplicationID": "testclient",
+    "interaction.sender.implementation": "INTERACTION_FILE_SENDER",
+    "observation.sender.implementation": "OBSERVATION_FILE_SENDER",
+    "interaction.file.name": "interaction.fbs",
+    "observation.file.name": "observation.fbs",
+    "IsExplorationEnabled": true,
+    "InitialExplorationEpsilon": 1.0,
+    "LearningMode": "Online",
+    "model.source": "FILE_MODEL_DATA",
+    "protocol.version":"2"
+}

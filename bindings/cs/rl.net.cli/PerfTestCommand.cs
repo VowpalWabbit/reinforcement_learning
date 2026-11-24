@@ -36,6 +36,9 @@ namespace Rl.Net.Cli
         [Option(longName: "parallelism", shortName: 'p', HelpText = "Degree of parallelism to use. Use 0 to use all available processors", Required = false, Default = 1)]
         public int Parallelism { get; set; }
 
+        [Option(longName: "filePath", HelpText = "DsJson file path to test from", Required = false, Default = "")]
+        public string FilePath { get; set; }
+
         public override void Run()
         {
             Console.WriteLine("The number of processors on this computer is {0}.", Environment.ProcessorCount);
@@ -64,13 +67,23 @@ namespace Rl.Net.Cli
         private PerfTestStepProvider DoWork(string tag)
         {
             LiveModel liveModel = Helpers.CreateLiveModelOrExit(this.ConfigPath);
-
-            PerfTestStepProvider stepProvider = new PerfTestStepProvider(this.ActionsCount, this.SharedFeatures, this.ActionFeatures, this.NumSlots)
+            PerfTestStepProvider stepProvider;
+            if (this.FilePath != "")
             {
-                Duration = TimeSpan.FromMilliseconds(this.DurationMs),
-                Tag = tag,
-                DataSize = this.DataSize * 1024 * 1024 * 1024 / this.Parallelism
-            };
+                stepProvider = new PerfTestStepProvider(this.FilePath)
+                {
+                    Tag = tag,
+                };
+            }
+            else
+            {
+                stepProvider = new PerfTestStepProvider(this.ActionsCount, this.SharedFeatures, this.ActionFeatures, this.NumSlots)
+                {
+                    Duration = TimeSpan.FromMilliseconds(this.DurationMs),
+                    Tag = tag,
+                    DataSize = this.DataSize * 1024 * 1024 * 1024 / this.Parallelism
+                };
+            }
 
             Console.WriteLine(stepProvider.DataSize);
             RLDriver rlDriver = new RLDriver(liveModel, loopKind: this.GetLoopKind())

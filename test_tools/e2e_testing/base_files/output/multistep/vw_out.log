@@ -1,0 +1,34 @@
+creating quadratic features for pairs: ::
+[warning] Any duplicate namespace interactions will be removed
+You can use --leave_duplicate_interactions to disable this behaviour.
+using no cache
+Reading datafile = merged.fbs
+num sources = 1
+Num weight bits = 18
+learning rate = 0.001
+initial_t = 0
+power_t = 0
+cb_type = mtr
+Enabled reductions: gd, generate_interactions, scorer-identity, csoaa_ldf-rank, cb_adf, cb_explore_adf_greedy, shared_feature_merger
+Input label = cb
+Output pred = action_probs
+average  since         example        example        current        current  current
+loss     last          counter         weight          label        predict features
+0.000000 0.000000            1            1.0       3:-0:0.2          0:0.2      140
+0.000000 0.000000            2            2.0       0:-0:0.2          0:0.2      140
+0.000000 0.000000            4            4.0       2:-0:0.2          0:0.2      140
+0.000000 0.000000            8            8.0       4:-0:0.2          0:0.2      140
+0.000000 0.000000           16           16.0       3:-0:0.2          0:0.2      140
+-0.05000 -0.10000           32           32.0       2:-0:0.2         0:0.44      140
+-0.09375 -0.13750           64           64.0       0:-0:0.2         1:0.84      140
+-0.16250 -0.23125          128          128.0       3:-0:0.2         1:0.84      140
+-0.18906 -0.21562          256          256.0       1:-0:0.2         0:0.84      140
+-0.20468 -0.22031          512          512.0       0:-0:0.2         1:0.84      140
+-0.24531 -0.28593         1024         1024.0       4:-0:0.2         1:0.84      140
+
+finished run
+number of examples = 2000
+weighted example sum = 2000.000000
+weighted label sum = 0.000000
+average loss = -0.284400
+total feature number = 280000

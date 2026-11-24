@@ -30,6 +30,11 @@ namespace Rl.Net.Cli
             get;
         }
 
+        string CcbContext
+        {
+            get;
+        }
+
         string SlatesContext
         {
             get;
@@ -37,6 +42,14 @@ namespace Rl.Net.Cli
 
         string ContinuousActionContext
         {
+            get;
+        }
+
+        ActionFlags DecisionFlags
+        {
+            get;
+        }
+        bool IsStepActivated {
             get;
         }
 
@@ -85,7 +98,7 @@ namespace Rl.Net.Cli
         bool TryQueueOutcomeEvent(RunContext runContext, string eventId, string slotId, TOutcome outcome);
     }
 
-    public class RLDriver : IOutcomeReporter<float>, IOutcomeReporter<string>
+    public class RLDriver : IOutcomeReporter<float>, IOutcomeReporter<float?>, IOutcomeReporter<string>
     {
         private LiveModel liveModel;
         private LoopKind loopKind;
@@ -148,6 +161,16 @@ namespace Rl.Net.Cli
             return this.liveModel.TryQueueOutcomeEvent(eventId, slotId, outcome, runContext.ApiStatusContainer);
         }
 
+        bool IOutcomeReporter<float?>.TryQueueOutcomeEvent(RunContext runContext, string eventId, float? outcome)
+        {
+            return this.liveModel.TryQueueOutcomeEvent(eventId, outcome.Value, runContext.ApiStatusContainer);
+        }
+
+        bool IOutcomeReporter<float?>.TryQueueOutcomeEvent(RunContext runContext, string eventId, string slotId, float? outcome)
+        {
+            return this.liveModel.TryQueueOutcomeEvent(eventId, slotId, outcome.Value, runContext.ApiStatusContainer);
+        }
+
         private void Step<TOutcome>(RunContext runContext, IOutcomeReporter<TOutcome> outcomeReporter, IStepContext<TOutcome> step)
         {
             string eventId = step.EventId;
@@ -184,7 +207,7 @@ namespace Rl.Net.Cli
             }
             else if (loopKind == LoopKind.CCB)
             {
-                if (!liveModel.TryRequestDecision(step.DecisionContext, runContext.DecisionResponseContainer, runContext.ApiStatusContainer))
+                if (!liveModel.TryRequestDecision(step.CcbContext, runContext.DecisionResponseContainer, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
                 }
@@ -202,7 +225,7 @@ namespace Rl.Net.Cli
             }
             else if (loopKind == LoopKind.CCBv2)
             {
-                if (!liveModel.TryRequestMultiSlotDecisionDetailed(eventId, step.DecisionContext, runContext.MultiSlotResponseDetailedContainer, runContext.ApiStatusContainer))
+                if (!liveModel.TryRequestMultiSlotDecisionDetailed(eventId, step.CcbContext, runContext.MultiSlotResponseDetailedContainer, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
                 }
@@ -218,7 +241,8 @@ namespace Rl.Net.Cli
             }
             else
             {
-                if (!liveModel.TryChooseRank(eventId, step.DecisionContext, runContext.ResponseContainer, runContext.ApiStatusContainer))
+                var flags = step.DecisionFlags;
+                if (!liveModel.TryChooseRank(eventId, step.DecisionContext, flags, runContext.ResponseContainer, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
                 }
@@ -227,6 +251,14 @@ namespace Rl.Net.Cli
                 if (!runContext.ResponseContainer.TryGetChosenAction(out actionIndex, runContext.ApiStatusContainer))
                 {
                     this.SafeRaiseError(runContext.ApiStatusContainer);
+                }
+
+                if(flags.HasFlag(ActionFlags.Deferred) && step.IsStepActivated)
+                {
+                    if (!this.liveModel.TryQueueActionTakenEvent(eventId, runContext.ApiStatusContainer))
+                    {
+                        this.SafeRaiseError(runContext.ApiStatusContainer);
+                    }
                 }
 
                 outcome = step.GetOutcome(actionIndex, runContext.ResponseContainer.AsEnumerable());

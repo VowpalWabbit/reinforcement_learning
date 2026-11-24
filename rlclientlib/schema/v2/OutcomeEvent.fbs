@@ -20,6 +20,8 @@ union IndexValue {
   literal: string
 }
 
+// both value and index are optional
+// OutcomeEvent can be used to indicate activation
 table OutcomeEvent {
   value: OutcomeValue;
   index: IndexValue;

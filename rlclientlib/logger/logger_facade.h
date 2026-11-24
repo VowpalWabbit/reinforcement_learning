@@ -3,117 +3,140 @@
 #include "api_status.h"
 #include "configuration.h"
 #include "constants.h"
-#include "learning_mode.h"
-#include "ranking_response.h"
 #include "error_callback_fn.h"
+#include "event_logger.h"
+#include "learning_mode.h"
+#include "logger/logger_extensions.h"
+#include "message_sender.h"
+#include "model_mgmt.h"
+#include "ranking_response.h"
+#include "serialization/payload_serializer.h"
+#include "time_helper.h"
 #include "utility/watchdog.h"
 
-#include "message_sender.h"
-#include "time_helper.h"
-
-#include "event_logger.h"
-#include "model_mgmt.h"
-
-#include "serialization/payload_serializer.h"
+#include <functional>
+#include <memory>
 
 namespace reinforcement_learning
 {
-  namespace logger {
-    class i_logger_extensions {
-    protected:
-      const utility::configuration& _config;
-    public:
-      i_logger_extensions(const utility::configuration&);
+namespace logger
+{
+class interaction_logger_facade
+{
+public:
+  interaction_logger_facade(reinforcement_learning::model_management::model_type_t model_type,
+      const utility::configuration& c, std::unique_ptr<i_message_sender> sender, utility::watchdog& watchdog,
+      std::unique_ptr<i_time_provider> time_provider, i_logger_extensions& logger_extensions,
+      error_callback_fn* perror_cb = nullptr);
 
-      virtual ~i_logger_extensions();
+  interaction_logger_facade(const interaction_logger_facade& other) = delete;
+  interaction_logger_facade& operator=(const interaction_logger_facade& other) = delete;
+  interaction_logger_facade(interaction_logger_facade&& other) = delete;
+  interaction_logger_facade& operator=(interaction_logger_facade&& other) = delete;
 
-      virtual bool is_object_extraction_enabled() const = 0;
-      virtual bool is_serialization_transform_enabled() const = 0;
+  ~interaction_logger_facade() = default;
 
-      virtual i_async_batcher<generic_event>* create_batcher(i_message_sender* sender, utility::watchdog& watchdog, error_callback_fn* perror_cb, const char* section) = 0;
-      virtual int transform_payload_and_extract_objects(const char* context, std::string& edited_payload, generic_event::object_list_t& objects, api_status* status) = 0;
-      virtual int transform_serialized_payload(generic_event::payload_buffer_t& input, event_content_type &content_type, api_status* status) const = 0;
+  int init(api_status* status);
 
-      static i_logger_extensions* get_extensions(const utility::configuration& config, i_time_provider* time_provider);
-    };
+  // CB v1/v2
+  int log(string_view context, unsigned int flags, const ranking_response& response, api_status* status,
+      learning_mode learning_mode = ONLINE);
 
-    class interaction_logger_facade {
-    public:
-      interaction_logger_facade(reinforcement_learning::model_management::model_type_t model_type,
-        const utility::configuration& c, i_message_sender* sender, utility::watchdog& watchdog,
-        i_time_provider* time_provider, i_logger_extensions& ext, error_callback_fn* perror_cb = nullptr);
+  int log_decisions(std::vector<const char*>& event_ids, string_view context, unsigned int flags,
+      const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs,
+      const std::string& model_version, api_status* status);
 
-      interaction_logger_facade(const interaction_logger_facade& other) = delete;
-      interaction_logger_facade& operator=(const interaction_logger_facade& other) = delete;
-      interaction_logger_facade(interaction_logger_facade&& other) = delete;
-      interaction_logger_facade& operator=(interaction_logger_facade&& other) = delete;
+  // Multislot (Slates v1/v2 + CCB v2)
+  int log_decision(const std::string& event_id, string_view context, unsigned int flags,
+      const std::vector<std::vector<uint32_t>>& action_ids, const std::vector<std::vector<float>>& pdfs,
+      const std::string& model_version, const std::vector<std::string>& slot_ids, api_status* status,
+      const std::vector<int>& baseline_actions, learning_mode learning_mode = ONLINE);
 
-      ~interaction_logger_facade() = default;
+  // Continuous
+  int log_continuous_action(
+      string_view context, unsigned int flags, const continuous_action_response& response, api_status* status);
 
-      int init(api_status* status);
+  // Multistep
+  int log(const char* episode_id, const char* previous_id, string_view context, unsigned int flags,
+      const ranking_response& response, api_status* status);
 
-      //CB v1/v2
-      int log(const char* context, unsigned int flags, const ranking_response& response, api_status* status, learning_mode learning_mode = ONLINE);
+private:
+  const reinforcement_learning::model_management::model_type_t _model_type;
+  const int _version;
+  int _serializer_shared_state;
+  // _logger_extensions is owned by live_model_impl
+  i_logger_extensions& _logger_extensions;
 
-      //CCB v1
-      int log_decisions(std::vector<const char*>& event_ids, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
-        const std::vector<std::vector<float>>& pdfs, const std::string& model_version, api_status* status);
+  const std::unique_ptr<interaction_logger> _v1_cb;
+  const std::unique_ptr<ccb_logger> _v1_ccb;
+  const std::unique_ptr<multi_slot_logger> _v1_multislot;
 
-      //Multislot (Slates v1/v2 + CCB v2)
-      int log_decision(const std::string& event_id, const char* context, unsigned int flags, const std::vector<std::vector<uint32_t>>& action_ids,
-        const std::vector<std::vector<float>>& pdfs, const std::string& model_version, const std::vector<std::string>& slot_ids, api_status* status, const std::vector<int>& baseline_actions, learning_mode learning_mode = ONLINE);
+  const std::unique_ptr<generic_event_logger> _v2;
 
-      //Continuous
-      int log_continuous_action(const char* context, unsigned int flags, const continuous_action_response& response, api_status* status);
+  const cb_serializer _serializer_cb;
+  const multi_slot_serializer _serializer_multislot;
+  const ca_serializer _serializer_ca;
+  const multistep_serializer _multistep_serializer;
+};
 
-    private:
-      const reinforcement_learning::model_management::model_type_t _model_type;
-      const int _version;
-      int _serializer_shared_state;
-      i_logger_extensions& _ext;
+class observation_logger_facade
+{
+public:
+  observation_logger_facade(const utility::configuration& c, std::unique_ptr<i_message_sender> sender,
+      utility::watchdog& watchdog, std::unique_ptr<i_time_provider> time_provider,
+      error_callback_fn* perror_cb = nullptr);
 
-      const std::unique_ptr<interaction_logger> _v1_cb;
-      const std::unique_ptr<ccb_logger> _v1_ccb;
-      const std::unique_ptr<multi_slot_logger> _v1_multislot;
+  observation_logger_facade(const observation_logger_facade& other) = delete;
+  observation_logger_facade& operator=(const observation_logger_facade& other) = delete;
+  observation_logger_facade(observation_logger_facade&& other) = delete;
+  observation_logger_facade& operator=(observation_logger_facade&& other) = delete;
 
-      const std::unique_ptr<generic_event_logger> _v2;
+  ~observation_logger_facade() = default;
 
-      const cb_serializer _serializer_cb;
-      const multi_slot_serializer _serializer_multislot;
-      const ca_serializer _serializer_ca;
+  int init(api_status* status);
 
-    };
+  int log(const char* event_id, float outcome, api_status* status);
+  int log(const char* event_id, const char* outcome, api_status* status);
 
-    class observation_logger_facade {
-    public:
-      observation_logger_facade(const utility::configuration& c,
-        i_message_sender* sender, utility::watchdog& watchdog, i_time_provider* time_provider, error_callback_fn* perror_cb = nullptr);
+  int log(const char* primary_id, int secondary_id, float outcome, api_status* status);
+  int log(const char* primary_id, int secondary_id, const char* outcome, api_status* status);
+  int log(const char* primary_id, const char* secondary_id, float outcome, api_status* status);
+  int log(const char* primary_id, const char* secondary_id, const char* outcome, api_status* status);
 
-      observation_logger_facade(const observation_logger_facade& other) = delete;
-      observation_logger_facade& operator=(const observation_logger_facade& other) = delete;
-      observation_logger_facade(observation_logger_facade&& other) = delete;
-      observation_logger_facade& operator=(observation_logger_facade&& other) = delete;
+  int report_action_taken(const char* event_id, api_status* status);
+  int report_action_taken(const char* primary_id, const char* secondary_id, api_status* status);
 
-      ~observation_logger_facade() = default;
+private:
+  const int _version;
+  int _serializer_shared_state;
+  const std::unique_ptr<observation_logger> _v1;
+  const std::unique_ptr<generic_event_logger> _v2;
+  const outcome_serializer _serializer;
+};
 
-      int init(api_status* status);
+class episode_logger_facade
+{
+public:
+  episode_logger_facade(const utility::configuration& c, std::unique_ptr<i_message_sender> sender,
+      utility::watchdog& watchdog, std::unique_ptr<i_time_provider> time_provider,
+      error_callback_fn* perror_cb = nullptr);
 
-      int log(const char* event_id, float outcome, api_status* status);
-      int log(const char* event_id, const char* outcome, api_status* status);
+  episode_logger_facade(const episode_logger_facade& other) = delete;
+  episode_logger_facade& operator=(const episode_logger_facade& other) = delete;
+  episode_logger_facade(episode_logger_facade&& other) = delete;
+  episode_logger_facade& operator=(episode_logger_facade&& other) = delete;
 
-      int log(const char* event_id, int index, float outcome, api_status* status);
-      int log(const char* event_id, int index, const char* outcome, api_status* status);
-      int log(const char* event_id, const char* index, float outcome, api_status* status);
-      int log(const char* event_id, const char* index, const char* outcome, api_status* status);
+  ~episode_logger_facade() = default;
 
-      int report_action_taken(const char* event_id, api_status* status);
+  int init(api_status* status);
 
-    private:
-      const int _version;
-      int _serializer_shared_state;
-      const std::unique_ptr<observation_logger> _v1;
-      const std::unique_ptr<generic_event_logger> _v2;
-      const outcome_serializer _serializer;
-    };
-  }
-}
+  int log(const char* episode_id, api_status* status);
+
+private:
+  const int _version;
+  int _serializer_shared_state;
+  const std::unique_ptr<generic_event_logger> _v2;
+  const episode_serializer _episode_serializer;
+};
+}  // namespace logger
+}  // namespace reinforcement_learning

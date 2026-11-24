@@ -1,66 +1,42 @@
 #include "model_mgmt.h"
 
-#include <new>
-#include <cstring>
+namespace reinforcement_learning
+{
+namespace model_management
+{
 
-namespace reinforcement_learning {
-  namespace model_management {
+char* model_data::data() { return _data.data(); }
+const char* model_data::data() const { return _data.data(); }
 
-    model_data::model_data() = default;
+void model_data::increment_refresh_count() { ++_refresh_count; }
 
-    model_data::~model_data() {
-      free();
-    }
+size_t model_data::data_sz() const { return _data.size(); }
 
-    char* model_data::data() const {
-      return _data;
-    }
+uint32_t model_data::refresh_count() const { return _refresh_count; }
 
-    void model_data::increment_refresh_count() {
-      ++_refresh_count;
-    }
+void model_data::data_sz(const size_t fillsz) { _data.resize(fillsz); }
 
-    size_t model_data::data_sz() const {
-      return _data_sz;
-    }
+char* model_data::alloc(const size_t desired)
+{
+  _data.clear();
+  _data.resize(desired);
+  return _data.data();
+}
 
-    uint32_t model_data::refresh_count() const {
-      return _refresh_count;
-    }
+void model_data::free() { _data.clear(); }
 
-    void model_data::data_sz(const size_t fillsz) {
-      _data_sz = fillsz;
-    }
+int model_data::set_data(const char* vw_model, size_t len)
+{
+  if (vw_model == nullptr || len == 0) { return reinforcement_learning::error_code::static_model_load_error; }
 
-    char* model_data::alloc(const size_t desired) {
-      free();
-      _data = new(std::nothrow) char[desired];
-      _data_sz = (_data == nullptr) ? 0 : desired;
-      return _data;
-    }
+  char* buffer = this->alloc(len);
+  if (buffer == nullptr) { return reinforcement_learning::error_code::static_model_load_error; }
 
-    void model_data::free() {
-      if (_data != nullptr) {
-        delete[] _data;
-        _data = nullptr;
-      }
-      _data_sz = 0;
-    }
+  memcpy(buffer, vw_model, len);
+  this->data_sz(len);
 
-    model_data::model_data(model_data const& other) {
-      *this = other;
-    }
+  return reinforcement_learning::error_code::success;
+}
 
-    model_data& model_data::operator=(model_data const& other) {
-      if (this != &other) {
-        // alloc will free an existing buffer, alloc the required size and set the _data_sz property.
-        _data = alloc(other._data_sz);
-        _refresh_count = other._refresh_count;
-
-        // Copy the contents of the other buffer to this object.
-        std::memcpy(_data, other._data, _data_sz);
-      }
-
-      return *this;
-    }
-}}
+}  // namespace model_management
+}  // namespace reinforcement_learning
