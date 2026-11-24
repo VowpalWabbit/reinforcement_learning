@@ -62,6 +62,8 @@ ctest --test-dir build --verbose --output-on-failure --no-tests=error
 
 These presets instrument the sources built by this repository, including VW;
 the standard vcpkg dependencies are not rebuilt with sanitizer instrumentation.
+The Windows job verifies that both test binaries import the ASan runtime before
+running them.
 
 ## Alternative system-specific build instructions
 ### Ubuntu
