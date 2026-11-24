@@ -36,6 +36,21 @@ Initialize a configuration from a json string:
 Instantiate Inference API using config:
 \snippet examples/basic_usage_cpp/basic_usage_cpp.cc (1) Instantiate Inference API using config
 
+Event logging is enabled by default. Set \c event.logging.enabled to \c false
+before initializing the client to run inference without interaction, observation,
+or episode logging. Event senders, serializers, queues, and their background
+workers are not initialized, so event sender credentials and destinations are
+not required. This differs from sending events to a file or a null destination,
+which still performs event serialization and batching.
+
+Decisions and episode history are still produced. Valid \c report_outcome and
+\c report_action_taken calls succeed without submitting events; invalid arguments
+and model background errors are still reported. Trace logging and VW audit output
+remain independently configured. Model loading, model refresh, and learning-mode
+action selection are unchanged. This setting
+does not provide a replacement training-event stream: applications that need
+online learning must keep event logging enabled.
+
 HTTP requests use the \c http.timeout setting, in seconds. The default is 30 seconds.
 Positive values up to \c INT_MAX / 1000 seconds are accepted, including values above
 30 such as 120 seconds. This bound ensures the timeout fits in signed integer
