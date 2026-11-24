@@ -13,9 +13,9 @@ concurrency:
 
 jobs:
   LatestVW_RLClientLib:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Update VW to latest
@@ -25,40 +25,26 @@ jobs:
           git config --global --add safe.directory "$(pwd)"
           git fetch origin master
           git reset --hard origin/master
+          git submodule update --init --recursive
           popd
-      - uses: lukka/get-cmake@latest
-      - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
-        shell: bash
-      - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-      - uses: actions/cache@v3
-        env:
-          cache-name: vcpkg-cache
-        with:
-          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
-          key: ubuntu-latest-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
-      - uses: lukka/run-vcpkg@v10
-        with:
-          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
-          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
+      - uses: ./.github/actions/setup-build
       - name: Configure
         run: >
           cmake -S . -B build -G Ninja
-          -DCMAKE_BUILD_TYPE=Debug
+          --preset vcpkg-debug
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
-          -DFMT_SYS_DEP=ON
-          -DSPDLOG_SYS_DEP=ON
       - name: Build
         run: |
           cmake --build build
       - name: Test
         run: |
           cd build
-          ctest --verbose --output-on-failure
+          ctest --verbose --output-on-failure --no-tests=error
 
   LatestVW_BinaryParser:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Update VW to latest
@@ -68,25 +54,12 @@ jobs:
           git config --global --add safe.directory "$(pwd)"
           git fetch origin master
           git reset --hard origin/master
+          git submodule update --init --recursive
           popd
-      - uses: lukka/get-cmake@latest
-      - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
-        shell: bash
-      - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-      - uses: actions/cache@v3
-        env:
-          cache-name: vcpkg-cache
-        with:
-          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
-          key: ubuntu-latest-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
-      - uses: lukka/run-vcpkg@v10
-        with:
-          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
-          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
+      - uses: ./.github/actions/setup-build
       - name: Configure
         run: >
-          cd external_parser;
-          cmake -S . -B build -G Ninja
+          cmake -S external_parser -B external_parser/build -G Ninja
           -DCMAKE_BUILD_TYPE=Debug
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
           -DVCPKG_MANIFEST_DIR="${{ github.workspace }}"
@@ -94,6 +67,10 @@ jobs:
           -Wno-deprecated
           -DFMT_SYS_DEP=ON
           -DSPDLOG_SYS_DEP=ON
+          -DRAPIDJSON_SYS_DEP=ON
+          -DVW_ZLIB_SYS_DEP=ON
+          -DVW_BOOST_MATH_SYS_DEP=ON
+          -DVW_GTEST_SYS_DEP=ON
       - name: Build
         run: |
           cd external_parser
@@ -101,4 +78,4 @@ jobs:
       - name: Test
         run: |
           cd external_parser/build
-          ctest --verbose --output-on-failure
+          ctest --verbose --output-on-failure --no-tests=error

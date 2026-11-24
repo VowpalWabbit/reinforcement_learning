@@ -423,22 +423,12 @@ def dump_file(f, verbose=False):
         dump_preamble_file(f, buf)
 
 
-# Generate FB serializers if they are not available
-try:
-    import reinforcement_learning.messages.flatbuff.v2.EventBatch
-except Exception as e:
-    import pathlib
-    import subprocess
+from pathlib import Path
 
-    script_dir = pathlib.Path(__file__).parent.absolute()
-    input_dir = (
-        pathlib.Path(script_dir).parents[1].joinpath("rlclientlib", "schema", "v2")
-    )
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from generate_flatbuffers import ensure_flatbuffer_bindings
 
-    input_files = " ".join([str(x) for x in input_dir.glob("*.fbs")])
-    subprocess.run(
-        f"flatc --python {input_files}", cwd=script_dir, shell=True, check=True
-    )
+ensure_flatbuffer_bindings(Path(__file__).resolve().parent)
 
 
 # must be done after the above that generates the classes we're importing

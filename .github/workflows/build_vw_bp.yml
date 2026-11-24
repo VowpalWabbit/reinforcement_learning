@@ -18,15 +18,15 @@ concurrency:
 
 jobs:
   build-binary-parser:
-    name: binary-parser-${{ matrix.build.build_type }}-${{ matrix.config.os }}
+    name: binary-parser-${{ matrix.build.build_type }}-${{ startsWith(matrix.config.os, 'ubuntu') && 'ubuntu-latest' || startsWith(matrix.config.os, 'windows') && 'windows-latest' || startsWith(matrix.config.os, 'macos') && 'macos-latest' || matrix.config.os }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
         config:
-          - { os: "windows-latest", vcpkg_target_triplet: "x64-windows-static" }
-          - { os: "ubuntu-latest", vcpkg_target_triplet: "x64-linux" }
-          - { os: "macos-latest", vcpkg_target_triplet: "x64-osx" }
+          - { os: "windows-2022", vcpkg_target_triplet: "x64-windows-static" }
+          - { os: "ubuntu-22.04", vcpkg_target_triplet: "x64-linux" }
+          - { os: "macos-15-intel", vcpkg_target_triplet: "x64-osx" }
         build:
           # Set the appropriate static runtime for MSVC on Windows
           # CMake ignores the CMAKE_MSVC_RUNTIME_LIBRARY option on other platforms
@@ -35,30 +35,21 @@ jobs:
     env:
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.config.vcpkg_target_triplet }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Enable long paths before recursive checkout
+        if: runner.os == 'Windows'
+        run: git config --global core.longpaths true
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Setup MSVC Developer Command Prompt
         if: ${{ startsWith(matrix.config.os, 'windows') }}
         uses: ilammy/msvc-dev-cmd@v1
-      - uses: lukka/get-cmake@latest
-      - run: echo "VCPKG_COMMIT=$(git rev-parse :ext_libs/vcpkg)" >> $GITHUB_ENV
-        shell: bash
-      - run: mkdir -p ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
-      - uses: actions/cache@v3
-        env:
-          cache-name: vcpkg-cache
+      - uses: ./.github/actions/setup-build
         with:
-          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}/*
-          key: ${{ matrix.config.os }}-build-${{ env.cache-name }}-${{ hashFiles('vcpkg.json') }}-${{ env.VCPKG_COMMIT }}"
-      - uses: lukka/run-vcpkg@v10
-        with:
-          vcpkgDirectory: '${{ github.workspace }}/ext_libs/vcpkg'
-          vcpkgJsonGlob: "${{ github.workspace }}/vcpkg.json"
+          cache-key: ${{ matrix.build.build_type }}-${{ matrix.config.vcpkg_target_triplet }}
       - name: Configure
         run: >
-          cd external_parser;
-          cmake -S . -B build -G Ninja
+          cmake -S external_parser -B external_parser/build -G Ninja
           -DCMAKE_BUILD_TYPE=${{ matrix.build.build_type }}
           -DCMAKE_MSVC_RUNTIME_LIBRARY=${{ matrix.build.msvc_runtime }}
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/ext_libs/vcpkg/scripts/buildsystems/vcpkg.cmake"
@@ -69,6 +60,10 @@ jobs:
           -Wno-deprecated
           -DFMT_SYS_DEP=ON
           -DSPDLOG_SYS_DEP=ON
+          -DRAPIDJSON_SYS_DEP=ON
+          -DVW_ZLIB_SYS_DEP=ON
+          -DVW_BOOST_MATH_SYS_DEP=ON
+          -DVW_GTEST_SYS_DEP=ON
       - name: Build
         run: |
           cd external_parser
@@ -76,12 +71,12 @@ jobs:
       - name: Test
         run: |
           cd external_parser/build
-          ctest --verbose --output-on-failure
+          ctest --verbose --output-on-failure --no-tests=error
       - name: Test binary parser VW executable
         run: |
           cd external_parser/build
           ./vw --extra_metrics metrics.json -d ../unit_tests/test_files/valid_joined_logs/cb_simple.log --binary_parser --cb_explore_adf
-          python3 -m json.tool metrics.json
+          python -m json.tool metrics.json
       - name: Test with Valgrind
         if: ${{ startsWith(matrix.config.os, 'ubuntu') }}
         run: |

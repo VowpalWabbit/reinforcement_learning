@@ -1,5 +1,6 @@
 set(rl_net_native_SOURCES
   binding_sender.cc
+  binding_static_model.cc
   binding_tracer.cc
   rl.net.api_status.cc
   rl.net.buffer.cc
@@ -22,6 +23,7 @@ set(rl_net_native_SOURCES
 
 set(rl_net_native_HEADERS
   binding_sender.h
+  binding_static_model.h
   binding_tracer.h
   rl.net.api_status.h
   rl.net.loop_context.h
@@ -42,6 +44,15 @@ set(rl_net_native_HEADERS
   rl.net.slates_loop.h
   rl.net.slot_ranking.h
 )
+
+if(RL_LINK_AZURE_LIBS)
+  list(APPEND rl_net_native_HEADERS
+    rl.net.azure_factories.h
+  )
+  list(APPEND rl_net_native_SOURCES
+    rl.net.azure_factories.cc
+  )
+endif()
 
 source_group("Sources" FILES ${rl_net_native_SOURCES})
 source_group("Headers" FILES ${rl_net_native_HEADERS})

@@ -54,12 +54,11 @@ class CMakeBuild(build_ext):
         # Can be set with Conda-Build, for example.
         cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
 
-        # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
         # EXAMPLE_VERSION_INFO shows you how to pass a value into the C++ code
         # from Python.
         cmake_args = [
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={}".format(extdir),
-            "-DPYTHON_EXECUTABLE={}".format(sys.executable),
+            "-DPython_EXECUTABLE={}".format(sys.executable),
             "-DCMAKE_BUILD_TYPE={}".format(cfg),  # not used on MSVC, but no harm
             "-DRL_BUILD_PYTHON=On",
             "-DRL_STATIC_DEPS=On",
@@ -134,6 +133,7 @@ setup(
     version="0.1.3",
     url="https://github.com/VowpalWabbit/reinforcement_learning",
     description="Python binding for reinforcement learning client library",
+    python_requires=">=3.6",
     long_description="",
     license="MIT",
     ext_modules=[CMakeExtension("rl_client")],

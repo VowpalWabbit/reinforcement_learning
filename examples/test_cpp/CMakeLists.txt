@@ -10,3 +10,9 @@ add_executable(rl_test.out
 target_include_directories(rl_test.out PRIVATE $<TARGET_PROPERTY:rlclientlib,INCLUDE_DIRECTORIES>)
 
 target_link_libraries(rl_test.out PRIVATE Boost::program_options rlclientlib)
+
+if(RL_LINK_AZURE_LIBS)
+  target_compile_definitions(rl_test.out PRIVATE LINK_AZURE_LIBS)
+  find_package(azure-identity-cpp CONFIG REQUIRED)
+  target_link_libraries(rl_test.out PRIVATE Azure::azure-identity)
+endif()

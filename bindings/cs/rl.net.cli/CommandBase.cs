@@ -7,6 +7,9 @@ namespace Rl.Net.Cli
         [Option(longName: "config", HelpText = "the path to client config", Required = true)]
         public string ConfigPath { get; set; }
 
+        [Option(longName: "model", HelpText = "the path to model file", Required = false)]
+        public string ModelPath { get; set; }
+
         [Option(longName: "slates", HelpText = "Use slates for decisions", Required = false, Default = false)]
         public bool UseSlates { get; set; }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Rl.Net
 {
@@ -8,6 +9,8 @@ namespace Rl.Net
         {
             public delegate void managed_background_error_callback_t(IntPtr apiStatus);
             public delegate void managed_trace_callback_t(int logLevel, IntPtr msgUtf8Ptr);
+            public delegate int managed_oauth_callback_t(IntPtr scopes, IntPtr tokenOutPtr, IntPtr unixTimestamp);
+            public delegate void managed_oauth_callback_t_complete_t(IntPtr tokenStringToFree, int errorCode);
         }
     }
 }

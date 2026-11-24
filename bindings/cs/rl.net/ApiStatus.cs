@@ -8,22 +8,22 @@ using System.Text;
 namespace Rl.Net {
     public sealed class ApiStatus : NativeObject<ApiStatus>
     {
-        [DllImport("rlnetnative")]
+        [DllImport(NativeImports.RLNETNATIVE)]
         private static extern IntPtr CreateApiStatus();
 
-        [DllImport("rlnetnative")]
+        [DllImport(NativeImports.RLNETNATIVE)]
         private static extern void DeleteApiStatus(IntPtr config);
 
-        [DllImport("rlnetnative")]
+        [DllImport(NativeImports.RLNETNATIVE)]
         private static extern IntPtr GetApiStatusErrorMessage(IntPtr status);
 
-        [DllImport("rlnetnative")]
+        [DllImport(NativeImports.RLNETNATIVE)]
         private static extern int GetApiStatusErrorCode(IntPtr status);
 
-        [DllImport("rlnetnative")]
+        [DllImport(NativeImports.RLNETNATIVE)]
         private static extern void UpdateApiStatusSafe(IntPtr status, int error_code, IntPtr message);
 
-        [DllImport("rlnetnative")]
+        [DllImport(NativeImports.RLNETNATIVE)]
         private static extern void ClearApiStatusSafe(IntPtr status);
 
         public ApiStatus() : base(new New<ApiStatus>(CreateApiStatus), new Delete<ApiStatus>(DeleteApiStatus))

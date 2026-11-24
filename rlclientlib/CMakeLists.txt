@@ -107,6 +107,7 @@ if(vw_USE_AZURE_FACTORIES)
   list(APPEND PROJECT_SOURCES
     azure_factories.cc
     model_mgmt/restapi_data_transport.cc
+    model_mgmt/restapi_data_transport_oauth.cc
     utility/eventhub_http_authorization.cc
     utility/header_authorization.cc
     utility/http_client.cc
@@ -117,6 +118,7 @@ endif()
 set(PROJECT_PUBLIC_HEADERS
   ../include/action_flags.h
   ../include/api_status.h
+  ../include/azure_credentials_provider.h
   ../include/loop_apis/base_loop.h
   ../include/loop_apis/ca_loop.h
   ../include/loop_apis/cb_loop.h
@@ -141,6 +143,7 @@ set(PROJECT_PUBLIC_HEADERS
   ../include/multi_slot_response_detailed.h
   ../include/multistep.h
   ../include/object_factory.h
+  ../include/oauth_callback_fn.h
   ../include/personalization.h
   ../include/ranking_response.h
   ../include/rl_string_view.h
@@ -186,10 +189,12 @@ if(vw_USE_AZURE_FACTORIES)
     azure_factories.h
     logger/http_transport_client.h
     model_mgmt/restapi_data_transport.h
+    model_mgmt/restapi_data_transport_oauth.h
     utility/eventhub_http_authorization.h
     utility/header_authorization.h
     utility/http_client.h
     utility/http_helper.h
+    utility/api_header_token.h
   )
 endif()
 
@@ -209,6 +214,11 @@ if(vw_USE_AZURE_FACTORIES)
   target_compile_definitions(rlclientlib PRIVATE USE_AZURE_FACTORIES)
 endif()
 
+if(RL_LINK_AZURE_LIBS)
+  target_compile_definitions(rlclientlib PRIVATE LINK_AZURE_LIBS)
+  find_package(azure-identity-cpp CONFIG REQUIRED)
+  target_link_libraries(rlclientlib PRIVATE Azure::azure-identity)
+endif()
 
 if(RL_USE_ZSTD)
   target_compile_definitions(rlclientlib PRIVATE USE_ZSTD)

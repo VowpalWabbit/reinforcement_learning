@@ -13,57 +13,70 @@ jobs:
   typecheck-build:
     name: lint.python.typecheck-build
     container:
-      image: vowpalwabbit/rlclientlib-manylinux2010-build:latest
-    runs-on: ubuntu-latest
+      image: quay.io/pypa/manylinux_2_28_x86_64@sha256:55a36963bc0504cdf004011001c1072306402f0b8b83be5a5eba7068f93eec53
+    runs-on: ubuntu-22.04
+    env:
+      VCPKG_DEFAULT_BINARY_CACHE: ${{github.workspace}}/vcpkg_binary_cache
     strategy:
+      fail-fast: false
       matrix:
         config:
         - { version: "3.9", base_path: /opt/python/cp39-cp39/, include_dir_name: python3.9/ }
+        - { version: "3.11", base_path: /opt/python/cp311-cp311/, include_dir_name: python3.11/ }
     steps:
-      # v1 must be used because newer versions require a node.js version that will not run on this old image.
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Install vcpkg build prerequisites
+        run: |
+          dnf install -y zip unzip curl tar perl-IPC-Cmd
+          perl -e 'use IPC::Cmd;'
+      - uses: ./.github/actions/setup-build
+        with:
+          cache-key: python-typecheck-${{ matrix.config.version }}
       - name: Build wheel
         shell: bash
-        run: |
-          ${{ matrix.config.base_path }}bin/pip wheel . -w wheel_output/ --verbose
-          auditwheel repair wheel_output/*whl -w audit_output/
+        env:
+          PYTHON: ${{ matrix.config.base_path }}bin/python
+        run: bash ./.scripts/linux/build-python-wheel.sh
       - name: Upload built wheel
-        # v1 must be used because newer versions require a node.js version that will not run on this old image.
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: wheel_${{ matrix.config.version }}
           path: audit_output/
+          if-no-files-found: error
   typecheck-check:
     name: lint.python.typecheck-check
     needs: typecheck-build
     container:
-      image: python:${{ matrix.config.version }}
-    runs-on: ubuntu-latest
+      image: python:${{ matrix.config.version }}-slim-bookworm
+    runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
         config:
         - { version: "3.9" }
+        - { version: "3.11" }
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
+      - uses: actions/checkout@v4
       - name: Download Wheel
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
           name: wheel_${{ matrix.config.version }}
+          path: ${{ github.workspace }}/wheel_${{ matrix.config.version }}
       - name: Install dependencies
         shell: bash
+        env:
+          PYTYPE_VERSION: ${{ matrix.config.version == '3.9' && '2024.4.11' || '2024.10.11' }}
         run: |
-          pip install pytype
+          python -m pip install "pytype==$PYTYPE_VERSION"
       - name: Install wheel
         shell: bash
         run: |
           export wheel_files=(wheel_${{ matrix.config.version }}/*)
           export wheel_file="${wheel_files[0]}"
           echo Installing ${wheel_file}...
-          pip install ${wheel_file}
+          python -m pip install "${wheel_file}"
       - name: Run pytype
         shell: bash
         run: |
@@ -73,31 +86,30 @@ jobs:
     name: lint.python.formatting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
+      - uses: actions/checkout@v4
       - name: Setup python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.9
-      - run: pip install black black[jupyter]
+          python-version: '3.11'
+      - run: pip install 'black[jupyter]==23.3.0'
       - name: Run python formatting
         shell: bash
         run: |
           python -m black --check . --exclude ext_libs/ || (echo -e "---\nTo fix, run:\n\tpython -m black . --exclude ext_libs"; exit 1)
   cpp-formatting:
     name: lint.c++.formatting
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      # Must use v1 or else git diff breaks
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          fetch-depth: 0
       - name: Install clang-format
         shell: bash
         run: |
           sudo apt update
-          sudo apt install clang-format
+          sudo apt install clang-format-14
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-14 100
+          sudo update-alternatives --install /usr/bin/clang-format-diff clang-format-diff /usr/bin/clang-format-diff-14 100
           clang-format --version
       - name: Check code formatting for codebase
         shell: bash
@@ -134,7 +146,7 @@ jobs:
       image: vowpalwabbit/ubuntu2004-dev:latest
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Install dependencies

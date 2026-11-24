@@ -10,16 +10,16 @@ namespace Rl.Net
         // The publics in this class are just a verbose, but jittably-efficient way of enabling overriding a native invocation
         internal static partial class NativeMethods
         {
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern IntPtr CreateCBLoop(IntPtr config, IntPtr factoryContext);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern void DeleteCBLoop(IntPtr cbLoop);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern int CBLoopInit(IntPtr cbLoop, IntPtr apiStatus);
 
-            [DllImport("rlnetnative", EntryPoint = "CBLoopChooseRank")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CBLoopChooseRank")]
             private static extern int CBLoopChooseRankNative(IntPtr cbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr rankingResponse, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, IntPtr, IntPtr, int> CBLoopChooseRankOverride { get; set; }
@@ -34,7 +34,7 @@ namespace Rl.Net
                 return CBLoopChooseRankNative(cbLoop, eventId, contextJson, contextJsonSize, rankingResponse, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CBLoopChooseRankWithFlags")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CBLoopChooseRankWithFlags")]
             private static extern int CBLoopChooseRankWithFlagsNative(IntPtr cbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr rankingResponse, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> CBLoopChooseRankWithFlagsOverride { get; set; }
@@ -49,7 +49,7 @@ namespace Rl.Net
                 return CBLoopChooseRankWithFlagsNative(cbLoop, eventId, contextJson, contextJsonSize, flags, rankingResponse, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CBLoopReportActionTaken")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CBLoopReportActionTaken")]
             private static extern int CBLoopReportActionTakenNative(IntPtr cbLoop, IntPtr eventId, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int> CBLoopReportActionTakenOverride { get; set; }
@@ -64,7 +64,7 @@ namespace Rl.Net
                 return CBLoopReportActionTakenNative(cbLoop, eventId, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CBLoopReportActionMultiIdTaken")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CBLoopReportActionMultiIdTaken")]
             private static extern int CBLoopReportActionTakenMultiIdNative(IntPtr cbLoop, IntPtr primaryId, IntPtr secondaryId, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> CBLoopReportActionTakenMultiIdOverride { get; set; }
@@ -79,7 +79,7 @@ namespace Rl.Net
                 return CBLoopReportActionTakenMultiIdNative(cbLoop, primaryId, secondaryId, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CBLoopReportOutcomeF")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CBLoopReportOutcomeF")]
             private static extern int CBLoopReportOutcomeFNative(IntPtr cbLoop, IntPtr eventId, float outcome, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, float, IntPtr, int> CBLoopReportOutcomeFOverride { get; set; }
@@ -94,7 +94,7 @@ namespace Rl.Net
                 return CBLoopReportOutcomeFNative(cbLoop, eventId, outcome, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CBLoopReportOutcomeJson")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CBLoopReportOutcomeJson")]
             private static extern int CBLoopReportOutcomeJsonNative(IntPtr cbLoop, IntPtr eventId, IntPtr outcomeJson, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> CBLoopReportOutcomeJsonOverride { get; set; }
@@ -109,13 +109,13 @@ namespace Rl.Net
                 return CBLoopReportOutcomeJsonNative(cbLoop, eventId, outcomeJson, apiStatus);
             }
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern int CBLoopRefreshModel(IntPtr cbLoop, IntPtr apiStatus);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern void CBLoopSetCallback(IntPtr cbLoop, [MarshalAs(UnmanagedType.FunctionPtr)] managed_background_error_callback_t callback = null);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern void CBLoopSetTrace(IntPtr cbLoop, [MarshalAs(UnmanagedType.FunctionPtr)] managed_trace_callback_t callback = null);
         }
     }

@@ -10,16 +10,16 @@ namespace Rl.Net
         // The publics in this class are just a verbose, but jittably-efficient way of enabling overriding a native invocation
         internal static partial class NativeMethods
         {
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern IntPtr CreateCCBLoop(IntPtr config, IntPtr factoryContext);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern void DeleteCCBLoop(IntPtr ccbLoop);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern int CCBLoopInit(IntPtr ccbLoop, IntPtr apiStatus);
 
-            [DllImport("rlnetnative", EntryPoint = "CCBLoopRequestDecision")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CCBLoopRequestDecision")]
             private static extern int CCBLoopRequestDecisionNative(IntPtr ccbLoop, IntPtr contextJson, int contextJsonSize, IntPtr decisionResponse, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, int, IntPtr, IntPtr, int> CCBLoopRequestDecisionOverride { get; set; }
@@ -34,7 +34,7 @@ namespace Rl.Net
                 return CCBLoopRequestDecisionNative(ccbLoop, contextJson, contextJsonSize, decisionResponse, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CCBLoopRequestDecisionWithFlags")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CCBLoopRequestDecisionWithFlags")]
             private static extern int CCBLoopRequestDecisionWithFlagsNative(IntPtr ccbLoop, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr decisionResponse, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> CCBLoopRequestDecisionWithFlagsOverride { get; set; }
@@ -49,7 +49,7 @@ namespace Rl.Net
                 return CCBLoopRequestDecisionWithFlagsNative(ccbLoop, contextJson, contextJsonSize, flags, decisionResponse, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CCBLoopRequestMultiSlotDecision")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CCBLoopRequestMultiSlotDecision")]
             private static extern int CCBLoopRequestMultiSlotDecisionNative(IntPtr ccbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr multiSlotResponse, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, IntPtr, IntPtr, int> CCBLoopRequestMultiSlotDecisionOverride { get; set; }
@@ -64,7 +64,7 @@ namespace Rl.Net
                 return CCBLoopRequestMultiSlotDecisionNative(ccbLoop, eventId, contextJson, contextJsonSize, multiSlotResponse, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CCBLoopRequestMultiSlotDecisionWithFlags")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CCBLoopRequestMultiSlotDecisionWithFlags")]
             private static extern int CCBLoopRequestMultiSlotDecisionWithFlagsNative(IntPtr ccbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr multiSlotResponse, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> CCBLoopRequestMultiSlotDecisionWithFlagsOverride { get; set; }
@@ -79,7 +79,7 @@ namespace Rl.Net
                 return CCBLoopRequestMultiSlotDecisionWithFlagsNative(ccbLoop, eventId, contextJson, contextJsonSize, flags, multiSlotResponse, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CCBLoopRequestMultiSlotDecisionWithBaselineAndFlags")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CCBLoopRequestMultiSlotDecisionWithBaselineAndFlags")]
             private static extern int CCBLoopRequestMultiSlotDecisionWithBaselineAndFlagsNative(IntPtr ccbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr multiSlotResponse, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, IntPtr, IntPtr, int> CCBLoopRequestMultiSlotDecisionWithBaselineAndFlagsOverride { get; set; }
@@ -94,7 +94,7 @@ namespace Rl.Net
                 return CCBLoopRequestMultiSlotDecisionWithBaselineAndFlagsNative(ccbLoop, eventId, contextJson, contextJsonSize, flags, multiSlotResponse, baselineActions, baselineActionsSize, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CCBLoopRequestMultiSlotDecisionDetailed")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CCBLoopRequestMultiSlotDecisionDetailed")]
             private static extern int CCBLoopRequestMultiSlotDecisionDetailedNative(IntPtr ccbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, IntPtr multiSlotResponseDetailed, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, IntPtr, IntPtr, int> CCBLoopRequestMultiSlotDecisionDetailedOverride { get; set; }
@@ -109,7 +109,7 @@ namespace Rl.Net
                 return CCBLoopRequestMultiSlotDecisionDetailedNative(ccbLoop, eventId, contextJson, contextJsonSize, multiSlotResponseDetailed, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CCBLoopRequestMultiSlotDecisionDetailedWithFlags")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CCBLoopRequestMultiSlotDecisionDetailedWithFlags")]
             private static extern int CCBLoopRequestMultiSlotDecisionDetailedWithFlagsNative(IntPtr ccbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr multiSlotResponseDetailed, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, int> CCBLoopRequestMultiSlotDecisionDetailedWithFlagsOverride { get; set; }
@@ -124,7 +124,7 @@ namespace Rl.Net
                 return CCBLoopRequestMultiSlotDecisionDetailedWithFlagsNative(ccbLoop, eventId, contextJson, contextJsonSize, flags, multiSlotResponseDetailed, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CCBLoopRequestMultiSlotDecisionDetailedWithBaselineAndFlags")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CCBLoopRequestMultiSlotDecisionDetailedWithBaselineAndFlags")]
             private static extern int CCBLoopRequestMultiSlotDecisionDetailedWithBaselineAndFlagsNative(IntPtr ccbLoop, IntPtr eventId, IntPtr contextJson, int contextJsonSize, uint flags, IntPtr multiSlotResponseDetailed, IntPtr baselineActions, IntPtr baselineActionsSize, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int, uint, IntPtr, IntPtr, IntPtr, IntPtr, int> CCBLoopRequestMultiSlotDecisionDetailedWithBaselineAndFlagsOverride { get; set; }
@@ -139,7 +139,7 @@ namespace Rl.Net
                 return CCBLoopRequestMultiSlotDecisionDetailedWithBaselineAndFlagsNative(ccbLoop, eventId, contextJson, contextJsonSize, flags, multiSlotResponseDetailed, baselineActions, baselineActionsSize, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CCBLoopReportActionTaken")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CCBLoopReportActionTaken")]
             private static extern int CCBLoopReportActionTakenNative(IntPtr ccbLoop, IntPtr eventId, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, int> CCBLoopReportActionTakenOverride { get; set; }
@@ -154,7 +154,7 @@ namespace Rl.Net
                 return CCBLoopReportActionTakenNative(ccbLoop, eventId, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CCBLoopReportActionMultiIdTaken")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CCBLoopReportActionMultiIdTaken")]
             private static extern int CCBLoopReportActionTakenMultiIdNative(IntPtr ccbLoop, IntPtr primaryId, IntPtr secondaryId, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, int> CCBLoopReportActionTakenMultiIdOverride { get; set; }
@@ -169,7 +169,7 @@ namespace Rl.Net
                 return CCBLoopReportActionTakenMultiIdNative(ccbLoop, primaryId, secondaryId, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CCBLoopReportOutcomeSlotF")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CCBLoopReportOutcomeSlotF")]
             private static extern int CCBLoopReportOutcomeSlotFNative(IntPtr ccbLoop, IntPtr eventId, uint slotIndex, float outcome, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, uint, float, IntPtr, int> CCBLoopReportOutcomeSlotFOverride { get; set; }
@@ -184,7 +184,7 @@ namespace Rl.Net
                 return CCBLoopReportOutcomeSlotFNative(ccbLoop, eventId, slotIndex, outcome, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CCBLoopReportOutcomeSlotJson")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CCBLoopReportOutcomeSlotJson")]
             private static extern int CCBLoopReportOutcomeSlotJsonNative(IntPtr ccbLoop, IntPtr eventId, uint slotIndex, IntPtr outcomeJson, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, uint, IntPtr, IntPtr, int> CCBLoopReportOutcomeSlotJsonOverride { get; set; }
@@ -199,7 +199,7 @@ namespace Rl.Net
                 return CCBLoopReportOutcomeSlotJsonNative(ccbLoop, eventId, slotIndex, outcomeJson, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CCBLoopReportOutcomeSlotStringIdF")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CCBLoopReportOutcomeSlotStringIdF")]
             private static extern int CCBLoopReportOutcomeSlotStringIdFNative(IntPtr ccbLoop, IntPtr eventId, IntPtr slotId, float outcome, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, float, IntPtr, int> CCBLoopReportOutcomeSlotStringIdFOverride { get; set; }
@@ -214,7 +214,7 @@ namespace Rl.Net
                 return CCBLoopReportOutcomeSlotStringIdFNative(ccbLoop, eventId, slotId, outcome, apiStatus);
             }
 
-            [DllImport("rlnetnative", EntryPoint = "CCBLoopReportOutcomeSlotStringIdJson")]
+            [DllImport(NativeImports.RLNETNATIVE, EntryPoint = "CCBLoopReportOutcomeSlotStringIdJson")]
             private static extern int CCBLoopReportOutcomeSlotStringIdJsonNative(IntPtr ccbLoop, IntPtr eventId, IntPtr slotId, IntPtr outcomeJson, IntPtr apiStatus);
 
             internal static Func<IntPtr, IntPtr, IntPtr, IntPtr, IntPtr, int> CCBLoopReportOutcomeSlotStringIdJsonOverride { get; set; }
@@ -229,13 +229,13 @@ namespace Rl.Net
                 return CCBLoopReportOutcomeSlotStringIdJsonNative(ccbLoop, eventId, slotId, outcomeJson, apiStatus);
             }
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern int CCBLoopRefreshModel(IntPtr ccbLoop, IntPtr apiStatus);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern void CCBLoopSetCallback(IntPtr ccbLoop, [MarshalAs(UnmanagedType.FunctionPtr)] managed_background_error_callback_t callback = null);
 
-            [DllImport("rlnetnative")]
+            [DllImport(NativeImports.RLNETNATIVE)]
             public static extern void CCBLoopSetTrace(IntPtr ccbLoop, [MarshalAs(UnmanagedType.FunctionPtr)] managed_trace_callback_t callback = null);
         }
     }

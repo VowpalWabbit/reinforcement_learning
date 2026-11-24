@@ -86,6 +86,12 @@ if(RL_USE_UBSAN)
   target_link_options(rltest PRIVATE -fno-sanitize=vptr)
 endif()
 
+if(RL_LINK_AZURE_LIBS)
+  target_compile_definitions(rltest PRIVATE LINK_AZURE_LIBS)
+  find_package(azure-identity-cpp CONFIG REQUIRED)
+  target_link_libraries(rltest PRIVATE Azure::azure-identity)
+endif()
+
 target_link_libraries(rltest
   PRIVATE
     rlclientlib

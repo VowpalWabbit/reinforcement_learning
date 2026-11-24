@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <iterator>
 #include <type_traits>
 #include <vector>

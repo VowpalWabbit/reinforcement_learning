@@ -3,6 +3,7 @@
 #include "ranking_response.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <iterator>
 #include <vector>
 
